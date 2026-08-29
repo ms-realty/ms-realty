@@ -14,11 +14,19 @@ function countBy(rows, keyFn) {
   return counts;
 }
 
-function reviewOwner(record) {
+function reviewRole(record) {
   if (record.source_domain === "makler-realty.ru") return "ru_preservation_editor";
   if (record.url_type === "listing") return "broker_listing_reviewer";
   if (record.url_type === "taxonomy") return "seo_taxonomy_editor";
   return "content_editor";
+}
+
+function unassignedReview(record) {
+  return {
+    review_owner: "unassigned",
+    review_role: reviewRole(record),
+    requires_assignment: true,
+  };
 }
 
 function actionRequired(record) {
@@ -73,7 +81,7 @@ export function attachMigrationReviewEvidence(routes, records) {
         image_count: Number(record.image_count || 0),
         internal_link_count: Number(record.internal_link_count || 0),
         migration_action: record.migration_action || "",
-        review_owner: reviewOwner(record),
+        ...unassignedReview(record),
         action_required: actionRequired(record),
         priority: priority(record, route, gaps),
         metadata_gaps: gaps,
@@ -147,7 +155,7 @@ export function buildMigrationReviewQueue(records, routeMap, contentEvidence) {
       source_domain: record.source_domain,
       url_type: record.url_type,
       admin_locale: record.source_domain === "makler-realty.ru" ? "ru" : "bg",
-      review_owner: reviewOwner(record),
+      ...unassignedReview(record),
       priority: priority(record, route, gaps),
       action_required: actionRequired(record),
       review_state: record.review_state,
@@ -167,6 +175,7 @@ export function buildMigrationReviewQueue(records, routeMap, contentEvidence) {
     summary: {
       total: rows.length,
       byOwner: countBy(rows, (row) => row.review_owner),
+      byRole: countBy(rows, (row) => row.review_role),
       byType: countBy(rows, (row) => row.url_type),
       byAdminLocale: countBy(rows, (row) => row.admin_locale),
       byPriority: countBy(rows, (row) => row.priority),
@@ -201,7 +210,11 @@ export function assertMigrationReviewQueue(queue) {
   if (queue.summary.nonListingUnmapped !== 292) throw new Error("Non-listing rows must remain unmapped until editorial review");
   if (queue.summary.listingRedirectReviews !== 165) throw new Error("Listing rows must stay in redirect review until approved");
   if (queue.summary.deployableRows !== 0) throw new Error("Review queue must not make rows deployable");
-  if (queue.summary.byOwner.ru_preservation_editor !== 179) throw new Error("RU rows need a dedicated preservation owner");
+  if (queue.summary.byOwner.unassigned !== 457) throw new Error("Migration review rows must remain unassigned until a real reviewer accepts them");
+  if (queue.summary.byRole.ru_preservation_editor !== 179) throw new Error("RU rows need a dedicated preservation role");
+  if (!queue.rows.every((row) => row.review_owner === "unassigned" && row.requires_assignment === true)) {
+    throw new Error("Migration review rows must not contain synthetic reviewer identities");
+  }
   return queue.summary;
 }
 

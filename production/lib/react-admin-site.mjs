@@ -1,6 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, propertyFamilyFor } from "./listing-facts.mjs";
 import { FACT_REVIEW_ROW_KEYS } from "./listing-fact-review.mjs";
+import { isFixtureBrokerId } from "./listing-verification.mjs";
+import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -166,7 +168,7 @@ const ADMIN_UI_COPY = {
     sourceLinks: "вътрешни връзки",
     openLegacyPage: "Отвори старата страница",
     openTargetPage: "Отвори целевата страница",
-    reviewOwner: "Отговорник",
+    reviewOwner: "Роля за преглед",
     requiredAction: "Нужно действие",
     approvableRedirects: "Пренасочвания за одобрение",
     oldUrl: "Стар URL",
@@ -470,7 +472,7 @@ const ADMIN_UI_COPY = {
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед", workspace_settings_updated: "Обновени настройки на работното пространство",
     },
     values: {
-      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", broker_phone: "Телефонно обаждане", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Имейл", broker_walk_in: "Посещение в офис", partner_referral: "Партньорска препоръка", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
+      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", website_consultation_request: "Заявка за консултация", website_buyer_onboarding: "Заявка за купувач", broker_phone: "Телефонно обаждане", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Имейл", broker_walk_in: "Посещение в офис", partner_referral: "Партньорска препоръка", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
       email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал", acknowledgement: "Потвърждение", viewing: "Оглед", callback: "Обратно обаждане", valuation: "Оценка",
     },
     statuses: {
@@ -693,6 +695,23 @@ const ADMIN_UI_COPY = {
         text: "Следващите действия са най-отгоре. Опашките, готовността и списъкът за настройка са в страничната лента.",
         dismiss: "Затвори",
       },
+      todayBriefing: {
+        title: "Кратка сводка",
+        description: "Само данни от текущите опашки: какво чака, защо и коя е следващата стъпка.",
+        attention: "Какво чака",
+        why: "Защо",
+        next: "Следващо",
+        count: "{count} приоритета",
+        clear: "Няма отворени приоритети",
+        clearWhy: "Текущите опашки не показват причина за действие.",
+        clearNext: "Провери отново по-късно.",
+        source: "Източник: запитвания, последващи действия, заявки от сайта и възможности.",
+      },
+      hermesEntry: {
+        title: "Попитай Hermes",
+        description: "Продължи в защитения работен изглед на Hermes за търсене, сводки и следващи действия.",
+        open: "Отвори Hermes",
+      },
       nextActions: {
         title: "Следващи действия",
         description: "Един списък за запитвания, последващи действия, заявки от сайта и възможности, най-спешните първо.",
@@ -832,7 +851,7 @@ const ADMIN_UI_COPY = {
     sourceLinks: "внутренних ссылок",
     openLegacyPage: "Открыть старую страницу",
     openTargetPage: "Открыть целевую страницу",
-    reviewOwner: "Ответственный",
+    reviewOwner: "Роль проверки",
     requiredAction: "Нужное действие",
     approvableRedirects: "Редиректы для одобрения",
     oldUrl: "Старый URL",
@@ -1136,7 +1155,7 @@ const ADMIN_UI_COPY = {
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано", workspace_settings_updated: "Настройки рабочего пространства обновлены",
     },
     values: {
-      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", broker_phone: "Телефонный звонок", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Эл. почта", broker_walk_in: "Визит в офис", partner_referral: "Партнерская рекомендация", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
+      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", website_consultation_request: "Заявка на консультацию", website_buyer_onboarding: "Заявка покупателя", broker_phone: "Телефонный звонок", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Эл. почта", broker_walk_in: "Визит в офис", partner_referral: "Партнерская рекомендация", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
       email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал", acknowledgement: "Подтверждение", viewing: "Просмотр", callback: "Обратный звонок", valuation: "Оценка",
     },
     statuses: {
@@ -1359,6 +1378,23 @@ const ADMIN_UI_COPY = {
         text: "Следующие действия идут первыми. Очереди, готовность и список настройки находятся в боковой панели.",
         dismiss: "Закрыть",
       },
+      todayBriefing: {
+        title: "Краткая сводка",
+        description: "Только данные текущих очередей: что ждёт, почему и какой следующий шаг.",
+        attention: "Что ждёт",
+        why: "Почему",
+        next: "Следующее",
+        count: "Приоритетов: {count}",
+        clear: "Открытых приоритетов нет",
+        clearWhy: "Текущие очереди не показывают причины для действий.",
+        clearNext: "Проверьте позже.",
+        source: "Источник: заявки, последующие действия, запросы с сайта и возможности.",
+      },
+      hermesEntry: {
+        title: "Спросить Hermes",
+        description: "Перейдите в защищённый рабочий раздел Hermes для поиска, сводок и следующих действий.",
+        open: "Открыть Hermes",
+      },
       nextActions: {
         title: "Следующие действия",
         description: "Один список по заявкам, последующим действиям, запросам с сайта и возможностям, самые срочные первыми.",
@@ -1498,7 +1534,7 @@ const ADMIN_UI_COPY = {
     sourceLinks: "internal links",
     openLegacyPage: "Open legacy page",
     openTargetPage: "Open target page",
-    reviewOwner: "Review owner",
+    reviewOwner: "Review role",
     requiredAction: "Required action",
     approvableRedirects: "Approvable listing redirects",
     oldUrl: "Old URL",
@@ -1802,7 +1838,7 @@ const ADMIN_UI_COPY = {
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded", workspace_settings_updated: "Workspace settings updated",
     },
     values: {
-      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", broker_phone: "Phone call", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Email", broker_walk_in: "Office walk-in", partner_referral: "Partner referral", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
+      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", website_consultation_request: "Consultation request", website_buyer_onboarding: "Buyer onboarding", broker_phone: "Phone call", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Email", broker_walk_in: "Office walk-in", partner_referral: "Partner referral", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
       email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel", acknowledgement: "Acknowledgement", viewing: "Viewing", callback: "Callback", valuation: "Valuation",
     },
     statuses: {
@@ -2025,6 +2061,23 @@ const ADMIN_UI_COPY = {
         text: "Next actions come first. Queues, readiness and your setup checklist sit in the rail.",
         dismiss: "Dismiss",
       },
+      todayBriefing: {
+        title: "Today briefing",
+        description: "A source-backed read of the current queues: what needs attention, why, and the next step.",
+        attention: "Needs attention",
+        why: "Why",
+        next: "Next",
+        count: "{count} priorities",
+        clear: "No open priorities",
+        clearWhy: "The current queues show no reason to act.",
+        clearNext: "Check again later.",
+        source: "Source: enquiries, follow-ups, website requests, and opportunities.",
+      },
+      hermesEntry: {
+        title: "Ask Hermes",
+        description: "Continue to the guarded Hermes work view for search, briefings, and next actions.",
+        open: "Open Hermes",
+      },
       nextActions: {
         title: "Next actions",
         description: "One list across enquiries, follow-ups, website requests and opportunities, most urgent first.",
@@ -2066,7 +2119,10 @@ function reviewerRoleText(copy, ui, value) {
 function brokerProfileText(page, brokerId) {
   const id = String(brokerId || "").trim();
   if (!id) return workbenchCopy(page).notSet;
-  return (page.brokerProfiles || []).find((profile) => profile.id === id)?.label || statusText(workbenchCopy(page), id);
+  const match = (page.brokerProfiles || []).find((profile) => profile.id === id);
+  if (match?.label) return match.label;
+  if (isFixtureBrokerId(id)) return workbenchCopy(page).notSet;
+  return statusText(workbenchCopy(page), id);
 }
 
 const LISTING_EDITOR_FACT_FIELDS = Object.freeze({
@@ -2137,6 +2193,17 @@ function listingQualityIssueText(ui, issue) {
   return statusText(ui, issue);
 }
 
+function listingPriceText(ui, row) {
+  if (row.price_on_request) return statusText(ui, "price_on_request");
+  if (row.price_eur === null || row.price_eur === undefined || row.price_eur === "") return ui.notSet;
+  return `€${Number(row.price_eur).toLocaleString("en")}`;
+}
+
+function listingLocaleText(row) {
+  const locales = Array.isArray(row.translation_locales) ? row.translation_locales.filter(Boolean) : [];
+  return locales.length ? locales.map((locale) => String(locale).toUpperCase()).join(" · ") : "—";
+}
+
 // The workspace default locale (Settings, Workspace section) is what the server
 // renders when no ?locale= is present, so links only carry the param when the
 // page locale differs from it.
@@ -2167,7 +2234,10 @@ function payloadAdminListingHref(listingId, page) {
 }
 
 function currentOperatorId(page, fallback) {
-  return page.workspace?.operator_id || fallback;
+  const operatorId = String(page.workspace?.operator_id || "").trim();
+  if (operatorId) return operatorId;
+  const fallbackId = String(fallback || "").trim();
+  return fallbackId && !isFixtureBrokerId(fallbackId) ? fallbackId : "";
 }
 
 // Display settings (timezone, date format) come from the workspace settings
@@ -2212,6 +2282,8 @@ function formatAdminDateTime(value, locale) {
 
 function leadContactActions(lead, copy) {
   const contact = lead.contact || {};
+  const contactName = String(contact.name || "").trim();
+  const displayName = contactName && !looksLikeGeneratedContactId(contactName) ? contactName : "";
   const channels = ["phone", "whatsapp", "viber", "email"].flatMap((channel) => {
     const value = String(contact[channel] || "").trim();
     if (!value) return [];
@@ -2226,11 +2298,11 @@ function leadContactActions(lead, copy) {
             : `tel:${number}`;
     return [h("a", { key: channel, href, className: "adm-lead-contact__action", "data-private-contact-channel": channel }, `${valueText(copy, channel)}: ${value}`)];
   });
-  if (!contact.name && !channels.length) return null;
+  if (!displayName && !channels.length) return null;
   return h(
     "div",
     { className: "adm-lead-contact", "data-private-contact": "true" },
-    contact.name ? h("strong", null, contact.name) : null,
+    displayName ? h("strong", null, displayName) : null,
     ...channels,
   );
 }
@@ -2301,6 +2373,31 @@ function StatGrid({ metrics }) {
         { key: metricLabel, className: "crm-stat", "data-stat": /\p{L}/u.test(String(value ?? "")) ? "text" : "number" },
         h("dt", { className: "crm-stat__label" }, metricLabel),
         h("dd", { className: "crm-stat__val" }, value),
+      ),
+    ),
+  );
+}
+
+function SummaryStrip({ cards, className = "", ...attrs }) {
+  const visibleCards = (cards || []).filter(Boolean);
+  if (!visibleCards.length) return null;
+  return h(
+    "section",
+    { className: ["adm-summary-strip", className].filter(Boolean).join(" "), ...attrs },
+    ...visibleCards.map((card) =>
+      h(
+        "article",
+        {
+          key: card.id || card.title,
+          className: "adm-summary-card",
+          "data-summary-card": card.id || card.title,
+          "data-summary-tone": card.tone || "ink",
+        },
+        card.eyebrow ? h("span", { className: "adm-summary-card__eyebrow" }, card.eyebrow) : null,
+        h("strong", { className: "adm-summary-card__title" }, card.title),
+        h("div", { className: "adm-summary-card__value" }, card.value),
+        card.meta ? h("p", { className: "adm-summary-card__meta" }, card.meta) : null,
+        card.status ? h("div", { className: "adm-summary-card__status" }, h(StatusPill, { tone: card.status.tone || card.tone || "ink" }, card.status.label)) : null,
       ),
     ),
   );
@@ -2459,7 +2556,7 @@ function LeadBulkActionsTool({ page, ui, copy }) {
         h(
           "select",
           { name: "brokerId" },
-          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, profile.label || profile.id)),
+          ...(page.brokerProfiles || []).map((profile) => h("option", { key: profile.id, value: profile.id }, brokerProfileText(page, profile.id))),
         ),
       ),
       h("label", { "data-lead-bulk-field": "snooze" }, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until" })),
@@ -2526,8 +2623,9 @@ function ActionDisclosure({ summary, icon = "plus", tone = "primary", className 
 
 const OWNER_CONSOLE_COPY = {
   bg: {
-    groups: { overview: "Обзор", crm: "CRM", website: "Уебсайт и съдържание", hermes: "Hermes AI", admin: "Администрация" },
-    routes: { today: "Днес", hermes: "Hermes", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
+    groups: { today: "Днес", crm: "CRM", cms: "CMS", hermes: "Hermes", workspace: "Работно пространство" },
+    routes: { today: "Днес", leads: "Запитвания", listings: "Имоти", translations: "Преводи", hermes: "Hermes", integrations: "Интеграции", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
+    navMore: "Още в {group}",
     profile: {
       title: "Профил на собственика",
       open: "Отвори профила и настройките",
@@ -2558,6 +2656,7 @@ const OWNER_CONSOLE_COPY = {
     runtime: {
       roleRestricted: "Този профил няма право да изпълни действието.",
       storageUnavailable: "Правата ви на собственик са активни. Това действие чака връзка с постоянния източник на данни; ролята ви не е ограничена.",
+      unavailable: "Недостъпно",
       title: "Нужна е връзка с данните",
       description: "Тази секция е защитена, но постоянният ѝ източник на данни още не е достъпен в текущата среда.",
       requestedPath: "Заявена секция",
@@ -2568,6 +2667,29 @@ const OWNER_CONSOLE_COPY = {
     hermes: {
       title: "Hermes AI",
       description: "Състояние на агента, безопасни задачи за чернови и връзката с ChatGPT/Codex на едно място.",
+      command: "Какво да подготви Hermes?",
+      commandDescription: "Опишете желания резултат. Hermes ще върне план от текущата защитена карта на системата и ще попита, ако липсват факти.",
+      commandLabel: "Задача за Hermes",
+      commandPlaceholder: "Например: Подготви план за днешните запитвания и обяви, които изискват преглед.",
+      preparePlan: "Подготви план",
+      commandDisabled: "Свържете Hermes и постоянния журнал за разписки, за да подготвяте планове.",
+      planReady: "План за преглед",
+      recentReceipts: "Последни разписки",
+      noReceipts: "Още няма записани команди.",
+      questions: "Въпроси преди работа",
+      reviewStep: "Преглед",
+      draftStep: "Чернова",
+      receipt: "Разписка",
+      notExecuted: "Нищо не е изпълнено автоматично.",
+      commandErrors: {
+        bad_request: "Опишете ясна задача до 2000 знака.",
+        hermes_receipt_unavailable: "Постоянният журнал за Hermes не е достъпен.",
+        hermes_unavailable: "Hermes не успя да подготви план. Проверете връзката и опитайте отново.",
+        hermes_invalid_plan: "Hermes върна план извън защитения договор.",
+        idempotency_conflict: "Тази разписка вече е използвана за друга задача.",
+        hermes_command_in_progress: "Тази задача вече е записана и няма да бъде повторена автоматично.",
+        hermes_command_expired: "Тази задача изтече преди да бъде записан план и няма да бъде повторена автоматично.",
+      },
       retry: "Провери отново",
       connections: "Връзки и настройка",
       hosted: "Hermes Agent runtime",
@@ -2579,6 +2701,8 @@ const OWNER_CONSOLE_COPY = {
       tools: "Възможности на Hermes",
       toolsDescription: "Точните операции, които MCP пакетът предоставя на собственика.",
       guardrails: "Задължителни ограничения",
+      runtimeDetails: "Диагностика на runtime",
+      technicalDetails: "Технически детайли и защити",
       ready: "Готово",
       blocked: "Блокирано",
       pass: "Успешно",
@@ -2611,8 +2735,9 @@ const OWNER_CONSOLE_COPY = {
     },
   },
   ru: {
-    groups: { overview: "Обзор", crm: "CRM", website: "Сайт и контент", hermes: "Hermes AI", admin: "Администрирование" },
-    routes: { today: "Сегодня", hermes: "Hermes", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
+    groups: { today: "Сегодня", crm: "CRM", cms: "CMS", hermes: "Hermes", workspace: "Рабочее пространство" },
+    routes: { today: "Сегодня", leads: "Заявки", listings: "Объекты", translations: "Переводы", hermes: "Hermes", integrations: "Интеграции", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
+    navMore: "Ещё в группе {group}",
     profile: {
       title: "Профиль владельца",
       open: "Открыть профиль и настройки",
@@ -2643,6 +2768,7 @@ const OWNER_CONSOLE_COPY = {
     runtime: {
       roleRestricted: "У этого профиля нет права выполнить действие.",
       storageUnavailable: "Ваши права владельца активны. Для этого действия ещё не подключён постоянный источник данных; ваша роль не ограничена.",
+      unavailable: "Недоступно",
       title: "Нужно подключение к данным",
       description: "Раздел защищён, но его постоянный источник данных пока недоступен в этой среде.",
       requestedPath: "Запрошенный раздел",
@@ -2653,6 +2779,29 @@ const OWNER_CONSOLE_COPY = {
     hermes: {
       title: "Hermes AI",
       description: "Состояние агента, безопасные задачи для черновиков и подключение ChatGPT/Codex в одном месте.",
+      command: "Что подготовить Hermes?",
+      commandDescription: "Опишите нужный результат. Hermes вернёт план из текущей защищённой карты системы и задаст вопрос, если фактов недостаточно.",
+      commandLabel: "Задача для Hermes",
+      commandPlaceholder: "Например: Подготовь план по сегодняшним заявкам и объектам, которым нужна проверка.",
+      preparePlan: "Подготовить план",
+      commandDisabled: "Подключите Hermes и постоянный журнал квитанций, чтобы готовить планы.",
+      planReady: "План на проверку",
+      recentReceipts: "Последние квитанции",
+      noReceipts: "Записанных команд пока нет.",
+      questions: "Вопросы перед работой",
+      reviewStep: "Проверка",
+      draftStep: "Черновик",
+      receipt: "Квитанция",
+      notExecuted: "Ничего не выполнено автоматически.",
+      commandErrors: {
+        bad_request: "Опишите ясную задачу длиной до 2000 знаков.",
+        hermes_receipt_unavailable: "Постоянный журнал Hermes недоступен.",
+        hermes_unavailable: "Hermes не смог подготовить план. Проверьте подключение и повторите попытку.",
+        hermes_invalid_plan: "Hermes вернул план вне защищённого контракта.",
+        idempotency_conflict: "Эта квитанция уже использована для другой задачи.",
+        hermes_command_in_progress: "Эта задача уже записана и не будет повторена автоматически.",
+        hermes_command_expired: "Эта задача истекла до записи плана и не будет повторена автоматически.",
+      },
       retry: "Проверить снова",
       connections: "Подключения и настройка",
       hosted: "Hermes Agent runtime",
@@ -2664,6 +2813,8 @@ const OWNER_CONSOLE_COPY = {
       tools: "Возможности Hermes",
       toolsDescription: "Точные операции, доступные владельцу через MCP-пакет.",
       guardrails: "Обязательные ограничения",
+      runtimeDetails: "Диагностика runtime",
+      technicalDetails: "Технические детали и ограничения",
       ready: "Готово",
       blocked: "Заблокировано",
       pass: "Успешно",
@@ -2696,8 +2847,9 @@ const OWNER_CONSOLE_COPY = {
     },
   },
   en: {
-    groups: { overview: "Overview", crm: "CRM", website: "Website and content", hermes: "Hermes AI", admin: "Administration" },
-    routes: { today: "Today", hermes: "Hermes", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
+    groups: { today: "Today", crm: "CRM", cms: "CMS", hermes: "Hermes", workspace: "Workspace" },
+    routes: { today: "Today", leads: "Leads", listings: "Listings", translations: "Translations", hermes: "Hermes", integrations: "Integrations", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
+    navMore: "More in {group}",
     profile: {
       title: "Owner profile",
       open: "Open profile and settings",
@@ -2728,6 +2880,7 @@ const OWNER_CONSOLE_COPY = {
     runtime: {
       roleRestricted: "This profile does not have permission to perform the action.",
       storageUnavailable: "Your owner permissions are active. This action is waiting for a durable data connection; your role is not restricted.",
+      unavailable: "Unavailable",
       title: "Data connection required",
       description: "This section is protected, but its durable data source is not available in the current environment.",
       requestedPath: "Requested section",
@@ -2738,6 +2891,29 @@ const OWNER_CONSOLE_COPY = {
     hermes: {
       title: "Hermes AI",
       description: "Agent health, safe draft tasks, and the owner's ChatGPT/Codex connection in one place.",
+      command: "What should Hermes prepare?",
+      commandDescription: "Describe the outcome. Hermes returns a plan from the current guarded operating map and asks when facts are missing.",
+      commandLabel: "Task for Hermes",
+      commandPlaceholder: "For example: Prepare a plan for today's enquiries and listings that need review.",
+      preparePlan: "Prepare plan",
+      commandDisabled: "Connect Hermes and its durable receipt store before preparing plans.",
+      planReady: "Plan for review",
+      recentReceipts: "Recent receipts",
+      noReceipts: "No commands have been recorded yet.",
+      questions: "Questions before work",
+      reviewStep: "Review",
+      draftStep: "Draft",
+      receipt: "Receipt",
+      notExecuted: "Nothing was executed automatically.",
+      commandErrors: {
+        bad_request: "Describe one clear task in 2,000 characters or fewer.",
+        hermes_receipt_unavailable: "The durable Hermes receipt store is unavailable.",
+        hermes_unavailable: "Hermes could not prepare a plan. Check the connection and try again.",
+        hermes_invalid_plan: "Hermes returned a plan outside the guarded contract.",
+        idempotency_conflict: "This receipt was already used for different work.",
+        hermes_command_in_progress: "This task is already recorded and will not be repeated automatically.",
+        hermes_command_expired: "This task expired before a plan was recorded and will not be repeated automatically.",
+      },
       retry: "Check again",
       connections: "Connections and setup",
       hosted: "Hermes Agent runtime",
@@ -2749,6 +2925,8 @@ const OWNER_CONSOLE_COPY = {
       tools: "Hermes capabilities",
       toolsDescription: "The exact operations exposed to the owner by the MCP package.",
       guardrails: "Mandatory guardrails",
+      runtimeDetails: "Runtime diagnostics",
+      technicalDetails: "Technical details and safeguards",
       ready: "Ready",
       blocked: "Blocked",
       pass: "Pass",
@@ -2840,33 +3018,11 @@ function OwnerIdentity({ page, mobile = false }) {
       "span",
       { className: "adm-owner-identity__copy" },
       h("strong", null, name),
-      h("small", null, profile.email ? h("bdi", null, profile.email) : role),
+      profile.email ? h("small", null, h("bdi", null, profile.email)) : null,
     ),
     h("span", { className: "adm-owner-identity__role" }, role),
   );
 }
-
-const NAV_ROUTES = [
-  { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
-  { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
-  { id: "contacts", module: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
-  { id: "consents", module: "crm", path: "/admin/consents", icon: "shield-check", kind: "admin_consents", capability: "operations:read" },
-  { id: "documents", module: "crm", path: "/admin/documents", icon: "file-check", kind: "admin_document_checklists", capability: "operations:read" },
-  { id: "realty_cases", module: "crm", path: "/admin/cases", icon: "kanban-square", kind: "admin_realty_cases", capability: "cases:read" },
-  { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
-  { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
-  { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
-  { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports", capability: "operations:read" },
-  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "activity:read" },
-  { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
-  { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
-  { id: "approved_content", module: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
-  { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
-  { id: "hermes", module: "hermes", path: "/admin/hermes", icon: "sparkles", kind: "admin_hermes", capability: "administration:read" },
-  { id: "connections", module: "workspace", path: "/admin/connect", icon: "link", kind: "admin_connections", capability: "settings:manage" },
-  { id: "settings", module: "workspace", path: "/admin/settings", icon: "settings", kind: "admin_workspace_settings", capability: "workspace:read" },
-  { id: "team", module: "workspace", path: "/admin/team", icon: "users", kind: "admin_team", capability: "team:manage" },
-];
 
 function adminNavigationGroups(page) {
   const copy = adminCopy(page);
@@ -2876,71 +3032,118 @@ function adminNavigationGroups(page) {
     const module = modules.find((entry) => entry.id === moduleId);
     return module?.screens?.find((screen) => screen.id === screenId)?.label || fallback;
   };
-  const route = (id) => NAV_ROUTES.find((entry) => entry.id === id);
+  const routeLabel = (item, destinationId) => {
+    if (destinationId && owner.routes[destinationId]) return owner.routes[destinationId];
+    if (owner.routes[item.id]) return owner.routes[item.id];
+    if (item.id === "realty_cases") return caseCopy(page).title;
+    if (item.id === "approved_content") return workbenchCopy(page).approvedContent.title;
+    if (item.id === "migration_review") return label(copy, "migrationReview", "Migration review");
+    return screenLabel(item.group, item.id, item.id);
+  };
+  const routeBadge = (item) => {
+    if (item.id === "lead_inbox" && page.kind === "admin_lead_inbox") return page.summary?.leads;
+    if (item.id === "realty_cases") return page.realtyCaseQueue?.summary?.open;
+    if (item.id === "lead_pipeline") return page.leadPipelineQueue?.summary?.open;
+    if (item.id === "requests") return page.publicRequestQueue?.summary?.open;
+    return undefined;
+  };
+  const decorateRoute = (item, destinationId = null) => ({
+    ...item,
+    label: routeLabel(item, destinationId),
+    badge: routeBadge(item),
+  });
+  const destinations = ownerConsoleNavigation().map((destination) => ({
+    ...destination,
+    label: owner.routes[destination.id] || routeLabel(destination.route, destination.id),
+    route: decorateRoute(destination.route, destination.id),
+    children: destination.children.map((item) => decorateRoute(item)),
+  }));
+  const visibleDestination = (destination) => {
+    const items = [destination.route, ...(destination.children || [])].filter((item) => pageCan(page, item.capability));
+    if (!items.length) return null;
+    const routeItem = items.find((item) => item.id === destination.route.id) || items[0];
+    return {
+      ...destination,
+      route: { ...routeItem, label: destination.label },
+      children: items.filter((item) => item.id !== routeItem.id),
+      items,
+    };
+  };
   const groups = [
-    {
-      label: owner.groups.overview,
-      items: [{ ...route("today"), label: screenLabel("crm", "today", owner.routes.today) }],
-    },
-    {
-      label: modules.find((module) => module.id === "crm")?.label || owner.groups.crm,
-      items: [
-        {
-          ...route("lead_inbox"),
-          label: screenLabel("crm", "lead_inbox", "Lead inbox"),
-          badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
-        },
-        { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
-        { ...route("consents"), label: screenLabel("crm", "consents", "Consent and preferences") },
-        { ...route("documents"), label: screenLabel("crm", "documents", "Documents and process") },
-        {
-          ...route("realty_cases"),
-          label: caseCopy(page).title,
-          badge: page.realtyCaseQueue?.summary?.open,
-        },
-        {
-          ...route("lead_pipeline"),
-          label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
-          badge: page.leadPipelineQueue?.summary?.open,
-        },
-        {
-          ...route("requests"),
-          label: screenLabel("crm", "requests", "Requests and alerts"),
-          badge: page.publicRequestQueue?.summary?.open,
-        },
-        { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
-        { ...route("reports"), label: screenLabel("crm", "reports", workbenchCopy(page).operationsReports) },
-      ],
-    },
-    {
-      label: owner.groups.website,
-      items: [
-        { ...route("listing_manager"), label: screenLabel("cms", "listing_manager", "Listings") },
-        { ...route("translation_queue"), label: screenLabel("cms", "translation_queue", "Translation review") },
-        { ...route("approved_content"), label: workbenchCopy(page).approvedContent.title },
-        { ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") },
-      ],
-    },
-    {
-      label: owner.groups.hermes,
-      items: [{ ...route("hermes"), label: owner.routes.hermes }],
-    },
-    {
-      label: owner.groups.admin,
-      items: [
-        { ...route("connections"), label: owner.routes.connections },
-        { ...route("settings"), label: owner.routes.settings },
-        { ...route("team"), label: owner.routes.team },
-        { ...route("activity"), label: owner.routes.activity },
-      ],
-    },
+    { id: "today", label: owner.groups.today, destinations: destinations.filter((destination) => destination.group === "today") },
+    { id: "crm", label: owner.groups.crm, destinations: destinations.filter((destination) => destination.group === "crm") },
+    { id: "cms", label: owner.groups.cms, destinations: destinations.filter((destination) => destination.group === "cms") },
+    { id: "hermes", label: owner.groups.hermes, destinations: destinations.filter((destination) => destination.group === "hermes") },
+    { id: "workspace", label: owner.groups.workspace, destinations: destinations.filter((destination) => destination.group === "workspace") },
   ];
   return groups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => pageCan(page, item.capability)),
+      destinations: group.destinations.map(visibleDestination).filter(Boolean),
     }))
-    .filter((group) => group.items.length);
+    .filter((group) => group.destinations.length);
+}
+
+function navigationLink(item, page, { mobile = false, primary = false, key } = {}) {
+  const className = mobile
+    ? `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`
+    : `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`;
+  return h(
+    "a",
+    {
+      key,
+      className,
+      href: adminHref(item.path, page),
+      "aria-current": page.kind === item.kind ? "page" : undefined,
+      "data-admin-nav-route": item.id,
+      "data-admin-nav-primary": primary && !mobile ? "true" : undefined,
+      "data-admin-nav-primary-mobile": primary && mobile ? "true" : undefined,
+    },
+    h(Icon, { name: item.icon, size: 18 }),
+    h("span", null, item.label),
+    item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
+  );
+}
+
+function navigationDestination(destination, page, { mobile = false } = {}) {
+  const moreLabel = ownerConsoleCopy(page).navMore.replace("{group}", destination.label);
+  const nested = destination.children?.length
+    ? mobile
+      ? h(
+          "details",
+          {
+            className: "adm-mobile-nav__more",
+            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
+            "data-admin-nav-drilldown": destination.id,
+          },
+          h("summary", { className: "adm-mobile-nav__more-summary" }, moreLabel),
+          h(
+            "div",
+            { className: "adm-mobile-nav__nested" },
+            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
+          ),
+        )
+      : h(
+          "div",
+          { className: "crm-sb__nested", "data-admin-nav-drilldown": destination.id },
+          ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
+        )
+    : null;
+  return h(
+    "div",
+    { key: `${mobile ? "mobile-" : ""}destination-${destination.id}`, className: mobile ? "adm-mobile-nav__destination" : "crm-sb__destination" },
+    navigationLink(destination.route, page, { mobile, primary: true, key: `${mobile ? "mobile-" : ""}primary-${destination.id}` }),
+    nested,
+  );
+}
+
+function navigationGroup(group, page, { mobile = false } = {}) {
+  return h(
+    "section",
+    { key: `${mobile ? "mobile-" : ""}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
+    h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label),
+    ...group.destinations.map((destination) => navigationDestination(destination, page, { mobile })),
+  );
 }
 
 function Sidebar({ page }) {
@@ -2960,23 +3163,7 @@ function Sidebar({ page }) {
     h(
       "nav",
       { className: "crm-sb__nav", "aria-label": page.workspace?.title || "Admin" },
-      ...visibleGroups.flatMap((group) => [
-        h("div", { key: `group-${group.label}`, className: "crm-sb__group" }, group.label),
-        ...group.items.map((item) =>
-          h(
-            "a",
-            {
-              key: item.id,
-              className: `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`,
-              href: adminHref(item.path, page),
-              "aria-current": page.kind === item.kind ? "page" : undefined,
-            },
-            h(Icon, { name: item.icon, size: 18 }),
-            h("span", null, item.label),
-            item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
-          ),
-        ),
-      ]),
+      ...visibleGroups.map((group) => navigationGroup(group, page)),
     ),
     h("div", { className: "crm-sb__me" }, h(OwnerIdentity, { page })),
   );
@@ -3066,23 +3253,7 @@ function MobileNavigation({ page }) {
       h(
         "nav",
         { className: "adm-mobile-nav__links", "aria-label": menuLabel },
-        ...visibleGroups.flatMap((group) => [
-          h("div", { key: `mobile-group-${group.label}`, className: "adm-mobile-nav__group" }, group.label),
-          ...group.items.map((item) =>
-            h(
-              "a",
-              {
-                key: `mobile-${item.id}`,
-                className: `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`,
-                href: adminHref(item.path, page),
-                "aria-current": page.kind === item.kind ? "page" : undefined,
-              },
-              h(Icon, { name: item.icon, size: 18 }),
-              h("span", null, item.label),
-              item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
-            ),
-          ),
-        ]),
+        ...visibleGroups.map((group) => navigationGroup(group, page, { mobile: true })),
       ),
       h(OwnerIdentity, { page, mobile: true }),
       h(ThemeSwitch, { ui, variant: "drawer" }),
@@ -3090,7 +3261,7 @@ function MobileNavigation({ page }) {
   );
 }
 
-function Topbar({ page, title }) {
+function Topbar({ page, title, titleAsHeading = false }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const locales = page.workspace?.interface_locales || [];
@@ -3099,9 +3270,9 @@ function Topbar({ page, title }) {
     { className: "crm-top" },
     h(
       "div",
-      { style: "min-width:0" },
-      h("div", { className: "crm-top__title" }, title),
-      h("div", { className: "crm-top__sub" }, page.workspace?.title || ""),
+      { className: "crm-top__context" },
+      h("div", { className: "crm-top__eyebrow" }, page.workspace?.title || "MS Realty"),
+      h("div", { className: "crm-top__sub" }, title),
     ),
     h(MobileNavigation, { page }),
     h(
@@ -3124,7 +3295,7 @@ function Topbar({ page, title }) {
   );
 }
 
-function adminShell(page, { title, mainAttrs, children }) {
+function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }) {
   const ui = workbenchCopy(page);
   return [
     h("a", { key: "skip", className: "skip-link", href: "#main" }, ui.skipToContent),
@@ -3135,7 +3306,7 @@ function adminShell(page, { title, mainAttrs, children }) {
       h(
         "div",
         { className: "crm-main" },
-        h(Topbar, { page, title }),
+        h(Topbar, { page, title, titleAsHeading }),
         h("main", { id: "main", tabIndex: -1, className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
       ),
     ),
@@ -3224,7 +3395,7 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       priority: row.overdue ? "urgent" : "normal",
       dueAt: row.due_at || null,
       overdue: row.overdue === true,
-      title: row.listing_reference || row.lead_id,
+      title: row.listing_reference || (row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
       context: `${row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")} · ${statusText(ui, row.viewing_status)}`,
       reference: row.viewing_id,
       href: adminHref("/admin/viewings", page),
@@ -3240,7 +3411,7 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       priority: row.overdue ? "urgent" : "normal",
       dueAt: row.due_at || null,
       overdue: row.overdue === true,
-      title: row.property?.location || row.lead_id,
+      title: row.property?.location || na.actions.sellerStep,
       context: statusText(ui, row.stage),
       reference: row.seller_pipeline_id,
       href: adminHref("/admin/viewings", page),
@@ -3249,6 +3420,11 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   }
   for (const row of page.publicRequestQueue?.rows || []) {
     if (row.status && !["open", "contacted"].includes(row.status)) continue;
+    const requestType =
+      row.request_type === "saved_search"
+        ? label(copy, "savedSearchRequest", "Saved search")
+        : label(copy, "languageRequest", "Language request");
+    const requestLocale = row.requested_locale || row.locale;
     rows.push({
       key: `request:${row.request_type}:${row.request_id}`,
       tags: "requests",
@@ -3256,11 +3432,10 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       priority: row.overdue ? "urgent" : "normal",
       dueAt: row.next_follow_up_at || null,
       overdue: row.overdue === true,
-      title:
-        row.request_type === "saved_search"
-          ? label(copy, "savedSearchRequest", "Saved search")
-          : label(copy, "languageRequest", "Language request"),
-      context: statusText(ui, row.status),
+      title: publicRequestCriteria(row) || row.requested_path || requestType,
+      context: [requestType, requestLocale ? String(requestLocale).toUpperCase() : null, row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null, statusText(ui, row.status)]
+        .filter(Boolean)
+        .join(" · "),
       reference: row.request_id,
       href: adminHref("/admin/requests", page),
       action: na.actions.outcome,
@@ -3290,28 +3465,84 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   });
 }
 
-function nextActionFilterOptions(rows, na) {
-  const count = (tag) => rows.filter((row) => row.tags === tag).length;
-  return [
-    { value: "all", label: na.filters.all, count: rows.length },
-    { value: "overdue", label: na.filters.overdue, count: rows.filter((row) => row.overdue).length },
-    { value: "enquiries", label: na.filters.enquiries, count: count("enquiries") },
-    { value: "follow-ups", label: na.filters.followUps, count: count("follow-ups") },
-    { value: "requests", label: na.filters.requests, count: count("requests") },
-    { value: "opportunities", label: na.filters.opportunities, count: count("opportunities") },
-  ].filter((option) => option.value === "all" || option.count > 0);
+function TodayBriefingPanel({ page, rows }) {
+  const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
+  const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
+  const first = rows[0];
+  const total = rows.length;
+  const count = copy.count.replace("{count}", String(total));
+  return h(
+    Panel,
+    {
+      title: copy.title,
+      "data-today-briefing": "true",
+      "data-today-primary-action": first?.kind || "none",
+      "data-today-priority-count": String(Math.min(total, 5)),
+      "data-today-priority-total": String(total),
+    },
+    h("p", { className: "adm-today-briefing__intro" }, copy.description),
+    h(
+      "dl",
+      { className: "adm-today-briefing__facts" },
+      h(
+        "div",
+        null,
+        h("dt", null, copy.attention),
+        h("dd", null, first ? `${count} · ${first.title}` : copy.clear),
+      ),
+      h(
+        "div",
+        null,
+        h("dt", null, copy.why),
+        h("dd", null, first ? first.context : copy.clearWhy),
+      ),
+      h(
+        "div",
+        null,
+        h("dt", null, copy.next),
+        h("dd", null, first ? first.action : copy.clearNext),
+      ),
+    ),
+    first
+      ? h(
+          "div",
+          { className: "adm-today-briefing__action" },
+          h(
+            "a",
+            { className: "mk-btn mk-btn--primary", href: first.href, "data-today-primary-open": first.kind },
+            h("span", null, first.action),
+            h(Icon, { name: "arrow-right", size: 15 }),
+          ),
+        )
+      : null,
+    h("p", { className: "adm-today-briefing__source" }, copy.source),
+    h(
+      "div",
+      { className: "adm-today-briefing__hermes", "data-hermes-entry": "today" },
+      h("h3", null, hermes.title),
+      h("p", { className: "adm-hermes-entry__description" }, hermes.description),
+      h(
+        "a",
+        { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes", page), "data-hermes-open": "today" },
+        h("span", null, hermes.open),
+        h(Icon, { name: "arrow-right", size: 15 }),
+      ),
+    ),
+  );
 }
 
-function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
+function NextActionsPanel({ page, rows }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const visible = rows.slice(0, 8);
-  const remaining = rows.length - visible.length;
+  const remaining = rows.length ? rows.slice(1) : rows;
+  const visible = remaining.slice(0, 5);
   return h(
     Panel,
     {
       title: na.title,
       "data-next-actions": "true",
-      "data-next-action-count": String(rows.length),
+      "data-next-action-count": String(remaining.length),
+      "data-next-action-total": String(rows.length),
+      "data-next-action-visible": String(visible.length),
     },
     h("p", { className: "adm-next-actions__intro" }, na.description),
     visible.length
@@ -3326,8 +3557,6 @@ function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
                 "data-next-action": row.kind,
                 "data-next-action-priority": row.priority,
                 "data-overdue": row.overdue ? "true" : "false",
-                "data-list-item": "next-actions",
-                "data-filter-tags": `${row.tags}${row.overdue ? " overdue" : ""}`,
               },
               h(
                 "div",
@@ -3350,25 +3579,20 @@ function NextActionsPanel({ page, copy, ui, rows, inboxHref }) {
                 ),
                 h("strong", null, row.title),
                 h("small", { className: "adm-lead-context" }, row.context),
-                h("code", { className: "crm-mono adm-task-list__reference" }, row.reference),
               ),
               h(
                 "div",
                 { className: "adm-next-actions__action" },
                 h(
                   "a",
-                  { className: "mk-btn mk-btn--primary mk-btn--sm", href: row.href },
+                  { className: "mk-btn mk-btn--secondary mk-btn--sm", href: row.href },
                   h("span", null, row.action),
                 ),
               ),
             ),
           ),
-        )
+      )
       : h("p", { className: "adm-empty", "data-next-actions-empty": "true" }, na.empty),
-    h(ListEmptyNote, { scope: "next-actions" }, na.emptyFiltered),
-    remaining > 0
-      ? h("p", { className: "adm-next-actions__more", "data-next-actions-more": String(remaining) }, na.more.replace("{count}", String(remaining)))
-      : null,
   );
 }
 
@@ -3502,8 +3726,8 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
     },
   ];
   return h(
-    "aside",
-    { className: "adm-workbench-rail", "data-readiness-rail": "true" },
+    "div",
+    { className: "adm-owner-flow__support", "data-readiness-support": "true" },
     h(Panel, { title: label(copy, "today", "Today"), "data-today-snapshot": "true" }, h(StatGrid, {
       metrics: [
         [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
@@ -3553,155 +3777,61 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
 function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const settingsCopy = workbenchCopy(page).workspaceSettings;
   const queue = leadQueueState(page);
-  const openTasks =
-    (page.summary?.viewingFollowUpsOpen || 0) +
-    (page.summary?.sellerPipelineOpen || 0) +
-    (page.summary?.publicRequestsOpen || 0) +
-    (page.summary?.buyerPipelineOpen || 0) +
-    (page.summary?.renterPipelineOpen || 0);
-  const overdueTasks =
-    (page.summary?.viewingFollowUpsOverdue || 0) +
-    (page.summary?.sellerPipelineOverdue || 0) +
-    (page.summary?.publicRequestsOverdue || 0) +
-    (page.summary?.leadPipelineOverdue || 0);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
+  const showNextActionsPanel = nextActions.length === 0 || nextActions.length > 1;
+  const openLeadPipelineTasks =
+    page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
+  const openSellerTasks =
+    page.sellerPipelineQueue?.summary?.open || (page.sellerPipelineQueue?.rows || []).filter((row) => !row.task_status || row.task_status === "open").length;
+  const overdueTasks = [
+    ...(page.viewingFollowUpQueue?.rows || []).filter((row) => row.overdue === true && (!row.task_status || row.task_status === "open")),
+    ...(page.sellerPipelineQueue?.rows || []).filter((row) => row.overdue === true && (!row.task_status || row.task_status === "open")),
+    ...(page.publicRequestQueue?.rows || []).filter(
+      (row) => row.overdue === true && (!row.status || row.status === "open" || row.status === "contacted"),
+    ),
+    ...(page.leadPipelineQueue?.rows || []).filter((row) => row.overdue === true && (!row.status || row.status === "open")),
+  ].length;
   return adminShell(page, {
     title,
+    titleAsHeading: true,
     mainAttrs: {
       "data-kind": "admin-today",
       "data-react-admin-ui": "today",
       "data-admin-workbench": "crm",
       "data-task-led": "true",
+      "data-today-layout": "operating-flow",
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h(WorkspaceWelcomeBanner, { page }),
       h(
         PageHeader,
-        { title, subtitle: page.metadata?.description },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
+        { title, subtitle: settingsCopy.todayBriefing.description },
+        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes", page) }, h(Icon, { name: "sparkles", size: 16 }), h("span", null, settingsCopy.hermesEntry.open)),
       ),
-      nextActions.length
-        ? h(
-            PageToolbar,
-            { "data-today-toolbar": "true" },
-            h(ListFilterTabs, {
-              scope: "next-actions",
-              label: workbenchCopy(page).workspaceSettings.nextActions.title,
-              options: nextActionFilterOptions(nextActions, workbenchCopy(page).workspaceSettings.nextActions),
-            }),
-          )
-        : null,
+      h(WorkspaceWelcomeBanner, { page }),
       h(
         "div",
-        { className: "adm-workbench-shell adm-workbench-shell--today", "data-today-layout": "action-rail" },
+        { className: "adm-owner-flow adm-owner-flow--today", "data-today-layout": "operating-flow" },
         h(
           "div",
-          { className: "adm-workbench-main" },
-          h(NextActionsPanel, { page, copy, ui, rows: nextActions, inboxHref }),
-          h(
-            Panel,
-            { title: label(copy, "priorityLeads", "Priority leads"), "data-priority-leads": "true" },
-            queue.pending.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...queue.pending.map((lead) => {
-                    const sla = queue.leadSlaById.get(lead.lead_id);
-                    const status = sla?.status || "pending";
-                    return h(
-                      "li",
-                      { key: lead.lead_id, "data-priority-lead": lead.lead_id },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        leadContactActions(lead, ui),
-                        h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
-                        requestDetailsText(lead) ? h("small", { className: "adm-lead-context" }, requestDetailsText(lead)) : null,
-                        h("code", { className: "crm-mono adm-task-list__reference" }, lead.lead_id),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: queueTone(status) }, statusText(ui, status)),
-                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "openAndReply", "Open and reply")),
-                      ),
-                    );
-                  }),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
-          ),
-          h(
-            Panel,
-            {
-              title: label(copy, "pipelineWorkspace", "Buyers and renters"),
-              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
-              "data-lead-pipeline-preview": "true",
-            },
-            page.leadPipelineQueue?.rows?.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
-                    h(
-                      "li",
-                      { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
-                        h("strong", null, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
-                        h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
-                        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "viewRecord", "Open")),
-                      ),
-                    ),
-                  ),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
-          ),
-          h(ViewingFollowUpQueue, { page, copy, ui }),
-          h(SellerPipelineQueue, { page, copy, ui }),
-          h(
-            Panel,
-            {
-              title: label(copy, "publicRequests", "Website requests"),
-              action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
-              "data-public-request-preview": "true",
-            },
-            page.publicRequestQueue?.rows?.length
-              ? h(
-                  "ul",
-                  { className: "adm-task-list" },
-                  ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
-                    h(
-                      "li",
-                      { key: `${row.request_type}:${row.request_id}` },
-                      h(
-                        "div",
-                        { className: "adm-task-list__body" },
-                        h("code", { className: "crm-mono" }, row.request_id),
-                        h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
-                      ),
-                      h(
-                        "div",
-                        { className: "adm-task-list__actions" },
-                        h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
-                      ),
-                    ),
-                  ),
-                )
-              : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
-          ),
+          { className: "adm-owner-flow__stack" },
+          h(TodayBriefingPanel, { page, rows: nextActions }),
+          showNextActionsPanel ? h(NextActionsPanel, { page, rows: nextActions }) : null,
         ),
-        h(TodayReadinessRail, { page, copy, ui, queue, openTasks, overdueTasks, inboxHref }),
+        h(TodayReadinessRail, {
+          page,
+          copy,
+          ui,
+          queue,
+          openTasks: openLeadPipelineTasks + openSellerTasks,
+          overdueTasks,
+          inboxHref,
+        }),
       ),
     ],
   });
@@ -3898,7 +4028,7 @@ function ViewingsBody({ page }) {
                     h(
                       "span",
                       { className: "adm-viewing-list__meta" },
-                      h("span", null, `${label(copy, "broker", "Broker")}: ${viewing.broker}`),
+                      h("span", null, `${label(copy, "broker", "Broker")}: ${brokerProfileText(page, viewing.broker)}`),
                       viewing.channel ? h("span", null, valueText(ui, viewing.channel)) : null,
                       h("code", { className: "crm-mono" }, viewing.id),
                     ),
@@ -3933,6 +4063,22 @@ function publicRequestTone(row) {
   if (row.status === "completed") return "success";
   if (row.status === "closed") return "sand";
   return "sun";
+}
+
+function publicRequestSubject(row, copy, ui) {
+  return row.request_type === "saved_search"
+    ? publicRequestCriteria(row) || label(copy, "savedSearchRequest", "Saved search")
+    : row.requested_path || ui.notSet;
+}
+
+function publicRequestSummaryMeta(row, copy, ui) {
+  return [
+    row.requested_locale || row.locale ? String(row.requested_locale || row.locale).toUpperCase() : null,
+    row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null,
+    row.request_type === "saved_search" && Number.isFinite(row.match_count) ? `${label(copy, "matches", "Matches")}: ${row.match_count}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function PublicRequestOutcomeForm({ page, row, copy, terminal = false }) {
@@ -3986,6 +4132,8 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false, filterScope 
     row.request_type === "saved_search"
       ? label(copy, "savedSearchRequest", "Saved search")
       : label(copy, "languageRequest", "Language request");
+  const requestSubject = publicRequestSubject(row, copy, ui);
+  const requestMeta = publicRequestSummaryMeta(row, copy, ui);
   const contact = leadContactActions(row, ui);
   const unavailable =
     row.contact_state === "locked"
@@ -4008,22 +4156,19 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false, filterScope 
       h(
         "div",
         { className: "adm-public-request__heading" },
-        h("div", null, h("h3", null, requestType), h("code", { className: "crm-mono" }, row.request_id)),
+        h(
+          "div",
+          null,
+          h("h3", null, requestType),
+          h("p", { className: "adm-public-request__subject", "data-public-request-subject": "true" }, requestSubject),
+          requestMeta ? h("p", { className: "adm-public-request__meta" }, requestMeta) : null,
+        ),
         h(StatusPill, { tone: publicRequestTone(row) }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
       ),
       h(
         "dl",
         { className: "adm-public-request__facts" },
         h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, row.requested_locale || row.locale ? String(row.requested_locale || row.locale).toUpperCase() : ui.notSet)),
-        row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row) || ui.notSet))
-          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || ui.notSet)),
-        row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : ui.notSet))
-          : null,
-        row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
-          : null,
         h(
           "div",
           null,
@@ -4036,15 +4181,27 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false, filterScope 
           h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
           h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : ui.notSet),
         ),
+        row.request_type === "saved_search"
+          ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
+          : null,
       ),
       h(
-        "div",
-        { className: "adm-public-request__contact", "data-private-request-contact": "true" },
-        h("strong", null, label(copy, "customerContact", "Customer contact")),
-        contact || h("p", { className: "adm-empty" }, unavailable),
-        row.message
-          ? h("div", { className: "adm-public-request__message", "data-private-request-message": "true" }, h("small", null, label(copy, "privateMessage", "Private message")), h("p", null, row.message))
-          : null,
+        "details",
+        { className: "adm-public-request__details", "data-public-request-details": "collapsed" },
+        h("summary", { className: "mk-btn mk-btn--ghost mk-btn--sm" }, h(Icon, { name: "user-round", size: 16 }), label(copy, "customerContact", "Customer contact")),
+        h(
+          "div",
+          { className: "adm-public-request__details-body" },
+          h(
+            "div",
+            { className: "adm-public-request__contact", "data-private-request-contact": "true" },
+            h("strong", null, label(copy, "customerContact", "Customer contact")),
+            contact || h("p", { className: "adm-empty" }, unavailable),
+            row.message
+              ? h("div", { className: "adm-public-request__message", "data-private-request-message": "true" }, h("small", null, label(copy, "privateMessage", "Private message")), h("p", null, row.message))
+              : null,
+          ),
+        ),
       ),
     ),
     h(
@@ -5801,7 +5958,7 @@ function LeadAssignmentControl({ page, lead, copy }) {
               "select",
               { name: "brokerId", defaultValue: brokerId, required: true },
               ...(page.brokerProfiles || []).map((profile) =>
-                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, profile.label || profile.id),
+                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, brokerProfileText(page, profile.id)),
               ),
             ),
           ),
@@ -5829,6 +5986,32 @@ function communicationEventLabel(copy, type) {
     delivery_requeue: label(copy, "deliveryRequeue", "Returned to queue"),
   };
   return labels[type] || type.replaceAll("_", " ");
+}
+
+function adminDataUnavailable(page, key) {
+  return page.dataAvailability?.[key]?.status === "unavailable";
+}
+
+function DataAvailabilityNotice({ page }) {
+  const unavailableDomains = Object.entries(page.dataAvailability || {})
+    .filter(([, value]) => value?.status === "unavailable")
+    .map(([key]) => key);
+  if (!unavailableDomains.length) return null;
+  const copy = ownerConsoleCopy(page).runtime;
+  return h(
+    "p",
+    {
+      className: "adm-inline-alert",
+      role: "status",
+      "data-unavailable-data": unavailableDomains.join(","),
+    },
+    h("strong", null, copy.title),
+    ` ${copy.description}`,
+  );
+}
+
+function availableMetric(page, key, value) {
+  return adminDataUnavailable(page, key) ? ownerConsoleCopy(page).runtime.unavailable : value;
 }
 
 function CommunicationThread({ page, thread, copy, ui }) {
@@ -5868,7 +6051,7 @@ function CommunicationThread({ page, thread, copy, ui }) {
               ? h("time", { dateTime: event.occurred_at, title: event.occurred_at }, formatAdminDateTime(event.occurred_at, page.workspace?.locale))
               : null,
           ),
-          event.actor ? h("small", null, event.actor) : null,
+          event.actor ? h("small", null, brokerProfileText(page, event.actor)) : null,
           h("p", null, event.body || label(copy, "noMessageBody", "No message body was provided.")),
         ),
       ),
@@ -6586,8 +6769,13 @@ function formatRelativeAge(value, ui, now = Date.now()) {
   return ui.ageDays.replace("{n}", String(Math.round(hours / 24)));
 }
 
+function leadSourceTitle(lead, ui) {
+  return valueText(ui, lead.source) || statusText(ui, lead.lead_type);
+}
+
 function leadTitle(lead, ui) {
-  return lead.contact?.name || statusText(ui, lead.lead_type);
+  const contactName = String(lead.contact?.name || "").trim();
+  return contactName && !looksLikeGeneratedContactId(contactName) ? contactName : leadSourceTitle(lead, ui);
 }
 
 function leadSlaTone(status) {
@@ -6630,13 +6818,14 @@ function LeadContactChannels({ lead, ui }) {
 function LeadInboxRow({ page, row, ui, locale }) {
   const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age, snooze } = row;
   const selectable = page?.leadOperations?.bulkWritable === true;
+  const repliesUnavailable = adminDataUnavailable(page, "replies");
   return h(
     "li",
     {
       "data-lead-row": "true",
       "data-lead-id": lead.lead_id,
       "data-lead-type": lead.lead_type,
-      "data-lead-replied": delivered ? "true" : "false",
+      ...(repliesUnavailable ? {} : { "data-lead-replied": delivered ? "true" : "false" }),
       "data-lead-snoozed": snooze?.status === "active" ? "true" : undefined,
       hidden: delivered,
     },
@@ -6733,6 +6922,9 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
 function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   const { lead, leadSla, slaStatus, queuedReply, delivery, delivered, brokerId, leadContext, requestDetails, intake, brief, thread } = row;
   const replyOpen = queuedReply && delivery && !delivered;
+  const repliesUnavailable = adminDataUnavailable(page, "replies");
+  const communicationUnavailable = adminDataUnavailable(page, "communicationThreads");
+  const runtimeCopy = ownerConsoleCopy(page).runtime;
   // Hermes availability comes from configuration on the payload, never from a
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
@@ -6751,7 +6943,7 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       "data-admin-locale": lead.admin_locale,
       "data-contact-preference": lead.contact_preference,
       "data-broker-assignment": brokerId,
-      "data-lead-replied": delivered ? "true" : "false",
+      ...(repliesUnavailable ? {} : { "data-lead-replied": delivered ? "true" : "false" }),
       "data-reply-queue-status": delivery && !delivered ? delivery.status : undefined,
       hidden: delivered,
     },
@@ -6766,7 +6958,7 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         h(
           "div",
           { className: "adm-lead-detail__meta" },
-          lead.contact?.name ? h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type)) : null,
+          h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type)),
           h("span", { className: "adm-lead-meta__source" }, valueText(ui, lead.source)),
           h("span", { className: "crm-lang" }, `${lead.original_language} → ${lead.admin_locale}`),
           h("span", { className: "adm-lead-meta__contact" }, valueText(ui, lead.contact_preference)),
@@ -6828,6 +7020,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         ...(hermesAvailable ? {} : { "data-hermes-state": "unavailable" }),
       },
       h("h3", null, leadColumns.reply),
+      repliesUnavailable
+        ? h(
+            "p",
+            { className: "adm-inline-alert", role: "status", "data-unavailable-domain": "replies" },
+            h("strong", null, runtimeCopy.title),
+            ` ${runtimeCopy.description}`,
+          )
+        : null,
       replyOpen ? h(ReplyDeliveryForm, { page, lead, reply: queuedReply, delivery, copy, ui }) : null,
       page.leadSourceDurable && !replyOpen && pageCan(page, "operations:write") ? h(DirectProviderReplyForm, { page, lead, copy, ui }) : null,
       h(
@@ -6935,7 +7135,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       "div",
       { className: "adm-lead-detail__section" },
       h(LeadAssignmentControl, { page, lead, copy }),
-      h(CommunicationThread, { page, thread, copy, ui }),
+      communicationUnavailable
+        ? h(
+            "p",
+            { className: "adm-inline-alert", role: "status", "data-unavailable-domain": "communicationThreads" },
+            h("strong", null, runtimeCopy.title),
+            ` ${runtimeCopy.description}`,
+          )
+        : h(CommunicationThread, { page, thread, copy, ui }),
       h(
         "details",
         { className: "adm-lead-more" },
@@ -6960,19 +7167,24 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
 function LeadInboxBody({ page }) {
   const ui = workbenchCopy(page);
   const copy = { ...ui, ...adminCopy(page) };
+  const runtimeCopy = ownerConsoleCopy(page).runtime;
   const locale = page.workspace?.locale;
   const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
   const sellerQueue = page.sellerPipelineQueue || { rows: [] };
-  const hasSecondaryQueue = Boolean(viewingQueue.rows?.length || sellerQueue.rows?.length);
+  const secondaryPanels = [
+    viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { key: "viewings", page, copy, ui }) : null,
+    sellerQueue.rows?.length ? h(SellerPipelineQueue, { key: "seller", page, copy, ui }) : null,
+  ].filter(Boolean);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
   const communicationByLeadId = new Map((page.communicationThreads || []).map((thread) => [thread.lead_id, thread]));
   const briefByLeadId = new Map((page.leadBriefs?.rows || []).map((brief) => [brief.lead_id, brief]));
   const briefOrder = new Map((page.leadBriefs?.rows || []).map((brief, index) => [brief.lead_id, index]));
-  const repliedLeadIds = new Set(
-    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
-  );
+  const repliesUnavailable = adminDataUnavailable(page, "replies");
+  const repliedLeadIds = repliesUnavailable
+    ? new Set()
+    : new Set((page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id));
   const leadPriority = (lead) => {
     const reply = replyByLeadId.get(lead.lead_id);
     const delivery = reply ? deliveryByReplyId.get(reply.id) : null;
@@ -6988,7 +7200,7 @@ function LeadInboxBody({ page }) {
     const briefDifference = (briefOrder.get(left.lead_id) ?? Number.MAX_SAFE_INTEGER) - (briefOrder.get(right.lead_id) ?? Number.MAX_SAFE_INTEGER);
     return briefDifference || leadPriority(left) - leadPriority(right);
   });
-  const needsReply = leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
+  const needsReply = repliesUnavailable ? [] : leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
   const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
   const rows = leads.map((lead) => {
     const leadSla = leadSlaById.get(lead.lead_id);
@@ -7013,9 +7225,9 @@ function LeadInboxBody({ page }) {
   });
   const slaCount = rows.filter((row) => row.slaStatus === "reminder_required" || row.slaStatus === "manager_escalation_required").length;
   const metrics = [
-    [label(copy, "needsReply", "Needs reply"), needsReply.length, "messages-square", "sea"],
-    [label(copy, "repliesQueued", "Replies queued"), page.summary.repliesQueued, "send", "sun"],
-    [statusText(ui, "failed"), page.summary.repliesFailed, "triangle-alert", "brick"],
+    [label(copy, "needsReply", "Needs reply"), repliesUnavailable ? runtimeCopy.unavailable : needsReply.length, "messages-square", "sea"],
+    [label(copy, "repliesQueued", "Replies queued"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesQueued, "send", "sun"],
+    [statusText(ui, "failed"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesFailed, "triangle-alert", "brick"],
     [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
   ];
   const title = label(copy, "leadInbox", "Lead inbox");
@@ -7041,14 +7253,20 @@ function LeadInboxBody({ page }) {
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(StatGrid, { metrics }),
+      h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
         h(
           "nav",
           { key: "tabs", className: "crm-seg adm-lead-tabs", "aria-label": label(copy, "leadQueues", "Lead queues"), "data-lead-queue-tabs": "true" },
-          h("button", { type: "button", "data-lead-filter": "all", "data-on": "0" }, label(copy, "all", "All"), h("span", { className: "adm-seg-count" }, leads.length)),
-          h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "1" }, label(copy, "needsReply", "Needs reply"), h("span", { className: "adm-seg-count" }, needsReply.length)),
+          h("button", { type: "button", "data-lead-filter": "all", "data-on": repliesUnavailable ? "1" : "0" }, label(copy, "all", "All"), h("span", { className: "adm-seg-count" }, leads.length)),
+          h(
+            "button",
+            { type: "button", "data-lead-filter": "needs_reply", "data-on": repliesUnavailable ? "0" : "1", disabled: repliesUnavailable || undefined },
+            label(copy, "needsReply", "Needs reply"),
+            h("span", { className: "adm-seg-count" }, repliesUnavailable ? runtimeCopy.unavailable : needsReply.length),
+          ),
           h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA"), h("span", { className: "adm-seg-count" }, slaCount)),
         ),
         h(ManualLeadForm, { key: "new", page }),
@@ -7071,12 +7289,11 @@ function LeadInboxBody({ page }) {
           h("p", { className: "adm-inbox__hint" }, ui.selectLead),
         ),
       ),
-      hasSecondaryQueue
+      secondaryPanels.length
         ? h(
             "section",
             { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
-            viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { page, copy, ui }) : null,
-            sellerQueue.rows?.length ? h(SellerPipelineQueue, { page, copy, ui }) : null,
+            ...secondaryPanels,
           )
         : null,
     ],
@@ -7667,18 +7884,23 @@ function DuplicateReviewPanel({ page }) {
     h("p", { className: "adm-note", role: "status", "data-duplicate-review-summary": "true" }, summaryText),
     review.rows?.length
       ? h(
-          "div",
-          { className: "adm-report-grid", "data-duplicate-review-pairs": String(review.rows.length) },
-          ...review.rows.map((pair) =>
-            h(
-              "article",
-              { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id, "data-duplicate-pair-status": pair.status },
-              h("header", null, h("div", null, h(StatusPill, { tone: pair.status === "confirmed" ? "success" : "sun" }, pair.status === "confirmed" ? copy.pairConfirmed || "Confirmed pair" : pair.candidate_source === "audit_only" ? copy.pairAuditOnly || "Audit-only candidate pair" : copy.pairCandidate || "Candidate pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+          "details",
+          { className: "adm-workbench-disclosure", "data-duplicate-review-results": String(review.rows.length) },
+          h("summary", null, h("span", null, `${label(adminCopy(page), "results", "Results")} · ${review.rows.length}`)),
+          h(
+            "div",
+            { className: "adm-report-grid", "data-duplicate-review-pairs": String(review.rows.length) },
+            ...review.rows.map((pair) =>
               h(
-                "div",
-                { className: "adm-report-grid adm-report-grid--two" },
-                duplicateListingCard({ card: pair.record_a, copy, page }),
-                duplicateListingCard({ card: pair.record_b, copy, page }),
+                "article",
+                { key: pair.pair_id, className: "adm-report-card", "data-duplicate-review-pair": pair.pair_id, "data-duplicate-pair-status": pair.status },
+                h("header", null, h("div", null, h(StatusPill, { tone: pair.status === "confirmed" ? "success" : "sun" }, pair.status === "confirmed" ? copy.pairConfirmed || "Confirmed pair" : pair.candidate_source === "audit_only" ? copy.pairAuditOnly || "Audit-only candidate pair" : copy.pairCandidate || "Candidate pair"), h("code", { className: "crm-mono" }, pair.pair_id)), h("small", null, copy.reviewOnly || "Manual comparison")),
+                h(
+                  "div",
+                  { className: "adm-report-grid adm-report-grid--two" },
+                  duplicateListingCard({ card: pair.record_a, copy, page }),
+                  duplicateListingCard({ card: pair.record_b, copy, page }),
+                ),
               ),
             ),
           ),
@@ -7734,7 +7956,7 @@ function AreaReviewPanel({ page }) {
     ),
     h(
       "details",
-      { open: true, className: "adm-workbench-disclosure", "data-area-review-missing": String(missingRows.length) },
+      { className: "adm-workbench-disclosure", "data-area-review-missing": String(missingRows.length) },
       h("summary", null, h("span", null, `${copy.missingCanonicalArea || "Missing canonical area"} · ${missingRows.length}`)),
       missingRows.length
         ? h("ul", { className: "adm-task-list" }, ...missingRows.map((row) => areaReviewRow({ row, copy, page, scope: "missing" })))
@@ -7742,7 +7964,7 @@ function AreaReviewPanel({ page }) {
     ),
     h(
       "details",
-      { open: Boolean(candidateRows.length), className: "adm-workbench-disclosure", "data-area-review-candidates": String(candidateRows.length) },
+      { className: "adm-workbench-disclosure", "data-area-review-candidates": String(candidateRows.length) },
       h("summary", null, h("span", null, `${copy.multipleCandidates || "Multiple prose suggestions"} · ${candidateRows.length}`)),
       candidateRows.length
         ? h("ul", { className: "adm-task-list" }, ...candidateRows.map((row) => areaReviewRow({ row, copy, page, scope: "candidates" })))
@@ -7776,7 +7998,7 @@ function ListingManagerBody({ page }) {
     [label(copy, "listingManager", "Listings"), page.summary.total, "building-2", "ink"],
     [ui.reviewRequired, page.summary.reviewRequired, "eye", "sun"],
     [statusText(ui, "price_on_request"), page.summary.priceOnRequest, "banknote", "sea"],
-    [label(copy, "translationQueue", "Translation review"), page.summary.translationReviewRequired, "languages", "brick"],
+    [label(copy, "translationQueue", "Translation review"), availableMetric(page, "translationTasks", page.summary.translationReviewRequired), "languages", "brick"],
   ];
   // Counted status filters in the toolbar: the fastest route from a summary
   // figure into the rows behind it, and it works without JavaScript.
@@ -7832,6 +8054,7 @@ function ListingManagerBody({ page }) {
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 16 }), h("span", null, label(copy, "translationQueue", "Translation review"))),
       ),
       h(StatGrid, { metrics }),
+      h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
@@ -7870,24 +8093,33 @@ function ListingManagerBody({ page }) {
         ),
         factReviewRows.length
           ? h(
-              "ul",
-              { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
-              ...factReviewRows.map((row) =>
-                h(
-                  "li",
-                  { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+              "details",
+              {
+                open: Boolean(factReview.filters?.row || factReview.filters?.q),
+                className: "adm-workbench-disclosure",
+                "data-fact-review-results": String(factReviewRows.length),
+              },
+              h("summary", null, h("span", null, `${label(copy, "results", "Results")} · ${factReviewRows.length}`)),
+              h(
+                "ul",
+                { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
+                ...factReviewRows.map((row) =>
                   h(
-                    "div",
-                    { className: "adm-task-list__body" },
-                    h("strong", null, row.title),
-                    h("code", { className: "crm-mono" }, row.listing_id),
-                    h("small", null, row.location || ui.notSet),
-                    h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
-                  ),
-                  h(
-                    "div",
-                    { className: "adm-task-list__actions" },
-                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                    "li",
+                    { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+                    h(
+                      "div",
+                      { className: "adm-task-list__body" },
+                      h("strong", null, row.title),
+                      h("code", { className: "crm-mono" }, row.listing_id),
+                      h("small", null, row.location || ui.notSet),
+                      h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
+                    ),
+                    h(
+                      "div",
+                      { className: "adm-task-list__actions" },
+                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                    ),
                   ),
                 ),
               ),
@@ -8022,11 +8254,36 @@ function ListingManagerBody({ page }) {
                           h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
                         ),
                       ),
-                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : ui.notSet))),
+                      h(
+                        "td",
+                        { "data-label": columns.listing, "data-listing-column": "listing" },
+                        h("div", { className: "adm-lead-identity adm-listing-identity__desktop" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, listingPriceText(ui, row))),
+                        h(
+                          "div",
+                          { className: "adm-listing-mobile-summary", "data-listing-mobile-summary": "true" },
+                          h(
+                            "div",
+                            { className: "adm-listing-mobile-summary__topline" },
+                            h("code", { className: "crm-mono" }, row.id),
+                            h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status)),
+                          ),
+                          h("strong", null, row.title),
+                          h(
+                            "small",
+                            { className: "adm-listing-mobile-summary__meta" },
+                            [
+                              row.location || ui.notSet,
+                              row.property_family ? statusText(ui, row.property_family) : ui.notSet,
+                              listingPriceText(ui, row),
+                              `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`,
+                            ].join(" · "),
+                          ),
+                        ),
+                      ),
                       h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || ui.notSet),
                       h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : ui.notSet),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
-                      h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
+                      h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, listingLocaleText(row))),
                       h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
                       h(
                         "td",
@@ -8035,6 +8292,23 @@ function ListingManagerBody({ page }) {
                           "div",
                           { className: "adm-task-list__actions" },
                           h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
+                          page.runtime_data_mode === "durable_only"
+                            ? null
+                            : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm adm-listing-history-link", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+                        ),
+                        h(
+                          "details",
+                          { className: "adm-listing-mobile-more", "data-listing-mobile-more": row.id },
+                          h("summary", null, h(Icon, { name: "chevron-right", size: 16 }), h("span", null, label(copy, "details", "Details"))),
+                          h(
+                            "dl",
+                            { className: "adm-listing-mobile-more__facts" },
+                            h("div", null, h("dt", null, columns.location), h("dd", null, row.location || ui.notSet)),
+                            h("div", null, h("dt", null, columns.propertyFamily), h("dd", null, row.property_family ? statusText(ui, row.property_family) : ui.notSet)),
+                            h("div", null, h("dt", null, columns.status), h("dd", null, statusText(ui, row.listing_status))),
+                            h("div", null, h("dt", null, columns.locale), h("dd", null, `${String(row.source_locale || "").toUpperCase() || ui.notSet} · ${listingLocaleText(row)}`)),
+                            h("div", null, h("dt", null, columns.quality), h("dd", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()} · ${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                          ),
                           page.runtime_data_mode === "durable_only"
                             ? null
                             : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
@@ -8070,10 +8344,10 @@ function TranslationQueueBody({ page }) {
   const hasFilters = Boolean(page.filters.q || page.filters.targetLocale || page.filters.taskType);
   const staleLocale = (page.filterOptions.taskTypes || []).includes("stale_review_required") ? "stale_review_required" : "";
   const metrics = [
-    [label(copy, "openTasks", "Open tasks"), page.summary.open_translation_tasks, "languages", "ink"],
+    [label(copy, "openTasks", "Open tasks"), availableMetric(page, "translationTasks", page.summary.open_translation_tasks), "languages", "ink"],
     [label(copy, "missingTranslations", "Missing translations"), page.summary.missing_translation_tasks, "circle-alert", "brick"],
-    [label(copy, "staleTranslations", "Stale translations"), page.summary.stale_translation_tasks, "clock", "sun"],
-    [label(copy, "results", "Results"), page.pagination.totalRows, "filter", "sea"],
+    [label(copy, "staleTranslations", "Stale translations"), availableMetric(page, "translationTasks", page.summary.stale_translation_tasks), "clock", "sun"],
+    [label(copy, "results", "Results"), availableMetric(page, "translationTasks", page.pagination.totalRows), "filter", "sea"],
   ];
   // Counted task-type filters in the toolbar, as links: this queue pages on
   // the server, so a client-side tab would hide rows the operator never got.
@@ -8124,6 +8398,7 @@ function TranslationQueueBody({ page }) {
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "building-2", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
       ),
       h(StatGrid, { metrics }),
+      h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
@@ -8210,14 +8485,18 @@ function TranslationQueueBody({ page }) {
                             h("input", { type: "hidden", name: "propertyFactsJson", defaultValue: JSON.stringify(row.property_facts) }),
                             h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
                             h(
-                              "div",
-                              { className: "adm-human-translation__context" },
+                              "section",
+                              { className: "adm-human-translation__overview", "data-translation-overview": "true" },
                               h(
                                 "div",
-                                { className: "adm-human-translation__source" },
-                                h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
-                                h("strong", null, row.source_title),
-                                row.source_description ? h("p", null, row.source_description) : null,
+                                { className: "adm-human-translation__context" },
+                                h(
+                                  "div",
+                                  { className: "adm-human-translation__source" },
+                                  h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()),
+                                  h("strong", null, row.source_title),
+                                  row.source_description ? h("p", null, row.source_description) : null,
+                                ),
                               ),
                               h(
                                 "dl",
@@ -8498,6 +8777,38 @@ function ListingEditorBody({ page }) {
       listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
+  const listingSummaryCards = [
+    {
+      id: "cms-status",
+      title: label(copy, "qualityStatus", "CMS status"),
+      value: statusText(ui, page.listing.cms_status),
+      meta: `${page.listing.source_domain} · ${page.listing.source_locale.toUpperCase()} · ${page.listing.id}`,
+      tone: PILL_TONES[page.listing.cms_status] || "ink",
+      status: { tone: PILL_TONES[page.listing.cms_status] || "ink", label: statusText(ui, page.listing.cms_status) },
+    },
+    {
+      id: "publish-approval",
+      title: ui.publishApproval,
+      value: workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing,
+      meta: workflow.availability_verified_at ? `${ui.availabilityVerification}: ${formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale)}` : ui.notVerified,
+      tone: workflow.publish_approved ? "success" : "sun",
+      status: { tone: workflow.publish_approved ? "success" : "sun", label: workflow.publish_approved ? statusText(ui, "approved") : statusText(ui, "review_required") },
+    },
+    {
+      id: "translations",
+      title: label(copy, "translationState", "Translation state"),
+      value: String(translationStates.length),
+      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : statusText(ui, "approved"),
+      tone: staleTranslations.length ? "brick" : "sea",
+    },
+    {
+      id: "media",
+      title: label(copy, "media", "Media"),
+      value: String((page.listing.media || []).length),
+      meta: `${ui.tourStatus}: ${statusText(ui, tourStatus)}`,
+      tone: reviewableMedia.length ? "ink" : "sand",
+    },
+  ];
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -8525,6 +8836,8 @@ function ListingEditorBody({ page }) {
           ? null
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
+      h(DataAvailabilityNotice, { page }),
+      h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" }),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -8570,7 +8883,7 @@ function ListingEditorBody({ page }) {
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
               editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
               h(
@@ -8636,8 +8949,8 @@ function ListingEditorBody({ page }) {
           ),
         ),
         h(
-          "aside",
-          { className: "adm-editor-rail", "data-editor-readiness-rail": "true" },
+          "section",
+          { className: "adm-editor-support", "data-editor-readiness-rail": "true" },
           h(
             Panel,
             {
@@ -9196,8 +9509,8 @@ function RuntimeEvidenceImport({ action, kind, statusHref, summary, templateLink
   );
 }
 
-function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
-  const operatorId = currentOperatorId(page, "seo_editor");
+function PendingLegacyRouteDecision({ page, route, ui, copy, defaultOpen = false }) {
+  const operatorId = currentOperatorId(page, "unassigned");
   const evidence = route.source_evidence || {};
   return h(
     "li",
@@ -9264,8 +9577,8 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
               `${evidence.word_count || 0} ${ui.sourceWords} · ${evidence.image_count || 0} ${ui.sourceImages} · ${evidence.internal_link_count || 0} ${ui.sourceLinks}`,
             ),
           ),
-          evidence.review_owner
-            ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, evidence.review_owner))
+          evidence.review_role
+            ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, reviewerRoleText(copy, ui, evidence.review_role)))
             : null,
           evidence.action_required
             ? h("div", null, h("dt", null, ui.requiredAction), h("dd", null, evidence.action_required))
@@ -9340,7 +9653,7 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
             "label",
             null,
             ui.reviewer,
-            h("input", { name: "reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }),
+            h("input", { name: "reviewer", defaultValue: operatorId, required: true, readOnly: true, autoComplete: "name" }),
           ),
           h(
             "label",
@@ -10020,7 +10333,7 @@ function MigrationReviewBody({ page }) {
               "ol",
               { className: "adm-route-decisions" },
               ...(page.routeMap.pendingSample || []).map((route) =>
-                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
+                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui, copy }),
               ),
             )
           : h(
@@ -10329,16 +10642,17 @@ function SettingsSection({ page, section, icon, fields }) {
   const statusText = saved ? copy.saved : failure || "";
   const statusState = saved ? "success" : failure ? "error" : undefined;
   return h(
-    "section",
+    "details",
     {
-      className: "crm-panel adm-settings-panel",
+      className: "crm-panel adm-settings-panel adm-settings-disclosure",
       id: `settings-${section}`,
+      open: section === "agency" || saved || failure ? true : undefined,
       "data-settings-section": section,
       "data-settings-state": meta ? "updated" : "defaults",
       ...(disabled ? { "data-settings-disabled": "true" } : {}),
     },
     h(
-      "div",
+      "summary",
       { className: "crm-panel__hd adm-settings-panel__hd" },
       h(
         "div",
@@ -10832,29 +11146,44 @@ function OwnerOperationsHub({ page }) {
   );
 }
 
+function operatorRolesForPage(page) {
+  const profileRoles = Array.isArray(page?.owner_profile?.roles) ? page.owner_profile.roles.map(String).filter(Boolean) : [];
+  if (profileRoles.length) return profileRoles;
+  return Array.isArray(page?.workspace?.operator_roles) ? page.workspace.operator_roles.map(String).filter(Boolean) : [];
+}
+
+function operatorIdForPage(page) {
+  const profileId = String(page?.owner_profile?.id || "").trim();
+  if (profileId) return profileId;
+  return String(page?.workspace?.operator_id || "").trim();
+}
+
 function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
   const profile = page.owner_profile || {};
+  const roles = operatorRolesForPage(page);
   const hasWorkspaceScope = Array.isArray(profile.workspace_ids);
   const workspaceIds = hasWorkspaceScope ? profile.workspace_ids : [];
-  return profile.full_workspace_access
-    ? copy.fullAccess
-    : hasWorkspaceScope
-      ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length })
-      : copy.scopeUnavailable;
+  if (profile.full_workspace_access || (roles.includes("admin") && hasWorkspaceScope && workspaceIds.length === 0)) return copy.fullAccess;
+  if (roles.includes("admin") && !hasWorkspaceScope && operatorIdForPage(page)) return copy.fullAccess;
+  return hasWorkspaceScope ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length }) : copy.scopeUnavailable;
+}
+
+function ownerRoleLabel(page, copy = ownerConsoleCopy(page).profile) {
+  const roles = operatorRolesForPage(page);
+  return roles.includes("admin") ? copy.administrator : roles.join(", ") || copy.owner;
 }
 
 function OwnerProfileSection({ page }) {
   const profile = page.owner_profile || {};
   const copy = ownerConsoleCopy(page).profile;
-  const roles = Array.isArray(profile.roles) ? profile.roles : [];
   const scope = ownerWorkspaceScope(page, copy);
-  const role = roles.includes("admin") ? copy.administrator : roles.join(", ") || copy.owner;
+  const role = ownerRoleLabel(page, copy);
   const fields = [
     [copy.name, profile.name || ownerIdentityName(page)],
     [copy.email, profile.email],
     [copy.role, role],
     [copy.scope, scope],
-    [copy.operatorId, profile.id],
+    [copy.operatorId, operatorIdForPage(page)],
   ].filter(([, value]) => value);
   return h(
     "section",
@@ -10862,7 +11191,7 @@ function OwnerProfileSection({ page }) {
     h(
       "div",
       { className: "crm-panel__hd adm-owner-profile__heading" },
-      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, scope)),
+      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, scope].filter(Boolean).join(" · "))),
     ),
     h(
       "dl",
@@ -10881,6 +11210,407 @@ function OwnerProfileSection({ page }) {
         : null,
     ),
   );
+}
+
+function connectionTone(status) {
+  if (status === "connected" || status === "ready") return "success";
+  if (status === "attention" || status === "needs_setup") return "brick";
+  return "sand";
+}
+
+function connectionListKind(connectionId) {
+  return ["google", "google_drive", "whatsapp", "ai"].includes(connectionId) ? "core" : "secondary";
+}
+
+function connectionGroupSummary(title, rows) {
+  return `${title} · ${rows.length}`;
+}
+
+function connectionIcon(connection) {
+  if (connection.id === "google") return "mail";
+  if (connection.id === "ai") return "sparkles";
+  if (connection.id === "cloudflare" || connection.id === "neon") return "shield-check";
+  return "message-circle";
+}
+
+function ConnectionAction({ connection }) {
+  if (connection.id === "whatsapp") {
+    if (!connection.can_manage) return null;
+    return h(
+      "button",
+      {
+        className: "mk-btn mk-btn--primary mk-btn--sm",
+        type: "button",
+        disabled: true,
+        "data-whatsapp-connect": "true",
+      },
+      h(Icon, { name: "message-circle", size: 15 }),
+      h("span", null, connection.action_label),
+    );
+  }
+  if (connection.can_manage && connection.action_href) {
+    return h(
+      "a",
+      { className: "mk-btn mk-btn--primary mk-btn--sm", href: connection.action_href },
+      h(Icon, { name: "link", size: 15 }),
+      h("span", null, connection.action_label),
+    );
+  }
+  if (!connection.docs_href) return null;
+  return h(
+    "a",
+    { className: "mk-btn mk-btn--ghost mk-btn--sm", href: connection.docs_href, target: "_blank", rel: "noreferrer" },
+    h(Icon, { name: "external-link", size: 15 }),
+    h("span", null, connection.docs_label),
+  );
+}
+
+function ConnectionRow({ connection, copy }) {
+  const connected = connection.status === "connected" || connection.status === "inactive";
+  return h(
+    "li",
+    {
+      className: "adm-connection-row",
+      id: `connection-${connection.id}`,
+      "data-provider": connection.id,
+      "data-status": connection.status,
+      "data-connection-kind": connectionListKind(connection.id),
+    },
+    h(
+      "div",
+      { className: "adm-connection-row__summary" },
+      h("div", { className: "adm-connection-row__icon", "aria-hidden": "true" }, h(Icon, { name: connectionIcon(connection), size: 18 })),
+      h(
+        "div",
+        null,
+        h("h3", null, connection.title),
+        h("p", null, connection.description),
+        connection.helper_text ? h("p", { className: "adm-connection-row__helper" }, connection.helper_text) : null,
+        connected ? h("p", { className: "adm-connection-row__account" }, h("bdi", null, connection.account_label), h("small", null, connection.verified_label)) : null,
+        connection.model || connection.endpoint
+          ? h(
+              "p",
+              { className: "adm-connection-row__account" },
+              connection.model ? h("span", null, connection.model) : null,
+              connection.endpoint ? h("small", null, connection.endpoint) : null,
+            )
+          : null,
+        connection.blocked_text ? h("p", { className: "adm-connection-row__blocked" }, connection.blocked_text) : null,
+        connection.unavailable_message
+          ? h("p", { className: "adm-connection-row__recovery" }, connection.unavailable_message, h("small", null, connection.recovery_message))
+          : null,
+      ),
+    ),
+    h(
+      "div",
+      { className: "adm-connection-row__state" },
+      h(StatusPill, { tone: connectionTone(connection.status) }, connection.status_label),
+      h(
+        "div",
+        { className: "adm-connection-row__actions" },
+        h(ConnectionAction, { connection }),
+        connected && connection.can_manage
+          ? h(
+              "form",
+              { method: "post", action: "/api/admin/connections/disconnect" },
+              h("input", { type: "hidden", name: "provider", value: connection.id }),
+              h("button", { className: "mk-btn mk-btn--ghost mk-btn--sm", type: "submit" }, copy.disconnect),
+            )
+          : null,
+      ),
+      connection.id === "whatsapp" ? h("small", { className: "adm-connection-row__live", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-whatsapp-result": "true" }) : null,
+    ),
+  );
+}
+
+function AssistantAccess({ assistant, copy }) {
+  const credential = String(assistant?.credential || "");
+  const config = String(assistant?.config || "");
+  if (!credential && !config && !assistant?.can_issue) return null;
+  const operatorId = assistant?.operator_id || "operator";
+  return h(
+    "div",
+    { className: "adm-assistant-connection__access", "data-assistant-access": "true" },
+    !credential && assistant?.can_issue
+      ? h(
+          "form",
+          { className: "adm-assistant-connection__credential", method: "post", action: assistant.issue_path || "/admin/connect", "data-agent-credential-issue": "true" },
+          h("input", { type: "hidden", name: "action", value: "issue_agent_credential" }),
+          h("button", { className: "mk-btn mk-btn--primary mk-btn--sm", type: "submit" }, h(Icon, { name: "key", size: 15 }), h("span", null, copy.agentIssue)),
+          h("p", { className: "adm-assistant-connection__hint" }, copy.agentIssueHint),
+        )
+      : null,
+    credential
+      ? h(
+          "div",
+          { className: "adm-assistant-connection__credential" },
+          h("label", { htmlFor: "agent-credential" }, assistant?.credential_env ? `${copy.agentCredentialLabel} (${assistant.credential_env})` : copy.agentCredentialLabel),
+          h(
+            "div",
+            { className: "adm-assistant-connection__credential-row" },
+            h("input", {
+              className: "adm-assistant-connection__credential-input",
+              id: "agent-credential",
+              type: "password",
+              value: credential,
+              readonly: true,
+              autoComplete: "off",
+              spellCheck: false,
+              "aria-describedby": "agent-credential-hint",
+            }),
+            h(
+              "button",
+              {
+                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                type: "button",
+                "data-copy-block": "agent-credential",
+                "data-copy-done": copy.agentCredentialCopied,
+                "data-copy-failed": copy.agentCopyFailed,
+                hidden: true,
+              },
+              copy.agentCredentialCopy,
+            ),
+            h("span", { className: "adm-assistant-connection__copy-status", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-copy-status": "agent-credential" }),
+          ),
+          h("p", { className: "adm-assistant-connection__hint", id: "agent-credential-hint" }, copy.agentCredentialHint),
+        )
+      : null,
+    config
+      ? h(
+          "details",
+          { className: "adm-assistant-connection__config", "data-assistant-config-disclosure": "true" },
+          h("summary", { className: "adm-assistant-connection__config-label", id: "agent-config-label" }, copy.agentConfigLabel),
+          h("pre", { className: "adm-assistant-connection__config-block", id: "agent-config", tabIndex: 0, "aria-labelledby": "agent-config-label" }, config),
+          h(
+            "div",
+            { className: "adm-assistant-connection__config-actions" },
+            h(
+              "button",
+              {
+                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                type: "button",
+                "data-copy-block": "agent-config",
+                "data-copy-done": copy.agentCopied,
+                "data-copy-failed": copy.agentCopyFailed,
+                hidden: true,
+              },
+              copy.agentCopy,
+            ),
+            h("span", { className: "adm-assistant-connection__copy-status", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-copy-status": "agent-config" }),
+          ),
+          h("p", { className: "adm-assistant-connection__hint" }, `${copy.agentWarning} ${operatorId}.`),
+        )
+      : null,
+  );
+}
+
+function ConnectionsBody({ page }) {
+  const copy = page.connection_copy || {};
+  const ui = workbenchCopy(page);
+  const whatsapp = page.whatsapp_client || {};
+  const connections = Array.isArray(page.connections) ? page.connections : [];
+  const supporting = Array.isArray(page.supporting_connections) ? page.supporting_connections : [];
+  const managed = Array.isArray(page.managed_systems) ? page.managed_systems : [];
+  const primaryConnectionIds = new Set(["google", "google_drive", "whatsapp", "ai"]);
+  const connectionById = (rows, id) => rows.find((row) => row.id === id) || null;
+  const readyCount = (rows) => rows.filter((row) => ["connected", "ready"].includes(row.status)).length;
+  const socialConnections = [...connections, ...supporting]
+    .filter((row) => ["facebook", "instagram"].includes(row.id))
+    .filter((row, index, rows) => rows.findIndex((candidate) => candidate.id === row.id) === index);
+  const google = connectionById(connections, "google");
+  const whatsappConnection = connectionById(connections, "whatsapp");
+  const primaryConnections = connections.filter((connection) => primaryConnectionIds.has(connection.id));
+  const secondaryWorkAccounts = connections.filter((connection) => !primaryConnectionIds.has(connection.id));
+  const assistantReady = Boolean(page.assistant?.credential);
+  const assistantInstallReady = !assistantReady && Boolean(page.assistant?.plugin_url || page.assistant?.config);
+  const assistantTone = assistantReady ? "success" : assistantInstallReady ? "sun" : "brick";
+  const assistantStatus = assistantReady ? statusText(ui, "ready") : assistantInstallReady ? statusText(ui, "in_progress") : statusText(ui, "blocked");
+  const socialReadyCount = readyCount(socialConnections);
+  const summaryCards = [
+    google
+      ? {
+          id: "google",
+          title: google.title,
+          value: google.status_label,
+          meta: google.account_label || google.helper_text || google.description,
+          tone: connectionTone(google.status),
+          status: { tone: connectionTone(google.status), label: google.status_label },
+        }
+      : null,
+    whatsappConnection
+      ? {
+          id: "whatsapp",
+          title: whatsappConnection.title,
+          value: whatsappConnection.status_label,
+          meta: whatsappConnection.helper_text || whatsappConnection.blocked_text || whatsappConnection.description,
+          tone: connectionTone(whatsappConnection.status),
+          status: { tone: connectionTone(whatsappConnection.status), label: whatsappConnection.status_label },
+        }
+      : null,
+    socialConnections.length
+      ? {
+          id: "social",
+          title: copy.marketingChannelsTitle || copy.additionalChannelsTitle,
+          value: `${socialReadyCount}/${socialConnections.length}`,
+          meta: socialConnections.map((row) => `${row.title}: ${row.status_label}`).join(" · "),
+          tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
+          status: {
+            tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
+            label: socialReadyCount === socialConnections.length ? statusText(ui, "ready") : socialReadyCount ? statusText(ui, "in_progress") : statusText(ui, "blocked"),
+          },
+        }
+      : null,
+    {
+      id: "assistant",
+      title: page.assistant?.title,
+      value: assistantStatus,
+      meta: assistantReady ? page.assistant?.description || page.assistant?.install_hint : page.assistant?.install_hint || page.assistant?.description,
+      tone: assistantTone,
+      status: { tone: assistantTone, label: assistantStatus },
+    },
+  ];
+  return adminShell(page, {
+    title: copy.title,
+    titleAsHeading: true,
+    mainAttrs: {
+      "data-kind": "admin_connections",
+      "data-react-admin-ui": "connections",
+      "data-admin-workbench": "connections",
+      "data-admin-locale": page.workspace.locale,
+      "data-whatsapp-embedded-signup": whatsapp.enabled ? "true" : "false",
+      "data-whatsapp-app-id": whatsapp.app_id || "",
+      "data-whatsapp-config-id": whatsapp.config_id || "",
+      "data-whatsapp-version": whatsapp.version || "",
+      "data-meta-checking": copy.metaChecking || "",
+      "data-meta-rejected": copy.metaRejected || "",
+      "data-meta-no-server": copy.metaNoServer || "",
+      "data-meta-ready": copy.metaReady || "",
+      "data-meta-sdk-failed": copy.metaSdkFailed || "",
+      "data-meta-sdk-not-ready": copy.metaSdkNotReady || "",
+      "data-meta-opening": copy.metaOpening || "",
+      "data-meta-cancelled": copy.metaCancelled || "",
+    },
+    children: [
+      h(
+        PageHeader,
+        { title: copy.title, subtitle: copy.intro },
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/settings", page) }, h(Icon, { name: "settings", size: 16 }), h("span", null, ownerConsoleCopy(page).routes.settings)),
+      ),
+      h(SummaryStrip, { cards: summaryCards, "data-summary-kind": "connections" }),
+      h(
+        "div",
+        { className: "adm-owner-flow adm-owner-flow--connections", "data-connections-layout": "operating-flow" },
+        h(
+          "div",
+          { className: "adm-owner-flow__stack" },
+          page.result
+            ? h("p", { className: "adm-connections-notice", role: page.result.tone === "error" ? "alert" : "status", "data-state": page.result.tone }, page.result.message)
+            : null,
+          h(
+            "section",
+            { className: "adm-owner-stage adm-owner-stage--connections", "data-connections-stage": "true" },
+            h(
+              "div",
+              { className: "adm-owner-stage__primary" },
+              h(
+                Panel,
+                { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
+                h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
+            h("ul", { className: "adm-connection-list", "data-connection-list": "core" }, ...primaryConnections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                secondaryWorkAccounts.length
+                  ? h(
+                      WorkbenchDisclosure,
+                      {
+                    summary: connectionGroupSummary(copy.marketingChannelsTitle || copy.additionalChannelsTitle, secondaryWorkAccounts),
+                    "data-connection-group": "secondary-work-accounts",
+                      },
+                  h(
+                    "div",
+                    null,
+                    copy.marketingChannelsDescription ? h("p", { className: "adm-connections-section-copy" }, copy.marketingChannelsDescription) : null,
+                    h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...secondaryWorkAccounts.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                  ),
+                )
+              : null,
+              ),
+            ),
+            h(
+              "div",
+              { className: "adm-owner-stage__aside" },
+              h(
+                Panel,
+                {
+                  title: page.assistant?.title,
+                  className: "adm-assistant-connection",
+                  "data-connection-group": "assistant",
+                  action: h(
+                    "a",
+                    {
+                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                      href: page.assistant?.plugin_url,
+                      rel: "noopener",
+                      "data-codex-plugin-install": "ms-realty-operator",
+                    },
+                    h(Icon, { name: "sparkles", size: 15 }),
+                    h("span", null, page.assistant?.install_label),
+                  ),
+                },
+                h(
+                  "div",
+                  { className: "adm-assistant-connection__copy" },
+                  h("p", null, page.assistant?.description),
+                  h("small", null, page.assistant?.install_hint),
+                  h(AssistantAccess, { assistant: page.assistant, copy }),
+                ),
+              ),
+              h(
+                Panel,
+                { title: copy.managedTitle, "data-connection-group": "managed-system" },
+                h("p", { className: "adm-connections-section-copy" }, copy.managedDescription),
+                h(
+                  "ul",
+                  { className: "adm-managed-system-list" },
+                  ...managed.map((system) =>
+                    h(
+                      "li",
+                      { key: system.id, "data-managed-system": system.id, "data-status": system.status },
+                      h(
+                        "div",
+                        null,
+                        h("h3", null, system.title),
+                        h("p", null, system.description),
+                        system.helper_text ? h("small", null, system.helper_text) : null,
+                      ),
+                      h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        h(
+          "div",
+          { className: "adm-owner-flow__support", "data-connections-support": "true" },
+          supporting.length
+            ? h(
+                Panel,
+                { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
+                h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
+                h(
+                  WorkbenchDisclosure,
+                  {
+                    summary: connectionGroupSummary(copy.additionalChannelsTitle, supporting),
+                    "data-connection-group": "supporting-disclosure",
+                  },
+                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                ),
+              )
+            : null,
+        ),
+      ),
+    ],
+  });
 }
 
 function RuntimeUnavailableBody({ page }) {
@@ -10932,19 +11662,33 @@ function hermesStateLabel(copy, state) {
     fail: copy.fail,
     missing_env: copy.missingEnv,
     not_run: copy.notRun,
+    requested: copy.notRun,
+    planned: copy.planReady,
+    failed: copy.fail,
   }[state] || state || copy.blocked;
 }
 
 function HermesBody({ page }) {
   const copy = ownerConsoleCopy(page).hermes;
+  const ui = workbenchCopy(page);
   const runtime = page.runtime || { ready: false, status: "blocked", checks: [], missing: [] };
   const queue = page.queue || { status: "blocked", summary: {}, rows: [] };
+  const receiptStore = page.receipt_store || { status: "blocked" };
   const bridgeReady = queue.status === "ready";
   const tasks = Array.isArray(queue.rows) ? queue.rows : [];
+  const firstTask = tasks[0] || null;
+  const queuedTasks = firstTask ? tasks.slice(1) : tasks;
+  const visibleTasks = queuedTasks.slice(0, 5);
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
+  const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
+  const runtimeBlocked = runtime.ready !== true || commandForm.enabled !== true;
+  const commandResult = page.command_result?.plan ? page.command_result : null;
+  const commandError = page.command_error?.kind ? copy.commandErrors[page.command_error.kind] || copy.commandErrors.hermes_unavailable : null;
+  const receipts = Array.isArray(page.receipts) ? page.receipts : [];
   return adminShell(page, {
     title: copy.title,
+    titleAsHeading: true,
     mainAttrs: {
       "data-kind": "admin-hermes",
       "data-react-admin-ui": "hermes",
@@ -10957,148 +11701,351 @@ function HermesBody({ page }) {
       h(
         PageHeader,
         { title: copy.title, subtitle: copy.description },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
         pageCan(page, "settings:manage")
-          ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
+          ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, copy.connections))
           : null,
       ),
       h(
         "div",
-        { className: "adm-hermes-status-grid" },
+        { className: "adm-owner-flow adm-owner-flow--hermes", "data-hermes-layout": "operating-flow" },
         h(
-          Panel,
-          { title: copy.hosted, "data-hermes-runtime-card": runtime.status },
+          "div",
+          { className: "adm-owner-flow__stack" },
           h(
-            "div",
-            { className: "adm-hermes-card" },
-            h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)), h("p", null, copy.hostedDescription)),
+            "section",
+            { className: "adm-owner-stage adm-owner-stage--hermes", "data-hermes-stage": "true" },
             h(
-              "dl",
-              { className: "adm-hermes-facts" },
-              runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
-              h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
-              h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
+              "div",
+              { className: "adm-owner-stage__primary" },
+              h(
+                Panel,
+                {
+                  title: copy.command,
+                  "data-hermes-command-panel": runtimeBlocked ? "blocked" : "ready",
+                },
+                runtimeBlocked
+                  ? h(
+                      "div",
+                      { className: "adm-hermes-command adm-hermes-command--blocked" },
+                      h("p", { className: "adm-hermes-panel-intro" }, copy.commandDisabled),
+                      h(
+                        "dl",
+                        { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
+                        h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
+                        h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
+                        h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-hermes-recovery", role: "group", "aria-label": copy.recoveryTitle, "data-hermes-command-recovery": "true" },
+                        h(Icon, { name: "link", size: 17 }),
+                        h(
+                          "div",
+                          { className: "adm-hermes-recovery__copy" },
+                          h("strong", null, copy.recoveryTitle),
+                          h("p", null, copy.recoveryDescription),
+                        ),
+                        pageCan(page, "settings:manage")
+                          ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
+                          : null,
+                        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, copy.retry),
+                      ),
+                      firstTask
+                        ? h(
+                            "div",
+                            { className: "adm-hermes-command__starting-point", "data-hermes-next-task": firstTask.id },
+                            h(
+                              "div",
+                              null,
+                              h("span", { className: "adm-hermes-command__starting-kicker" }, copy.queue),
+                              h("strong", null, firstTask.object_id),
+                              h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
+                            ),
+                            h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          )
+                        : null,
+                    )
+                  : h(
+                      "div",
+                      { className: "adm-hermes-command" },
+                      h("p", { className: "adm-hermes-panel-intro" }, copy.commandDescription),
+                      h(
+                        "dl",
+                        { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
+                        h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
+                        h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
+                        h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
+                      ),
+                      firstTask
+                        ? h(
+                            "div",
+                            { className: "adm-hermes-command__starting-point", "data-hermes-next-task": firstTask.id },
+                            h(
+                              "div",
+                              null,
+                              h("span", { className: "adm-hermes-command__starting-kicker" }, copy.queue),
+                              h("strong", null, firstTask.object_id),
+                              h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
+                            ),
+                            h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                            h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          )
+                        : null,
+                      h(
+                        "form",
+                        { className: "adm-hermes-command__form", method: "post", action: adminHref("/admin/hermes", page) },
+                        h("input", { type: "hidden", name: "idempotencyKey", value: commandForm.idempotency_key }),
+                        h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
+                        h("label", { htmlFor: "hermes-owner-command" }, copy.commandLabel),
+                        h("textarea", {
+                          id: "hermes-owner-command",
+                          name: "command",
+                          rows: 4,
+                          maxLength: commandForm.max_length,
+                          required: true,
+                          placeholder: copy.commandPlaceholder,
+                          "aria-describedby": "hermes-owner-command-note",
+                          autoComplete: "off",
+                        }),
+                        h(
+                          "div",
+                          { className: "adm-hermes-command__actions" },
+                          h("small", { id: "hermes-owner-command-note" }, copy.notExecuted),
+                          h(
+                            "button",
+                            { className: `mk-btn mk-btn--${firstTask ? "secondary" : "primary"}`, type: "submit" },
+                            h(Icon, { name: "sparkles", size: 16 }),
+                            h("span", null, copy.preparePlan),
+                          ),
+                        ),
+                      ),
+                    ),
+                commandError
+                  ? h(
+                      "div",
+                      { className: "adm-hermes-command__error", role: "alert", "data-hermes-command-error": page.command_error.kind },
+                      h(Icon, { name: "triangle-alert", size: 18 }),
+                      h("span", null, commandError),
+                    )
+                  : null,
+                commandResult
+                  ? h(
+                      "section",
+                      { className: "adm-hermes-plan", "data-hermes-command-result": commandResult.status },
+                      h(
+                        "header",
+                        null,
+                        h("div", null, h("h3", null, copy.planReady), h("p", null, commandResult.plan.summary)),
+                        h(StatusPill, { tone: "sun" }, copy.notExecuted),
+                      ),
+                      h(
+                        "ol",
+                        null,
+                        ...commandResult.plan.steps.map((step, index) =>
+                          h(
+                            "li",
+                            { key: `${commandResult.idempotency_key}-${index}` },
+                            h(
+                              "div",
+                              null,
+                              h("strong", null, step.title),
+                              h("p", null, step.why),
+                              h("small", null, step.evidence.join(" · ")),
+                            ),
+                            h(StatusPill, { tone: step.mode === "draft" ? "sun" : "sea" }, step.mode === "draft" ? copy.draftStep : copy.reviewStep),
+                            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(step.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                          ),
+                        ),
+                      ),
+                      commandResult.plan.questions.length
+                        ? h("div", { className: "adm-hermes-plan__questions" }, h("strong", null, copy.questions), h("ul", null, ...commandResult.plan.questions.map((question) => h("li", { key: question }, question))))
+                        : null,
+                      h("small", { className: "adm-hermes-plan__receipt" }, `${copy.receipt}: ${commandResult.idempotency_key}`),
+                    )
+                  : null,
+                h(
+                  "section",
+                  { className: "adm-hermes-receipts", "data-hermes-receipts": receipts.length },
+                  h("h3", null, copy.recentReceipts),
+                  receipts.length
+                    ? h(
+                        "ul",
+                        null,
+                        ...receipts.map((receipt) =>
+                          h(
+                            "li",
+                            { key: receipt.idempotency_key },
+                            h("span", null, h("strong", null, receipt.plan?.summary || receipt.failure_code || receipt.status), h("small", null, formatAdminDateTime(receipt.completed_at || receipt.started_at, page.workspace.locale))),
+                            h(StatusPill, { tone: receipt.status === "planned" ? "success" : receipt.status === "failed" ? "brick" : "sand" }, hermesStateLabel(copy, receipt.status)),
+                          ),
+                        ),
+                      )
+                    : h("p", { className: "adm-hermes-receipts__empty" }, copy.noReceipts),
+                ),
+              ),
+              queue.status !== "ready" || visibleTasks.length || !firstTask
+                ? h(
+                    Panel,
+                    {
+                      title: copy.queue,
+                      action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
+                      "data-hermes-task-queue": queue.status,
+                    },
+                    h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
+                    queue.status !== "ready"
+                      ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
+                      : visibleTasks.length
+                        ? h(
+                            "ul",
+                            {
+                              className: "adm-hermes-tasks",
+                              "data-hermes-task-count": String(tasks.length),
+                              "data-hermes-task-visible": String(visibleTasks.length),
+                            },
+                            ...visibleTasks.map((task) =>
+                              h(
+                                "li",
+                                { key: task.id, "data-hermes-task": task.id },
+                                h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
+                                h(
+                                  "span",
+                                  { className: "adm-hermes-task__copy" },
+                                  h("strong", null, task.object_id),
+                                  h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+                                ),
+                                h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                                h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                              ),
+                            ),
+                          )
+                        : h(
+                            "div",
+                            { className: "adm-hermes-empty", role: "status" },
+                            h(Icon, { name: "check-circle-2", size: 18 }),
+                            h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
+                          ),
+                  )
+                : null,
             ),
             h(
               "div",
-              { className: "adm-hermes-checks", "aria-label": copy.checks },
-              h("strong", null, copy.checks),
+              { className: "adm-owner-stage__aside" },
               h(
-                "ul",
-                null,
-                ...(runtime.checks || []).map((check) =>
-                  h(
-                    "li",
-                    { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
-                    h("code", null, check.id),
-                    h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
-                  ),
-                ),
-              ),
-            ),
-            runtime.missing?.length
-              ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
-              : null,
-            !runtime.ready
-              ? h(
+                Panel,
+                {
+                  title: copy.hosted,
+                  "data-hermes-runtime-card": runtime.status,
+                },
+                h(
                   "div",
-                  { className: "adm-hermes-recovery", role: "note", "data-hermes-recovery": "true" },
-                  h(Icon, { name: "link", size: 17 }),
+                  { className: "adm-hermes-card" },
+                  h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)), h("p", null, copy.hostedDescription)),
                   h(
-                    "div",
-                    { className: "adm-hermes-recovery__copy" },
-                    h("strong", null, copy.recoveryTitle),
-                    h("p", null, copy.recoveryDescription),
-                  ),
-                  pageCan(page, "settings:manage")
-                    ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
-                    : null,
-                )
-              : null,
-          ),
-        ),
-        h(
-          Panel,
-          { title: copy.desktop, "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked" },
-          h(
-            "div",
-            { className: "adm-hermes-card" },
-            h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
-            h(StatGrid, {
-              metrics: [
-                [copy.eligible, queue.eligible_for_desktop || 0],
-                [copy.withheld, queue.withheld_sensitive || 0],
-              ],
-            }),
-            h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm adm-hermes-card__action", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections)),
-          ),
-        ),
-      ),
-      h(
-        Panel,
-        {
-          title: copy.queue,
-          action: h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 15 }), h("span", null, copy.openReview)),
-          "data-hermes-task-queue": queue.status,
-        },
-        h("p", { className: "adm-hermes-panel-intro" }, copy.queueDescription),
-        queue.status !== "ready"
-          ? h("div", { className: "adm-hermes-empty adm-hermes-empty--blocked", role: "status" }, h(Icon, { name: "triangle-alert", size: 18 }), h("span", null, copy.taskSourceUnavailable))
-          : tasks.length
-            ? h(
-                "ul",
-                { className: "adm-hermes-tasks" },
-                ...tasks.map((task) =>
-                  h(
-                    "li",
-                    { key: task.id, "data-hermes-task": task.id },
-                    h("span", { className: "adm-hermes-task__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 17 })),
+                    "details",
+                    { className: "adm-hermes-diagnostics", "data-hermes-diagnostics": "collapsed" },
+                    h("summary", null, h(Icon, { name: "settings", size: 16 }), h("span", null, copy.runtimeDetails)),
                     h(
-                      "span",
-                      { className: "adm-hermes-task__copy" },
-                      h("strong", null, task.object_id),
-                      h("small", null, `${task.source_locale.toUpperCase()} → ${task.target_locale.toUpperCase()} · ${task.task_type}`),
+                      "div",
+                      { className: "adm-hermes-diagnostics__body" },
+                      h(
+                        "dl",
+                        { className: "adm-hermes-facts" },
+                        runtime.endpoint ? h("div", null, h("dt", null, copy.endpoint), h("dd", null, h("code", null, runtime.endpoint))) : null,
+                        h("div", null, h("dt", null, copy.model), h("dd", null, runtime.model || "—")),
+                        h("div", null, h("dt", null, copy.generatedAt), h("dd", null, formatAdminDateTime(runtime.generated_at || page.generated_at, page.workspace.locale))),
+                      ),
+                      h(
+                        "div",
+                        { className: "adm-hermes-checks", "aria-label": copy.checks },
+                        h("strong", null, copy.checks),
+                        h(
+                          "ul",
+                          null,
+                          ...(runtime.checks || []).map((check) =>
+                            h(
+                              "li",
+                              { key: check.id, "data-hermes-check": check.id, "data-check-state": check.status },
+                              h("code", null, check.id),
+                              h(StatusPill, { tone: check.status === "pass" ? "success" : check.status === "fail" ? "brick" : "sand" }, hermesStateLabel(copy, check.status)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      runtime.missing?.length
+                        ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
+                        : null,
                     ),
-                    h(StatusPill, { tone: "sun" }, copy.draftWrite),
-                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(task.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
                   ),
                 ),
-              )
-            : h(
-                "div",
-                { className: "adm-hermes-empty", role: "status" },
-                h(Icon, { name: "check-circle-2", size: 18 }),
-                h("span", null, h("strong", null, copy.noTasks), h("small", null, copy.noTasksDescription)),
               ),
-      ),
-      h(
-        "div",
-        { className: "adm-hermes-bottom-grid" },
-        h(
-          Panel,
-          { title: copy.tools, "data-hermes-tool-coverage": tools.length },
-          h("p", { className: "adm-hermes-panel-intro" }, copy.toolsDescription),
-          h(
-            "ul",
-            { className: "adm-hermes-tools" },
-            ...tools.map((tool) =>
               h(
-                "li",
-                { key: tool.operation, "data-hermes-tool": tool.operation },
-                h("div", null, h("strong", null, h("code", null, tool.operation)), h(StatusPill, { tone: tool.read_only ? "sea" : "sun" }, tool.read_only ? copy.readOnly : copy.draftWrite)),
-                tool.confirmation ? h("small", null, `${copy.confirmationRequired}: ${tool.confirmation}`) : null,
-                h("small", null, `${copy.prohibited}: ${(tool.prohibited_actions || []).join(", ")}`),
+                "div",
+                { className: "adm-owner-flow__support", "data-hermes-support": "true" },
+                h(
+                  WorkbenchDisclosure,
+                  {
+                    summary: `${copy.desktop} · ${queue.eligible_for_desktop || 0}`,
+                    "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked",
+                  },
+                  h(
+                    Panel,
+                    { title: copy.desktop },
+                    h(
+                      "div",
+                      { className: "adm-hermes-card" },
+                      h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
+                      h(StatGrid, {
+                        metrics: [
+                          [copy.eligible, queue.eligible_for_desktop || 0],
+                          [copy.withheld, queue.withheld_sensitive || 0],
+                        ],
+                      }),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
         ),
         h(
-          Panel,
-          { title: copy.guardrails, "data-hermes-guardrails": "true" },
+          "div",
+          { className: "adm-owner-flow__support", "data-hermes-disclosures": "true" },
           h(
-            "ul",
-            { className: "adm-hermes-guardrails" },
-            ...copy.guardrailItems.map((item) => h("li", { key: item }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, item))),
+            "details",
+            { className: "adm-hermes-safeguards", "data-hermes-safeguards": "collapsed" },
+            h("summary", null, h(Icon, { name: "shield-check", size: 16 }), h("span", null, copy.technicalDetails)),
+            h(
+              "div",
+              { className: "adm-hermes-safeguards__body" },
+              h(
+                Panel,
+                { title: copy.tools, "data-hermes-tool-coverage": tools.length },
+                h("p", { className: "adm-hermes-panel-intro" }, copy.toolsDescription),
+                h(
+                  "ul",
+                  { className: "adm-hermes-tools" },
+                  ...tools.map((tool) =>
+                    h(
+                      "li",
+                      { key: tool.operation, "data-hermes-tool": tool.operation },
+                      h("div", null, h("strong", null, h("code", null, tool.operation)), h(StatusPill, { tone: tool.read_only ? "sea" : "sun" }, tool.read_only ? copy.readOnly : copy.draftWrite)),
+                      tool.confirmation ? h("small", null, copy.confirmationRequired) : null,
+                      h("small", null, `${copy.prohibited}: ${(tool.prohibited_actions || []).join(", ")}`),
+                    ),
+                  ),
+                ),
+              ),
+              h(
+                Panel,
+                { title: copy.guardrails, "data-hermes-guardrails": "true" },
+                h(
+                  "ul",
+                  { className: "adm-hermes-guardrails" },
+                  ...copy.guardrailItems.map((item) => h("li", { key: item }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, item))),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -11122,6 +12069,11 @@ function SettingsBody({ page }) {
   const notifications = settingsSectionValues(page, "notifications");
   const workspace = settingsSectionValues(page, "workspace");
   const publicSite = settingsSectionValues(page, "public_site");
+  const updatedSections = ["agency", "leads", "notifications", "workspace", "public_site"].filter((section) => page.workspace_settings?.section_updates?.[section]);
+  const liveSectionTitles = [
+    page.workspace_security?.two_factor ? settings.liveSections.security.title : null,
+    page.workspace_security?.exports || page.workspace_security?.audit_retention ? settings.liveSections.data.title : null,
+  ].filter(Boolean);
   const fieldError = (section, field) => settingsFieldError(page, section, field);
   const brokerSelect = (group) =>
     h(
@@ -11132,7 +12084,7 @@ function SettingsBody({ page }) {
         h(
           "option",
           { key: profile.id, value: profile.id, selected: leads.nested("default_brokers", group) === profile.id ? true : undefined },
-          profile.label || profile.id,
+          brokerProfileText(page, profile.id),
         ),
       ),
     );
@@ -11212,8 +12164,45 @@ function SettingsBody({ page }) {
       }),
     ),
   );
+  const settingsSummaryCards = [
+    {
+      id: "agency-profile",
+      title: settings.sections.agency.title,
+      value: agency.text("name") || settings.notConfirmed,
+      meta: [agency.text("email"), agency.text("phone")].filter(Boolean).join(" · ") || settings.fields.officesHint,
+      tone: agency.text("name") ? "sea" : "sand",
+    },
+    {
+      id: "lead-sla",
+      title: settings.sections.leads.title,
+      value: `${leads.text("first_reply_target_minutes", "15")} ${ui.minutesShort}`,
+      meta: `${settings.fields.manager_escalation_minutes}: ${leads.text("manager_escalation_minutes", "60")} ${ui.minutesShort}`,
+      tone: "ink",
+    },
+    {
+      id: "workspace",
+      title: settings.sections.workspace.title,
+      value: settings.locales[workspace.text("default_locale", "en")] || workspace.text("default_locale", "en").toUpperCase(),
+      meta: [workspace.text("timezone", "Europe/Sofia"), workspace.text("date_format", "locale") === "locale" ? settings.fields.dateFormatLocale : workspace.text("date_format", "locale")].join(" · "),
+      tone: "ink",
+    },
+    {
+      id: "settings-state",
+      title: page.onboarding ? settings.onboarding.title : settings.sectionsNav,
+      value: page.onboarding ? `${page.onboarding.done}/${page.onboarding.total}` : `${updatedSections.length}/5`,
+      meta: page.onboarding
+        ? settings.onboarding.progress.replace("{done}", String(page.onboarding.done)).replace("{total}", String(page.onboarding.total))
+        : liveSectionTitles.join(" · ") || settings.notConfirmed,
+      tone: (page.onboarding?.done || updatedSections.length) ? "sea" : "sand",
+      status: {
+        tone: (page.onboarding?.done || updatedSections.length) ? "sea" : "ink",
+        label: (page.onboarding?.done || updatedSections.length) ? settings.sectionState.updated : settings.sectionState.defaults,
+      },
+    },
+  ];
   return adminShell(page, {
     title,
+    titleAsHeading: true,
     mainAttrs: {
       "data-kind": "admin-settings",
       "data-react-admin-ui": "settings",
@@ -11221,8 +12210,12 @@ function SettingsBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h(PageHeader, { title, subtitle: settings.description }),
-      h(OwnerOperationsHub, { page }),
+      h(
+        PageHeader,
+        { title, subtitle: settings.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, owner.routes.integrations)),
+      ),
+      h(SummaryStrip, { cards: settingsSummaryCards, "data-summary-kind": "settings" }),
       // The store being unconfigured is one fact about the environment, said
       // once - not restated under every section.
       storeMissing
@@ -11235,10 +12228,42 @@ function SettingsBody({ page }) {
         : null,
       h(
         "div",
-        { className: "adm-workbench-shell adm-workbench-shell--settings", "data-settings-layout": "sections-rail" },
+        { className: "adm-owner-flow adm-owner-flow--settings", "data-settings-layout": "sections-flow" },
         h(
           "div",
-          { className: "adm-workbench-main" },
+          { className: "adm-owner-flow__support", "data-settings-overview": "true" },
+          sectionsNav,
+          page.onboarding ? h(WorkspaceChecklistPanel, { page }) : null,
+          h(
+            Panel,
+            { title: settings.lastUpdated, "data-settings-history": "true" },
+            h(
+              "div",
+              { className: "adm-settings-history" },
+              page.workspace_settings?.updated_at
+                ? h(
+                    "p",
+                    null,
+                    h(
+                      "time",
+                      { dateTime: page.workspace_settings.updated_at, title: page.workspace_settings.updated_at },
+                      formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale),
+                    ),
+                    page.workspace_settings.updated_by ? h("small", null, page.workspace_settings.updated_by) : null,
+                  )
+                : h("p", { className: "adm-empty" }, settings.notConfirmed),
+              h(
+                "a",
+                { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) },
+                h(Icon, { name: "list", size: 16 }),
+                h("span", null, label(copy, "viewHistory", "History")),
+              ),
+            ),
+          ),
+        ),
+        h(
+          "div",
+          { className: "adm-owner-flow__stack" },
           h(OwnerProfileSection, { page }),
           h(SettingsSection, {
             page,
@@ -11514,37 +12539,6 @@ function SettingsBody({ page }) {
           page.workspace_security?.two_factor ? h(SettingsSecuritySection, { page, icon: "shield-check" }) : null,
           page.workspace_security?.exports || page.workspace_security?.audit_retention ? h(SettingsDataSection, { page, icon: "download" }) : null,
         ),
-        h(
-          "aside",
-          { className: "adm-workbench-rail", "data-settings-rail": "true" },
-          sectionsNav,
-          h(
-            Panel,
-            { title: settings.lastUpdated, "data-settings-history": "true" },
-            h(
-              "div",
-              { className: "adm-settings-history" },
-              page.workspace_settings?.updated_at
-                ? h(
-                    "p",
-                    null,
-                    h(
-                      "time",
-                      { dateTime: page.workspace_settings.updated_at, title: page.workspace_settings.updated_at },
-                      formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale),
-                    ),
-                    page.workspace_settings.updated_by ? h("small", null, page.workspace_settings.updated_by) : null,
-                  )
-                : h("p", { className: "adm-empty" }, settings.notConfirmed),
-              h(
-                "a",
-                { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) },
-                h(Icon, { name: "list", size: 16 }),
-                h("span", null, label(copy, "viewHistory", "History")),
-              ),
-            ),
-          ),
-        ),
       ),
     ],
   });
@@ -11564,6 +12558,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_runtime_unavailable") return renderStaticElement(h(RuntimeUnavailableBody, { page }));
   if (page.kind === "admin_hermes") return renderStaticElement(h(HermesBody, { page }));
+  if (page.kind === "admin_connections") return renderStaticElement(h(ConnectionsBody, { page }));
   if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));

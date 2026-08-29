@@ -72,7 +72,7 @@ const crmCss = `
 .crm-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-card); box-shadow:var(--shadow-card); }
 .crm-panel__hd { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; border-bottom:1px solid var(--border); }
 .crm-panel__hd h3 { margin:0; font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--text-strong); letter-spacing:-.01em; }
-.crm-panel__hd a { font:600 12.5px/1 var(--font-sans); color:var(--text-link); text-decoration:none; cursor:pointer; }
+.crm-panel__hd a:not(.mk-btn) { font:600 12.5px/1 var(--font-sans); color:var(--text-link); text-decoration:none; cursor:pointer; }
 
 /* ---- Data table ---- */
 .crm-tbl { width:100%; border-collapse:separate; border-spacing:0; font:400 13px/1.4 var(--font-sans); }

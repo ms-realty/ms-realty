@@ -300,7 +300,7 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.doesNotMatch(html, />manager escalation required</);
 });
 
-test("admin today keeps empty viewing and seller queues compact and explicit", () => {
+test("admin lead inbox omits empty viewing and seller queues until there is actionable work", () => {
   const page = renderAdminLeadsPayload(registry, "en", {
     leads: [],
     replies: [],
@@ -313,11 +313,11 @@ test("admin today keeps empty viewing and seller queues compact and explicit", (
     viewingFollowUpQueue: { rows: [], summary: {} },
     sellerPipelineQueue: { rows: [], summary: {} },
   });
-  const html = renderHtmlPage({ ...page, kind: "admin_today", path: "/admin/today", canonical: "/admin/today" });
+  const html = renderHtmlPage(page);
 
-  assert.equal((html.match(/crm-panel crm-panel--compact-empty/g) || []).length, 2);
-  assert.match(html, /data-empty-viewing-follow-ups="true"[^>]*>.*No open viewing follow-ups\./);
-  assert.match(html, /data-empty-seller-pipeline="true"[^>]*>.*No open seller valuation tasks\./);
+  assert.doesNotMatch(html, /data-lead-secondary-queues="true"/);
+  assert.doesNotMatch(html, /data-empty-viewing-follow-ups="true"/);
+  assert.doesNotMatch(html, /data-empty-seller-pipeline="true"/);
 });
 
 test("admin viewing follow-up queue formats due dates and keeps action header distinct", () => {

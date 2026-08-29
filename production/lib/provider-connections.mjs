@@ -16,10 +16,10 @@ const PROVIDERS = new Set([
   "github",
   "cloudflare",
   "neon",
-  // The Hermes model provider. Its row deliberately carries an empty credential
-  // envelope: HERMES_API_KEY is on the repo's never-persist list and the
-  // drafting worker only ever reads it from the process environment. The row
-  // exists so the connect screen can show when the endpoint last answered.
+  // The owner-managed OpenRouter connection. A key submitted through the
+  // signed-in connection form lives only inside this row's encrypted envelope;
+  // the separately managed HERMES_API_KEY environment fallback is never copied
+  // into Payload.
   "ai",
 ]);
 const GOOGLE_SCOPES = [
@@ -118,6 +118,8 @@ export function providerConnectionConfigFromEnv(env = process.env) {
     metaAppSecret: String(env.MS_REALTY_META_APP_SECRET || "").trim(),
     metaConfigId: String(env.MS_REALTY_META_EMBEDDED_SIGNUP_CONFIG_ID || "").trim(),
     metaGraphVersion: String(env.MS_REALTY_META_GRAPH_VERSION || "").trim(),
+    metaFacebookPublishReady: String(env.MS_REALTY_META_FACEBOOK_PUBLISH_READY || "").trim() === "true",
+    metaInstagramPublishReady: String(env.MS_REALTY_META_INSTAGRAM_PUBLISH_READY || "").trim() === "true",
     metaWebhookVerifyToken: String(env.MS_REALTY_META_WEBHOOK_VERIFY_TOKEN || "").trim(),
     viberCommercialReady: String(env.MS_REALTY_VIBER_COMMERCIAL_READY || "").trim() === "true",
     webhookMaxBytes: Number(env.MS_REALTY_PROVIDER_WEBHOOK_MAX_BYTES || 1024 * 1024),
@@ -588,6 +590,16 @@ function safeConnection(document) {
   };
 }
 
+function uniqueProviderConflict(error) {
+  const message = String(error?.message || error || "");
+  if (/duplicate key|unique constraint|already exists/i.test(message)) return true;
+  const entries = [
+    ...(Array.isArray(error?.data?.errors) ? error.data.errors : []),
+    ...(Array.isArray(error?.errors) ? error.errors : []),
+  ];
+  return entries.some((entry) => String(entry?.path || entry?.field || "").trim() === "provider");
+}
+
 async function findProvider(runtime, provider) {
   const result = await runtime.find({
     collection: "provider_connections",
@@ -674,7 +686,7 @@ export async function saveProviderConnection(
   try {
     const runtime = await runtimePayload(payload);
     const existing = await findProvider(runtime, provider);
-    const document = existing
+    let document = existing
       ? await runtime.update({
           collection: "provider_connections",
           id: existing.id,
@@ -682,12 +694,28 @@ export async function saveProviderConnection(
           depth: 0,
           overrideAccess: true,
         })
-      : await runtime.create({
+      : null;
+    if (!document) {
+      try {
+        document = await runtime.create({
           collection: "provider_connections",
           data,
           depth: 0,
           overrideAccess: true,
         });
+      } catch (error) {
+        if (!uniqueProviderConflict(error)) throw error;
+        const winner = await findProvider(runtime, provider);
+        if (!winner) throw error;
+        document = await runtime.update({
+          collection: "provider_connections",
+          id: winner.id,
+          data,
+          depth: 0,
+          overrideAccess: true,
+        });
+      }
+    }
     return safeConnection(document);
   } catch (error) {
     if (error instanceof ProviderConnectionUnavailableError) throw error;

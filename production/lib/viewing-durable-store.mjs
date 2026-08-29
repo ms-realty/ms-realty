@@ -64,6 +64,8 @@ export function viewingDurableStoreConfigFromEnv(env = process.env) {
     viewingDurableStoreEnabled: String(env.MS_REALTY_VIEWING_DURABLE_STORE_ENABLED || "").trim() === "true",
     payloadSecret: String(env.PAYLOAD_SECRET || "").trim(),
     databaseUrl: String(env.DATABASE_URL || "").trim(),
+    contactSecret: String(env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY || ""),
+    workspaceId: String(env.MS_REALTY_WORKSPACE_ID || "").trim(),
   };
 }
 

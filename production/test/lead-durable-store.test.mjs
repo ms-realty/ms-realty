@@ -612,9 +612,11 @@ test("a seller intake atomically creates all four durable records without plaint
   assert.equal(result.consent.marketing_opt_in, true);
   assert.equal(result.sellerPipeline.stage, "valuation_requested");
   assert.equal(result.sellerPipeline.created_at, "2026-08-10T09:00:01.000Z");
+  assert.equal(result.sellerPipeline.owner, "unassigned");
+  assert.equal(result.sellerPipeline.next_task.owner, "unassigned");
   assert.equal("contact_name" in result.sellerPipeline, false);
   const sideEffects = JSON.stringify({ consent: payload.rows.consent_events, seller: payload.rows.seller_pipeline_events });
-  for (const plaintext of ["Mira Private", "+359000000004", "Please value my apartment"]) {
+  for (const plaintext of ["Mira Private", "+359000000004", "Please value my apartment", "broker_bg", "broker_en"]) {
     assert.equal(sideEffects.includes(plaintext), false, `${plaintext} must not enter durable side-effect events`);
   }
 });

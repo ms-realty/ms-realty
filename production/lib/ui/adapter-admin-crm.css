@@ -711,6 +711,18 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   .adm-lead-detail__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-toolbar > .crm-seg:not(.adm-cms-filter) { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); overflow: visible; }
   .adm-toolbar > .crm-seg button { min-width: 0; padding-inline: var(--space-2); font-size: var(--text-2xs); }
+  .adm-toolbar > .crm-seg[data-list-filter="requests"] {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .adm-toolbar > .crm-seg[data-list-filter="requests"] button {
+    min-height: 44px;
+    padding-inline: 8px;
+    font-size: var(--text-xs);
+    line-height: var(--lh-tight);
+    white-space: normal;
+  }
   .adm-toolbar > .crm-seg.adm-lead-tabs,
   .adm-toolbar > .crm-seg.adm-pipeline-tabs { display: grid; }
 }

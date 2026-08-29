@@ -84,6 +84,8 @@ test("public request queue decrypts contacts only for the authenticated operatio
   assert.equal(queue.summary.open, 2);
   assert.equal(queue.summary.overdue, 2);
   assert.equal(queue.summary.contacts_available, 2);
+  assert.deepEqual(queue.rows.map((row) => row.owner), ["unassigned", "unassigned"]);
+  assert.doesNotMatch(JSON.stringify(queue), /broker_(?:bg|ru|en|international)/);
   assert.equal(queue.rows.find((row) => row.request_type === "saved_search").contact.email, "noa@example.test");
   assert.equal(queue.rows.find((row) => row.request_type === "language_request").message, "Please notify me when Greek is reviewed.");
 });

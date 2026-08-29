@@ -1,4 +1,6 @@
 const PAYLOAD_ADMIN_COLLECTION = "admins";
+import { isFixtureBrokerId } from "./listing-verification.mjs";
+
 export const PAYLOAD_ADMIN_ROLES = ["admin", "broker", "editor", "translator"];
 const PASSWORD_CHANGE_FAILURE_CODES = new Set([
   "missing_fields",
@@ -42,12 +44,30 @@ export function assignableBrokerProfiles(operators) {
         ["admin", "broker"].includes(String(operator?.role || "").trim().toLowerCase()) &&
         String(operator?.id ?? "").trim(),
     )
-    .map((operator) => ({
-      id: String(operator.id),
-      name: String(operator.name || operator.email || operator.id),
-      email: String(operator.email || ""),
-      languages: [],
-    }));
+    .map((operator) => {
+      const id = String(operator.id);
+      const email = String(operator.email || "");
+      const fixture = isFixtureBrokerId(id);
+      const name = String(operator.name || "").trim();
+      const languages =
+        Array.isArray(operator.languages) && operator.languages.length
+          ? [...new Set(operator.languages.map((value) => String(value || "").trim()).filter(Boolean))]
+          : fixture
+            ? id === "broker_bg"
+              ? ["bg"]
+              : id === "broker_ru"
+                ? ["ru"]
+                : id === "broker_international"
+                  ? ["en"]
+                  : []
+            : [];
+      return {
+        id,
+        email,
+        name: fixture && (!name || name === id) ? "" : name || email || id,
+        languages,
+      };
+    });
 }
 
 export function payloadAdminPrincipal(value) {

@@ -8,20 +8,20 @@
 //                    registered an application with that provider, which is a
 //                    one-time human job nobody can automate away.
 //   embedded_signup  Meta's WhatsApp flow: an in-page handover, same shape.
-//   token            The provider has no OAuth for this. The operator pastes
-//                    one value and we spend one cheap API call proving it works
-//                    before storing it. Never "saved" on the operator's word.
-//   runtime          The Hermes model provider. Its key is read from the
-//                    process environment by the drafting worker and the repo's
-//                    provisioning contract lists it as never-persist, so this
-//                    card verifies and reports -- it does not collect a key it
-//                    could not make anything do.
+//   token            The provider has no OAuth for this. Those providers stay
+//                    unavailable in the owner UI rather than collecting a raw
+//                    credential.
 //
 // A provider whose application has not been registered yet renders as
-// "needs one-time setup" with the exact environment variable names, never as a
-// button that would fail.
+// "needs one-time setup" with a plain unavailable/recovery explanation, never
+// as a button that would fail or a credential checklist for the owner.
 
-import { hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
+import crypto from "node:crypto";
+
+import {
+  DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL,
+  hermesProviderConfigFromEnv,
+} from "./hermes-provider-provisioning.mjs";
 import {
   GOOGLE_SCOPES,
   createProviderOAuthState,
@@ -36,8 +36,8 @@ import {
 // explicitly picked. Asking for whole-Drive access would be a restricted scope
 // and a far heavier review for no gain.
 export const GOOGLE_DRIVE_SCOPES = Object.freeze(["openid", "email", "https://www.googleapis.com/auth/drive.file"]);
-export const FACEBOOK_SCOPES = Object.freeze(["pages_show_list", "pages_read_engagement", "pages_manage_metadata"]);
-export const INSTAGRAM_SCOPES = Object.freeze(["pages_show_list", "instagram_basic", "instagram_manage_comments"]);
+export const FACEBOOK_SCOPES = Object.freeze(["pages_show_list", "pages_manage_posts"]);
+export const INSTAGRAM_SCOPES = Object.freeze(["pages_show_list", "instagram_basic", "instagram_content_publish"]);
 // read:user identifies the account; repo is what lets the agent read and open
 // changes in the agency's own repository.
 export const GITHUB_SCOPES = Object.freeze(["read:user", "repo"]);
@@ -54,6 +54,7 @@ const DEFINITIONS = Object.freeze([
     id: "google",
     kind: "oauth",
     family: "google",
+    ownerConnectable: true,
     scopes: GOOGLE_SCOPES,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
@@ -80,6 +81,7 @@ const DEFINITIONS = Object.freeze([
     id: "whatsapp",
     kind: "embedded_signup",
     family: "meta",
+    ownerConnectable: true,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
       "MS_REALTY_META_APP_ID",
@@ -94,6 +96,9 @@ const DEFINITIONS = Object.freeze([
     id: "viber",
     kind: "token",
     family: "viber",
+    // Viber's official Bot API is token-only. The owner console is OAuth-first,
+    // so this provider is deliberately visible but not connectable here.
+    supported: false,
     setupEnv: ["MS_REALTY_PUBLIC_ORIGIN", "MS_REALTY_VIBER_COMMERCIAL_READY"],
     setupUrl: "https://partners.viber.com/",
   },
@@ -101,12 +106,14 @@ const DEFINITIONS = Object.freeze([
     id: "facebook",
     kind: "oauth",
     family: "meta",
+    ownerConnectable: true,
     scopes: FACEBOOK_SCOPES,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
       "MS_REALTY_META_APP_ID",
       "MS_REALTY_META_APP_SECRET",
       "MS_REALTY_META_GRAPH_VERSION",
+      "MS_REALTY_META_FACEBOOK_PUBLISH_READY",
       "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
     ],
     setupUrl: "https://developers.facebook.com/apps",
@@ -115,12 +122,14 @@ const DEFINITIONS = Object.freeze([
     id: "instagram",
     kind: "oauth",
     family: "meta",
+    ownerConnectable: true,
     scopes: INSTAGRAM_SCOPES,
     setupEnv: [
       "MS_REALTY_PUBLIC_ORIGIN",
       "MS_REALTY_META_APP_ID",
       "MS_REALTY_META_APP_SECRET",
       "MS_REALTY_META_GRAPH_VERSION",
+      "MS_REALTY_META_INSTAGRAM_PUBLISH_READY",
       "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET",
     ],
     setupUrl: "https://developers.facebook.com/apps",
@@ -142,6 +151,9 @@ const DEFINITIONS = Object.freeze([
     id: "cloudflare",
     kind: "token",
     family: "cloudflare",
+    // Cloudflare documents OAuth, but this runtime has no OAuth route yet. Do
+    // not fall back to an API-token field or imply that one will work here.
+    supported: false,
     setupEnv: [],
     setupUrl: "https://dash.cloudflare.com/profile/api-tokens",
   },
@@ -149,22 +161,147 @@ const DEFINITIONS = Object.freeze([
     id: "neon",
     kind: "token",
     family: "neon",
+    // Neon exposes OAuth through its managed remote MCP path, not a direct
+    // third-party API client in this runtime. Keep direct API connection off.
+    supported: false,
     setupEnv: [],
     setupUrl: "https://console.neon.tech/app/settings/api-keys",
   },
   {
     id: "ai",
-    kind: "runtime",
-    family: "hermes",
-    setupEnv: ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"],
-    setupUrl: "https://openrouter.ai/settings/keys",
+    kind: "oauth",
+    family: "openrouter",
+    ownerConnectable: true,
+    setupEnv: ["MS_REALTY_PUBLIC_ORIGIN", "MS_REALTY_PROVIDER_OAUTH_STATE_SECRET"],
+    setupUrl: "https://openrouter.ai/docs/guides/overview/auth/oauth",
   },
 ]);
 
+const OWNER_CONNECTION_LIFECYCLE = Object.freeze([
+  "authorizing",
+  "connected",
+  "reauthorize",
+  "error",
+  "disconnected",
+]);
+
+// Executable product truth for the owner connection surface. A provider is
+// enabled only when its provider-authorized handoff powers a real MS Realty
+// consumer. Everything else is managed infrastructure or a named gap, never a
+// decorative connection button or a secret-entry form.
+const PROVIDER_COVERAGE = Object.freeze({
+  google: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "oauth_authorization_code",
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "approved_email_delivery", source_file: "production/lib/provider-delivery.mjs", symbol: "deliverApprovedProviderMessage" },
+      { workflow: "viewing_calendar_sync", source_file: "production/lib/provider-connections.mjs", symbol: "syncViewingToGoogleCalendar" },
+    ],
+  },
+  google_drive: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "oauth_authorization_code",
+    reason: "no_approved_runtime_consumer",
+    consumers: [],
+  },
+  whatsapp: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "provider_embedded_signup",
+    ownerAction: { kind: "embedded_signup", method: "POST", pathname: "/api/admin/connections" },
+    consumers: [
+      { workflow: "approved_whatsapp_delivery", source_file: "production/lib/provider-delivery.mjs", symbol: "deliverApprovedProviderMessage" },
+      { workflow: "verified_inbound_webhooks", source_file: "production/lib/provider-webhooks.mjs", symbol: "renderProviderWebhookResponse" },
+    ],
+  },
+  viber: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "token_only",
+    reason: "provider_has_no_supported_oauth_or_partner_handoff",
+    consumers: [
+      { workflow: "approved_viber_delivery", source_file: "production/lib/provider-delivery.mjs", symbol: "deliverApprovedProviderMessage" },
+      { workflow: "verified_inbound_webhooks", source_file: "production/lib/provider-webhooks.mjs", symbol: "renderProviderWebhookResponse" },
+    ],
+  },
+  facebook: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "oauth_authorization_code",
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "approved_facebook_page_publish", source_file: "production/lib/social-marketing-publishing.mjs", symbol: "publishApprovedSocialDraft" },
+    ],
+  },
+  instagram: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "oauth_authorization_code",
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "approved_instagram_publish", source_file: "production/lib/social-marketing-publishing.mjs", symbol: "publishApprovedSocialDraft" },
+    ],
+  },
+  github: {
+    state: "disabled",
+    ownerSurface: "hidden",
+    authorization: "oauth_authorization_code",
+    reason: "no_approved_runtime_consumer",
+    consumers: [],
+  },
+  cloudflare: {
+    state: "managed",
+    ownerSurface: "infrastructure_status",
+    authorization: "managed_runtime",
+    reason: "infrastructure_managed_outside_owner_connections",
+    consumers: [],
+  },
+  neon: {
+    state: "managed",
+    ownerSurface: "data_status",
+    authorization: "managed_runtime",
+    reason: "database_managed_outside_owner_connections",
+    consumers: [],
+  },
+  ai: {
+    state: "enabled",
+    ownerSurface: "one_click",
+    authorization: "oauth_pkce",
+    ownerAction: { kind: "oauth_redirect", method: "GET", pathname: "/api/admin/connections", action: "start" },
+    consumers: [
+      { workflow: "guarded_hermes_owner_plans", source_file: "production/lib/hermes-owner-command.mjs", symbol: "runHermesOwnerCommand" },
+    ],
+  },
+});
+
 export const OPERATOR_PROVIDERS = Object.freeze(DEFINITIONS.map((definition) => definition.id));
-// Everything except the runtime card is a row in the connection store.
+export const OWNER_CONNECTABLE_PROVIDERS = Object.freeze(
+  DEFINITIONS.filter((definition) => definition.ownerConnectable === true).map((definition) => definition.id),
+);
+export const OPERATOR_PROVIDER_COVERAGE = Object.freeze(
+  DEFINITIONS.map((definition) => {
+    const coverage = PROVIDER_COVERAGE[definition.id];
+    if (!coverage) throw new Error(`Missing provider coverage for ${definition.id}`);
+    return Object.freeze({
+      provider: definition.id,
+      state: coverage.state,
+      enabled: coverage.state === "enabled",
+      owner_surface: coverage.ownerSurface,
+      authorization: coverage.authorization,
+      owner_action: coverage.ownerAction ? Object.freeze({ ...coverage.ownerAction, provider: definition.id }) : null,
+      lifecycle: coverage.state === "enabled" ? OWNER_CONNECTION_LIFECYCLE : [],
+      downstream_consumers: Object.freeze(coverage.consumers.map((consumer) => Object.freeze({ ...consumer }))),
+      reason: coverage.reason || null,
+      owner_secret_fields: false,
+      source_file: "production/lib/operator-provider-catalog.mjs",
+    });
+  }),
+);
 export const OPERATOR_STORED_PROVIDERS = Object.freeze(
-  DEFINITIONS.filter((definition) => definition.kind !== "runtime").map((definition) => definition.id),
+  DEFINITIONS.map((definition) => definition.id),
 );
 const BY_ID = new Map(DEFINITIONS.map((definition) => [definition.id, definition]));
 
@@ -172,6 +309,14 @@ export function operatorProviderDefinition(id) {
   const definition = BY_ID.get(String(id || "").trim());
   if (!definition) throw new Error("Unknown operator provider");
   return definition;
+}
+
+export function isOwnerConnectableProvider(id) {
+  try {
+    return operatorProviderDefinition(id).ownerConnectable === true;
+  } catch {
+    return false;
+  }
 }
 
 function trimmed(value) {
@@ -253,18 +398,19 @@ export function operatorProviderAvailability(config = operatorProviderConfigFrom
     ...state,
     ...store,
   ];
-  // A pasted key only needs somewhere safe to live.
-  const hermes = config.hermes || {};
-  const ai = [
-    ...(trimmed(hermes.endpoint) ? [] : ["HERMES_CHAT_COMPLETIONS_URL"]),
-    ...(hermes.has_api_key ? [] : ["HERMES_API_KEY"]),
-  ];
+  const ai = [...origin, ...state, ...store];
   const entry = (missing) => ({ ready: missing.length === 0, missing: [...new Set(missing)] });
   return {
     ...base,
     google_drive: entry(google),
-    facebook: entry(meta),
-    instagram: entry(meta),
+    facebook: entry([
+      ...meta,
+      ...(config.metaFacebookPublishReady ? [] : ["MS_REALTY_META_FACEBOOK_PUBLISH_READY"]),
+    ]),
+    instagram: entry([
+      ...meta,
+      ...(config.metaInstagramPublishReady ? [] : ["MS_REALTY_META_INSTAGRAM_PUBLISH_READY"]),
+    ]),
     github: entry(github),
     cloudflare: entry(store),
     neon: entry(store),
@@ -286,25 +432,50 @@ export function operatorProviderCards({
   return DEFINITIONS.map((definition) => {
     const connection = stored.get(definition.id) || null;
     const ready = availability[definition.id]?.ready === true;
-    const connected = connection?.status === "connected";
+    const storedStatus = trimmed(connection?.status);
+    const connected = storedStatus === "connected";
+    const active = definition.id !== "ai" || hermes.mode === "openrouter";
+    const supported = definition.supported !== false;
+    const status =
+      storedStatus === "connecting" || storedStatus === "unavailable"
+        ? storedStatus
+        : !supported
+          ? "disabled"
+          : connected
+              ? active
+                ? "connected"
+                : "inactive"
+              : ready
+                ? "not_connected"
+                : "needs_setup";
     return {
       id: definition.id,
       kind: definition.kind,
       family: definition.family,
-      status: connected ? "connected" : ready ? "not_connected" : "needs_setup",
+      status,
+      supported,
+      owner_connectable: definition.ownerConnectable === true,
       ready,
       scopes: definition.scopes ? [...definition.scopes] : [],
-      setup_env: [...definition.setupEnv, ...(definition.kind === "runtime" ? [] : STORE_ENV)].filter(
-        (name, index, all) => all.indexOf(name) === index,
-      ),
-      setup_url: definition.setupUrl,
+      setup_env: supported
+        ? [...definition.setupEnv, ...STORE_ENV].filter(
+            (name, index, all) => all.indexOf(name) === index,
+          )
+        : [],
+      setup_url: supported ? definition.setupUrl : "",
       missing: availability[definition.id]?.missing || [],
       account_label: connection?.account_label || "",
       last_verified_at: connection?.last_verified_at || null,
-      // The runtime card reports where it would call and with which model; the
-      // key itself is never read back into the page.
-      endpoint: definition.kind === "runtime" ? hermes.endpoint_redacted || null : null,
-      model: definition.kind === "runtime" ? trimmed(hermes.model) || null : null,
+      // Endpoint and model are safe operational metadata. The credential
+      // envelope is never part of a card or status response.
+      endpoint:
+        definition.id === "ai"
+          ? trimmed(connection?.metadata?.endpoint) || DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL
+          : null,
+      model:
+        definition.id === "ai"
+          ? trimmed(connection?.metadata?.model) || (hermes.mode === "openrouter" ? trimmed(hermes.model) : "") || null
+          : null,
     };
   });
 }
@@ -322,11 +493,12 @@ function requireReady(availability, provider) {
   if (availability[provider]?.ready !== true) throw new Error(`${provider} is not configured`);
 }
 
-export function operatorProviderAuthorizationUrl({
+export function operatorProviderAuthorizationRequest({
   provider,
   config = operatorProviderConfigFromEnv(),
   operatorId,
   now,
+  codeVerifier = "",
 } = {}) {
   const definition = operatorProviderDefinition(provider);
   if (definition.kind !== "oauth") throw new Error(`${provider} does not use an authorization-code flow`);
@@ -337,6 +509,19 @@ export function operatorProviderAuthorizationUrl({
     { provider: definition.id, operatorId },
     { stateSecret: config.stateSecret, now },
   );
+  if (definition.family === "openrouter") {
+    const verifier = trimmed(codeVerifier);
+    if (!/^[A-Za-z0-9._~-]{43,128}$/.test(verifier)) throw new Error("OpenRouter PKCE verifier is invalid");
+    const callback = new URL(redirectUri(config, definition.id));
+    callback.searchParams.set("state", state);
+    const url = new URL("https://openrouter.ai/auth");
+    url.search = new URLSearchParams({
+      callback_url: callback.toString(),
+      code_challenge: crypto.createHash("sha256").update(verifier).digest("base64url"),
+      code_challenge_method: "S256",
+    }).toString();
+    return { url: url.toString(), state };
+  }
   const url =
     definition.family === "google"
       ? new URL("https://accounts.google.com/o/oauth2/v2/auth")
@@ -371,7 +556,11 @@ export function operatorProviderAuthorizationUrl({
             state,
           };
   url.search = new URLSearchParams(parameters).toString();
-  return url.toString();
+  return { url: url.toString(), state };
+}
+
+export function operatorProviderAuthorizationUrl(options = {}) {
+  return operatorProviderAuthorizationRequest(options).url;
 }
 
 async function exchangeGoogleCode({ definition, code, config, fetchImpl, existingRefreshToken, now }) {
@@ -419,7 +608,7 @@ async function exchangeGoogleCode({ definition, code, config, fetchImpl, existin
   };
 }
 
-async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
+async function exchangeMetaCode({ definition, code, config, fetchImpl, now }) {
   const graph = `https://graph.facebook.com/${config.metaGraphVersion}`;
   const exchange = new URL(`${graph}/oauth/access_token`);
   exchange.search = new URLSearchParams({
@@ -428,16 +617,43 @@ async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
     code: String(code),
     redirect_uri: redirectUri(config, definition.id),
   }).toString();
-  const token = await responseJson(await fetchImpl(exchange), "Meta OAuth");
-  const accessToken = trimmed(token.access_token);
-  if (!accessToken) throw new Error("Meta did not return an access token");
+  const shortLived = await responseJson(await fetchImpl(exchange), "Meta OAuth");
+  const shortLivedToken = trimmed(shortLived.access_token);
+  if (!shortLivedToken) throw new Error("Meta did not return an access token");
+  const token = await responseJson(
+    await fetchImpl(
+      `${graph}/oauth/access_token?${new URLSearchParams({
+        grant_type: "fb_exchange_token",
+        client_id: config.metaAppId,
+        client_secret: config.metaAppSecret,
+        fb_exchange_token: shortLivedToken,
+      })}`,
+    ),
+    "Meta long-lived token exchange",
+  );
+  const userAccessToken = trimmed(token.access_token);
+  if (!userAccessToken) throw new Error("Meta did not return a long-lived access token");
+  const permissions = await responseJson(
+    await fetchImpl(`${graph}/me/permissions`, {
+      headers: { authorization: `Bearer ${userAccessToken}` },
+    }),
+    "Meta permission readback",
+  );
+  const granted = new Set(
+    (Array.isArray(permissions.data) ? permissions.data : [])
+      .filter((entry) => entry?.status === "granted" && entry?.permission)
+      .map((entry) => String(entry.permission)),
+  );
+  if (definition.scopes.some((scope) => !granted.has(scope))) {
+    throw new Error("Meta did not grant the scopes this connection needs");
+  }
   const fields =
     definition.id === "instagram"
-      ? "id,name,instagram_business_account{id,username}"
-      : "id,name";
+      ? "id,name,access_token,instagram_business_account{id,username}"
+      : "id,name,access_token";
   const accounts = await responseJson(
     await fetchImpl(`${graph}/me/accounts?fields=${encodeURIComponent(fields)}`, {
-      headers: { authorization: `Bearer ${accessToken}` },
+      headers: { authorization: `Bearer ${userAccessToken}` },
     }),
     "Meta page readback",
   );
@@ -447,8 +663,8 @@ async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
   // card and saying so is more useful than storing a token that cannot post.
   const page =
     definition.id === "instagram"
-      ? pages.find((candidate) => candidate?.instagram_business_account?.id)
-      : pages[0];
+      ? pages.find((candidate) => candidate?.instagram_business_account?.id && trimmed(candidate?.access_token))
+      : pages.find((candidate) => trimmed(candidate?.access_token));
   if (!page?.id) {
     throw new Error(
       definition.id === "instagram"
@@ -456,19 +672,27 @@ async function exchangeMetaCode({ definition, code, config, fetchImpl }) {
         : "No Facebook Page was granted",
     );
   }
+  const pageAccessToken = trimmed(page.access_token);
+  if (!pageAccessToken) throw new Error("Meta did not return a Page access token");
   const instagram = page.instagram_business_account || null;
   return {
     provider: definition.id,
     status: "connected",
     accountLabel: String(instagram?.username ? `@${instagram.username}` : page.name || page.id),
     externalAccountId: String(instagram?.id || page.id),
-    scopes: [...definition.scopes],
+    scopes: [...granted].sort(),
     metadata: {
       page_id: String(page.id),
       page_name: page.name ? String(page.name) : null,
       ...(instagram ? { instagram_account_id: String(instagram.id) } : {}),
     },
-    credentials: { access_token: accessToken, page_id: String(page.id) },
+    credentials: {
+      user_access_token: userAccessToken,
+      user_expires_at: new Date(Number(now) + Number(token.expires_in || 60 * 24 * 60 * 60) * 1000).toISOString(),
+      page_access_token: pageAccessToken,
+      page_id: String(page.id),
+      ...(instagram ? { instagram_account_id: String(instagram.id) } : {}),
+    },
   };
 }
 
@@ -514,10 +738,41 @@ async function exchangeGitHubCode({ definition, code, config, fetchImpl }) {
   };
 }
 
+async function exchangeOpenRouterCode({ code, codeVerifier, config, fetchImpl }) {
+  const verifier = trimmed(codeVerifier);
+  if (!/^[A-Za-z0-9._~-]{43,128}$/.test(verifier)) throw new Error("OpenRouter PKCE verifier is invalid");
+  const exchange = await responseJson(
+    await fetchImpl("https://openrouter.ai/api/v1/auth/keys", {
+      method: "POST",
+      headers: { accept: "application/json", "content-type": "application/json" },
+      body: JSON.stringify({ code: String(code), code_verifier: verifier, code_challenge_method: "S256" }),
+    }),
+    "OpenRouter OAuth",
+  );
+  const apiKey = trimmed(exchange.key);
+  const model = trimmed(config.hermes?.model);
+  const verified = await verifyOperatorAiProvider({
+    endpoint: DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL,
+    model,
+    apiKey,
+    fetchImpl,
+  });
+  return {
+    ...verified,
+    accountLabel: "OpenRouter",
+    externalAccountId: trimmed(exchange.user_id) || verified.externalAccountId,
+    metadata: {
+      ...verified.metadata,
+      authorization: "oauth_pkce",
+      ...(trimmed(exchange.user_id) ? { user_id: trimmed(exchange.user_id) } : {}),
+    },
+  };
+}
+
 // Verifies the round trip, then proves the grant by reading the account back
 // from the provider. Nothing is stored on the strength of a redirect alone.
 export async function completeOperatorProviderOAuth(
-  { provider, code, state, operatorId, existingRefreshToken = "" },
+  { provider, code, state, operatorId, existingRefreshToken = "", codeVerifier = "" },
   { config = operatorProviderConfigFromEnv(), fetchImpl = fetch, now = Date.now() } = {},
 ) {
   const definition = operatorProviderDefinition(provider);
@@ -533,7 +788,10 @@ export async function completeOperatorProviderOAuth(
   if (definition.family === "google") {
     return exchangeGoogleCode({ definition, code, config, fetchImpl, existingRefreshToken, now });
   }
-  if (definition.family === "meta") return exchangeMetaCode({ definition, code, config, fetchImpl });
+  if (definition.family === "meta") return exchangeMetaCode({ definition, code, config, fetchImpl, now });
+  if (definition.family === "openrouter") {
+    return exchangeOpenRouterCode({ code, codeVerifier, config, fetchImpl });
+  }
   return exchangeGitHubCode({ definition, code, config, fetchImpl });
 }
 
@@ -599,47 +857,90 @@ export async function completeOperatorTokenConnection(
 }
 
 // ---------------------------------------------------------------------------
-// The Hermes model provider: verified, never collected
+// The OpenRouter model provider: verified, then encrypted
 // ---------------------------------------------------------------------------
 
-// One cheap call against the endpoint the drafting worker would use, with the
-// key the worker reads from the environment. The key never enters this page in
-// either direction -- the repo's provisioning contract lists it as never-persist
-// and the worker only ever reads it from the process environment, so a paste
-// field here would store a secret that could not make anything happen.
-export async function verifyOperatorAiProvider({
-  config = operatorProviderConfigFromEnv(),
-  env = process.env,
-  fetchImpl = fetch,
-} = {}) {
-  const availability = operatorProviderAvailability(config);
-  requireReady(availability, "ai");
-  const hermes = config.hermes || {};
-  const models = new URL(hermes.endpoint);
-  models.pathname = models.pathname.replace(/\/chat\/completions\/?$/, "/models");
-  models.search = "";
-  const body = await responseJson(
-    await fetchImpl(models.toString(), {
-      headers: { accept: "application/json", authorization: `Bearer ${trimmed(env.HERMES_API_KEY)}` },
-    }),
-    "AI provider verification",
-  );
-  const listed = Array.isArray(body.data) ? body.data : [];
+export class OperatorProviderConnectionError extends Error {
+  constructor(code, message, cause = null) {
+    super(message);
+    this.name = "OperatorProviderConnectionError";
+    this.code = code;
+    if (cause) this.cause = cause;
+  }
+}
+
+function openRouterInput({ endpoint, model, apiKey }) {
+  const resolvedEndpoint = trimmed(endpoint);
+  if (resolvedEndpoint !== DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL) {
+    throw new OperatorProviderConnectionError(
+      "openrouter_endpoint_invalid",
+      `OpenRouter endpoint must be ${DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL}`,
+    );
+  }
+  const resolvedModel = trimmed(model);
+  if (!resolvedModel || resolvedModel.length > 160 || /[\u0000-\u001f\s]/.test(resolvedModel)) {
+    throw new OperatorProviderConnectionError("openrouter_model_invalid", "OpenRouter model is invalid");
+  }
+  const resolvedKey = String(apiKey || "").trim();
+  if (resolvedKey.length < 20 || /[\u0000-\u0020\u007f]/.test(resolvedKey)) {
+    throw new OperatorProviderConnectionError("openrouter_api_key_invalid", "OpenRouter API key is invalid");
+  }
+  return { endpoint: resolvedEndpoint, model: resolvedModel, apiKey: resolvedKey };
+}
+
+// A one-token completion is the smallest authoritative proof that the submitted
+// key may call the exact model through the exact runtime endpoint. The prompt is
+// static and contains no MS Realty or customer data.
+export async function verifyOperatorAiProvider({ endpoint, model, apiKey, fetchImpl = fetch } = {}) {
+  const input = openRouterInput({ endpoint, model, apiKey });
+  let body;
+  try {
+    body = await responseJson(
+      await fetchImpl(input.endpoint, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          authorization: `Bearer ${input.apiKey}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model: input.model,
+          messages: [{ role: "user", content: "Reply with OK." }],
+          max_tokens: 1,
+          temperature: 0,
+          stream: false,
+        }),
+        signal: AbortSignal.timeout(10_000),
+      }),
+      "OpenRouter chat-completions readback",
+    );
+  } catch (cause) {
+    throw new OperatorProviderConnectionError(
+      "openrouter_verification_failed",
+      "OpenRouter did not confirm the API key",
+      cause,
+    );
+  }
+  if (!Array.isArray(body?.choices) || !body.choices[0] || typeof body.choices[0] !== "object") {
+    throw new OperatorProviderConnectionError(
+      "openrouter_verification_failed",
+      "OpenRouter did not confirm the selected model and API key",
+    );
+  }
   return {
     provider: "ai",
     status: "connected",
-    accountLabel: trimmed(hermes.model) || "Hermes model provider",
-    externalAccountId: "",
-    scopes: [],
+    accountLabel: input.model,
+    externalAccountId: input.model,
+    scopes: ["chat.completions"],
     metadata: {
-      mode: hermes.mode || null,
-      endpoint: hermes.endpoint_redacted || null,
-      model: trimmed(hermes.model) || null,
-      models_listed: listed.length,
+      mode: "openrouter",
+      endpoint: input.endpoint,
+      model: input.model,
+      key_verified: true,
+      verification: "one_token_chat_completion",
     },
-    // Deliberately empty: the model key stays in the environment. The row
-    // exists so the card can show a real "checked at" against a real answer.
-    credentials: {},
+    credentials: { api_key: input.apiKey, endpoint: input.endpoint, model: input.model },
   };
 }
 
@@ -655,7 +956,14 @@ export async function revokeOperatorProvider(
   { config = operatorProviderConfigFromEnv(), fetchImpl = fetch } = {},
 ) {
   const definition = operatorProviderDefinition(provider);
-  const token = trimmed(credentials.refresh_token || credentials.access_token || credentials.api_token || credentials.auth_token);
+  const token = trimmed(
+    credentials.refresh_token ||
+      credentials.user_access_token ||
+      credentials.page_access_token ||
+      credentials.access_token ||
+      credentials.api_token ||
+      credentials.auth_token,
+  );
   try {
     if (definition.family === "google" && token) {
       const revoke = new URL("https://oauth2.googleapis.com/revoke");

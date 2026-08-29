@@ -12,7 +12,43 @@ export const OWNER_OPERATOR_ADMIN_READ_TOOL = "ms_realty_admin_read";
 export const OWNER_OPERATOR_ADMIN_WRITE_TOOL = "ms_realty_admin_write";
 export const OWNER_OPERATOR_HERMES_TOOL = "ms_realty_hermes";
 export const OWNER_OPERATOR_CONTEXT_TOOL = "ms_realty_admin_context";
-export const OWNER_OPERATOR_WRITE_CONFIRMATION = "CONFIRM_MS_REALTY_ADMIN_OPERATION";
+export const ADMIN_PAGE_SURFACES = Object.freeze([
+  { id: "today", group: "today", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
+  { id: "lead_inbox", group: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
+  { id: "contacts", group: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
+  { id: "consents", group: "crm", path: "/admin/consents", icon: "shield-check", kind: "admin_consents", capability: "operations:read" },
+  { id: "documents", group: "crm", path: "/admin/documents", icon: "file-check", kind: "admin_document_checklists", capability: "operations:read" },
+  { id: "realty_cases", group: "crm", path: "/admin/cases", icon: "kanban-square", kind: "admin_realty_cases", capability: "cases:read" },
+  { id: "lead_pipeline", group: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
+  { id: "requests", group: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
+  { id: "viewings", group: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
+  { id: "reports", group: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports", capability: "operations:read" },
+  { id: "activity", group: "workspace", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "activity:read" },
+  { id: "listing_manager", group: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
+  { id: "translation_queue", group: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
+  { id: "approved_content", group: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
+  { id: "migration_review", group: "cms", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
+  { id: "hermes", group: "hermes", path: "/admin/hermes", icon: "sparkles", kind: "admin_hermes", capability: "administration:read" },
+  { id: "connections", group: "workspace", path: "/admin/connect", icon: "link", kind: "admin_connections", capability: "settings:manage" },
+  { id: "settings", group: "workspace", path: "/admin/settings", icon: "settings", kind: "admin_workspace_settings", capability: "workspace:read" },
+  { id: "team", group: "workspace", path: "/admin/team", icon: "users", kind: "admin_team", capability: "team:manage" },
+]);
+export const OWNER_CONSOLE_NAV_DESTINATIONS = Object.freeze([
+  { id: "today", group: "today", primary: "today", children: [] },
+  { id: "leads", group: "crm", primary: "lead_inbox", children: ["contacts", "consents", "documents", "realty_cases", "lead_pipeline", "requests", "viewings", "reports"] },
+  { id: "listings", group: "cms", primary: "listing_manager", children: [] },
+  { id: "translations", group: "cms", primary: "translation_queue", children: ["approved_content", "migration_review"] },
+  { id: "hermes", group: "hermes", primary: "hermes", children: [] },
+  { id: "integrations", group: "workspace", primary: "connections", children: [] },
+  { id: "settings", group: "workspace", primary: "settings", children: ["team", "activity"] },
+]);
+export const OWNER_OPERATOR_CHALLENGE = Object.freeze({
+  kind: "signed_expiring_challenge",
+  version: "c1",
+  algorithm: "HMAC-SHA256",
+  ttl_seconds: 120,
+  binds: ["operator_id", "session_id", "operation", "input_hash"],
+});
 
 const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/accounts/link"],
@@ -31,6 +67,7 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/cases"],
   ["GET", "/api/admin/cms-collections"],
   ["GET", "/api/admin/connections/agent-config"],
+  ["POST", "/api/admin/connections/agent-config"],
   ["POST", "/api/admin/connections/disconnect"],
   ["GET", "/api/admin/connections"],
   ["POST", "/api/admin/connections"],
@@ -45,6 +82,7 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/documents/outcome"],
   ["GET", "/api/admin/documents"],
   ["GET", "/api/admin/hermes"],
+  ["POST", "/api/admin/hermes"],
   ["GET", "/api/admin/launch-input-checklist"],
   ["POST", "/api/admin/launch-readiness/export"],
   ["GET", "/api/admin/launch-readiness"],
@@ -108,6 +146,7 @@ const ADMIN_ROUTE_METHODS = [
   ["GET", "/api/admin/security/two-factor"],
   ["POST", "/api/admin/security/two-factor/verify"],
   ["POST", "/api/admin/seller-pipeline/outcome"],
+  ["POST", "/api/admin/social-marketing/publish"],
   ["GET", "/api/admin/seo-evidence/export"],
   ["POST", "/api/admin/seo-evidence/import"],
   ["GET", "/api/admin/seo-evidence"],
@@ -156,7 +195,7 @@ const HERMES_TOOL_COVERAGE = [
     source: "production/scripts/hermes-mcp-server.mjs",
     read_only: false,
     draft_only: true,
-    confirmation: "SUBMIT_HERMES_DRAFT",
+    confirmation: Object.freeze({ ...OWNER_OPERATOR_CHALLENGE, operation: "hermes_submit_draft" }),
     prohibited_actions: ["publish", "send", "mark_indexable", "approve_legal"],
   },
 ];
@@ -174,7 +213,7 @@ function operationFamily(pathname) {
   if (/\/security\/|\/data-exports/.test(pathname)) return "security";
   if (/\/cases(?:\/|$)/.test(pathname)) return "cases";
   if (
-    /\/listings?|\/listing-quality|\/media\/|\/tours\/|\/translations?|\/locales$|\/approved-content|\/cms-collections|\/redirect-/.test(
+    /\/listings?|\/listing-quality|\/media\/|\/social-marketing\/|\/tours\/|\/translations?|\/locales$|\/approved-content|\/cms-collections|\/redirect-/.test(
       pathname,
     )
   ) {
@@ -191,13 +230,13 @@ function operationFamily(pathname) {
 }
 
 function isSensitivePath(pathname) {
-  return /\/accounts?|\/broker-contacts|\/consents|\/contacts|\/data-exports|\/documents|\/leads?|\/replies|\/security\/|\/team/.test(
+  return /\/accounts?|\/broker-contacts|\/connections\/agent-config|\/consents|\/contacts|\/data-exports|\/documents|\/hermes|\/leads?|\/replies|\/security\/|\/team/.test(
     pathname,
   );
 }
 
 function hermesAccess(method, pathname) {
-  if (method === "POST" && ["/api/admin/replies/draft", "/api/admin/translations/draft"].includes(pathname)) {
+  if (method === "POST" && ["/api/admin/hermes", "/api/admin/replies/draft", "/api/admin/translations/draft"].includes(pathname)) {
     return "draft_only";
   }
   return "none";
@@ -207,8 +246,8 @@ function executionBoundary(pathname) {
   // These routes intentionally go through the workspace-security or Payload
   // session implementation, or carry file/secret material. A delegated MCP
   // bearer must not pretend it can satisfy an interactive browser session or
-  // a step-up challenge. The same operation remains available to WebMCP on
-  // the authenticated admin origin.
+  // a step-up challenge. Browser WebMCP is intentionally read/open only;
+  // mutations stay on the signed delegated MCP path or visible forms.
   if (
     /\/security\//.test(pathname) ||
     /\/data-exports/.test(pathname) ||
@@ -245,7 +284,7 @@ export const ADMIN_ROUTE_COVERAGE = Object.freeze(
       capability: requiredAdminCapability(method, pathname),
       read_only: readOnly,
       sensitive: isSensitivePath(pathname),
-      confirmation: readOnly ? null : OWNER_OPERATOR_WRITE_CONFIRMATION,
+      confirmation: readOnly ? null : OWNER_OPERATOR_CHALLENGE,
       idempotency: "existing_admin_route",
       hermes_access: hermesAccess(method, pathname),
       execution,
@@ -269,6 +308,7 @@ export const OWNER_OPERATOR_REMOTE_OPERATIONS = Object.freeze(
 );
 
 const OWNER_OPERATOR_OPERATION_INDEX = new Map(ADMIN_ROUTE_COVERAGE.map((row) => [row.operation, row]));
+const ADMIN_PAGE_SURFACE_INDEX = new Map(ADMIN_PAGE_SURFACES.map((row) => [row.id, row]));
 
 export { HERMES_TOOL_COVERAGE };
 
@@ -284,7 +324,21 @@ export function ownerOperatorOperationById(operation) {
 export function ownerOperatorConfirmation(operation) {
   const row = ownerOperatorOperationById(operation);
   if (!row || row.read_only) return null;
-  return `${OWNER_OPERATOR_WRITE_CONFIRMATION}:${row.operation}`;
+  return Object.freeze({ ...OWNER_OPERATOR_CHALLENGE, operation: row.operation });
+}
+
+export function adminPageSurfaceById(id) {
+  return ADMIN_PAGE_SURFACE_INDEX.get(String(id || "")) || null;
+}
+
+export function ownerConsoleNavigation() {
+  return OWNER_CONSOLE_NAV_DESTINATIONS.map((destination) =>
+    Object.freeze({
+      ...destination,
+      route: adminPageSurfaceById(destination.primary),
+      children: destination.children.map((id) => adminPageSurfaceById(id)).filter(Boolean),
+    }),
+  );
 }
 
 export function ownerOperatorCatalog(principal) {
@@ -362,13 +416,34 @@ export function assertOwnerOperatorCatalog() {
     seen.add(row.operation);
     if (!row.capability) throw new Error(`Missing capability for owner/operator operation: ${row.operation}`);
     if (!row.pathname.startsWith("/api/admin/")) throw new Error(`Non-admin route in owner/operator catalog: ${row.pathname}`);
-    if (!row.read_only && row.confirmation !== OWNER_OPERATOR_WRITE_CONFIRMATION) {
+    if (
+      !row.read_only &&
+      (row.confirmation?.kind !== OWNER_OPERATOR_CHALLENGE.kind ||
+        row.confirmation?.version !== OWNER_OPERATOR_CHALLENGE.version ||
+        row.confirmation?.algorithm !== OWNER_OPERATOR_CHALLENGE.algorithm)
+    ) {
       throw new Error(`Mutating operation lacks confirmation: ${row.operation}`);
     }
   }
   for (const row of HERMES_TOOL_COVERAGE) {
     if (!row.draft_only || row.prohibited_actions?.includes("publish") !== true || row.prohibited_actions?.includes("send") !== true) {
       throw new Error(`Hermes operation is missing draft-only guardrails: ${row.operation}`);
+    }
+  }
+  const pageIds = new Set();
+  const pageKinds = new Set();
+  for (const row of ADMIN_PAGE_SURFACES) {
+    if (pageIds.has(row.id)) throw new Error(`Duplicate admin page id: ${row.id}`);
+    if (pageKinds.has(row.kind)) throw new Error(`Duplicate admin page kind: ${row.kind}`);
+    if (!row.path.startsWith("/admin/")) throw new Error(`Non-admin page in page surface catalog: ${row.path}`);
+    if (!row.capability) throw new Error(`Missing capability for admin page: ${row.id}`);
+    pageIds.add(row.id);
+    pageKinds.add(row.kind);
+  }
+  for (const destination of OWNER_CONSOLE_NAV_DESTINATIONS) {
+    if (!adminPageSurfaceById(destination.primary)) throw new Error(`Owner console destination is missing a primary page: ${destination.id}`);
+    for (const childId of destination.children) {
+      if (!adminPageSurfaceById(childId)) throw new Error(`Owner console destination child is missing a page: ${destination.id}.${childId}`);
     }
   }
   return true;

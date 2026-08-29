@@ -127,6 +127,7 @@ function sellerPipelineEventFor(lead, ledgerRow, { createdAt, workspaceId }) {
   if (ledgerRow.lead_type !== "seller") return null;
   const { contact_name: _contactName, ...payload } = createSellerPipelineItem(lead, {
     createdAt: createdAt || ledgerRow.received_at,
+    owner: "unassigned",
   });
   return {
     event_id: `seller-pipeline-created:${ledgerRow.lead_id}`,

@@ -6,6 +6,16 @@ import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LISTING_VERIFICATION_REPORT = fromRoot("production", "data", "listing-verification-report.json");
+export const UNASSIGNED_REVIEW_OWNER = "unassigned";
+const SYNTHETIC_REVIEW_OWNER_IDS = new Set([
+  "agency_admin",
+  "broker_bg",
+  "broker_international",
+  "broker_ru",
+  "content_editor",
+  "ru_preservation_editor",
+  "seo_editor",
+]);
 
 function listingRecords(seed) {
   return new Map(seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]));
@@ -18,10 +28,51 @@ function editsByListing(edits) {
   }, new Map());
 }
 
-function ownerForLocale(locale) {
-  if (locale === "ru") return "broker_ru";
-  if (locale === "bg") return "broker_bg";
-  return "broker_international";
+function normalizedLocale(value) {
+  return String(value || "").trim().toLowerCase().split(/[-_]/)[0];
+}
+
+function profileLocales(profile) {
+  const values = [
+    ...(Array.isArray(profile?.languages) ? profile.languages : []),
+    ...(Array.isArray(profile?.locales) ? profile.locales : []),
+    ...(Array.isArray(profile?.supported_locales) ? profile.supported_locales : []),
+    ...(Array.isArray(profile?.supportedLocales) ? profile.supportedLocales : []),
+    profile?.language,
+    profile?.locale,
+  ];
+  return new Set(values.map(normalizedLocale).filter(Boolean));
+}
+
+export function isFixtureBrokerId(value) {
+  return SYNTHETIC_REVIEW_OWNER_IDS.has(String(value || "").trim().toLowerCase());
+}
+
+function configuredBrokerProfiles(value) {
+  return (Array.isArray(value) ? value : [])
+    .filter((profile) => {
+      const id = String(profile?.id || "").trim();
+      return Boolean(id) && !isFixtureBrokerId(id);
+    })
+    .map((profile) => ({ profile, locales: profileLocales(profile) }));
+}
+
+export function resolveListingVerificationOwner(locale, brokerProfiles = []) {
+  const requestedLocale = normalizedLocale(locale);
+  const eligible = configuredBrokerProfiles(brokerProfiles);
+  const match = eligible.find(({ locales }) => requestedLocale && locales.has(requestedLocale));
+  if (match) return String(match.profile.id).trim();
+  // A single real configured broker is an honest fallback even when the
+  // directory has not yet captured language metadata. Multiple unknown
+  // brokers must remain unassigned rather than receiving invented routing.
+  if (eligible.length === 1 && eligible[0].locales.size === 0) return String(eligible[0].profile.id).trim();
+  return UNASSIGNED_REVIEW_OWNER;
+}
+
+export function listingVerificationOwnerForRow(row, brokerProfiles = []) {
+  const existing = String(row?.verification_task?.owner || "").trim();
+  if (existing && !isFixtureBrokerId(existing)) return existing;
+  return resolveListingVerificationOwner(row?.source_locale, brokerProfiles);
 }
 
 function priorityForEdit(edit) {
@@ -58,6 +109,7 @@ export function buildListingVerificationReport({
   seed = loadCmsSeed(),
   edits = readListingEdits(),
   generatedAt = new Date().toISOString(),
+  brokerProfiles = [],
 } = {}) {
   const records = listingRecords(seed);
   const properties = new Map((seed.properties || []).map((property) => [property.id, property]));
@@ -67,7 +119,7 @@ export function buildListingVerificationReport({
       const edit = listingEdits.at(-1);
       const record = records.get(listingId);
       const rowPriority = verificationPriority(listingEdits);
-      const owner = ownerForLocale(edit.source_locale || record.source_locale);
+      const owner = resolveListingVerificationOwner(edit.source_locale || record.source_locale, brokerProfiles);
       const publicationReadiness = publicationReadinessFor({
         listing: record,
         property: properties.get(record.property),
@@ -99,6 +151,8 @@ export function buildListingVerificationReport({
         verification_task: {
           id: `verify-${edit.listing_id}`,
           owner,
+          role: "broker",
+          requires_assignment: owner === UNASSIGNED_REVIEW_OWNER,
           status: "open",
           due_at: dueAt(generatedAt, rowPriority),
         },
@@ -133,8 +187,17 @@ export function assertListingVerificationReport(report) {
     if (!row.listing_id || !row.source_hash_after || !row.admin_path.startsWith("/admin/listings/edit?listingId=")) {
       throw new Error("Listing verification rows must preserve editor routing data");
     }
-    if (row.verification_task?.status !== "open" || !row.verification_task.owner || !row.verification_task.due_at) {
+    if (
+      row.verification_task?.status !== "open" ||
+      !row.verification_task.owner ||
+      row.verification_task.role !== "broker" ||
+      row.verification_task.requires_assignment !== (row.verification_task.owner === UNASSIGNED_REVIEW_OWNER) ||
+      !row.verification_task.due_at
+    ) {
       throw new Error("Listing verification rows must create open broker tasks");
+    }
+    if (isFixtureBrokerId(row.verification_task.owner)) {
+      throw new Error("Listing verification tasks must not assign fixture identities");
     }
     if (row.stale_translation_count > 0 && row.priority !== "high") {
       throw new Error("Stale translation verification rows must be high priority");

@@ -35,6 +35,21 @@ test("assignable broker profiles include only identified admins and brokers", ()
   );
 });
 
+test("assignable broker profiles keep fixture roster ids as routing keys without surfacing them as person names", () => {
+  assert.deepEqual(
+    assignableBrokerProfiles([
+      { id: "broker_bg", name: "broker_bg", role: "broker" },
+      { id: "broker_ru", role: "broker" },
+      { id: "broker_international", name: "broker_international", role: "broker" },
+    ]),
+    [
+      { id: "broker_bg", email: "", name: "", languages: ["bg"] },
+      { id: "broker_ru", email: "", name: "", languages: ["ru"] },
+      { id: "broker_international", email: "", name: "", languages: ["en"] },
+    ],
+  );
+});
+
 function user(overrides = {}) {
   return {
     id: 1,
@@ -481,7 +496,7 @@ test("the App Router renders the full owner navigation and a privacy-safe owner 
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(html, /data-owner-profile="true"/);
-  assert.match(html, /data-owner-hub="true"/);
+  assert.doesNotMatch(html, /data-owner-hub="true"/);
   assert.match(html, /Ivan Peychev/);
   assert.match(html, /peycheff\.com@gmail\.com/);
   assert.match(html, /Все рабочие пространства/);
@@ -831,6 +846,12 @@ test("Payload admin can approve and send a durable lead reply without the file o
       contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
       workspaceId: "workspace-sandanski",
     },
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: "payload-secret-for-test",
+      databaseUrl: "postgres://test.invalid/ms_realty",
+    },
+    readViewingsDurably: async () => [],
     readLeadIntakesDurably: async () => [
       {
         lead_id: "lead-durable-1",

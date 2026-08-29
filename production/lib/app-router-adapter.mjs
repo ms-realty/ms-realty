@@ -185,6 +185,8 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
         naturalLanguageEnabled: config.naturalLanguageSearchEnabled === true,
       })
     : null;
+  const brokerContacts = readThroughCached(config.brokerContactLedgerPath, () => readBrokerContacts(config.brokerContactLedgerPath));
+  const tourApprovals = readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath));
   const rendered = searchLocale
     ? searchRuntimeListings(registry, seed, {
         localeCode: searchRequest.intent.locale,
@@ -202,12 +204,8 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
         seed,
         pathname,
         translationTasks,
-        config.runtimeDataDurableOnly
-          ? []
-          : readThroughCached(config.brokerContactLedgerPath, () => readBrokerContacts(config.brokerContactLedgerPath)),
-        config.runtimeDataDurableOnly
-          ? []
-          : readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
+        brokerContacts,
+        tourApprovals,
         currentRouteContract(config).catalog,
         { searchParams: requestUrl.searchParams },
       );

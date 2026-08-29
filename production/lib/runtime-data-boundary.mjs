@@ -8,6 +8,7 @@ export const FILE_BACKED_PUBLIC_MUTATIONS = new Set([
   "/api/language-requests",
   "/api/saved-searches",
   "/api/saved-searches/manage",
+  "/api/viewing-trips",
 ]);
 
 export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
@@ -101,6 +102,7 @@ export function productionRuntimeDataUnavailable({
   durableLeadOperations = false,
   durableOnly = false,
   durableProviderDelivery = false,
+  durableViewingTrip = false,
   durableViewing = false,
   method,
   pathname,
@@ -115,6 +117,7 @@ export function productionRuntimeDataUnavailable({
   }
   if (!MUTATING_METHODS.has(verb)) return false;
   if (path === "/api/events" && durableEvent) return false;
+  if (path === "/api/viewing-trips" && durableViewingTrip) return false;
   if (path === "/api/admin/replies/delivery" && durableProviderDelivery) return false;
   if (["/api/admin/viewings", "/api/admin/viewings/follow-up"].includes(path) && durableViewing) return false;
   if (durableLeadOperations && DURABLE_LEAD_OPERATION_PATHS.has(path)) return false;

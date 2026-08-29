@@ -387,11 +387,18 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(today.headers.get("cache-control"), "no-store");
       assert.match(todayHtml, /data-kind="admin-today"/);
       assert.match(todayHtml, /data-react-admin-ui="today"/);
-      assert.match(todayHtml, /data-priority-leads="true"/);
-      assert.match(todayHtml, new RegExp(`data-priority-lead="${leadId}"`));
-      assert.match(todayHtml, /adm-task-list__reference/);
-      assert.match(todayHtml, /Открыть и ответить/);
+      assert.match(todayHtml, /data-today-briefing="true"/);
+      assert.match(todayHtml, /data-hermes-entry="today"/);
+      assert.match(todayHtml, /data-next-actions="true"/);
+      assert.doesNotMatch(todayHtml, /data-next-action="lead"/);
+      assert.match(todayHtml, /adm-next-actions__body/);
+      assert.match(todayHtml, /(?:Открыть|Проверить) и ответить/);
       assert.match(todayHtml, new RegExp(`href="/admin/leads\\?locale=ru#lead-${leadId}"`));
+      assert.match(todayHtml, /class="crm-ph"/);
+      assert.doesNotMatch(todayHtml, /data-priority-leads=/);
+      assert.match(todayHtml, /data-today-layout="operating-flow"/);
+      assert.match(todayHtml, /data-readiness-support="true"/);
+      assert.match(todayHtml, /data-workspace-onboarding="open"/);
       assert.match(todayHtml, /href="\/admin\/viewings\?locale=ru"/);
       assert.match(todayHtml, /href="\/admin\/activity\?locale=ru"/);
       const todayJson = await todayJsonRoute.GET(new Request("https://example.test/api/admin/today?locale=ru", { headers: auth }));
@@ -1367,7 +1374,31 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const redirectWorkbookRows = parseCsv(redirectWorkbookCsv);
       assert.equal(redirectWorkbookRows[0].source_status, "200");
       assert.ok(redirectWorkbookRows[0].source_title);
-      assert.ok(redirectWorkbookRows[0].review_owner);
+      assert.equal(redirectWorkbookRows[0].review_owner, "unassigned");
+
+      const spoofedRedirectApproval = await redirectApprovalsRoute.POST(
+        new Request("https://example.test/api/admin/redirect-approvals", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            oldUrl: firstRedirect.old_url,
+            equivalentContent: true,
+            reviewer: "seo_editor",
+          }),
+        }),
+      );
+      assert.equal(spoofedRedirectApproval.status, 400);
+      assert.match((await spoofedRedirectApproval.json()).message, /authenticated operator/);
+
+      const spoofedRedirectImport = await redirectApprovalsImportRoute.POST(
+        new Request("https://example.test/api/admin/redirect-approvals/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,seo_editor\n`,
+        }),
+      );
+      assert.equal(spoofedRedirectImport.status, 400);
+      assert.match((await spoofedRedirectImport.json()).message, /authenticated operator/);
 
       const redirectApproval = await redirectApprovalsRoute.POST(
         new Request("https://example.test/api/admin/redirect-approvals", {
@@ -1376,7 +1407,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           body: JSON.stringify({
             oldUrl: firstRedirect.old_url,
             equivalentContent: true,
-            reviewer: "seo_editor",
+            reviewer: "unassigned",
           }),
         }),
       );
@@ -1399,7 +1430,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/api/admin/redirect-approvals/import", {
           method: "POST",
           headers: { ...auth, "content-type": "text/csv" },
-          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,seo_editor\n`,
+          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,unassigned\n`,
         }),
       );
       const redirectImportBody = await redirectImport.json();
@@ -1977,6 +2008,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         seller_pipeline_outcome_recorded: 1,
         deal_closed: 1,
       });
+      for (const action of [
+        "seo_evidence_imported",
+        "redirect_approval_created",
+        "redirect_approvals_imported",
+        "deployable_redirects_exported",
+      ]) {
+        assert.equal(auditRows.find((row) => row.action === action).actor, "unassigned");
+      }
       const viewingFollowUpAudit = readAuditLog(auditLogPath).find((row) => row.action === "viewing_follow_up_recorded");
       assert.equal(viewingFollowUpAudit.metadata.note, undefined);
       const sellerPipelineAudits = auditRows.filter((row) => row.action === "seller_pipeline_outcome_recorded");

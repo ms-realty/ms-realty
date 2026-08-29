@@ -130,6 +130,18 @@ test("Hermes hosted fallback is configured as non-sensitive only", () => {
   assert.equal(report.provider.sensitive_data_allowed, false);
   assert.equal(report.provider.hosted_fallback_allowed_for_sensitive_data, false);
   assert.deepEqual(report.env_contract.required, ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"]);
+  assert.throws(
+    () =>
+      buildHermesProviderProvisioningReport({
+        env: {
+          HERMES_PROVIDER_MODE: "openrouter",
+          HERMES_CHAT_COMPLETIONS_URL: "https://example.com/v1/chat/completions",
+          HERMES_API_KEY: "test-secret-key",
+        },
+        generatedAt: "2026-07-06T00:00:00Z",
+      }),
+    /OpenRouter endpoint must be https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/,
+  );
 });
 
 test("Hermes provisioning report rejects incomplete ready endpoint evidence", () => {

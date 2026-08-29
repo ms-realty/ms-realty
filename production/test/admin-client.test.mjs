@@ -7,20 +7,27 @@ test("admin progressive-enhancement bundle remains valid JavaScript", () => {
   assert.doesNotThrow(() => new vm.Script(ADMIN_APP_JS));
 });
 
-test("admin bundle registers route-aware WebMCP tools through the signed-in session", () => {
+test("admin bundle exposes only read/open WebMCP tools through the signed-in session", () => {
   assert.match(ADMIN_APP_JS, /function initAdminWebMcp\(\)/);
   assert.match(ADMIN_APP_JS, /document\.modelContext/);
   assert.match(ADMIN_APP_JS, /agent-config\?catalog=1/);
   assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_context"/);
   assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_read"/);
-  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_write"/);
   assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_open"/);
-  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_context"[\s\S]*?annotations: \{ readOnlyHint: true \},/);
-  assert.match(ADMIN_APP_JS, /name: "ms_realty_admin_read"[\s\S]*?annotations: \{ readOnlyHint: true, untrustedContentHint: true \},/);
+  assert.doesNotMatch(ADMIN_APP_JS, /name: "ms_realty_admin_write"/);
+  assert.doesNotMatch(ADMIN_APP_JS, /remoteWrites/);
   assert.match(ADMIN_APP_JS, /credentials: "same-origin"/);
   assert.match(ADMIN_APP_JS, /untrustedContentHint: true/);
-  assert.match(ADMIN_APP_JS, /args\.confirmation !== row\.confirmation/);
   assert.match(ADMIN_APP_JS, /row\.execution !== "browser_session"/);
+});
+
+test("admin bundle loads the provider-authorized WhatsApp handoff without collecting a secret", () => {
+  assert.match(ADMIN_APP_JS, /function initWhatsAppEmbeddedSignup\(\)/);
+  assert.match(ADMIN_APP_JS, /https:\/\/connect\.facebook\.net\/en_US\/sdk\.js/);
+  assert.match(ADMIN_APP_JS, /type === "WA_EMBEDDED_SIGNUP"/);
+  assert.match(ADMIN_APP_JS, /provider: "whatsapp", code: code, waba_id:/);
+  assert.match(ADMIN_APP_JS, /credentials: "same-origin"/);
+  assert.doesNotMatch(ADMIN_APP_JS, /name=["'](?:token|password|client_secret)["']/i);
 });
 
 test("admin reply client submits broker-only drafts and reviewed replies as JSON", () => {
@@ -68,6 +75,8 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /setAttribute\("aria-current", "location"\)/);
   assert.match(ADMIN_APP_JS, /window\.addEventListener\("scroll", scheduleSync/);
   assert.match(ADMIN_APP_JS, /data-admin-mobile-nav-close/);
+  assert.match(ADMIN_APP_JS, /summary\.setAttribute\("aria-expanded", mobileNav\.open \? "true" : "false"\)/);
+  assert.match(ADMIN_APP_JS, /document\.documentElement\.classList\.toggle\("admin-mobile-nav-open", mobileNav\.open\)/);
+  assert.match(ADMIN_APP_JS, /var target = close \|\| panel\.querySelector\('\[aria-current="page"\]'\) \|\| focusableItems\(\)\[0\];/);
   assert.match(ADMIN_APP_JS, /var target = returnFocusTarget && returnFocusTarget\.isConnected \? returnFocusTarget : summary/);
 });
-

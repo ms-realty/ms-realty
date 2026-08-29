@@ -100,7 +100,11 @@ import {
   DEFAULT_VIEWING_TRIP_LEDGER_PATH,
   appendViewingTripRequest,
   createViewingTripRequest,
+  ViewingTripConflictError,
+  isViewingTripDurableStoreEnabled,
+  persistViewingTripDurably,
   privacySafeViewingTripRequest,
+  ViewingTripStoreUnavailableError,
 } from "./viewing-trip-requests.mjs";
 
 const ERROR_JSON_HEADERS = {
@@ -182,6 +186,7 @@ export function appApiConfigFromEnv(env = process.env) {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     viewingDurableStore: viewingDurableStoreConfigFromEnv(env),
+    viewingDurablePayload: null,
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     viewingTripLedgerPath: env.MS_REALTY_VIEWING_TRIP_LEDGER_PATH || DEFAULT_VIEWING_TRIP_LEDGER_PATH,
     brokerAvailabilityAt: env.MS_REALTY_BROKER_AVAILABILITY_AT,
@@ -378,6 +383,13 @@ async function recordOperationalEvent(input, config) {
 function recordConsent(input, config) {
   return appendConsentRecord(createConsentRecord(input, config.receivedAt || new Date().toISOString()), {
     filePath: config.consentLedgerPath,
+  });
+}
+
+function viewingTripStoreUnavailable() {
+  return privateJson(503, {
+    kind: "viewing_trip_store_unavailable",
+    message: "Viewing trip requests are temporarily unavailable.",
   });
 }
 
@@ -727,26 +739,50 @@ function viewingSlotsNow(config) {
 }
 
 // B5: a viewing trip is a request for a human to arrange, never a booking.
-function routeViewingTrip(request, body, registry, config) {
+async function routeViewingTrip(request, body, registry, config) {
   try {
     const requestedAt = config.viewingTripRequestedAt || config.savedAt || config.receivedAt || new Date().toISOString();
     const input = parseBody(request, body);
     const trip = createViewingTripRequest(registry, input, { requestedAt });
-    if (!config.publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
-    const contactVault = appendPublicContact(
-      {
-        subjectType: "viewing_trip",
-        subjectId: trip.id,
-        contact: trip.contact,
-        contactPreference: trip.contact_preference,
-        message: trip.note,
-      },
-      { filePath: config.publicContactVaultPath, secret: config.publicContactKey, storedAt: requestedAt },
-    );
-    const safeTrip = privacySafeViewingTripRequest(trip);
-    const ledger = config.viewingTripLedgerPath
-      ? appendViewingTripRequest(safeTrip, { filePath: config.viewingTripLedgerPath })
-      : null;
+    const durableStore = config.viewingDurableStore || {};
+    const durableRequested = durableStore.viewingDurableStoreEnabled === true;
+    let contactVault = null;
+    let safeTrip = privacySafeViewingTripRequest(trip);
+    let ledger = null;
+    if (durableRequested) {
+      if (!isViewingTripDurableStoreEnabled(durableStore)) {
+        throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+      }
+      const stored = await (config.persistViewingTripDurably || persistViewingTripDurably)({
+        trip,
+        contactSecret: durableStore.contactSecret,
+        payload: config.viewingDurablePayload || null,
+        workspaceId: durableStore.workspaceId,
+      });
+      safeTrip = stored.request;
+      ledger = { ...stored.request, durable: true };
+      contactVault = {
+        contact_ref: stored.request.contact_ref,
+        stored_at: stored.request.requested_at,
+        encrypted: true,
+        durable: true,
+      };
+    } else {
+      if (!config.publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
+      contactVault = appendPublicContact(
+        {
+          subjectType: "viewing_trip",
+          subjectId: trip.id,
+          contact: trip.contact,
+          contactPreference: trip.contact_preference,
+          message: trip.note,
+        },
+        { filePath: config.publicContactVaultPath, secret: config.publicContactKey, storedAt: requestedAt },
+      );
+      ledger = config.viewingTripLedgerPath
+        ? appendViewingTripRequest(safeTrip, { filePath: config.viewingTripLedgerPath })
+        : null;
+    }
     const consent = recordConsent(
       {
         consentType: "viewing_trip_request",
@@ -762,6 +798,10 @@ function routeViewingTrip(request, body, registry, config) {
     );
     return privateJson(201, { ...safeTrip, ledger, contactVault, consent });
   } catch (error) {
+    if (error instanceof ViewingTripConflictError) {
+      return privateJson(409, { kind: error.code, message: error.message });
+    }
+    if (error instanceof ViewingTripStoreUnavailableError) return viewingTripStoreUnavailable();
     return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
   }
 }
@@ -783,6 +823,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       }
     }
     if (productionRuntimeDataUnavailable({
+      durableViewingTrip: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
       durableEvent: config.eventDurableStore?.eventDurableStoreEnabled === true,
       durableOnly: config.runtimeDataDurableOnly,
       method: request.method,
@@ -945,7 +986,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     // B5: a viewing trip is a request a human confirms, never a booking.
     if (url.pathname === "/api/viewing-trips") {
       if (request.method !== "POST") return webResponse(privateJson(405, { kind: "method_not_allowed" }));
-      return webResponse(routeViewingTrip(request, body, currentRegistry(config), config));
+      return webResponse(await routeViewingTrip(request, body, currentRegistry(config), config));
     }
 
     return webResponse(json(405, { kind: "method_not_allowed" }));

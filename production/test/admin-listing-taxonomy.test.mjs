@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   renderAdminActivityPayload,
   renderAdminContactsPayload,
@@ -14,6 +17,8 @@ import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
 
@@ -36,17 +41,17 @@ function emptyLeads() {
 
 test("admin listing editor quality rail uses a compact status list", () => {
   const html = editorHtml("MS-CRAWL-0001", "bg");
-  const rail = html.match(/data-editor-readiness-rail="true"[\s\S]*?<\/aside>/)?.[0] || "";
-  assert.match(rail, /class="crm-panel"/);
-  assert.match(rail, /Публикувано/);
-  assert.match(rail, /data-quality-panel="true"/);
-  assert.match(rail, /data-translation-panel="true"/);
-  assert.match(rail, /data-media-review-panel="true"/);
+  assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
+  assert.match(html, /class="crm-panel"/);
+  assert.match(html, /Публикувано/);
+  assert.match(html, /data-quality-panel="true"/);
+  assert.match(html, /data-translation-panel="true"/);
+  assert.match(html, /data-media-review-panel="true"/);
   // Owner-directed publication does not clear the review work: the rail still
   // names the outstanding fact gap and the unverified availability check.
-  assert.match(rail, /data-listing-quality-issues="[1-9]/);
-  assert.match(rail, /data-quality-issue="missing_area"/);
-  assert.match(rail, /Не е проверена/);
+  assert.match(html, /data-listing-quality-issues="[1-9]/);
+  assert.match(html, /data-quality-issue="missing_area"/);
+  assert.match(html, /Не е проверена/);
 });
 
 test("admin listing editor savebar uses workspace copy instead of filter leftovers", () => {
@@ -111,6 +116,8 @@ test("admin listing manager filters and labels every canonical family", () => {
   assert.match(html, /class="adm-filterbar/);
   assert.match(html, /data-listing-filters="true"/);
   assert.match(html, /adm-listing-table/);
+  assert.match(html, /data-listing-mobile-summary="true"/);
+  assert.match(html, /data-listing-mobile-more="MS-CRAWL-0001"/);
   assert.match(html, /class="crm-ph"/);
   assert.doesNotMatch(html, /<h2>Резултати<\/h2>/);
   assert.equal([...html.matchAll(/<h2>Резултати · \d+<\/h2>/g)].length, 1);
@@ -173,6 +180,12 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.doesNotMatch(html, /<h2>CRM запитвания<\/h2>/);
   assert.doesNotMatch(html, /<h2>CRM leads<\/h2>/);
+});
+
+test("listing editor keeps support panels in the main flow instead of a narrow readiness rail", () => {
+  const html = editorHtml("MS-CRAWL-0001", "en");
+  assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
+  assert.match(generatedCss, /main\[data-react-admin-ui="listing-editor"\]\s+\.adm-editor-support\{[^}]*grid-template-columns:minmax\(0,1fr\)/);
 });
 
 test("admin pipeline cards keep qualification collapsed and facts unboxed", () => {
@@ -247,7 +260,7 @@ function todayPage(data, locale = "bg") {
   });
 }
 
-test("admin today pipeline CTA is a verb and follow-up due dates stay formatted", () => {
+test("admin Today ranks pipeline and follow-up work in one priority list", () => {
   const html = renderReactAdminBody(
     todayPage({
       leadPipelineQueue: {
@@ -298,24 +311,17 @@ test("admin today pipeline CTA is a verb and follow-up due dates stay formatted"
     }),
   );
 
-  const preview = html.match(/data-pipeline-preview-row="lead-pipe-1"[\s\S]*?<\/li>/)?.[0] || "";
-  assert.match(preview, /class="mk-btn mk-btn--primary mk-btn--sm"[^>]*>Отвори</);
-  assert.doesNotMatch(preview, /class="mk-btn mk-btn--primary mk-btn--sm"[^>]*>Отворено</);
-
-  const dueCell = html.match(/data-viewing-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
-  assert.match(dueCell, /<time dateTime="2026-07-06T12:00:00.000Z"/);
-  assert.doesNotMatch(dueCell.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
-  const sellerDue = html.match(/data-seller-pipeline-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
-  assert.match(sellerDue, /<time dateTime="2026-07-06T12:00:00.000Z"/);
-  assert.doesNotMatch(sellerDue.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
-  const viewingTable = html.match(/data-viewing-follow-up-table="true"[\s\S]*?<\/table>/)?.[0] || "";
-  assert.match(viewingTable, /<th scope="col">Статус<\/th>/);
-  assert.match(viewingTable, /<th scope="col">Действие<\/th>/);
-  assert.doesNotMatch(viewingTable, /<th scope="col">Статус на огледа<\/th>/);
-  assert.doesNotMatch(viewingTable, /<th scope="col">Запиши<\/th>/);
-  assert.match(viewingTable, />Запиши</);
-  assert.match(html, /data-readiness-rail="true"/);
-  assert.match(html, /data-today-snapshot="true"/);
+  assert.match(html, /data-next-action="pipeline"/);
+  assert.match(html, /data-next-action="seller"/);
+  assert.match(html, /data-next-actions="true" data-next-action-count="2" data-next-action-total="3" data-next-action-visible="2"/);
+  assert.doesNotMatch(html, /data-next-action="viewing"/);
+  assert.match(html, /class="mk-btn mk-btn--secondary mk-btn--sm"[^>]*><span>Запиши стъпка за продавача<\/span>/);
+  const dueAction = html.match(/<time dateTime="2026-07-06T12:00:00.000Z"[^>]*>([\s\S]*?)<\/time>/)?.[1] || "";
+  assert.ok(dueAction, "follow-up due time stays in the source-backed priority row");
+  assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);
+  assert.doesNotMatch(html, /data-pipeline-preview-row=/);
+  assert.doesNotMatch(html, /data-viewing-follow-up-table=/);
+  assert.match(html, /data-readiness-support="true"/);
 });
 
 test("admin translation queue localizes reviewer roles and titles results once", () => {
@@ -365,7 +371,7 @@ test("admin activity localizes leftover keys and uses human filter hints", () =>
   assert.doesNotMatch(html, /<dt>object id<\/dt>/);
 });
 
-test("admin contacts hide generated ids behind a human title and localize broker roles", () => {
+test("admin contacts hide generated ids and resolve real owner profiles", () => {
   const html = renderReactAdminBody(
     renderAdminContactsPayload(registry, "bg", {
       contacts: [
@@ -377,18 +383,19 @@ test("admin contacts hide generated ids behind a human title and localize broker
           lead_ids: ["lead-anon"],
           lead_count: 1,
           duplicate_leads: 0,
-          assigned_brokers: ["broker_international"],
+          assigned_brokers: ["owner-ms-realty"],
           languages: ["en"],
           communication_event_count: 0,
           latest_received_at: "2026-07-19T08:00:00.000Z",
         },
       ],
       accounts: [],
+      brokerProfiles: [{ id: "owner-ms-realty", email: "ms.realty.bg@gmail.com", languages: ["bg"] }],
     }),
   );
   assert.match(html, /<h3>buyer@example.test<\/h3>/);
   assert.match(html, /class="crm-mono adm-id-caption">contact-lead-anon</);
-  assert.match(html, /Международен брокер/);
+  assert.match(html, /<dt>Отговорници<\/dt><dd>ms\.realty\.bg@gmail\.com<\/dd>/);
   assert.doesNotMatch(html, /<h3>contact-lead-anon<\/h3>/);
   assert.doesNotMatch(html, />broker_international</);
 });

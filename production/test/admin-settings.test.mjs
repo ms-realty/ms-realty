@@ -9,6 +9,7 @@ import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   WORKSPACE_SETTINGS_DEFAULTS,
+  WORKSPACE_SETTINGS_COLLECTION_SLUG,
   applyWorkspaceDefaultBroker,
   buildWorkspaceOnboarding,
   leadSlaOptions,
@@ -58,6 +59,75 @@ function paths(overrides = {}) {
     reviewedAt: "2026-07-19T10:00:00.000Z",
     ...overrides,
   };
+}
+
+function createWorkspaceSettingsPayloadStore(initial = null, { workspaceId = "workspace-sandanski" } = {}) {
+  let row = initial
+    ? {
+        id: 1,
+        workspace_id: workspaceId,
+        version: initial.version,
+        revision: initial.revision,
+        updated_by: initial.updated_by,
+        sections: structuredClone(initial.sections),
+        section_updates: structuredClone(initial.section_updates),
+        revisions: structuredClone(initial.revisions),
+        updatedAt: initial.updated_at,
+        createdAt: initial.updated_at || "2026-07-19T09:00:00.000Z",
+      }
+    : null;
+  const calls = [];
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const current = () => (row ? clone(row) : null);
+  return {
+    calls,
+    payload: {
+      async find(input) {
+        calls.push({ method: "find", input: clone(input) });
+        assert.equal(input.collection, WORKSPACE_SETTINGS_COLLECTION_SLUG);
+        const scope =
+          input.where?.workspace_id?.equals || input.where?.and?.find((clause) => clause.workspace_id)?.workspace_id?.equals;
+        return { docs: row && scope === row.workspace_id ? [current()] : [] };
+      },
+      async create(input) {
+        calls.push({ method: "create", input: clone(input) });
+        assert.equal(input.collection, WORKSPACE_SETTINGS_COLLECTION_SLUG);
+        const updatedAt =
+          Object.values(input.data.section_updates || {})
+            .map((entry) => entry?.updated_at)
+            .filter(Boolean)
+            .at(-1) || "2026-07-19T10:00:00.000Z";
+        row = {
+          id: 1,
+          ...clone(input.data),
+          updatedAt,
+          createdAt: updatedAt,
+        };
+        return current();
+      },
+      async update(input) {
+        calls.push({ method: "update", input: clone(input) });
+        assert.equal(input.collection, WORKSPACE_SETTINGS_COLLECTION_SLUG);
+        assert.equal(input.id, row?.id);
+        const updatedAt =
+          Object.values(input.data.section_updates || {})
+            .map((entry) => entry?.updated_at)
+            .filter(Boolean)
+            .at(-1) || row?.updatedAt || "2026-07-19T10:00:00.000Z";
+        row = {
+          id: row?.id || 1,
+          ...clone(input.data),
+          updatedAt,
+          createdAt: row?.createdAt || updatedAt,
+        };
+        return current();
+      },
+    },
+  };
+}
+
+function headingCount(html) {
+  return (html.match(/<h1(?:\s|>)/g) || []).length;
 }
 
 async function withAdmin(fn, { roles = "admin", actor = "operations_lead" } = {}) {
@@ -198,19 +268,29 @@ test("workspace onboarding is computed from real workspace state", () => {
   assert.ok(complete.items.every((item) => item.done));
 });
 
-test("settings screen renders working sections and omits the unconnected backlog", async () => {
+test("settings screen renders working sections and an in-flow owner overview", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="settings"/);
-    assert.match(page.body, /data-settings-layout="sections-rail"/);
+    assert.match(page.body, /data-settings-layout="sections-flow"/);
+    assert.match(page.body, /class="crm-ph"/);
+    assert.match(page.body, /<h1>Settings<\/h1>/);
+    assert.match(page.body, /Agency profile, lead reply targets, notifications,/);
+    assert.match(page.body, /data-summary-kind="settings"/);
+    for (const card of ["agency-profile", "lead-sla", "workspace", "settings-state"]) {
+      assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
+    }
+    assert.match(page.body, /data-summary-card="settings-state"[\s\S]*?Set up your workspace[\s\S]*?0\/5[\s\S]*?0 of 5 done/);
     for (const section of ["agency", "leads", "notifications", "workspace", "public_site"]) {
       assert.match(page.body, new RegExp(`data-settings-section="${section}"`), `${section} panel`);
       assert.match(page.body, new RegExp(`data-workspace-settings-form="${section}"`), `${section} form`);
       assert.match(page.body, new RegExp(`data-admin-mutation-form="workspace-settings-${section}"`), `${section} mutation contract`);
       assert.match(page.body, new RegExp(`id="settings-${section}"`), `${section} anchor`);
     }
+    assert.match(page.body, /<details class="crm-panel adm-settings-panel adm-settings-disclosure" id="settings-agency" open/);
+    assert.doesNotMatch(page.body, /id="settings-leads" open/);
     // Pristine: every section still shows the committed defaults.
     assert.equal(page.body.match(/data-settings-state="defaults"/g).length, 5);
     assert.doesNotMatch(page.body, /data-settings-state="updated"/);
@@ -220,12 +300,17 @@ test("settings screen renders working sections and omits the unconnected backlog
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // Unconnected settings are absent rather than consuming the owner task
-    // flow with inert controls. The integrations hub remains the recovery path.
-    assert.doesNotMatch(page.body, /data-settings-pending-panel=/);
-    assert.doesNotMatch(page.body, /data-settings-planned=/);
+    // Each overview fact has one owner: section index, onboarding checklist,
+    // and history. A second action card must not repeat all three.
+    assert.doesNotMatch(page.body, /data-settings-actions=/);
+    assert.equal((page.body.match(/data-settings-index="true"/g) || []).length, 1);
+    assert.match(page.body, /data-workspace-onboarding="open" data-workspace-onboarding-progress="0\/5"/);
+    assert.equal((page.body.match(/data-settings-history="true"/g) || []).length, 1);
     assert.doesNotMatch(page.body, /data-planned-control=/);
+    assert.doesNotMatch(page.body, /data-export-form=/);
     assert.doesNotMatch(page.body, /Coming soon/);
+    assert.doesNotMatch(page.body, /data-settings-capability-gaps=/);
+    assert.doesNotMatch(page.body, /data-settings-gap=/);
     assert.doesNotMatch(page.body, /data-settings-section="(?:security|data)"/);
     assert.match(page.body, /href="\/admin\/connect"/);
 
@@ -253,10 +338,24 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    assert.match(today.body, />Administration</);
+    assert.match(today.body, />Workspace</);
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
+  });
+});
+
+test("owner screens keep one page heading after moving titles into PageHeader", async () => {
+  await withAdmin(async () => {
+    const app = createHttpApp(paths());
+    const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
+    const hermes = await dispatchHttp(app, { url: "/admin/hermes", headers: HEADERS });
+    const connections = await dispatchHttp(app, { url: "/admin/connect", headers: HEADERS });
+    const settings = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
+    assert.equal(headingCount(today.body), 1, "Today has exactly one h1");
+    assert.equal(headingCount(hermes.body), 1, "Hermes has exactly one h1");
+    assert.equal(headingCount(connections.body), 1, "Connections has exactly one h1");
+    assert.equal(headingCount(settings.body), 1, "Settings has exactly one h1");
   });
 });
 
@@ -344,19 +443,17 @@ test("settings validation reports the field for JSON and re-renders the form wit
   });
 });
 
-test("settings stay read-only without a configured ledger and for operators without the capability", async () => {
+test("settings reject missing durable authority explicitly in durable-only runtimes and stay read-only for operators without the capability", async () => {
   await withAdmin(async () => {
-    const app = createHttpApp({ ...paths(), workspaceSettingsPath: null });
+    const app = createHttpApp({ ...paths(), runtimeDataDurableOnly: true, workspaceSettingsPath: null });
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
-    assert.equal(page.status, 200);
-    // The unconfigured store is one page-level banner now, not a note under
-    // every section; the per-section note is reserved for the role case.
-    assert.match(page.body, /data-settings-store-missing="true"/);
-    assert.equal([...page.body.matchAll(/Settings storage is not configured on this runtime\./g)].length, 1);
-    assert.match(page.body, /data-settings-disabled="true"/);
+    assert.equal(page.status, 503);
+    assert.match(page.body, /data-react-admin-ui="runtime-unavailable"/);
+    assert.match(page.body, /Data connection required/);
     const blocked = await dispatchHttp(app, { method: "POST", url: "/api/admin/settings", headers: HEADERS, body: { section: "agency", name: "X" } });
     assert.equal(blocked.status, 503);
-    assert.equal(blocked.body.kind, "workspace_settings_read_only");
+    assert.equal(blocked.body.kind, "workspace_settings_unavailable");
+
   });
 
   await withAdmin(
@@ -380,6 +477,64 @@ test("settings stay read-only without a configured ledger and for operators with
     },
     { roles: "broker", actor: "broker_ivan" },
   );
+});
+
+test("Payload-backed workspace settings round-trip and drive lead routing without a file ledger", async () => {
+  await withAdmin(async () => {
+    const store = createWorkspaceSettingsPayloadStore();
+    const config = {
+      ...paths({ workspaceSettingsPath: null }),
+      workspaceSettingsPayload: store.payload,
+      workspaceSettingsPayloadRuntimeConfigured: true,
+      workspaceSettingsWorkspaceId: "workspace-sandanski",
+    };
+    const app = createHttpApp(config);
+
+    const initial = await dispatchHttp(app, { url: "/api/admin/settings", headers: HEADERS });
+    assert.equal(initial.status, 200);
+    assert.equal(initial.body.kind, "admin_workspace_settings");
+    assert.equal(initial.body.settings_writable, true);
+    assert.equal(initial.body.workspace_settings.revision, 0);
+
+    const saved = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/settings",
+      headers: HEADERS,
+      body: {
+        section: "leads",
+        first_reply_target_minutes: 25,
+        manager_escalation_minutes: 95,
+        default_brokers: { buyer: "broker_ru" },
+      },
+    });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.revision, 1);
+    assert.equal(saved.body.settings.sections.leads.first_reply_target_minutes, 25);
+    assert.equal(store.calls.filter((call) => call.method === "create").length, 1);
+
+    const lead = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/leads",
+      headers: HEADERS,
+      body: {
+        id: "payload-workspace-settings-lead",
+        source: "broker_whatsapp",
+        leadType: "buyer",
+        language: "en",
+        contact_preference: "whatsapp",
+        contact: { name: "Payload Routed Buyer", phone: "+359880000222" },
+        requirements: { locations: ["Sandanski"], property_types: ["apartment"], budget_max_eur: 150000, timeline: "This year" },
+        message: "Please route me with payload settings.",
+        humanConfirmed: true,
+      },
+    });
+    assert.equal(lead.status, 201);
+
+    const rows = readLeadLedger(config.leadLedgerPath);
+    assert.equal(rows[0].assigned_broker, "broker_ru");
+    assert.equal(rows[0].sla_due_at, "2026-07-19T09:25:00.000Z");
+    assert.equal(rows[0].manager_escalation_due_at, "2026-07-19T10:35:00.000Z");
+  });
 });
 
 test("workspace settings drive the reply clock, the default broker and the workbench defaults", async () => {
@@ -455,7 +610,7 @@ test("a manual broker override still beats the workspace default broker", () => 
   assert.equal(routed.broker_assignment.method, "workspace_default");
 });
 
-test("Today leads with next actions, keeps its queue previews and shows the onboarding checklist", async () => {
+test("Today leads with a source-backed briefing, Hermes entry, and one ranked priority list", async () => {
   await withAdmin(async () => {
     const config = paths();
     const app = createHttpApp(config);
@@ -463,18 +618,34 @@ test("Today leads with next actions, keeps its queue previews and shows the onbo
     assert.equal(empty.status, 200);
     assert.match(empty.body, /data-next-actions="true"/);
     assert.match(empty.body, /data-next-actions-empty="true"/);
+    assert.match(empty.body, /data-next-action-count="0" data-next-action-total="0" data-next-action-visible="0"/);
     assert.match(empty.body, /Nothing is waiting\./);
-    assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
-    // Next actions come before the queue previews the existing contracts pin.
-    assert.ok(empty.body.indexOf('data-next-actions="true"') < empty.body.indexOf('data-priority-leads="true"'));
-    for (const contract of ["data-today-layout=\"action-rail\"", "data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\"", "data-readiness-rail=\"true\""]) {
-      assert.match(empty.body, new RegExp(contract), contract);
+    assert.match(empty.body, /data-today-briefing="true" data-today-primary-action="none" data-today-priority-count="0"/);
+    assert.match(empty.body, /data-hermes-entry="today"/);
+    assert.match(empty.body, /data-hermes-open="today"/);
+    assert.match(empty.body, /href="\/admin\/hermes"/);
+    assert.doesNotMatch(empty.body, /name="q"/);
+    assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
+    assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
+    assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 7);
+    for (const destination of ["Today", "Leads", "Listings", "Translations", "Hermes", "Integrations", "Settings"]) {
+      assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
-    // Checklist: nothing done yet on a fresh workspace.
+    for (const drilldown of ["leads", "translations", "settings"]) {
+      assert.match(empty.body, new RegExp(`data-admin-nav-drilldown="${drilldown}"`), drilldown);
+    }
+    // Legacy destinations remain reachable through grouped disclosures.
+    for (const route of ["contacts", "consents", "documents", "cases", "pipeline", "requests", "viewings", "reports", "approved-content", "migration/review", "team", "activity"]) {
+      assert.match(empty.body, new RegExp(`href="/admin/${route}"`), route);
+    }
+    assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
+    assert.match(empty.body, /class="crm-ph"/);
+    for (const contract of ["data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\""]) {
+      assert.doesNotMatch(empty.body, new RegExp(contract), contract);
+    }
+    assert.match(empty.body, /data-today-layout="operating-flow"/);
+    assert.match(empty.body, /data-readiness-support="true"/);
     assert.match(empty.body, /data-workspace-onboarding="open"/);
-    assert.match(empty.body, /data-workspace-onboarding-progress="0\/5"/);
-    assert.equal(empty.body.match(/data-onboarding-done="false"/g).length, 5);
-    assert.match(empty.body, /data-workspace-onboarding-dismiss="true"/);
     assert.doesNotMatch(empty.body, /data-workspace-welcome="true"/);
 
     await dispatchHttp(app, {
@@ -496,26 +667,25 @@ test("Today leads with next actions, keeps its queue previews and shows the onbo
 
     const populated = await dispatchHttp(app, { url: "/admin/today?welcome=1", headers: HEADERS });
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
-    assert.match(populated.body, /data-next-action="lead"/);
+    assert.match(populated.body, /data-today-primary-action="lead"/);
+    assert.match(populated.body, /data-today-primary-open="lead"/);
+    assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
-    assert.match(populated.body, /data-next-action-count="2"/);
-    // The shared shell: page header, then a toolbar row of counted filters, then content.
-    assert.match(populated.body, /data-today-toolbar="true"/);
-    assert.match(populated.body, /data-list-filter="next-actions"/);
-    assert.match(populated.body, /data-filter-value="enquiries"[^>]*/);
-    assert.match(populated.body, /data-list-item="next-actions"/);
-    // Both fixture rows are past their deadline, so each carries its kind plus "overdue".
-    assert.match(populated.body, /data-filter-tags="enquiries overdue"/);
-    assert.match(populated.body, /data-filter-tags="opportunities overdue"/);
-    assert.match(populated.body, /data-list-empty="next-actions"/);
-    assert.ok(populated.body.indexOf('data-today-toolbar="true"') < populated.body.indexOf('data-next-actions="true"'));
+    assert.match(populated.body, /data-next-action-count="1" data-next-action-total="2" data-next-action-visible="1"/);
+    assert.match(populated.body, /data-today-briefing="true" data-today-primary-action="lead" data-today-priority-count="2" data-today-priority-total="2"/);
+    assert.doesNotMatch(populated.body, /data-today-toolbar="true"/);
+    assert.doesNotMatch(populated.body, /data-list-filter="next-actions"/);
+    assert.doesNotMatch(populated.body, /data-list-item="next-actions"/);
+    assert.doesNotMatch(populated.body, /data-filter-tags="/);
     assert.match(populated.body, /data-next-action-priority="(critical|urgent|normal)"/);
-    assert.match(populated.body, /data-priority-lead="today-next-action-lead"/);
     assert.doesNotMatch(populated.body, /data-next-actions-empty="true"/);
-    // The welcome banner only appears on the post-login hop and can be dismissed.
+    assert.doesNotMatch(populated.body, /data-priority-lead=/);
+    assert.doesNotMatch(populated.body, /data-lead-pipeline-preview=/);
+    assert.doesNotMatch(populated.body, /data-public-request-preview=/);
+    assert.match(populated.body, /data-readiness-support="true"/);
     assert.match(populated.body, /data-workspace-welcome="true"/);
-    assert.match(populated.body, /data-workspace-welcome-dismiss="true"/);
-    assert.match(populated.body, /Welcome, operations lead\./);
+    assert.match(populated.body, /data-workspace-onboarding="open"/);
+    assert.match(populated.body, /class="crm-ph"/);
 
     const json = await dispatchHttp(app, { url: "/api/admin/today", headers: HEADERS });
     assert.equal(json.status, 200);

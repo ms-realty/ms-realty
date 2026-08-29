@@ -821,7 +821,7 @@ const ADMIN_COPY = {
     templateReviewNotice: "Шаблон это только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
   },
   en: {
-    workspaceTitle: "MS Realty Admin",
+    workspaceTitle: "MS Realty",
     crm: "CRM",
     cms: "CMS",
     listingManager: "Listings",

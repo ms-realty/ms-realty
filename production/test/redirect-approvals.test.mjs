@@ -285,7 +285,7 @@ test("redirect approval workbook includes every legacy URL without approving it"
   assert.ok(evidenceRow.source_h1);
   assert.ok(evidenceRow.source_robots_meta);
   assert.ok(evidenceRow.source_word_count);
-  assert.ok(evidenceRow.review_owner);
+  assert.equal(evidenceRow.review_owner, "unassigned");
   assert.ok(evidenceRow.action_required);
   assert.ok(evidenceRow.priority);
   assert.match(evidenceRow.metadata_gaps, /missingSchema/);

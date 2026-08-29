@@ -11,9 +11,11 @@ import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { FILE_BACKED_LEAD_MUTATION_PATHS, isFileBackedLeadMutationBlocked } from "../lib/lead-durable-boundary.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { dispatchHttp } from "../lib/http.mjs";
+import { LEAD_OPERATIONS } from "../lib/lead-ops-durable-store.mjs";
 import { saveProviderConnection } from "../lib/provider-connections.mjs";
 import { providerWebhookSignature } from "../lib/provider-webhooks.mjs";
 import { persistViewingDurably } from "../lib/viewing-durable-store.mjs";
+import { emptyWorkspaceSettingsDocument } from "../lib/workspace-settings.mjs";
 import { createProductionHttpApp, createProductionServer, productionServerConfig } from "../server.mjs";
 import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
@@ -200,7 +202,6 @@ test("production server entrypoint serves runtime routes with env config", async
       body: JSON.stringify({
         oldUrl: listing.old_url,
         equivalentContent: true,
-        reviewer: "editor_bg",
       }),
     });
     assert.equal(redirectApproval.status, 201);
@@ -295,6 +296,8 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.viewingDurableStore.viewingDurableStoreEnabled, true);
   assert.equal(config.viewingDurableStore.payloadSecret, "test-payload-secret");
   assert.equal(config.viewingDurableStore.databaseUrl, "postgres://payload:payload@127.0.0.1:5432/payload");
+  assert.equal(config.viewingDurableStore.contactSecret, "test-only-production-contact-key-32-characters");
+  assert.equal(config.viewingDurableStore.workspaceId, "workspace-sandanski");
   assert.equal(config.providerConnection.publicOrigin, "https://ms-realty.example");
   assert.equal(config.providerConnection.credentialSecret, PROVIDER_CREDENTIAL_SECRET);
   assert.equal(config.providerConnection.googleClientId, "google-client-id");
@@ -386,8 +389,12 @@ test("production server HTTP app forwards provider runtimes and durable viewing 
       viewingDurableStoreEnabled: true,
       payloadSecret: "payload-secret",
       databaseUrl: "postgres://payload.example/ms_realty",
+      contactSecret: LEAD_CONTACT_SECRET,
+      workspaceId: "workspace-sandanski",
     },
     viewingDurablePayload: payload,
+    readViewingTripRequestsDurably: async () => [],
+    readViewingTripContactsDurably: async () => new Map(),
   };
 
   appendLeadContact(
@@ -560,6 +567,7 @@ test("production server routes seller intake through one durable write with zero
       idempotent: false,
     };
   };
+  config.readWorkspaceSettingsDurably = async () => emptyWorkspaceSettingsDocument();
 
   const server = createProductionServer(config);
   const address = await listen(server, 0, "127.0.0.1");
@@ -590,6 +598,98 @@ test("production server routes seller intake through one durable write with zero
   } finally {
     await close(server);
   }
+});
+
+test("production server forwards durable lead-operation and viewing readers into the admin inbox", async () => {
+  const config = productionServerConfig({
+    ...approvedPublicSeedFixtureEnv(),
+    NODE_ENV: "production",
+    MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_CONTACT_KEY: LEAD_CONTACT_SECRET,
+    MS_REALTY_WORKSPACE_ID: "sandanski",
+    PAYLOAD_SECRET: "p".repeat(40),
+    DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+  });
+  config.payloadAdminAuth = payloadAdminAuth();
+  config.readLeadIntakes = async () => [
+    {
+      lead_id: "server-forwarded-lead",
+      source: "website_listing_detail",
+      intent: "inquiry",
+      lead_type: "buyer",
+      listing_reference: "MS-CRAWL-0001",
+      original_language: "bg",
+      admin_locale: "bg",
+      contact_preference: "email",
+      received_at: "2026-08-13T08:00:00.000Z",
+      assigned_broker: "broker_bg",
+      assignment_method: "rules",
+      sla_due_at: "2026-08-13T08:15:00.000Z",
+      intake_completion: { complete: false, missing_fields: [], captured_fields: [] },
+      contact: { name: "Server Durable", email: "server-durable@example.invalid" },
+    },
+  ];
+  config.readLeadOperationsDurably = async ({ operation }) => {
+    if (operation === LEAD_OPERATIONS.assignment) {
+      return [
+        {
+          id: "assignment-forwarded-1",
+          lead_id: "server-forwarded-lead",
+          broker_id: "broker_ru",
+          actor: "payload-server-admin",
+          reason: "Russian-speaking buyer",
+          recorded_at: "2026-08-13T08:01:00.000Z",
+        },
+      ];
+    }
+    if (operation === LEAD_OPERATIONS.snooze) {
+      return [
+        {
+          id: "snooze-forwarded-1",
+          lead_id: "server-forwarded-lead",
+          action: "snooze",
+          reason: "Waiting for callback time",
+          until: "2026-09-20T08:00:00.000Z",
+          actor: "payload-server-admin",
+          recorded_at: "2026-08-13T08:02:00.000Z",
+        },
+      ];
+    }
+    return [];
+  };
+  config.readSellerPipelineItemsDurably = async () => [];
+  config.readViewingsDurably = async () => [
+    {
+      id: "server-forwarded-viewing",
+      lead_id: "server-forwarded-lead",
+      listing_reference: "MS-CRAWL-0001",
+      broker: "broker_ru",
+      status: "booked",
+      booked_at: "2026-08-13T08:10:00.000Z",
+      starts_at: "2026-08-13T09:00:00.000Z",
+      original_language: "bg",
+      admin_locale: "bg",
+    },
+  ];
+  config.readViewingTripRequestsDurably = async () => [];
+  config.readViewingTripContactsDurably = async () => new Map();
+
+  const app = createProductionHttpApp(config);
+  const response = await dispatchHttp(app, {
+    url: "/api/admin/leads",
+    headers: payloadSessionHeaders(),
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.runtime_data_mode, "durable_only");
+  assert.equal(response.body.leadOperations.snoozeWritable, true);
+  assert.equal(response.body.leadOperations.bulkWritable, true);
+  assert.equal(response.body.leads[0].assigned_broker, "broker_ru");
+  assert.equal(response.body.viewings[0].id, "server-forwarded-viewing");
+  assert.equal(response.body.leadSla.rows[0].snooze.status, "active");
 });
 
 test("production server blocks every file-backed lead mutation while durable intake is enabled", async (t) => {

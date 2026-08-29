@@ -19,6 +19,7 @@ import { DEFAULT_LEAD_SNOOZE_LEDGER_PATH } from "./lib/lead-snoozes.mjs";
 import { DEFAULT_OPERATOR_VIEW_LEDGER_PATH } from "./lib/operator-views.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
 import { leadDurableStoreConfigFromEnv } from "./lib/lead-durable-store.mjs";
+import { leadOperationsDurableStoreConfigFromEnv } from "./lib/lead-ops-durable-store.mjs";
 import { DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/lead-pipeline-outcomes.mjs";
 import { providerConnectionConfigFromEnv } from "./lib/provider-connections.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH } from "./lib/public-contact-vault.mjs";
@@ -172,6 +173,7 @@ export function productionServerConfig(env = process.env) {
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     leadDurableStore: leadDurableStoreConfigFromEnv(env),
+    leadOperationsDurableStore: leadOperationsDurableStoreConfigFromEnv(env),
     leadDurablePayload: undefined,
     publicContactVaultPath:
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
@@ -237,7 +239,9 @@ export function productionServerConfig(env = process.env) {
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
-    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || null,
+    workspaceSettingsWorkspaceId: env.MS_REALTY_WORKSPACE_ID || "",
+    workspaceSettingsPayloadRuntimeConfigured: Boolean(String(env.PAYLOAD_SECRET || "").trim() && String(env.DATABASE_URL || "").trim()),
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
     seoEvidenceInputDir: env.MS_REALTY_SEO_EVIDENCE_INPUT_DIR,
@@ -296,6 +300,13 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     leadContactKey: config.leadContactKey,
     leadDurableStore: config.leadDurableStore,
     leadDurablePayload: config.leadDurablePayload,
+    leadOperationsDurableStore: config.leadOperationsDurableStore,
+    leadOperationsPayload: config.leadOperationsPayload,
+    readLeadOperationsDurably: config.readLeadOperationsDurably,
+    appendLeadOperationDurably: config.appendLeadOperationDurably,
+    readSellerPipelineItemsDurably: config.readSellerPipelineItemsDurably,
+    readConsentEventsDurably: config.readConsentEventsDurably,
+    appendConsentEventDurably: config.appendConsentEventDurably,
     persistLeadIntake: config.persistLeadIntake,
     readLeadIntakes: config.readLeadIntakes,
     publicContactVaultPath: config.publicContactVaultPath,
@@ -314,6 +325,9 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     viewingLedgerPath: config.viewingLedgerPath,
     viewingDurableStore: config.viewingDurableStore,
     viewingDurablePayload: config.viewingDurablePayload,
+    readViewingsDurably: config.readViewingsDurably,
+    readViewingTripRequestsDurably: config.readViewingTripRequestsDurably,
+    readViewingTripContactsDurably: config.readViewingTripContactsDurably,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
     brokerAvailabilityLedgerPath: config.brokerAvailabilityLedgerPath,
     viewingTripLedgerPath: config.viewingTripLedgerPath,
@@ -349,6 +363,9 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     deployableRedirectOutputPath: config.deployableRedirectOutputPath,
     launchReadinessOutputPath: config.launchReadinessOutputPath,
     workspaceSettingsPath: config.workspaceSettingsPath,
+    workspaceSettingsWorkspaceId: config.workspaceSettingsWorkspaceId,
+    workspaceSettingsPayloadRuntimeConfigured: config.workspaceSettingsPayloadRuntimeConfigured,
+    readWorkspaceSettingsDurably: config.readWorkspaceSettingsDurably,
     listingQualityReviewPath: config.listingQualityReviewPath,
     seoEvidenceInputDir: config.seoEvidenceInputDir,
     seoEvidenceOutputPath: config.seoEvidenceOutputPath,

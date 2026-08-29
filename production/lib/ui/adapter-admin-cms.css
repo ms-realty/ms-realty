@@ -77,6 +77,64 @@
 .adm-listing-bulk__status[data-state="saving"] { color: var(--text-muted); }
 .adm-listing-bulk__status[data-state="success"] { color: var(--success-600); }
 .adm-listing-bulk__status[data-state="error"] { color: var(--brick-700); }
+.adm-listing-mobile-summary { display: none; }
+.adm-listing-mobile-summary__topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.adm-listing-mobile-summary strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.adm-listing-mobile-summary__location,
+.adm-listing-mobile-summary__meta {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
+.adm-listing-mobile-more { display: none; }
+.adm-listing-mobile-more > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  color: var(--text-link);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  list-style: none;
+}
+.adm-listing-mobile-more > summary::-webkit-details-marker { display: none; }
+.adm-listing-mobile-more[open] > summary { margin-bottom: var(--space-2); }
+.adm-listing-mobile-more__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+.adm-listing-mobile-more__facts > div { min-width: 0; }
+.adm-listing-mobile-more__facts dt {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+.adm-listing-mobile-more__facts dd {
+  margin: 3px 0 0;
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 719px) {
+  .adm-listing-mobile-summary { display: grid; gap: 6px; min-width: 0; }
+  .adm-listing-mobile-more { display: grid; gap: var(--space-2); width: 100%; margin-top: var(--space-2); }
+  .adm-listing-mobile-more__facts { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* ------------------------------------------------------------
    Translation review
@@ -520,6 +578,6 @@
   .adm-approved-ready { margin-inline-start: 0; flex-basis: 100%; }
 }
 
-/* The editor rail pins its stat strips to two columns, so an odd last stat
+/* The editor support grid pins its stat strips to two columns, so an odd last stat
    would leave a dead cell next to it. Let it take the full row instead. */
-.adm-editor-rail .adm-kpis > .crm-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.adm-editor-support .adm-kpis > .crm-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }

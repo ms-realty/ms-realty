@@ -165,7 +165,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Report: `production/data/listing-verification-report.json`
 - Broker verification tasks: 165
 - High priority tasks: 74
-- Tasks by owner: broker_bg: 113, broker_ru: 52
+- Tasks by owner: unassigned: 165
 - Publication/verification build overrides: `MS_REALTY_LOCALE_REGISTRY_PATH`, `MS_REALTY_LISTING_EDIT_LEDGER_PATH`, `MS_REALTY_LISTING_PUBLICATION_REPORT_PATH`, `MS_REALTY_LISTING_VERIFICATION_REPORT_PATH`
 
 ## Monitoring And Rollback

@@ -24,6 +24,7 @@ const TEST_BROKER_PROFILES = Object.freeze([
   { id: "broker_ru", languages: ["ru"] },
   { id: "broker_international", languages: ["en"] },
 ]);
+const CONTACT_KEY = "test-only-admin-crm-contact-key-32-chars";
 
 // The suite reads the checked-in demo ledgers through private copies so the
 // SQLite mirrors under production/data are never shared with the other test
@@ -42,6 +43,8 @@ function app() {
     reviewedAt: "2026-07-19T12:00:00.000Z",
     leadLedgerPath,
     eventLedgerPath,
+    leadContactVaultPath: path.join(dataDir, "lead-contacts.jsonl"),
+    leadContactKey: CONTACT_KEY,
     brokerProfiles: TEST_BROKER_PROFILES,
   });
 }
@@ -51,6 +54,9 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   assert.equal(page.status, 200);
   assert.match(page.body, /data-inbox-layout="two-pane"/);
   assert.match(page.body, /<section class="adm-inbox" id="lead-inbox" data-inbox-panes="true"/);
+  assert.match(page.body, /<span class="adm-inbox__title">Listing inquiry<\/span>/);
+  assert.match(page.body, /<span class="adm-inbox__title">Viewing request<\/span>/);
+  assert.doesNotMatch(page.body, /<span class="adm-inbox__title">Renter<\/span>/);
 
   // Every row links to the detail article that carries the same lead id, so
   // selection works through the URL fragment without JavaScript.
@@ -65,6 +71,41 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   assert.match(page.body, /data-hermes-draft-request="true"/);
   assert.match(page.body, /data-reply-approval-required="true"/);
   assert.match(page.body, /data-lead-assignment-control=/);
+});
+
+test("manual lead names and localized source truth stay visible across inbox, detail, and contacts", async () => {
+  const server = app();
+  const created = await dispatchHttp(server, {
+    method: "POST",
+    url: "/api/admin/leads",
+    headers: auth,
+    body: {
+      id: "placeholder-lead",
+      source: "broker_email",
+      leadType: "buyer",
+      language: "en",
+      contact_preference: "email",
+      "contact.name": "Maria Petrova",
+      "contact.email": "owner@example.com",
+      "requirements.locations": "Sandanski",
+      "requirements.property_types": "apartment",
+      "requirements.budget_max_eur": "120000",
+      "requirements.timeline": "Soon",
+      message: "Please email me details.",
+      humanConfirmed: "on",
+    },
+  });
+  assert.equal(created.status, 201);
+
+  const inbox = await dispatchHttp(server, { url: "/admin/leads?locale=en", headers: auth });
+  assert.equal(inbox.status, 200);
+  assert.match(inbox.body, /<span class="adm-inbox__title">Maria Petrova<\/span>/);
+  assert.match(inbox.body, /<span class="adm-lead-meta__source">Email<\/span>/);
+
+  const contacts = await dispatchHttp(server, { url: "/admin/contacts?locale=en", headers: auth });
+  assert.equal(contacts.status, 200);
+  assert.match(contacts.body, /owner@example\.com/);
+  assert.match(contacts.body, /<h3>Maria Petrova<\/h3>/);
 });
 
 test("the inbox answers its empty states: no leads, no queue matches, and no selection", async () => {
@@ -162,7 +203,9 @@ test("unavailable CRM affordances stay out of the owner task flow", async () => 
   const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
   assert.doesNotMatch(inbox.body, /data-planned-control=/);
   assert.doesNotMatch(inbox.body, /Coming soon/);
-  assert.match(inbox.body, /class="adm-inbox__broker">(?:Bulgarian|Russian|International) broker<\/span>/);
+  assert.doesNotMatch(inbox.body, />broker_(?:bg|ru|international)</);
+  assert.match(inbox.body, /class="adm-inbox__broker">Not set<\/span>/);
+  assert.doesNotMatch(inbox.body, /(Bulgarian|Russian|International) broker/);
 
   // B5 built broker availability and the free-slot calculation, so the week
   // view is no longer planned: the segmented control is two real links and the
@@ -170,6 +213,7 @@ test("unavailable CRM affordances stay out of the owner task flow", async () => 
   const viewings = await dispatchHttp(app(), { url: "/admin/viewings?locale=en", headers: auth });
   assert.doesNotMatch(viewings.body, /data-planned-control="viewing_week_view"/);
   assert.doesNotMatch(viewings.body, /The week calendar is waiting for broker availability/);
+  assert.doesNotMatch(viewings.body, /Broker: broker_(?:bg|ru|international)/);
   assert.match(viewings.body, /<a href="\/admin\/viewings\?view=week"[^>]*>Week<\/a>/);
 
   const week = await dispatchHttp(app(), { url: "/admin/viewings?locale=en&view=week", headers: auth });

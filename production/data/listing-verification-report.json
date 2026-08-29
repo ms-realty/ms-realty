@@ -7,8 +7,7 @@
     "stale_translation_tasks": 1,
     "publication_blocked": 165,
     "by_owner": {
-      "broker_bg": 113,
-      "broker_ru": 52
+      "unassigned": 165
     }
   },
   "rows": [
@@ -63,7 +62,9 @@
       },
       "verification_task": {
         "id": "verify-MS-3000",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -121,7 +122,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0001",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -176,7 +179,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0002",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -233,7 +238,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0003",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -290,7 +297,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0004",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -347,7 +356,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0005",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -402,7 +413,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0006",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -459,7 +472,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0007",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -516,7 +531,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0008",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -573,7 +590,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0009",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -630,7 +649,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0010",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -683,7 +704,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0011",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -736,7 +759,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0012",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -791,7 +816,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0013",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -848,7 +875,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0014",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -903,7 +932,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0015",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -958,7 +989,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0016",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1015,7 +1048,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0017",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1070,7 +1105,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0018",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1125,7 +1162,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0019",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -1180,7 +1219,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0020",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1237,7 +1278,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0021",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1292,7 +1335,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0022",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1347,7 +1392,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0023",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1404,7 +1451,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0024",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1459,7 +1508,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0025",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1514,7 +1565,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0026",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1571,7 +1624,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0027",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1628,7 +1683,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0028",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1685,7 +1742,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0029",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1742,7 +1801,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0030",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1797,7 +1858,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0031",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1855,7 +1918,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0032",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1910,7 +1975,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0033",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -1968,7 +2035,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0034",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2026,7 +2095,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0035",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2082,7 +2153,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0036",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2139,7 +2212,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0037",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -2178,7 +2253,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0038",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2234,7 +2311,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0039",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -2290,7 +2369,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0040",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2347,7 +2428,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0041",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2403,7 +2486,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0042",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2458,7 +2543,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0043",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2513,7 +2600,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0044",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2568,7 +2657,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0045",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2623,7 +2714,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0046",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2678,7 +2771,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0047",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2733,7 +2828,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0048",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2788,7 +2885,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0049",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2845,7 +2944,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0050",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2900,7 +3001,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0051",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -2955,7 +3058,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0052",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -3010,7 +3115,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0053",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -3067,7 +3174,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0054",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3123,7 +3232,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0055",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -3179,7 +3290,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0056",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3235,7 +3348,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0057",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3291,7 +3406,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0058",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3347,7 +3464,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0059",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -3403,7 +3522,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0060",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3459,7 +3580,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0061",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -3514,7 +3637,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0062",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3569,7 +3694,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0063",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -3624,7 +3751,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0064",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3681,7 +3810,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0065",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3738,7 +3869,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0066",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3795,7 +3928,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0067",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3851,7 +3986,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0068",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3907,7 +4044,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0069",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -3962,7 +4101,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0070",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4018,7 +4159,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0071",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4075,7 +4218,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0072",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4130,7 +4275,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0073",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4185,7 +4332,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0074",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4240,7 +4389,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0075",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4297,7 +4448,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0077",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4354,7 +4507,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0078",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4411,7 +4566,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0079",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4468,7 +4625,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0080",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4524,7 +4683,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0081",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4580,7 +4741,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0082",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4635,7 +4798,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0083",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4692,7 +4857,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0084",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4749,7 +4916,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0085",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4804,7 +4973,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0086",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4860,7 +5031,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0087",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -4916,7 +5089,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0088",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -4973,7 +5148,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0089",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -5030,7 +5207,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0090",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5085,7 +5264,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0091",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -5140,7 +5321,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0092",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5195,7 +5378,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0093",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5250,7 +5435,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0094",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -5305,7 +5492,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0095",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5360,7 +5549,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0096",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -5415,7 +5606,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0097",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5470,7 +5663,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0098",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5525,7 +5720,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0099",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5582,7 +5779,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0100",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -5639,7 +5838,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0101",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5696,7 +5897,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0102",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5753,7 +5956,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0103",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5809,7 +6014,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0104",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5862,7 +6069,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0105",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -5919,7 +6128,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0106",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -5976,7 +6187,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0107",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -6031,7 +6244,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0108",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -6088,7 +6303,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0109",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6145,7 +6362,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0110",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6201,7 +6420,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0111",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6257,7 +6478,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0112",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -6314,7 +6537,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0113",
-        "owner": "broker_bg",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -6369,7 +6594,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0114",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6426,7 +6653,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0115",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6482,7 +6711,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0116",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -6538,7 +6769,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0117",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6593,7 +6826,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0118",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -6650,7 +6885,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0119",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6703,7 +6940,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0120",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6758,7 +6997,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0121",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6797,7 +7038,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0122",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6852,7 +7095,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0123",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6907,7 +7152,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0124",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -6962,7 +7209,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0125",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7018,7 +7267,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0126",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7074,7 +7325,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0127",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7130,7 +7383,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0128",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7169,7 +7424,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0129",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7224,7 +7481,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0130",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7281,7 +7540,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0131",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7336,7 +7597,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0132",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7391,7 +7654,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0133",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -7448,7 +7713,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0134",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7505,7 +7772,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0135",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7561,7 +7830,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0136",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7617,7 +7888,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0137",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7672,7 +7945,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0138",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -7727,7 +8002,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0139",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7780,7 +8057,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0140",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -7836,7 +8115,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0141",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -7893,7 +8174,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0142",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -7950,7 +8233,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0143",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8006,7 +8291,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0144",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8062,7 +8349,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0145",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -8115,7 +8404,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0146",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8172,7 +8463,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0147",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8228,7 +8521,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0148",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8283,7 +8578,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0149",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8339,7 +8636,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0150",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8394,7 +8693,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0151",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8450,7 +8751,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0152",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8506,7 +8809,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0153",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8562,7 +8867,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0154",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -8618,7 +8925,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0155",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8674,7 +8983,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0156",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8730,7 +9041,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0157",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8787,7 +9100,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0158",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8842,7 +9157,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0159",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-08T00:00:00.000Z"
       }
@@ -8899,7 +9216,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0160",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -8956,7 +9275,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0161",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -9013,7 +9334,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0162",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -9070,7 +9393,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0163",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -9127,7 +9452,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0164",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }
@@ -9183,7 +9510,9 @@
       },
       "verification_task": {
         "id": "verify-MS-CRAWL-0165",
-        "owner": "broker_ru",
+        "owner": "unassigned",
+        "role": "broker",
+        "requires_assignment": true,
         "status": "open",
         "due_at": "2026-07-06T00:00:00.000Z"
       }

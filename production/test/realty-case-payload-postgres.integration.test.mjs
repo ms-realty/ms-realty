@@ -20,6 +20,8 @@ const caseReadback = path.join(root, "production", "scripts", "run-realty-case-p
 const payloadConfig = path.join(root, "payload.config.js");
 const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index.js");
 const payloadAuthority = path.join(root, "production", "lib", "realty-case-payload-authority.mjs");
+const hermesOwnerCommand = path.join(root, "production", "lib", "hermes-owner-command.mjs");
+const privateContactVault = path.join(root, "production", "lib", "private-contact-vault.mjs");
 const leadDurableStore = path.join(root, "production", "lib", "lead-durable-store.mjs");
 const httpRuntime = path.join(root, "production", "lib", "http.mjs");
 const durableLeadMigration = path.join(root, "migrations", "20260813_120000_durable_lead_side_effects.ts");
@@ -27,7 +29,7 @@ const COMMAND_TIMEOUT_MS = 120_000;
 
 function redact(value, env) {
   let text = String(value || "");
-  for (const secret of [env?.DATABASE_URL, env?.PAYLOAD_SECRET, env?.PAYLOAD_POSTGRES_PASSWORD]) {
+  for (const secret of [env?.DATABASE_URL, env?.PAYLOAD_SECRET, env?.PAYLOAD_POSTGRES_PASSWORD, env?.MS_REALTY_PROVIDER_TOKEN_KEY]) {
     if (secret) text = text.replaceAll(secret, "[redacted]");
   }
   return text.replace(/postgres(?:ql)?:\/\/[^\s@]+@/gi, "postgres://[redacted]@");
@@ -755,6 +757,7 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
         "20260810_000558_durable_lead_store",
         "20260810_143000_repair_durable_lead_relations",
         "20260813_120000_durable_lead_side_effects",
+        "20260828_120000_hermes_owner_receipts",
       ]) {
         assert.ok(migrationNames.has(name), \`missing applied Payload migration \${name}\`);
       }
@@ -821,6 +824,90 @@ function verifyProjection(env, workspaceId, caseId, { label, outboxStatus, outbo
   command(process.execPath, ["--input-type=module", "--eval", script], { env, label });
 }
 
+function exerciseHermesOwnerCommand(env) {
+  const script = `
+    import assert from "node:assert/strict";
+    import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
+    import payloadConfig from ${JSON.stringify(pathToFileURL(payloadConfig).href)};
+    import { runHermesOwnerCommand } from ${JSON.stringify(pathToFileURL(hermesOwnerCommand).href)};
+    import { openPrivateContactEnvelope } from ${JSON.stringify(pathToFileURL(privateContactVault).href)};
+
+    let payload;
+    let exitCode = 0;
+    try {
+      payload = await getPayload({ config: await payloadConfig });
+      let providerCalls = 0;
+      const input = {
+        idempotencyKey: "hermes-owner-payload-postgres-it",
+        command: "Prepare a guarded review plan for today's enquiries.",
+        locale: "en",
+      };
+      const options = {
+        operator: { id: "payload-owner-it", roles: ["admin"], workspace_ids: [] },
+        payload,
+        secret: process.env.MS_REALTY_PROVIDER_TOKEN_KEY,
+        provider: async () => {
+          providerCalls += 1;
+          return {
+            summary: "Review today's source-backed enquiry queue.",
+            steps: [{
+              title: "Open the work queue",
+              why: "The authenticated queue is the source of truth.",
+              destination: "work",
+              mode: "review",
+              evidence: ["authenticated_owner_scope"],
+            }],
+            questions: [],
+          };
+        },
+        now: (() => {
+          const values = ["2026-08-28T12:00:00.000Z", "2026-08-28T12:00:01.000Z"];
+          return () => values.shift() || "2026-08-28T12:00:01.000Z";
+        })(),
+      };
+
+      const receipt = await runHermesOwnerCommand(input, options);
+      assert.equal(receipt.status, "planned");
+      assert.equal(receipt.plan.steps[0].can_execute, false);
+      assert.equal(receipt.plan.steps[0].requires_human_approval, true);
+      const repeated = await runHermesOwnerCommand(input, options);
+      assert.equal(repeated.idempotent, true);
+      assert.equal(providerCalls, 1);
+
+      const stored = await payload.find({
+        collection: "hermes_owner_receipts",
+        depth: 0,
+        limit: 1,
+        overrideAccess: true,
+        pagination: false,
+        where: { idempotency_key: { equals: input.idempotencyKey } },
+      });
+      assert.equal(stored.docs.length, 1);
+      assert.equal(stored.docs[0].operator_id, "payload-owner-it");
+      assert.equal(JSON.stringify(stored.docs[0]).includes(input.command), false);
+      const opened = openPrivateContactEnvelope(stored.docs[0].receipt_envelope, {
+        secret: process.env.MS_REALTY_PROVIDER_TOKEN_KEY,
+        secretName: "MS_REALTY_PROVIDER_TOKEN_KEY",
+      });
+      assert.equal(opened.payload.command, input.command);
+      assert.equal(opened.payload.plan.steps[0].can_execute, false);
+    } catch (error) {
+      console.error(error.stack || error);
+      exitCode = 1;
+    } finally {
+      if (payload) await payload.destroy().catch((error) => {
+        console.error(error.stack || error);
+        exitCode = 1;
+      });
+    }
+    process.exit(exitCode);
+  `;
+  command(process.execPath, ["--input-type=module", "--eval", script], {
+    env,
+    label: "exercising Hermes owner command against Payload/Postgres",
+  });
+}
+
 test(
   "Payload/Postgres authority writer and RealtyCase projectors work against an isolated database",
   { skip: enabled ? false : "set MS_REALTY_RUN_PAYLOAD_INTEGRATION=1 to run the disposable Docker integration test", timeout: 180_000 },
@@ -850,12 +937,14 @@ test(
       PAYLOAD_POSTGRES_USER: databaseUser,
       PAYLOAD_SECRET: payloadSecret,
       MS_REALTY_LEAD_CONTACT_KEY: leadContactKey,
+      MS_REALTY_PROVIDER_TOKEN_KEY: randomBytes(32).toString("hex"),
       MS_REALTY_WORKSPACE_ID: workspaceId,
     };
     try {
       runCompose(project, ["up", "--detach", "--wait", "payload-postgres"], env, "starting isolated Payload Postgres");
       command(process.execPath, [payloadCli, "migrate"], { env, label: "running Payload migrations" });
       command(process.execPath, [payloadCli, "migrate:status"], { env, label: "checking Payload migration status" });
+      exerciseHermesOwnerCommand(env);
       exerciseDurableLeadMigrationRoundTrip(env);
       exerciseDurableLeadStore(env);
       await exercisePayloadAuthority(env, authorityWorkspaceId);

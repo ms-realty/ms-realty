@@ -35,9 +35,21 @@ test("listing manager leads with the shell the CRM screens use and no dead list 
   assert.match(page.body, /data-filter-value=""[^>]*data-on="1"/);
   assert.match(page.body, /<span class="adm-seg-count">165<\/span>/);
   assert.doesNotMatch(page.body, /data-planned-control=/);
+  // Secondary QA inventories stay complete but do not bury the paginated
+  // listing table under hundreds of expanded actions.
+  assert.match(page.body, /<details class="adm-workbench-disclosure" data-fact-review-results="145">/);
+  assert.match(page.body, /<details class="adm-workbench-disclosure" data-duplicate-review-results="/);
+  assert.match(page.body, /<details class="adm-workbench-disclosure" data-area-review-missing="/);
+  assert.doesNotMatch(page.body, /<details open class="adm-workbench-disclosure" data-(?:fact|duplicate|area)-review/);
   // The queue itself keeps its contracts.
   assert.match(page.body, /data-listing-manager-row="MS-CRAWL-0001"/);
   assert.match(page.body, /data-listing-bulk-bar="true" data-selection="empty"/);
+  assert.match(page.body, /data-listing-mobile-summary="true"/);
+  assert.match(page.body, /data-listing-mobile-more="MS-CRAWL-0001"/);
+  assert.match(cmsCss, /\.adm-listing-mobile-summary \{ display: none; \}/);
+  assert.match(cmsCss, /\.adm-listing-mobile-more__facts \{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
+  assert.match(adminCss, /@media \(max-width: 719px\)[\s\S]*?\.adm-listing-mobile-summary \{ display: grid;/);
+  assert.match(adminCss, /@media \(max-width: 719px\)[\s\S]*?td\[data-listing-column="location"\],[\s\S]*?display: none;/);
 });
 
 test("a counted status filter marks the selected option and links without JavaScript", async () => {
@@ -78,11 +90,12 @@ test("translation review groups its rows by listing so one title is not repeated
   assert.match(page.body, /class="adm-translation-continued"/);
   assert.match(page.body, /data-translation-editor-row="translation-MS-CRAWL-0001-en"/);
   assert.match(page.body, /<td colSpan="5"><details class="adm-reply adm-translation-editor" data-translation-editor-workspace="true">/);
+  assert.match(page.body, /data-translation-overview="true"/);
   assert.match(page.body, /class="adm-human-translation__context"/);
   assert.match(page.body, /class="adm-human-translation__fields"/);
   assert.match(page.body, /class="adm-human-translation__facts"/);
-  assert.match(adminCss, /\.adm-human-translation\s*\{[^}]*grid-template-columns:\s*minmax\(260px,\s*0\.88fr\)\s+minmax\(0,\s*1\.12fr\)/);
-  assert.match(adminCss, /\.adm-human-translation__context\s*\{[^}]*position:\s*sticky/);
+  assert.match(adminCss, /\.adm-human-translation\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(adminCss, /\.adm-human-translation__overview\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.18fr\)\s+minmax\(260px,\s*0\.82fr\)/);
   assert.match(adminCss, /\.adm-human-translation__fields\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(crmCss, /\.adm-toolbar > \.crm-seg:not\(\.adm-cms-filter\)\s*\{[^}]*overflow:\s*visible/);
   assert.match(cmsCss, /\.adm-cms-filter a\s*\{[^}]*flex:\s*none/);
@@ -101,10 +114,7 @@ test("mobile editors keep all section controls visible and put translation input
     adminCss,
     /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs \{[\s\S]*?scrollbar-width:\s*auto;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="listing-editor"\] \.adm-editor-tabs::\-webkit-scrollbar \{ display:\s*initial; \}/,
   );
-  assert.match(
-    adminCss,
-    /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__fields \{[\s\S]*?order:\s*1;[\s\S]*?\}[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-human-translation__context \{[\s\S]*?order:\s*2;/,
-  );
+  assert.match(adminCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-human-translation__overview \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\);/);
   assert.match(
     adminCss,
     /@media \(max-width: 767px\)[\s\S]*?main\[data-react-admin-ui="translation-queue"\] \.adm-toolbar > \.adm-cms-filter\[data-cms-filter="translations"\] \{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[\s\S]*?overflow:\s*visible;/,
@@ -128,6 +138,10 @@ test("the listing editor names the listing, hides the operator field and carries
   // The topbar names the screen; the heading names the listing.
   assert.match(page.body, /<h1>Автор|<h1>[^<]{10,}<\/h1>/);
   assert.match(page.body, /<p>Property editor · makler-realty\.com · bg · MS-CRAWL-0001<\/p>/);
+  assert.match(page.body, /data-summary-kind="listing-editor"/);
+  for (const card of ["cms-status", "publish-approval", "translations", "media"]) {
+    assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
+  }
   // The server attributes the edit, so the editor id travels as a hidden field.
   assert.match(page.body, /<input type="hidden" name="editor" value="[^"]*" data-editor-name="true">/);
   assert.match(page.body, /Editing as /);
@@ -140,8 +154,8 @@ test("the listing editor names the listing, hides the operator field and carries
     assert.match(cmsCss, new RegExp(`\\[data-save-state="${state}"\\]`), state);
   }
   assert.match(adminCss, /\.adm-editor-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
-  assert.match(adminCss, /\.adm-editor-rail\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);[^}]*position:\s*static;/s);
-  assert.match(adminCss, /\.adm-editor-rail > \[data-media-review-panel\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;/);
+  assert.match(adminCss, /\.adm-editor-support\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);[^}]*position:\s*static;/s);
+  assert.match(adminCss, /\.adm-editor-support > \[data-media-review-panel\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;/);
   assert.match(adminCss, /\.adm-editor-tabs\s*\{[^}]*position:\s*sticky;[^}]*backdrop-filter:\s*blur\(14px\)/s);
   assert.match(cmsCss, /\.adm-editor-conflict\[hidden\] \{ display: none; \}/);
 });
@@ -152,8 +166,9 @@ test("shared admin status tokens keep dark surfaces legible and owner identity n
   assert.ok(ownerIdentity, "the owner identity is rendered as a link");
   assert.doesNotMatch(ownerIdentity, /aria-label=/, "visible owner identity text supplies the accessible name");
   assert.match(ownerIdentity, /title="Open profile and settings"/);
-  assert.match(ownerIdentity, /<strong>MS Realty Admin<\/strong>/);
+  assert.match(ownerIdentity, /<strong>MS Realty<\/strong>/);
   assert.match(ownerIdentity, /class="adm-owner-identity__role">Owner<\/span>/);
+  assert.equal((ownerIdentity.match(/>Owner</g) || []).length, 1, "the fallback role is rendered once");
   // StatusPill exposes its tone to CSS instead of freezing a light-ramp color
   // in an inline style that cannot follow the dark workbench palette.
   assert.match(page.body, /<span class="crm-pill" data-tone="brick"[^>]*>/);
@@ -295,7 +310,7 @@ test("the standalone pages speak the three workbench languages and carry their s
   assert.match(team, /<option value="admin">Administrator<\/option>/);
 });
 
-test("the connect page keeps the operator token masked until it is asked for", () => {
+test("the connect page never renders an operator bearer token or credential field", () => {
   const html = renderOperatorConnectPage({
     baseUrl: "https://ms-realty.example.workers.dev",
     token: "connect-operator-token-0123456789",
@@ -303,17 +318,19 @@ test("the connect page keeps the operator token masked until it is asked for", (
     connections: [],
     availability: { google: { ready: false } },
   });
-  assert.match(html, /<button class="button button--quiet" id="reveal" type="button" aria-controls="prompt" aria-pressed="false" hidden>/);
-  // Both the bootstrap prompt and the assistant configuration block are masked
-  // by the same rule, because both carry a credential.
-  assert.match(html, /textarea\[data-masked="true"\][^{]*\{ filter: blur\(4px\)/);
-  assert.match(html, /pre\[data-masked="true"\] \{ filter: blur\(4px\)/);
-  // Without JavaScript nothing is blurred, so the prompt stays selectable.
-  assert.doesNotMatch(html, /<textarea id="prompt"[^>]*data-masked/);
-  assert.doesNotMatch(html, /<pre class="agent__config"[^>]*data-masked/);
-  assert.match(html, /area\.setAttribute\("data-masked", "true"\)/);
-  assert.match(html, /maskable\(promptArea, document\.getElementById\("reveal"\)/);
-  assert.match(html, /Copying did not work/);
+  assert.doesNotMatch(html, /connect-operator-token-0123456789/);
+  assert.doesNotMatch(html, /name="token"/);
+  assert.doesNotMatch(html, /<input[^>]+type="password"/);
+  assert.match(html, /data-react-admin-ui="connections"/);
+  assert.match(html, /data-provider="google"/);
+  assert.match(html, /data-provider="whatsapp"/);
+  assert.match(html, /data-provider="facebook"/);
+  assert.match(html, /data-provider="instagram"/);
+  assert.doesNotMatch(html, /data-provider="github"/);
+  assert.doesNotMatch(html, /data-provider="cloudflare"/);
+  assert.doesNotMatch(html, /data-provider="neon"/);
+  assert.doesNotMatch(html, /href="\/api\/admin\/connections\?provider=(?:github|viber|cloudflare|neon)&amp;action=start"/);
+  assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   // Each workbench language gets the whole page, script messages included.
   const bulgarian = renderOperatorConnectPage({
     baseUrl: "https://ms-realty.example.workers.dev",
@@ -323,8 +340,9 @@ test("the connect page keeps the operator token masked until it is asked for", (
     availability: { google: { ready: false } },
     locale: "bg",
   });
-  assert.match(bulgarian, /<html lang="bg">/);
-  assert.match(bulgarian, /Копирането не стана/);
+  assert.match(bulgarian, /<html lang="bg" dir="ltr">/);
+  assert.match(bulgarian, /Работни акаунти/);
+  assert.match(bulgarian, /Управлявана система/);
   assert.doesNotMatch(bulgarian, /Copying did not work/);
 });
 

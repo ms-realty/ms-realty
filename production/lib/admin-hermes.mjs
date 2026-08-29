@@ -1,10 +1,15 @@
 import { renderAdminHermesPayload } from "./admin-payloads.mjs";
-import { hermesReplyAvailability } from "./hermes-availability.mjs";
+import { hermesOwnerCommandAvailability, hermesReplyAvailability } from "./hermes-availability.mjs";
 import { probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
 import { bridgeNextTasks, bridgeStatus } from "./hermes-desktop-bridge.mjs";
 import { buildHermesDraftDispatch } from "./hermes-draft-dispatch.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { HERMES_TOOL_COVERAGE } from "./owner-operator-catalog.mjs";
+import {
+  HERMES_OWNER_COMMAND_MAX_LENGTH,
+  createHermesOwnerCommandIdempotencyKey,
+  readHermesOwnerReceipts,
+} from "./hermes-owner-command.mjs";
 
 function boundedFetch(fetchImpl, timeoutMs) {
   if (typeof fetchImpl !== "function") return fetchImpl;
@@ -53,11 +58,17 @@ export async function buildAdminHermesPayload({
   payload = null,
   requirePayload = false,
   provider = null,
+  commandProvider = null,
   fetchImpl = globalThis.fetch,
   generatedAt = new Date().toISOString(),
   probeTimeoutMs = 5_000,
+  receiptPayload = payload,
+  receiptSecret = "",
+  commandResult = null,
+  commandError = null,
 } = {}) {
   const availability = hermesReplyAvailability({ env: hermesEnv, provider, fetchImpl });
+  const commandAvailability = hermesOwnerCommandAvailability({ env: hermesEnv, provider: commandProvider, fetchImpl });
   const runtime = await probeHermesAgentRuntime({
     endpoint: hermesEnv.HERMES_CHAT_COMPLETIONS_URL,
     apiKey: hermesEnv.HERMES_API_KEY,
@@ -91,8 +102,27 @@ export async function buildAdminHermesPayload({
     // model, prompt, or filesystem exception.
   }
 
+  let receiptStore = { status: "blocked", reason: "receipt_store_unavailable", rows: [] };
+  if (operator?.id && String(receiptSecret || "").length >= 32) {
+    try {
+      receiptStore = {
+        status: "ready",
+        reason: null,
+        rows: await readHermesOwnerReceipts({
+          payload: receiptPayload,
+          operatorId: operator.id,
+          secret: receiptSecret,
+          limit: 5,
+        }),
+      };
+    } catch {
+      // The page exposes a fixed recovery state, not the database or envelope error.
+    }
+  }
+
   return renderAdminHermesPayload(registry, requestedLocale, {
     availability,
+    command_availability: commandAvailability,
     bridge,
     generatedAt,
     operator,
@@ -100,5 +130,14 @@ export async function buildAdminHermesPayload({
     runtime,
     runtimeDataMode: requirePayload ? "durable_only" : "file_backed",
     tools: HERMES_TOOL_COVERAGE,
+    command_form: {
+      enabled: commandAvailability.available === true && receiptStore.status === "ready" && operator?.roles?.includes("admin"),
+      idempotency_key: createHermesOwnerCommandIdempotencyKey(),
+      max_length: HERMES_OWNER_COMMAND_MAX_LENGTH,
+    },
+    command_result: commandResult,
+    command_error: commandError,
+    receipt_store: receiptStore,
+    receipts: receiptStore.rows,
   });
 }

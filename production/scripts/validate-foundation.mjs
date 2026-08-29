@@ -199,7 +199,7 @@ if (
 ) {
   throw new Error("Migration review queue must cover every URL without making review-gated rows deployable");
 }
-if (reviewQueue.summary.byOwner.ru_preservation_editor !== 179) {
+if (reviewQueue.summary.byOwner.unassigned !== 457 || reviewQueue.summary.byRole.ru_preservation_editor !== 179) {
   throw new Error("Migration review queue must keep RU preservation first-class");
 }
 
@@ -1235,11 +1235,10 @@ assertListingVerificationReport(listingVerification);
 if (
   listingVerification.summary.edited_listings !== 165 ||
   listingVerification.summary.broker_verification_tasks !== 165 ||
-  listingVerification.summary.by_owner.broker_bg !== 113 ||
-  listingVerification.summary.by_owner.broker_ru !== 52 ||
+  listingVerification.summary.by_owner.unassigned !== 165 ||
   listingVerification.rows.find((row) => row.listing_id === "MS-CRAWL-0001")?.priority !== "high"
 ) {
-  throw new Error("Listing verification report must create broker tasks for edited BG/RU listings");
+  throw new Error("Listing verification report must create broker tasks for edited listings without inventing broker identities");
 }
 
 const mobileQa = JSON.parse(fs.readFileSync(fromRoot("production", "data", "mobile-elderly-qa-report.json"), "utf8"));

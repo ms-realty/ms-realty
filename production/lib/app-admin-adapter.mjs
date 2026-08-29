@@ -16,9 +16,11 @@ import {
 } from "./admin-auth.mjs";
 import {
   OPERATOR_TOKEN_ENV,
+  buildOperatorConnectPayload,
   operatorAgentConfigBlock,
+  operatorBootstrapPrompt,
+  operatorConnectCopy,
   operatorConnectResult,
-  renderOperatorConnectPage,
 } from "./operator-connect.mjs";
 import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
 import {
@@ -44,6 +46,7 @@ import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperator
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamPage } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
+import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
 import { adminCredentials } from "./admin-auth.mjs";
@@ -53,10 +56,14 @@ import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   applyWorkspaceDefaultBroker,
   buildWorkspaceOnboarding,
+  emptyWorkspaceSettingsDocument,
   leadSlaOptions,
   readWorkspaceSettings,
-  updateWorkspaceSettings,
+  readWorkspaceSettingsStore,
+  updateWorkspaceSettingsStore,
   workspaceSettingsView,
+  workspaceSettingsStoreConfigured,
+  WorkspaceSettingsStoreUnavailableError,
 } from "./workspace-settings.mjs";
 import { assignableBrokerProfiles, getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
 import {
@@ -75,11 +82,14 @@ import {
   OPERATOR_CONNECTION_DISCONNECT_PATH,
   isOperatorOAuthProvider,
   operatorConnectionAudit,
+  operatorConnectionPkceClearCookie,
+  operatorConnectionPkceVerifier,
   operatorConnectionStart,
   runOperatorConnectionAction,
 } from "./operator-connect-routes.mjs";
-import { issueOperatorAgentToken } from "./operator-agent-access.mjs";
+import { issueOperatorAgentToken, operatorAgentAccessConfigured } from "./operator-agent-access.mjs";
 import { ProviderDeliveryError, deliverApprovedProviderMessage } from "./provider-delivery.mjs";
+import { SocialMarketingPublishError, publishApprovedSocialDraft } from "./social-marketing-publishing.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -326,6 +336,7 @@ import {
 import { loadCmsSeed } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
+import { parseCsv } from "./csv.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -400,6 +411,13 @@ import {
 import { DEFAULT_VIEWING_DURATION_MINUTES } from "./broker-free-slots.mjs";
 import { buildViewingWeekView } from "./viewing-week-view.mjs";
 import { wholeNumberSlotParam } from "./viewing-slots.mjs";
+import {
+  readViewingTripContactsDurably,
+  readViewingTripRequests,
+  readViewingTripRequestsDurably,
+  isViewingTripDurableStoreEnabled,
+  ViewingTripStoreUnavailableError,
+} from "./viewing-trip-requests.mjs";
 // B3 saved-search alerts: the broker-facing delivery queue.
 import {
   DEFAULT_SAVED_SEARCH_ALERT_DELIVERY_LEDGER_PATH,
@@ -471,7 +489,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
-    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || DEFAULT_WORKSPACE_SETTINGS_PATH,
+    workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || null,
+    workspaceSettingsWorkspaceId: env.MS_REALTY_WORKSPACE_ID || "",
+    workspaceSettingsPayloadRuntimeConfigured: Boolean(String(env.PAYLOAD_SECRET || "").trim() && String(env.DATABASE_URL || "").trim()),
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
@@ -699,16 +719,28 @@ function workspaceSecurityFor(url, config) {
   });
 }
 
-function workspaceSettingsPayload(registry, url, config, { requestedLocale = adminLocaleParam(url, config), form = null } = {}) {
+function workspaceSettingsPayload(
+  registry,
+  url,
+  config,
+  {
+    requestedLocale = adminLocaleParam(url, config),
+    form = null,
+    settings = workspaceSettingsFor(config),
+    writable = Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+    onboarding = null,
+  } = {},
+) {
   return withWorkspaceSettings(
     renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
-      settings: workspaceSettingsFor(config),
+      settings,
       operator: config.adminPrincipal,
       brokerProfiles: config.brokerProfiles || [],
       adminLocales: adminLocales(registry),
       saved: url.searchParams.get("saved"),
       form,
-      writable: Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+      writable,
+      onboarding,
       // B6 workspace security and data
       security: workspaceSecurityFor(url, config),
     }),
@@ -1096,19 +1128,54 @@ async function leadJourneyContext(config, source = null) {
   const ledgers = leadOperationLedgersFor(config);
   const leadSource = source || (await leadJourneySource(config));
   const filterRows = leadScopedRows(leadSource);
-  const assignments = filterRows(await ledgers.assignments.read());
-  return leadJourneyContextFrom({
-    ledgers,
-    leads: applyLeadAssignments(leadSource.leads, assignments),
-    viewings: filterRows((await adminViewingSource(config)).viewings),
-    viewingFollowUps: filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
-    sellerPipelines: await sellerPipelineItems(config, leadSource),
-  });
+  const viewingSource = await adminViewingSource(config);
+  try {
+    const assignments = filterRows(await ledgers.assignments.read());
+    const context = await leadJourneyContextFrom({
+      ledgers,
+      leads: applyLeadAssignments(leadSource.leads, assignments),
+      viewings: filterRows(viewingSource.viewings),
+      viewingFollowUps:
+        viewingSource.durable || config.runtimeDataDurableOnly
+          ? []
+          : filterRows(readViewingFollowUps(config.viewingFollowUpLedgerPath)),
+      sellerPipelines: await sellerPipelineItems(config, leadSource),
+    });
+    return {
+      ...context,
+      outcomes: filterRows(context.outcomes),
+      deals: filterRows(context.deals),
+      sellerPipelineOutcomes: filterRows(context.sellerPipelineOutcomes),
+    };
+  } catch (error) {
+    if (
+      !ledgers.durable ||
+      error instanceof LeadOperationStoreUnavailableError ||
+      error instanceof LeadStoreUnavailableError ||
+      error instanceof ViewingStoreUnavailableError
+    ) {
+      throw error;
+    }
+    throw new LeadOperationStoreUnavailableError("Durable lead operations read failed", error);
+  }
 }
 
 function currentListingQualityReport(config, options = {}) {
   return buildListingQualityReport({
     seed: currentSeed(config),
+    tourApprovals: readTourApprovals(config.tourApprovalLedgerPath),
+    ...options,
+  });
+}
+
+async function authoritativeListingQualityReport(config, options = {}) {
+  if (!config.runtimeDataDurableOnly) return currentListingQualityReport(config, options);
+  return buildListingQualityReport({
+    seed: await projectListingDraftSeed(currentSeed(config), {
+      payload: config.payloadListingRuntime || null,
+      env: config.payloadListingEnv || config.authEnv || process.env,
+      requirePayload: true,
+    }),
     tourApprovals: readTourApprovals(config.tourApprovalLedgerPath),
     ...options,
   });
@@ -1182,28 +1249,81 @@ function recordAuditReplica(input, config, recordedAt, alreadyRecorded, bestEffo
   }
 }
 
-function publicRequestContactData(config) {
-  if (!config.publicContactVaultPath) {
-    return { contactMaps: {}, contactVaultStatus: "not_configured" };
+async function publicRequestContactData(config) {
+  let contactMaps = {};
+  let contactVaultStatus = "not_configured";
+  if (config.publicContactVaultPath) {
+    try {
+      contactMaps = {
+        saved_search: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "saved_search"),
+        language_request: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "language_request"),
+      };
+      const count = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length;
+      contactVaultStatus = count ? "available" : "empty";
+    } catch {
+      contactMaps = {};
+      contactVaultStatus = "locked";
+    }
   }
-  try {
-    const contactMaps = {
-      saved_search: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "saved_search"),
-      language_request: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "language_request"),
-    };
-    const count = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length;
-    return { contactMaps, contactVaultStatus: count ? "available" : "empty" };
-  } catch {
-    return { contactMaps: {}, contactVaultStatus: "locked" };
+  if (!config.viewingDurableStore?.viewingDurableStoreEnabled) {
+    if (config.publicContactVaultPath) {
+      try {
+        contactMaps.viewing_trip = readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "viewing_trip");
+        if (contactVaultStatus !== "locked") {
+          const count = Object.values(contactMaps).reduce((total, map) => total + [...(map?.values?.() || [])].length, 0);
+          contactVaultStatus = count ? "available" : "empty";
+        }
+      } catch {
+        if (contactVaultStatus !== "locked") {
+          contactMaps = {};
+          contactVaultStatus = "locked";
+        }
+      }
+    }
+    return { contactMaps, contactVaultStatus };
   }
+  const durableStore = config.viewingDurableStore || {};
+  if (!isViewingTripDurableStoreEnabled(durableStore)) {
+    throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+  }
+  const scope = leadReadScopeForPrincipal(config.adminPrincipal, durableStore.workspaceId);
+  contactMaps.viewing_trip = await (config.readViewingTripContactsDurably || readViewingTripContactsDurably)({
+    contactSecret: durableStore.contactSecret,
+    payload: config.viewingDurablePayload || null,
+    user: payloadUserForLeadRead(config.adminPrincipal, config.payloadAdminSession?.user || null),
+    workspaceIds: scope.workspaceIds,
+  });
+  if (contactVaultStatus !== "locked") {
+    const count = Object.values(contactMaps).reduce((total, map) => total + [...(map?.values?.() || [])].length, 0);
+    contactVaultStatus = count ? "available" : "empty";
+  }
+  return { contactMaps, contactVaultStatus };
 }
 
-function currentPublicRequestQueue(config) {
+async function publicRequestViewingTrips(config) {
+  if (!config.viewingDurableStore?.viewingDurableStoreEnabled) {
+    return readViewingTripRequests(config.viewingTripLedgerPath || undefined);
+  }
+  const durableStore = config.viewingDurableStore || {};
+  if (!isViewingTripDurableStoreEnabled(durableStore)) {
+    throw new ViewingTripStoreUnavailableError("Durable viewing trip store is enabled but not fully configured");
+  }
+  const scope = leadReadScopeForPrincipal(config.adminPrincipal, durableStore.workspaceId);
+  return (config.readViewingTripRequestsDurably || readViewingTripRequestsDurably)({
+    payload: config.viewingDurablePayload || null,
+    user: payloadUserForLeadRead(config.adminPrincipal, config.payloadAdminSession?.user || null),
+    workspaceIds: scope.workspaceIds,
+  });
+}
+
+async function currentPublicRequestQueue(config) {
+  const viewingTrips = await publicRequestViewingTrips(config);
   return buildPublicRequestQueue({
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
     languageRequests: readLanguageRequests(config.languageRequestPath),
+    viewingTrips,
     outcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath),
-    ...publicRequestContactData(config),
+    ...(await publicRequestContactData(config)),
     now: config.publicRequestOutcomeAt || config.reviewedAt || new Date().toISOString(),
   });
 }
@@ -1263,6 +1383,9 @@ async function adminEventSource(config) {
 async function adminViewingSource(config) {
   const durableStore = config.viewingDurableStore || {};
   if (!durableStore.viewingDurableStoreEnabled) {
+    if (config.runtimeDataDurableOnly) {
+      throw new ViewingStoreUnavailableError("Production admin viewings require the durable store");
+    }
     return { durable: false, viewings: readViewings(config.viewingLedgerPath) };
   }
   if (!isViewingDurableStoreEnabled(durableStore)) {
@@ -1462,11 +1585,86 @@ function leadScopedRows(source) {
 // control's disabled treatment instead of pretending.
 function leadOperationsFor(config) {
   const principal = config.adminPrincipal;
-  const writable = !config.runtimeDataDurableOnly && canAdminAccess(principal, "operations:write");
+  const writable =
+    canAdminAccess(principal, "operations:write") &&
+    (!config.runtimeDataDurableOnly || leadOperationsDurable(config));
   return {
     snoozeWritable: writable,
     bulkWritable: writable,
-    savedViewsWritable: writable && Boolean(principal?.id),
+    savedViewsWritable: !config.runtimeDataDurableOnly && writable && Boolean(principal?.id),
+  };
+}
+
+async function authoritativeListingCount(config) {
+  const listingSeed = config.runtimeDataDurableOnly
+    ? await projectListingDraftSeed(currentSeed(config), {
+        payload: config.payloadListingRuntime || null,
+        env: config.payloadListingEnv || config.authEnv || process.env,
+        requirePayload: true,
+      })
+    : currentSeed(config);
+  return listingSeed.records.filter((record) => record.collection === "listings").length;
+}
+
+async function hermesBusinessContext(config) {
+  const env = config.authEnv || process.env;
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  const leadSource = await adminLeadSource(config);
+  const journey = await leadJourneyContext(config, leadSource);
+  const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+    now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+  });
+  const sellerPipelineQueue = buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+    now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+  });
+  const viewingFollowUpQueue = buildViewingFollowUpQueue(journey.viewings, journey.viewingFollowUps, {
+    now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+  });
+  const listingTotal = await authoritativeListingCount(config);
+  const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(env);
+  const providers = new Map();
+  if (providerConnectionAvailability(providerConfig).store.ready) {
+    try {
+      const connections = await (config.readProviderConnections || readProviderConnections)({
+        payload: config.providerConnectionPayload || null,
+      });
+      for (const connection of connections) {
+        if (connection?.status !== "connected") continue;
+        providers.set(String(connection.provider), {
+          id: String(connection.provider),
+          status: String(connection.status),
+          scopes: Array.isArray(connection.scopes) ? connection.scopes.map(String) : [],
+            last_verified_at: connection.last_verified_at || null,
+          });
+        }
+    } catch (error) {
+      if (error instanceof ProviderConnectionUnavailableError) throw error;
+      throw new ProviderConnectionUnavailableError("Provider connection storage is unavailable", error);
+    }
+  }
+  if (String(env.HERMES_CHAT_COMPLETIONS_URL || "").trim() && String(env.HERMES_API_KEY || "").trim()) {
+    const mode = String(env.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted";
+    providers.set(mode === "openrouter" ? "openrouter" : "hermes", {
+      id: mode === "openrouter" ? "openrouter" : "hermes",
+      status: "configured",
+      scopes: ["chat.completions"],
+      last_verified_at: null,
+    });
+  }
+  return {
+    generated_at: generatedAt,
+    authoritative_state: {
+      status: "available",
+      source: config.runtimeDataDurableOnly ? "payload_postgres" : "workspace_runtime",
+      authoritative: true,
+    },
+    counts: {
+      leads: journey.leads.length,
+      pipeline: leadPipelineQueue.summary.open + sellerPipelineQueue.summary.open,
+      tasks: viewingFollowUpQueue.summary.open,
+      listings: listingTotal,
+    },
+    providers: [...providers.values()],
   };
 }
 
@@ -1501,8 +1699,9 @@ async function leadInboxPayload(registry, url, config) {
           },
         ]),
       );
-    } catch {
-      providerConnections = {};
+    } catch (error) {
+      if (error instanceof ProviderConnectionUnavailableError) throw error;
+      throw new ProviderConnectionUnavailableError("Provider connection storage is unavailable", error);
     }
   }
   if (source.durable && config.runtimeDataDurableOnly) {
@@ -1511,15 +1710,23 @@ async function leadInboxPayload(registry, url, config) {
       payload: config.payloadListingRuntime || null,
       requirePayload: true,
     });
-    const viewingSource = await adminViewingSource(config);
-    const viewings = filterRows(viewingSource.viewings);
+    const journey = await leadJourneyContext(config, source);
+    const leadPipelineQueue = buildLeadPipelineQueue(journey, {
+      now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+    });
+    const ledgers = leadOperationLedgersFor(config);
+    const viewings = journey.viewings;
+    const viewingFollowUpQueue = buildViewingFollowUpQueue(viewings, journey.viewingFollowUps, {
+      now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+    });
     return {
       ...renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
-        leads: source.leads,
+        leads: journey.leads,
+        leadPipelineQueue,
         replies: [],
         communicationThreads: [],
         communicationTemplates: Object.fromEntries(
-          source.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
+          journey.leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
         ),
         languageRequests: [],
         translationTasks: [],
@@ -1527,8 +1734,8 @@ async function leadInboxPayload(registry, url, config) {
         leadMatching: buildLeadMatchingReport({
           registry,
           seed,
-          leads: source.leads,
-          leadPipelineStates: [],
+          leads: journey.leads,
+          leadPipelineStates: leadPipelineQueue.states,
           generatedAt: config.reviewedAt || new Date().toISOString(),
         }),
         operatorId: config.adminPrincipal || null,
@@ -1536,14 +1743,24 @@ async function leadInboxPayload(registry, url, config) {
         providerConnections,
         viewings,
         viewingFollowUpWritable: false,
-        viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, [], {
-          now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
-        }),
+        viewingFollowUpQueue,
         savedSearches: [],
-        sellerPipeline: [],
-        deals: [],
+        sellerPipeline: journey.sellerPipelines,
+        sellerPipelineQueue: buildSellerPipelineQueue(journey.sellerPipelines, journey.sellerPipelineOutcomes, {
+          now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+        }),
+        deals: journey.deals,
         brokerContacts: [],
         brokerProfiles: config.brokerProfiles || [],
+        leadSnoozes: filterRows(await ledgers.snoozes.read()),
+        dataAvailability: {
+          replies: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          communicationThreads: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          languageRequests: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          savedSearches: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          brokerContacts: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
         hermes: hermesReplyAvailability({ env: config.authEnv || process.env }),
         leadOperations: leadOperationsFor(config),
         operatorViews: [],
@@ -1599,7 +1816,7 @@ async function leadInboxPayload(registry, url, config) {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
     }),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
-    publicRequestQueue: currentPublicRequestQueue(config),
+    publicRequestQueue: await currentPublicRequestQueue(config),
     sellerPipeline,
     sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, sellerPipelineOutcomes, {
       now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
@@ -1656,6 +1873,7 @@ async function contactsPayload(registry, url, config) {
     contacts: data.contacts,
     accounts: data.accounts,
     operatorId: config.adminPrincipal || null,
+    brokerProfiles: config.brokerProfiles || [],
   });
 }
 
@@ -1871,7 +2089,20 @@ async function listingManagerPayload(registry, url, config) {
     factQuery: url.searchParams.get("factQ") || "",
     page: url.searchParams.get("page") || 1,
   });
-  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  return config.runtimeDataDurableOnly
+    ? {
+        ...payload,
+        runtime_data_mode: "durable_only",
+        dataAvailability: {
+          publicationSchedules: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          slugHistory: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
+        listings: payload.listings.map((row) => ({ ...row, translation_review_required: null })),
+        publicationSchedules: null,
+        summary: { ...payload.summary, translationReviewRequired: null },
+      }
+    : payload;
 }
 
 async function listingEditorPayload(registry, url, config) {
@@ -1890,7 +2121,19 @@ async function listingEditorPayload(registry, url, config) {
     config.runtimeDataDurableOnly ? [] : readTourApprovals(config.tourApprovalLedgerPath),
     config.adminPrincipal || null,
   );
-  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  return config.runtimeDataDurableOnly
+    ? {
+        ...payload,
+        runtime_data_mode: "durable_only",
+        dataAvailability: {
+          listingEdits: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          slugHistory: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          tourApprovals: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
+        edits: null,
+      }
+    : payload;
 }
 
 async function translationQueuePayload(registry, url, config) {
@@ -1912,10 +2155,24 @@ async function translationQueuePayload(registry, url, config) {
     taskType: url.searchParams.get("taskType") || "",
     page: url.searchParams.get("page") || 1,
   });
-  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  return config.runtimeDataDurableOnly
+    ? {
+        ...payload,
+        runtime_data_mode: "durable_only",
+        dataAvailability: {
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
+        summary: {
+          ...payload.summary,
+          approved_waiting_publish: null,
+          open_translation_tasks: null,
+          stale_translation_tasks: null,
+        },
+      }
+    : payload;
 }
 
-async function hermesConsolePayload(registry, url, config) {
+async function hermesConsolePayload(registry, url, config, { commandResult = null, commandError = null } = {}) {
   const env = config.authEnv || process.env;
   return buildAdminHermesPayload({
     registry,
@@ -1927,9 +2184,14 @@ async function hermesConsolePayload(registry, url, config) {
     payload: config.payloadListingRuntime || null,
     requirePayload: config.runtimeDataDurableOnly,
     provider: config.hermesReplyProvider || null,
+    commandProvider: config.hermesOwnerCommandProvider || null,
     fetchImpl: config.hermesAgentFetch || globalThis.fetch,
     generatedAt: config.reviewedAt || new Date().toISOString(),
     probeTimeoutMs: config.hermesAgentProbeTimeoutMs || 5_000,
+    receiptPayload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
+    receiptSecret: config.hermesReceiptSecret || env.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+    commandResult,
+    commandError,
   });
 }
 
@@ -2029,6 +2291,35 @@ function launchReadiness(config) {
   });
 }
 
+async function authoritativeLaunchReadiness(config) {
+  return buildLaunchReadinessReport({
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    routeMap: {
+      summary: summarizeLegacyRouteMap(routeMapRows()),
+      routes: routeMapRows(),
+    },
+    deployableRedirects: approvedRouteArtifact(config),
+    listingQuality: await authoritativeListingQualityReport(config, {
+      generatedAt: config.reviewedAt || new Date().toISOString(),
+    }),
+    listingQualityReviewPath: config.listingQualityReviewPath || undefined,
+    seoEvidence: currentSeoEvidence(config),
+    liveServices: liveServiceReports({
+      syncReportPath: config.searchSyncReportPath || undefined,
+      queryReportPath: config.searchQueryReportPath || undefined,
+      hermesReportPath: config.hermesWorkerReportPath || undefined,
+    }),
+    liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+    monitoringRollback: monitoringRollbackState(config.monitoringRollbackReportPath || undefined),
+    payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+    r2MediaCoverage: r2MediaCoverageState(config.r2MediaCoverageReportPath || undefined),
+    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+      publicKey: config.productionRecoverySigningPublicKey,
+    }),
+    productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
+  });
+}
+
 function launchInputChecklist(config) {
   const routes = routeMapRows();
   const artifact = approvedRouteArtifact(config);
@@ -2036,6 +2327,23 @@ function launchInputChecklist(config) {
   return renderLaunchInputChecklist({
     generatedAt,
     launchReadiness: launchReadiness(config),
+    seoEvidence: currentSeoEvidence(config),
+    redirectWorkbookCsv: renderRedirectApprovalWorkbook(
+      buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routes, loadMigrationRecords())),
+    ),
+    deployableRedirects: artifact,
+    routeMap: routeMapSummary(routes),
+    liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+  });
+}
+
+async function authoritativeLaunchInputChecklist(config) {
+  const routes = routeMapRows();
+  const artifact = approvedRouteArtifact(config);
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  return renderLaunchInputChecklist({
+    generatedAt,
+    launchReadiness: await authoritativeLaunchReadiness(config),
     seoEvidence: currentSeoEvidence(config),
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(
       buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routes, loadMigrationRecords())),
@@ -2063,6 +2371,41 @@ function preflightReports(config) {
       refresh_command: "npm run launch:inputs",
     },
     launch_readiness: launchBlockerSummary(launchReadiness(config)),
+    reports: {
+      seo: seoPreflightReport(config),
+      listing_quality: buildListingQualityPreflightReport({
+        report: listingReport,
+        reviewPath: config.listingQualityReviewPath || undefined,
+        generatedAt,
+      }),
+      live_services: buildLiveServicePreflightReport({
+        generatedAt,
+        syncReportPath: config.searchSyncReportPath || undefined,
+        queryReportPath: config.searchQueryReportPath || undefined,
+        hermesReportPath: config.hermesWorkerReportPath || undefined,
+      }),
+      live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+      payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+      r2_media_coverage: r2MediaCoverageState(config.r2MediaCoverageReportPath || undefined),
+      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined, {
+        publicKey: config.productionRecoverySigningPublicKey,
+      }),
+    },
+  };
+}
+
+async function authoritativePreflightReports(config) {
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  const listingReport = await authoritativeListingQualityReport(config, { generatedAt });
+  return {
+    kind: "admin_preflight_reports",
+    generated_at: generatedAt,
+    checklist: {
+      endpoint: "/api/admin/launch-input-checklist",
+      path: "production/data/launch-input-checklist.md",
+      refresh_command: "npm run launch:inputs",
+    },
+    launch_readiness: launchBlockerSummary(await authoritativeLaunchReadiness(config)),
     reports: {
       seo: seoPreflightReport(config),
       listing_quality: buildListingQualityPreflightReport({
@@ -2115,6 +2458,7 @@ function migrationReviewPayload(registry, url, config) {
     seed: currentSeed(config),
     edits: readListingEdits(config.listingEditLedgerPath),
     generatedAt: config.reviewedAt || new Date().toISOString(),
+    brokerProfiles: config.brokerProfiles || [],
   });
   const translationCoverage = buildTranslationCoverageReport({
     registry,
@@ -2176,6 +2520,7 @@ function migrationReviewPayload(registry, url, config) {
       listingVerification,
       translationCoverage,
       brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+      brokerProfiles: config.brokerProfiles || [],
       seoEvidence,
       launchReadiness: readiness,
     }),
@@ -2652,12 +2997,13 @@ async function appendSellerPipelineOutcomeEntry(input, config) {
   });
 }
 
-function appendPublicRequestOutcomeEntry(input, config) {
+async function appendPublicRequestOutcomeEntry(input, config) {
   const recordedAt = config.publicRequestOutcomeAt || config.reviewedAt || new Date().toISOString();
   const result = appendPublicRequestOutcome(
     {
       savedSearches: readSavedSearches(config.savedSearchLedgerPath),
       languageRequests: readLanguageRequests(config.languageRequestPath),
+      viewingTrips: await publicRequestViewingTrips(config),
     },
     bindAuthenticatedOperator(input, config.adminPrincipal),
     { filePath: config.publicRequestOutcomeLedgerPath, recordedAt },
@@ -3358,8 +3704,10 @@ function appendListingSlugChange(registry, input, config) {
   return change;
 }
 
-function appendRedirectApprovalRow(input, config) {
-  const approval = appendRedirectApproval(routeMapRows(), redirectApprovalInput(input), {
+async function appendRedirectApprovalRow(input, config) {
+  const principal = { id: config.adminPrincipal?.id || "unassigned" };
+  const attributed = bindAuthenticatedOperator(redirectApprovalInput(input), principal, ["reviewer"]);
+  const approval = appendRedirectApproval(routeMapRows(), attributed, {
     filePath: config.redirectApprovalPath,
     approvedAt: config.reviewedAt,
   });
@@ -3378,11 +3726,15 @@ function appendRedirectApprovalRow(input, config) {
     approval,
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: currentLegacyRouteDecisions(config),
-    report: launchReadiness(config),
+    report: await authoritativeLaunchReadiness(config),
   };
 }
 
-function importRedirectApprovalRows(csvText, config) {
+async function importRedirectApprovalRows(csvText, config) {
+  const principal = { id: config.adminPrincipal?.id || "unassigned" };
+  for (const row of parseCsv(csvText)) {
+    bindAuthenticatedOperator(row, principal, ["reviewer"]);
+  }
   const imported = importRedirectApprovalsCsv(routeMapRows(), csvText, {
     filePath: config.redirectApprovalPath,
     approvedAt: config.reviewedAt,
@@ -3390,7 +3742,7 @@ function importRedirectApprovalRows(csvText, config) {
   recordAudit(
     {
       action: "redirect_approvals_imported",
-      actor: "seo_editor",
+      actor: principal.id,
       objectType: "redirect_import",
       objectId: `redirect-import-${imported.length}`,
       metadata: { imported: imported.length },
@@ -3402,29 +3754,29 @@ function importRedirectApprovalRows(csvText, config) {
     approvals: imported,
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: currentLegacyRouteDecisions(config),
-    report: launchReadiness(config),
+    report: await authoritativeLaunchReadiness(config),
   };
 }
 
-function exportDeployableRedirectRows(config) {
+async function exportDeployableRedirectRows(config) {
   const rows = currentDeployableRedirects(config);
   const decisions = currentLegacyRouteDecisions(config);
   const exported = { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath, { decisions }) };
   recordAudit(
     {
       action: "deployable_redirects_exported",
-      actor: "seo_editor",
+      actor: config.adminPrincipal?.id || "unassigned",
       objectType: "redirect_export",
       objectId: "deployable-redirects",
       metadata: { exported: rows.length, terminal_decisions: decisions.length, total: exported.summary?.total },
     },
     config,
   );
-  return { ...exported, report: launchReadiness(config) };
+  return { ...exported, report: await authoritativeLaunchReadiness(config) };
 }
 
-function exportLaunchReadiness(config) {
-  const report = launchReadiness(config);
+async function exportLaunchReadiness(config) {
+  const report = await authoritativeLaunchReadiness(config);
   const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined, {
     productionRecoveryPublicKey: config.productionRecoverySigningPublicKey,
   });
@@ -3441,7 +3793,7 @@ function exportLaunchReadiness(config) {
   return { outPath, report };
 }
 
-function importLiveServiceReport(input, config) {
+async function importLiveServiceReport(input, config) {
   const imported = writeLiveServiceReport(input.source, input.report, {
     syncReportPath: config.searchSyncReportPath || undefined,
     queryReportPath: config.searchQueryReportPath || undefined,
@@ -3468,10 +3820,10 @@ function importLiveServiceReport(input, config) {
     },
     config,
   );
-  return { imported, liveImport, livePreflight, report: launchReadiness(config) };
+  return { imported, liveImport, livePreflight, report: await authoritativeLaunchReadiness(config) };
 }
 
-function importPayloadRuntimeReport(report, config) {
+async function importPayloadRuntimeReport(report, config) {
   const outPath = writePayloadRuntimeReport(report, config.payloadRuntimeReportPath || undefined);
   const runtime = payloadRuntimeImportSummary(report);
   recordAudit(
@@ -3491,10 +3843,10 @@ function importPayloadRuntimeReport(report, config) {
     },
     config,
   );
-  return { imported: { outPath, summary: report.summary }, report: launchReadiness(config), runtime };
+  return { imported: { outPath, summary: report.summary }, report: await authoritativeLaunchReadiness(config), runtime };
 }
 
-function importLiveServiceProvisioningReport(report, config) {
+async function importLiveServiceProvisioningReport(report, config) {
   const outPath = writeLiveServiceProvisioningReport(report, config.liveServiceProvisioningReportPath || undefined);
   const provisioning = liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined);
   recordAudit(
@@ -3511,10 +3863,10 @@ function importLiveServiceProvisioningReport(report, config) {
     },
     config,
   );
-  return { imported: { outPath, summary: report.summary }, provisioning, report: launchReadiness(config) };
+  return { imported: { outPath, summary: report.summary }, provisioning, report: await authoritativeLaunchReadiness(config) };
 }
 
-function importProductionRecoveryReport(report, config) {
+async function importProductionRecoveryReport(report, config) {
   const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined, {
     publicKey: config.productionRecoverySigningPublicKey,
   });
@@ -3537,15 +3889,15 @@ function importProductionRecoveryReport(report, config) {
     },
     config,
   );
-  return { imported: { outPath }, recovery, report: launchReadiness(config) };
+  return { imported: { outPath }, recovery, report: await authoritativeLaunchReadiness(config) };
 }
 
-function importSeoEvidence(input, config) {
+async function importSeoEvidence(input, config) {
   const result = importAppSeoEvidenceRows(input, config);
   recordAudit(
     {
       action: "seo_evidence_imported",
-      actor: "seo_editor",
+      actor: config.adminPrincipal?.id || "unassigned",
       objectType: "seo_evidence",
       objectId: input.source,
       metadata: {
@@ -3555,7 +3907,7 @@ function importSeoEvidence(input, config) {
     },
     config,
   );
-  return { ...result, report: launchReadiness(config) };
+  return { ...result, report: await authoritativeLaunchReadiness(config) };
 }
 
 function redirectApprovalWorkbook(url, config) {
@@ -3568,25 +3920,25 @@ function redirectApprovalWorkbook(url, config) {
   return renderRedirectApprovalWorkbook(rows);
 }
 
-function listingQualityWorkbook(config) {
-  return renderListingQualityWorkbook(currentListingQualityReport(config));
+async function listingQualityWorkbook(config) {
+  return renderListingQualityWorkbook(await authoritativeListingQualityReport(config));
 }
 
-function listingQualityReviewDraft(config) {
-  return renderListingQualityReviewDraft(currentListingQualityReport(config));
+async function listingQualityReviewDraft(config) {
+  return renderListingQualityReviewDraft(await authoritativeListingQualityReport(config));
 }
 
-function listingQualityReviewPacket(config) {
+async function listingQualityReviewPacket(config) {
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return buildListingQualityReviewPacket({
     generatedAt,
-    report: currentListingQualityReport(config, { generatedAt }),
+    report: await authoritativeListingQualityReport(config, { generatedAt }),
     reviewPath: config.listingQualityReviewPath || undefined,
   });
 }
 
-function importListingQualityRows(inputCsv, config, source = "listing_quality_csv") {
-  const report = currentListingQualityReport(config);
+async function importListingQualityRows(inputCsv, config, source = "listing_quality_csv") {
+  const report = await authoritativeListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
   const reviewOutputPath = config.listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
   const existingReviewCsv = fs.existsSync(reviewOutputPath) ? fs.readFileSync(reviewOutputPath, "utf8") : "";
@@ -3657,7 +4009,7 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
     factsReviewRows: review.summary.facts_review_rows,
     mediaReviewRows: review.summary.media_review_rows,
     missingReviewRows: mergedReview.summary.missing_review_rows,
-    report: launchReadiness(config),
+    report: await authoritativeLaunchReadiness(config),
     reviewImport,
     reviewSummary: mergedReview.summary,
     reviewPersisted: Boolean(reviewPath),
@@ -3937,25 +4289,56 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const settingsStore = {
+        filePath: config.workspaceSettingsPath,
+        payload: config.workspaceSettingsPayload || config.payloadListingRuntime || null,
+        payloadRuntimeConfigured: config.workspaceSettingsPayloadRuntimeConfigured === true,
+        workspaceId: config.workspaceSettingsWorkspaceId || "",
+      };
+      const settingsStoreReady = workspaceSettingsStoreConfigured(settingsStore);
       if (request.method === "GET") {
-        const payload = workspaceSettingsPayload(registry, url, config);
-        if (url.pathname === "/admin/settings") return htmlResponse(payload);
-        return jsonResponse(200, payload);
+        if (!settingsStoreReady && config.runtimeDataDurableOnly) {
+          if (url.pathname === "/admin/settings") {
+            return htmlResponse(renderAdminRuntimeUnavailablePayload(registry, url.searchParams.get("locale") || "en", { path: url.pathname }, principal));
+          }
+          return jsonResponse(503, {
+            kind: "workspace_settings_unavailable",
+            message: "Workspace settings storage is not configured on this runtime.",
+          });
+        }
+        try {
+          const settings = settingsStoreReady ? await readWorkspaceSettingsStore(settingsStore) : emptyWorkspaceSettingsDocument();
+          const requestedLocale = url.searchParams.get("locale") || settings.sections.workspace.default_locale || "en";
+          const payload = workspaceSettingsPayload(registry, url, config, {
+            requestedLocale,
+            settings,
+            writable: settingsStoreReady,
+            onboarding: await workspaceOnboardingFor({ replyDeliveryQueue: { states: [] } }, config),
+          });
+          if (url.pathname === "/admin/settings") return htmlResponse(payload);
+          return jsonResponse(200, payload);
+        } catch (error) {
+          if (!(error instanceof WorkspaceSettingsStoreUnavailableError)) throw error;
+          if (url.pathname === "/admin/settings") {
+            return htmlResponse(renderAdminRuntimeUnavailablePayload(registry, url.searchParams.get("locale") || "en", { path: url.pathname }, principal));
+          }
+          return jsonResponse(error.status || 503, { kind: error.code, message: error.message });
+        }
       }
       if (request.method === "POST" && url.pathname === "/api/admin/settings") {
         const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes)) || {};
         const section = String(input.section || "").trim();
         const requestedLocale = String(input.locale || "").trim() || adminLocaleParam(url, config);
-        if (config.runtimeDataDurableOnly || !config.workspaceSettingsPath) {
+        if (!settingsStoreReady) {
           return jsonResponse(503, {
-            kind: "workspace_settings_read_only",
+            kind: "workspace_settings_unavailable",
             message: "Workspace settings storage is not configured on this runtime.",
           });
         }
         try {
-          const result = updateWorkspaceSettings({
-            filePath: config.workspaceSettingsPath,
+          const result = await updateWorkspaceSettingsStore({
+            ...settingsStore,
             section,
             values: input,
             actor: principal?.id || "admin",
@@ -3995,10 +4378,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         } catch (error) {
           const status = error.status || 400;
           if (formRequest && status === 400) {
+            const settings = await readWorkspaceSettingsStore(settingsStore).catch(() => emptyWorkspaceSettingsDocument());
             return htmlResponse(
               workspaceSettingsPayload(registry, url, config, {
                 requestedLocale,
                 form: { section, error: error.message, field: error.field || null, values: input },
+                settings,
+                writable: settingsStoreReady,
               }),
             );
           }
@@ -4016,11 +4402,71 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       });
     }
     const registry = loadLocaleRegistry(config.localeRegistryPath);
-    if (request.method === "GET" && ["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
-      const payload = await hermesConsolePayload(registry, url, config);
-      return url.pathname === "/admin/hermes" ? htmlResponse(payload) : jsonResponse(200, payload);
+    if (["/admin/hermes", "/api/admin/hermes"].includes(url.pathname)) {
+      if (request.method === "GET") {
+        const payload = await hermesConsolePayload(registry, url, config);
+        return url.pathname === "/admin/hermes" ? htmlResponse(payload) : jsonResponse(200, payload);
+      }
+      if (request.method === "POST") {
+        try {
+          const businessContext = await hermesBusinessContext(config);
+          const receipt = await runHermesOwnerCommand(
+            parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+            {
+              operator: principal,
+              payload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
+              secret: config.hermesReceiptSecret || authEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+              env: authEnv,
+              fetchImpl: config.hermesCommandFetch || config.hermesAgentFetch || globalThis.fetch,
+              provider: config.hermesOwnerCommandProvider || null,
+              providerMetadata: { mode: String(authEnv.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted" },
+              businessContext,
+              requireBusinessContext: true,
+              now: () => config.reviewedAt || new Date().toISOString(),
+            },
+          );
+          if (url.pathname === "/api/admin/hermes") {
+            return jsonResponse(201, { kind: "hermes_owner_receipt", receipt });
+          }
+          return htmlResponse(await hermesConsolePayload(registry, url, config, { commandResult: receipt }));
+        } catch (cause) {
+          const error =
+            cause instanceof ProviderConnectionUnavailableError
+              ? cause
+              : cause instanceof HermesOwnerCommandError
+              ? cause
+              : new HermesOwnerCommandError("hermes_unavailable", { status: 503, cause });
+          if (url.pathname === "/api/admin/hermes") {
+            return jsonResponse(error instanceof ProviderConnectionUnavailableError ? 503 : error.status, {
+              kind: error instanceof ProviderConnectionUnavailableError ? "provider_connection_unavailable" : error.code,
+              message: error.message,
+              ...("receipt" in error && error.receipt ? { receipt: error.receipt } : {}),
+            });
+          }
+          return htmlResponse(
+            await hermesConsolePayload(registry, url, config, {
+              commandError: {
+                kind: error instanceof ProviderConnectionUnavailableError ? "provider_connection_unavailable" : error.code,
+                message: error.message,
+                receipt: "receipt" in error ? error.receipt || null : null,
+              },
+            }),
+          );
+        }
+      }
+      return jsonResponse(405, { kind: "method_not_allowed" });
     }
-    if (request.method === "GET" && url.pathname === "/admin/connect") {
+    if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
+      const canManageConnections = Boolean(
+        payloadSession && principal.source === "payload_session" && principal.roles?.includes("admin"),
+      );
+      let agent = null;
+      if (request.method === "POST") {
+        if (!canManageConnections) return adminForbidden("payload_admin_session");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        if (input.action !== "issue_agent_credential") return jsonResponse(400, { kind: "bad_request" });
+        agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
+      }
       const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
       let availability = operatorProviderAvailability(providerConfig);
       let connections = [];
@@ -4039,21 +4485,21 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           Object.entries(availability).map(([key, value]) => [key, { ...value, ready: false }]),
         );
       }
-      const token = principal.source === "payload_session" ? "" : String(authHeader).replace(/^Bearer\s+/i, "").trim();
+      const connectLocale = url.searchParams.get("locale") || "en";
+      const agentError = request.method === "POST" && !agent;
+      const resultError = Boolean(url.searchParams.get("error")) || storeError || agentError;
+      const result = agentError
+        ? operatorConnectCopy(connectLocale).agentBlocked
+        : operatorConnectResult({
+            locale: connectLocale,
+            connected: url.searchParams.get("connected") || "",
+            disconnected: url.searchParams.get("disconnected") || "",
+            verified: url.searchParams.get("verified") || "",
+            error: Boolean(url.searchParams.get("error")),
+            storeError,
+          });
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
-      const connectLocale = url.searchParams.get("locale") || "en";
-      const result = operatorConnectResult({
-        locale: connectLocale,
-        connected: url.searchParams.get("connected") || "",
-        disconnected: url.searchParams.get("disconnected") || "",
-        verified: url.searchParams.get("verified") || "",
-        error: Boolean(url.searchParams.get("error")),
-        storeError,
-      });
-      // A delegated, expiring credential for the operator's own assistant,
-      // minted per page view rather than stored.
-      const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
       if (agent) {
         recordAudit(
           {
@@ -4066,28 +4512,28 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           config,
         );
       }
-      return new Response(
-        renderOperatorConnectPage({
-          baseUrl: base,
-          token,
-          operatorId: principal?.id || "operator",
+      return htmlResponse(
+        buildOperatorConnectPayload({
+          registry,
+          requestedLocale: connectLocale,
+          operator: principal,
           connections,
           availability,
           providerConfig,
+          baseUrl: base,
+          assistantPrompt:
+            !agent && principal?.source === "credential_registry"
+              ? operatorBootstrapPrompt({ baseUrl: base, operatorId: principal.id })
+              : "",
           agentToken: agent?.token || "",
           agentExpiresAt: agent?.expires_at || "",
           codexMarketplacePath: (config.authEnv || process.env).MS_REALTY_CODEX_MARKETPLACE_PATH,
           result,
-          locale: connectLocale,
+          resultTone: resultError ? "error" : "success",
+          storeError,
+          canManageConnections,
+          canIssueAgentCredential: operatorAgentAccessConfigured(config.authEnv || process.env),
         }),
-        {
-          status: 200,
-          headers: {
-            "content-type": "text/html; charset=utf-8",
-            "cache-control": "no-store",
-            "x-robots-tag": "noindex, nofollow",
-          },
-        },
       );
     }
     if (
@@ -4121,8 +4567,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         verifyOperatorAiProvider: config.verifyOperatorAiProvider,
         revokeOperatorProvider: config.revokeOperatorProvider,
       };
-      const connectionRedirect = (query) =>
-        new Response(null, { status: 303, headers: { location: `/admin/connect?${query}`, "cache-control": "no-store" } });
+      const connectionRedirect = (query, headers = {}) =>
+        new Response(null, { status: 303, headers: { location: `/admin/connect?${query}`, "cache-control": "no-store", ...headers } });
       const recordConnectionOutcome = (outcome) => {
         const entry = operatorConnectionAudit(outcome, { actor: principal.id });
         if (entry) recordAudit(entry, config);
@@ -4138,10 +4584,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         return adminForbidden("payload_admin_session");
       }
       if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
-        if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
-        if (url.searchParams.get("catalog") === "1") {
+        if (request.method === "GET" && url.searchParams.get("catalog") === "1") {
           return jsonResponse(200, ownerOperatorCatalog(principal));
         }
+        if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
         const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
         if (!agent) {
           return jsonResponse(503, {
@@ -4207,15 +4653,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         const action = url.searchParams.get("action");
         if (action === "start") {
           try {
+            const start = operatorConnectionStart({
+              provider: requestedProvider,
+              config: providerConfig,
+              operatorId: principal.id,
+            });
             return new Response(null, {
               status: 303,
               headers: {
-                location: operatorConnectionStart({
-                  provider: requestedProvider,
-                  config: providerConfig,
-                  operatorId: principal.id,
-                }),
+                location: start.location,
                 "cache-control": "no-store",
+                ...(start.setCookie ? { "set-cookie": start.setCookie } : {}),
               },
             });
           } catch (error) {
@@ -4224,25 +4672,38 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           }
         }
         if (action === "callback") {
+          const clearCookie = operatorConnectionPkceClearCookie(requestedProvider);
+          const redirectHeaders = clearCookie ? { "set-cookie": clearCookie } : {};
           if (url.searchParams.get("error")) {
             recordProviderConnectionFailure(requestedProvider, "oauth_callback", new Error("provider_rejected"), config);
-            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
+            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`, redirectHeaders);
+          }
+          let codeVerifier = "";
+          try {
+            codeVerifier = operatorConnectionPkceVerifier(request.headers.get("cookie") || "", {
+              provider: requestedProvider,
+              state: url.searchParams.get("state"),
+            });
+          } catch (error) {
+            recordProviderConnectionFailure(requestedProvider, "oauth_callback", error, config);
+            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`, redirectHeaders);
           }
           const outcome = await runOperatorConnectionAction({
             intent: "callback",
             provider: requestedProvider,
             code: url.searchParams.get("code"),
             state: url.searchParams.get("state"),
+            codeVerifier,
             operatorId: principal.id,
             config: providerConfig,
             deps: connectionDeps,
           });
           if (outcome.outcome === "rejected") {
             recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error, config);
-            return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`);
+            return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
           }
           recordConnectionOutcome(outcome);
-          return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`);
+          return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
         }
       }
       if (request.method === "POST") {
@@ -4410,13 +4871,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(200, { kind: "admin_payload_collections", ...loadPayloadCollections() });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
-      return jsonResponse(200, launchReadiness(config));
+      return jsonResponse(200, await authoritativeLaunchReadiness(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
-      return markdownResponse(launchInputChecklist(config));
+      return markdownResponse(await authoritativeLaunchInputChecklist(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
-      return jsonResponse(200, preflightReports(config));
+      return jsonResponse(200, await authoritativePreflightReports(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-preflight") {
       return jsonResponse(200, { kind: "admin_seo_preflight", seo: seoPreflightReport(config) });
@@ -4426,7 +4887,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(200, {
         kind: "admin_listing_quality",
         listing_quality: buildListingQualityPreflightReport({
-          report: currentListingQualityReport(config, { generatedAt }),
+          report: await authoritativeListingQualityReport(config, { generatedAt }),
           reviewPath: config.listingQualityReviewPath || undefined,
           generatedAt,
         }),
@@ -4452,7 +4913,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
       const report = reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)));
-      return jsonResponse(report.ready ? 201 : 202, importLiveServiceProvisioningReport(report, config));
+      return jsonResponse(report.ready ? 201 : 202, await importLiveServiceProvisioningReport(report, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
       return jsonResponse(200, {
@@ -4492,13 +4953,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return csvResponse(redirectApprovalWorkbook(url, config), "redirect-approval-workbook.csv");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
-      return csvResponse(listingQualityWorkbook(config), "listing-quality-workbook.csv");
+      return csvResponse(await listingQualityWorkbook(config), "listing-quality-workbook.csv");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
-      return csvResponse(listingQualityReviewDraft(config), "listing-quality-review-draft.csv");
+      return csvResponse(await listingQualityReviewDraft(config), "listing-quality-review-draft.csv");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-packet") {
-      return jsonResponse(200, listingQualityReviewPacket(config));
+      return jsonResponse(200, await listingQualityReviewPacket(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
@@ -4513,41 +4974,44 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, appendPublishedTranslation(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
-      return jsonResponse(201, appendRedirectApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, await appendRedirectApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
-      return jsonResponse(201, importRedirectApprovalRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, await importRedirectApprovalRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
-      return jsonResponse(201, exportDeployableRedirectRows(config));
+      return jsonResponse(201, await exportDeployableRedirectRows(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
-      return jsonResponse(201, exportLaunchReadiness(config));
+      return jsonResponse(201, await exportLaunchReadiness(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-reports/import") {
-      const result = importLiveServiceReport(liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await importLiveServiceReport(
+        liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)),
+        config,
+      );
       return jsonResponse(result.livePreflight.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
       const report = reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)));
-      return jsonResponse(report.ready ? 201 : 202, importPayloadRuntimeReport(report, config));
+      return jsonResponse(report.ready ? 201 : 202, await importPayloadRuntimeReport(report, config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/production-recovery/import") {
       return jsonResponse(
         201,
-        importProductionRecoveryReport(
+        await importProductionRecoveryReport(
           reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes))),
           config,
         ),
       );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
-      const result = importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.missingRequiredSources.length ? 202 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       const input = listingQualityReviewInput(request, await readRequestBody(request, config.maxBodyBytes));
-      const result = importListingQualityRows(input.csv, config, input.source);
+      const result = await importListingQualityRows(input.csv, config, input.source);
       return jsonResponse(result.reviewImport.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
@@ -4561,6 +5025,65 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           ? await sendQueuedReplyViaProvider(input, config)
           : appendReplyDeliveryOutcomeEntry(input, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/social-marketing/publish") {
+      if (!principal?.id) throw new Error("Social publishing requires a named authenticated operator");
+      const input = bindAuthenticatedOperator(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), principal, [
+        "approvedBy",
+      ]);
+      const workspaceId = String(input.workspaceId || input.workspace_id || "").trim();
+      if (!workspaceId) throw new Error("workspaceId is required for social publishing");
+      if (!canAdminAccessWorkspace(principal, workspaceId)) return adminForbidden("content:write");
+      const approved = String(input.approved || "").trim().toLowerCase() === "true";
+      if (!approved) throw new Error("Human approval is required before social publishing");
+      const providerConfig = config.providerConnection || providerConnectionConfigFromEnv(config.authEnv || process.env);
+      const approvedAt = config.reviewedAt || new Date().toISOString();
+      const publication = await (config.publishApprovedSocialDraft || publishApprovedSocialDraft)(
+        {
+          provider: input.provider,
+          workspaceId,
+          idempotencyKey: String(input.idempotencyKey || input.idempotency_key || "").trim(),
+          message: input.message,
+          link: input.link,
+          imageUrl: input.imageUrl || input.image_url,
+          caption: input.caption,
+          approved: true,
+          approvedBy: input.approvedBy,
+          approvedAt,
+        },
+        {
+          config: providerConfig,
+          payload: config.socialMarketingPayload || config.providerConnectionPayload || null,
+          fetchImpl: config.providerFetch || fetch,
+        },
+      );
+      const existingAudit = config.auditLogPath
+        ? readAuditLog(config.auditLogPath).some(
+            (row) => row.action === "social_marketing_published" && row.object_id === publication.idempotency_key,
+          )
+        : false;
+      if (!existingAudit) {
+        recordAudit(
+          {
+            action: "social_marketing_published",
+            actor: principal.id,
+            objectType: "social_marketing_publication",
+            objectId: publication.idempotency_key,
+            metadata: {
+              workspace_id: publication.workspace_id,
+              provider: publication.provider,
+              external_post_id: publication.external_post_id,
+              external_account_id: publication.external_account_id,
+            },
+          },
+          config,
+          publication.completed_at || approvedAt,
+        );
+      }
+      return jsonResponse(publication.idempotent ? 200 : 201, {
+        kind: "social_marketing_publication",
+        publication,
+      });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
       const result = await appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
@@ -4913,7 +5436,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
-      const result = appendPublicRequestOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendPublicRequestOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
@@ -4936,11 +5459,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (error instanceof LeadStoreUnavailableError || error?.code === "lead_store_unavailable") {
       return leadStoreUnavailable();
     }
+    if (error instanceof LeadOperationStoreUnavailableError || error?.code === "lead_operation_store_unavailable") {
+      return leadStoreUnavailable("lead_operation_store_unavailable");
+    }
     if (error instanceof EventStoreUnavailableError || error?.code === "event_store_unavailable") {
       return jsonResponse(503, { kind: "event_store_unavailable", message: "Analytics storage is temporarily unavailable" });
     }
     if (error instanceof ViewingStoreUnavailableError || error?.code === "viewing_store_unavailable") {
       return jsonResponse(503, { kind: "viewing_store_unavailable", message: "Viewing storage is temporarily unavailable" });
+    }
+    if (error instanceof ViewingTripStoreUnavailableError || error?.code === "viewing_trip_store_unavailable") {
+      return jsonResponse(503, { kind: "viewing_trip_store_unavailable", message: "Viewing trip requests are temporarily unavailable" });
     }
     if (error instanceof ViewingConflictError || error?.code === "viewing_conflict") {
       return jsonResponse(409, { kind: "viewing_conflict", message: error.message });
@@ -4953,6 +5482,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         error.code === "provider_delivery_unavailable" || error.code === "provider_delivery_not_connected"
           ? 503
           : ["provider_delivery_uncertain", "provider_delivery_conflict"].includes(error.code)
+            ? 409
+            : 502;
+      return jsonResponse(status, { kind: error.code, message: error.message, receipt: error.receipt || null });
+    }
+    if (error instanceof SocialMarketingPublishError) {
+      const status =
+        ["social_marketing_unavailable", "social_marketing_not_connected"].includes(error.code)
+          ? 503
+          : ["social_marketing_uncertain", "social_marketing_conflict"].includes(error.code)
             ? 409
             : 502;
       return jsonResponse(status, { kind: error.code, message: error.message, receipt: error.receipt || null });

@@ -96,7 +96,7 @@ export function createSavedSearchAlertDelivery(record, alertRow, { queuedAt = ne
     queued_at: isoTimestamp(queuedAt, "queuedAt"),
     saved_search_id: record.id,
     alert_task_id: record.alert_task?.id || null,
-    owner: record.alert_task?.owner || "broker_en",
+    owner: "unassigned",
     locale: record.locale,
     requested_locale: record.requested_locale,
     alert_frequency: record.alert_frequency,

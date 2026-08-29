@@ -243,25 +243,30 @@ export function readHermesDraftDispatch(filePath = DEFAULT_HERMES_DRAFT_DISPATCH
 }
 
 export function openAiCompatibleHermesProvider({
-  endpoint = process.env.HERMES_CHAT_COMPLETIONS_URL,
-  apiKey = process.env.HERMES_API_KEY,
-  model = process.env.HERMES_MODEL || "NousResearch/Hermes-4-14B",
+  endpoint,
+  apiKey,
+  model,
+  env = process.env,
   fetchImpl = globalThis.fetch,
 } = {}) {
-  if (!endpoint) throw new Error("HERMES_CHAT_COMPLETIONS_URL is required");
-  assertHermesChatCompletionsEndpoint(endpoint);
-  if (!apiKey) throw new Error("HERMES_API_KEY is required");
+  const config = hermesProviderConfigFromEnv(env);
+  const resolvedEndpoint = endpoint === undefined ? config.endpoint : endpoint;
+  const resolvedApiKey = apiKey === undefined ? env.HERMES_API_KEY : apiKey;
+  const resolvedModel = model === undefined ? config.model : model;
+  if (!resolvedEndpoint) throw new Error("HERMES_CHAT_COMPLETIONS_URL is required");
+  assertHermesChatCompletionsEndpoint(resolvedEndpoint);
+  if (!resolvedApiKey) throw new Error("HERMES_API_KEY is required");
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Hermes provider");
 
   return async function callHermes(row) {
-    const response = await fetchImpl(endpoint, {
+    const response = await fetchImpl(resolvedEndpoint, {
       method: "POST",
       signal: AbortSignal.timeout(180_000),
       headers: {
         "content-type": "application/json",
-        ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}),
+        ...(resolvedApiKey ? { authorization: `Bearer ${resolvedApiKey}` } : {}),
       },
-      body: JSON.stringify(providerRequestBody(row, model)),
+      body: JSON.stringify(providerRequestBody(row, resolvedModel)),
     });
     if (!response.ok) throw new Error(`Hermes provider failed: ${response.status}`);
     const payload = await response.json();

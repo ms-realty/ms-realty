@@ -120,6 +120,7 @@ const CONTENT_WRITE_PATHS = new Set([
   "/api/admin/listings/publication-schedules/run-due",
   "/api/admin/media/reviews",
   "/api/admin/media/uploads",
+  "/api/admin/social-marketing/publish",
   "/api/admin/tours/approve",
 ]);
 
@@ -200,7 +201,7 @@ export function requiredAdminCapability(method, pathname) {
   // below, which is where they already were.
   if (
     verb !== "GET" &&
-    ["/api/admin/connections", "/api/admin/connections/disconnect"].includes(pathname)
+    ["/admin/connect", "/api/admin/connections", "/api/admin/connections/disconnect"].includes(pathname)
   ) {
     return "settings:manage";
   }

@@ -11,9 +11,13 @@ import { LEAD_OPERATION_COLLECTION } from "./production/lib/lead-ops-durable-sto
 import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
 import { PROVIDER_CONNECTION_COLLECTION } from "./production/lib/provider-connections.mjs";
 import { PROVIDER_DELIVERY_RECEIPT_COLLECTION } from "./production/lib/provider-delivery.mjs";
+import { HERMES_OWNER_RECEIPT_COLLECTION } from "./production/lib/hermes-owner-command.mjs";
+import { SOCIAL_MARKETING_PUBLICATION_COLLECTION } from "./production/lib/social-marketing-publishing.mjs";
 import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-webhooks.mjs";
 import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
+import { VIEWING_TRIP_REQUEST_COLLECTION } from "./production/lib/viewing-trip-requests.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
+import { WORKSPACE_SETTINGS_COLLECTION } from "./production/lib/workspace-settings.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
 import {
@@ -323,6 +327,26 @@ const providerDeliveryReceiptCollectionWithAccess = {
   access: { ...serverOwnedCollectionAccess, read: () => false },
 };
 
+const hermesOwnerReceiptCollectionWithAccess = {
+  ...HERMES_OWNER_RECEIPT_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+const socialMarketingPublicationCollectionWithAccess = {
+  ...SOCIAL_MARKETING_PUBLICATION_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: () => false },
+};
+
+const workspaceSettingsCollectionWithAccess = {
+  ...WORKSPACE_SETTINGS_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+};
+
+const viewingTripRequestCollectionWithAccess = {
+  ...VIEWING_TRIP_REQUEST_COLLECTION,
+  access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+};
+
 // Request-time lead side effects share the lead transaction. They remain
 // append-only, server-owned event records; brokers can inspect their
 // privacy-safe payloads but cannot forge or rewrite them.
@@ -380,7 +404,11 @@ export default buildConfig({
     providerConnectionCollectionWithAccess,
     providerWebhookEventCollectionWithAccess,
     providerDeliveryReceiptCollectionWithAccess,
+    hermesOwnerReceiptCollectionWithAccess,
+    socialMarketingPublicationCollectionWithAccess,
+    workspaceSettingsCollectionWithAccess,
     VIEWING_COLLECTION,
+    viewingTripRequestCollectionWithAccess,
     LEAD_OPERATION_COLLECTION,
     ...durableLeadSideEffectCollections,
   ],

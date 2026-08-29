@@ -16,6 +16,7 @@ import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const adminAdapterCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin.css"), "utf8");
+const adminCrmCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-crm.css"), "utf8");
 const adminSettingsCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-settings.css"), "utf8");
 const generatedDesignCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
@@ -82,6 +83,74 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
 
+test("summary cards tint the active theme instead of forcing light-only ramps", () => {
+  for (const [tone, mix] of [
+    ["success", 55],
+    ["sea", 50],
+    ["sun", 42],
+    ["brick", 58],
+  ]) {
+    assert.match(
+      adminAdapterCss,
+      new RegExp(`\\.adm-summary-card\\[data-summary-tone="${tone}"\\]\\s*\\{[^}]*background:\\s*color-mix\\(in srgb, var\\(--adm-pill-${tone}-bg\\) ${mix}%, var\\(--surface\\)\\)`),
+    );
+  }
+});
+
+test("Today, Hermes, and Settings use an in-flow owner grid instead of a split rail shell", () => {
+  assert.match(adminAdapterCss, /\.adm-owner-flow__support\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /\.adm-owner-flow--today \[data-readiness-support="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(240px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /\.adm-owner-flow--settings \[data-settings-overview="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+  assert.match(adminSettingsCss, /\.adm-settings-disclosure > summary\s*\{[^}]*cursor:\s*pointer;[^}]*list-style:\s*none/);
+  assert.match(adminSettingsCss, /\.adm-settings-disclosure\[open\] > summary::after\s*\{[^}]*content:\s*"−"/);
+});
+
+test("connections and Hermes keep supporting state in-flow without a sticky rail", () => {
+  assert.match(adminAdapterCss, /\.adm-owner-flow--connections \[data-connections-support="true"\],\s*\.adm-owner-flow--hermes \[data-hermes-support="true"\],\s*\.adm-owner-flow--hermes \[data-hermes-disclosures="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(300px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-list\[data-connection-list="core"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-row\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-disclosure > summary\s*\{[^}]*min-height:\s*44px/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?\.adm-owner-flow__support\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?main\[data-react-admin-ui="hermes"\] \.adm-hermes-panel-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+});
+
+test("requests and Hermes use disclosure for secondary detail instead of primary clutter", () => {
+  assert.match(adminAdapterCss, /\.adm-public-request__details > summary/);
+  assert.match(adminAdapterCss, /\.adm-public-request__details-body\s*\{[^}]*background:\s*var\(--surface-sunken\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__readiness\s*\{[^}]*display:\s*flex;[^}]*flex-wrap:\s*wrap/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__readiness > div\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__starting-point\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto auto/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__starting-kicker\s*\{[^}]*text-transform:\s*uppercase/);
+  assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-command__readiness\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminCrmCss, /@media \(max-width: 719px\)[\s\S]*?\.adm-toolbar > \.crm-seg\[data-list-filter="requests"\]\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+});
+
+test("technical Hermes and assistant setup content is collapsed without JavaScript", () => {
+  assert.match(adminAdapterCss, /\.adm-hermes-diagnostics\s*,\s*\.adm-hermes-safeguards\s*\{[^}]*overflow:\s*hidden/);
+  assert.match(adminAdapterCss, /\.adm-hermes-diagnostics > summary/);
+  assert.match(adminAdapterCss, /\.adm-hermes-safeguards\[open\] > summary::after/);
+  assert.match(adminAdapterCss, /\.adm-assistant-connection__config-label::after/);
+});
+
+test("390px mobile contracts keep one dominant action per owner screen", () => {
+  assert.match(adminSettingsCss, /\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
+  assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-today-briefing__action \.mk-btn,[\s\S]*?min-height:\s*44px/);
+  assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-next-actions__action \.mk-btn[\s\S]*?width:\s*100%/);
+  assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-command__starting-point \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
+});
+
+test("mobile owner pages retain their title and use a dense media review grid", () => {
+  assert.match(adminAdapterCss, /\.crm-top > div:first-child\s*\{[^}]*display:\s*grid/);
+  assert.match(adminAdapterCss, /data-react-admin-ui="listing-editor"\]\s+\.adm-media-manager\s*\{[^}]*grid-template-columns:\s*repeat\(2/);
+});
+
+test("panel header links do not override primary button contrast", () => {
+  for (const css of [generatedDesignCss]) {
+    assert.match(css, /\.crm-panel__hd a:not\(\.mk-btn\)/);
+    assert.doesNotMatch(css, /\.crm-panel__hd a\{/);
+  }
+});
+
 test("queue filters reveal an empty note when no row matches", () => {
   assert.match(ADMIN_APP_JS, /var empty = document\.querySelector\("\[data-lead-queue-empty\]"\);\s*if \(empty\) empty\.hidden = visible > 0 \|\| rows\.length === 0;/);
   assert.match(ADMIN_APP_JS, /var empty = document\.querySelector\("\[data-pipeline-empty\]"\);/);
@@ -127,7 +196,7 @@ test("transaction case forms are localized and report their own status", async (
   }
 });
 
-test("connect page loads the workbench fonts and design-system bundle without em-dashes in its chrome", () => {
+test("connect page uses the persistent workbench shell and responsive connection rows", () => {
   const html = renderOperatorConnectPage({
     baseUrl: "https://ms-realty.example.workers.dev",
     token: "connect-operator-token-0123456789",
@@ -138,11 +207,13 @@ test("connect page loads the workbench fonts and design-system bundle without em
   assert.ok(html.includes(`<link rel="stylesheet" href="${FONTS_URL}">`));
   assert.ok(html.includes(`<link rel="stylesheet" href="/vendor/ms-realty-admin.css?v=${ADMIN_CSS_HASH}"`));
   assert.match(html, /<title>Подключения · MS Realty<\/title>/);
-  assert.match(html, /<body class="connect-page">/);
-  assert.match(html, /\.button \{[^}]*min-height: 44px;[^}]*background: var\(--brand, #222222\)/);
-  assert.match(html, /class="status status--ok"/);
+  assert.match(html, /<body>\s*<a class="skip-link" href="#main">/);
+  assert.match(html, /data-react-admin-ui="connections"/);
+  assert.match(html, /data-provider="google" data-status="connected"/);
   assert.match(html, /Проверено: дата не указана/);
-  const chrome = html.slice(html.indexOf("<body"), html.indexOf('<textarea id="prompt"'));
+  assert.match(adminAdapterCss, /\.adm-connection-row,/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)/);
+  const chrome = html.slice(html.indexOf("<body"), html.indexOf("<script defer"));
   assert.doesNotMatch(chrome, /[—–]/);
   assert.doesNotMatch(html, /#1d4ed8/);
 });

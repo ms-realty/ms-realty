@@ -33,9 +33,10 @@ credential. Для workspace-wide подключения используетс�
 - translator: очередь контента, очередь и черновик перевода.
 
 `get_broker_work_queue` не возвращает raw contact и customer message body.
-`run_operator_workflow` принимает только девять allowlisted операций и повторно
-проходит те же state-transition, capability, confirmation и audit проверки, что
-обычный admin UI. Endpoint намеренно не даёт tool для публикации страницы,
+Все изменения проходят через `ms_realty_admin_write` или `ms_realty_hermes`:
+операция выбирается только из source-derived каталога, входные данные проверяются,
+а одноразовое подписанное подтверждение привязано к оператору, сессии, операции и
+точному payload. Endpoint намеренно не даёт tool для публикации страницы,
 индексирования перевода, фактической отправки сообщения клиенту, назначения прав
 доступа, произвольного SQL/HTTP-запроса или запуска фоновых задач. Черновик ответа
 всегда ждёт ручной доставки брокером; изменение контента не меняет
@@ -114,7 +115,10 @@ ChatGPT-подписка покрывает интерактивную рабо�
 worker. API OpenAI биллингуется и управляется отдельно от ChatGPT, поэтому если в
 будущем Hermes должен выполнять автономные model calls, ему нужен отдельный OpenAI API
 project, ключ и budget — либо остаётся текущий private self-hosted Hermes. Для MS Realty
-OpenRouter не используется.
+Автономный Hermes может использовать self-hosted endpoint или OpenRouter. Это
+отдельный server-side provider с отдельным API budget; ключ никогда не попадает в
+MCP-конфигурацию, браузер или репозиторий, а внешнему provider передаются только
+privacy-safe задачи без customer PII.
 
 Источник: [OpenAI: API billed separately from
 ChatGPT](https://help.openai.com/en/articles/8156019-is-api-usage-included-in-chatgpt-subscriptions-even-if-i-have-a-paid-chatgpt-account).

@@ -10,6 +10,17 @@ export const DURABLE_LISTING_AUTHORITY_PATHS = new Set([
   "/api/admin/listings/status",
 ]);
 
+export const DURABLE_LEAD_AUTHORITY_PATHS = new Set([
+  "/api/admin/leads/assign",
+  "/api/admin/leads/bulk",
+  "/api/admin/leads/snooze",
+  "/api/admin/leads/unsnooze",
+  "/api/admin/lead-pipeline/outcome",
+  "/api/admin/seller-pipeline/outcome",
+  "/api/admin/deals/close",
+  "/api/admin/consents/withdraw",
+]);
+
 export const LEAD_PROBE_HEADER = "x-ms-realty-lead-probe";
 
 async function sha256(value) {
@@ -172,5 +183,18 @@ export function allowsDurableListingAuthorityMutation({ method, pathname, env })
     DURABLE_LISTING_AUTHORITY_PATHS.has(pathname) &&
     Boolean(env.PAYLOAD_SECRET?.trim()) &&
     Boolean(env.DATABASE_URL?.trim())
+  );
+}
+
+export function allowsDurableLeadAuthorityMutation({ method, pathname, env }) {
+  return (
+    method === "POST" &&
+    DURABLE_LEAD_AUTHORITY_PATHS.has(pathname) &&
+    String(env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED || "").trim() === "true" &&
+    String(env.MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED || "").trim() === "true" &&
+    Boolean(env.PAYLOAD_SECRET?.trim()) &&
+    Boolean(env.DATABASE_URL?.trim()) &&
+    String(env.MS_REALTY_LEAD_CONTACT_KEY || "").length >= 32 &&
+    Boolean(env.MS_REALTY_WORKSPACE_ID?.trim())
   );
 }

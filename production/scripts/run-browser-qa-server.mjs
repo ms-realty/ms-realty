@@ -4,6 +4,7 @@ import path from "node:path";
 import { createHttpApp } from "../lib/http.mjs";
 import { close, createNodeServer, listen } from "../lib/node-server.mjs";
 import { approvedPublicSeedFixture } from "../test/approved-public-seed.fixture.mjs";
+import { createPayloadDraftRuntime } from "../test/payload-draft-runtime.fixture.mjs";
 
 const port = Number(process.env.PORT || 4321);
 const sessionToken = "payload.browser.qa";
@@ -13,6 +14,7 @@ const leadDurableStore = {
   payloadSecret: "browser-qa-payload-secret",
   databaseUrl: "postgres://browser-qa.invalid/ms_realty",
   contactSecret: leadContactKey,
+  workspaceId: "sandanski",
 };
 Object.assign(process.env, {
   MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
@@ -53,7 +55,7 @@ const providerDocuments = [
     id: "browser-qa-google",
     provider: "google",
     status: "connected",
-    account_label: "owner@example.test",
+    account_label: "ms.realty.bg@gmail.com",
     scopes: ["gmail.send", "calendar.events"],
     last_verified_at: "2026-08-13T12:00:00.000Z",
     credential_envelope: { ciphertext: "BROWSER_QA_CREDENTIAL_MARKER" },
@@ -64,11 +66,20 @@ const providerPayload = {
     const provider = where?.provider?.equals;
     return { docs: provider ? providerDocuments.filter((row) => row.provider === provider) : providerDocuments };
   },
+  async create() {
+    throw new Error("Browser QA provider writes are disabled");
+  },
+  async update() {
+    throw new Error("Browser QA provider writes are disabled");
+  },
 };
+const payloadListingRuntime = createPayloadDraftRuntime(approvedPublicSeedFixture()).payload;
 
 const app = createHttpApp({
   ...paths,
   seed: approvedPublicSeedFixture(),
+  payloadListingRuntime,
+  payloadListingEnv: {},
   leadContactKey,
   publicContactKey: "browser-qa-public-contact-key-longer-than-thirty-two-characters",
   leadDurableStore,
@@ -85,13 +96,13 @@ const app = createHttpApp({
       return token === sessionToken
         ? {
             principal: {
-              id: "browser-qa-admin",
+              id: "ms-realty-owner",
               source: "payload_session",
               can_mutate: true,
               roles: ["admin"],
               workspace_ids: ["sandanski"],
             },
-            user: { id: "browser-qa-admin" },
+            user: { id: "ms-realty-owner" },
           }
         : null;
     },
@@ -108,6 +119,8 @@ const app = createHttpApp({
     metaAppSecret: "browser-qa-meta-secret",
     metaConfigId: "987654321098765",
     metaGraphVersion: "v22.0",
+    metaFacebookPublishReady: true,
+    metaInstagramPublishReady: true,
     metaWebhookVerifyToken: "browser-qa-webhook-token-long-enough",
     viberCommercialReady: true,
     webhookMaxBytes: 1024 * 1024,

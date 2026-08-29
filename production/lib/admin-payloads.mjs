@@ -9,6 +9,7 @@ import { buildLeadBriefs } from "./lead-briefs.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
 import { CANONICAL_PROPERTY_FAMILIES, propertyFamilyFor } from "./listing-facts.mjs";
+import { isFixtureBrokerId } from "./listing-verification.mjs";
 import {
   buildListingAreaReview,
   buildListingDuplicateReview,
@@ -227,6 +228,7 @@ export function renderAdminHermesPayload(
   requestedLocale,
   {
     availability,
+    command_availability = null,
     bridge,
     generatedAt,
     operator = null,
@@ -234,6 +236,11 @@ export function renderAdminHermesPayload(
     runtime,
     runtimeDataMode = "file_backed",
     tools = [],
+    command_form = null,
+    command_result = null,
+    command_error = null,
+    receipt_store = null,
+    receipts = [],
   } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
@@ -256,9 +263,15 @@ export function renderAdminHermesPayload(
     runtime_data_mode: runtimeDataMode,
     runtime,
     availability,
+    command_availability,
     bridge,
     queue,
     tools,
+    command_form,
+    command_result,
+    command_error,
+    receipt_store,
+    receipts,
   };
 }
 
@@ -287,9 +300,11 @@ function adminBrokerProfile(profile, locale) {
     ru: { bg: "Болгароязычная команда", ru: "Русскоязычная команда", international: "Международная команда" },
     en: { bg: "Bulgarian desk", ru: "Russian desk", international: "International desk" },
   };
+  const id = String(profile.id || "").trim();
+  const displayName = String(profile.labels?.[locale] || profile.display_name || profile.name || "").trim();
   return {
     id: profile.id,
-    label: profile.labels?.[locale] || profile.display_name || profile.name || deskLabels[locale]?.[language] || profile.id,
+    label: displayName && !isFixtureBrokerId(displayName) ? displayName : String(profile.email || "").trim() || deskLabels[locale]?.[language] || id,
     languages: profile.languages || [],
   };
 }
@@ -305,6 +320,7 @@ export function renderAdminWorkspaceSettingsPayload(
     saved = null,
     form = null,
     writable = true,
+    onboarding = null,
     // B6 workspace security and data. Null when the workspace-security ledgers
     // are not configured, which is what keeps the Security and Data sections in
     // their "not connected" treatment instead of pretending to work.
@@ -342,6 +358,7 @@ export function renderAdminWorkspaceSettingsPayload(
         }
       : null,
     savedSection: WORKSPACE_SETTINGS_SECTIONS.includes(saved) ? saved : null,
+    onboarding: onboarding || null,
     workspace_security: security || null,
   };
 }
@@ -657,6 +674,9 @@ export function renderAdminTranslationQueuePayload(
 
 export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const dataAvailable = (key) => data.dataAvailability?.[key]?.status !== "unavailable";
+  const availableCount = (key, value) => (dataAvailable(key) ? value : null);
+  const publicRequestsAvailable = dataAvailable("savedSearches") && dataAvailable("languageRequests");
   const {
     leadSla: providedLeadSla,
     leadSlaGeneratedAt,
@@ -734,6 +754,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       replyDeliveryQueue,
       communicationThreads: data.communicationThreads,
     });
+  const secondaryQueuesProvided = Boolean(providedViewingFollowUpQueue || providedSellerPipelineQueue);
   return {
     kind: "admin_lead_inbox",
     status: 200,
@@ -756,15 +777,16 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     replyDeliveryQueue,
     viewingFollowUpQueue,
     sellerPipelineQueue,
+    secondaryQueuesProvided,
     publicRequestQueue,
     leadBriefs,
     summary: {
       leads: data.leads.length,
-      replies: data.replies.length,
-      repliesQueued: replyDeliveryQueue.summary.queued,
-      repliesFailed: replyDeliveryQueue.summary.failed,
-      repliesSent: replyDeliveryQueue.summary.sent,
-      communicationThreads: data.communicationThreads?.length || 0,
+      replies: availableCount("replies", data.replies.length),
+      repliesQueued: availableCount("replies", replyDeliveryQueue.summary.queued),
+      repliesFailed: availableCount("replies", replyDeliveryQueue.summary.failed),
+      repliesSent: availableCount("replies", replyDeliveryQueue.summary.sent),
+      communicationThreads: availableCount("communicationThreads", data.communicationThreads?.length || 0),
       buyerPipelineOpen: leadPipelineQueue.summary.buyers_open,
       renterPipelineOpen: leadPipelineQueue.summary.renters_open,
       leadPipelineOverdue: leadPipelineQueue.summary.overdue,
@@ -776,13 +798,13 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
       leadsSnoozed: leadSla.summary.snoozed || 0,
-      languageRequests: data.languageRequests.length,
+      languageRequests: availableCount("languageRequests", data.languageRequests.length),
       viewings: data.viewings.length,
       viewingFollowUpsOpen: viewingFollowUpQueue.summary.open,
       viewingFollowUpsOverdue: viewingFollowUpQueue.summary.overdue,
-      savedSearches: data.savedSearches.length,
-      publicRequestsOpen: publicRequestQueue.summary.open,
-      publicRequestsOverdue: publicRequestQueue.summary.overdue,
+      savedSearches: availableCount("savedSearches", data.savedSearches.length),
+      publicRequestsOpen: publicRequestsAvailable ? publicRequestQueue.summary.open : null,
+      publicRequestsOverdue: publicRequestsAvailable ? publicRequestQueue.summary.overdue : null,
       sellerPipeline: data.sellerPipeline.length,
       sellerPipelineOpen: sellerPipelineQueue.summary.open,
       sellerPipelineOverdue: sellerPipelineQueue.summary.overdue,
@@ -810,6 +832,7 @@ export function renderAdminContactsPayload(registry, requestedLocale, data) {
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, data.operatorId || null),
+    brokerProfiles: (data.brokerProfiles || []).map((profile) => adminBrokerProfile(profile, workspace.locale)),
     contacts,
     accounts,
     summary: {
