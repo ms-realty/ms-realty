@@ -4,6 +4,7 @@ import path from "node:path";
 import { createHttpApp } from "../lib/http.mjs";
 import { close, createNodeServer, listen } from "../lib/node-server.mjs";
 import { approvedPublicSeedFixture } from "../test/approved-public-seed.fixture.mjs";
+import { createPayloadDraftRuntime } from "../test/payload-draft-runtime.fixture.mjs";
 
 const port = Number(process.env.PORT || 4321);
 const sessionToken = "payload.browser.qa";
@@ -65,11 +66,20 @@ const providerPayload = {
     const provider = where?.provider?.equals;
     return { docs: provider ? providerDocuments.filter((row) => row.provider === provider) : providerDocuments };
   },
+  async create() {
+    throw new Error("Browser QA provider writes are disabled");
+  },
+  async update() {
+    throw new Error("Browser QA provider writes are disabled");
+  },
 };
+const payloadListingRuntime = createPayloadDraftRuntime(approvedPublicSeedFixture()).payload;
 
 const app = createHttpApp({
   ...paths,
   seed: approvedPublicSeedFixture(),
+  payloadListingRuntime,
+  payloadListingEnv: {},
   leadContactKey,
   publicContactKey: "browser-qa-public-contact-key-longer-than-thirty-two-characters",
   leadDurableStore,
@@ -109,6 +119,8 @@ const app = createHttpApp({
     metaAppSecret: "browser-qa-meta-secret",
     metaConfigId: "987654321098765",
     metaGraphVersion: "v22.0",
+    metaFacebookPublishReady: true,
+    metaInstagramPublishReady: true,
     metaWebhookVerifyToken: "browser-qa-webhook-token-long-enough",
     viberCommercialReady: true,
     webhookMaxBytes: 1024 * 1024,
