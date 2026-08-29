@@ -26,7 +26,7 @@ import { operatorProviderCards } from "./operator-provider-catalog.mjs";
 
 export const OPERATOR_TOKEN_ENV = "MS_REALTY_OPERATOR_TOKEN";
 const OPERATOR_TOKEN_PLACEHOLDER = `\${${OPERATOR_TOKEN_ENV}}`;
-const OPERATIONAL_PROVIDER_IDS = Object.freeze(["google", "whatsapp", "facebook", "instagram"]);
+const OPERATIONAL_PROVIDER_IDS = Object.freeze(["google", "whatsapp", "facebook", "instagram", "ai"]);
 const SUPPORTING_PROVIDER_IDS = Object.freeze(["viber"]);
 
 const PROMPT_TEMPLATE = `You are now the operations copilot for MS Realty, a family real-estate agency in Sandanski, Bulgaria (legacy sites makler-realty.com and makler-realty.ru; the authoritative public platform runs at __BASE_URL__).
@@ -224,7 +224,7 @@ function ownerConnectionView(card, copy, canManageConnections) {
     viber: copy.viberDisabled,
     cloudflare: copy.cloudflareDisabled,
     neon: copy.neonDisabled,
-    ai: copy.aiProviderHealthy,
+    ai: copy.aiProviderBlocked,
   }[card.id] || "";
   return {
     id: card.id,
@@ -255,14 +255,18 @@ function ownerConnectionView(card, copy, canManageConnections) {
         ? copy.sessionRequired
         : ready
           ? ""
-          : copy.oauthUnavailable
+          : card.id === "ai"
+            ? copy.aiProviderUnavailable
+            : copy.oauthUnavailable
       : "",
     recovery_message: card.owner_connectable
       ? !canManageConnections
         ? copy.sessionRequiredRecovery
         : ready
           ? ""
-          : copy.oauthRecovery
+          : card.id === "ai"
+            ? copy.aiProviderRecovery
+            : copy.oauthRecovery
       : "",
     helper_text: helperText,
     blocked_text:
@@ -273,6 +277,17 @@ function ownerConnectionView(card, copy, canManageConnections) {
           : blockedText,
     model: card.model || "",
     endpoint: card.endpoint || "",
+    credential_form:
+      card.id === "ai" && ownerCanAct && ready
+        ? {
+            endpoint: card.endpoint || "https://openrouter.ai/api/v1/chat/completions",
+            model: card.model || "",
+            endpoint_label: copy.aiProviderEndpoint,
+            model_label: copy.aiProviderModel,
+            api_key_label: copy.aiProviderApiKey,
+            api_key_hint: copy.aiProviderKeyHint,
+          }
+        : null,
   };
 }
 
@@ -345,7 +360,10 @@ export function buildOperatorConnectPayload({
         title: copy.managedHermesTitle,
         description: copy.managedHermesDescription,
         helper_text: copy.aiUsage,
-        ...systemState(availability.ai?.ready === true),
+        ...systemState(
+          cardById.get("ai")?.status === "connected" ||
+            Boolean(providerConfig?.hermes?.endpoint && providerConfig?.hermes?.has_api_key),
+        ),
         model: providerConfig?.hermes?.model || "",
         endpoint: providerConfig?.hermes?.endpoint_redacted || "",
       },

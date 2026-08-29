@@ -11,17 +11,17 @@
 //   token            The provider has no OAuth for this. The operator pastes
 //                    one value and we spend one cheap API call proving it works
 //                    before storing it. Never "saved" on the operator's word.
-//   runtime          The Hermes model provider. Its key is read from the
-//                    process environment by the drafting worker and the repo's
-//                    provisioning contract lists it as never-persist, so this
-//                    card verifies and reports -- it does not collect a key it
-//                    could not make anything do.
+//                    OpenRouter uses the same verified-token shape, with its
+//                    exact endpoint and model beside the password field.
 //
 // A provider whose application has not been registered yet renders as
 // "needs one-time setup" with a plain unavailable/recovery explanation, never
 // as a button that would fail or a credential checklist for the owner.
 
-import { hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
+import {
+  DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL,
+  hermesProviderConfigFromEnv,
+} from "./hermes-provider-provisioning.mjs";
 import {
   GOOGLE_SCOPES,
   createProviderOAuthState,
@@ -169,9 +169,10 @@ const DEFINITIONS = Object.freeze([
   },
   {
     id: "ai",
-    kind: "runtime",
+    kind: "token",
     family: "hermes",
-    setupEnv: ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"],
+    ownerConnectable: true,
+    setupEnv: [],
     setupUrl: "https://openrouter.ai/settings/keys",
   },
 ]);
@@ -266,12 +267,12 @@ const PROVIDER_COVERAGE = Object.freeze({
     consumers: [],
   },
   ai: {
-    state: "managed",
-    ownerSurface: "hermes_status",
-    authorization: "managed_hermes_runtime",
-    reason: "hermes_runtime_managed_outside_owner_connections",
+    state: "enabled",
+    ownerSurface: "credential_form",
+    authorization: "verified_encrypted_api_key",
+    ownerAction: { kind: "credential_form", method: "POST", pathname: "/api/admin/connections" },
     consumers: [
-      { workflow: "guarded_hermes_owner_plans", source_file: "production/lib/admin-hermes.mjs", symbol: "buildAdminHermesPayload" },
+      { workflow: "guarded_hermes_owner_plans", source_file: "production/lib/hermes-owner-command.mjs", symbol: "runHermesOwnerCommand" },
     ],
   },
 });
@@ -294,14 +295,13 @@ export const OPERATOR_PROVIDER_COVERAGE = Object.freeze(
       lifecycle: coverage.state === "enabled" ? OWNER_CONNECTION_LIFECYCLE : [],
       downstream_consumers: Object.freeze(coverage.consumers.map((consumer) => Object.freeze({ ...consumer }))),
       reason: coverage.reason || null,
-      owner_secret_fields: false,
+      owner_secret_fields: definition.id === "ai",
       source_file: "production/lib/operator-provider-catalog.mjs",
     });
   }),
 );
-// Everything except the runtime card is a row in the connection store.
 export const OPERATOR_STORED_PROVIDERS = Object.freeze(
-  DEFINITIONS.filter((definition) => definition.kind !== "runtime").map((definition) => definition.id),
+  DEFINITIONS.map((definition) => definition.id),
 );
 const BY_ID = new Map(DEFINITIONS.map((definition) => [definition.id, definition]));
 
@@ -398,12 +398,9 @@ export function operatorProviderAvailability(config = operatorProviderConfigFrom
     ...state,
     ...store,
   ];
-  // A pasted key only needs somewhere safe to live.
-  const hermes = config.hermes || {};
-  const ai = [
-    ...(trimmed(hermes.endpoint) ? [] : ["HERMES_CHAT_COMPLETIONS_URL"]),
-    ...(hermes.has_api_key ? [] : ["HERMES_API_KEY"]),
-  ];
+  // Endpoint, model and key arrive together in the owner form; before the
+  // provider readback, this path only needs somewhere encrypted to save them.
+  const ai = store;
   const entry = (missing) => ({ ready: missing.length === 0, missing: [...new Set(missing)] });
   return {
     ...base,
@@ -445,11 +442,7 @@ export function operatorProviderCards({
         ? storedStatus
         : !supported
           ? "disabled"
-          : definition.kind === "runtime"
-            ? ready
-              ? "configured"
-              : "disabled"
-            : connected
+          : connected
               ? "connected"
               : ready
                 ? "not_connected"
@@ -464,7 +457,7 @@ export function operatorProviderCards({
       ready,
       scopes: definition.scopes ? [...definition.scopes] : [],
       setup_env: supported
-        ? [...definition.setupEnv, ...(definition.kind === "runtime" ? [] : STORE_ENV)].filter(
+        ? [...definition.setupEnv, ...STORE_ENV].filter(
             (name, index, all) => all.indexOf(name) === index,
           )
         : [],
@@ -472,10 +465,16 @@ export function operatorProviderCards({
       missing: availability[definition.id]?.missing || [],
       account_label: connection?.account_label || "",
       last_verified_at: connection?.last_verified_at || null,
-      // The runtime card reports where it would call and with which model; the
-      // key itself is never read back into the page.
-      endpoint: definition.kind === "runtime" ? hermes.endpoint_redacted || null : null,
-      model: definition.kind === "runtime" ? trimmed(hermes.model) || null : null,
+      // Endpoint and model are safe operational metadata. The credential
+      // envelope is never part of a card or status response.
+      endpoint:
+        definition.id === "ai"
+          ? trimmed(connection?.metadata?.endpoint) || DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL
+          : null,
+      model:
+        definition.id === "ai"
+          ? trimmed(connection?.metadata?.model) || (hermes.mode === "openrouter" ? trimmed(hermes.model) : "") || null
+          : null,
     };
   });
 }
@@ -805,47 +804,90 @@ export async function completeOperatorTokenConnection(
 }
 
 // ---------------------------------------------------------------------------
-// The Hermes model provider: verified, never collected
+// The OpenRouter model provider: verified, then encrypted
 // ---------------------------------------------------------------------------
 
-// One cheap call against the endpoint the drafting worker would use, with the
-// key the worker reads from the environment. The key never enters this page in
-// either direction -- the repo's provisioning contract lists it as never-persist
-// and the worker only ever reads it from the process environment, so a paste
-// field here would store a secret that could not make anything happen.
-export async function verifyOperatorAiProvider({
-  config = operatorProviderConfigFromEnv(),
-  env = process.env,
-  fetchImpl = fetch,
-} = {}) {
-  const availability = operatorProviderAvailability(config);
-  requireReady(availability, "ai");
-  const hermes = config.hermes || {};
-  const models = new URL(hermes.endpoint);
-  models.pathname = models.pathname.replace(/\/chat\/completions\/?$/, "/models");
-  models.search = "";
-  const body = await responseJson(
-    await fetchImpl(models.toString(), {
-      headers: { accept: "application/json", authorization: `Bearer ${trimmed(env.HERMES_API_KEY)}` },
-    }),
-    "AI provider verification",
-  );
-  const listed = Array.isArray(body.data) ? body.data : [];
+export class OperatorProviderConnectionError extends Error {
+  constructor(code, message, cause = null) {
+    super(message);
+    this.name = "OperatorProviderConnectionError";
+    this.code = code;
+    if (cause) this.cause = cause;
+  }
+}
+
+function openRouterInput({ endpoint, model, apiKey }) {
+  const resolvedEndpoint = trimmed(endpoint);
+  if (resolvedEndpoint !== DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL) {
+    throw new OperatorProviderConnectionError(
+      "openrouter_endpoint_invalid",
+      `OpenRouter endpoint must be ${DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL}`,
+    );
+  }
+  const resolvedModel = trimmed(model);
+  if (!resolvedModel || resolvedModel.length > 160 || /[\u0000-\u001f\s]/.test(resolvedModel)) {
+    throw new OperatorProviderConnectionError("openrouter_model_invalid", "OpenRouter model is invalid");
+  }
+  const resolvedKey = String(apiKey || "").trim();
+  if (resolvedKey.length < 20 || /[\u0000-\u0020\u007f]/.test(resolvedKey)) {
+    throw new OperatorProviderConnectionError("openrouter_api_key_invalid", "OpenRouter API key is invalid");
+  }
+  return { endpoint: resolvedEndpoint, model: resolvedModel, apiKey: resolvedKey };
+}
+
+// These two zero-token reads prove separate facts before storage: /key proves
+// that the bearer credential is active, while /models confirms the exact model
+// slug. Neither request sends business content.
+export async function verifyOperatorAiProvider({ endpoint, model, apiKey, fetchImpl = fetch } = {}) {
+  const input = openRouterInput({ endpoint, model, apiKey });
+  let keyBody;
+  let modelsBody;
+  try {
+    const headers = { accept: "application/json", authorization: `Bearer ${input.apiKey}` };
+    keyBody = await responseJson(
+      await fetchImpl("https://openrouter.ai/api/v1/key", { headers }),
+      "OpenRouter API key readback",
+    );
+    modelsBody = await responseJson(
+      await fetchImpl("https://openrouter.ai/api/v1/models", {
+        headers,
+      }),
+      "OpenRouter model readback",
+    );
+  } catch (cause) {
+    throw new OperatorProviderConnectionError(
+      "openrouter_verification_failed",
+      "OpenRouter did not confirm the API key",
+      cause,
+    );
+  }
+  if (!keyBody?.data || typeof keyBody.data !== "object" || Array.isArray(keyBody.data)) {
+    throw new OperatorProviderConnectionError(
+      "openrouter_verification_failed",
+      "OpenRouter did not confirm the API key",
+    );
+  }
+  const listed = Array.isArray(modelsBody.data) ? modelsBody.data : [];
+  if (!listed.some((entry) => trimmed(entry?.id) === input.model)) {
+    throw new OperatorProviderConnectionError(
+      "openrouter_model_unavailable",
+      "OpenRouter did not return the selected model",
+    );
+  }
   return {
     provider: "ai",
     status: "connected",
-    accountLabel: trimmed(hermes.model) || "Hermes model provider",
-    externalAccountId: "",
-    scopes: [],
+    accountLabel: input.model,
+    externalAccountId: input.model,
+    scopes: ["chat.completions"],
     metadata: {
-      mode: hermes.mode || null,
-      endpoint: hermes.endpoint_redacted || null,
-      model: trimmed(hermes.model) || null,
+      mode: "openrouter",
+      endpoint: input.endpoint,
+      model: input.model,
+      key_verified: true,
       models_listed: listed.length,
     },
-    // Deliberately empty: the model key stays in the environment. The row
-    // exists so the card can show a real "checked at" against a real answer.
-    credentials: {},
+    credentials: { api_key: input.apiKey, endpoint: input.endpoint, model: input.model },
   };
 }
 

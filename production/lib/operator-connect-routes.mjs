@@ -124,16 +124,14 @@ async function runSubmit({ provider, input, operatorId, config, deps }) {
     return { outcome: "connected", provider, connection: saved };
   }
   if (provider === "ai") {
-    // Nothing is collected here: the check calls the configured endpoint with
-    // the key the drafting worker reads from the environment and stores only
-    // the fact that it answered.
     const verified = await provider_(deps, "verifyOperatorAiProvider", verifyOperatorAiProvider)({
-      config,
-      env: deps.env,
+      endpoint: input.endpoint,
+      model: input.model,
+      apiKey: input.api_key,
       fetchImpl: deps.fetchImpl,
     });
     const saved = await deps.saveProviderConnection(verified, { ...deps.storeOptions, connectedBy: operatorId });
-    return { outcome: "verified", provider, connection: saved };
+    return { outcome: "connected", provider, connection: saved };
   }
   const connection = await provider_(deps, "completeOperatorTokenConnection", completeOperatorTokenConnection)(
     { provider, token: input.token },

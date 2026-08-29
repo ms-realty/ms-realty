@@ -15,7 +15,7 @@ import { OWNER_CONNECTABLE_PROVIDERS, OPERATOR_PROVIDERS } from "../lib/operator
 import { OPERATOR_AGENT_SECRET_ENV, mintOperatorAgentToken } from "../lib/operator-agent-access.mjs";
 import { OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
 import { payloadAdminPrincipal } from "../lib/payload-admin-auth.mjs";
-import { saveProviderConnection } from "../lib/provider-connections.mjs";
+import { readProviderCredentials, saveProviderConnection } from "../lib/provider-connections.mjs";
 
 const ORIGIN = "https://ms-realty.example";
 const SECRET = "operator-routes-secret-that-is-longer-than-thirty-two-characters";
@@ -182,7 +182,7 @@ test("both servers render only working one-click connections in the persistent o
   });
 });
 
-test("a signed-in Payload owner gets the real Google, WhatsApp, Facebook, and Instagram one-click actions", async (t) => {
+test("a signed-in Payload owner gets four one-click actions and one protected OpenRouter form", async (t) => {
   const app = createHttpApp({
     reviewedAt: "2026-08-24T12:00:00.000Z",
     auditLogPath: auditFile(t),
@@ -201,8 +201,146 @@ test("a signed-in Payload owner gets the real Google, WhatsApp, Facebook, and In
   assert.ok(response.body.includes("/api/admin/connections?provider=instagram&amp;action=start"));
   assert.ok(response.body.includes("data-whatsapp-connect=\"true\""));
   assert.ok(response.body.includes("data-whatsapp-embedded-signup=\"true\""));
-  assert.doesNotMatch(response.body, /<input[^>]+type="password"/);
+  assert.equal((response.body.match(/<input[^>]+type="password"/g) || []).length, 1);
+  assert.match(response.body, /data-provider-credential-form="ai"/);
+  assert.match(response.body, /name="api_key" type="password"[^>]+autocomplete="new-password"/);
   assert.doesNotMatch(response.body, /name="token"/);
+});
+
+test("both owner runtimes verify and encrypt OpenRouter without echoing its key", async (t) => {
+  const apiKey = "sk-or-v1-route-secret-never-rendered";
+  const model = "NousResearch/Hermes-4-14B";
+  const body = new URLSearchParams({
+    provider: "ai",
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model,
+    api_key: apiKey,
+  }).toString();
+  const fetchCalls = [];
+  const providerFetch = async (url, init = {}) => {
+    const requestUrl = String(url);
+    fetchCalls.push({ url: requestUrl, authorization: init.headers?.authorization || "" });
+    const data = requestUrl.endsWith("/key") ? { label: "ms-realty-owner" } : [{ id: model }];
+    return new Response(JSON.stringify({ data }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+  const headers = {
+    cookie: `ms_admin=${SESSION}`,
+    "content-type": "application/x-www-form-urlencoded",
+    host: "ms-realty.example",
+    origin: ORIGIN,
+    "sec-fetch-site": "same-origin",
+  };
+
+  const standalonePayload = providerPayload();
+  const standaloneAudit = auditFile(t);
+  const standalone = await dispatchHttp(
+    createHttpApp({
+      reviewedAt: "2026-08-29T12:00:00.000Z",
+      auditLogPath: standaloneAudit,
+      payloadAdminAuth: payloadAdminAuth(),
+      providerConnection: PROVIDER_CONFIG,
+      providerConnectionPayload: standalonePayload,
+      providerFetch,
+    }),
+    { method: "POST", url: "/api/admin/connections", headers, body },
+  );
+  assert.equal(standalone.status, 303);
+  assert.equal(standalone.headers.location, "/admin/connect?connected=ai");
+  assert.equal(JSON.stringify(standalone).includes(apiKey), false);
+  assert.equal(JSON.stringify(standalonePayload.rows).includes(apiKey), false);
+  assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: standalonePayload }), {
+    api_key: apiKey,
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model,
+  });
+
+  const adapterPayload = providerPayload();
+  const adapterAudit = auditFile(t);
+  const adapter = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections`, { method: "POST", headers, body }),
+    {
+      config: {
+        ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }),
+        reviewedAt: "2026-08-29T12:00:00.000Z",
+        auditLogPath: adapterAudit,
+        payloadAdminAuth: payloadAdminAuth(),
+        providerConnection: PROVIDER_CONFIG,
+        providerConnectionPayload: adapterPayload,
+        providerFetch,
+      },
+    },
+  );
+  assert.equal(adapter.status, 303);
+  assert.equal(adapter.headers.get("location"), "/admin/connect?connected=ai");
+  assert.equal((await adapter.text()).includes(apiKey), false);
+  assert.equal(JSON.stringify(adapterPayload.rows).includes(apiKey), false);
+  assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: adapterPayload }), {
+    api_key: apiKey,
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model,
+  });
+
+  assert.equal(fetchCalls.length, 4);
+  assert.deepEqual(fetchCalls.map((call) => call.url), [
+    "https://openrouter.ai/api/v1/key",
+    "https://openrouter.ai/api/v1/models",
+    "https://openrouter.ai/api/v1/key",
+    "https://openrouter.ai/api/v1/models",
+  ]);
+  assert.ok(fetchCalls.every((call) => call.authorization === `Bearer ${apiKey}`));
+  for (const auditPath of [standaloneAudit, adapterAudit]) {
+    const rows = readAuditLog(auditPath).filter((row) => row.action === "provider_connected");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].object_id, "ai");
+    assert.equal(JSON.stringify(rows).includes(apiKey), false);
+  }
+});
+
+test("OpenRouter verification failures are typed and redacted", async (t) => {
+  const apiKey = "sk-or-v1-rejected-secret-never-rendered";
+  const auditLogPath = auditFile(t);
+  const payload = providerPayload();
+  const response = await dispatchHttp(
+    createHttpApp({
+      reviewedAt: "2026-08-29T12:00:00.000Z",
+      auditLogPath,
+      payloadAdminAuth: payloadAdminAuth(),
+      providerConnection: PROVIDER_CONFIG,
+      providerConnectionPayload: payload,
+      providerFetch: async () =>
+        new Response(JSON.stringify({ error: { message: `rejected ${apiKey}` } }), {
+          status: 401,
+          headers: { "content-type": "application/json" },
+        }),
+    }),
+    {
+      method: "POST",
+      url: "/api/admin/connections",
+      headers: {
+        cookie: `ms_admin=${SESSION}`,
+        "content-type": "application/x-www-form-urlencoded",
+        host: "ms-realty.example",
+        origin: ORIGIN,
+        "sec-fetch-site": "same-origin",
+      },
+      body: new URLSearchParams({
+        provider: "ai",
+        endpoint: "https://openrouter.ai/api/v1/chat/completions",
+        model: "NousResearch/Hermes-4-14B",
+        api_key: apiKey,
+      }).toString(),
+    },
+  );
+  assert.equal(response.status, 303);
+  assert.equal(response.headers.location, "/admin/connect?error=ai");
+  assert.equal(payload.rows.length, 0);
+  const failures = readAuditLog(auditLogPath).filter((row) => row.action === "provider_connection_failed");
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].metadata.error_code, "openrouter_verification_failed");
+  assert.equal(JSON.stringify({ response, failures }).includes(apiKey), false);
 });
 
 test("disconnect revokes, deletes, redirects and writes one audit row", async (t) => {
@@ -373,6 +511,11 @@ test("connection writes need a Payload admin session on both servers", async (t)
     });
     for (const [method, url, body] of [
       ["POST", "/api/admin/connections/disconnect", "provider=neon"],
+      [
+        "POST",
+        "/api/admin/connections",
+        "provider=ai&endpoint=https%3A%2F%2Fopenrouter.ai%2Fapi%2Fv1%2Fchat%2Fcompletions&model=NousResearch%2FHermes-4-14B&api_key=sk-or-v1-must-not-be-used",
+      ],
       ["GET", "/api/admin/connections/agent-config", undefined],
       ["GET", "/api/admin/connections?provider=github&action=start", undefined],
     ]) {

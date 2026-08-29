@@ -20,8 +20,10 @@ function fakePayload(seed = []) {
     docs,
     async find({ where, limit = 10 }) {
       let rows = [...docs];
+      const provider = where?.provider?.equals;
       const key = where?.idempotency_key?.equals;
       const operatorId = where?.operator_id?.equals;
+      if (provider) rows = rows.filter((doc) => doc.provider === provider);
       if (key) rows = rows.filter((doc) => doc.idempotency_key === key);
       if (operatorId) rows = rows.filter((doc) => doc.operator_id === operatorId);
       rows.sort((left, right) => String(right.started_at).localeCompare(String(left.started_at)));
@@ -52,6 +54,30 @@ function fakePayload(seed = []) {
       docs[index] = { ...docs[index], ...data };
       return docs[index];
     },
+  };
+}
+
+function connectedAiProvider({
+  apiKey = "sk-or-v1-stored-openrouter-key-never-rendered",
+  endpoint = "https://openrouter.ai/api/v1/chat/completions",
+  model = "NousResearch/Hermes-4-14B",
+} = {}) {
+  return {
+    provider: "ai",
+    status: "connected",
+    account_label: model,
+    external_account_id: model,
+    scopes: ["chat.completions"],
+    metadata: { mode: "openrouter", endpoint, model },
+    credential_envelope: createPrivateContactEnvelope(
+      {
+        subjectType: "provider_connection",
+        subjectId: "ai",
+        payload: { api_key: apiKey, endpoint, model },
+      },
+      { secret: SECRET, secretName: "MS_REALTY_PROVIDER_TOKEN_KEY", storedAt: STARTED_AT },
+    ),
+    last_verified_at: STARTED_AT,
   };
 }
 
@@ -435,6 +461,71 @@ test("OpenRouter owner-command planning uses the provisioned hosted endpoint", a
   assert.equal(result.model, "openrouter/test-model");
 });
 
+test("Hermes prefers the encrypted owner connection and keeps the managed env fallback", async () => {
+  const storedKey = "sk-or-v1-stored-openrouter-key-never-rendered";
+  const payload = fakePayload([connectedAiProvider({ apiKey: storedKey })]);
+  const timestamps = [STARTED_AT, COMPLETED_AT];
+  let providerCalls = 0;
+  const result = await runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-stored-openrouter" }), {
+    operator,
+    payload,
+    secret: SECRET,
+    // This remains the managed-deployment fallback, but must not win over the
+    // owner-managed Payload connection.
+    env: {
+      HERMES_PROVIDER_MODE: "self_hosted",
+      HERMES_CHAT_COMPLETIONS_URL: "https://managed-hermes.example/v1/chat/completions",
+      HERMES_API_KEY: "managed-fallback-key-that-must-not-be-used",
+      HERMES_MODEL: "managed/fallback-model",
+    },
+    fetchImpl: async (url, init) => {
+      providerCalls += 1;
+      assert.equal(url, "https://openrouter.ai/api/v1/chat/completions");
+      assert.equal(init.headers.authorization, `Bearer ${storedKey}`);
+      assert.match(init.body, /NousResearch\/Hermes-4-14B/);
+      assert.doesNotMatch(init.body, /managed\/fallback-model/);
+      return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(safePlan()) } }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    },
+    now: () => timestamps.shift() || COMPLETED_AT,
+  });
+  assert.equal(providerCalls, 1);
+  assert.equal(result.status, "planned");
+  assert.equal(result.model, "NousResearch/Hermes-4-14B");
+  assert.equal(JSON.stringify(payload.docs).includes(storedKey), false);
+});
+
+test("stored OpenRouter failures expose only a fixed code, never provider or key values", async () => {
+  const storedKey = "sk-or-v1-rejected-openrouter-key-never-rendered";
+  const payload = fakePayload([connectedAiProvider({ apiKey: storedKey })]);
+  const timestamps = [STARTED_AT, COMPLETED_AT];
+  let exposedError;
+  try {
+    await runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-stored-openrouter-failure" }), {
+      operator,
+      payload,
+      secret: SECRET,
+      fetchImpl: async () =>
+        new Response(JSON.stringify({ error: { message: `provider rejected ${storedKey}` } }), {
+          status: 401,
+          headers: { "content-type": "application/json" },
+        }),
+      now: () => timestamps.shift() || COMPLETED_AT,
+    });
+  } catch (error) {
+    exposedError = error;
+  }
+  assert.ok(exposedError instanceof HermesOwnerCommandError);
+  assert.equal(exposedError.code, "hermes_provider_unauthorized");
+  assert.equal(exposedError.status, 503);
+  assert.equal(exposedError.message.includes(storedKey), false);
+  const receipt = payload.docs.find((doc) => doc.idempotency_key === "hermes-owner-stored-openrouter-failure");
+  assert.equal(receipt.failure_code, "hermes_provider_unauthorized");
+  assert.equal(JSON.stringify(payload.docs).includes(storedKey), false);
+});
+
 test("Hermes owner command passes privacy-safe business context to the provider and binds it into the receipt", async () => {
   const payload = fakePayload();
   const timestamps = [STARTED_AT, COMPLETED_AT];
@@ -566,6 +657,31 @@ test("OpenRouter owner-command planning rejects raw contact data before provider
     (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_command_contains_sensitive_data" && error.status === 400,
   );
   assert.equal(providerCalls, 0);
+});
+
+test("the connected OpenRouter credential rejects raw contact data before any provider call", async () => {
+  const payload = fakePayload([connectedAiProvider()]);
+  let providerCalls = 0;
+  await assert.rejects(
+    runHermesOwnerCommand(
+      command({
+        idempotencyKey: "hermes-owner-connected-pii",
+        command: "Prepare a plan for owner@example.com and +359 888 123 456.",
+      }),
+      {
+        operator,
+        payload,
+        secret: SECRET,
+        fetchImpl: async () => {
+          providerCalls += 1;
+          throw new Error("must not call OpenRouter");
+        },
+      },
+    ),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "hermes_command_contains_sensitive_data" && error.status === 400,
+  );
+  assert.equal(providerCalls, 0);
+  assert.equal(payload.docs.some((doc) => doc.idempotency_key === "hermes-owner-connected-pii"), false);
 });
 
 test("OpenRouter owner-command planning does not misclassify bare listing references as phone numbers", async () => {

@@ -16,10 +16,10 @@ const PROVIDERS = new Set([
   "github",
   "cloudflare",
   "neon",
-  // The Hermes model provider. Its row deliberately carries an empty credential
-  // envelope: HERMES_API_KEY is on the repo's never-persist list and the
-  // drafting worker only ever reads it from the process environment. The row
-  // exists so the connect screen can show when the endpoint last answered.
+  // The owner-managed OpenRouter connection. A key submitted through the
+  // signed-in connection form lives only inside this row's encrypted envelope;
+  // the separately managed HERMES_API_KEY environment fallback is never copied
+  // into Payload.
   "ai",
 ]);
 const GOOGLE_SCOPES = [

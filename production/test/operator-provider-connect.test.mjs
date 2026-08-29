@@ -136,7 +136,7 @@ test("every catalogue provider has a card, a title and a sentence in all three l
     cards.filter((card) => card.owner_connectable).map((card) => card.id),
     [...OWNER_CONNECTABLE_PROVIDERS],
   );
-  assert.deepEqual([...OWNER_CONNECTABLE_PROVIDERS], ["google", "whatsapp", "facebook", "instagram"]);
+  assert.deepEqual([...OWNER_CONNECTABLE_PROVIDERS], ["google", "whatsapp", "facebook", "instagram", "ai"]);
   for (const locale of OPERATOR_CONNECT_LOCALES) {
     const copy = operatorConnectCopy(locale);
     for (const card of cards) {
@@ -174,13 +174,14 @@ test("a provider without an active authorization path stays unavailable without 
     assert.ok(byId[id].setup_env.length > 0, `${id} names the settings somebody has to add`);
     assert.ok(byId[id].setup_url, `${id} points at where to add them`);
   }
-  assert.equal(byId.ai.status, "disabled");
+  assert.equal(byId.ai.status, "not_connected");
   // The catalogue still records source-owned configuration metadata for
   // diagnostics, but the owner page never exposes those names.
   assert.ok(byId.github.setup_env.includes("MS_REALTY_GITHUB_OAUTH_CLIENT_ID"));
   assert.ok(byId.github.setup_env.includes("MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET"));
   assert.ok(byId.google_drive.setup_env.includes("MS_REALTY_GOOGLE_OAUTH_CLIENT_ID"));
-  assert.ok(byId.ai.setup_env.includes("HERMES_API_KEY"));
+  assert.ok(byId.ai.setup_env.includes("MS_REALTY_PROVIDER_TOKEN_KEY"));
+  assert.equal(byId.ai.setup_env.some((name) => name.startsWith("HERMES_")), false);
   // Token-only/direct-API providers stay visible but disabled. Their old
   // backend verification helpers remain for existing records; this screen
   // never asks an owner to paste a secret.
@@ -205,6 +206,7 @@ test("a provider without an active authorization path stays unavailable without 
   assert.match(html, /data-provider="whatsapp" data-status="needs_setup"/);
   assert.match(html, /data-provider="facebook" data-status="needs_setup"/);
   assert.match(html, /data-provider="instagram" data-status="needs_setup"/);
+  assert.match(html, /data-provider="ai" data-status="not_connected"/);
   assert.match(html, /data-provider="viber" data-status="disabled"/);
   for (const id of ["facebook", "instagram", "viber"]) {
     assert.equal(html.includes(`/api/admin/connections?provider=${id}&amp;action=start`), false, id);
@@ -214,10 +216,14 @@ test("a provider without an active authorization path stays unavailable without 
   assert.match(html, /Отговорникът за инфраструктурата трябва/);
   assert.doesNotMatch(html, /Свързването е достъпно само във влязла сесия/);
   assert.doesNotMatch(html, /MS_REALTY_[A-Z0-9_]+/);
-  assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon|ai)"/);
+  assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
   assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
   assert.match(html, /data-managed-system="neon" data-status="managed"/);
-  assert.doesNotMatch(html, /<input[^>]+type="password"/);
+  assert.equal((html.match(/<input[^>]+type="password"/g) || []).length, 1);
+  assert.match(html, /data-provider-credential-form="ai"/);
+  assert.match(html, /name="endpoint"[^>]+value="https:\/\/openrouter\.ai\/api\/v1\/chat\/completions"/);
+  assert.match(html, /name="model"[^>]+required/);
+  assert.match(html, /name="api_key" type="password"[^>]+autocomplete="new-password"/);
   assert.doesNotMatch(html, /name="token"/);
 });
 
@@ -275,7 +281,7 @@ test("stored provider rows keep truthful intermediate and unavailable status", (
   assert.equal(byId.google.status, "unavailable");
 });
 
-test("a configured owner page offers exactly the four working one-click handoffs", () => {
+test("a configured owner page offers four one-click handoffs and the protected OpenRouter form", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
     baseUrl: ORIGIN,
@@ -292,8 +298,10 @@ test("a configured owner page offers exactly the four working one-click handoffs
     assert.match(html, new RegExp(`data-provider="${id}"`));
   }
   assert.equal(html.includes("/api/admin/connections?provider=viber&amp;action=start"), false);
-  assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon|ai)"/);
-  assert.doesNotMatch(html, /<input[^>]+type="password"/);
+  assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
+  assert.match(html, /data-provider="ai" data-status="not_connected"/);
+  assert.equal((html.match(/<input[^>]+type="password"/g) || []).length, 1);
+  assert.match(html, /<span>Connect OpenRouter<\/span>/);
   assert.doesNotMatch(html, /name="token"/);
   assert.match(html, /data-managed-system="hermes" data-status="ready"/);
   assert.match(html, /data-managed-system="data" data-status="ready"/);
@@ -585,25 +593,61 @@ test("a pasted key is stored only after the provider itself confirms it", async 
   );
 });
 
-test("the model provider is verified against its real endpoint and its key is never stored", async () => {
-  const config = fullConfig();
+test("OpenRouter verifies the exact endpoint, key, and selected model before encrypted storage", async () => {
+  const apiKey = "sk-or-v1-openrouter-test-key-never-rendered";
   const stub = stubFetch({
+    "https://openrouter.ai/api/v1/key": { body: { data: { label: "ms-realty-owner" } } },
     "https://openrouter.ai/api/v1/models": { body: { data: [{ id: "NousResearch/Hermes-4-14B" }] } },
   });
   const verified = await verifyOperatorAiProvider({
-    config,
-    env: { HERMES_API_KEY: "hermes-key-value" },
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model: "NousResearch/Hermes-4-14B",
+    apiKey,
     fetchImpl: stub.fetchImpl,
   });
   assert.equal(verified.provider, "ai");
   assert.equal(verified.status, "connected");
   assert.equal(verified.metadata.models_listed, 1);
   assert.equal(verified.metadata.model, "NousResearch/Hermes-4-14B");
-  // The chat-completions path became the models path; the key went in a header
-  // and stayed out of the stored envelope entirely.
-  assert.equal(stub.calls[0].url, "https://openrouter.ai/api/v1/models");
-  assert.deepEqual(verified.credentials, {});
-  assert.equal(JSON.stringify(verified).includes("hermes-key-value"), false);
+  // The verification call is a zero-token model listing. The verified secret
+  // stays in the internal connection object only long enough for the existing
+  // store to seal it; the public route returns that store's safe projection.
+  assert.deepEqual(stub.calls.map((call) => call.url), [
+    "https://openrouter.ai/api/v1/key",
+    "https://openrouter.ai/api/v1/models",
+  ]);
+  assert.equal(stub.calls[0].headers.authorization, `Bearer ${apiKey}`);
+  assert.equal(stub.calls[1].headers.authorization, `Bearer ${apiKey}`);
+  assert.deepEqual(verified.credentials, {
+    api_key: apiKey,
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model: "NousResearch/Hermes-4-14B",
+  });
+
+  for (const input of [
+    { endpoint: "https://example.com/api/v1/chat/completions", model: "NousResearch/Hermes-4-14B", apiKey, code: "openrouter_endpoint_invalid" },
+    { endpoint: "https://openrouter.ai/api/v1/chat/completions", model: "bad model", apiKey, code: "openrouter_model_invalid" },
+    { endpoint: "https://openrouter.ai/api/v1/chat/completions", model: "NousResearch/Hermes-4-14B", apiKey: "short", code: "openrouter_api_key_invalid" },
+  ]) {
+    await assert.rejects(
+      verifyOperatorAiProvider({ ...input, fetchImpl: stub.fetchImpl }),
+      (error) => error.code === input.code && !error.message.includes(apiKey),
+    );
+  }
+
+  const unavailable = stubFetch({
+    "https://openrouter.ai/api/v1/key": { body: { data: { label: "ms-realty-owner" } } },
+    "https://openrouter.ai/api/v1/models": { body: { data: [{ id: "another/model" }] } },
+  });
+  await assert.rejects(
+    verifyOperatorAiProvider({
+      endpoint: "https://openrouter.ai/api/v1/chat/completions",
+      model: "NousResearch/Hermes-4-14B",
+      apiKey,
+      fetchImpl: unavailable.fetchImpl,
+    }),
+    (error) => error.code === "openrouter_model_unavailable" && !error.message.includes(apiKey),
+  );
 });
 
 test("disconnecting revokes at the provider and then deletes the row", async () => {
@@ -639,6 +683,23 @@ test("disconnecting revokes at the provider and then deletes the row", async () 
   assert.equal(manual.revoked, false);
   assert.equal(manual.deleted, true);
   assert.deepEqual(cloudflare.deleted, ["cloudflare"]);
+
+  const ai = storeDeps({
+    readProviderCredentials: async () => ({
+      api_key: "sk-or-v1-openrouter-test-key-never-rendered",
+      endpoint: "https://openrouter.ai/api/v1/chat/completions",
+      model: "NousResearch/Hermes-4-14B",
+    }),
+  });
+  const disconnectedAi = await runOperatorConnectionAction({
+    intent: "disconnect",
+    provider: "ai",
+    operatorId: "connect_operator",
+    config,
+    deps: { ...ai.deps, fetchImpl: async () => { throw new Error("must not call"); } },
+  });
+  assert.deepEqual(disconnectedAi, { outcome: "disconnected", provider: "ai", revoked: false, deleted: true });
+  assert.deepEqual(ai.deleted, ["ai"]);
 
   const unavailable = storeDeps({
     readProviderCredentials: async () => {
@@ -719,6 +780,10 @@ test("the assistant's configuration helper stays available as an API and the own
   });
   // The owner page exposes the short-lived credential once in a masked,
   // read-only field and keeps the copied configuration token-free.
+  assert.match(html, /data-summary-kind="connections"/);
+  for (const card of ["google", "whatsapp", "social", "assistant"]) {
+    assert.match(html, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
+  }
   assert.match(html, /data-connection-group="assistant"/);
   assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   assert.equal((html.match(/id="agent-credential"/g) || []).length, 1);
@@ -830,19 +895,24 @@ test("no raw copy keys and no English leak into the Bulgarian or Russian screen"
   }
 });
 
-test("connection credentials are sealed with the same envelope the contact vault uses", async () => {
+test("OpenRouter credentials are sealed with the same envelope the contact vault uses", async () => {
   // The store is the already-tested provider connection store; this holds the
-  // new providers to it, so a Cloudflare key is protected exactly as a Gmail
-  // refresh token is.
+  // new providers to it, so the OpenRouter key, endpoint, and model are
+  // protected exactly as a Gmail refresh token is.
   const { createPrivateContactEnvelope, openPrivateContactEnvelope } = await import("../lib/private-contact-vault.mjs");
+  const credentials = {
+    api_key: "sk-or-v1-openrouter-secret-never-rendered",
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model: "NousResearch/Hermes-4-14B",
+  };
   const envelope = createPrivateContactEnvelope(
-    { subjectType: "provider_connection", subjectId: "cloudflare", payload: { api_token: "cf-secret" } },
+    { subjectType: "provider_connection", subjectId: "ai", payload: credentials },
     { secret: SECRET, secretName: "MS_REALTY_PROVIDER_TOKEN_KEY" },
   );
   assert.equal(envelope.algorithm, "aes-256-gcm");
-  assert.equal(JSON.stringify(envelope).includes("cf-secret"), false);
-  assert.deepEqual(openPrivateContactEnvelope(envelope, { secret: SECRET }).payload, { api_token: "cf-secret" });
-  // The subject is authenticated data, so a Cloudflare envelope cannot be
+  assert.equal(JSON.stringify(envelope).includes(credentials.api_key), false);
+  assert.deepEqual(openPrivateContactEnvelope(envelope, { secret: SECRET }).payload, credentials);
+  // The subject is authenticated data, so an OpenRouter envelope cannot be
   // replayed as another provider's.
   assert.throws(() =>
     openPrivateContactEnvelope({ ...envelope, subject_id: "neon" }, { secret: SECRET }),

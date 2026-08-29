@@ -1,6 +1,11 @@
 import crypto from "node:crypto";
 import { createPrivateContactEnvelope, openPrivateContactEnvelope } from "./private-contact-vault.mjs";
-import { assertHermesChatCompletionsEndpoint, hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
+import {
+  DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL,
+  assertHermesChatCompletionsEndpoint,
+  hermesProviderConfigFromEnv,
+} from "./hermes-provider-provisioning.mjs";
+import { readProviderCredentials } from "./provider-connections.mjs";
 
 export const HERMES_OWNER_COMMAND_MAX_LENGTH = 2_000;
 export const HERMES_OWNER_RECEIPT_REQUEST_TTL_MS = 60_000;
@@ -359,12 +364,35 @@ function providerTransportCode(cause) {
   return "hermes_unavailable";
 }
 
-function openAiCompatibleOwnerCommandProvider({ env, fetchImpl }) {
-  const config = hermesProviderConfigFromEnv(env);
+function connectedOpenRouterConfig(credentials) {
+  if (!credentials || typeof credentials !== "object" || Array.isArray(credentials)) return null;
+  if (Object.keys(credentials).length === 0) return null;
+  const endpoint = String(credentials.endpoint || "").trim();
+  const model = String(credentials.model || "").trim();
+  const apiKey = String(credentials.api_key || "").trim();
+  if (
+    endpoint !== DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL ||
+    !model ||
+    model.length > 160 ||
+    /[\u0000-\u001f\s]/.test(model) ||
+    apiKey.length < 20 ||
+    /[\u0000-\u0020\u007f]/.test(apiKey)
+  ) {
+    throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
+  }
+  return { mode: "openrouter", endpoint, model, apiKey };
+}
+
+async function openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret }) {
+  const stored = connectedOpenRouterConfig(
+    await readProviderCredentials("ai", { credentialSecret: secret, payload }),
+  );
+  const fallback = hermesProviderConfigFromEnv(env);
+  const config = stored || { ...fallback, apiKey: String(env.HERMES_API_KEY || "") };
   if (!["self_hosted", "openrouter"].includes(config.mode)) {
     throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
   }
-  if (!config.endpoint || !config.has_api_key || typeof fetchImpl !== "function") {
+  if (!config.endpoint || !config.apiKey || typeof fetchImpl !== "function") {
     throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
   }
   assertHermesChatCompletionsEndpoint(config.endpoint);
@@ -376,7 +404,7 @@ function openAiCompatibleOwnerCommandProvider({ env, fetchImpl }) {
       try {
         response = await fetchImpl(config.endpoint, {
           method: "POST",
-          headers: { "content-type": "application/json", authorization: `Bearer ${env.HERMES_API_KEY}` },
+          headers: { "content-type": "application/json", authorization: `Bearer ${config.apiKey}` },
           body: JSON.stringify(ownerCommandRequestBody(input, evidence, config.model)),
           signal: AbortSignal.timeout(HERMES_OWNER_COMMAND_TIMEOUT_MS),
         });
@@ -669,7 +697,7 @@ export async function runHermesOwnerCommand(
     providerMode = providerMode || String(env.HERMES_PROVIDER_MODE || "").trim().toLowerCase() || "injected_provider";
     callProvider = provider;
   } else {
-    const resolved = openAiCompatibleOwnerCommandProvider({ env, fetchImpl });
+    const resolved = await openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret });
     model = resolved.model;
     providerMode = resolved.mode;
     callProvider = (request) => resolved.call(request, evidence);
