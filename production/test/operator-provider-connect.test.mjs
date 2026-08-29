@@ -11,6 +11,7 @@ import {
   completeOperatorProviderOAuth,
   completeOperatorTokenConnection,
   operatorProviderAuthorizationUrl,
+  operatorProviderAuthorizationRequest,
   operatorProviderAvailability,
   operatorProviderCards,
   operatorProviderConfigFromEnv,
@@ -180,7 +181,7 @@ test("a provider without an active authorization path stays unavailable without 
     assert.ok(byId[id].setup_env.length > 0, `${id} names the settings somebody has to add`);
     assert.ok(byId[id].setup_url, `${id} points at where to add them`);
   }
-  assert.equal(byId.ai.status, "not_connected");
+  assert.equal(byId.ai.status, "needs_setup");
   // The catalogue still records source-owned configuration metadata for
   // diagnostics, but the owner page never exposes those names.
   assert.ok(byId.github.setup_env.includes("MS_REALTY_GITHUB_OAUTH_CLIENT_ID"));
@@ -212,7 +213,7 @@ test("a provider without an active authorization path stays unavailable without 
   assert.match(html, /data-provider="whatsapp" data-status="needs_setup"/);
   assert.match(html, /data-provider="facebook" data-status="needs_setup"/);
   assert.match(html, /data-provider="instagram" data-status="needs_setup"/);
-  assert.match(html, /data-provider="ai" data-status="not_connected"/);
+  assert.match(html, /data-provider="ai" data-status="needs_setup"/);
   assert.match(html, /data-provider="viber" data-status="disabled"/);
   for (const id of ["facebook", "instagram", "viber"]) {
     assert.equal(html.includes(`/api/admin/connections?provider=${id}&amp;action=start`), false, id);
@@ -225,12 +226,9 @@ test("a provider without an active authorization path stays unavailable without 
   assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
   assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
   assert.match(html, /data-managed-system="neon" data-status="managed"/);
-  assert.equal((html.match(/<input[^>]+type="password"/g) || []).length, 1);
-  assert.match(html, /data-provider-credential-form="ai"/);
-  assert.match(html, /name="endpoint"[^>]+value="https:\/\/openrouter\.ai\/api\/v1\/chat\/completions"/);
-  assert.match(html, /name="model"[^>]+required/);
-  assert.match(html, /name="api_key" type="password"[^>]+autocomplete="new-password"/);
-  assert.doesNotMatch(html, /name="token"/);
+  assert.equal((html.match(/<input\b/g) || []).length, 0);
+  assert.doesNotMatch(html, /data-provider-credential-form/);
+  assert.doesNotMatch(html, /name="(?:api_key|token)"/);
 });
 
 test("a connected card dates itself in words and offers a disclosure with a marker", () => {
@@ -287,7 +285,7 @@ test("stored provider rows keep truthful intermediate and unavailable status", (
   assert.equal(byId.google.status, "unavailable");
 });
 
-test("a configured owner page offers four one-click handoffs and the protected OpenRouter form", () => {
+test("a configured owner page offers five one-click handoffs and no raw credential form", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
     baseUrl: ORIGIN,
@@ -299,14 +297,21 @@ test("a configured owner page offers four one-click handoffs and the protected O
   assert.ok(html.includes('href="/api/admin/connections?provider=google&amp;action=start"'));
   assert.ok(html.includes('href="/api/admin/connections?provider=facebook&amp;action=start"'));
   assert.ok(html.includes('href="/api/admin/connections?provider=instagram&amp;action=start"'));
+  assert.ok(html.includes('href="/api/admin/connections?provider=ai&amp;action=start"'));
   assert.equal((html.match(/data-whatsapp-connect="true"/g) || []).length, 1);
+  assert.equal(
+    (html.match(/(?:href="\/api\/admin\/connections\?provider=(?:google|facebook|instagram|ai)&amp;action=start"|data-whatsapp-connect="true")/g) || []).length,
+    5,
+  );
   for (const id of ["facebook", "instagram", "viber"]) {
     assert.match(html, new RegExp(`data-provider="${id}"`));
   }
   assert.equal(html.includes("/api/admin/connections?provider=viber&amp;action=start"), false);
   assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
   assert.match(html, /data-provider="ai" data-status="not_connected"/);
-  assert.equal((html.match(/<input[^>]+type="password"/g) || []).length, 1);
+  assert.equal((html.match(/<input\b/g) || []).length, 0);
+  assert.doesNotMatch(html, /data-provider-credential-form/);
+  assert.doesNotMatch(html, /name="(?:api_key|token)"/);
   assert.match(html, /<span>Connect OpenRouter<\/span>/);
   assert.doesNotMatch(html, /name="token"/);
   assert.match(html, /data-managed-system="hermes" data-status="ready"/);
@@ -337,6 +342,27 @@ test("OAuth start binds the state to this provider and this operator", () => {
   assert.match(drive.searchParams.get("scope"), /auth\/drive\.file/);
   // drive.file only, never the restricted whole-Drive scope.
   assert.equal(drive.searchParams.get("scope").includes("auth/drive "), false);
+
+  const verifier = "pkce-verifier-abcdefghijklmnopqrstuvwxyz-0123456789";
+  const openRouter = operatorProviderAuthorizationRequest({
+    provider: "ai",
+    config,
+    operatorId: "connect_operator",
+    now: Date.parse("2026-08-29T12:00:00.000Z"),
+    codeVerifier: verifier,
+  });
+  const ai = new URL(openRouter.url);
+  assert.equal(ai.origin + ai.pathname, "https://openrouter.ai/auth");
+  assert.equal(ai.searchParams.get("code_challenge_method"), "S256");
+  assert.equal(
+    ai.searchParams.get("code_challenge"),
+    createHash("sha256").update(verifier).digest("base64url"),
+  );
+  const callback = new URL(ai.searchParams.get("callback_url"));
+  assert.equal(callback.origin + callback.pathname, `${ORIGIN}/api/admin/connections`);
+  assert.equal(callback.searchParams.get("provider"), "ai");
+  assert.equal(callback.searchParams.get("action"), "callback");
+  assert.equal(callback.searchParams.get("state"), openRouter.state);
 });
 
 test("the owner action router accepts Google and Instagram and rejects unused OAuth providers", async () => {

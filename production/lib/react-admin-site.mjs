@@ -11221,67 +11221,6 @@ function connectionIcon(connection) {
 }
 
 function ConnectionAction({ connection }) {
-  if (connection.id === "ai" && connection.can_manage && connection.credential_form) {
-    const form = connection.credential_form;
-    return h(
-      "form",
-      {
-        className: "adm-connection-credential",
-        method: "post",
-        action: "/api/admin/connections",
-        "data-provider-credential-form": "ai",
-      },
-      h("input", { type: "hidden", name: "provider", value: "ai" }),
-      h(
-        "label",
-        { htmlFor: "ai-endpoint" },
-        h("span", null, form.endpoint_label),
-        h("input", {
-          className: "mk-input",
-          id: "ai-endpoint",
-          name: "endpoint",
-          type: "url",
-          inputMode: "url",
-          autoComplete: "off",
-          spellCheck: false,
-          required: true,
-          value: form.endpoint,
-        }),
-      ),
-      h(
-        "label",
-        { htmlFor: "ai-model" },
-        h("span", null, form.model_label),
-        h("input", {
-          className: "mk-input",
-          id: "ai-model",
-          name: "model",
-          type: "text",
-          autoComplete: "off",
-          spellCheck: false,
-          required: true,
-          value: form.model,
-        }),
-      ),
-      h(
-        "label",
-        { htmlFor: "ai-api-key" },
-        h("span", null, form.api_key_label),
-        h("input", {
-          className: "mk-input",
-          id: "ai-api-key",
-          name: "api_key",
-          type: "password",
-          autoComplete: "new-password",
-          minlength: 20,
-          required: true,
-          "aria-describedby": "ai-api-key-hint",
-        }),
-      ),
-      h("small", { id: "ai-api-key-hint" }, form.api_key_hint),
-      h("button", { className: "mk-btn mk-btn--primary mk-btn--sm", type: "submit" }, h(Icon, { name: "link", size: 15 }), h("span", null, connection.action_label)),
-    );
-  }
   if (connection.id === "whatsapp") {
     if (!connection.can_manage) return null;
     return h(
@@ -11374,11 +11313,20 @@ function ConnectionRow({ connection, copy }) {
 function AssistantAccess({ assistant, copy }) {
   const credential = String(assistant?.credential || "");
   const config = String(assistant?.config || "");
-  if (!credential && !config) return null;
+  if (!credential && !config && !assistant?.can_issue) return null;
   const operatorId = assistant?.operator_id || "operator";
   return h(
     "div",
     { className: "adm-assistant-connection__access", "data-assistant-access": "true" },
+    !credential && assistant?.can_issue
+      ? h(
+          "form",
+          { className: "adm-assistant-connection__credential", method: "post", action: assistant.issue_path || "/admin/connect", "data-agent-credential-issue": "true" },
+          h("input", { type: "hidden", name: "action", value: "issue_agent_credential" }),
+          h("button", { className: "mk-btn mk-btn--primary mk-btn--sm", type: "submit" }, h(Icon, { name: "key", size: 15 }), h("span", null, copy.agentIssue)),
+          h("p", { className: "adm-assistant-connection__hint" }, copy.agentIssueHint),
+        )
+      : null,
     credential
       ? h(
           "div",

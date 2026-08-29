@@ -65,6 +65,14 @@ export function operatorAgentSecret(env = process.env) {
   return secret;
 }
 
+export function operatorAgentAccessConfigured(env = process.env) {
+  try {
+    return Boolean(operatorAgentSecret(env));
+  } catch {
+    return false;
+  }
+}
+
 export function operatorAgentTtlDays(env = process.env) {
   const raw = String(env.MS_REALTY_OPERATOR_AGENT_TOKEN_TTL_DAYS || "").trim();
   if (!raw) return DEFAULT_OPERATOR_AGENT_TTL_DAYS;

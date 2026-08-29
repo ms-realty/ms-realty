@@ -75,15 +75,11 @@ export function assertProviderCoverage(
     throw new Error(`Owner provider coverage mismatch: enabled=${JSON.stringify(enabled)}, connectable=${JSON.stringify(connectableProviders)}`);
   }
   for (const row of rows) {
-    const encryptedWriteOnlySecret =
-      row.provider === "ai" &&
-      row.authorization === "verified_encrypted_api_key" &&
-      row.owner_surface === "credential_form";
-    if (row.owner_secret_fields !== encryptedWriteOnlySecret) {
+    if (row.owner_secret_fields !== false) {
       throw new Error(`${row.provider} owner secret-field contract is invalid`);
     }
     if (row.enabled) {
-      if (!["oauth_authorization_code", "provider_embedded_signup", "verified_encrypted_api_key"].includes(row.authorization)) {
+      if (!["oauth_authorization_code", "oauth_pkce", "provider_embedded_signup"].includes(row.authorization)) {
         throw new Error(`${row.provider} is enabled without a provider-authorized handoff`);
       }
       if (!row.owner_action || row.downstream_consumers.length === 0) {

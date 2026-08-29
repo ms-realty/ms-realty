@@ -277,17 +277,6 @@ function ownerConnectionView(card, copy, canManageConnections) {
           : blockedText,
     model: card.model || "",
     endpoint: card.endpoint || "",
-    credential_form:
-      card.id === "ai" && ownerCanAct && ready
-        ? {
-            endpoint: card.endpoint || "https://openrouter.ai/api/v1/chat/completions",
-            model: card.model || "",
-            endpoint_label: copy.aiProviderEndpoint,
-            model_label: copy.aiProviderModel,
-            api_key_label: copy.aiProviderApiKey,
-            api_key_hint: copy.aiProviderKeyHint,
-          }
-        : null,
   };
 }
 
@@ -311,6 +300,7 @@ export function buildOperatorConnectPayload({
   resultTone = "success",
   storeError = false,
   canManageConnections = false,
+  canIssueAgentCredential = false,
 } = {}) {
   const workspace = workspaceForOperator(registry, requestedLocale, operator);
   const copy = operatorConnectCopy(workspace.locale);
@@ -409,6 +399,8 @@ export function buildOperatorConnectPayload({
       credential_env: OPERATOR_TOKEN_ENV,
       credential: String(agentToken || ""),
       expires_at: String(agentExpiresAt || ""),
+      can_issue: Boolean(canManageConnections && canIssueAgentCredential && !agentToken),
+      issue_path: `/admin/connect?locale=${encodeURIComponent(workspace.locale)}`,
     },
     result: result ? { message: result, tone: resultTone === "error" ? "error" : "success" } : null,
     store_error: storeError,
@@ -440,6 +432,7 @@ export function renderOperatorConnectPage(options = {}) {
     resultTone: options.resultTone || "success",
     storeError: options.storeError === true,
     canManageConnections: true,
+    canIssueAgentCredential: options.canIssueAgentCredential === true,
   });
   return renderHtmlPage(page, { bodyHtml: renderReactAdminBody(page) });
 }

@@ -4,6 +4,7 @@
 // expectations rather than trusting that the two code paths agree.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -122,9 +123,11 @@ const HTML_HEADERS = { authorization: `Bearer ${BEARER}`, host: "ms-realty.examp
 
 test("both servers render only working one-click connections in the persistent owner shell", async (t) => {
   await withNamedBearer(async () => {
+    const standaloneAudit = auditFile(t);
+    const adapterAudit = auditFile(t);
     const app = createHttpApp({
       reviewedAt: "2026-08-24T12:00:00.000Z",
-      auditLogPath: auditFile(t),
+      auditLogPath: standaloneAudit,
       providerConnection: PROVIDER_CONFIG,
       providerConnectionPayload: providerPayload(),
       operatorAgentEnv: { [OPERATOR_AGENT_SECRET_ENV]: SECRET },
@@ -135,7 +138,7 @@ test("both servers render only working one-click connections in the persistent o
     const adapter = await renderAppAdminResponse(new Request(`${ORIGIN}/admin/connect?locale=bg`, { headers: HTML_HEADERS }), {
       config: {
         ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
-        auditLogPath: auditFile(t),
+        auditLogPath: adapterAudit,
         authEnv: {
           NODE_ENV: "production",
           MS_REALTY_PUBLIC_ORIGIN: ORIGIN,
@@ -166,26 +169,28 @@ test("both servers render only working one-click connections in the persistent o
       assert.equal((body.match(/<h1\b/g) || []).length, 1, "one page heading");
       assert.equal(body.includes("/api/admin/connections?provider=google&amp;action=start"), false, "bearer view has no OAuth mutation");
       assert.equal(body.includes("data-whatsapp-connect"), false, "bearer view has no embedded-signup mutation");
-      // Both surfaces expose the one-time delegated credential in a masked,
-      // read-only field. The copied configuration names its env slot rather
-      // than embedding either the delegated token or the original bearer.
-      assert.equal((body.match(/id="agent-credential"/g) || []).length, 1, "one assistant credential field");
-      assert.match(body, /id="agent-credential" type="password"[^>]*readonly/);
-      assert.equal((body.match(/data-copy-block="agent-credential"/g) || []).length, 1, "one credential copy action");
-      assert.equal((body.match(/data-copy-block="agent-config"/g) || []).length, 1, "one assistant config action");
+      // GET only renders the handoff. It must not mint or audit a delegated
+      // credential; issuance is an explicit owner POST below.
+      assert.equal((body.match(/id="agent-credential"/g) || []).length, 0, "GET does not mint a credential");
+      assert.equal((body.match(/data-copy-block="agent-credential"/g) || []).length, 0, "GET has no credential copy action");
+      assert.equal((body.match(/data-copy-block="agent-config"/g) || []).length, 1, "GET may copy the token-free bootstrap config");
       assert.match(body, /<details class="adm-assistant-connection__config" data-assistant-config-disclosure="true">/);
       assert.match(body, /MS_REALTY_OPERATOR_TOKEN/);
       assert.equal(body.includes(BEARER), false, "no operator bearer in owner HTML");
       assert.ok(body.includes('data-codex-plugin-install="ms-realty-operator"'), "Codex plugin install link");
       assert.ok(body.includes('<html lang="bg" dir="ltr">'));
     }
+    for (const auditPath of [standaloneAudit, adapterAudit]) {
+      assert.equal(readAuditLog(auditPath).filter((row) => row.action === "operator_agent_token_issued").length, 0);
+    }
   });
 });
 
-test("a signed-in Payload owner gets four one-click actions and one protected OpenRouter form", async (t) => {
+test("a signed-in Payload owner gets five one-click actions and no raw OpenRouter form", async (t) => {
+  const auditLogPath = auditFile(t);
   const app = createHttpApp({
     reviewedAt: "2026-08-24T12:00:00.000Z",
-    auditLogPath: auditFile(t),
+    auditLogPath,
     payloadAdminAuth: payloadAdminAuth(),
     providerConnection: PROVIDER_CONFIG,
     providerConnectionPayload: providerPayload(),
@@ -199,23 +204,102 @@ test("a signed-in Payload owner gets four one-click actions and one protected Op
   assert.ok(response.body.includes("/api/admin/connections?provider=google&amp;action=start"));
   assert.ok(response.body.includes("/api/admin/connections?provider=facebook&amp;action=start"));
   assert.ok(response.body.includes("/api/admin/connections?provider=instagram&amp;action=start"));
+  assert.ok(response.body.includes("/api/admin/connections?provider=ai&amp;action=start"));
   assert.ok(response.body.includes("data-whatsapp-connect=\"true\""));
   assert.ok(response.body.includes("data-whatsapp-embedded-signup=\"true\""));
-  assert.equal((response.body.match(/<input[^>]+type="password"/g) || []).length, 1);
-  assert.match(response.body, /data-provider-credential-form="ai"/);
-  assert.match(response.body, /name="api_key" type="password"[^>]+autocomplete="new-password"/);
+  assert.equal(
+    (response.body.match(/(?:\/api\/admin\/connections\?provider=(?:google|facebook|instagram|ai)&amp;action=start|data-whatsapp-connect="true")/g) || []).length,
+    5,
+  );
+  assert.equal((response.body.match(/<input\b/g) || []).length, 0);
+  assert.doesNotMatch(response.body, /data-provider-credential-form/);
+  assert.doesNotMatch(response.body, /name="(?:api_key|token)"/);
   assert.doesNotMatch(response.body, /name="token"/);
+  assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "operator_agent_token_issued").length, 0);
 });
 
-test("both owner runtimes verify and encrypt OpenRouter without echoing its key", async (t) => {
+test("the owner page GET does not issue a credential, while explicit POST does", async (t) => {
+  const standaloneAudit = auditFile(t);
+  const standalone = createHttpApp({
+    reviewedAt: "2026-08-29T12:00:00.000Z",
+    auditLogPath: standaloneAudit,
+    payloadAdminAuth: payloadAdminAuth(),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: providerPayload(),
+    operatorAgentEnv: { [OPERATOR_AGENT_SECRET_ENV]: SECRET },
+  });
+  const pageHeaders = { cookie: `ms_admin=${SESSION}`, host: "ms-realty.example", accept: "text/html" };
+  const get = await dispatchHttp(standalone, { method: "GET", url: "/admin/connect?locale=en", headers: pageHeaders });
+  assert.equal(get.status, 200);
+  assert.equal((get.body.match(/id="agent-credential"/g) || []).length, 0);
+  assert.equal(readAuditLog(standaloneAudit).filter((row) => row.action === "operator_agent_token_issued").length, 0);
+  const post = await dispatchHttp(standalone, {
+    method: "POST",
+    url: "/admin/connect?locale=en",
+    headers: {
+      ...pageHeaders,
+      "content-type": "application/x-www-form-urlencoded",
+      origin: ORIGIN,
+      "sec-fetch-site": "same-origin",
+    },
+    body: "action=issue_agent_credential",
+  });
+  assert.equal(post.status, 200);
+  assert.match(post.body, /id="agent-credential" type="password"[^>]*readonly/);
+  const standaloneIssued = readAuditLog(standaloneAudit).filter((row) => row.action === "operator_agent_token_issued");
+  assert.equal(standaloneIssued.length, 1);
+  assert.equal(standaloneIssued[0].object_id, "payload-1");
+  assert.equal(JSON.stringify(standaloneIssued).includes("a1."), false);
+
+  const adapterAudit = auditFile(t);
+  const adapter = await renderAppAdminResponse(new Request(`${ORIGIN}/admin/connect?locale=en`, { headers: pageHeaders }), {
+    config: {
+      ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }),
+      reviewedAt: "2026-08-29T12:00:00.000Z",
+      auditLogPath: adapterAudit,
+      authEnv: { NODE_ENV: "production", MS_REALTY_PUBLIC_ORIGIN: ORIGIN, [OPERATOR_AGENT_SECRET_ENV]: SECRET },
+      payloadAdminAuth: payloadAdminAuth(),
+      providerConnection: PROVIDER_CONFIG,
+      providerConnectionPayload: providerPayload(),
+    },
+  });
+  assert.equal(adapter.status, 200);
+  assert.equal((await adapter.text()).match(/id="agent-credential"/g)?.length || 0, 0);
+  assert.equal(readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued").length, 0);
+  const adapterPost = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/admin/connect?locale=en`, {
+      method: "POST",
+      headers: {
+        ...pageHeaders,
+        "content-type": "application/x-www-form-urlencoded",
+        origin: ORIGIN,
+        "sec-fetch-site": "same-origin",
+      },
+      body: "action=issue_agent_credential",
+    }),
+    {
+      config: {
+        ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }),
+        reviewedAt: "2026-08-29T12:00:00.000Z",
+        auditLogPath: adapterAudit,
+        authEnv: { NODE_ENV: "production", MS_REALTY_PUBLIC_ORIGIN: ORIGIN, [OPERATOR_AGENT_SECRET_ENV]: SECRET },
+        payloadAdminAuth: payloadAdminAuth(),
+        providerConnection: PROVIDER_CONFIG,
+        providerConnectionPayload: providerPayload(),
+      },
+    },
+  );
+  assert.equal(adapterPost.status, 200);
+  assert.match(await adapterPost.text(), /id="agent-credential" type="password"[^>]*readonly/);
+  const adapterIssued = readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued");
+  assert.equal(adapterIssued.length, 1);
+  assert.equal(adapterIssued[0].object_id, "payload-1");
+  assert.equal(JSON.stringify(adapterIssued).includes("a1."), false);
+});
+
+test("both owner runtimes complete OpenRouter PKCE and verify one token before storage", async (t) => {
   const apiKey = "sk-or-v1-route-secret-never-rendered";
   const model = "NousResearch/Hermes-4-14B";
-  const body = new URLSearchParams({
-    provider: "ai",
-    endpoint: "https://openrouter.ai/api/v1/chat/completions",
-    model,
-    api_key: apiKey,
-  }).toString();
   const fetchCalls = [];
   const providerFetch = async (url, init = {}) => {
     const requestUrl = String(url);
@@ -223,12 +307,172 @@ test("both owner runtimes verify and encrypt OpenRouter without echoing its key"
       url: requestUrl,
       method: init.method,
       authorization: init.headers?.authorization || "",
-      body: JSON.parse(init.body),
+      body: init.body ? JSON.parse(init.body) : null,
     });
-    return new Response(JSON.stringify({ id: "generation-test", choices: [{ message: { content: "OK" } }] }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
+    if (requestUrl === "https://openrouter.ai/api/v1/auth/keys") {
+      return new Response(JSON.stringify({ key: apiKey, user_id: "openrouter-user" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (requestUrl === "https://openrouter.ai/api/v1/chat/completions") {
+      return new Response(JSON.stringify({ id: "generation-test", choices: [{ message: { content: "OK" } }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    throw new Error(`unstubbed OpenRouter fetch: ${requestUrl}`);
+  };
+  const sessionHeaders = { cookie: `ms_admin=${SESSION}`, host: "ms-realty.example" };
+
+  const standalonePayload = providerPayload();
+  const standaloneAudit = auditFile(t);
+  const standaloneApp = createHttpApp({
+    reviewedAt: "2026-08-29T12:00:00.000Z",
+    auditLogPath: standaloneAudit,
+    payloadAdminAuth: payloadAdminAuth(),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: standalonePayload,
+    providerFetch,
+  });
+  const standaloneStart = await dispatchHttp(standaloneApp, {
+    method: "GET",
+    url: "/api/admin/connections?provider=ai&action=start",
+    headers: sessionHeaders,
+  });
+  assert.equal(standaloneStart.status, 303);
+  const standaloneAuthorization = new URL(standaloneStart.headers.location);
+  assert.equal(standaloneAuthorization.origin + standaloneAuthorization.pathname, "https://openrouter.ai/auth");
+  assert.equal(standaloneAuthorization.searchParams.get("code_challenge_method"), "S256");
+  const standaloneSetCookie = standaloneStart.headers["set-cookie"];
+  assert.match(standaloneSetCookie, /^__Host-ms_realty_openrouter_pkce=/);
+  assert.match(standaloneSetCookie, /Max-Age=600/);
+  assert.match(standaloneSetCookie, /HttpOnly/);
+  assert.match(standaloneSetCookie, /Secure/);
+  assert.match(standaloneSetCookie, /SameSite=Lax/);
+  const standaloneCookiePair = standaloneSetCookie.split(";", 1)[0];
+  const standalonePkce = JSON.parse(
+    Buffer.from(standaloneCookiePair.slice(standaloneCookiePair.indexOf("=") + 1), "base64url").toString("utf8"),
+  );
+  assert.equal(
+    standaloneAuthorization.searchParams.get("code_challenge"),
+    createHash("sha256").update(standalonePkce.verifier).digest("base64url"),
+  );
+  const standaloneCallback = new URL(standaloneAuthorization.searchParams.get("callback_url"));
+  assert.equal(standaloneCallback.searchParams.get("provider"), "ai");
+  assert.equal(standaloneCallback.searchParams.get("action"), "callback");
+  assert.equal(standaloneCallback.searchParams.get("state"), standalonePkce.state);
+  standaloneCallback.searchParams.set("code", "openrouter-code");
+  const standaloneCallbackResponse = await dispatchHttp(standaloneApp, {
+    method: "GET",
+    url: `${standaloneCallback.pathname}${standaloneCallback.search}`,
+    headers: { ...sessionHeaders, cookie: `${sessionHeaders.cookie}; ${standaloneCookiePair}` },
+  });
+  assert.equal(standaloneCallbackResponse.status, 303);
+  assert.equal(standaloneCallbackResponse.headers.location, "/admin/connect?connected=ai");
+  assert.match(standaloneCallbackResponse.headers["set-cookie"], /Max-Age=0/);
+  assert.equal(JSON.stringify(standaloneCallbackResponse).includes(apiKey), false);
+  assert.equal(JSON.stringify(standalonePayload.rows).includes(apiKey), false);
+  assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: standalonePayload }), {
+    api_key: apiKey,
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model,
+  });
+
+  const adapterPayload = providerPayload();
+  const adapterAudit = auditFile(t);
+  const adapterConfig = {
+    ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }),
+    reviewedAt: "2026-08-29T12:00:00.000Z",
+    auditLogPath: adapterAudit,
+    payloadAdminAuth: payloadAdminAuth(),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: adapterPayload,
+    providerFetch,
+  };
+  const adapterStart = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections?provider=ai&action=start`, { headers: sessionHeaders }),
+    { config: adapterConfig },
+  );
+  assert.equal(adapterStart.status, 303);
+  const adapterAuthorization = new URL(adapterStart.headers.get("location"));
+  assert.equal(adapterAuthorization.origin + adapterAuthorization.pathname, "https://openrouter.ai/auth");
+  assert.equal(adapterAuthorization.searchParams.get("code_challenge_method"), "S256");
+  const adapterSetCookie = adapterStart.headers.get("set-cookie");
+  assert.match(adapterSetCookie, /^__Host-ms_realty_openrouter_pkce=/);
+  assert.match(adapterSetCookie, /Max-Age=600/);
+  const adapterCookiePair = adapterSetCookie.split(";", 1)[0];
+  const adapterPkce = JSON.parse(
+    Buffer.from(adapterCookiePair.slice(adapterCookiePair.indexOf("=") + 1), "base64url").toString("utf8"),
+  );
+  assert.equal(
+    adapterAuthorization.searchParams.get("code_challenge"),
+    createHash("sha256").update(adapterPkce.verifier).digest("base64url"),
+  );
+  const adapterCallback = new URL(adapterAuthorization.searchParams.get("callback_url"));
+  assert.equal(adapterCallback.searchParams.get("state"), adapterPkce.state);
+  adapterCallback.searchParams.set("code", "openrouter-code");
+  const adapterCallbackResponse = await renderAppAdminResponse(
+    new Request(`${ORIGIN}${adapterCallback.pathname}${adapterCallback.search}`, {
+      headers: { ...sessionHeaders, cookie: `${sessionHeaders.cookie}; ${adapterCookiePair}` },
+    }),
+    { config: adapterConfig },
+  );
+  assert.equal(adapterCallbackResponse.status, 303);
+  assert.equal(adapterCallbackResponse.headers.get("location"), "/admin/connect?connected=ai");
+  assert.match(adapterCallbackResponse.headers.get("set-cookie"), /Max-Age=0/);
+  assert.equal((await adapterCallbackResponse.clone().text()).includes(apiKey), false);
+  assert.equal(JSON.stringify(adapterPayload.rows).includes(apiKey), false);
+  assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: adapterPayload }), {
+    api_key: apiKey,
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model,
+  });
+
+  assert.equal(fetchCalls.length, 4);
+  for (const [auth, completion, pkce] of [
+    [fetchCalls[0], fetchCalls[1], standalonePkce],
+    [fetchCalls[2], fetchCalls[3], adapterPkce],
+  ]) {
+    assert.equal(auth.url, "https://openrouter.ai/api/v1/auth/keys");
+    assert.equal(auth.method, "POST");
+    assert.deepEqual(auth.body, {
+      code: "openrouter-code",
+      code_verifier: pkce.verifier,
+      code_challenge_method: "S256",
     });
+    assert.equal(completion.url, "https://openrouter.ai/api/v1/chat/completions");
+    assert.equal(completion.method, "POST");
+    assert.equal(completion.authorization, `Bearer ${apiKey}`);
+    assert.deepEqual(completion.body, {
+      model,
+      messages: [{ role: "user", content: "Reply with OK." }],
+      max_tokens: 1,
+      temperature: 0,
+      stream: false,
+    });
+  }
+  for (const auditPath of [standaloneAudit, adapterAudit]) {
+    const rows = readAuditLog(auditPath).filter((row) => row.action === "provider_connected");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].object_id, "ai");
+    assert.equal(rows[0].metadata.external_account_id, "openrouter-user");
+    assert.equal(JSON.stringify(rows).includes(apiKey), false);
+  }
+});
+
+test("raw OpenRouter API-key POST is rejected by both owner runtimes", async (t) => {
+  const apiKey = "sk-or-v1-raw-post-must-never-be-used";
+  const body = new URLSearchParams({
+    provider: "ai",
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    model: "NousResearch/Hermes-4-14B",
+    api_key: apiKey,
+  }).toString();
+  const fetchCalls = [];
+  const providerFetch = async (...args) => {
+    fetchCalls.push(args);
+    throw new Error("raw AI POST must not reach a provider");
   };
   const headers = {
     cookie: `ms_admin=${SESSION}`,
@@ -237,7 +481,6 @@ test("both owner runtimes verify and encrypt OpenRouter without echoing its key"
     origin: ORIGIN,
     "sec-fetch-site": "same-origin",
   };
-
   const standalonePayload = providerPayload();
   const standaloneAudit = auditFile(t);
   const standalone = await dispatchHttp(
@@ -252,14 +495,8 @@ test("both owner runtimes verify and encrypt OpenRouter without echoing its key"
     { method: "POST", url: "/api/admin/connections", headers, body },
   );
   assert.equal(standalone.status, 303);
-  assert.equal(standalone.headers.location, "/admin/connect?connected=ai");
-  assert.equal(JSON.stringify(standalone).includes(apiKey), false);
-  assert.equal(JSON.stringify(standalonePayload.rows).includes(apiKey), false);
-  assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: standalonePayload }), {
-    api_key: apiKey,
-    endpoint: "https://openrouter.ai/api/v1/chat/completions",
-    model,
-  });
+  assert.equal(standalone.headers.location, "/admin/connect?error=ai");
+  assert.equal(standalonePayload.rows.length, 0);
 
   const adapterPayload = providerPayload();
   const adapterAudit = auditFile(t);
@@ -278,71 +515,16 @@ test("both owner runtimes verify and encrypt OpenRouter without echoing its key"
     },
   );
   assert.equal(adapter.status, 303);
-  assert.equal(adapter.headers.get("location"), "/admin/connect?connected=ai");
-  assert.equal((await adapter.text()).includes(apiKey), false);
-  assert.equal(JSON.stringify(adapterPayload.rows).includes(apiKey), false);
-  assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: adapterPayload }), {
-    api_key: apiKey,
-    endpoint: "https://openrouter.ai/api/v1/chat/completions",
-    model,
-  });
-
-  assert.equal(fetchCalls.length, 2);
-  assert.ok(fetchCalls.every((call) => call.url === "https://openrouter.ai/api/v1/chat/completions"));
-  assert.ok(fetchCalls.every((call) => call.method === "POST"));
-  assert.ok(fetchCalls.every((call) => call.authorization === `Bearer ${apiKey}`));
-  assert.ok(fetchCalls.every((call) => call.body.model === model && call.body.max_tokens === 1));
-  assert.ok(fetchCalls.every((call) => JSON.stringify(call.body.messages) === JSON.stringify([{ role: "user", content: "Reply with OK." }])));
+  assert.equal(adapter.headers.get("location"), "/admin/connect?error=ai");
+  assert.equal(adapterPayload.rows.length, 0);
+  assert.equal(fetchCalls.length, 0);
   for (const auditPath of [standaloneAudit, adapterAudit]) {
-    const rows = readAuditLog(auditPath).filter((row) => row.action === "provider_connected");
-    assert.equal(rows.length, 1);
-    assert.equal(rows[0].object_id, "ai");
-    assert.equal(JSON.stringify(rows).includes(apiKey), false);
+    const failures = readAuditLog(auditPath).filter((row) => row.action === "provider_connection_failed");
+    assert.equal(failures.length, 1);
+    assert.equal(failures[0].object_id, "ai");
+    assert.equal(failures[0].metadata.phase, "token_verification");
+    assert.equal(JSON.stringify(failures).includes(apiKey), false);
   }
-});
-
-test("OpenRouter verification failures are typed and redacted", async (t) => {
-  const apiKey = "sk-or-v1-rejected-secret-never-rendered";
-  const auditLogPath = auditFile(t);
-  const payload = providerPayload();
-  const response = await dispatchHttp(
-    createHttpApp({
-      reviewedAt: "2026-08-29T12:00:00.000Z",
-      auditLogPath,
-      payloadAdminAuth: payloadAdminAuth(),
-      providerConnection: PROVIDER_CONFIG,
-      providerConnectionPayload: payload,
-      providerFetch: async () =>
-        new Response(JSON.stringify({ error: { message: `rejected ${apiKey}` } }), {
-          status: 401,
-          headers: { "content-type": "application/json" },
-        }),
-    }),
-    {
-      method: "POST",
-      url: "/api/admin/connections",
-      headers: {
-        cookie: `ms_admin=${SESSION}`,
-        "content-type": "application/x-www-form-urlencoded",
-        host: "ms-realty.example",
-        origin: ORIGIN,
-        "sec-fetch-site": "same-origin",
-      },
-      body: new URLSearchParams({
-        provider: "ai",
-        endpoint: "https://openrouter.ai/api/v1/chat/completions",
-        model: "NousResearch/Hermes-4-14B",
-        api_key: apiKey,
-      }).toString(),
-    },
-  );
-  assert.equal(response.status, 303);
-  assert.equal(response.headers.location, "/admin/connect?error=ai");
-  assert.equal(payload.rows.length, 0);
-  const failures = readAuditLog(auditLogPath).filter((row) => row.action === "provider_connection_failed");
-  assert.equal(failures.length, 1);
-  assert.equal(failures[0].metadata.error_code, "openrouter_verification_failed");
-  assert.equal(JSON.stringify({ response, failures }).includes(apiKey), false);
 });
 
 test("disconnect revokes, deletes, redirects and writes one audit row", async (t) => {
@@ -438,7 +620,7 @@ test("disconnect preserves the row when encrypted credentials cannot be read", a
   assert.equal(payload.rows.length, 1);
 });
 
-test("the assistant configuration route hands back a working config and records the issue", async (t) => {
+test("agent config GET is catalog-only while POST explicitly issues and audits", async (t) => {
   const auditLogPath = auditFile(t);
   const app = createHttpApp({
     reviewedAt: "2026-08-24T12:00:00.000Z",
@@ -454,14 +636,10 @@ test("the assistant configuration route hands back a working config and records 
     origin: ORIGIN,
     "sec-fetch-site": "same-origin",
   };
-  const response = await dispatchHttp(app, { method: "GET", url: "/api/admin/connections/agent-config", headers });
-  assert.equal(response.status, 200);
-  const body = response.body;
-  assert.equal(body.kind, "operator_agent_config");
-  assert.equal(body.mcp_url, `${ORIGIN}/mcp`);
-  assert.match(body.config, /claude mcp add --transport http ms-realty/);
-  assert.match(body.config, /\[mcp_servers\.ms-realty\]/);
-  assert.ok(body.expires_at > "2026-08-24");
+  const unsupportedGet = await dispatchHttp(app, { method: "GET", url: "/api/admin/connections/agent-config", headers });
+  assert.equal(unsupportedGet.status, 405);
+  assert.equal(unsupportedGet.body.kind, "method_not_allowed");
+  assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "operator_agent_token_issued").length, 0);
 
   const catalogResponse = await dispatchHttp(app, {
     method: "GET",
@@ -470,20 +648,69 @@ test("the assistant configuration route hands back a working config and records 
   });
   assert.equal(catalogResponse.status, 200);
   assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
-    assert.equal(catalogResponse.body.summary.total, 118);
-    assert.equal(catalogResponse.body.operations.length, 118);
+  assert.equal(catalogResponse.body.summary.total, 119);
+  assert.equal(catalogResponse.body.operations.length, 119);
   assert.equal(
     catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
     OWNER_OPERATOR_BROWSER_OPERATIONS.length,
   );
   assert.equal("config" in catalogResponse.body, false);
   assert.equal(JSON.stringify(catalogResponse.body).includes("a1."), false);
+  assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "operator_agent_token_issued").length, 0);
+
+  const response = await dispatchHttp(app, { method: "POST", url: "/api/admin/connections/agent-config", headers });
+  assert.equal(response.status, 200);
+  const body = response.body;
+  assert.equal(body.kind, "operator_agent_config");
+  assert.equal(body.mcp_url, `${ORIGIN}/mcp`);
+  assert.match(body.config, /claude mcp add --transport http ms-realty/);
+  assert.match(body.config, /\[mcp_servers\.ms-realty\]/);
+  assert.ok(body.expires_at > "2026-08-24");
+  assert.match(body.credential, /^a1\./);
 
   const issued = readAuditLog(auditLogPath).filter((row) => row.action === "operator_agent_token_issued");
-  assert.ok(issued.length >= 1);
+  assert.equal(issued.length, 1);
   // The audit records that a token was issued and when it dies, never the token.
   assert.equal(JSON.stringify(issued).includes("a1."), false);
   assert.ok(issued.at(-1).metadata.expires_at);
+
+  const adapterAudit = auditFile(t);
+  const adapterConfig = {
+    ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }),
+    reviewedAt: "2026-08-24T12:00:00.000Z",
+    auditLogPath: adapterAudit,
+    authEnv: { NODE_ENV: "production", MS_REALTY_PUBLIC_ORIGIN: ORIGIN, [OPERATOR_AGENT_SECRET_ENV]: SECRET },
+    payloadAdminAuth: payloadAdminAuth(),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: providerPayload(),
+  };
+  const adapterGet = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections/agent-config`, { headers }),
+    { config: adapterConfig },
+  );
+  assert.equal(adapterGet.status, 405);
+  assert.equal((await adapterGet.json()).kind, "method_not_allowed");
+  assert.equal(readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued").length, 0);
+  const adapterCatalog = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections/agent-config?catalog=1`, { headers }),
+    { config: adapterConfig },
+  );
+  assert.equal(adapterCatalog.status, 200);
+  const adapterCatalogBody = await adapterCatalog.json();
+  assert.equal(adapterCatalogBody.kind, "owner_operator_catalog");
+  assert.equal(adapterCatalogBody.summary.total, 119);
+  assert.equal(readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued").length, 0);
+  const adapterPost = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections/agent-config`, { method: "POST", headers }),
+    { config: adapterConfig },
+  );
+  assert.equal(adapterPost.status, 200);
+  const adapterBody = await adapterPost.json();
+  assert.equal(adapterBody.kind, "operator_agent_config");
+  assert.match(adapterBody.credential, /^a1\./);
+  const adapterIssued = readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued");
+  assert.equal(adapterIssued.length, 1);
+  assert.equal(JSON.stringify(adapterIssued).includes("a1."), false);
 
   // Without the signing secret the route says so rather than inventing one.
   const unconfigured = createHttpApp({
@@ -495,7 +722,7 @@ test("the assistant configuration route hands back a working config and records 
     operatorAgentEnv: {},
   });
   const refused = await dispatchHttp(unconfigured, {
-    method: "GET",
+    method: "POST",
     url: "/api/admin/connections/agent-config",
     headers,
   });

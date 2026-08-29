@@ -67,6 +67,7 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/cases"],
   ["GET", "/api/admin/cms-collections"],
   ["GET", "/api/admin/connections/agent-config"],
+  ["POST", "/api/admin/connections/agent-config"],
   ["POST", "/api/admin/connections/disconnect"],
   ["GET", "/api/admin/connections"],
   ["POST", "/api/admin/connections"],
@@ -229,7 +230,7 @@ function operationFamily(pathname) {
 }
 
 function isSensitivePath(pathname) {
-  return /\/accounts?|\/broker-contacts|\/consents|\/contacts|\/data-exports|\/documents|\/hermes|\/leads?|\/replies|\/security\/|\/team/.test(
+  return /\/accounts?|\/broker-contacts|\/connections\/agent-config|\/consents|\/contacts|\/data-exports|\/documents|\/hermes|\/leads?|\/replies|\/security\/|\/team/.test(
     pathname,
   );
 }

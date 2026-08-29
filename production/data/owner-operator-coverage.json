@@ -4,12 +4,12 @@
   "generated_by": "production/scripts/build-owner-operator-coverage.mjs",
   "summary": {
     "admin_route_files": 104,
-    "admin_methods": 118,
+    "admin_methods": 119,
     "admin_pages": 19,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 121,
-    "reachable_workflows": 121,
+    "authorized_workflows": 122,
+    "reachable_workflows": 122,
     "reachability_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -363,7 +363,7 @@
       "tool": "ms_realty_admin_read",
       "capability": "settings:manage",
       "read_only": true,
-      "sensitive": false,
+      "sensitive": true,
       "confirmation": null,
       "idempotency": "existing_admin_route",
       "hermes_access": "none",
@@ -1431,6 +1431,35 @@
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js",
+      "reachability": "admin_ui_and_signed_in_webmcp_open"
+    },
+    {
+      "operation": "admin_post_connections_agent_config",
+      "method": "POST",
+      "pathname": "/api/admin/connections/agent-config",
+      "family": "administration",
+      "tool": "ms_realty_admin_write",
+      "capability": "settings:manage",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "browser_session",
+      "ui_path": "/admin/connect",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/connections/agent-config/route.js",
       "reachability": "admin_ui_and_signed_in_webmcp_open"
     },
     {
@@ -3177,12 +3206,13 @@
       "provider": "ai",
       "state": "enabled",
       "enabled": true,
-      "owner_surface": "credential_form",
-      "authorization": "verified_encrypted_api_key",
+      "owner_surface": "one_click",
+      "authorization": "oauth_pkce",
       "owner_action": {
-        "kind": "credential_form",
-        "method": "POST",
+        "kind": "oauth_redirect",
+        "method": "GET",
         "pathname": "/api/admin/connections",
+        "action": "start",
         "provider": "ai"
       },
       "lifecycle": [
@@ -3200,7 +3230,7 @@
         }
       ],
       "reason": null,
-      "owner_secret_fields": true,
+      "owner_secret_fields": false,
       "source_file": "production/lib/operator-provider-catalog.mjs"
     }
   ]

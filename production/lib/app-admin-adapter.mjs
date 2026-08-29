@@ -19,6 +19,7 @@ import {
   buildOperatorConnectPayload,
   operatorAgentConfigBlock,
   operatorBootstrapPrompt,
+  operatorConnectCopy,
   operatorConnectResult,
 } from "./operator-connect.mjs";
 import { ownerOperatorCatalog } from "./owner-operator-catalog.mjs";
@@ -81,10 +82,12 @@ import {
   OPERATOR_CONNECTION_DISCONNECT_PATH,
   isOperatorOAuthProvider,
   operatorConnectionAudit,
+  operatorConnectionPkceClearCookie,
+  operatorConnectionPkceVerifier,
   operatorConnectionStart,
   runOperatorConnectionAction,
 } from "./operator-connect-routes.mjs";
-import { issueOperatorAgentToken } from "./operator-agent-access.mjs";
+import { issueOperatorAgentToken, operatorAgentAccessConfigured } from "./operator-agent-access.mjs";
 import { ProviderDeliveryError, deliverApprovedProviderMessage } from "./provider-delivery.mjs";
 import { SocialMarketingPublishError, publishApprovedSocialDraft } from "./social-marketing-publishing.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
@@ -4453,7 +4456,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
-    if (request.method === "GET" && url.pathname === "/admin/connect") {
+    if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
+      const canManageConnections = Boolean(
+        payloadSession && principal.source === "payload_session" && principal.roles?.includes("admin"),
+      );
+      let agent = null;
+      if (request.method === "POST") {
+        if (!canManageConnections) return adminForbidden("payload_admin_session");
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        if (input.action !== "issue_agent_credential") return jsonResponse(400, { kind: "bad_request" });
+        agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
+      }
       const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
       let availability = operatorProviderAvailability(providerConfig);
       let connections = [];
@@ -4473,18 +4486,20 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         );
       }
       const connectLocale = url.searchParams.get("locale") || "en";
-      const resultError = Boolean(url.searchParams.get("error")) || storeError;
-      const result = operatorConnectResult({
-        locale: connectLocale,
-        connected: url.searchParams.get("connected") || "",
-        disconnected: url.searchParams.get("disconnected") || "",
-        verified: url.searchParams.get("verified") || "",
-        error: Boolean(url.searchParams.get("error")),
-        storeError,
-      });
+      const agentError = request.method === "POST" && !agent;
+      const resultError = Boolean(url.searchParams.get("error")) || storeError || agentError;
+      const result = agentError
+        ? operatorConnectCopy(connectLocale).agentBlocked
+        : operatorConnectResult({
+            locale: connectLocale,
+            connected: url.searchParams.get("connected") || "",
+            disconnected: url.searchParams.get("disconnected") || "",
+            verified: url.searchParams.get("verified") || "",
+            error: Boolean(url.searchParams.get("error")),
+            storeError,
+          });
       const base =
         String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
-      const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
       if (agent) {
         recordAudit(
           {
@@ -4516,9 +4531,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           result,
           resultTone: resultError ? "error" : "success",
           storeError,
-          canManageConnections: Boolean(
-            payloadSession && principal.source === "payload_session" && principal.roles?.includes("admin"),
-          ),
+          canManageConnections,
+          canIssueAgentCredential: operatorAgentAccessConfigured(config.authEnv || process.env),
         }),
       );
     }
@@ -4553,8 +4567,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         verifyOperatorAiProvider: config.verifyOperatorAiProvider,
         revokeOperatorProvider: config.revokeOperatorProvider,
       };
-      const connectionRedirect = (query) =>
-        new Response(null, { status: 303, headers: { location: `/admin/connect?${query}`, "cache-control": "no-store" } });
+      const connectionRedirect = (query, headers = {}) =>
+        new Response(null, { status: 303, headers: { location: `/admin/connect?${query}`, "cache-control": "no-store", ...headers } });
       const recordConnectionOutcome = (outcome) => {
         const entry = operatorConnectionAudit(outcome, { actor: principal.id });
         if (entry) recordAudit(entry, config);
@@ -4570,10 +4584,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         return adminForbidden("payload_admin_session");
       }
       if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
-        if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
-        if (url.searchParams.get("catalog") === "1") {
+        if (request.method === "GET" && url.searchParams.get("catalog") === "1") {
           return jsonResponse(200, ownerOperatorCatalog(principal));
         }
+        if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
         const agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
         if (!agent) {
           return jsonResponse(503, {
@@ -4639,15 +4653,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         const action = url.searchParams.get("action");
         if (action === "start") {
           try {
+            const start = operatorConnectionStart({
+              provider: requestedProvider,
+              config: providerConfig,
+              operatorId: principal.id,
+            });
             return new Response(null, {
               status: 303,
               headers: {
-                location: operatorConnectionStart({
-                  provider: requestedProvider,
-                  config: providerConfig,
-                  operatorId: principal.id,
-                }),
+                location: start.location,
                 "cache-control": "no-store",
+                ...(start.setCookie ? { "set-cookie": start.setCookie } : {}),
               },
             });
           } catch (error) {
@@ -4656,25 +4672,38 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           }
         }
         if (action === "callback") {
+          const clearCookie = operatorConnectionPkceClearCookie(requestedProvider);
+          const redirectHeaders = clearCookie ? { "set-cookie": clearCookie } : {};
           if (url.searchParams.get("error")) {
             recordProviderConnectionFailure(requestedProvider, "oauth_callback", new Error("provider_rejected"), config);
-            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
+            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`, redirectHeaders);
+          }
+          let codeVerifier = "";
+          try {
+            codeVerifier = operatorConnectionPkceVerifier(request.headers.get("cookie") || "", {
+              provider: requestedProvider,
+              state: url.searchParams.get("state"),
+            });
+          } catch (error) {
+            recordProviderConnectionFailure(requestedProvider, "oauth_callback", error, config);
+            return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`, redirectHeaders);
           }
           const outcome = await runOperatorConnectionAction({
             intent: "callback",
             provider: requestedProvider,
             code: url.searchParams.get("code"),
             state: url.searchParams.get("state"),
+            codeVerifier,
             operatorId: principal.id,
             config: providerConfig,
             deps: connectionDeps,
           });
           if (outcome.outcome === "rejected") {
             recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error, config);
-            return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`);
+            return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
           }
           recordConnectionOutcome(outcome);
-          return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`);
+          return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
         }
       }
       if (request.method === "POST") {

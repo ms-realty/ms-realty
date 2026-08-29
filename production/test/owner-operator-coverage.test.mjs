@@ -34,7 +34,7 @@ const key = (row) => `${row.method} ${row.pathname}`;
 test("owner/operator catalog covers every admin route method exactly once", () => {
   assert.equal(assertOwnerOperatorCatalog(), true);
   const discovered = discoverAdminRoutes();
-  assert.equal(discovered.length, 118);
+  assert.equal(discovered.length, 119);
   assert.equal(new Set(discovered.map((row) => key(row))).size, discovered.length);
   assert.equal(ADMIN_ROUTE_COVERAGE.length, discovered.length);
   assert.deepEqual(
@@ -79,12 +79,12 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   assert.deepEqual(artifact, coverage);
   assert.deepEqual(artifact.summary, {
     admin_route_files: 104,
-    admin_methods: 118,
+    admin_methods: 119,
     admin_pages: ADMIN_PAGE_SURFACES.length,
     nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,
-    authorized_workflows: 121,
-    reachable_workflows: 121,
+    authorized_workflows: 122,
+    reachable_workflows: 122,
     reachability_percent: 100,
     providers: 10,
     enabled_integrations: 5,
@@ -149,10 +149,10 @@ test("provider matrix enables only one-click connections with real consumers", (
   );
 
   for (const row of coverage.provider_matrix) {
-    assert.equal(row.owner_secret_fields, row.provider === "ai", row.provider);
+    assert.equal(row.owner_secret_fields, false, row.provider);
     if (row.enabled) {
       assert.ok(
-        ["oauth_authorization_code", "provider_embedded_signup", "verified_encrypted_api_key"].includes(row.authorization),
+        ["oauth_authorization_code", "oauth_pkce", "provider_embedded_signup"].includes(row.authorization),
         row.provider,
       );
       assert.ok(row.owner_action, row.provider);
@@ -173,16 +173,19 @@ test("provider matrix enables only one-click connections with real consumers", (
     ["cloudflare", "neon"],
   );
   const ai = coverage.provider_matrix.find((row) => row.provider === "ai");
-  assert.equal(ai.authorization, "verified_encrypted_api_key");
+  assert.equal(ai.authorization, "oauth_pkce");
   assert.deepEqual(ai.owner_action, {
-    kind: "credential_form",
-    method: "POST",
+    kind: "oauth_redirect",
+    method: "GET",
     pathname: "/api/admin/connections",
+    action: "start",
     provider: "ai",
   });
 });
 
-test("only the verified encrypted OpenRouter form may accept an owner secret", () => {
+test("every provider forbids owner secret fields while OAuth PKCE remains valid", () => {
+  assert.equal(OPERATOR_PROVIDER_COVERAGE.every((row) => row.owner_secret_fields === false), true);
+
   const nonAiSecret = OPERATOR_PROVIDER_COVERAGE.map((row) =>
     row.provider === "google" ? { ...row, owner_secret_fields: true } : row,
   );
@@ -191,13 +194,15 @@ test("only the verified encrypted OpenRouter form may accept an owner secret", (
     /google owner secret-field contract is invalid/,
   );
 
-  const unverifiedAiSecret = OPERATOR_PROVIDER_COVERAGE.map((row) =>
-    row.provider === "ai" ? { ...row, authorization: "oauth_authorization_code" } : row,
+  const aiSecret = OPERATOR_PROVIDER_COVERAGE.map((row) =>
+    row.provider === "ai" ? { ...row, owner_secret_fields: true } : row,
   );
   assert.throws(
-    () => assertProviderCoverage(unverifiedAiSecret),
+    () => assertProviderCoverage(aiSecret),
     /ai owner secret-field contract is invalid/,
   );
+
+  assert.doesNotThrow(() => assertProviderCoverage(OPERATOR_PROVIDER_COVERAGE));
 });
 
 test("operation inputs are fixed to registry metadata, never caller-supplied paths", () => {
