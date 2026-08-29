@@ -9,6 +9,7 @@ import { buildLeadBriefs } from "./lead-briefs.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingQualityReport } from "./listing-quality.mjs";
 import { CANONICAL_PROPERTY_FAMILIES, propertyFamilyFor } from "./listing-facts.mjs";
+import { isFixtureBrokerId } from "./listing-verification.mjs";
 import {
   buildListingAreaReview,
   buildListingDuplicateReview,
@@ -299,9 +300,11 @@ function adminBrokerProfile(profile, locale) {
     ru: { bg: "Болгароязычная команда", ru: "Русскоязычная команда", international: "Международная команда" },
     en: { bg: "Bulgarian desk", ru: "Russian desk", international: "International desk" },
   };
+  const id = String(profile.id || "").trim();
+  const displayName = String(profile.labels?.[locale] || profile.display_name || profile.name || "").trim();
   return {
     id: profile.id,
-    label: profile.labels?.[locale] || profile.display_name || profile.name || deskLabels[locale]?.[language] || profile.id,
+    label: displayName && !isFixtureBrokerId(displayName) ? displayName : String(profile.email || "").trim() || deskLabels[locale]?.[language] || id,
     languages: profile.languages || [],
   };
 }

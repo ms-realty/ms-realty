@@ -35,6 +35,21 @@ test("assignable broker profiles include only identified admins and brokers", ()
   );
 });
 
+test("assignable broker profiles keep fixture roster ids as routing keys without surfacing them as person names", () => {
+  assert.deepEqual(
+    assignableBrokerProfiles([
+      { id: "broker_bg", name: "broker_bg", role: "broker" },
+      { id: "broker_ru", role: "broker" },
+      { id: "broker_international", name: "broker_international", role: "broker" },
+    ]),
+    [
+      { id: "broker_bg", email: "", name: "", languages: ["bg"] },
+      { id: "broker_ru", email: "", name: "", languages: ["ru"] },
+      { id: "broker_international", email: "", name: "", languages: ["en"] },
+    ],
+  );
+});
+
 function user(overrides = {}) {
   return {
     id: 1,

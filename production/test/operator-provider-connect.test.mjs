@@ -796,6 +796,8 @@ test("the assistant's configuration helper stays available as an API and the own
     assert.match(html, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
   }
   assert.match(html, /data-connection-group="assistant"/);
+  assert.match(html, /data-connection-list="core"/);
+  assert.match(html, /data-connection-group="supporting-disclosure"/);
   assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   assert.equal((html.match(/id="agent-credential"/g) || []).length, 1);
   assert.match(html, /id="agent-credential" type="password"[^>]*readonly/);

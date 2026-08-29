@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, propertyFamilyFor } from "./listing-facts.mjs";
 import { FACT_REVIEW_ROW_KEYS } from "./listing-fact-review.mjs";
+import { isFixtureBrokerId } from "./listing-verification.mjs";
 import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
@@ -2118,7 +2119,10 @@ function reviewerRoleText(copy, ui, value) {
 function brokerProfileText(page, brokerId) {
   const id = String(brokerId || "").trim();
   if (!id) return workbenchCopy(page).notSet;
-  return (page.brokerProfiles || []).find((profile) => profile.id === id)?.label || statusText(workbenchCopy(page), id);
+  const match = (page.brokerProfiles || []).find((profile) => profile.id === id);
+  if (match?.label) return match.label;
+  if (isFixtureBrokerId(id)) return workbenchCopy(page).notSet;
+  return statusText(workbenchCopy(page), id);
 }
 
 const LISTING_EDITOR_FACT_FIELDS = Object.freeze({
@@ -2230,7 +2234,10 @@ function payloadAdminListingHref(listingId, page) {
 }
 
 function currentOperatorId(page, fallback) {
-  return page.workspace?.operator_id || fallback;
+  const operatorId = String(page.workspace?.operator_id || "").trim();
+  if (operatorId) return operatorId;
+  const fallbackId = String(fallback || "").trim();
+  return fallbackId && !isFixtureBrokerId(fallbackId) ? fallbackId : "";
 }
 
 // Display settings (timezone, date format) come from the workspace settings
@@ -2694,6 +2701,7 @@ const OWNER_CONSOLE_COPY = {
       tools: "Възможности на Hermes",
       toolsDescription: "Точните операции, които MCP пакетът предоставя на собственика.",
       guardrails: "Задължителни ограничения",
+      runtimeDetails: "Диагностика на runtime",
       technicalDetails: "Технически детайли и защити",
       ready: "Готово",
       blocked: "Блокирано",
@@ -2805,6 +2813,7 @@ const OWNER_CONSOLE_COPY = {
       tools: "Возможности Hermes",
       toolsDescription: "Точные операции, доступные владельцу через MCP-пакет.",
       guardrails: "Обязательные ограничения",
+      runtimeDetails: "Диагностика runtime",
       technicalDetails: "Технические детали и ограничения",
       ready: "Готово",
       blocked: "Заблокировано",
@@ -2916,6 +2925,7 @@ const OWNER_CONSOLE_COPY = {
       tools: "Hermes capabilities",
       toolsDescription: "The exact operations exposed to the owner by the MCP package.",
       guardrails: "Mandatory guardrails",
+      runtimeDetails: "Runtime diagnostics",
       technicalDetails: "Technical details and safeguards",
       ready: "Ready",
       blocked: "Blocked",
@@ -11201,29 +11211,44 @@ function OwnerOperationsHub({ page }) {
   );
 }
 
+function operatorRolesForPage(page) {
+  const profileRoles = Array.isArray(page?.owner_profile?.roles) ? page.owner_profile.roles.map(String).filter(Boolean) : [];
+  if (profileRoles.length) return profileRoles;
+  return Array.isArray(page?.workspace?.operator_roles) ? page.workspace.operator_roles.map(String).filter(Boolean) : [];
+}
+
+function operatorIdForPage(page) {
+  const profileId = String(page?.owner_profile?.id || "").trim();
+  if (profileId) return profileId;
+  return String(page?.workspace?.operator_id || "").trim();
+}
+
 function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
   const profile = page.owner_profile || {};
+  const roles = operatorRolesForPage(page);
   const hasWorkspaceScope = Array.isArray(profile.workspace_ids);
   const workspaceIds = hasWorkspaceScope ? profile.workspace_ids : [];
-  return profile.full_workspace_access
-    ? copy.fullAccess
-    : hasWorkspaceScope
-      ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length })
-      : copy.scopeUnavailable;
+  if (profile.full_workspace_access || (roles.includes("admin") && hasWorkspaceScope && workspaceIds.length === 0)) return copy.fullAccess;
+  if (roles.includes("admin") && !hasWorkspaceScope && operatorIdForPage(page)) return copy.fullAccess;
+  return hasWorkspaceScope ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length }) : copy.scopeUnavailable;
+}
+
+function ownerRoleLabel(page, copy = ownerConsoleCopy(page).profile) {
+  const roles = operatorRolesForPage(page);
+  return roles.includes("admin") ? copy.administrator : roles.join(", ") || copy.owner;
 }
 
 function OwnerProfileSection({ page }) {
   const profile = page.owner_profile || {};
   const copy = ownerConsoleCopy(page).profile;
-  const roles = Array.isArray(profile.roles) ? profile.roles : [];
   const scope = ownerWorkspaceScope(page, copy);
-  const role = roles.includes("admin") ? copy.administrator : roles.join(", ") || copy.owner;
+  const role = ownerRoleLabel(page, copy);
   const fields = [
     [copy.name, profile.name || ownerIdentityName(page)],
     [copy.email, profile.email],
     [copy.role, role],
     [copy.scope, scope],
-    [copy.operatorId, profile.id],
+    [copy.operatorId, operatorIdForPage(page)],
   ].filter(([, value]) => value);
   return h(
     "section",
@@ -11231,7 +11256,7 @@ function OwnerProfileSection({ page }) {
     h(
       "div",
       { className: "crm-panel__hd adm-owner-profile__heading" },
-      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, scope)),
+      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, scope].filter(Boolean).join(" · "))),
     ),
     h(
       "dl",
@@ -11256,6 +11281,14 @@ function connectionTone(status) {
   if (status === "connected" || status === "ready") return "success";
   if (status === "attention" || status === "needs_setup") return "brick";
   return "sand";
+}
+
+function connectionListKind(connectionId) {
+  return ["google", "google_drive", "whatsapp", "ai"].includes(connectionId) ? "core" : "secondary";
+}
+
+function connectionGroupSummary(title, rows) {
+  return `${title} · ${rows.length}`;
 }
 
 function connectionIcon(connection) {
@@ -11362,7 +11395,13 @@ function ConnectionRow({ connection, copy }) {
   const connected = connection.status === "connected";
   return h(
     "li",
-    { className: "adm-connection-row", "data-provider": connection.id, "data-status": connection.status },
+    {
+      className: "adm-connection-row",
+      id: `connection-${connection.id}`,
+      "data-provider": connection.id,
+      "data-status": connection.status,
+      "data-connection-kind": connectionListKind(connection.id),
+    },
     h(
       "div",
       { className: "adm-connection-row__summary" },
@@ -11489,6 +11528,7 @@ function ConnectionsBody({ page }) {
   const connections = Array.isArray(page.connections) ? page.connections : [];
   const supporting = Array.isArray(page.supporting_connections) ? page.supporting_connections : [];
   const managed = Array.isArray(page.managed_systems) ? page.managed_systems : [];
+  const primaryConnectionIds = new Set(["google", "google_drive", "whatsapp", "ai"]);
   const connectionById = (rows, id) => rows.find((row) => row.id === id) || null;
   const readyCount = (rows) => rows.filter((row) => ["connected", "ready"].includes(row.status)).length;
   const socialConnections = [...connections, ...supporting]
@@ -11496,6 +11536,8 @@ function ConnectionsBody({ page }) {
     .filter((row, index, rows) => rows.findIndex((candidate) => candidate.id === row.id) === index);
   const google = connectionById(connections, "google");
   const whatsappConnection = connectionById(connections, "whatsapp");
+  const primaryConnections = connections.filter((connection) => primaryConnectionIds.has(connection.id));
+  const secondaryWorkAccounts = connections.filter((connection) => !primaryConnectionIds.has(connection.id));
   const assistantReady = Boolean(page.assistant?.credential || page.assistant?.config || page.assistant?.plugin_url);
   const socialReadyCount = readyCount(socialConnections);
   const summaryCards = [
@@ -11578,13 +11620,17 @@ function ConnectionsBody({ page }) {
             Panel,
             { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
             h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
-            h("ul", { className: "adm-connection-list" }, ...connections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
-          ),
-          h(
-            Panel,
-            { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
-            h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
-            h("ul", { className: "adm-connection-list" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+            h("ul", { className: "adm-connection-list", "data-connection-list": "core" }, ...primaryConnections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+            secondaryWorkAccounts.length
+              ? h(
+                  WorkbenchDisclosure,
+                  {
+                    summary: connectionGroupSummary(copy.workAccountsTitle, secondaryWorkAccounts),
+                    "data-connection-group": "secondary-work-accounts",
+                  },
+                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...secondaryWorkAccounts.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                )
+              : null,
           ),
           h(
             Panel,
@@ -11612,6 +11658,21 @@ function ConnectionsBody({ page }) {
               h(AssistantAccess, { assistant: page.assistant, copy }),
             ),
           ),
+          supporting.length
+            ? h(
+                Panel,
+                { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
+                h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
+                h(
+                  WorkbenchDisclosure,
+                  {
+                    summary: connectionGroupSummary(copy.additionalChannelsTitle, supporting),
+                    "data-connection-group": "supporting-disclosure",
+                  },
+                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                ),
+              )
+            : null,
         ),
         h(
           "aside",
@@ -11923,7 +11984,7 @@ function HermesBody({ page }) {
               h(
                 "details",
                 { className: "adm-hermes-diagnostics", "data-hermes-diagnostics": "collapsed" },
-                h("summary", null, h(Icon, { name: "settings", size: 16 }), h("span", null, copy.technicalDetails)),
+                h("summary", null, h(Icon, { name: "settings", size: 16 }), h("span", null, copy.runtimeDetails)),
                 h(
                   "div",
                   { className: "adm-hermes-diagnostics__body" },
@@ -11975,18 +12036,25 @@ function HermesBody({ page }) {
             ),
           ),
           h(
-            Panel,
-            { title: copy.desktop, "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked" },
+            WorkbenchDisclosure,
+            {
+              summary: `${copy.desktop} · ${queue.eligible_for_desktop || 0}`,
+              "data-hermes-desktop-card": bridgeReady ? "ready" : "blocked",
+            },
             h(
-              "div",
-              { className: "adm-hermes-card" },
-              h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
-              h(StatGrid, {
-                metrics: [
-                  [copy.eligible, queue.eligible_for_desktop || 0],
-                  [copy.withheld, queue.withheld_sensitive || 0],
-                ],
-              }),
+              Panel,
+              { title: copy.desktop },
+              h(
+                "div",
+                { className: "adm-hermes-card" },
+                h("div", { className: "adm-hermes-card__state" }, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked), h("p", null, copy.desktopDescription)),
+                h(StatGrid, {
+                  metrics: [
+                    [copy.eligible, queue.eligible_for_desktop || 0],
+                    [copy.withheld, queue.withheld_sensitive || 0],
+                  ],
+                }),
+              ),
             ),
           ),
           h(

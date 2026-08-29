@@ -2405,6 +2405,29 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .crm-app main[data-react-admin-ui="hermes"] .adm-workbench-rail {
   gap: var(--space-3);
 }
+.crm-app main[data-react-admin-ui="connections"] .adm-connection-list {
+  gap: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="connections"] .adm-connection-list[data-connection-list="core"] {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.crm-app main[data-react-admin-ui="connections"] .adm-connection-list[data-connection-list="secondary"] {
+  padding-top: var(--space-3);
+}
+.crm-app main[data-react-admin-ui="connections"] .adm-connection-row {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.crm-app main[data-react-admin-ui="connections"] .adm-connection-row__summary,
+.crm-app main[data-react-admin-ui="connections"] .adm-connection-row__state {
+  gap: var(--space-2);
+}
 .adm-connection-row__summary { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: var(--space-3); min-width: 0; }
 .adm-connection-row__icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: var(--radius-md); background: var(--surface-sunken); color: var(--text-muted); }
 .adm-connection-row h3,
@@ -2453,8 +2476,38 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-assistant-connection__copy-status { margin: 0; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
 .adm-assistant-connection__copy-status[data-state="success"] { color: var(--success-600); font-weight: var(--fw-semibold); }
 .adm-assistant-connection__copy-status[data-state="error"] { color: var(--brick-600); font-weight: var(--fw-semibold); }
+.crm-app main[data-react-admin-ui="connections"] .adm-workbench-disclosure {
+  margin: 0 var(--space-5) var(--space-5);
+}
+.crm-app main[data-react-admin-ui="connections"] .adm-workbench-disclosure > summary {
+  min-height: 44px;
+  background: var(--surface-sunken);
+}
 
 @media (max-width: 700px) {
+  .crm-app main[data-react-admin-ui="connections"] .adm-workbench-shell,
+  .crm-app main[data-react-admin-ui="hermes"] .adm-workbench-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .crm-app main[data-react-admin-ui="connections"] .adm-workbench-rail,
+  .crm-app main[data-react-admin-ui="hermes"] .adm-workbench-rail {
+    grid-column: 1;
+    min-width: 0;
+  }
+  .crm-app main[data-react-admin-ui="hermes"] [data-hermes-runtime-card] > .crm-panel__hd {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .crm-app main[data-react-admin-ui="hermes"] .adm-hermes-panel-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .crm-app main[data-react-admin-ui="hermes"] .adm-hermes-panel-actions .mk-btn {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+  }
   .adm-connection-row,
   .adm-managed-system-list > li { grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: var(--space-3); padding: var(--space-4); }
   .adm-connections-section-copy { padding-inline: var(--space-4); }
@@ -2471,6 +2524,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-assistant-connection .crm-panel__hd .mk-btn { width: 100%; justify-content: center; }
   .adm-assistant-connection__copy { padding-inline: var(--space-4); }
   .adm-assistant-connection__credential-input { flex-basis: 100%; }
+  .crm-app main[data-react-admin-ui="connections"] .adm-workbench-disclosure { margin-inline: var(--space-4); }
 }
 
 /* ---- Listing photo upload (media manager) ---- */
@@ -2763,7 +2817,6 @@ html[data-theme="dark"] .crm-top {
 .adm-summary-strip[data-summary-kind="settings"] .adm-summary-card__value {
   font-size: clamp(1rem, 0.95rem + 0.22vw, 1.2rem);
 }
-
 /* The local editor index stays visible while the operator moves through the
    long form. A solid surface avoids the fuzzy, stacked-card effect of the
    previous translucent tab rail. */

@@ -93,6 +93,11 @@ test("connections and Hermes keep supporting state in-flow instead of sticky sid
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-shell,[\s\S]*grid-template-columns:\s*minmax\(0, 1\.12fr\)\s+minmax\(280px, 0\.88fr\)/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-rail,[\s\S]*position:\s*static/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="hermes"\] \.adm-workbench-rail[\s\S]*inline-size:\s*100%/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-list\[data-connection-list="core"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-row\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-disclosure > summary\s*\{[^}]*min-height:\s*44px/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?main\[data-react-admin-ui="connections"\] \.adm-workbench-shell,[\s\S]*?main\[data-react-admin-ui="hermes"\] \.adm-workbench-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?main\[data-react-admin-ui="hermes"\] \.adm-hermes-panel-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
 });
 
 test("requests and Hermes use disclosure for secondary detail instead of primary clutter", () => {

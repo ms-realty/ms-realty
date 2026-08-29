@@ -151,7 +151,9 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.match(html, /data-hermes-runtime="blocked"/);
   assert.match(html, /data-hermes-readiness="true"/);
   assert.match(html, /<details class="adm-hermes-diagnostics" data-hermes-diagnostics="collapsed">/);
+  assert.match(html, /Runtime diagnostics/);
   assert.match(html, /<details class="adm-hermes-safeguards" data-hermes-safeguards="collapsed">/);
+  assert.match(html, /class="adm-workbench-disclosure" data-hermes-desktop-card="ready"/);
   assert.match(html, /data-hermes-next-task="/);
   const queueCounts = html.match(/data-hermes-task-count="(\d+)" data-hermes-task-visible="(\d+)"/);
   assert.ok(queueCounts, "remaining queue contract present");
