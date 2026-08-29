@@ -1374,7 +1374,31 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const redirectWorkbookRows = parseCsv(redirectWorkbookCsv);
       assert.equal(redirectWorkbookRows[0].source_status, "200");
       assert.ok(redirectWorkbookRows[0].source_title);
-      assert.ok(redirectWorkbookRows[0].review_owner);
+      assert.equal(redirectWorkbookRows[0].review_owner, "unassigned");
+
+      const spoofedRedirectApproval = await redirectApprovalsRoute.POST(
+        new Request("https://example.test/api/admin/redirect-approvals", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            oldUrl: firstRedirect.old_url,
+            equivalentContent: true,
+            reviewer: "seo_editor",
+          }),
+        }),
+      );
+      assert.equal(spoofedRedirectApproval.status, 400);
+      assert.match((await spoofedRedirectApproval.json()).message, /authenticated operator/);
+
+      const spoofedRedirectImport = await redirectApprovalsImportRoute.POST(
+        new Request("https://example.test/api/admin/redirect-approvals/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,seo_editor\n`,
+        }),
+      );
+      assert.equal(spoofedRedirectImport.status, 400);
+      assert.match((await spoofedRedirectImport.json()).message, /authenticated operator/);
 
       const redirectApproval = await redirectApprovalsRoute.POST(
         new Request("https://example.test/api/admin/redirect-approvals", {
@@ -1383,7 +1407,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           body: JSON.stringify({
             oldUrl: firstRedirect.old_url,
             equivalentContent: true,
-            reviewer: "seo_editor",
+            reviewer: "unassigned",
           }),
         }),
       );
@@ -1406,7 +1430,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/api/admin/redirect-approvals/import", {
           method: "POST",
           headers: { ...auth, "content-type": "text/csv" },
-          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,seo_editor\n`,
+          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,unassigned\n`,
         }),
       );
       const redirectImportBody = await redirectImport.json();
@@ -1984,6 +2008,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         seller_pipeline_outcome_recorded: 1,
         deal_closed: 1,
       });
+      for (const action of [
+        "seo_evidence_imported",
+        "redirect_approval_created",
+        "redirect_approvals_imported",
+        "deployable_redirects_exported",
+      ]) {
+        assert.equal(auditRows.find((row) => row.action === action).actor, "unassigned");
+      }
       const viewingFollowUpAudit = readAuditLog(auditLogPath).find((row) => row.action === "viewing_follow_up_recorded");
       assert.equal(viewingFollowUpAudit.metadata.note, undefined);
       const sellerPipelineAudits = auditRows.filter((row) => row.action === "seller_pipeline_outcome_recorded");

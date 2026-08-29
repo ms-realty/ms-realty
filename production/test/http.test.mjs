@@ -1344,6 +1344,17 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
   });
 
+  const spoofed = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      oldUrl: listing.old_url,
+      equivalentContent: true,
+      reviewer: "seo_editor",
+      reason: "This submitted identity must not be trusted.",
+    },
+  });
   const approved = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/redirect-approvals",
@@ -1351,7 +1362,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     body: {
       oldUrl: listing.old_url,
       equivalentContent: true,
-      reviewer: "editor_bg",
+      reviewer: "unassigned",
       reason: "Reviewed listing parity in migration workbench.",
     },
   });
@@ -1365,7 +1376,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     body: new URLSearchParams({
       oldUrl: ruListing.old_url,
       equivalentContent: "true",
-      reviewer: "ru_preservation_editor",
+      reviewer: "unassigned",
       reason: "Reviewed same-content Russian route mapping.",
     }).toString(),
   });
@@ -1376,7 +1387,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     body: {
       oldUrl: taxonomy.old_url,
       equivalentContent: true,
-      reviewer: "editor_bg",
+      reviewer: "unassigned",
     },
   });
   const unauthorized = await dispatchHttp(app, {
@@ -1508,6 +1519,15 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/payload-collections",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const spoofedImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals/import",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "text/csv",
+    },
+    body: `old_url,equivalent_content,reviewer,approved_at,reason\n${importListing.old_url},true,seo_editor,2026-07-05T00:01:00Z,Rejected spoof\n`,
+  });
   const imported = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/redirect-approvals/import",
@@ -1515,7 +1535,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       authorization: "Bearer local-admin-smoke",
       "content-type": "text/csv",
     },
-    body: `old_url,equivalent_content,reviewer,approved_at,reason\n${importListing.old_url},true,editor_bg,2026-07-05T00:01:00Z,Reviewed via CSV\n`,
+    body: `old_url,equivalent_content,reviewer,approved_at,reason\n${importListing.old_url},true,unassigned,2026-07-05T00:01:00Z,Reviewed via CSV\n`,
   });
   const formImported = await dispatchHttp(app, {
     method: "POST",
@@ -1525,7 +1545,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       "content-type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      csv: `old_url,equivalent_content,reviewer,approved_at,reason\n${importRuListing.old_url},true,ru_preservation_editor,2026-07-05T00:02:00Z,Reviewed via pasted CSV\n`,
+      csv: `old_url,equivalent_content,reviewer,approved_at,reason\n${importRuListing.old_url},true,unassigned,2026-07-05T00:02:00Z,Reviewed via pasted CSV\n`,
     }).toString(),
   });
   const pendingWorkbook = await dispatchHttp(app, {
@@ -1550,6 +1570,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     headers: { authorization: "Bearer local-admin-smoke" },
   });
 
+  assert.equal(spoofed.status, 400);
+  assert.match(spoofed.body.message, /authenticated operator/);
   assert.equal(approved.status, 201);
   assert.equal(approved.body.approval.old_url, listing.old_url);
   assert.equal(approved.body.approval.deployable, true);
@@ -1570,7 +1592,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(redirectWorkbookRows.length, 457);
   assert.equal(redirectWorkbookRows[0].source_status, "200");
   assert.ok(redirectWorkbookRows[0].source_title);
-  assert.ok(redirectWorkbookRows[0].review_owner);
+  assert.equal(redirectWorkbookRows[0].review_owner, "unassigned");
   assert.equal(qualityWorkbookUnauthorized.status, 401);
   assert.equal(qualityWorkbook.status, 200);
   assert.equal(qualityWorkbook.headers["content-type"], "text/csv; charset=utf-8");
@@ -1689,6 +1711,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     payloadCollections.body.collections.every((collection) => collection.versions === false || collection.versions.drafts),
     true,
   );
+  assert.equal(spoofedImport.status, 400);
+  assert.match(spoofedImport.body.message, /authenticated operator/);
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
@@ -1820,6 +1844,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     redirect_approvals_imported: 2,
     deployable_redirects_exported: 1,
   });
+  for (const action of ["redirect_approval_created", "redirect_approvals_imported", "deployable_redirects_exported"]) {
+    assert.ok(auditRows.filter((row) => row.action === action).every((row) => row.actor === "unassigned"));
+  }
 });
 
 test("HTTP admin persists complete listing quality review CSV as launch evidence", async () => {

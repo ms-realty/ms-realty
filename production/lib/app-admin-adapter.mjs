@@ -332,6 +332,7 @@ import {
 import { loadCmsSeed } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
+import { parseCsv } from "./csv.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -3556,7 +3557,9 @@ function appendListingSlugChange(registry, input, config) {
 }
 
 function appendRedirectApprovalRow(input, config) {
-  const approval = appendRedirectApproval(routeMapRows(), redirectApprovalInput(input), {
+  const principal = { id: config.adminPrincipal?.id || "unassigned" };
+  const attributed = bindAuthenticatedOperator(redirectApprovalInput(input), principal, ["reviewer"]);
+  const approval = appendRedirectApproval(routeMapRows(), attributed, {
     filePath: config.redirectApprovalPath,
     approvedAt: config.reviewedAt,
   });
@@ -3580,6 +3583,10 @@ function appendRedirectApprovalRow(input, config) {
 }
 
 function importRedirectApprovalRows(csvText, config) {
+  const principal = { id: config.adminPrincipal?.id || "unassigned" };
+  for (const row of parseCsv(csvText)) {
+    bindAuthenticatedOperator(row, principal, ["reviewer"]);
+  }
   const imported = importRedirectApprovalsCsv(routeMapRows(), csvText, {
     filePath: config.redirectApprovalPath,
     approvedAt: config.reviewedAt,
@@ -3587,7 +3594,7 @@ function importRedirectApprovalRows(csvText, config) {
   recordAudit(
     {
       action: "redirect_approvals_imported",
-      actor: "seo_editor",
+      actor: principal.id,
       objectType: "redirect_import",
       objectId: `redirect-import-${imported.length}`,
       metadata: { imported: imported.length },
@@ -3610,7 +3617,7 @@ function exportDeployableRedirectRows(config) {
   recordAudit(
     {
       action: "deployable_redirects_exported",
-      actor: "seo_editor",
+      actor: config.adminPrincipal?.id || "unassigned",
       objectType: "redirect_export",
       objectId: "deployable-redirects",
       metadata: { exported: rows.length, terminal_decisions: decisions.length, total: exported.summary?.total },
@@ -3742,7 +3749,7 @@ function importSeoEvidence(input, config) {
   recordAudit(
     {
       action: "seo_evidence_imported",
-      actor: "seo_editor",
+      actor: config.adminPrincipal?.id || "unassigned",
       objectType: "seo_evidence",
       objectId: input.source,
       metadata: {

@@ -9,5 +9,6 @@ const contentEvidence = loadMigrationContentEvidence(records, { evidenceDir: con
 const { outPath, summary } = writeMigrationReviewQueue(buildMigrationReviewQueue(records, routes, contentEvidence));
 
 console.log(`Wrote ${summary.total} migration review rows to ${outPath}`);
-console.log(`Owners: ${JSON.stringify(summary.byOwner)}`);
+console.log(`Assignments: ${JSON.stringify(summary.byOwner)}`);
+console.log(`Roles: ${JSON.stringify(summary.byRole)}`);
 console.log(`Content evidence: ${JSON.stringify(contentEvidence.summary)}`);

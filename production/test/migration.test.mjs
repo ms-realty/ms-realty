@@ -107,7 +107,7 @@ test("generated legacy route map file is valid when present", () => {
   assert.equal(data.routes.length, 457);
 });
 
-test("migration review queue assigns owners without making rows deployable", () => {
+test("migration review queue assigns roles without inventing reviewers or making rows deployable", () => {
   const records = normalizeMigrationRecords(loadCrawlArtifact());
   const routeMap = buildLegacyRouteMap(loadLocaleRegistry(), records, loadListings());
   const queue = buildMigrationReviewQueue(records, routeMap);
@@ -117,10 +117,12 @@ test("migration review queue assigns owners without making rows deployable", () 
   assert.equal(summary.ruRows, 179);
   assert.equal(summary.nonListingUnmapped, 292);
   assert.equal(summary.listingRedirectReviews, 165);
-  assert.equal(summary.byOwner.ru_preservation_editor, 179);
-  assert.equal(summary.byOwner.broker_listing_reviewer, 113);
-  assert.equal(summary.byOwner.seo_taxonomy_editor, 97);
-  assert.equal(summary.byOwner.content_editor, 68);
+  assert.deepEqual(summary.byOwner, { unassigned: 457 });
+  assert.equal(summary.byRole.ru_preservation_editor, 179);
+  assert.equal(summary.byRole.broker_listing_reviewer, 113);
+  assert.equal(summary.byRole.seo_taxonomy_editor, 97);
+  assert.equal(summary.byRole.content_editor, 68);
+  assert.ok(queue.rows.every((row) => row.review_owner === "unassigned" && row.requires_assignment === true));
   assert.ok(queue.rows.every((row) => row.deployable === false));
   assert.ok(queue.rows.some((row) => row.url_type === "taxonomy" && row.action_required === "map_or_rebuild_taxonomy_landing"));
 });
@@ -143,7 +145,9 @@ test("migration review routes expose crawl evidence without making a terminal de
   assert.equal(route.source_evidence.meta_description, records[0].source_seo.meta_description);
   assert.equal(route.source_evidence.open_graph, records[0].source_seo.open_graph);
   assert.equal(route.source_evidence.word_count, records[0].word_count);
-  assert.equal(route.source_evidence.review_owner, "content_editor");
+  assert.equal(route.source_evidence.review_owner, "unassigned");
+  assert.equal(route.source_evidence.review_role, "content_editor");
+  assert.equal(route.source_evidence.requires_assignment, true);
   assert.equal(route.source_evidence.action_required, "map_or_rebuild_content_page");
 });
 

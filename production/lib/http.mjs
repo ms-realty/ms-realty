@@ -197,6 +197,7 @@ import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSear
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
+import { parseCsv } from "./csv.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
@@ -5351,7 +5352,7 @@ export function createHttpApp({
         });
         recordAudit({
           action: "seo_evidence_imported",
-          actor: "seo_editor",
+          actor: principal?.id || "unassigned",
           objectType: "seo_evidence",
           objectId: input.source,
           metadata: {
@@ -5390,7 +5391,11 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = redirectApprovalInput(request);
+        const input = bindAuthenticatedOperator(
+          redirectApprovalInput(request),
+          { id: principal?.id || "unassigned" },
+          ["reviewer"],
+        );
         const approval = appendRedirectApproval(routeMap, input, {
           filePath: redirectApprovalPath || undefined,
           approvedAt: reviewedAt,
@@ -5418,14 +5423,19 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const imported = importRedirectApprovalsCsv(routeMap, csvInput(request), {
+        const csv = csvInput(request);
+        const operator = { id: principal?.id || "unassigned" };
+        for (const row of parseCsv(csv)) {
+          bindAuthenticatedOperator(row, operator, ["reviewer"]);
+        }
+        const imported = importRedirectApprovalsCsv(routeMap, csv, {
           filePath: redirectApprovalPath || undefined,
           approvedAt: reviewedAt,
         });
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
         recordAudit({
           action: "redirect_approvals_imported",
-          actor: "seo_editor",
+          actor: operator.id,
           objectType: "redirect_import",
           objectId: `redirect-import-${imported.length}`,
           metadata: { imported: imported.length },
@@ -5451,7 +5461,7 @@ export function createHttpApp({
         const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined, { decisions });
         recordAudit({
           action: "deployable_redirects_exported",
-          actor: "seo_editor",
+          actor: principal?.id || "unassigned",
           objectType: "redirect_export",
           objectId: "deployable-redirects",
           metadata: { exported: rows.length, terminal_decisions: decisions.length, total: written.summary?.total },

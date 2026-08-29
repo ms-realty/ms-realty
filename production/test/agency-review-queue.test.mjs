@@ -104,3 +104,37 @@ test("production-review admin renders localized mobile queue labels and unverifi
   assert.equal(listings.status, 200);
   assert.equal(payload.listings[0].listing_status, "unverified");
 });
+
+test("signed-in migration review payload and HTML keep fixture broker identities out of the queue", async () => {
+  const token = "agency-review-fixture-scrub-test";
+  const config = {
+    ...appAdminConfigFromEnv({}),
+    authEnv: { MS_REALTY_ADMIN_TOKEN: token },
+    brokerProfiles: [
+      { id: "broker_bg", languages: ["bg"] },
+      { id: "broker_ru", languages: ["ru"] },
+      { id: "broker_international", languages: ["en"] },
+    ],
+  };
+  const headers = { authorization: `Bearer ${token}` };
+
+  const payloadResponse = await renderAppAdminResponse(
+    new Request("http://local/api/admin/migration/review?locale=en", { headers }),
+    { config },
+  );
+  const payload = await payloadResponse.json();
+  assert.equal(payloadResponse.status, 200);
+  const taskOwners = payload.agencyReviewQueue.lanes.flatMap((laneItem) => laneItem.tasks.map((task) => task.owner));
+  assert.ok(taskOwners.length > 0);
+  assert.ok(taskOwners.every((owner) => owner === "unassigned"));
+  assert.doesNotMatch(JSON.stringify(payload.agencyReviewQueue), /agency_admin|broker_bg|broker_ru|broker_international|content_editor|ru_preservation_editor|seo_editor/);
+
+  const htmlResponse = await renderAppAdminResponse(
+    new Request("http://local/admin/migration/review?locale=ru", { headers }),
+    { config },
+  );
+  const html = await htmlResponse.text();
+  assert.equal(htmlResponse.status, 200);
+  assert.match(html, /Очередь решений агентства/);
+  assert.doesNotMatch(html, /agency_admin|broker_bg|broker_ru|broker_international|content_editor|ru_preservation_editor|seo_editor/);
+});

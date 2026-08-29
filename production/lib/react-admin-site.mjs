@@ -166,7 +166,7 @@ const ADMIN_UI_COPY = {
     sourceLinks: "вътрешни връзки",
     openLegacyPage: "Отвори старата страница",
     openTargetPage: "Отвори целевата страница",
-    reviewOwner: "Отговорник",
+    reviewOwner: "Роля за преглед",
     requiredAction: "Нужно действие",
     approvableRedirects: "Пренасочвания за одобрение",
     oldUrl: "Стар URL",
@@ -849,7 +849,7 @@ const ADMIN_UI_COPY = {
     sourceLinks: "внутренних ссылок",
     openLegacyPage: "Открыть старую страницу",
     openTargetPage: "Открыть целевую страницу",
-    reviewOwner: "Ответственный",
+    reviewOwner: "Роль проверки",
     requiredAction: "Нужное действие",
     approvableRedirects: "Редиректы для одобрения",
     oldUrl: "Старый URL",
@@ -1532,7 +1532,7 @@ const ADMIN_UI_COPY = {
     sourceLinks: "internal links",
     openLegacyPage: "Open legacy page",
     openTargetPage: "Open target page",
-    reviewOwner: "Review owner",
+    reviewOwner: "Review role",
     requiredAction: "Required action",
     approvableRedirects: "Approvable listing redirects",
     oldUrl: "Old URL",
@@ -9408,8 +9408,8 @@ function RuntimeEvidenceImport({ action, kind, statusHref, summary, templateLink
   );
 }
 
-function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
-  const operatorId = currentOperatorId(page, "seo_editor");
+function PendingLegacyRouteDecision({ page, route, ui, copy, defaultOpen = false }) {
+  const operatorId = currentOperatorId(page, "unassigned");
   const evidence = route.source_evidence || {};
   return h(
     "li",
@@ -9476,8 +9476,8 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
               `${evidence.word_count || 0} ${ui.sourceWords} · ${evidence.image_count || 0} ${ui.sourceImages} · ${evidence.internal_link_count || 0} ${ui.sourceLinks}`,
             ),
           ),
-          evidence.review_owner
-            ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, evidence.review_owner))
+          evidence.review_role
+            ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, reviewerRoleText(copy, ui, evidence.review_role)))
             : null,
           evidence.action_required
             ? h("div", null, h("dt", null, ui.requiredAction), h("dd", null, evidence.action_required))
@@ -9552,7 +9552,7 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
             "label",
             null,
             ui.reviewer,
-            h("input", { name: "reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }),
+            h("input", { name: "reviewer", defaultValue: operatorId, required: true, readOnly: true, autoComplete: "name" }),
           ),
           h(
             "label",
@@ -10232,7 +10232,7 @@ function MigrationReviewBody({ page }) {
               "ol",
               { className: "adm-route-decisions" },
               ...(page.routeMap.pendingSample || []).map((route) =>
-                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
+                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui, copy }),
               ),
             )
           : h(

@@ -199,7 +199,7 @@ if (
 ) {
   throw new Error("Migration review queue must cover every URL without making review-gated rows deployable");
 }
-if (reviewQueue.summary.byOwner.ru_preservation_editor !== 179) {
+if (reviewQueue.summary.byOwner.unassigned !== 457 || reviewQueue.summary.byRole.ru_preservation_editor !== 179) {
   throw new Error("Migration review queue must keep RU preservation first-class");
 }
 
