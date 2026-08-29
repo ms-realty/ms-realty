@@ -2369,6 +2369,31 @@ function StatGrid({ metrics }) {
   );
 }
 
+function SummaryStrip({ cards, className = "", ...attrs }) {
+  const visibleCards = (cards || []).filter(Boolean);
+  if (!visibleCards.length) return null;
+  return h(
+    "section",
+    { className: ["adm-summary-strip", className].filter(Boolean).join(" "), ...attrs },
+    ...visibleCards.map((card) =>
+      h(
+        "article",
+        {
+          key: card.id || card.title,
+          className: "adm-summary-card",
+          "data-summary-card": card.id || card.title,
+          "data-summary-tone": card.tone || "ink",
+        },
+        card.eyebrow ? h("span", { className: "adm-summary-card__eyebrow" }, card.eyebrow) : null,
+        h("strong", { className: "adm-summary-card__title" }, card.title),
+        h("div", { className: "adm-summary-card__value" }, card.value),
+        card.meta ? h("p", { className: "adm-summary-card__meta" }, card.meta) : null,
+        card.status ? h("div", { className: "adm-summary-card__status" }, h(StatusPill, { tone: card.status.tone || card.tone || "ink" }, card.status.label)) : null,
+      ),
+    ),
+  );
+}
+
 function PageHeader({ title, subtitle, children }) {
   return h(
     "div",
@@ -8723,6 +8748,38 @@ function ListingEditorBody({ page }) {
       listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
+  const listingSummaryCards = [
+    {
+      id: "cms-status",
+      title: label(copy, "qualityStatus", "CMS status"),
+      value: statusText(ui, page.listing.cms_status),
+      meta: `${page.listing.source_domain} · ${page.listing.source_locale.toUpperCase()} · ${page.listing.id}`,
+      tone: PILL_TONES[page.listing.cms_status] || "ink",
+      status: { tone: PILL_TONES[page.listing.cms_status] || "ink", label: statusText(ui, page.listing.cms_status) },
+    },
+    {
+      id: "publish-approval",
+      title: ui.publishApproval,
+      value: workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing,
+      meta: workflow.availability_verified_at ? `${ui.availabilityVerification}: ${formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale)}` : ui.notVerified,
+      tone: workflow.publish_approved ? "success" : "sun",
+      status: { tone: workflow.publish_approved ? "success" : "sun", label: workflow.publish_approved ? statusText(ui, "approved") : statusText(ui, "review_required") },
+    },
+    {
+      id: "translations",
+      title: label(copy, "translationState", "Translation state"),
+      value: String(translationStates.length),
+      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : statusText(ui, "approved"),
+      tone: staleTranslations.length ? "brick" : "sea",
+    },
+    {
+      id: "media",
+      title: label(copy, "media", "Media"),
+      value: String((page.listing.media || []).length),
+      meta: `${ui.tourStatus}: ${statusText(ui, tourStatus)}`,
+      tone: reviewableMedia.length ? "ink" : "sand",
+    },
+  ];
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -8751,6 +8808,7 @@ function ListingEditorBody({ page }) {
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(DataAvailabilityNotice, { page }),
+      h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" }),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -8796,7 +8854,7 @@ function ListingEditorBody({ page }) {
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
               editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: detailFields.length <= 4, section: "details", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
               h(
@@ -10545,10 +10603,7 @@ function SettingsCheck({ name, labelText, hint, checked, disabled }) {
 
 function SettingsCapabilityGaps({ page }) {
   const settings = settingsCopy(page);
-  const rows = [
-    ...Object.entries(settings.plannedRows || {}),
-    ...Object.entries(settings.pending?.items || {}),
-  ];
+  const rows = settingsCapabilityGapRows(page);
   if (!rows.length) return null;
   const pendingLabel = label(adminCopy(page), "comingSoon", "Pending");
   return h(
@@ -10589,6 +10644,14 @@ function SettingsCapabilityGaps({ page }) {
       ),
     ),
   );
+}
+
+function settingsCapabilityGapRows(page) {
+  const settings = settingsCopy(page);
+  return [
+    ...Object.entries(settings.plannedRows || {}),
+    ...Object.entries(settings.pending?.items || {}),
+  ];
 }
 
 function SettingsSection({ page, section, icon, fields }) {
@@ -11328,10 +11391,63 @@ function AssistantAccess({ assistant, copy }) {
 
 function ConnectionsBody({ page }) {
   const copy = page.connection_copy || {};
+  const ui = workbenchCopy(page);
   const whatsapp = page.whatsapp_client || {};
   const connections = Array.isArray(page.connections) ? page.connections : [];
   const supporting = Array.isArray(page.supporting_connections) ? page.supporting_connections : [];
   const managed = Array.isArray(page.managed_systems) ? page.managed_systems : [];
+  const connectionById = (rows, id) => rows.find((row) => row.id === id) || null;
+  const readyCount = (rows) => rows.filter((row) => ["connected", "ready"].includes(row.status)).length;
+  const socialConnections = [...connections, ...supporting]
+    .filter((row) => ["facebook", "instagram"].includes(row.id))
+    .filter((row, index, rows) => rows.findIndex((candidate) => candidate.id === row.id) === index);
+  const google = connectionById(connections, "google");
+  const whatsappConnection = connectionById(connections, "whatsapp");
+  const assistantReady = Boolean(page.assistant?.credential || page.assistant?.config || page.assistant?.plugin_url);
+  const socialReadyCount = readyCount(socialConnections);
+  const summaryCards = [
+    google
+      ? {
+          id: "google",
+          title: google.title,
+          value: google.status_label,
+          meta: google.account_label || google.helper_text || google.description,
+          tone: connectionTone(google.status),
+          status: { tone: connectionTone(google.status), label: google.status_label },
+        }
+      : null,
+    whatsappConnection
+      ? {
+          id: "whatsapp",
+          title: whatsappConnection.title,
+          value: whatsappConnection.status_label,
+          meta: whatsappConnection.helper_text || whatsappConnection.blocked_text || whatsappConnection.description,
+          tone: connectionTone(whatsappConnection.status),
+          status: { tone: connectionTone(whatsappConnection.status), label: whatsappConnection.status_label },
+        }
+      : null,
+    socialConnections.length
+      ? {
+          id: "social",
+          title: copy.additionalChannelsTitle,
+          value: `${socialReadyCount}/${socialConnections.length}`,
+          meta: socialConnections.map((row) => `${row.title}: ${row.status_label}`).join(" · "),
+          tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
+          status: {
+            tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
+            label: socialReadyCount === socialConnections.length ? statusText(ui, "ready") : socialReadyCount ? statusText(ui, "in_progress") : statusText(ui, "blocked"),
+          },
+        }
+      : null,
+    {
+      id: "assistant",
+      title: page.assistant?.title,
+      value: assistantReady ? statusText(ui, "ready") : statusText(ui, "blocked"),
+      meta: page.assistant?.install_hint || page.assistant?.description,
+      tone: assistantReady ? "success" : "brick",
+      status: { tone: assistantReady ? "success" : "brick", label: assistantReady ? statusText(ui, "ready") : statusText(ui, "blocked") },
+    },
+  ];
   return adminShell(page, {
     title: copy.title,
     titleAsHeading: true,
@@ -11355,6 +11471,7 @@ function ConnectionsBody({ page }) {
     },
     children: [
       h("p", { className: "adm-connections-intro" }, copy.intro),
+      h(SummaryStrip, { cards: summaryCards, "data-summary-kind": "connections" }),
       h(
         "div",
         { className: "adm-workbench-shell", "data-connections-layout": "workbench" },
@@ -11837,6 +11954,12 @@ function SettingsBody({ page }) {
   const notifications = settingsSectionValues(page, "notifications");
   const workspace = settingsSectionValues(page, "workspace");
   const publicSite = settingsSectionValues(page, "public_site");
+  const settingsGapRows = settingsCapabilityGapRows(page);
+  const updatedSections = ["agency", "leads", "notifications", "workspace", "public_site"].filter((section) => page.workspace_settings?.section_updates?.[section]);
+  const liveSectionTitles = [
+    page.workspace_security?.two_factor ? settings.liveSections.security.title : null,
+    page.workspace_security?.exports || page.workspace_security?.audit_retention ? settings.liveSections.data.title : null,
+  ].filter(Boolean);
   const fieldError = (section, field) => settingsFieldError(page, section, field);
   const brokerSelect = (group) =>
     h(
@@ -11927,6 +12050,40 @@ function SettingsBody({ page }) {
       }),
     ),
   );
+  const settingsSummaryCards = [
+    {
+      id: "agency-profile",
+      title: settings.sections.agency.title,
+      value: agency.text("name") || settings.notConfirmed,
+      meta: [agency.text("email"), agency.text("phone")].filter(Boolean).join(" · ") || settings.fields.officesHint,
+      tone: agency.text("name") ? "sea" : "sand",
+    },
+    {
+      id: "lead-sla",
+      title: settings.sections.leads.title,
+      value: `${leads.text("first_reply_target_minutes", "15")} ${ui.minutesShort}`,
+      meta: `${settings.fields.manager_escalation_minutes}: ${leads.text("manager_escalation_minutes", "60")} ${ui.minutesShort}`,
+      tone: "ink",
+    },
+    {
+      id: "workspace",
+      title: settings.sections.workspace.title,
+      value: settings.locales[workspace.text("default_locale", "en")] || workspace.text("default_locale", "en").toUpperCase(),
+      meta: [workspace.text("timezone", "Europe/Sofia"), workspace.text("date_format", "locale") === "locale" ? settings.fields.dateFormatLocale : workspace.text("date_format", "locale")].join(" · "),
+      tone: "ink",
+    },
+    {
+      id: "settings-state",
+      title: settings.sectionsNav,
+      value: `${updatedSections.length}/5`,
+      meta: liveSectionTitles.length ? `${liveSectionTitles.join(" · ")} · ${settings.pending.title}: ${settingsGapRows.length}` : `${settings.pending.title}: ${settingsGapRows.length}`,
+      tone: updatedSections.length ? "sea" : "sand",
+      status: {
+        tone: updatedSections.length ? "sea" : "ink",
+        label: updatedSections.length ? settings.sectionState.updated : settings.sectionState.defaults,
+      },
+    },
+  ];
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -11937,6 +12094,7 @@ function SettingsBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: settings.description }),
+      h(SummaryStrip, { cards: settingsSummaryCards, "data-summary-kind": "settings" }),
       // The store being unconfigured is one fact about the environment, said
       // once - not restated under every section.
       storeMissing
