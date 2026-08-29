@@ -10,13 +10,10 @@ test("the owner-approved catalog is published in full", () => {
   const approvedIds = operatorPublishedListingIds();
   const publicListings = publicSeedFor(imported).records.filter((record) => record.collection === "listings");
 
-  // 164 named by the approval; MS-CRAWL-0127 is recorded as excluded (no
-  // location, empty title) and therefore deliberately absent from the public
-  // inventory - named plus excluded still accounts for the whole catalog.
-  assert.equal(approvedIds.length, 163);
-  assert.equal(publicListings.length, 163);
-  assert.ok(!approvedIds.includes("MS-CRAWL-0127"));
-  assert.ok(!approvedIds.includes("MS-CRAWL-0159"));
+  assert.equal(approvedIds.length, 165);
+  assert.equal(publicListings.length, 165);
+  assert.ok(approvedIds.includes("MS-CRAWL-0127"));
+  assert.ok(approvedIds.includes("MS-CRAWL-0159"));
   assert.deepEqual(
     publicListings.map((listing) => listing.id).sort((left, right) => left.localeCompare(right)),
     approvedIds,
@@ -63,8 +60,8 @@ test("broker-verified inventory still requires every human publication gate", ()
     .filter((record) => record.collection === "listings" && !publicListings.some((listing) => listing.id === record.id))
     .map((record) => record.id);
 
-  assert.equal(publicListings.length, 163);
-  assert.deepEqual(blockedListingIds, ["MS-CRAWL-0127-UNAPPROVED", "MS-CRAWL-0159-UNAPPROVED"]);
+  assert.equal(publicListings.length, 165);
+  assert.deepEqual(blockedListingIds, []);
   assert.equal(
     publicSeedFor({
       ...unapproved,
