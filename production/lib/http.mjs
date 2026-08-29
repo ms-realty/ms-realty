@@ -4204,7 +4204,7 @@ export function createHttpApp({
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);
-      const settingsPage = (requestedLocale, settings, form = null, writable = workspaceSettingsStoreReady) =>
+      const settingsPage = (requestedLocale, settings, form = null, writable = workspaceSettingsStoreReady, onboarding = null) =>
         withWorkspaceSettings(
           renderAdminWorkspaceSettingsPayload(activeRegistry, requestedLocale, {
             settings,
@@ -4214,6 +4214,7 @@ export function createHttpApp({
             saved: url.searchParams.get("saved"),
             form,
             writable,
+            onboarding,
             // B6 workspace security and data
             security: workspaceSecurityView(
               principal,
@@ -4247,7 +4248,13 @@ export function createHttpApp({
         try {
           const settings = workspaceSettingsStoreReady ? await currentDurableWorkspaceSettings() : emptyWorkspaceSettingsDocument();
           const requestedLocale = String(url.searchParams.get("locale") || settings.sections.workspace.default_locale || "en");
-          const payload = settingsPage(requestedLocale, settings, null, workspaceSettingsStoreReady);
+          const payload = settingsPage(
+            requestedLocale,
+            settings,
+            null,
+            workspaceSettingsStoreReady,
+            await currentWorkspaceOnboarding({ replyDeliveryQueue: { states: [] } }, payloadSession),
+          );
           if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {
             return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
           }

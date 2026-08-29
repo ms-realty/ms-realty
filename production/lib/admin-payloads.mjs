@@ -317,6 +317,7 @@ export function renderAdminWorkspaceSettingsPayload(
     saved = null,
     form = null,
     writable = true,
+    onboarding = null,
     // B6 workspace security and data. Null when the workspace-security ledgers
     // are not configured, which is what keeps the Security and Data sections in
     // their "not connected" treatment instead of pretending to work.
@@ -354,6 +355,7 @@ export function renderAdminWorkspaceSettingsPayload(
         }
       : null,
     savedSection: WORKSPACE_SETTINGS_SECTIONS.includes(saved) ? saved : null,
+    onboarding: onboarding || null,
     workspace_security: security || null,
   };
 }

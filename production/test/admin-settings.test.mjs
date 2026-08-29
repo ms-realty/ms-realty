@@ -268,7 +268,7 @@ test("workspace onboarding is computed from real workspace state", () => {
   assert.ok(complete.items.every((item) => item.done));
 });
 
-test("settings screen renders working sections and a concise capability-gap rail", async () => {
+test("settings screen renders working sections and an action-first owner rail", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
@@ -294,17 +294,18 @@ test("settings screen renders working sections and a concise capability-gap rail
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // Unconnected settings stay explicit in one concise rail panel, without
-    // dead controls or a fake submit path.
-    assert.match(page.body, /data-settings-capability-gaps="true" data-settings-gap-count="4"/);
-    for (const gap of ["notification_centre", "messaging_credentials", "working_hours", "routing_rules"]) {
-      assert.match(page.body, new RegExp(`data-settings-gap="${gap}"`), gap);
+    // The rail stays action-first: current sections, current onboarding
+    // progress, and current links - not a roadmap of unsupported controls.
+    assert.match(page.body, /data-settings-action-rail="true" data-settings-onboarding="0\/5"/);
+    for (const row of ["onboarding", "connections", "history"]) {
+      assert.match(page.body, new RegExp(`data-settings-rail-row="${row}"`), row);
     }
-    assert.match(page.body, /<div class="adm-settings-pending__copy">\s*<strong>[^<]+<\/strong>\s*<p class="adm-planned-note">/);
-    assert.doesNotMatch(page.body, /<span class="adm-settings-pending__copy">\s*<strong>[^<]+<\/strong>\s*<p class="adm-planned-note">/);
+    assert.match(page.body, /data-workspace-onboarding="open" data-workspace-onboarding-progress="0\/5"/);
     assert.doesNotMatch(page.body, /data-planned-control=/);
     assert.doesNotMatch(page.body, /data-export-form=/);
     assert.doesNotMatch(page.body, /Coming soon/);
+    assert.doesNotMatch(page.body, /data-settings-capability-gaps=/);
+    assert.doesNotMatch(page.body, /data-settings-gap=/);
     assert.doesNotMatch(page.body, /data-settings-section="(?:security|data)"/);
     assert.match(page.body, /href="\/admin\/connect"/);
 

@@ -725,6 +725,7 @@ function workspaceSettingsPayload(
     form = null,
     settings = workspaceSettingsFor(config),
     writable = Boolean(config.workspaceSettingsPath) && !config.runtimeDataDurableOnly,
+    onboarding = null,
   } = {},
 ) {
   return withWorkspaceSettings(
@@ -736,6 +737,7 @@ function workspaceSettingsPayload(
       saved: url.searchParams.get("saved"),
       form,
       writable,
+      onboarding,
       // B6 workspace security and data
       security: workspaceSecurityFor(url, config),
     }),
@@ -4307,6 +4309,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             requestedLocale,
             settings,
             writable: settingsStoreReady,
+            onboarding: await workspaceOnboardingFor({ replyDeliveryQueue: { states: [] } }, config),
           });
           if (url.pathname === "/admin/settings") return htmlResponse(payload);
           return jsonResponse(200, payload);

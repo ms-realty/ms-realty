@@ -7148,10 +7148,10 @@ function LeadInboxBody({ page }) {
   const locale = page.workspace?.locale;
   const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
   const sellerQueue = page.sellerPipelineQueue || { rows: [] };
-  // Once the payload includes either secondary queue, keep both panels in the
-  // workbench even when empty. Their compact empty state is useful evidence
-  // that the queue was checked and avoids making an empty queue disappear.
-  const hasSecondaryQueue = page.secondaryQueuesProvided === true || Boolean(viewingQueue.rows?.length || sellerQueue.rows?.length);
+  const secondaryPanels = [
+    viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { key: "viewings", page, copy, ui }) : null,
+    sellerQueue.rows?.length ? h(SellerPipelineQueue, { key: "seller", page, copy, ui }) : null,
+  ].filter(Boolean);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -7266,12 +7266,11 @@ function LeadInboxBody({ page }) {
           h("p", { className: "adm-inbox__hint" }, ui.selectLead),
         ),
       ),
-      hasSecondaryQueue
+      secondaryPanels.length
         ? h(
             "section",
             { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
-            h(ViewingFollowUpQueue, { page, copy, ui }),
-            h(SellerPipelineQueue, { page, copy, ui }),
+            ...secondaryPanels,
           )
         : null,
     ],
@@ -10608,57 +10607,83 @@ function SettingsCheck({ name, labelText, hint, checked, disabled }) {
   );
 }
 
-function SettingsCapabilityGaps({ page }) {
+function SettingsActionRail({ page }) {
   const settings = settingsCopy(page);
-  const rows = settingsCapabilityGapRows(page);
-  if (!rows.length) return null;
-  const pendingLabel = label(adminCopy(page), "comingSoon", "Pending");
+  const onboarding = page.onboarding || null;
+  const connectHref = adminHref("/admin/connect", page);
   return h(
     Panel,
     {
-      title: settings.pending.title,
-      "data-settings-capability-gaps": "true",
-      "data-settings-gap-count": String(rows.length),
+      title: settings.sectionsNav,
+      "data-settings-action-rail": "true",
+      "data-settings-onboarding": onboarding ? `${onboarding.done}/${onboarding.total}` : "absent",
       action: pageCan(page, "settings:manage")
         ? h(
             "a",
-            { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/connect", page) },
+            { className: "mk-btn mk-btn--ghost mk-btn--sm", href: connectHref },
             h(Icon, { name: "link", size: 15 }),
             h("span", null, ownerConsoleCopy(page).profile.manageConnections),
           )
         : null,
     },
-    h("p", { className: "adm-settings-gap-intro" }, settings.pending.description),
+    h("p", { className: "adm-settings-gap-intro" }, settings.description),
+    h("ol", { className: "adm-readiness-list" }, ...settingsActionRailRows(page, { connectHref })),
+  );
+}
+
+function settingsActionRailRows(page, { connectHref }) {
+  const settings = settingsCopy(page);
+  const onboarding = page.onboarding || null;
+  const rows = [];
+  if (onboarding) {
+    rows.push({
+      id: "onboarding",
+      href: "#settings-agency",
+      label: settings.onboarding.title,
+      detail: settings.onboarding.progress.replace("{done}", String(onboarding.done)).replace("{total}", String(onboarding.total)),
+      tone: onboarding.complete ? "success" : "ink",
+      value: onboarding.complete ? settings.onboarding.done : settings.onboarding.todo,
+    });
+  }
+  rows.push({
+    id: "connections",
+    href: connectHref,
+    label: ownerConsoleCopy(page).profile.manageConnections,
+    detail: ownerConsoleCopy(page).profile.connectChannels,
+    tone: "sea",
+    value: ownerConsoleCopy(page).profile.connections,
+  });
+  rows.push({
+    id: "history",
+    href: adminHref("/admin/activity?action=workspace_settings_updated", page),
+    label: settings.lastUpdated,
+    detail: page.workspace_settings?.updated_at
+      ? formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale)
+      : settings.notConfirmed,
+    tone: page.workspace_settings?.updated_at ? "sea" : "ink",
+    value: page.workspace_settings?.updated_at ? settings.sectionState.updated : settings.sectionState.defaults,
+  });
+  return rows.map((item) =>
     h(
-      "ul",
-      { className: "adm-settings-pending" },
-      ...rows.map(([id, item]) =>
+      "li",
+      { key: item.id, "data-settings-rail-row": item.id },
+      h(
+        "a",
+        { className: "adm-readiness-link", href: item.href },
         h(
-          "li",
-          { key: id, "data-settings-gap": id },
-          h(
-            "div",
-            { className: "adm-settings-pending__copy" },
-            h("strong", null, item.label),
-            h("p", { className: "adm-planned-note" }, item.note),
-          ),
-          h(
-            "div",
-            { className: "adm-settings-pending__control" },
-            h(StatusPill, { tone: "sun" }, pendingLabel),
-          ),
+          "span",
+          { className: "adm-readiness-copy" },
+          h("strong", null, item.label),
+          h("small", null, item.detail),
+        ),
+        h(
+          "span",
+          { className: "adm-readiness-value" },
+          h(StatusPill, { tone: item.tone }, item.value),
         ),
       ),
     ),
   );
-}
-
-function settingsCapabilityGapRows(page) {
-  const settings = settingsCopy(page);
-  return [
-    ...Object.entries(settings.plannedRows || {}),
-    ...Object.entries(settings.pending?.items || {}),
-  ];
 }
 
 function SettingsSection({ page, section, icon, fields }) {
@@ -12022,7 +12047,6 @@ function SettingsBody({ page }) {
   const notifications = settingsSectionValues(page, "notifications");
   const workspace = settingsSectionValues(page, "workspace");
   const publicSite = settingsSectionValues(page, "public_site");
-  const settingsGapRows = settingsCapabilityGapRows(page);
   const updatedSections = ["agency", "leads", "notifications", "workspace", "public_site"].filter((section) => page.workspace_settings?.section_updates?.[section]);
   const liveSectionTitles = [
     page.workspace_security?.two_factor ? settings.liveSections.security.title : null,
@@ -12144,7 +12168,9 @@ function SettingsBody({ page }) {
       id: "settings-state",
       title: settings.sectionsNav,
       value: `${updatedSections.length}/5`,
-      meta: liveSectionTitles.length ? `${liveSectionTitles.join(" · ")} · ${settings.pending.title}: ${settingsGapRows.length}` : `${settings.pending.title}: ${settingsGapRows.length}`,
+      meta: page.onboarding
+        ? settings.onboarding.progress.replace("{done}", String(page.onboarding.done)).replace("{total}", String(page.onboarding.total))
+        : liveSectionTitles.join(" · ") || settings.notConfirmed,
       tone: updatedSections.length ? "sea" : "sand",
       status: {
         tone: updatedSections.length ? "sea" : "ink",
@@ -12458,7 +12484,8 @@ function SettingsBody({ page }) {
           "aside",
           { className: "adm-workbench-rail", "data-settings-rail": "true" },
           sectionsNav,
-          h(SettingsCapabilityGaps, { page }),
+          h(SettingsActionRail, { page }),
+          page.onboarding ? h(WorkspaceChecklistPanel, { page }) : null,
           h(
             Panel,
             { title: settings.lastUpdated, "data-settings-history": "true" },
