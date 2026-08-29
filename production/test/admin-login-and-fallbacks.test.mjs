@@ -154,6 +154,9 @@ test("session cookie helpers round-trip and cap the Payload session token", () =
   assert.match(login, /\.login-page \{[^}]*background: var\(--ink-50, #F4F4F3\)/);
   assert.match(login, /\.login \{[^}]*max-width: 420px;[^}]*border-radius: 14px/);
   assert.match(login, /\.login__title \{[^}]*font-size: 22px;\s*font-weight: 600/);
+  for (const selector of ["locale", "hint", "optional", "reveal", "support"]) {
+    assert.match(login, new RegExp(`\\.login__${selector} \\{[^}]*color: var\\(--stone-600, #73644A\\)`));
+  }
   assert.match(login, /\.login #admin-email,\s*\.login #admin-password,\s*\.login #admin-code,\s*\.login #admin-new-password,\s*\.login #admin-password-confirmation \{[^}]*height: 48px;[^}]*border: 1px solid var\(--ink-200, #C9C9C7\);\s*border-radius: 8px/);
   assert.match(login, /#admin-code:focus-visible,[\s\S]*?\{[^}]*box-shadow: var\(--shadow-focus,/);
   // The optional second-factor code shares the field and focus treatment.

@@ -216,7 +216,7 @@ const LOGIN_STYLE = `
     height: 30px;
     padding: 0 10px;
     border-radius: 999px;
-    color: var(--text-muted, #948263);
+    color: var(--stone-600, #73644A);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -238,7 +238,7 @@ const LOGIN_STYLE = `
     letter-spacing: -0.015em;
     color: var(--text-strong, #241F18);
   }
-  .login__hint { margin: 0 0 20px; color: var(--text-muted, #948263); }
+  .login__hint { margin: 0 0 20px; color: var(--stone-600, #73644A); }
   .login__error {
     display: flex;
     gap: 10px;
@@ -273,7 +273,7 @@ const LOGIN_STYLE = `
     font-weight: 600;
     line-height: 1.25;
   }
-  .login__optional { font-weight: 400; color: var(--text-muted, #948263); }
+  .login__optional { font-weight: 400; color: var(--stone-600, #73644A); }
   .login__field { position: relative; margin: 0 0 16px; }
   .login #admin-email,
   .login #admin-password,
@@ -337,7 +337,7 @@ const LOGIN_STYLE = `
     border: 0;
     border-radius: 6px;
     background: transparent;
-    color: var(--text-muted, #948263);
+    color: var(--stone-600, #73644A);
     font: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -380,7 +380,7 @@ const LOGIN_STYLE = `
   .login__submit .login__spinner { display: none; width: 16px; height: 16px; animation: login-spin 900ms linear infinite; }
   .login-page[data-login-state="submitting"] .login__submit .login__spinner { display: block; }
   @keyframes login-spin { to { transform: rotate(360deg); } }
-  .login__support { margin: 20px 0 0; color: var(--text-muted, #948263); font-size: 13px; line-height: 1.4; }
+  .login__support { margin: 20px 0 0; color: var(--stone-600, #73644A); font-size: 13px; line-height: 1.4; }
   @media (prefers-reduced-motion: reduce) {
     .login__submit:active { transform: none; }
     .login__submit .login__spinner { animation: none; }
