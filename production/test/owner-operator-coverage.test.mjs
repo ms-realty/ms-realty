@@ -83,8 +83,8 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
     reachable_workflows: 121,
     reachability_percent: 100,
     providers: 10,
-    enabled_integrations: 4,
-    managed_systems: 3,
+    enabled_integrations: 5,
+    managed_systems: 2,
     disabled_integrations: 3,
   });
   const command = artifact.admin_routes.find((row) => row.method === "POST" && row.pathname === "/api/admin/hermes");
@@ -145,9 +145,12 @@ test("provider matrix enables only one-click connections with real consumers", (
   );
 
   for (const row of coverage.provider_matrix) {
-    assert.equal(row.owner_secret_fields, false, row.provider);
+    assert.equal(row.owner_secret_fields, row.provider === "ai", row.provider);
     if (row.enabled) {
-      assert.ok(["oauth_authorization_code", "provider_embedded_signup"].includes(row.authorization), row.provider);
+      assert.ok(
+        ["oauth_authorization_code", "provider_embedded_signup", "verified_encrypted_api_key"].includes(row.authorization),
+        row.provider,
+      );
       assert.ok(row.owner_action, row.provider);
       assert.ok(row.downstream_consumers.length > 0, row.provider);
       assert.deepEqual(row.lifecycle, ["authorizing", "connected", "reauthorize", "error", "disconnected"]);
@@ -163,8 +166,16 @@ test("provider matrix enables only one-click connections with real consumers", (
   );
   assert.deepEqual(
     coverage.provider_matrix.filter((row) => row.state === "managed").map((row) => row.provider),
-    ["cloudflare", "neon", "ai"],
+    ["cloudflare", "neon"],
   );
+  const ai = coverage.provider_matrix.find((row) => row.provider === "ai");
+  assert.equal(ai.authorization, "verified_encrypted_api_key");
+  assert.deepEqual(ai.owner_action, {
+    kind: "credential_form",
+    method: "POST",
+    pathname: "/api/admin/connections",
+    provider: "ai",
+  });
 });
 
 test("operation inputs are fixed to registry metadata, never caller-supplied paths", () => {

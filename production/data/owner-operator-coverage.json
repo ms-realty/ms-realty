@@ -12,8 +12,8 @@
     "reachable_workflows": 121,
     "reachability_percent": 100,
     "providers": 10,
-    "enabled_integrations": 4,
-    "managed_systems": 3,
+    "enabled_integrations": 5,
+    "managed_systems": 2,
     "disabled_integrations": 3
   },
   "admin_pages": [
@@ -3175,21 +3175,32 @@
     },
     {
       "provider": "ai",
-      "state": "managed",
-      "enabled": false,
-      "owner_surface": "hermes_status",
-      "authorization": "managed_hermes_runtime",
-      "owner_action": null,
-      "lifecycle": [],
+      "state": "enabled",
+      "enabled": true,
+      "owner_surface": "credential_form",
+      "authorization": "verified_encrypted_api_key",
+      "owner_action": {
+        "kind": "credential_form",
+        "method": "POST",
+        "pathname": "/api/admin/connections",
+        "provider": "ai"
+      },
+      "lifecycle": [
+        "authorizing",
+        "connected",
+        "reauthorize",
+        "error",
+        "disconnected"
+      ],
       "downstream_consumers": [
         {
           "workflow": "guarded_hermes_owner_plans",
-          "source_file": "production/lib/admin-hermes.mjs",
-          "symbol": "buildAdminHermesPayload"
+          "source_file": "production/lib/hermes-owner-command.mjs",
+          "symbol": "runHermesOwnerCommand"
         }
       ],
-      "reason": "hermes_runtime_managed_outside_owner_connections",
-      "owner_secret_fields": false,
+      "reason": null,
+      "owner_secret_fields": true,
       "source_file": "production/lib/operator-provider-catalog.mjs"
     }
   ]

@@ -2398,6 +2398,11 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-connection-row__state { display: grid; justify-items: end; gap: var(--space-2); }
 .adm-connection-row__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
 .adm-connection-row__actions form { margin: 0; }
+.adm-connection-row__actions .adm-connection-credential { display: grid; width: min(100%, 360px); gap: var(--space-2); text-align: start; }
+.adm-connection-credential label { display: grid; gap: var(--space-1); color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-connection-credential .mk-input { width: 100%; min-width: 0; font-family: var(--font-mono, ui-monospace, monospace); }
+.adm-connection-credential small { color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-regular); line-height: var(--lh-snug); }
+.adm-connection-credential .mk-btn { justify-self: end; }
 .adm-connection-row__live { max-width: 34ch; color: var(--text-muted); text-align: end; }
 .adm-managed-system-list > li > .crm-pill { justify-self: end; }
 .adm-assistant-connection__copy { display: grid; gap: var(--space-2); padding: 0 var(--space-5) var(--space-5); }
@@ -2432,6 +2437,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-connection-row__actions .mk-btn,
   .adm-connection-row__actions form { width: 100%; }
   .adm-connection-row__actions .mk-btn { justify-content: center; }
+  .adm-connection-row__actions .adm-connection-credential { width: 100%; }
+  .adm-connection-credential .mk-btn { justify-self: stretch; }
   .adm-connection-row__live { max-width: none; text-align: start; }
   .adm-managed-system-list > li > .crm-pill { justify-self: start; }
   .adm-assistant-connection .crm-panel__hd { align-items: stretch; flex-direction: column; }

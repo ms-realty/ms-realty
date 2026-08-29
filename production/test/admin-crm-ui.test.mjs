@@ -75,27 +75,31 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
 
 test("placeholder lead names fall back to source truth across inbox, detail, and contacts", async () => {
   const server = app();
-  await dispatchHttp(server, {
+  const created = await dispatchHttp(server, {
     method: "POST",
     url: "/api/admin/leads",
     headers: auth,
     body: {
       id: "placeholder-lead",
-      source: "website_listing_detail",
+      source: "broker_email",
       leadType: "buyer",
       language: "en",
       contact_preference: "email",
-      contact: { name: "Test", email: "owner@example.com", phone: "+359880000099" },
-      listingReference: "MS-CRAWL-0001",
-      requirements: { locations: ["Sandanski"], property_types: ["apartment"], budget_max_eur: 120000, timeline: "Soon" },
+      "contact.name": "Test",
+      "contact.email": "owner@example.com",
+      "requirements.locations": "Sandanski",
+      "requirements.property_types": "apartment",
+      "requirements.budget_max_eur": "120000",
+      "requirements.timeline": "Soon",
       message: "Please email me details.",
-      humanConfirmed: true,
+      humanConfirmed: "on",
     },
   });
+  assert.equal(created.status, 201);
 
   const inbox = await dispatchHttp(server, { url: "/admin/leads?locale=en", headers: auth });
   assert.equal(inbox.status, 200);
-  assert.match(inbox.body, /<span class="adm-inbox__title">Listing inquiry<\/span>/);
+  assert.match(inbox.body, /<span class="adm-inbox__title">Email<\/span>/);
   assert.doesNotMatch(inbox.body, /<span class="adm-inbox__title">Test<\/span>/);
   assert.doesNotMatch(inbox.body, /<strong>Test<\/strong>/);
 
