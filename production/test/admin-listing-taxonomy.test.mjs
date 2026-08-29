@@ -111,6 +111,8 @@ test("admin listing manager filters and labels every canonical family", () => {
   assert.match(html, /class="adm-filterbar/);
   assert.match(html, /data-listing-filters="true"/);
   assert.match(html, /adm-listing-table/);
+  assert.match(html, /data-listing-mobile-summary="true"/);
+  assert.match(html, /data-listing-mobile-more="MS-CRAWL-0001"/);
   assert.match(html, /class="crm-ph"/);
   assert.doesNotMatch(html, /<h2>Резултати<\/h2>/);
   assert.equal([...html.matchAll(/<h2>Резултати · \d+<\/h2>/g)].length, 1);

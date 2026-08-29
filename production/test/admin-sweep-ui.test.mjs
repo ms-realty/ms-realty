@@ -16,6 +16,7 @@ import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const adminAdapterCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin.css"), "utf8");
+const adminCrmCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-crm.css"), "utf8");
 const adminSettingsCss = fs.readFileSync(path.join(ROOT, "production/lib/ui/adapter-admin-settings.css"), "utf8");
 const generatedDesignCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const auth = { authorization: "Bearer local-admin-smoke" };
@@ -80,6 +81,17 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
   assert.match(adminAdapterCss, /\.adm-hermes-missing\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
   assert.match(adminAdapterCss, /\.adm-hermes-empty--blocked\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--sun-300\) 12%, var\(--surface\)\)/);
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-checks ul\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+});
+
+test("requests and Hermes use disclosure for secondary detail instead of primary clutter", () => {
+  assert.match(adminAdapterCss, /\.adm-public-request__details > summary/);
+  assert.match(adminAdapterCss, /\.adm-public-request__details-body\s*\{[^}]*background:\s*var\(--surface-sunken\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__readiness\s*\{[^}]*display:\s*flex;[^}]*flex-wrap:\s*wrap/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__readiness > div\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__starting-point\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto auto/);
+  assert.match(adminAdapterCss, /\.adm-hermes-command__starting-kicker\s*\{[^}]*text-transform:\s*uppercase/);
+  assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-command__readiness\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminCrmCss, /@media \(max-width: 719px\)[\s\S]*?\.adm-toolbar > \.crm-seg\[data-list-filter="requests"\]\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
 });
 
 test("technical Hermes and assistant setup content is collapsed without JavaScript", () => {

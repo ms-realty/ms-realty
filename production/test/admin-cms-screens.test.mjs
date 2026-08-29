@@ -44,6 +44,12 @@ test("listing manager leads with the shell the CRM screens use and no dead list 
   // The queue itself keeps its contracts.
   assert.match(page.body, /data-listing-manager-row="MS-CRAWL-0001"/);
   assert.match(page.body, /data-listing-bulk-bar="true" data-selection="empty"/);
+  assert.match(page.body, /data-listing-mobile-summary="true"/);
+  assert.match(page.body, /data-listing-mobile-more="MS-CRAWL-0001"/);
+  assert.match(cmsCss, /\.adm-listing-mobile-summary \{ display: none; \}/);
+  assert.match(cmsCss, /\.adm-listing-mobile-more__facts \{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
+  assert.match(adminCss, /@media \(max-width: 719px\)[\s\S]*?\.adm-listing-mobile-summary \{ display: grid;/);
+  assert.match(adminCss, /@media \(max-width: 719px\)[\s\S]*?td\[data-listing-column="location"\],[\s\S]*?display: none;/);
 });
 
 test("a counted status filter marks the selected option and links without JavaScript", async () => {

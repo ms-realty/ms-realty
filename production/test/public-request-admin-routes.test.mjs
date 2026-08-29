@@ -199,9 +199,12 @@ test("authenticated request workspace joins private contacts without leaking the
     assert.match(html, /Заявки и уведомления/);
     assert.match(html, /Ежедневно/);
     assert.doesNotMatch(html, />daily</);
+    assert.match(html, /data-public-request-subject="true"/);
+    assert.match(html, /data-public-request-details="collapsed"/);
     assert.match(html, /data-public-request-outcome-form="true"/);
     assert.match(html, /mailto:elena@example\.test/);
     assert.match(html, /data-private-request-message="true"/);
+    assert.doesNotMatch(html, /<code class="crm-mono">saved-search-ru-review<\/code>/);
 
     assert.doesNotMatch(fs.readFileSync(paths.savedSearchLedgerPath, "utf8"), /elena@example\.test/);
     assert.doesNotMatch(fs.readFileSync(paths.languageRequestPath, "utf8"), /Noa Levi|Please tell me/);

@@ -2188,6 +2188,17 @@ function listingQualityIssueText(ui, issue) {
   return statusText(ui, issue);
 }
 
+function listingPriceText(ui, row) {
+  if (row.price_on_request) return statusText(ui, "price_on_request");
+  if (row.price_eur === null || row.price_eur === undefined || row.price_eur === "") return ui.notSet;
+  return `€${Number(row.price_eur).toLocaleString("en")}`;
+}
+
+function listingLocaleText(row) {
+  const locales = Array.isArray(row.translation_locales) ? row.translation_locales.filter(Boolean) : [];
+  return locales.length ? locales.map((locale) => String(locale).toUpperCase()).join(" · ") : "—";
+}
+
 // The workspace default locale (Settings, Workspace section) is what the server
 // renders when no ?locale= is present, so links only carry the param when the
 // page locale differs from it.
@@ -3400,7 +3411,7 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       priority: row.overdue ? "urgent" : "normal",
       dueAt: row.due_at || null,
       overdue: row.overdue === true,
-      title: row.listing_reference || row.lead_id,
+      title: row.listing_reference || (row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
       context: `${row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")} · ${statusText(ui, row.viewing_status)}`,
       reference: row.viewing_id,
       href: adminHref("/admin/viewings", page),
@@ -3416,7 +3427,7 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       priority: row.overdue ? "urgent" : "normal",
       dueAt: row.due_at || null,
       overdue: row.overdue === true,
-      title: row.property?.location || row.lead_id,
+      title: row.property?.location || na.actions.sellerStep,
       context: statusText(ui, row.stage),
       reference: row.seller_pipeline_id,
       href: adminHref("/admin/viewings", page),
@@ -3425,6 +3436,11 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   }
   for (const row of page.publicRequestQueue?.rows || []) {
     if (row.status && !["open", "contacted"].includes(row.status)) continue;
+    const requestType =
+      row.request_type === "saved_search"
+        ? label(copy, "savedSearchRequest", "Saved search")
+        : label(copy, "languageRequest", "Language request");
+    const requestLocale = row.requested_locale || row.locale;
     rows.push({
       key: `request:${row.request_type}:${row.request_id}`,
       tags: "requests",
@@ -3432,11 +3448,10 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       priority: row.overdue ? "urgent" : "normal",
       dueAt: row.next_follow_up_at || null,
       overdue: row.overdue === true,
-      title:
-        row.request_type === "saved_search"
-          ? label(copy, "savedSearchRequest", "Saved search")
-          : label(copy, "languageRequest", "Language request"),
-      context: statusText(ui, row.status),
+      title: publicRequestCriteria(row) || row.requested_path || requestType,
+      context: [requestType, requestLocale ? String(requestLocale).toUpperCase() : null, row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null, statusText(ui, row.status)]
+        .filter(Boolean)
+        .join(" · "),
       reference: row.request_id,
       href: adminHref("/admin/requests", page),
       action: na.actions.outcome,
@@ -3564,7 +3579,6 @@ function NextActionsPanel({ page, rows }) {
                 ),
                 h("strong", null, row.title),
                 h("small", { className: "adm-lead-context" }, row.context),
-                h("code", { className: "crm-mono adm-task-list__reference" }, row.reference),
               ),
               h(
                 "div",
@@ -4043,6 +4057,22 @@ function publicRequestTone(row) {
   return "sun";
 }
 
+function publicRequestSubject(row, copy, ui) {
+  return row.request_type === "saved_search"
+    ? publicRequestCriteria(row) || label(copy, "savedSearchRequest", "Saved search")
+    : row.requested_path || ui.notSet;
+}
+
+function publicRequestSummaryMeta(row, copy, ui) {
+  return [
+    row.requested_locale || row.locale ? String(row.requested_locale || row.locale).toUpperCase() : null,
+    row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null,
+    row.request_type === "saved_search" && Number.isFinite(row.match_count) ? `${label(copy, "matches", "Matches")}: ${row.match_count}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function PublicRequestOutcomeForm({ page, row, copy, terminal = false }) {
   const formAttrs = {
     method: "post",
@@ -4094,6 +4124,8 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false, filterScope 
     row.request_type === "saved_search"
       ? label(copy, "savedSearchRequest", "Saved search")
       : label(copy, "languageRequest", "Language request");
+  const requestSubject = publicRequestSubject(row, copy, ui);
+  const requestMeta = publicRequestSummaryMeta(row, copy, ui);
   const contact = leadContactActions(row, ui);
   const unavailable =
     row.contact_state === "locked"
@@ -4116,22 +4148,19 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false, filterScope 
       h(
         "div",
         { className: "adm-public-request__heading" },
-        h("div", null, h("h3", null, requestType), h("code", { className: "crm-mono" }, row.request_id)),
+        h(
+          "div",
+          null,
+          h("h3", null, requestType),
+          h("p", { className: "adm-public-request__subject", "data-public-request-subject": "true" }, requestSubject),
+          requestMeta ? h("p", { className: "adm-public-request__meta" }, requestMeta) : null,
+        ),
         h(StatusPill, { tone: publicRequestTone(row) }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
       ),
       h(
         "dl",
         { className: "adm-public-request__facts" },
         h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, row.requested_locale || row.locale ? String(row.requested_locale || row.locale).toUpperCase() : ui.notSet)),
-        row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row) || ui.notSet))
-          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || ui.notSet)),
-        row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : ui.notSet))
-          : null,
-        row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
-          : null,
         h(
           "div",
           null,
@@ -4144,15 +4173,27 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false, filterScope 
           h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
           h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : ui.notSet),
         ),
+        row.request_type === "saved_search"
+          ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
+          : null,
       ),
       h(
-        "div",
-        { className: "adm-public-request__contact", "data-private-request-contact": "true" },
-        h("strong", null, label(copy, "customerContact", "Customer contact")),
-        contact || h("p", { className: "adm-empty" }, unavailable),
-        row.message
-          ? h("div", { className: "adm-public-request__message", "data-private-request-message": "true" }, h("small", null, label(copy, "privateMessage", "Private message")), h("p", null, row.message))
-          : null,
+        "details",
+        { className: "adm-public-request__details", "data-public-request-details": "collapsed" },
+        h("summary", { className: "mk-btn mk-btn--ghost mk-btn--sm" }, h(Icon, { name: "user-round", size: 16 }), label(copy, "customerContact", "Customer contact")),
+        h(
+          "div",
+          { className: "adm-public-request__details-body" },
+          h(
+            "div",
+            { className: "adm-public-request__contact", "data-private-request-contact": "true" },
+            h("strong", null, label(copy, "customerContact", "Customer contact")),
+            contact || h("p", { className: "adm-empty" }, unavailable),
+            row.message
+              ? h("div", { className: "adm-public-request__message", "data-private-request-message": "true" }, h("small", null, label(copy, "privateMessage", "Private message")), h("p", null, row.message))
+              : null,
+          ),
+        ),
       ),
     ),
     h(
@@ -8147,11 +8188,36 @@ function ListingManagerBody({ page }) {
                           h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
                         ),
                       ),
-                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : ui.notSet))),
+                      h(
+                        "td",
+                        { "data-label": columns.listing, "data-listing-column": "listing" },
+                        h("div", { className: "adm-lead-identity adm-listing-identity__desktop" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, listingPriceText(ui, row))),
+                        h(
+                          "div",
+                          { className: "adm-listing-mobile-summary", "data-listing-mobile-summary": "true" },
+                          h(
+                            "div",
+                            { className: "adm-listing-mobile-summary__topline" },
+                            h("code", { className: "crm-mono" }, row.id),
+                            h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status)),
+                          ),
+                          h("strong", null, row.title),
+                          h(
+                            "small",
+                            { className: "adm-listing-mobile-summary__meta" },
+                            [
+                              row.location || ui.notSet,
+                              row.property_family ? statusText(ui, row.property_family) : ui.notSet,
+                              listingPriceText(ui, row),
+                              `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`,
+                            ].join(" · "),
+                          ),
+                        ),
+                      ),
                       h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || ui.notSet),
                       h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : ui.notSet),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
-                      h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
+                      h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, listingLocaleText(row))),
                       h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
                       h(
                         "td",
@@ -8160,6 +8226,23 @@ function ListingManagerBody({ page }) {
                           "div",
                           { className: "adm-task-list__actions" },
                           h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
+                          page.runtime_data_mode === "durable_only"
+                            ? null
+                            : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm adm-listing-history-link", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+                        ),
+                        h(
+                          "details",
+                          { className: "adm-listing-mobile-more", "data-listing-mobile-more": row.id },
+                          h("summary", null, h(Icon, { name: "chevron-right", size: 16 }), h("span", null, label(copy, "details", "Details"))),
+                          h(
+                            "dl",
+                            { className: "adm-listing-mobile-more__facts" },
+                            h("div", null, h("dt", null, columns.location), h("dd", null, row.location || ui.notSet)),
+                            h("div", null, h("dt", null, columns.propertyFamily), h("dd", null, row.property_family ? statusText(ui, row.property_family) : ui.notSet)),
+                            h("div", null, h("dt", null, columns.status), h("dd", null, statusText(ui, row.listing_status))),
+                            h("div", null, h("dt", null, columns.locale), h("dd", null, `${String(row.source_locale || "").toUpperCase() || ui.notSet} · ${listingLocaleText(row)}`)),
+                            h("div", null, h("dt", null, columns.quality), h("dd", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()} · ${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                          ),
                           page.runtime_data_mode === "durable_only"
                             ? null
                             : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
@@ -11308,11 +11391,14 @@ function hermesStateLabel(copy, state) {
 
 function HermesBody({ page }) {
   const copy = ownerConsoleCopy(page).hermes;
+  const ui = workbenchCopy(page);
   const runtime = page.runtime || { ready: false, status: "blocked", checks: [], missing: [] };
   const queue = page.queue || { status: "blocked", summary: {}, rows: [] };
+  const receiptStore = page.receipt_store || { status: "blocked" };
   const bridgeReady = queue.status === "ready";
   const tasks = Array.isArray(queue.rows) ? queue.rows : [];
   const visibleTasks = tasks.slice(0, 5);
+  const firstTask = visibleTasks[0] || null;
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
   const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
@@ -11348,6 +11434,28 @@ function HermesBody({ page }) {
               "div",
               { className: "adm-hermes-command" },
               h("p", { className: "adm-hermes-panel-intro" }, copy.commandDescription),
+              h(
+                "dl",
+                { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
+                h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
+                h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
+                h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
+              ),
+              firstTask
+                ? h(
+                    "div",
+                    { className: "adm-hermes-command__starting-point", "data-hermes-next-task": firstTask.id },
+                    h(
+                      "div",
+                      null,
+                      h("span", { className: "adm-hermes-command__starting-kicker" }, copy.queue),
+                      h("strong", null, firstTask.object_id),
+                      h("small", null, [firstTask.source_locale?.toUpperCase(), firstTask.target_locale?.toUpperCase(), valueText(ui, firstTask.task_type)].filter(Boolean).join(" · ")),
+                    ),
+                    h(StatusPill, { tone: "sun" }, copy.draftWrite),
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(firstTask.admin_path, page) }, h("span", null, copy.openReview), h(Icon, { name: "arrow-right", size: 15 })),
+                  )
+                : null,
               h(
                 "form",
                 { className: "adm-hermes-command__form", method: "post", action: adminHref("/admin/hermes", page) },
@@ -11535,11 +11643,11 @@ function HermesBody({ page }) {
                       ),
                     ),
                   ),
+                  runtime.missing?.length
+                    ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
+                    : null,
                 ),
               ),
-              runtime.missing?.length
-                ? h("p", { className: "adm-hermes-missing", "data-hermes-missing": runtime.missing.join(",") }, runtime.missing.join(" · "))
-                : null,
               !runtime.ready
                 ? h(
                     "div",
