@@ -300,7 +300,7 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.doesNotMatch(html, />manager escalation required</);
 });
 
-test("admin lead inbox keeps empty viewing and seller queues compact and explicit", () => {
+test("admin lead inbox omits empty viewing and seller queues until there is actionable work", () => {
   const page = renderAdminLeadsPayload(registry, "en", {
     leads: [],
     replies: [],
@@ -315,12 +315,9 @@ test("admin lead inbox keeps empty viewing and seller queues compact and explici
   });
   const html = renderHtmlPage(page);
 
-  const compactEmptyPanels = [...html.matchAll(/class="([^"]*)"/g)].filter(([, classes]) =>
-    classes.split(/\s+/).includes("crm-panel--compact-empty"),
-  );
-  assert.equal(compactEmptyPanels.length, 2);
-  assert.match(html, /data-empty-viewing-follow-ups="true"[^>]*>.*No open viewing follow-ups\./);
-  assert.match(html, /data-empty-seller-pipeline="true"[^>]*>.*No open seller valuation tasks\./);
+  assert.doesNotMatch(html, /data-lead-secondary-queues="true"/);
+  assert.doesNotMatch(html, /data-empty-viewing-follow-ups="true"/);
+  assert.doesNotMatch(html, /data-empty-seller-pipeline="true"/);
 });
 
 test("admin viewing follow-up queue formats due dates and keeps action header distinct", () => {

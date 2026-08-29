@@ -84,9 +84,15 @@ test("warning surfaces tint the active theme instead of forcing a light-only pal
 });
 
 test("Today, Hermes, and Settings use readable clamped rails instead of fractional sidebars", () => {
-  assert.match(adminAdapterCss, /\.adm-workbench-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(320px, 32vw, 360px\)/);
-  assert.match(adminAdapterCss, /\.adm-workbench-rail\s*\{[^}]*inline-size:\s*min\(100%, clamp\(320px, 32vw, 360px\)\)/);
+  assert.match(adminAdapterCss, /\.adm-workbench-shell\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(300px, 30vw, 336px\)/);
+  assert.match(adminAdapterCss, /\.adm-workbench-rail\s*\{[^}]*inline-size:\s*min\(100%, clamp\(300px, 30vw, 336px\)\)/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="settings"\] \.adm-workbench-shell--settings\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)\s+clamp\(320px, 30vw, 352px\)/);
+});
+
+test("connections and Hermes keep supporting state in-flow instead of sticky side rails", () => {
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-shell,[\s\S]*grid-template-columns:\s*minmax\(0, 1\.12fr\)\s+minmax\(280px, 0\.88fr\)/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-rail,[\s\S]*position:\s*static/);
+  assert.match(adminAdapterCss, /main\[data-react-admin-ui="hermes"\] \.adm-workbench-rail[\s\S]*inline-size:\s*100%/);
 });
 
 test("requests and Hermes use disclosure for secondary detail instead of primary clutter", () => {

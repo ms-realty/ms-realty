@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   renderAdminActivityPayload,
   renderAdminContactsPayload,
@@ -14,6 +17,8 @@ import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
 
@@ -177,6 +182,12 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
   assert.doesNotMatch(html, /<h2>CRM leads<\/h2>/);
 });
 
+test("listing editor keeps support panels in the main flow instead of a narrow readiness rail", () => {
+  const html = editorHtml("MS-CRAWL-0001", "en");
+  assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
+  assert.match(generatedCss, /main\[data-react-admin-ui="listing-editor"\]\s+\.adm-editor-support\{[^}]*grid-template-columns:minmax\(0,1fr\)/);
+});
+
 test("admin pipeline cards keep qualification collapsed and facts unboxed", () => {
   const html = renderReactAdminBody(
     renderAdminOperationalQueuePayload(
@@ -301,10 +312,10 @@ test("admin Today ranks pipeline and follow-up work in one priority list", () =>
   );
 
   assert.match(html, /data-next-action="pipeline"/);
-  assert.match(html, /data-next-action="viewing"/);
   assert.match(html, /data-next-action="seller"/);
-  assert.match(html, /data-next-actions="true"/);
-  assert.match(html, /class="mk-btn mk-btn--primary mk-btn--sm"[^>]*><span>Запиши стъпка за продавача<\/span>/);
+  assert.match(html, /data-next-actions="true" data-next-action-count="2" data-next-action-total="3" data-next-action-visible="2"/);
+  assert.doesNotMatch(html, /data-next-action="viewing"/);
+  assert.match(html, /class="mk-btn mk-btn--secondary mk-btn--sm"[^>]*><span>Запиши стъпка за продавача<\/span>/);
   const dueAction = html.match(/<time dateTime="2026-07-06T12:00:00.000Z"[^>]*>([\s\S]*?)<\/time>/)?.[1] || "";
   assert.ok(dueAction, "follow-up due time stays in the source-backed priority row");
   assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);
