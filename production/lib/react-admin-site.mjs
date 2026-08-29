@@ -10550,9 +10550,22 @@ function SettingsCapabilityGaps({ page }) {
     ...Object.entries(settings.pending?.items || {}),
   ];
   if (!rows.length) return null;
+  const pendingLabel = label(adminCopy(page), "comingSoon", "Pending");
   return h(
     Panel,
-    { title: settings.pending.title, "data-settings-capability-gaps": "true", "data-settings-gap-count": String(rows.length) },
+    {
+      title: settings.pending.title,
+      "data-settings-capability-gaps": "true",
+      "data-settings-gap-count": String(rows.length),
+      action: pageCan(page, "settings:manage")
+        ? h(
+            "a",
+            { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/connect", page) },
+            h(Icon, { name: "link", size: 15 }),
+            h("span", null, ownerConsoleCopy(page).profile.manageConnections),
+          )
+        : null,
+    },
     h("p", { className: "adm-settings-gap-intro" }, settings.pending.description),
     h(
       "ul",
@@ -10568,9 +10581,9 @@ function SettingsCapabilityGaps({ page }) {
             h("p", { className: "adm-planned-note" }, item.note),
           ),
           h(
-            "span",
+            "div",
             { className: "adm-settings-pending__control" },
-            item.sample ? h("code", null, item.sample) : h(StatusPill, { tone: "ink" }, settings.pending.title),
+            h(StatusPill, { tone: "sun" }, pendingLabel),
           ),
         ),
       ),
