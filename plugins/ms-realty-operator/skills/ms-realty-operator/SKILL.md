@@ -1,6 +1,6 @@
 ---
 name: ms-realty-operator
-description: Operate MS Realty admin and guarded Hermes workflows through the role-scoped production MCP, signed-in WebMCP tools, and the local or SSH Hermes bridge. Use for MS Realty owner operations, admin changes, launch status, broker work, integrations, listings, translations, or Hermes drafting.
+description: Operate MS Realty admin and guarded Hermes workflows through one Operator plugin, its role-scoped production MCP and signed-in WebMCP tools, plus its optional bundled local or SSH Hermes bridge. Use for MS Realty owner operations, admin changes, launch status, broker work, integrations, listings, translations, or Hermes drafting.
 ---
 
 # MS Realty Operator
@@ -25,8 +25,9 @@ credential and never turns a refusal into permission.
 
 ## Hermes
 
-Use `ms_realty_hermes` on the production MCP for owner-authorized Hermes actions, or the local
-`ms-realty-hermes` server for subscription-backed drafting:
+Use `ms_realty_hermes` on the production MCP for owner-authorized Hermes actions. The same Operator
+plugin can also use its bundled local `ms-realty-hermes` bridge for subscription-backed drafting;
+this bridge is an execution option inside the plugin, not a second plugin:
 
 1. Call `hermes_status`.
 2. Call `hermes_next_tasks` with `limit: 1` unless the owner requests a batch.

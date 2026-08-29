@@ -53,9 +53,9 @@ PHASE 1 — CONNECT THE BUSINESS (remote MCP)
 PHASE 2 — VERIFY
 Call these MCP tools and keep the results for the report: get_launch_status, search_public_listings (query "Sandanski", locale "bg"), and get_operator_brief if your role allows it. A 401 means the token was mis-pasted; a 503 on other site APIs is a designed gate, not an outage.
 
-PHASE 3 — HERMES DRAFTING BRIDGE (only on the owner's machine with the private repo)
+PHASE 3 — OPTIONAL HERMES BRIDGE INSIDE MS REALTY OPERATOR (only on the owner's machine with the private repo)
 1. Check whether the ms-realty repository exists locally (common path: ~/Code/MS-Realty). If absent, skip this phase silently — the remote MCP already works.
-2. If present: run \`npm ci --no-audit --no-fund\` there once, then register the local drafting bridge:
+2. If present: run \`npm ci --no-audit --no-fund\` there once, then register the bundled local drafting bridge. This remains part of MS Realty Operator; it is not a second plugin:
    claude mcp add ms-realty-hermes -- node <repo>/production/scripts/hermes-mcp-server.mjs
    (Codex: [mcp_servers.ms-realty-hermes] command = "node", args = ["<repo>/production/scripts/hermes-mcp-server.mjs"])
 3. Verify with hermes_status. It reports how many translation drafts are eligible; sensitive rows are withheld by design.
@@ -145,7 +145,7 @@ export function operatorAgentConfigBlock({ baseUrl, token, operatorId, expiresAt
     `Credential secret/environment field: ${OPERATOR_TOKEN_ENV}`,
     "Do not paste the token into saved headers, URLs, configuration, or chat.",
     "",
-    "=== Hermes drafting bridge (optional, on the machine with the repository) ===",
+    "=== Optional Hermes bridge inside MS Realty Operator (not a second plugin) ===",
     "claude mcp add ms-realty-hermes -- node <repo>/production/scripts/hermes-mcp-server.mjs",
     "",
     "Ask it: get_launch_status, get_operator_brief, hermes_next_tasks.",
@@ -206,7 +206,9 @@ function workspaceForOperator(registry, requestedLocale, operator) {
 
 function ownerConnectionView(card, copy, canManageConnections) {
   const connected = card.status === "connected";
-  const ready = card.status === "not_connected" || connected;
+  const inactive = card.status === "inactive";
+  const storedConnected = connected || inactive;
+  const ready = card.status === "not_connected" || storedConnected;
   const ownerCanAct = card.owner_connectable && canManageConnections;
   const helperText = {
     google: copy.googleUsage,
@@ -216,7 +218,7 @@ function ownerConnectionView(card, copy, canManageConnections) {
     viber: copy.viberUsage,
     cloudflare: copy.cloudflareUsage,
     neon: copy.neonUsage,
-    ai: copy.aiUsage,
+    ai: inactive ? copy.aiInactiveUsage : copy.aiUsage,
   }[card.id] || "";
   const blockedText = {
     facebook: copy.facebookBlocked,
@@ -233,14 +235,16 @@ function ownerConnectionView(card, copy, canManageConnections) {
     status: card.status,
     title: copy[providerCopyKey(card.id, "Title")],
     description: copy[providerCopyKey(card.id, "Description")],
-    status_label: connected
-      ? copy.connected
+    status_label: storedConnected
+      ? inactive
+        ? copy.connectedInactive
+        : copy.connected
       : card.status === "needs_setup"
         ? copy.needsSetup
         : copy.notConnected,
-    account_label: connected ? card.account_label || copy.accountConfirmed : "",
-    verified_label: connected ? `${copy.verifiedAt}: ${verifiedAt(card.last_verified_at, copy)}` : "",
-    action_label: connected ? copy.reauthorize : copy[providerCopyKey(card.id, "Connect")],
+    account_label: storedConnected ? card.account_label || copy.accountConfirmed : "",
+    verified_label: storedConnected ? `${copy.verifiedAt}: ${verifiedAt(card.last_verified_at, copy)}` : "",
+    action_label: storedConnected ? copy.reauthorize : copy[providerCopyKey(card.id, "Connect")],
     can_manage: ownerCanAct,
     action_href:
       ownerCanAct && card.kind === "oauth" && ready
@@ -270,7 +274,7 @@ function ownerConnectionView(card, copy, canManageConnections) {
       : "",
     helper_text: helperText,
     blocked_text:
-      connected || card.status === "not_connected"
+      storedConnected || card.status === "not_connected"
         ? ""
         : !canManageConnections && card.owner_connectable
           ? copy.sessionRequired
@@ -313,6 +317,15 @@ export function buildOperatorConnectPayload({
     .filter(Boolean)
     .map((card) => ownerConnectionView(card, copy, false));
   const whatsapp = cards.find((card) => card.id === "whatsapp");
+  const ai = cardById.get("ai");
+  const hermesMode = providerConfig?.hermes?.mode;
+  const hermesRuntimeConfigured = Boolean(
+    providerConfig?.hermes?.endpoint && providerConfig?.hermes?.has_api_key,
+  );
+  const hermesReady =
+    hermesMode === "openrouter"
+      ? ai?.status === "connected" || hermesRuntimeConfigured
+      : hermesMode === "self_hosted" && hermesRuntimeConfigured;
   const operatorId = workspace.operator_id || operator?.id || "operator";
   const assistantConfig = agentToken
     ? operatorAgentConfigBlock({
@@ -349,11 +362,8 @@ export function buildOperatorConnectPayload({
         id: "hermes",
         title: copy.managedHermesTitle,
         description: copy.managedHermesDescription,
-        helper_text: copy.aiUsage,
-        ...systemState(
-          cardById.get("ai")?.status === "connected" ||
-            Boolean(providerConfig?.hermes?.endpoint && providerConfig?.hermes?.has_api_key),
-        ),
+        helper_text: hermesMode === "self_hosted" ? copy.managedHermesSelfHostedUsage : copy.aiUsage,
+        ...systemState(hermesReady),
         model: providerConfig?.hermes?.model || "",
         endpoint: providerConfig?.hermes?.endpoint_redacted || "",
       },

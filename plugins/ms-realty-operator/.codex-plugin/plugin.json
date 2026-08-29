@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "MS Realty Operator",
     "shortDescription": "Run authorized admin and guarded Hermes workflows",
-    "longDescription": "MS Realty Operator connects Codex to the role-scoped production MCP, the signed-in admin WebMCP tools, and the local or SSH Hermes drafting bridge. Existing workspace scope, 2FA, validation, explicit mutation confirmations, audit attribution, and human review remain authoritative.",
+    "longDescription": "One MS Realty Operator plugin connects Codex to the role-scoped production MCP and signed-in admin WebMCP tools. Its optional bundled local or SSH Hermes bridge adds guarded drafting without becoming a second plugin. Existing workspace scope, 2FA, validation, explicit mutation confirmations, audit attribution, and human review remain authoritative.",
     "developerName": "MS Realty",
     "category": "Productivity",
     "capabilities": [

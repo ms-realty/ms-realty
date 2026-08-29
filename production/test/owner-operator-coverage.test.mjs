@@ -84,8 +84,8 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
     nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,
     authorized_workflows: 122,
-    reachable_workflows: 122,
-    reachability_percent: 100,
+    structurally_covered_workflows: 122,
+    structural_coverage_percent: 100,
     providers: 10,
     enabled_integrations: 5,
     managed_systems: 2,
@@ -102,7 +102,7 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   for (const row of HERMES_TOOL_COVERAGE) {
     const artifactRow = artifact.hermes_tools.find((entry) => entry.operation === row.operation);
     assert.ok(artifactRow, row.operation);
-    assert.equal(artifactRow.reachability, "owner_plugin_mcp");
+    assert.equal(artifactRow.declared_entrypoint, "owner_plugin_mcp");
     assert.equal(row.tool, OWNER_OPERATOR_HERMES_TOOL);
     assert.equal(row.draft_only, true);
     assert.ok(row.prohibited_actions.includes("publish"));
@@ -111,7 +111,7 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   }
 });
 
-test("every authorized workflow has an executable owner entrypoint", () => {
+test("every authorized workflow has a declared owner entrypoint", () => {
   const coverage = buildOwnerOperatorCoverage();
   assert.equal(coverage.admin_routes.length + coverage.hermes_tools.length, ADMIN_ROUTE_COVERAGE.length + HERMES_TOOL_COVERAGE.length);
 
@@ -119,18 +119,18 @@ test("every authorized workflow has an executable owner entrypoint", () => {
     const workflow = coverage.admin_routes.find((entry) => entry.operation === row.operation);
     assert.ok(workflow, row.operation);
     if (row.execution === "browser_session") {
-      assert.equal(workflow.reachability, "admin_ui_and_signed_in_webmcp_open");
+      assert.equal(workflow.declared_entrypoint, "admin_ui_and_signed_in_webmcp_open");
       assert.ok(workflow.ui_path?.startsWith("/admin"));
     } else if (row.read_only) {
-      assert.equal(workflow.reachability, "delegated_mcp_and_signed_in_webmcp_read");
+      assert.equal(workflow.declared_entrypoint, "delegated_mcp_and_signed_in_webmcp_read");
       assert.equal(workflow.tool, OWNER_OPERATOR_ADMIN_READ_TOOL);
     } else {
-      assert.equal(workflow.reachability, "signed_delegated_mcp_and_human_admin_ui");
+      assert.equal(workflow.declared_entrypoint, "signed_delegated_mcp_and_human_admin_ui");
       assert.equal(workflow.tool, OWNER_OPERATOR_ADMIN_WRITE_TOOL);
     }
   }
-  assert.equal(coverage.hermes_tools.every((row) => row.reachability === "owner_plugin_mcp"), true);
-  assert.equal(coverage.admin_pages.every((row) => row.reachability === "signed_in_admin_ui"), true);
+  assert.equal(coverage.hermes_tools.every((row) => row.declared_entrypoint === "owner_plugin_mcp"), true);
+  assert.equal(coverage.admin_pages.every((row) => row.declared_entrypoint === "signed_in_admin_ui"), true);
 
   const client = fs.readFileSync(fromRoot("production", "lib", "ui", "client.mjs"), "utf8");
   for (const tool of ["ms_realty_admin_context", "ms_realty_admin_read", "ms_realty_admin_open"]) {

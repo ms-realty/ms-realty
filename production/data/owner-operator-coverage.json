@@ -1,5 +1,6 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "proof_kind": "structural_inventory",
   "plugin_id": "ms-realty-operator",
   "generated_by": "production/scripts/build-owner-operator-coverage.mjs",
   "summary": {
@@ -9,8 +10,8 @@
     "nav_destinations": 7,
     "hermes_tools": 3,
     "authorized_workflows": 122,
-    "reachable_workflows": 122,
-    "reachability_percent": 100,
+    "structurally_covered_workflows": 122,
+    "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
     "managed_systems": 2,
@@ -24,7 +25,7 @@
       "icon": "layout-dashboard",
       "kind": "admin_today",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "lead_inbox",
@@ -33,7 +34,7 @@
       "icon": "inbox",
       "kind": "admin_lead_inbox",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "contacts",
@@ -42,7 +43,7 @@
       "icon": "users",
       "kind": "admin_contacts",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "consents",
@@ -51,7 +52,7 @@
       "icon": "shield-check",
       "kind": "admin_consents",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "documents",
@@ -60,7 +61,7 @@
       "icon": "file-check",
       "kind": "admin_document_checklists",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "realty_cases",
@@ -69,7 +70,7 @@
       "icon": "kanban-square",
       "kind": "admin_realty_cases",
       "capability": "cases:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "lead_pipeline",
@@ -78,7 +79,7 @@
       "icon": "kanban-square",
       "kind": "admin_lead_pipeline",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "requests",
@@ -87,7 +88,7 @@
       "icon": "bell",
       "kind": "admin_requests",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "viewings",
@@ -96,7 +97,7 @@
       "icon": "calendar-days",
       "kind": "admin_viewings",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "reports",
@@ -105,7 +106,7 @@
       "icon": "bar-chart-3",
       "kind": "admin_operations_reports",
       "capability": "operations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "activity",
@@ -114,7 +115,7 @@
       "icon": "list",
       "kind": "admin_activity",
       "capability": "activity:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "listing_manager",
@@ -123,7 +124,7 @@
       "icon": "building-2",
       "kind": "admin_listing_manager",
       "capability": "content:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "translation_queue",
@@ -132,7 +133,7 @@
       "icon": "languages",
       "kind": "admin_translation_queue",
       "capability": "translations:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "approved_content",
@@ -141,7 +142,7 @@
       "icon": "check-circle-2",
       "kind": "admin_approved_content_review",
       "capability": "content:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "migration_review",
@@ -150,7 +151,7 @@
       "icon": "file-check",
       "kind": "admin_migration_review",
       "capability": "administration:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "hermes",
@@ -159,7 +160,7 @@
       "icon": "sparkles",
       "kind": "admin_hermes",
       "capability": "administration:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "connections",
@@ -168,7 +169,7 @@
       "icon": "link",
       "kind": "admin_connections",
       "capability": "settings:manage",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "settings",
@@ -177,7 +178,7 @@
       "icon": "settings",
       "kind": "admin_workspace_settings",
       "capability": "workspace:read",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     },
     {
       "id": "team",
@@ -186,7 +187,7 @@
       "icon": "users",
       "kind": "admin_team",
       "capability": "team:manage",
-      "reachability": "signed_in_admin_ui"
+      "declared_entrypoint": "signed_in_admin_ui"
     }
   ],
   "admin_routes": [
@@ -216,7 +217,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_get_activity",
@@ -233,7 +234,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/activity/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_approved_content",
@@ -250,7 +251,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/approved-content/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_availability",
@@ -267,7 +268,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/availability/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_cases",
@@ -284,7 +285,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_cases_conditions",
@@ -301,7 +302,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/conditions/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_cases_intents",
@@ -318,7 +319,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/intents/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_cms_collections",
@@ -335,7 +336,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cms-collections/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_connections",
@@ -353,7 +354,7 @@
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_connections_agent_config",
@@ -371,7 +372,7 @@
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/agent-config/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_consents",
@@ -388,7 +389,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/consents/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_contacts",
@@ -405,7 +406,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/contacts/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_data_exports",
@@ -423,7 +424,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_data_exports_download",
@@ -441,7 +442,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/download/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_documents",
@@ -458,7 +459,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/documents/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_hermes",
@@ -475,7 +476,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/hermes/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_launch_input_checklist",
@@ -492,7 +493,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/launch-input-checklist/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_launch_readiness",
@@ -509,7 +510,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/launch-readiness/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_leads",
@@ -526,7 +527,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_listing_quality",
@@ -543,7 +544,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_listing_quality_review_draft",
@@ -560,7 +561,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality-review-draft/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_listing_quality_review_packet",
@@ -577,7 +578,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality-review-packet/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_listing_quality_workbook",
@@ -594,7 +595,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality-workbook/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_listings",
@@ -611,7 +612,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_live_service_provisioning",
@@ -628,7 +629,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-provisioning/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_live_service_report_template",
@@ -645,7 +646,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-report-template/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_live_services",
@@ -662,7 +663,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-services/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_locales",
@@ -679,7 +680,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/locales/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_media_uploads",
@@ -697,7 +698,7 @@
       "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_media_uploads_by_assetId",
@@ -715,7 +716,7 @@
       "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/[assetId]/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_migration_review",
@@ -732,7 +733,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/migration/review/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_payload_collections",
@@ -749,7 +750,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-collections/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_payload_runtime",
@@ -766,7 +767,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_payload_runtime_bootstrap",
@@ -783,7 +784,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime-bootstrap/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_pipeline",
@@ -800,7 +801,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/pipeline/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_preflight_reports",
@@ -817,7 +818,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/preflight-reports/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_production_recovery",
@@ -834,7 +835,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_production_recovery_template",
@@ -851,7 +852,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery-template/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_redirect_approval_workbook",
@@ -868,7 +869,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approval-workbook/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_reports",
@@ -885,7 +886,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/reports/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_reports_export",
@@ -902,7 +903,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/reports/export/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_requests",
@@ -919,7 +920,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/requests/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_security_audit_retention",
@@ -937,7 +938,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/audit-retention/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_security_sessions",
@@ -955,7 +956,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/sessions/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_security_two_factor",
@@ -973,7 +974,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_seo_evidence",
@@ -990,7 +991,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_seo_evidence_export",
@@ -1007,7 +1008,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/export/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_seo_evidence_template",
@@ -1024,7 +1025,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/template/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_seo_preflight",
@@ -1041,7 +1042,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-preflight/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_settings",
@@ -1058,7 +1059,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/settings/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_team",
@@ -1076,7 +1077,7 @@
       "ui_path": "/admin/team",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/team/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_today",
@@ -1093,7 +1094,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/today/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_translations",
@@ -1110,7 +1111,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_viewings",
@@ -1127,7 +1128,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_viewings_ics",
@@ -1144,7 +1145,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings.ics/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_viewings_week",
@@ -1161,7 +1162,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/week/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_get_views",
@@ -1178,7 +1179,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js",
-      "reachability": "delegated_mcp_and_signed_in_webmcp_read"
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
       "operation": "admin_post_accounts",
@@ -1206,7 +1207,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/accounts/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_accounts_link",
@@ -1234,7 +1235,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/accounts/link/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_availability",
@@ -1262,7 +1263,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/availability/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_broker_contacts",
@@ -1290,7 +1291,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/broker-contacts/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_cases",
@@ -1318,7 +1319,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_cases_actions",
@@ -1346,7 +1347,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/actions/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_cases_conditions",
@@ -1374,7 +1375,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/conditions/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_cases_conditions_actions",
@@ -1402,7 +1403,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/cases/conditions/actions/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_connections",
@@ -1431,7 +1432,7 @@
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_connections_agent_config",
@@ -1460,7 +1461,7 @@
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/agent-config/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_connections_disconnect",
@@ -1489,7 +1490,7 @@
       "ui_path": "/admin/connect",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/connections/disconnect/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_consents_withdraw",
@@ -1517,7 +1518,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/consents/withdraw/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_data_exports",
@@ -1546,7 +1547,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/data-exports/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_deals_close",
@@ -1574,7 +1575,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/deals/close/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_deployable_redirects_export",
@@ -1602,7 +1603,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/deployable-redirects/export/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_documents_outcome",
@@ -1630,7 +1631,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/documents/outcome/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_hermes",
@@ -1658,7 +1659,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/hermes/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_launch_readiness_export",
@@ -1686,7 +1687,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/launch-readiness/export/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_lead_pipeline_outcome",
@@ -1714,7 +1715,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/lead-pipeline/outcome/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_leads",
@@ -1742,7 +1743,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_leads_assign",
@@ -1770,7 +1771,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/assign/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_leads_bulk",
@@ -1798,7 +1799,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/bulk/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_leads_snooze",
@@ -1826,7 +1827,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/snooze/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_leads_unsnooze",
@@ -1854,7 +1855,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/leads/unsnooze/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listing_quality_import",
@@ -1883,7 +1884,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_listings_edit",
@@ -1911,7 +1912,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/edit/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listings_publication_schedules",
@@ -1939,7 +1940,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/publication-schedules/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listings_publication_schedules_cancel",
@@ -1967,7 +1968,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/publication-schedules/cancel/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listings_publication_schedules_run_due",
@@ -1995,7 +1996,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/publication-schedules/run-due/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listings_slug",
@@ -2023,7 +2024,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/slug/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listings_status",
@@ -2051,7 +2052,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listings/status/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_live_service_provisioning_import",
@@ -2080,7 +2081,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-provisioning/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_live_service_reports_import",
@@ -2109,7 +2110,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/live-service-reports/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_locales",
@@ -2137,7 +2138,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/locales/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_media_reviews",
@@ -2165,7 +2166,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/reviews/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_media_uploads",
@@ -2194,7 +2195,7 @@
       "ui_path": "/admin/listings/edit",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/media/uploads/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_payload_runtime_import",
@@ -2223,7 +2224,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/payload-runtime/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_production_recovery_import",
@@ -2252,7 +2253,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_public_requests_outcome",
@@ -2280,7 +2281,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/public-requests/outcome/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_redirect_approvals",
@@ -2308,7 +2309,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approvals/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_redirect_approvals_import",
@@ -2337,7 +2338,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/redirect-approvals/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_replies",
@@ -2365,7 +2366,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/replies/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_replies_delivery",
@@ -2393,7 +2394,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/replies/delivery/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_replies_draft",
@@ -2421,7 +2422,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/replies/draft/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_saved_search_alerts_run_due",
@@ -2449,7 +2450,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/saved-search-alerts/run-due/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_security_sessions_revoke",
@@ -2478,7 +2479,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/sessions/revoke/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_activate",
@@ -2507,7 +2508,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/activate/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_disable",
@@ -2536,7 +2537,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/disable/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_enrol",
@@ -2565,7 +2566,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/enrol/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_security_two_factor_verify",
@@ -2594,7 +2595,7 @@
       "ui_path": "/admin/settings#settings-security",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/security/two-factor/verify/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_seller_pipeline_outcome",
@@ -2622,7 +2623,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seller-pipeline/outcome/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_seo_evidence_import",
@@ -2651,7 +2652,7 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/seo-evidence/import/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_settings",
@@ -2679,7 +2680,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/settings/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_social_marketing_publish",
@@ -2707,7 +2708,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/social-marketing/publish/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_team",
@@ -2736,7 +2737,7 @@
       "ui_path": "/admin/team",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/team/route.js",
-      "reachability": "admin_ui_and_signed_in_webmcp_open"
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_tours_approve",
@@ -2764,7 +2765,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/tours/approve/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_translations_approve",
@@ -2792,7 +2793,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/approve/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_translations_draft",
@@ -2820,7 +2821,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/draft/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_translations_publish",
@@ -2848,7 +2849,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/translations/publish/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_viewings",
@@ -2876,7 +2877,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_viewings_follow_up",
@@ -2904,7 +2905,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/viewings/follow-up/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_views",
@@ -2932,7 +2933,7 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js",
-      "reachability": "signed_delegated_mcp_and_human_admin_ui"
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     }
   ],
   "hermes_tools": [
@@ -2948,7 +2949,7 @@
         "mark_indexable",
         "approve_legal"
       ],
-      "reachability": "owner_plugin_mcp"
+      "declared_entrypoint": "owner_plugin_mcp"
     },
     {
       "operation": "hermes_next_tasks",
@@ -2962,7 +2963,7 @@
         "mark_indexable",
         "approve_legal"
       ],
-      "reachability": "owner_plugin_mcp"
+      "declared_entrypoint": "owner_plugin_mcp"
     },
     {
       "operation": "hermes_submit_draft",
@@ -2989,7 +2990,7 @@
         "mark_indexable",
         "approve_legal"
       ],
-      "reachability": "owner_plugin_mcp"
+      "declared_entrypoint": "owner_plugin_mcp"
     }
   ],
   "provider_matrix": [

@@ -434,6 +434,7 @@ export function operatorProviderCards({
     const ready = availability[definition.id]?.ready === true;
     const storedStatus = trimmed(connection?.status);
     const connected = storedStatus === "connected";
+    const active = definition.id !== "ai" || hermes.mode === "openrouter";
     const supported = definition.supported !== false;
     const status =
       storedStatus === "connecting" || storedStatus === "unavailable"
@@ -441,7 +442,9 @@ export function operatorProviderCards({
         : !supported
           ? "disabled"
           : connected
-              ? "connected"
+              ? active
+                ? "connected"
+                : "inactive"
               : ready
                 ? "not_connected"
                 : "needs_setup";

@@ -285,6 +285,44 @@ test("stored provider rows keep truthful intermediate and unavailable status", (
   assert.equal(byId.google.status, "unavailable");
 });
 
+test("a stored OpenRouter authorization stays inactive while Hermes runs self-hosted", () => {
+  const config = fullConfig({
+    hermes: {
+      mode: "self_hosted",
+      endpoint: "https://hermes.internal.example/v1/chat/completions",
+      endpoint_redacted: "https://hermes.internal.example/v1/chat/completions",
+      model: "NousResearch/Hermes-4-14B",
+      has_api_key: true,
+    },
+  });
+  const connections = [{
+    provider: "ai",
+    status: "connected",
+    account_label: "OpenRouter",
+    last_verified_at: "2026-08-24T12:00:00.000Z",
+    metadata: { model: "openrouter/auto" },
+  }];
+  const cards = operatorProviderCards({
+    connections,
+    availability: operatorProviderAvailability(config),
+    config,
+  });
+  assert.equal(cards.find((card) => card.id === "ai").status, "inactive");
+
+  const html = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections,
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(html, /data-provider="ai" data-status="inactive"/);
+  assert.match(html, /Connected · not active/);
+  assert.match(html, /data-managed-system="hermes" data-status="ready"/);
+  assert.match(html, /Hermes uses the configured self-hosted model runtime/);
+});
+
 test("a configured owner page offers five one-click handoffs and no raw credential form", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({

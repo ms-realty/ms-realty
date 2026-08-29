@@ -11266,7 +11266,7 @@ function ConnectionAction({ connection }) {
 }
 
 function ConnectionRow({ connection, copy }) {
-  const connected = connection.status === "connected";
+  const connected = connection.status === "connected" || connection.status === "inactive";
   return h(
     "li",
     {
@@ -11574,7 +11574,13 @@ function ConnectionsBody({ page }) {
                     h(
                       "li",
                       { key: system.id, "data-managed-system": system.id, "data-status": system.status },
-                      h("div", null, h("h3", null, system.title), h("p", null, system.description)),
+                      h(
+                        "div",
+                        null,
+                        h("h3", null, system.title),
+                        h("p", null, system.description),
+                        system.helper_text ? h("small", null, system.helper_text) : null,
+                      ),
                       h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
                     ),
                   ),

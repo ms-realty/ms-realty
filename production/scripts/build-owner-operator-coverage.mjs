@@ -121,23 +121,24 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
   const adminRoutes = discovered.map((source) => ({
     ...catalogByKey.get(operationKey(source.method, source.pathname)),
     source_file: source.source_file,
-    reachability: adminWorkflowReachability(catalogByKey.get(operationKey(source.method, source.pathname))),
+    declared_entrypoint: adminWorkflowReachability(catalogByKey.get(operationKey(source.method, source.pathname))),
   }));
   const adminPages = ADMIN_PAGE_SURFACES.map((page) => ({
     ...page,
-    reachability: "signed_in_admin_ui",
+    declared_entrypoint: "signed_in_admin_ui",
   }));
   const hermesTools = HERMES_TOOL_COVERAGE.map((row) => ({
     ...row,
-    reachability: hermesWorkflowReachability(row),
+    declared_entrypoint: hermesWorkflowReachability(row),
   }));
   const authorizedWorkflows = adminRoutes.length + hermesTools.length;
-  const reachableWorkflows = [
-    ...adminRoutes.map((row) => row.reachability),
-    ...hermesTools.map((row) => row.reachability),
+  const structurallyCoveredWorkflows = [
+    ...adminRoutes.map((row) => row.declared_entrypoint),
+    ...hermesTools.map((row) => row.declared_entrypoint),
   ].filter(Boolean).length;
   return {
-    schema_version: 2,
+    schema_version: 3,
+    proof_kind: "structural_inventory",
     plugin_id: OWNER_OPERATOR_PLUGIN_ID,
     generated_by: "production/scripts/build-owner-operator-coverage.mjs",
     summary: {
@@ -147,8 +148,8 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
       nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
       hermes_tools: hermesTools.length,
       authorized_workflows: authorizedWorkflows,
-      reachable_workflows: reachableWorkflows,
-      reachability_percent: authorizedWorkflows ? (reachableWorkflows * 100) / authorizedWorkflows : 100,
+      structurally_covered_workflows: structurallyCoveredWorkflows,
+      structural_coverage_percent: authorizedWorkflows ? (structurallyCoveredWorkflows * 100) / authorizedWorkflows : 100,
       providers: OPERATOR_PROVIDER_COVERAGE.length,
       enabled_integrations: OPERATOR_PROVIDER_COVERAGE.filter((row) => row.state === "enabled").length,
       managed_systems: OPERATOR_PROVIDER_COVERAGE.filter((row) => row.state === "managed").length,
@@ -167,6 +168,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === entrypoint) {
   const coverage = buildOwnerOperatorCoverage();
   fs.writeFileSync(outputPath, `${JSON.stringify(coverage, null, 2)}\n`);
   console.log(
-    `Wrote ${outputPath} (${coverage.summary.reachable_workflows}/${coverage.summary.authorized_workflows} workflows, ${coverage.summary.enabled_integrations} enabled integrations)`,
+    `Wrote ${outputPath} (${coverage.summary.structurally_covered_workflows}/${coverage.summary.authorized_workflows} structurally covered workflows, ${coverage.summary.enabled_integrations} enabled integrations)`,
   );
 }
