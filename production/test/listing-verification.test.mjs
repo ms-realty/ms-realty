@@ -56,6 +56,8 @@ test("listing verification report creates broker tasks from latest listing edits
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").latest_edit_id, "latest-edit");
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0116").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.role, "broker");
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.requires_assignment, true);
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.ready, false);
   assert.ok(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.blocking_fields.includes("location_id"));
 });
@@ -74,14 +76,16 @@ test("listing verification resolves a configured real broker without inventing f
       },
     ],
     brokerProfiles: [
-      { id: "broker_bg", languages: ["bg"] },
+      ...["agency_admin", "broker_bg", "broker_ru", "broker_international", "content_editor", "ru_preservation_editor", "seo_editor"].map((id) => ({ id, languages: ["bg"] })),
       { id: "real-broker-bg", languages: ["bg"] },
     ],
     generatedAt: "2026-07-05T00:00:00Z",
   });
 
   assert.equal(report.rows[0].verification_task.owner, "real-broker-bg");
-  assert.doesNotMatch(JSON.stringify(report), /broker_bg|broker_ru|broker_international/);
+  assert.equal(report.rows[0].verification_task.role, "broker");
+  assert.equal(report.rows[0].verification_task.requires_assignment, false);
+  assert.doesNotMatch(JSON.stringify(report), /agency_admin|broker_bg|broker_ru|broker_international|content_editor|ru_preservation_editor|seo_editor/);
 });
 
 test("later legacy description restorations retain the immediately preceding factual verification priority", () => {

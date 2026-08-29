@@ -34,7 +34,13 @@ test("agency review queue defers decisions without weakening public guardrails",
   assert.equal(queue.guardrails.unapproved_customer_messages, "blocked");
   assert.equal(queue.guardrails.legacy_route_compatibility, "review_required");
   assert.equal(queue.lanes.find((laneItem) => laneItem.id === "broker_contacts").count, 1);
-  assert.doesNotMatch(JSON.stringify(queue), /broker_bg|broker_ru|broker_international/);
+  const tasks = queue.lanes.flatMap((laneItem) => laneItem.tasks);
+  assert.ok(tasks.every((item) => item.owner === "unassigned" && item.requires_assignment === true));
+  assert.equal(tasks.find((item) => item.id === "route-url-1")?.role, "content_and_seo");
+  assert.equal(tasks.find((item) => item.id === "translation-MS-1-de")?.role, "translator_de");
+  assert.equal(tasks.find((item) => item.id === "signoff-production_recovery")?.role, "operations");
+  assert.equal(queue.lanes.find((laneItem) => laneItem.id === "operational_signoff")?.owner, "operations");
+  assert.doesNotMatch(JSON.stringify(queue), /agency_admin|broker_bg|broker_ru|broker_international|content_editor|ru_preservation_editor|seo_editor/);
 });
 
 test("agency review queue keeps an unassigned role when no real broker is configured", () => {
@@ -52,7 +58,23 @@ test("agency review queue keeps an unassigned role when no real broker is config
   const tasks = queue.lanes.flatMap((laneItem) => laneItem.tasks);
   assert.equal(tasks.find((item) => item.id === "listing-quality-MS-1")?.owner, "unassigned");
   assert.equal(tasks.find((item) => item.id === "verify-MS-1")?.owner, "unassigned");
-  assert.doesNotMatch(JSON.stringify(queue), /broker_bg|broker_ru|broker_international/);
+  assert.ok(tasks.every((item) => item.role === "broker" && item.requires_assignment === true));
+  assert.doesNotMatch(JSON.stringify(queue), /agency_admin|broker_bg|broker_ru|broker_international|content_editor|ru_preservation_editor|seo_editor/);
+});
+
+test("agency review queue keeps a verified broker assignee and marks the task assigned", () => {
+  const queue = buildAgencyReviewQueue({
+    listingQuality: {
+      rows: [{ listing_id: "MS-1", source_locale: "bg", editor_path: "/admin/listings/edit?listingId=MS-1" }],
+      review_queue: { summary: { pending_review_rows: 1 } },
+    },
+    brokerProfiles: [{ id: "payload-owner-123", languages: ["bg"] }],
+  });
+
+  const assigned = queue.lanes[0].tasks[0];
+  assert.equal(assigned.owner, "payload-owner-123");
+  assert.equal(assigned.role, "broker");
+  assert.equal(assigned.requires_assignment, false);
 });
 
 test("production-review admin renders localized mobile queue labels and unverified imported listings", async () => {

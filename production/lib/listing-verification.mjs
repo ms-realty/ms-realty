@@ -7,7 +7,15 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LISTING_VERIFICATION_REPORT = fromRoot("production", "data", "listing-verification-report.json");
 export const UNASSIGNED_REVIEW_OWNER = "unassigned";
-const FIXTURE_BROKER_IDS = new Set(["broker_bg", "broker_ru", "broker_international"]);
+const SYNTHETIC_REVIEW_OWNER_IDS = new Set([
+  "agency_admin",
+  "broker_bg",
+  "broker_international",
+  "broker_ru",
+  "content_editor",
+  "ru_preservation_editor",
+  "seo_editor",
+]);
 
 function listingRecords(seed) {
   return new Map(seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]));
@@ -37,7 +45,7 @@ function profileLocales(profile) {
 }
 
 export function isFixtureBrokerId(value) {
-  return FIXTURE_BROKER_IDS.has(String(value || "").trim().toLowerCase());
+  return SYNTHETIC_REVIEW_OWNER_IDS.has(String(value || "").trim().toLowerCase());
 }
 
 function configuredBrokerProfiles(value) {
@@ -143,6 +151,8 @@ export function buildListingVerificationReport({
         verification_task: {
           id: `verify-${edit.listing_id}`,
           owner,
+          role: "broker",
+          requires_assignment: owner === UNASSIGNED_REVIEW_OWNER,
           status: "open",
           due_at: dueAt(generatedAt, rowPriority),
         },
@@ -177,8 +187,17 @@ export function assertListingVerificationReport(report) {
     if (!row.listing_id || !row.source_hash_after || !row.admin_path.startsWith("/admin/listings/edit?listingId=")) {
       throw new Error("Listing verification rows must preserve editor routing data");
     }
-    if (row.verification_task?.status !== "open" || !row.verification_task.owner || !row.verification_task.due_at) {
+    if (
+      row.verification_task?.status !== "open" ||
+      !row.verification_task.owner ||
+      row.verification_task.role !== "broker" ||
+      row.verification_task.requires_assignment !== (row.verification_task.owner === UNASSIGNED_REVIEW_OWNER) ||
+      !row.verification_task.due_at
+    ) {
       throw new Error("Listing verification rows must create open broker tasks");
+    }
+    if (isFixtureBrokerId(row.verification_task.owner)) {
+      throw new Error("Listing verification tasks must not assign fixture identities");
     }
     if (row.stale_translation_count > 0 && row.priority !== "high") {
       throw new Error("Stale translation verification rows must be high priority");

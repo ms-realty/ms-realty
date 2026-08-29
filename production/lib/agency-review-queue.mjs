@@ -8,7 +8,13 @@ import {
 const SAMPLE_LIMIT = 20;
 
 function task(input) {
-  return { status: "open", ...input };
+  const owner = String(input.owner || "").trim() || UNASSIGNED_REVIEW_OWNER;
+  return {
+    status: "open",
+    ...input,
+    owner,
+    requires_assignment: owner === UNASSIGNED_REVIEW_OWNER,
+  };
 }
 
 function lane({ id, title, owner, priority, adminPath, guardrail, count, tasks }) {
@@ -60,7 +66,8 @@ export function buildAgencyReviewQueue({
         task({
           id: `route-${row.id || encodeURIComponent(row.old_url)}`,
           title: row.old_url,
-          owner: row.source_domain === "makler-realty.ru" ? "ru_preservation_editor" : "content_editor",
+          owner: UNASSIGNED_REVIEW_OWNER,
+          role: "content_and_seo",
           priority: row.priority || "high",
           admin_path: `/admin/migration/review?q=${encodeURIComponent(row.old_url)}`,
         }),
@@ -74,15 +81,17 @@ export function buildAgencyReviewQueue({
       adminPath: "/admin/migration/review",
       guardrail: "Unreviewed listings remain blocked from publication.",
       count: qualityCount,
-      tasks: qualityRows.map((row) =>
-        task({
+      tasks: qualityRows.map((row) => {
+        const owner = resolveListingVerificationOwner(row.source_locale, brokerProfiles);
+        return task({
           id: `listing-quality-${row.listing_id}`,
           title: row.title || row.listing_id,
-          owner: resolveListingVerificationOwner(row.source_locale, brokerProfiles),
+          owner,
+          role: "broker",
           priority: "high",
           admin_path: row.editor_path,
-        }),
-      ),
+        });
+      }),
     }),
     lane({
       id: "broker_verification",
@@ -92,15 +101,17 @@ export function buildAgencyReviewQueue({
       adminPath: "/admin/listings",
       guardrail: "Availability, canonical facts, and SEO approval must be verified before publication.",
       count: verificationRows.length,
-      tasks: verificationRows.map((row) =>
-        task({
+      tasks: verificationRows.map((row) => {
+        const owner = listingVerificationOwnerForRow(row, brokerProfiles);
+        return task({
           id: row.verification_task?.id || `verify-${row.listing_id}`,
           title: row.listing_id,
-          owner: listingVerificationOwnerForRow(row, brokerProfiles),
+          owner,
+          role: "broker",
           priority: row.priority || "high",
           admin_path: row.admin_path,
-        }),
-      ),
+        });
+      }),
     }),
     lane({
       id: "broker_contacts",
@@ -110,15 +121,17 @@ export function buildAgencyReviewQueue({
       adminPath: "/admin/listings",
       guardrail: "Listings use the safe enquiry fallback until an independently verified contact is approved.",
       count: contactRows.length,
-      tasks: contactRows.map((row) =>
-        task({
+      tasks: contactRows.map((row) => {
+        const owner = listingVerificationOwnerForRow(row, brokerProfiles);
+        return task({
           id: `broker-contact-${row.listing_id}`,
           title: row.listing_id,
-          owner: listingVerificationOwnerForRow(row, brokerProfiles) || UNASSIGNED_REVIEW_OWNER,
+          owner,
+          role: "broker",
           priority: "high",
           admin_path: row.admin_path,
-        }),
-      ),
+        });
+      }),
     }),
     lane({
       id: "translations",
@@ -132,7 +145,8 @@ export function buildAgencyReviewQueue({
         task({
           id: row.task?.id || `translation-${row.listing_id}-${row.target_locale}`,
           title: `${row.listing_id} → ${String(row.target_locale || "").toUpperCase()}`,
-          owner: row.task?.owner || row.reviewer_role,
+          owner: UNASSIGNED_REVIEW_OWNER,
+          role: row.reviewer_role || "translation_editor",
           priority: row.current_status === "stale" ? "high" : "medium",
           admin_path: row.admin_path,
         }),
@@ -141,7 +155,7 @@ export function buildAgencyReviewQueue({
     lane({
       id: "operational_signoff",
       title: "Monitoring and recovery sign-off",
-      owner: "agency_admin",
+      owner: "operations",
       priority: "high",
       adminPath: "/admin/migration/review",
       guardrail: "Public launch remains blocked until production evidence and the required reviewer sign-off exist.",
@@ -150,7 +164,8 @@ export function buildAgencyReviewQueue({
         task({
           id: `signoff-${gate.id}`,
           title: gate.id,
-          owner: "agency_admin",
+          owner: UNASSIGNED_REVIEW_OWNER,
+          role: "operations",
           priority: "high",
           admin_path: "/admin/migration/review",
         }),
