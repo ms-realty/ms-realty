@@ -34,22 +34,14 @@ test("the owner's full-catalog approval names every catalogued listing", () => {
   assert.equal(approval.scope, "full_freeze_catalog");
   assert.equal(approval.decision, "publish_source_as_is");
   assert.equal(approval.approved_by, "agency_owner");
-  assert.equal(approval.reason, "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.");
+  assert.equal(approval.reason, "Owner directive of 2026-08-30, given in the operations session: complete every listing translation and publish everything; keep every admin review queue.");
   assert.equal(catalogIds.length, 165);
-  // One catalogued listing cannot render publicly - no location relation and
-  // an empty title - so the approval names the 164 that can and records the
-  // one exclusion with its reason; named plus excluded still accounts for all.
-  assert.deepEqual(
-    approval.listing_ids,
-    catalogIds.filter((id) => id !== "MS-CRAWL-0127" && id !== "MS-CRAWL-0159"),
-  );
-  assert.equal(approval.excluded_listings.length, 2);
-  assert.deepEqual(approval.excluded_listings.map((entry) => entry.id).sort(), ["MS-CRAWL-0127", "MS-CRAWL-0159"]);
-  for (const entry of approval.excluded_listings) assert.match(entry.reason, /no location relation/);
+  assert.deepEqual(approval.listing_ids, catalogIds);
+  assert.deepEqual(approval.excluded_listings, []);
   // The narrower freeze-active scope stays a strict subset of the approved set.
   assert.equal(freezeActiveListingIds(freeze).every((id) => approval.listing_ids.includes(id)), true);
   assert.equal(hasOperatorPublicationListingEvidence(operatorPublicationListingEvidence(freeze)), true);
-  assert.equal(operatorPublishedListingIds(freeze).length, 163);
+  assert.equal(operatorPublishedListingIds(freeze).length, 165);
 });
 
 test("full-catalog publication must account for every catalogued listing", () => {

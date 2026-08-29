@@ -2,13 +2,13 @@
   "schema_version": 2,
   "approval_id": "MSR-LISTING-PUBLICATION-1",
   "approved_by": "agency_owner",
-  "approved_at": "2026-08-24T00:00:00.000Z",
-  "reason": "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.",
+  "approved_at": "2026-08-30T00:00:00.000+03:00",
+  "reason": "Owner directive of 2026-08-30, given in the operations session: complete every listing translation and publish everything; keep every admin review queue.",
   "based_on_freeze_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
   "based_on_freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
   "scope": "full_freeze_catalog",
   "decision": "publish_source_as_is",
-  "publication_boundary": "Owner-directed publication of the entire 165-listing freeze catalog as source-locale public inventory, without further per-listing verification. Every admin quality, verification, media and translation queue keeps its outstanding work: publication changes cms_status and publish_approved only. Non-source translations stay unpublished until a human approves them.",
+  "publication_boundary": "Owner-directed publication of the entire 165-listing freeze catalog as source-locale public inventory after reconciling the two previously missing reviewed location relations. Every admin quality, verification, media and translation queue keeps its outstanding work; translated copy remains governed by its separate human-approval and indexability gate.",
   "supersedes": {
     "scope": "freeze_active_catalog",
     "approved_by": "Ivan Peychev",
@@ -142,6 +142,7 @@
     "MS-CRAWL-0124",
     "MS-CRAWL-0125",
     "MS-CRAWL-0126",
+    "MS-CRAWL-0127",
     "MS-CRAWL-0128",
     "MS-CRAWL-0129",
     "MS-CRAWL-0130",
@@ -173,6 +174,7 @@
     "MS-CRAWL-0156",
     "MS-CRAWL-0157",
     "MS-CRAWL-0158",
+    "MS-CRAWL-0159",
     "MS-CRAWL-0160",
     "MS-CRAWL-0161",
     "MS-CRAWL-0162",
@@ -180,14 +182,5 @@
     "MS-CRAWL-0164",
     "MS-CRAWL-0165"
   ],
-  "excluded_listings": [
-    {
-      "id": "MS-CRAWL-0127",
-      "reason": "no location relation and an empty title in the frozen catalog; a search document and a titled public page cannot be built from it"
-    },
-    {
-      "id": "MS-CRAWL-0159",
-      "reason": "no location relation in the frozen catalog; a search document and a located public page cannot be built from it"
-    }
-  ]
+  "excluded_listings": []
 }
