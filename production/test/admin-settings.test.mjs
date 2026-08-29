@@ -661,9 +661,9 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
-    assert.match(populated.body, /data-next-action="lead"/);
+    assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
-    assert.match(populated.body, /data-next-action-count="2" data-next-action-total="2" data-next-action-visible="2"/);
+    assert.match(populated.body, /data-next-action-count="1" data-next-action-total="2" data-next-action-visible="1"/);
     assert.match(populated.body, /data-today-briefing="true" data-today-primary-action="lead" data-today-priority-count="2" data-today-priority-total="2"/);
     assert.doesNotMatch(populated.body, /data-today-toolbar="true"/);
     assert.doesNotMatch(populated.body, /data-list-filter="next-actions"/);

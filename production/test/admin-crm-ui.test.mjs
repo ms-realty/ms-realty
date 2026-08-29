@@ -73,7 +73,7 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   assert.match(page.body, /data-lead-assignment-control=/);
 });
 
-test("placeholder lead names fall back to source truth across inbox, detail, and contacts", async () => {
+test("manual lead names and localized source truth stay visible across inbox, detail, and contacts", async () => {
   const server = app();
   const created = await dispatchHttp(server, {
     method: "POST",
@@ -85,7 +85,7 @@ test("placeholder lead names fall back to source truth across inbox, detail, and
       leadType: "buyer",
       language: "en",
       contact_preference: "email",
-      "contact.name": "Test",
+      "contact.name": "Maria Petrova",
       "contact.email": "owner@example.com",
       "requirements.locations": "Sandanski",
       "requirements.property_types": "apartment",
@@ -99,14 +99,13 @@ test("placeholder lead names fall back to source truth across inbox, detail, and
 
   const inbox = await dispatchHttp(server, { url: "/admin/leads?locale=en", headers: auth });
   assert.equal(inbox.status, 200);
-  assert.match(inbox.body, /<span class="adm-inbox__title">Email<\/span>/);
-  assert.doesNotMatch(inbox.body, /<span class="adm-inbox__title">Test<\/span>/);
-  assert.doesNotMatch(inbox.body, /<strong>Test<\/strong>/);
+  assert.match(inbox.body, /<span class="adm-inbox__title">Maria Petrova<\/span>/);
+  assert.match(inbox.body, /<span class="adm-lead-meta__source">Email<\/span>/);
 
   const contacts = await dispatchHttp(server, { url: "/admin/contacts?locale=en", headers: auth });
   assert.equal(contacts.status, 200);
   assert.match(contacts.body, /owner@example\.com/);
-  assert.doesNotMatch(contacts.body, /<h3>Test<\/h3>/);
+  assert.match(contacts.body, /<h3>Maria Petrova<\/h3>/);
 });
 
 test("the inbox answers its empty states: no leads, no queue matches, and no selection", async () => {

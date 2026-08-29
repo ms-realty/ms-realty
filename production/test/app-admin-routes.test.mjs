@@ -390,7 +390,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(todayHtml, /data-today-briefing="true"/);
       assert.match(todayHtml, /data-hermes-entry="today"/);
       assert.match(todayHtml, /data-next-actions="true"/);
-      assert.match(todayHtml, /data-next-action="lead"/);
+      assert.doesNotMatch(todayHtml, /data-next-action="lead"/);
       assert.match(todayHtml, /adm-next-actions__body/);
       assert.match(todayHtml, /(?:Открыть|Проверить) и ответить/);
       assert.match(todayHtml, new RegExp(`href="/admin/leads\\?locale=ru#lead-${leadId}"`));

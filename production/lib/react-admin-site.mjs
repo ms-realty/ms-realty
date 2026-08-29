@@ -2276,7 +2276,7 @@ function formatAdminDateTime(value, locale) {
 function leadContactActions(lead, copy) {
   const contact = lead.contact || {};
   const contactName = String(contact.name || "").trim();
-  const displayName = contactName && !looksLikeGeneratedContactId(contactName) && !placeholderLeadName(contactName) ? contactName : "";
+  const displayName = contactName && !looksLikeGeneratedContactId(contactName) ? contactName : "";
   const channels = ["phone", "whatsapp", "viber", "email"].flatMap((channel) => {
     const value = String(contact[channel] || "").trim();
     if (!value) return [];
@@ -3517,13 +3517,14 @@ function TodayBriefingPanel({ page, rows }) {
 
 function NextActionsPanel({ page, rows }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const visible = rows.slice(0, 5);
+  const remaining = rows.length ? rows.slice(1) : rows;
+  const visible = remaining.slice(0, 5);
   return h(
     Panel,
     {
       title: na.title,
       "data-next-actions": "true",
-      "data-next-action-count": String(rows.length),
+      "data-next-action-count": String(remaining.length),
       "data-next-action-total": String(rows.length),
       "data-next-action-visible": String(visible.length),
     },
@@ -6476,9 +6477,9 @@ function looksLikeGeneratedContactId(value) {
 // it is evidence, and evidence belongs in the caption underneath.
 function contactTitle(contact, ui) {
   const display = String(contact.display_name || "").trim();
-  if (display && display !== contact.id && !looksLikeGeneratedContactId(display) && !placeholderLeadName(display)) return display;
+  if (display && display !== contact.id && !looksLikeGeneratedContactId(display)) return display;
   const person = String(contact.contact?.name || "").trim();
-  if (person && !looksLikeGeneratedContactId(person) && !placeholderLeadName(person)) return person;
+  if (person && !looksLikeGeneratedContactId(person)) return person;
   const email = String(contact.contact?.email || "").trim();
   if (email) return email;
   const types = (contact.lead_types || []).map((type) => statusText(ui, type)).filter(Boolean);
@@ -6745,21 +6746,13 @@ function formatRelativeAge(value, ui, now = Date.now()) {
   return ui.ageDays.replace("{n}", String(Math.round(hours / 24)));
 }
 
-function placeholderLeadName(value) {
-  const normalized = String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-  return ["test", "test user", "test buyer", "test seller", "demo", "sample", "example", "placeholder", "тест"].includes(normalized);
-}
-
 function leadSourceTitle(lead, ui) {
   return valueText(ui, lead.source) || statusText(ui, lead.lead_type);
 }
 
 function leadTitle(lead, ui) {
   const contactName = String(lead.contact?.name || "").trim();
-  return contactName && !placeholderLeadName(contactName) ? contactName : leadSourceTitle(lead, ui);
+  return contactName && !looksLikeGeneratedContactId(contactName) ? contactName : leadSourceTitle(lead, ui);
 }
 
 function leadSlaTone(status) {
