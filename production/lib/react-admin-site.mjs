@@ -4028,7 +4028,7 @@ function ViewingsBody({ page }) {
                     h(
                       "span",
                       { className: "adm-viewing-list__meta" },
-                      h("span", null, `${label(copy, "broker", "Broker")}: ${viewing.broker}`),
+                      h("span", null, `${label(copy, "broker", "Broker")}: ${brokerProfileText(page, viewing.broker)}`),
                       viewing.channel ? h("span", null, valueText(ui, viewing.channel)) : null,
                       h("code", { className: "crm-mono" }, viewing.id),
                     ),

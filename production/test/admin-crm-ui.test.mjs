@@ -212,6 +212,7 @@ test("unavailable CRM affordances stay out of the owner task flow", async () => 
   const viewings = await dispatchHttp(app(), { url: "/admin/viewings?locale=en", headers: auth });
   assert.doesNotMatch(viewings.body, /data-planned-control="viewing_week_view"/);
   assert.doesNotMatch(viewings.body, /The week calendar is waiting for broker availability/);
+  assert.doesNotMatch(viewings.body, /Broker: broker_(?:bg|ru|international)/);
   assert.match(viewings.body, /<a href="\/admin\/viewings\?view=week"[^>]*>Week<\/a>/);
 
   const week = await dispatchHttp(app(), { url: "/admin/viewings?locale=en&view=week", headers: auth });

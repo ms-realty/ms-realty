@@ -55,7 +55,7 @@ const providerDocuments = [
     id: "browser-qa-google",
     provider: "google",
     status: "connected",
-    account_label: "owner@example.test",
+    account_label: "ms.realty.bg@gmail.com",
     scopes: ["gmail.send", "calendar.events"],
     last_verified_at: "2026-08-13T12:00:00.000Z",
     credential_envelope: { ciphertext: "BROWSER_QA_CREDENTIAL_MARKER" },
@@ -96,13 +96,13 @@ const app = createHttpApp({
       return token === sessionToken
         ? {
             principal: {
-              id: "browser-qa-admin",
+              id: "ms-realty-owner",
               source: "payload_session",
               can_mutate: true,
               roles: ["admin"],
               workspace_ids: ["sandanski"],
             },
-            user: { id: "browser-qa-admin" },
+            user: { id: "ms-realty-owner" },
           }
         : null;
     },
