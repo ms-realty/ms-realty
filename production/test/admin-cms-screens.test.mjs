@@ -168,6 +168,7 @@ test("shared admin status tokens keep dark surfaces legible and owner identity n
   assert.match(ownerIdentity, /title="Open profile and settings"/);
   assert.match(ownerIdentity, /<strong>MS Realty Admin<\/strong>/);
   assert.match(ownerIdentity, /class="adm-owner-identity__role">Owner<\/span>/);
+  assert.equal((ownerIdentity.match(/>Owner</g) || []).length, 1, "the fallback role is rendered once");
   // StatusPill exposes its tone to CSS instead of freezing a light-ramp color
   // in an inline style that cannot follow the dark workbench palette.
   assert.match(page.body, /<span class="crm-pill" data-tone="brick"[^>]*>/);

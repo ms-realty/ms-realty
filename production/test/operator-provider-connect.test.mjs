@@ -806,6 +806,10 @@ test("the assistant's configuration helper stays available as an API and the own
   for (const card of ["google", "whatsapp", "social", "assistant"]) {
     assert.match(html, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
   }
+  assert.match(html, /data-summary-card="social"/);
+  assert.match(html, /<details class="adm-workbench-disclosure" data-connection-group="secondary-work-accounts">[\s\S]*?Маркетинг канали · 2/);
+  assert.match(html, /<details class="adm-workbench-disclosure" data-connection-group="supporting-disclosure">/);
+  assert.doesNotMatch(html, /Работни акаунти · 2/);
   assert.match(html, /data-summary-card="assistant" data-summary-tone="success"/);
   assert.match(html, /data-connection-group="assistant"/);
   assert.match(html, /data-connection-list="core"/);

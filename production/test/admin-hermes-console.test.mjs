@@ -160,7 +160,7 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.ok(Number(queueCounts[2]) < Number(queueCounts[1]), "starting point is removed from the remaining queue");
   assert.match(html, /data-hermes-next-task="[^"]+"[\s\S]*?class="mk-btn mk-btn--secondary mk-btn--sm"/);
   assert.doesNotMatch(html, /<form class="adm-hermes-command__form"/);
-  assert.match(html, /data-hermes-command-recovery="true"[\s\S]*?class="mk-btn mk-btn--primary mk-btn--sm"/);
+  assert.match(html, /class="adm-hermes-recovery" role="group" aria-label="Recover the connection" data-hermes-command-recovery="true"[\s\S]*?class="mk-btn mk-btn--primary mk-btn--sm"/);
   assert.match(html, /HERMES_CHAT_COMPLETIONS_URL/);
   assert.equal(html.match(/class="adm-hermes-recovery"/g)?.length, 1);
   assert.match(html, /Recover the connection/);

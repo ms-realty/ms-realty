@@ -2425,7 +2425,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 }
 
 /* ---- Owner connections: working OAuth accounts + managed system state ---- */
-.adm-connections-intro { max-width: 70ch; margin: 0; color: var(--text-muted); font-size: var(--text-base); }
+.adm-connections-intro,
+.adm-settings-page-intro { max-width: 70ch; margin: 0; color: var(--text-muted); font-size: var(--text-base); }
 .adm-connections-notice { margin: 0; padding: var(--space-3) var(--space-4); border: 1px solid var(--success-200, var(--border)); border-radius: var(--radius-md); background: var(--success-50); color: var(--success-700, var(--success-600)); font-weight: var(--fw-semibold); }
 .adm-connections-notice[data-state="error"] { border-color: var(--brick-200, var(--border)); background: var(--brick-50); color: var(--brick-700, var(--brick-600)); }
 .adm-connections-section-copy { margin: 0; padding: 0 var(--space-5) var(--space-4); color: var(--text-muted); }

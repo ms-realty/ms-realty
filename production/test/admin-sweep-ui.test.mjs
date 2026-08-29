@@ -101,6 +101,8 @@ test("Today, Hermes, and Settings use an in-flow owner grid instead of a split r
   assert.match(adminAdapterCss, /\.adm-owner-flow__support\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
   assert.match(adminAdapterCss, /\.adm-owner-flow--today \[data-readiness-support="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(240px, 1fr\)\)/);
   assert.match(adminAdapterCss, /\.adm-owner-flow--settings \[data-settings-overview="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
+  assert.match(adminSettingsCss, /\.adm-settings-disclosure > summary\s*\{[^}]*cursor:\s*pointer;[^}]*list-style:\s*none/);
+  assert.match(adminSettingsCss, /\.adm-settings-disclosure\[open\] > summary::after\s*\{[^}]*content:\s*"−"/);
 });
 
 test("connections and Hermes keep supporting state in-flow without a sticky rail", () => {

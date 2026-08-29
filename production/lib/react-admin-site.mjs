@@ -3018,7 +3018,7 @@ function OwnerIdentity({ page, mobile = false }) {
       "span",
       { className: "adm-owner-identity__copy" },
       h("strong", null, name),
-      h("small", null, profile.email ? h("bdi", null, profile.email) : role),
+      profile.email ? h("small", null, h("bdi", null, profile.email)) : null,
     ),
     h("span", { className: "adm-owner-identity__role" }, role),
   );
@@ -10617,85 +10617,6 @@ function SettingsCheck({ name, labelText, hint, checked, disabled }) {
   );
 }
 
-function SettingsActionRail({ page }) {
-  const settings = settingsCopy(page);
-  const onboarding = page.onboarding || null;
-  const connectHref = adminHref("/admin/connect", page);
-  return h(
-    Panel,
-    {
-      title: settings.sectionsNav,
-      "data-settings-actions": "true",
-      "data-settings-onboarding": onboarding ? `${onboarding.done}/${onboarding.total}` : "absent",
-      action: pageCan(page, "settings:manage")
-        ? h(
-            "a",
-            { className: "mk-btn mk-btn--ghost mk-btn--sm", href: connectHref },
-            h(Icon, { name: "link", size: 15 }),
-            h("span", null, ownerConsoleCopy(page).profile.manageConnections),
-          )
-        : null,
-    },
-    h("p", { className: "adm-settings-gap-intro" }, settings.description),
-    h("ol", { className: "adm-readiness-list" }, ...settingsActionRailRows(page, { connectHref })),
-  );
-}
-
-function settingsActionRailRows(page, { connectHref }) {
-  const settings = settingsCopy(page);
-  const onboarding = page.onboarding || null;
-  const rows = [];
-  if (onboarding) {
-    rows.push({
-      id: "onboarding",
-      href: "#settings-agency",
-      label: settings.onboarding.title,
-      detail: settings.onboarding.progress.replace("{done}", String(onboarding.done)).replace("{total}", String(onboarding.total)),
-      tone: onboarding.complete ? "success" : "ink",
-      value: onboarding.complete ? settings.onboarding.done : settings.onboarding.todo,
-    });
-  }
-  rows.push({
-    id: "connections",
-    href: connectHref,
-    label: ownerConsoleCopy(page).profile.manageConnections,
-    detail: ownerConsoleCopy(page).profile.connectChannels,
-    tone: "sea",
-    value: ownerConsoleCopy(page).profile.connections,
-  });
-  rows.push({
-    id: "history",
-    href: adminHref("/admin/activity?action=workspace_settings_updated", page),
-    label: settings.lastUpdated,
-    detail: page.workspace_settings?.updated_at
-      ? formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale)
-      : settings.notConfirmed,
-    tone: page.workspace_settings?.updated_at ? "sea" : "ink",
-    value: page.workspace_settings?.updated_at ? settings.sectionState.updated : settings.sectionState.defaults,
-  });
-  return rows.map((item) =>
-    h(
-      "li",
-      { key: item.id, "data-settings-action-row": item.id },
-      h(
-        "a",
-        { className: "adm-readiness-link", href: item.href },
-        h(
-          "span",
-          { className: "adm-readiness-copy" },
-          h("strong", null, item.label),
-          h("small", null, item.detail),
-        ),
-        h(
-          "span",
-          { className: "adm-readiness-value" },
-          h(StatusPill, { tone: item.tone }, item.value),
-        ),
-      ),
-    ),
-  );
-}
-
 function SettingsSection({ page, section, icon, fields }) {
   const copy = settingsCopy(page);
   const sectionCopy = copy.sections[section];
@@ -10708,16 +10629,17 @@ function SettingsSection({ page, section, icon, fields }) {
   const statusText = saved ? copy.saved : failure || "";
   const statusState = saved ? "success" : failure ? "error" : undefined;
   return h(
-    "section",
+    "details",
     {
-      className: "crm-panel adm-settings-panel",
+      className: "crm-panel adm-settings-panel adm-settings-disclosure",
       id: `settings-${section}`,
+      open: section === "agency" || saved || failure ? true : undefined,
       "data-settings-section": section,
       "data-settings-state": meta ? "updated" : "defaults",
       ...(disabled ? { "data-settings-disabled": "true" } : {}),
     },
     h(
-      "div",
+      "summary",
       { className: "crm-panel__hd adm-settings-panel__hd" },
       h(
         "div",
@@ -11567,7 +11489,7 @@ function ConnectionsBody({ page }) {
     socialConnections.length
       ? {
           id: "social",
-          title: copy.additionalChannelsTitle,
+          title: copy.marketingChannelsTitle || copy.additionalChannelsTitle,
           value: `${socialReadyCount}/${socialConnections.length}`,
           meta: socialConnections.map((row) => `${row.title}: ${row.status_label}`).join(" · "),
           tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
@@ -11630,14 +11552,19 @@ function ConnectionsBody({ page }) {
                 { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
                 h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
             h("ul", { className: "adm-connection-list", "data-connection-list": "core" }, ...primaryConnections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
-            secondaryWorkAccounts.length
-              ? h(
-                  WorkbenchDisclosure,
-                  {
-                    summary: connectionGroupSummary(copy.workAccountsTitle, secondaryWorkAccounts),
+                secondaryWorkAccounts.length
+                  ? h(
+                      WorkbenchDisclosure,
+                      {
+                    summary: connectionGroupSummary(copy.marketingChannelsTitle || copy.additionalChannelsTitle, secondaryWorkAccounts),
                     "data-connection-group": "secondary-work-accounts",
-                  },
-                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...secondaryWorkAccounts.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                      },
+                  h(
+                    "div",
+                    null,
+                    copy.marketingChannelsDescription ? h("p", { className: "adm-connections-section-copy" }, copy.marketingChannelsDescription) : null,
+                    h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...secondaryWorkAccounts.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
+                  ),
                 )
               : null,
               ),
@@ -11700,9 +11627,12 @@ function ConnectionsBody({ page }) {
                 { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
                 h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
                 h(
-                  "ul",
-                  { className: "adm-connection-list adm-connection-list--secondary", "data-connection-list": "secondary" },
-                  ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy })),
+                  WorkbenchDisclosure,
+                  {
+                    summary: connectionGroupSummary(copy.additionalChannelsTitle, supporting),
+                    "data-connection-group": "supporting-disclosure",
+                  },
+                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
                 ),
               )
             : null,
@@ -11830,7 +11760,7 @@ function HermesBody({ page }) {
                       ),
                       h(
                         "div",
-                        { className: "adm-hermes-recovery", role: "note", "data-hermes-command-recovery": "true" },
+                        { className: "adm-hermes-recovery", role: "group", "aria-label": copy.recoveryTitle, "data-hermes-command-recovery": "true" },
                         h(Icon, { name: "link", size: 17 }),
                         h(
                           "div",
@@ -12281,20 +12211,21 @@ function SettingsBody({ page }) {
     },
     {
       id: "settings-state",
-      title: settings.sectionsNav,
-      value: `${updatedSections.length}/5`,
+      title: page.onboarding ? settings.onboarding.title : settings.sectionsNav,
+      value: page.onboarding ? `${page.onboarding.done}/${page.onboarding.total}` : `${updatedSections.length}/5`,
       meta: page.onboarding
         ? settings.onboarding.progress.replace("{done}", String(page.onboarding.done)).replace("{total}", String(page.onboarding.total))
         : liveSectionTitles.join(" · ") || settings.notConfirmed,
-      tone: updatedSections.length ? "sea" : "sand",
+      tone: (page.onboarding?.done || updatedSections.length) ? "sea" : "sand",
       status: {
-        tone: updatedSections.length ? "sea" : "ink",
-        label: updatedSections.length ? settings.sectionState.updated : settings.sectionState.defaults,
+        tone: (page.onboarding?.done || updatedSections.length) ? "sea" : "ink",
+        label: (page.onboarding?.done || updatedSections.length) ? settings.sectionState.updated : settings.sectionState.defaults,
       },
     },
   ];
   return adminShell(page, {
     title,
+    titleAsHeading: true,
     mainAttrs: {
       "data-kind": "admin-settings",
       "data-react-admin-ui": "settings",
@@ -12302,7 +12233,7 @@ function SettingsBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h(PageHeader, { title, subtitle: settings.description }),
+      h("p", { className: "adm-settings-page-intro" }, settings.description),
       h(SummaryStrip, { cards: settingsSummaryCards, "data-summary-kind": "settings" }),
       // The store being unconfigured is one fact about the environment, said
       // once - not restated under every section.
@@ -12321,7 +12252,6 @@ function SettingsBody({ page }) {
           "div",
           { className: "adm-owner-flow__support", "data-settings-overview": "true" },
           sectionsNav,
-          h(SettingsActionRail, { page }),
           page.onboarding ? h(WorkspaceChecklistPanel, { page }) : null,
           h(
             Panel,

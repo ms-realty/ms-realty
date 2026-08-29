@@ -137,6 +137,16 @@
 /* ---- Settings screen ---- */
 .adm-workbench-shell--settings { align-items: start; }
 .adm-settings-panel { scroll-margin-top: calc(var(--adm-shell-top-offset, 64px) + var(--space-4)); }
+.adm-settings-disclosure > summary { cursor: pointer; list-style: none; }
+.adm-settings-disclosure > summary::-webkit-details-marker { display: none; }
+.adm-settings-disclosure > summary::after {
+  content: "+";
+  flex: none;
+  color: var(--text-muted);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-regular);
+}
+.adm-settings-disclosure[open] > summary::after { content: "−"; }
 .adm-settings-panel__hd { align-items: flex-start; }
 .adm-settings-panel__title { display: grid; gap: 3px; min-width: 0; }
 .adm-settings-panel__title h2 { display: flex; align-items: center; gap: var(--space-2); }

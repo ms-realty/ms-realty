@@ -275,16 +275,22 @@ test("settings screen renders working sections and an in-flow owner overview", a
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="settings"/);
     assert.match(page.body, /data-settings-layout="sections-flow"/);
+    assert.match(page.body, /<h1 class="crm-top__title">Settings<\/h1>/);
+    assert.doesNotMatch(page.body, /class="crm-ph"/);
+    assert.match(page.body, /class="adm-settings-page-intro"/);
     assert.match(page.body, /data-summary-kind="settings"/);
     for (const card of ["agency-profile", "lead-sla", "workspace", "settings-state"]) {
       assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
     }
+    assert.match(page.body, /data-summary-card="settings-state"[\s\S]*?Set up your workspace[\s\S]*?0\/5[\s\S]*?0 of 5 done/);
     for (const section of ["agency", "leads", "notifications", "workspace", "public_site"]) {
       assert.match(page.body, new RegExp(`data-settings-section="${section}"`), `${section} panel`);
       assert.match(page.body, new RegExp(`data-workspace-settings-form="${section}"`), `${section} form`);
       assert.match(page.body, new RegExp(`data-admin-mutation-form="workspace-settings-${section}"`), `${section} mutation contract`);
       assert.match(page.body, new RegExp(`id="settings-${section}"`), `${section} anchor`);
     }
+    assert.match(page.body, /<details class="crm-panel adm-settings-panel adm-settings-disclosure" id="settings-agency" open/);
+    assert.doesNotMatch(page.body, /id="settings-leads" open/);
     // Pristine: every section still shows the committed defaults.
     assert.equal(page.body.match(/data-settings-state="defaults"/g).length, 5);
     assert.doesNotMatch(page.body, /data-settings-state="updated"/);
@@ -294,13 +300,12 @@ test("settings screen renders working sections and an in-flow owner overview", a
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // The overview stays action-first: current sections, current onboarding
-    // progress, and current links - not a roadmap of unsupported controls.
-    assert.match(page.body, /data-settings-actions="true" data-settings-onboarding="0\/5"/);
-    for (const row of ["onboarding", "connections", "history"]) {
-      assert.match(page.body, new RegExp(`data-settings-action-row="${row}"`), row);
-    }
+    // Each overview fact has one owner: section index, onboarding checklist,
+    // and history. A second action card must not repeat all three.
+    assert.doesNotMatch(page.body, /data-settings-actions=/);
+    assert.equal((page.body.match(/data-settings-index="true"/g) || []).length, 1);
     assert.match(page.body, /data-workspace-onboarding="open" data-workspace-onboarding-progress="0\/5"/);
+    assert.equal((page.body.match(/data-settings-history="true"/g) || []).length, 1);
     assert.doesNotMatch(page.body, /data-planned-control=/);
     assert.doesNotMatch(page.body, /data-export-form=/);
     assert.doesNotMatch(page.body, /Coming soon/);
