@@ -66,12 +66,15 @@ function hermesWorkflowReachability() {
   return "owner_plugin_mcp";
 }
 
-function assertProviderCoverage() {
-  const enabled = OPERATOR_PROVIDER_COVERAGE.filter((row) => row.enabled).map((row) => row.provider);
-  if (JSON.stringify(enabled) !== JSON.stringify(OWNER_CONNECTABLE_PROVIDERS)) {
-    throw new Error(`Owner provider coverage mismatch: enabled=${JSON.stringify(enabled)}, connectable=${JSON.stringify(OWNER_CONNECTABLE_PROVIDERS)}`);
+export function assertProviderCoverage(
+  rows = OPERATOR_PROVIDER_COVERAGE,
+  connectableProviders = OWNER_CONNECTABLE_PROVIDERS,
+) {
+  const enabled = rows.filter((row) => row.enabled).map((row) => row.provider);
+  if (JSON.stringify(enabled) !== JSON.stringify(connectableProviders)) {
+    throw new Error(`Owner provider coverage mismatch: enabled=${JSON.stringify(enabled)}, connectable=${JSON.stringify(connectableProviders)}`);
   }
-  for (const row of OPERATOR_PROVIDER_COVERAGE) {
+  for (const row of rows) {
     const encryptedWriteOnlySecret =
       row.provider === "ai" &&
       row.authorization === "verified_encrypted_api_key" &&

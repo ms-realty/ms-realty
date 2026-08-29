@@ -23,7 +23,11 @@ import {
   OPERATOR_PROVIDER_COVERAGE,
   OWNER_CONNECTABLE_PROVIDERS,
 } from "../lib/operator-provider-catalog.mjs";
-import { buildOwnerOperatorCoverage, discoverAdminRoutes } from "../scripts/build-owner-operator-coverage.mjs";
+import {
+  assertProviderCoverage,
+  buildOwnerOperatorCoverage,
+  discoverAdminRoutes,
+} from "../scripts/build-owner-operator-coverage.mjs";
 
 const key = (row) => `${row.method} ${row.pathname}`;
 
@@ -176,6 +180,24 @@ test("provider matrix enables only one-click connections with real consumers", (
     pathname: "/api/admin/connections",
     provider: "ai",
   });
+});
+
+test("only the verified encrypted OpenRouter form may accept an owner secret", () => {
+  const nonAiSecret = OPERATOR_PROVIDER_COVERAGE.map((row) =>
+    row.provider === "google" ? { ...row, owner_secret_fields: true } : row,
+  );
+  assert.throws(
+    () => assertProviderCoverage(nonAiSecret),
+    /google owner secret-field contract is invalid/,
+  );
+
+  const unverifiedAiSecret = OPERATOR_PROVIDER_COVERAGE.map((row) =>
+    row.provider === "ai" ? { ...row, authorization: "oauth_authorization_code" } : row,
+  );
+  assert.throws(
+    () => assertProviderCoverage(unverifiedAiSecret),
+    /ai owner secret-field contract is invalid/,
+  );
 });
 
 test("operation inputs are fixed to registry metadata, never caller-supplied paths", () => {
