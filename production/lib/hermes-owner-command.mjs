@@ -519,7 +519,7 @@ async function updateReceipt(
   command,
   evidence,
   status,
-  { secret, recordedAt, plan = null, failureCode = null, locale, contextDigest } = {},
+  { secret, recordedAt, plan = null, failureCode = null, locale, contextDigest, model = null } = {},
 ) {
   if (!STATUSES.has(status) || status === "requested") throw new Error("Invalid Hermes owner receipt transition");
   const result = await runtime.update({
@@ -533,6 +533,7 @@ async function updateReceipt(
     overrideAccess: true,
     data: {
       status,
+      ...(model ? { model } : {}),
       completed_at: recordedAt,
       failure_code: failureCode,
       receipt_envelope: receiptEnvelope(document.idempotency_key, command, evidence, plan, {
@@ -690,18 +691,17 @@ export async function runHermesOwnerCommand(
     return existingReceipt(runtime, existing, receiptIdentity, secret, operatorId, { now });
   }
 
-  let model = "injected";
+  const fallbackProvider = provider ? null : hermesProviderConfigFromEnv(env);
+  let model = provider ? "injected" : fallbackProvider.model;
   let callProvider;
-  let providerMode = typeof providerMetadata?.mode === "string" ? providerMetadata.mode : null;
+  let providerMode =
+    typeof providerMetadata?.mode === "string"
+      ? providerMetadata.mode
+      : provider
+        ? String(env.HERMES_PROVIDER_MODE || "").trim().toLowerCase() || "injected_provider"
+        : fallbackProvider.mode;
   if (provider) {
     if (typeof provider !== "function") throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
-    providerMode = providerMode || String(env.HERMES_PROVIDER_MODE || "").trim().toLowerCase() || "injected_provider";
-    callProvider = provider;
-  } else {
-    const resolved = await openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret });
-    model = resolved.model;
-    providerMode = resolved.mode;
-    callProvider = (request) => resolved.call(request, evidence);
   }
   if (providerMode === "openrouter" && commandContainsSensitiveData(normalized.command)) {
     throw new HermesOwnerCommandError("hermes_command_contains_sensitive_data", { status: 400 });
@@ -744,6 +744,14 @@ export async function runHermesOwnerCommand(
 
   let plan;
   try {
+    if (provider) {
+      callProvider = provider;
+    } else {
+      const resolved = await openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret });
+      model = resolved.model;
+      providerMode = resolved.mode;
+      callProvider = (request) => resolved.call(request, evidence);
+    }
     plan = normalizedPlan(
       await callProvider({
         ...normalized,
@@ -763,6 +771,7 @@ export async function runHermesOwnerCommand(
         failureCode: error.code,
         locale: normalized.locale,
         contextDigest,
+        model,
       });
     } catch (storeCause) {
       let raced;
@@ -791,6 +800,7 @@ export async function runHermesOwnerCommand(
       plan,
       locale: normalized.locale,
       contextDigest,
+      model,
     });
     return safeReceiptOrUnavailable(document, secret);
   } catch (cause) {

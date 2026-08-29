@@ -5027,22 +5027,29 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           fetchImpl: config.providerFetch || fetch,
         },
       );
-      recordAudit(
-        {
-          action: "social_marketing_published",
-          actor: principal.id,
-          objectType: "social_marketing_publication",
-          objectId: publication.idempotency_key,
-          metadata: {
-            workspace_id: publication.workspace_id,
-            provider: publication.provider,
-            external_post_id: publication.external_post_id,
-            external_account_id: publication.external_account_id,
+      const existingAudit = config.auditLogPath
+        ? readAuditLog(config.auditLogPath).some(
+            (row) => row.action === "social_marketing_published" && row.object_id === publication.idempotency_key,
+          )
+        : false;
+      if (!existingAudit) {
+        recordAudit(
+          {
+            action: "social_marketing_published",
+            actor: principal.id,
+            objectType: "social_marketing_publication",
+            objectId: publication.idempotency_key,
+            metadata: {
+              workspace_id: publication.workspace_id,
+              provider: publication.provider,
+              external_post_id: publication.external_post_id,
+              external_account_id: publication.external_account_id,
+            },
           },
-        },
-        config,
-        publication.completed_at || approvedAt,
-      );
+          config,
+          publication.completed_at || approvedAt,
+        );
+      }
       return jsonResponse(publication.idempotent ? 200 : 201, {
         kind: "social_marketing_publication",
         publication,

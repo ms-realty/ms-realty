@@ -491,6 +491,15 @@ test("Meta OAuth exchanges to a long-lived user token, reads granted scopes, and
   assert.equal(connection.credentials.page_access_token, "meta-page-access");
   assert.equal(connection.credentials.page_id, "100000000099");
   assert.equal(connection.credentials.user_expires_at, "2026-10-28T12:00:00.000Z");
+  assert.equal(stub.calls.length, 4);
+  const shortLivedExchange = new URL(stub.calls[0].url);
+  const longLivedExchange = new URL(stub.calls[1].url);
+  assert.equal(shortLivedExchange.searchParams.get("code"), "meta-code");
+  assert.equal(shortLivedExchange.searchParams.has("grant_type"), false);
+  assert.equal(longLivedExchange.searchParams.get("grant_type"), "fb_exchange_token");
+  assert.equal(longLivedExchange.searchParams.get("fb_exchange_token"), "meta-user-access");
+  assert.equal(stub.calls[2].url, "https://graph.facebook.com/v22.0/me/permissions");
+  assert.match(stub.calls[3].url, /^https:\/\/graph\.facebook\.com\/v22\.0\/me\/accounts\?/);
 });
 
 test("Meta OAuth refuses a callback whose granted scopes do not cover publishing", async () => {

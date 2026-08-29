@@ -552,6 +552,34 @@ test("stored OpenRouter failures expose only a fixed code, never provider or key
   assert.equal(JSON.stringify(payload.docs).includes(storedKey), false);
 });
 
+test("a broken stored OpenRouter credential still leaves a terminal durable receipt", async () => {
+  const payload = fakePayload([
+    connectedAiProvider({ apiKey: "sk-or-v1-stored-under-a-different-secret" }),
+  ]);
+  const timestamps = [STARTED_AT, COMPLETED_AT];
+  let exposedError;
+  try {
+    await runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-broken-stored-openrouter" }), {
+      operator,
+      payload,
+      secret: "different-hermes-owner-secret-longer-than-thirty-two-characters",
+      env: { HERMES_PROVIDER_MODE: "openrouter" },
+      fetchImpl: async () => {
+        throw new Error("provider must not be called");
+      },
+      now: () => timestamps.shift() || COMPLETED_AT,
+    });
+  } catch (error) {
+    exposedError = error;
+  }
+
+  assert.ok(exposedError instanceof HermesOwnerCommandError);
+  assert.equal(exposedError.code, "hermes_unavailable");
+  const receipt = payload.docs.find((doc) => doc.idempotency_key === "hermes-owner-broken-stored-openrouter");
+  assert.equal(receipt.status, "failed");
+  assert.equal(receipt.failure_code, "hermes_unavailable");
+});
+
 test("Hermes owner command passes privacy-safe business context to the provider and binds it into the receipt", async () => {
   const payload = fakePayload();
   const timestamps = [STARTED_AT, COMPLETED_AT];
