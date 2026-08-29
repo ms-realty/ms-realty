@@ -2069,7 +2069,20 @@ async function listingManagerPayload(registry, url, config) {
     factQuery: url.searchParams.get("factQ") || "",
     page: url.searchParams.get("page") || 1,
   });
-  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  return config.runtimeDataDurableOnly
+    ? {
+        ...payload,
+        runtime_data_mode: "durable_only",
+        dataAvailability: {
+          publicationSchedules: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          slugHistory: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
+        listings: payload.listings.map((row) => ({ ...row, translation_review_required: null })),
+        publicationSchedules: null,
+        summary: { ...payload.summary, translationReviewRequired: null },
+      }
+    : payload;
 }
 
 async function listingEditorPayload(registry, url, config) {
@@ -2088,7 +2101,19 @@ async function listingEditorPayload(registry, url, config) {
     config.runtimeDataDurableOnly ? [] : readTourApprovals(config.tourApprovalLedgerPath),
     config.adminPrincipal || null,
   );
-  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  return config.runtimeDataDurableOnly
+    ? {
+        ...payload,
+        runtime_data_mode: "durable_only",
+        dataAvailability: {
+          listingEdits: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          slugHistory: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          tourApprovals: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
+        edits: null,
+      }
+    : payload;
 }
 
 async function translationQueuePayload(registry, url, config) {
@@ -2110,7 +2135,21 @@ async function translationQueuePayload(registry, url, config) {
     taskType: url.searchParams.get("taskType") || "",
     page: url.searchParams.get("page") || 1,
   });
-  return config.runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+  return config.runtimeDataDurableOnly
+    ? {
+        ...payload,
+        runtime_data_mode: "durable_only",
+        dataAvailability: {
+          translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+        },
+        summary: {
+          ...payload.summary,
+          approved_waiting_publish: null,
+          open_translation_tasks: null,
+          stale_translation_tasks: null,
+        },
+      }
+    : payload;
 }
 
 async function hermesConsolePayload(registry, url, config, { commandResult = null, commandError = null } = {}) {

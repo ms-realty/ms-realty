@@ -2008,7 +2008,20 @@ export function createHttpApp({
         { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
       ),
     });
-    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+    return runtimeDataDurableOnly
+      ? {
+          ...payload,
+          runtime_data_mode: "durable_only",
+          dataAvailability: {
+            publicationSchedules: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            slugHistory: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          },
+          listings: payload.listings.map((row) => ({ ...row, translation_review_required: null })),
+          publicationSchedules: null,
+          summary: { ...payload.summary, translationReviewRequired: null },
+        }
+      : payload;
   };
   const currentListingEditorPayload = async (url, operatorId = null) => {
     const payload = renderAdminListingEditorPayload(
@@ -2025,7 +2038,19 @@ export function createHttpApp({
       runtimeDataDurableOnly ? [] : currentTourApprovals(),
       operatorId,
     );
-    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+    return runtimeDataDurableOnly
+      ? {
+          ...payload,
+          runtime_data_mode: "durable_only",
+          dataAvailability: {
+            listingEdits: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            slugHistory: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            tourApprovals: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          },
+          edits: null,
+        }
+      : payload;
   };
   const currentTranslationQueuePayload = async (url, operatorId = null) => {
     const payload = renderAdminTranslationQueuePayload(activeRegistry, adminLocaleParam(url), {
@@ -2042,7 +2067,21 @@ export function createHttpApp({
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
     });
-    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+    return runtimeDataDurableOnly
+      ? {
+          ...payload,
+          runtime_data_mode: "durable_only",
+          dataAvailability: {
+            translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          },
+          summary: {
+            ...payload.summary,
+            approved_waiting_publish: null,
+            open_translation_tasks: null,
+            stale_translation_tasks: null,
+          },
+        }
+      : payload;
   };
   const currentSeoEvidence = () =>
     buildSeoEvidence({

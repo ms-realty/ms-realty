@@ -5987,6 +5987,28 @@ function adminDataUnavailable(page, key) {
   return page.dataAvailability?.[key]?.status === "unavailable";
 }
 
+function DataAvailabilityNotice({ page }) {
+  const unavailableDomains = Object.entries(page.dataAvailability || {})
+    .filter(([, value]) => value?.status === "unavailable")
+    .map(([key]) => key);
+  if (!unavailableDomains.length) return null;
+  const copy = ownerConsoleCopy(page).runtime;
+  return h(
+    "p",
+    {
+      className: "adm-inline-alert",
+      role: "status",
+      "data-unavailable-data": unavailableDomains.join(","),
+    },
+    h("strong", null, copy.title),
+    ` ${copy.description}`,
+  );
+}
+
+function availableMetric(page, key, value) {
+  return adminDataUnavailable(page, key) ? ownerConsoleCopy(page).runtime.unavailable : value;
+}
+
 function CommunicationThread({ page, thread, copy, ui }) {
   // A lead with no recorded message still shows the section, so the operator
   // can see that nothing has been exchanged rather than an absent control.
@@ -7150,9 +7172,6 @@ function LeadInboxBody({ page }) {
   const briefByLeadId = new Map((page.leadBriefs?.rows || []).map((brief) => [brief.lead_id, brief]));
   const briefOrder = new Map((page.leadBriefs?.rows || []).map((brief, index) => [brief.lead_id, index]));
   const repliesUnavailable = adminDataUnavailable(page, "replies");
-  const unavailableDomains = Object.entries(page.dataAvailability || {})
-    .filter(([, value]) => value?.status === "unavailable")
-    .map(([key]) => key);
   const repliedLeadIds = repliesUnavailable
     ? new Set()
     : new Set((page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id));
@@ -7224,18 +7243,7 @@ function LeadInboxBody({ page }) {
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(StatGrid, { metrics }),
-      unavailableDomains.length
-        ? h(
-            "p",
-            {
-              className: "adm-inline-alert",
-              role: "status",
-              "data-unavailable-data": unavailableDomains.join(","),
-            },
-            h("strong", null, runtimeCopy.title),
-            ` ${runtimeCopy.description}`,
-          )
-        : null,
+      h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
@@ -7981,7 +7989,7 @@ function ListingManagerBody({ page }) {
     [label(copy, "listingManager", "Listings"), page.summary.total, "building-2", "ink"],
     [ui.reviewRequired, page.summary.reviewRequired, "eye", "sun"],
     [statusText(ui, "price_on_request"), page.summary.priceOnRequest, "banknote", "sea"],
-    [label(copy, "translationQueue", "Translation review"), page.summary.translationReviewRequired, "languages", "brick"],
+    [label(copy, "translationQueue", "Translation review"), availableMetric(page, "translationTasks", page.summary.translationReviewRequired), "languages", "brick"],
   ];
   // Counted status filters in the toolbar: the fastest route from a summary
   // figure into the rows behind it, and it works without JavaScript.
@@ -8037,6 +8045,7 @@ function ListingManagerBody({ page }) {
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 16 }), h("span", null, label(copy, "translationQueue", "Translation review"))),
       ),
       h(StatGrid, { metrics }),
+      h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
@@ -8326,10 +8335,10 @@ function TranslationQueueBody({ page }) {
   const hasFilters = Boolean(page.filters.q || page.filters.targetLocale || page.filters.taskType);
   const staleLocale = (page.filterOptions.taskTypes || []).includes("stale_review_required") ? "stale_review_required" : "";
   const metrics = [
-    [label(copy, "openTasks", "Open tasks"), page.summary.open_translation_tasks, "languages", "ink"],
+    [label(copy, "openTasks", "Open tasks"), availableMetric(page, "translationTasks", page.summary.open_translation_tasks), "languages", "ink"],
     [label(copy, "missingTranslations", "Missing translations"), page.summary.missing_translation_tasks, "circle-alert", "brick"],
-    [label(copy, "staleTranslations", "Stale translations"), page.summary.stale_translation_tasks, "clock", "sun"],
-    [label(copy, "results", "Results"), page.pagination.totalRows, "filter", "sea"],
+    [label(copy, "staleTranslations", "Stale translations"), availableMetric(page, "translationTasks", page.summary.stale_translation_tasks), "clock", "sun"],
+    [label(copy, "results", "Results"), availableMetric(page, "translationTasks", page.pagination.totalRows), "filter", "sea"],
   ];
   // Counted task-type filters in the toolbar, as links: this queue pages on
   // the server, so a client-side tab would hide rows the operator never got.
@@ -8380,6 +8389,7 @@ function TranslationQueueBody({ page }) {
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "building-2", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
       ),
       h(StatGrid, { metrics }),
+      h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
@@ -8785,6 +8795,7 @@ function ListingEditorBody({ page }) {
           ? null
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
+      h(DataAvailabilityNotice, { page }),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },

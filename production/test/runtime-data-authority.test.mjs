@@ -305,7 +305,24 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(listing.status, 200);
   const html = await listing.text();
   assert.match(html, /data-react-admin-ui="listing-manager"/);
+  assert.match(html, /data-unavailable-data="[^"]*translationTasks[^"]*"/);
+  assert.match(html, /Нужна е връзка с данните/);
   assert.doesNotMatch(html, /data-publication-schedule-panel="true"/);
+
+  const listingApi = await renderAppAdminResponse(new Request("https://live.test/api/admin/listings?locale=en"), { config });
+  const listingBody = await listingApi.json();
+  assert.equal(listingApi.status, 200);
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(listingBody.dataAvailability).map(([key, value]) => [key, value.status])),
+    {
+      publicationSchedules: "unavailable",
+      slugHistory: "unavailable",
+      translationTasks: "unavailable",
+    },
+  );
+  assert.equal(listingBody.summary.translationReviewRequired, null);
+  assert.equal(listingBody.publicationSchedules, null);
+  assert.equal(listingBody.listings.every((row) => row.translation_review_required === null), true);
 
   const editor = await renderAppAdminResponse(
     new Request("https://live.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en"),
@@ -314,6 +331,9 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   const editorHtml = await editor.text();
   assert.equal(editor.status, 200);
   assert.match(editorHtml, /data-action-unavailable="runtime"/);
+  assert.match(editorHtml, /data-unavailable-data="[^"]*listingEdits[^"]*"/);
+  assert.match(editorHtml, /data-unavailable-data="[^"]*tourApprovals[^"]*"/);
+  assert.match(editorHtml, /Data connection required/);
   assert.match(editorHtml, /Your owner permissions are active/);
   assert.doesNotMatch(editorHtml, /data-read-only-role="true"/);
 
@@ -322,7 +342,43 @@ test("durable admin reads use Payload while every remaining file mutation fails 
     { config },
   );
   assert.equal(translations.status, 200);
-  assert.equal((await translations.json()).runtime_data_mode, "durable_only");
+  const translationsBody = await translations.json();
+  assert.equal(translationsBody.runtime_data_mode, "durable_only");
+  assert.equal(translationsBody.dataAvailability.translationTasks.status, "unavailable");
+  assert.equal(translationsBody.summary.approved_waiting_publish, null);
+  assert.equal(translationsBody.summary.open_translation_tasks, null);
+  assert.equal(translationsBody.summary.stale_translation_tasks, null);
+
+  const translationPage = await renderAppAdminResponse(
+    new Request("https://live.test/admin/translations?locale=ru"),
+    { config },
+  );
+  assert.equal(translationPage.status, 200);
+  const translationHtml = await translationPage.text();
+  assert.match(translationHtml, /data-unavailable-data="translationTasks"/);
+  assert.match(translationHtml, /Нужно подключение к данным/);
+
+  for (const pathname of ["/api/admin/reports", "/api/admin/reports/export"]) {
+    const response = await renderAppAdminResponse(new Request(`https://live.test${pathname}`), { config });
+    assert.equal(response.status, 503, pathname);
+    assert.equal((await response.json()).kind, "runtime_data_unavailable", pathname);
+  }
+
+  const blockedReportsPage = await renderAppAdminResponse(
+    new Request("https://live.test/admin/reports?locale=en", { headers: { accept: "text/html" } }),
+    { config },
+  );
+  assert.equal(blockedReportsPage.status, 503);
+  const blockedReportsHtml = await blockedReportsPage.text();
+  assert.match(blockedReportsHtml, /data-react-admin-ui="runtime-unavailable"/);
+  assert.match(blockedReportsHtml, /<code>\/admin\/reports<\/code>/);
+
+  const blockedAlertRun = await renderAppAdminResponse(
+    new Request("https://live.test/api/admin/saved-search-alerts/run-due", { method: "POST" }),
+    { config },
+  );
+  assert.equal(blockedAlertRun.status, 503);
+  assert.equal((await blockedAlertRun.json()).kind, "runtime_data_unavailable");
 
   for (const pathname of [
     "/api/admin/media/reviews",
@@ -354,7 +410,61 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.match(blockedHtml, /href="\/admin\/connect"/);
   assert.match(blockedHtml, /<code>\/admin\/migration\/review<\/code>/);
 
-  const standalone = createHttpApp({ runtimeDataDurableOnly: true });
+  const standalone = createHttpApp({
+    runtimeDataDurableOnly: true,
+    payloadListingRuntime: runtime.payload,
+    payloadListingEnv: LIVE_ENV,
+  });
+  const standaloneListings = await dispatchHttp(standalone, {
+    url: "/api/admin/listings?locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(standaloneListings.status, 200);
+  assert.equal(standaloneListings.body.dataAvailability.publicationSchedules.status, "unavailable");
+  assert.equal(standaloneListings.body.dataAvailability.slugHistory.status, "unavailable");
+  assert.equal(standaloneListings.body.summary.translationReviewRequired, null);
+  assert.equal(standaloneListings.body.publicationSchedules, null);
+
+  const standaloneEditor = await dispatchHttp(standalone, {
+    url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(standaloneEditor.status, 200);
+  assert.match(standaloneEditor.body, /data-unavailable-data="[^"]*listingEdits[^"]*"/);
+  assert.match(standaloneEditor.body, /data-unavailable-data="[^"]*tourApprovals[^"]*"/);
+  assert.match(standaloneEditor.body, /Data connection required/);
+
+  const standaloneTranslations = await dispatchHttp(standalone, {
+    url: "/api/admin/translations?locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(standaloneTranslations.status, 200);
+  assert.equal(standaloneTranslations.body.dataAvailability.translationTasks.status, "unavailable");
+  assert.equal(standaloneTranslations.body.summary.approved_waiting_publish, null);
+  assert.equal(standaloneTranslations.body.summary.open_translation_tasks, null);
+  assert.equal(standaloneTranslations.body.summary.stale_translation_tasks, null);
+
+  for (const request of [
+    { method: "GET", url: "/api/admin/reports" },
+    { method: "GET", url: "/api/admin/reports/export" },
+    { method: "POST", url: "/api/admin/saved-search-alerts/run-due" },
+  ]) {
+    const response = await dispatchHttp(standalone, {
+      ...request,
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+    assert.equal(response.status, 503, request.url);
+    assert.equal(response.body.kind, "runtime_data_unavailable", request.url);
+  }
+
+  const standaloneReportsPage = await dispatchHttp(standalone, {
+    url: "/admin/reports?locale=ru",
+    headers: { accept: "text/html", authorization: "Bearer local-admin-smoke" },
+  });
+  assert.equal(standaloneReportsPage.status, 503);
+  assert.match(standaloneReportsPage.body, /data-react-admin-ui="runtime-unavailable"/);
+  assert.match(standaloneReportsPage.body, /<code>\/admin\/reports<\/code>/);
+
   const standalonePage = await dispatchHttp(standalone, {
     url: "/admin/migration/review?locale=en",
     headers: { authorization: "Bearer local-admin-smoke" },
