@@ -5,6 +5,8 @@
   "summary": {
     "admin_route_files": 104,
     "admin_methods": 118,
+    "admin_pages": 19,
+    "nav_destinations": 7,
     "hermes_tools": 3,
     "authorized_workflows": 121,
     "reachable_workflows": 121,
@@ -14,6 +16,179 @@
     "managed_systems": 3,
     "disabled_integrations": 3
   },
+  "admin_pages": [
+    {
+      "id": "today",
+      "group": "today",
+      "path": "/admin/today",
+      "icon": "layout-dashboard",
+      "kind": "admin_today",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "lead_inbox",
+      "group": "crm",
+      "path": "/admin/leads",
+      "icon": "inbox",
+      "kind": "admin_lead_inbox",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "contacts",
+      "group": "crm",
+      "path": "/admin/contacts",
+      "icon": "users",
+      "kind": "admin_contacts",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "consents",
+      "group": "crm",
+      "path": "/admin/consents",
+      "icon": "shield-check",
+      "kind": "admin_consents",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "documents",
+      "group": "crm",
+      "path": "/admin/documents",
+      "icon": "file-check",
+      "kind": "admin_document_checklists",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "realty_cases",
+      "group": "crm",
+      "path": "/admin/cases",
+      "icon": "kanban-square",
+      "kind": "admin_realty_cases",
+      "capability": "cases:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "lead_pipeline",
+      "group": "crm",
+      "path": "/admin/pipeline",
+      "icon": "kanban-square",
+      "kind": "admin_lead_pipeline",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "requests",
+      "group": "crm",
+      "path": "/admin/requests",
+      "icon": "bell",
+      "kind": "admin_requests",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "viewings",
+      "group": "crm",
+      "path": "/admin/viewings",
+      "icon": "calendar-days",
+      "kind": "admin_viewings",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "reports",
+      "group": "crm",
+      "path": "/admin/reports",
+      "icon": "bar-chart-3",
+      "kind": "admin_operations_reports",
+      "capability": "operations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "activity",
+      "group": "workspace",
+      "path": "/admin/activity",
+      "icon": "list",
+      "kind": "admin_activity",
+      "capability": "activity:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "listing_manager",
+      "group": "cms",
+      "path": "/admin/listings",
+      "icon": "building-2",
+      "kind": "admin_listing_manager",
+      "capability": "content:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "translation_queue",
+      "group": "cms",
+      "path": "/admin/translations",
+      "icon": "languages",
+      "kind": "admin_translation_queue",
+      "capability": "translations:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "approved_content",
+      "group": "cms",
+      "path": "/admin/approved-content",
+      "icon": "check-circle-2",
+      "kind": "admin_approved_content_review",
+      "capability": "content:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "migration_review",
+      "group": "cms",
+      "path": "/admin/migration/review",
+      "icon": "file-check",
+      "kind": "admin_migration_review",
+      "capability": "administration:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "hermes",
+      "group": "hermes",
+      "path": "/admin/hermes",
+      "icon": "sparkles",
+      "kind": "admin_hermes",
+      "capability": "administration:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "connections",
+      "group": "workspace",
+      "path": "/admin/connect",
+      "icon": "link",
+      "kind": "admin_connections",
+      "capability": "settings:manage",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "settings",
+      "group": "workspace",
+      "path": "/admin/settings",
+      "icon": "settings",
+      "kind": "admin_workspace_settings",
+      "capability": "workspace:read",
+      "reachability": "signed_in_admin_ui"
+    },
+    {
+      "id": "team",
+      "group": "workspace",
+      "path": "/admin/team",
+      "icon": "users",
+      "kind": "admin_team",
+      "capability": "team:manage",
+      "reachability": "signed_in_admin_ui"
+    }
+  ],
   "admin_routes": [
     {
       "operation": "admin_delete_views",

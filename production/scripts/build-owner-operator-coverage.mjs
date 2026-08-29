@@ -3,8 +3,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { fromRoot } from "../lib/paths.mjs";
 import {
+  ADMIN_PAGE_SURFACES,
   ADMIN_ROUTE_COVERAGE,
   HERMES_TOOL_COVERAGE,
+  OWNER_CONSOLE_NAV_DESTINATIONS,
   OWNER_OPERATOR_PLUGIN_ID,
   assertOwnerOperatorCatalog,
 } from "../lib/owner-operator-catalog.mjs";
@@ -116,6 +118,10 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
     source_file: source.source_file,
     reachability: adminWorkflowReachability(catalogByKey.get(operationKey(source.method, source.pathname))),
   }));
+  const adminPages = ADMIN_PAGE_SURFACES.map((page) => ({
+    ...page,
+    reachability: "signed_in_admin_ui",
+  }));
   const hermesTools = HERMES_TOOL_COVERAGE.map((row) => ({
     ...row,
     reachability: hermesWorkflowReachability(row),
@@ -132,6 +138,8 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
     summary: {
       admin_route_files: new Set(discovered.map((row) => row.source_file)).size,
       admin_methods: adminRoutes.length,
+      admin_pages: adminPages.length,
+      nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
       hermes_tools: hermesTools.length,
       authorized_workflows: authorizedWorkflows,
       reachable_workflows: reachableWorkflows,
@@ -141,6 +149,7 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
       managed_systems: OPERATOR_PROVIDER_COVERAGE.filter((row) => row.state === "managed").length,
       disabled_integrations: OPERATOR_PROVIDER_COVERAGE.filter((row) => row.state === "disabled").length,
     },
+    admin_pages: adminPages,
     admin_routes: adminRoutes,
     hermes_tools: hermesTools,
     provider_matrix: OPERATOR_PROVIDER_COVERAGE,

@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
+  ADMIN_PAGE_SURFACES,
   ADMIN_ROUTE_COVERAGE,
   HERMES_TOOL_COVERAGE,
+  OWNER_CONSOLE_NAV_DESTINATIONS,
   OWNER_OPERATOR_ADMIN_READ_TOOL,
   OWNER_OPERATOR_ADMIN_WRITE_TOOL,
   OWNER_OPERATOR_BROWSER_OPERATIONS,
@@ -74,6 +76,8 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   assert.deepEqual(artifact.summary, {
     admin_route_files: 104,
     admin_methods: 118,
+    admin_pages: ADMIN_PAGE_SURFACES.length,
+    nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,
     authorized_workflows: 121,
     reachable_workflows: 121,
@@ -86,6 +90,11 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   const command = artifact.admin_routes.find((row) => row.method === "POST" && row.pathname === "/api/admin/hermes");
   assert.equal(command.sensitive, true);
   assert.equal(command.hermes_access, "draft_only");
+  assert.equal(artifact.admin_pages.length, ADMIN_PAGE_SURFACES.length);
+  assert.deepEqual(
+    artifact.admin_pages.map((row) => row.id),
+    ADMIN_PAGE_SURFACES.map((row) => row.id),
+  );
   for (const row of HERMES_TOOL_COVERAGE) {
     const artifactRow = artifact.hermes_tools.find((entry) => entry.operation === row.operation);
     assert.ok(artifactRow, row.operation);
@@ -117,6 +126,7 @@ test("every authorized workflow has an executable owner entrypoint", () => {
     }
   }
   assert.equal(coverage.hermes_tools.every((row) => row.reachability === "owner_plugin_mcp"), true);
+  assert.equal(coverage.admin_pages.every((row) => row.reachability === "signed_in_admin_ui"), true);
 
   const client = fs.readFileSync(fromRoot("production", "lib", "ui", "client.mjs"), "utf8");
   for (const tool of ["ms_realty_admin_context", "ms_realty_admin_read", "ms_realty_admin_open"]) {

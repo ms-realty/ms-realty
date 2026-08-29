@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, propertyFamilyFor } from "./listing-facts.mjs";
 import { FACT_REVIEW_ROW_KEYS } from "./listing-fact-review.mjs";
+import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -2986,28 +2987,6 @@ function OwnerIdentity({ page, mobile = false }) {
   );
 }
 
-const NAV_ROUTES = [
-  { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
-  { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
-  { id: "contacts", module: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
-  { id: "consents", module: "crm", path: "/admin/consents", icon: "shield-check", kind: "admin_consents", capability: "operations:read" },
-  { id: "documents", module: "crm", path: "/admin/documents", icon: "file-check", kind: "admin_document_checklists", capability: "operations:read" },
-  { id: "realty_cases", module: "crm", path: "/admin/cases", icon: "kanban-square", kind: "admin_realty_cases", capability: "cases:read" },
-  { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
-  { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
-  { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
-  { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports", capability: "operations:read" },
-  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "activity:read" },
-  { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
-  { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
-  { id: "approved_content", module: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
-  { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
-  { id: "hermes", module: "hermes", path: "/admin/hermes", icon: "sparkles", kind: "admin_hermes", capability: "administration:read" },
-  { id: "connections", module: "workspace", path: "/admin/connect", icon: "link", kind: "admin_connections", capability: "settings:manage" },
-  { id: "settings", module: "workspace", path: "/admin/settings", icon: "settings", kind: "admin_workspace_settings", capability: "workspace:read" },
-  { id: "team", module: "workspace", path: "/admin/team", icon: "users", kind: "admin_team", capability: "team:manage" },
-];
-
 function adminNavigationGroups(page) {
   const copy = adminCopy(page);
   const owner = ownerConsoleCopy(page);
@@ -3016,73 +2995,32 @@ function adminNavigationGroups(page) {
     const module = modules.find((entry) => entry.id === moduleId);
     return module?.screens?.find((screen) => screen.id === screenId)?.label || fallback;
   };
-  const route = (id) => NAV_ROUTES.find((entry) => entry.id === id);
-  const destinations = [
-    {
-      id: "today",
-      label: owner.routes.today,
-      route: { ...route("today"), label: owner.routes.today },
-    },
-    {
-      id: "leads",
-      label: owner.routes.leads,
-      route: {
-        ...route("lead_inbox"),
-        label: owner.routes.leads,
-        badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
-      },
-      children: [
-        { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
-        { ...route("consents"), label: screenLabel("crm", "consents", "Consent and preferences") },
-        { ...route("documents"), label: screenLabel("crm", "documents", "Documents and process") },
-        { ...route("realty_cases"), label: caseCopy(page).title, badge: page.realtyCaseQueue?.summary?.open },
-        {
-          ...route("lead_pipeline"),
-          label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
-          badge: page.leadPipelineQueue?.summary?.open,
-        },
-        { ...route("requests"), label: screenLabel("crm", "requests", "Requests and alerts"), badge: page.publicRequestQueue?.summary?.open },
-        { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
-        { ...route("reports"), label: screenLabel("crm", "reports", workbenchCopy(page).operationsReports) },
-      ],
-    },
-    {
-      id: "listings",
-      label: owner.routes.listings,
-      route: { ...route("listing_manager"), label: owner.routes.listings },
-      children: [],
-    },
-    {
-      id: "translations",
-      label: owner.routes.translations,
-      route: { ...route("translation_queue"), label: owner.routes.translations },
-      children: [
-        { ...route("approved_content"), label: workbenchCopy(page).approvedContent.title },
-        { ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") },
-      ],
-    },
-    {
-      id: "hermes",
-      label: owner.routes.hermes,
-      route: { ...route("hermes"), label: owner.routes.hermes },
-      children: [],
-    },
-    {
-      id: "integrations",
-      label: owner.routes.integrations,
-      route: { ...route("connections"), label: owner.routes.integrations },
-      children: [],
-    },
-    {
-      id: "settings",
-      label: owner.routes.settings,
-      route: { ...route("settings"), label: owner.routes.settings },
-      children: [
-        { ...route("team"), label: owner.routes.team },
-        { ...route("activity"), label: owner.routes.activity },
-      ],
-    },
-  ];
+  const routeLabel = (item, destinationId) => {
+    if (destinationId && owner.routes[destinationId]) return owner.routes[destinationId];
+    if (owner.routes[item.id]) return owner.routes[item.id];
+    if (item.id === "realty_cases") return caseCopy(page).title;
+    if (item.id === "approved_content") return workbenchCopy(page).approvedContent.title;
+    if (item.id === "migration_review") return label(copy, "migrationReview", "Migration review");
+    return screenLabel(item.group, item.id, item.id);
+  };
+  const routeBadge = (item) => {
+    if (item.id === "lead_inbox" && page.kind === "admin_lead_inbox") return page.summary?.leads;
+    if (item.id === "realty_cases") return page.realtyCaseQueue?.summary?.open;
+    if (item.id === "lead_pipeline") return page.leadPipelineQueue?.summary?.open;
+    if (item.id === "requests") return page.publicRequestQueue?.summary?.open;
+    return undefined;
+  };
+  const decorateRoute = (item, destinationId = null) => ({
+    ...item,
+    label: routeLabel(item, destinationId),
+    badge: routeBadge(item),
+  });
+  const destinations = ownerConsoleNavigation().map((destination) => ({
+    ...destination,
+    label: owner.routes[destination.id] || routeLabel(destination.route, destination.id),
+    route: decorateRoute(destination.route, destination.id),
+    children: destination.children.map((item) => decorateRoute(item)),
+  }));
   const visibleDestination = (destination) => {
     const items = [destination.route, ...(destination.children || [])].filter((item) => pageCan(page, item.capability));
     if (!items.length) return null;
@@ -3095,11 +3033,11 @@ function adminNavigationGroups(page) {
     };
   };
   const groups = [
-    { id: "today", label: owner.groups.today, destinations: [destinations[0]] },
-    { id: "crm", label: owner.groups.crm, destinations: [destinations[1]] },
-    { id: "cms", label: owner.groups.cms, destinations: destinations.slice(2, 4) },
-    { id: "hermes", label: owner.groups.hermes, destinations: [destinations[4]] },
-    { id: "workspace", label: owner.groups.workspace, destinations: destinations.slice(5) },
+    { id: "today", label: owner.groups.today, destinations: destinations.filter((destination) => destination.group === "today") },
+    { id: "crm", label: owner.groups.crm, destinations: destinations.filter((destination) => destination.group === "crm") },
+    { id: "cms", label: owner.groups.cms, destinations: destinations.filter((destination) => destination.group === "cms") },
+    { id: "hermes", label: owner.groups.hermes, destinations: destinations.filter((destination) => destination.group === "hermes") },
+    { id: "workspace", label: owner.groups.workspace, destinations: destinations.filter((destination) => destination.group === "workspace") },
   ];
   return groups
     .map((group) => ({
