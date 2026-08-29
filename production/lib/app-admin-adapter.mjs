@@ -4880,7 +4880,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
       const report = reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)));
-      return jsonResponse(report.ready ? 201 : 202, importLiveServiceProvisioningReport(report, config));
+      return jsonResponse(report.ready ? 201 : 202, await importLiveServiceProvisioningReport(report, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
       return jsonResponse(200, {

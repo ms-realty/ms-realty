@@ -24,6 +24,7 @@ const TEST_BROKER_PROFILES = Object.freeze([
   { id: "broker_ru", languages: ["ru"] },
   { id: "broker_international", languages: ["en"] },
 ]);
+const CONTACT_KEY = "test-only-admin-crm-contact-key-32-chars";
 
 // The suite reads the checked-in demo ledgers through private copies so the
 // SQLite mirrors under production/data are never shared with the other test
@@ -42,6 +43,8 @@ function app() {
     reviewedAt: "2026-07-19T12:00:00.000Z",
     leadLedgerPath,
     eventLedgerPath,
+    leadContactVaultPath: path.join(dataDir, "lead-contacts.jsonl"),
+    leadContactKey: CONTACT_KEY,
     brokerProfiles: TEST_BROKER_PROFILES,
   });
 }
@@ -51,6 +54,9 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   assert.equal(page.status, 200);
   assert.match(page.body, /data-inbox-layout="two-pane"/);
   assert.match(page.body, /<section class="adm-inbox" id="lead-inbox" data-inbox-panes="true"/);
+  assert.match(page.body, /<span class="adm-inbox__title">Listing inquiry<\/span>/);
+  assert.match(page.body, /<span class="adm-inbox__title">Viewing request<\/span>/);
+  assert.doesNotMatch(page.body, /<span class="adm-inbox__title">Renter<\/span>/);
 
   // Every row links to the detail article that carries the same lead id, so
   // selection works through the URL fragment without JavaScript.
@@ -65,6 +71,38 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   assert.match(page.body, /data-hermes-draft-request="true"/);
   assert.match(page.body, /data-reply-approval-required="true"/);
   assert.match(page.body, /data-lead-assignment-control=/);
+});
+
+test("placeholder lead names fall back to source truth across inbox, detail, and contacts", async () => {
+  const server = app();
+  await dispatchHttp(server, {
+    method: "POST",
+    url: "/api/admin/leads",
+    headers: auth,
+    body: {
+      id: "placeholder-lead",
+      source: "website_listing_detail",
+      leadType: "buyer",
+      language: "en",
+      contact_preference: "email",
+      contact: { name: "Test", email: "owner@example.com", phone: "+359880000099" },
+      listingReference: "MS-CRAWL-0001",
+      requirements: { locations: ["Sandanski"], property_types: ["apartment"], budget_max_eur: 120000, timeline: "Soon" },
+      message: "Please email me details.",
+      humanConfirmed: true,
+    },
+  });
+
+  const inbox = await dispatchHttp(server, { url: "/admin/leads?locale=en", headers: auth });
+  assert.equal(inbox.status, 200);
+  assert.match(inbox.body, /<span class="adm-inbox__title">Listing inquiry<\/span>/);
+  assert.doesNotMatch(inbox.body, /<span class="adm-inbox__title">Test<\/span>/);
+  assert.doesNotMatch(inbox.body, /<strong>Test<\/strong>/);
+
+  const contacts = await dispatchHttp(server, { url: "/admin/contacts?locale=en", headers: auth });
+  assert.equal(contacts.status, 200);
+  assert.match(contacts.body, /owner@example\.com/);
+  assert.doesNotMatch(contacts.body, /<h3>Test<\/h3>/);
 });
 
 test("the inbox answers its empty states: no leads, no queue matches, and no selection", async () => {
