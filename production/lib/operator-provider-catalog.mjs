@@ -857,6 +857,7 @@ export async function verifyOperatorAiProvider({ endpoint, model, apiKey, fetchI
           temperature: 0,
           stream: false,
         }),
+        signal: AbortSignal.timeout(10_000),
       }),
       "OpenRouter chat-completions readback",
     );

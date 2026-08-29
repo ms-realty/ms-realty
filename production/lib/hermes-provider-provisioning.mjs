@@ -85,8 +85,13 @@ function cleanMode(value) {
 
 function endpointFor(mode, env) {
   const configured = String(env.HERMES_CHAT_COMPLETIONS_URL || "").trim();
-  if (configured) return configured;
-  return mode === "openrouter" ? DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL : "";
+  if (mode === "openrouter") {
+    if (configured && configured !== DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL) {
+      throw new Error(`OpenRouter endpoint must be ${DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL}`);
+    }
+    return DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL;
+  }
+  return configured;
 }
 
 function redactedEndpoint(endpoint) {

@@ -384,10 +384,11 @@ function connectedOpenRouterConfig(credentials) {
 }
 
 async function openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret }) {
-  const stored = connectedOpenRouterConfig(
-    await readProviderCredentials("ai", { credentialSecret: secret, payload }),
-  );
   const fallback = hermesProviderConfigFromEnv(env);
+  const stored =
+    fallback.mode === "openrouter"
+      ? connectedOpenRouterConfig(await readProviderCredentials("ai", { credentialSecret: secret, payload }))
+      : null;
   const config = stored || { ...fallback, apiKey: String(env.HERMES_API_KEY || "") };
   if (!["self_hosted", "openrouter"].includes(config.mode)) {
     throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });

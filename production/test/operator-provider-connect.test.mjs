@@ -86,6 +86,7 @@ function stubFetch(routes) {
         method: init.method || "GET",
         headers: init.headers || {},
         body: init.body,
+        signal: init.signal,
       });
       const match = Object.keys(routes).find((key) => url.startsWith(key));
       if (!match) throw new Error(`unstubbed fetch: ${url}`);
@@ -622,6 +623,7 @@ test("OpenRouter verifies the exact endpoint, key, and selected model before enc
   assert.deepEqual(stub.calls.map((call) => call.url), ["https://openrouter.ai/api/v1/chat/completions"]);
   assert.equal(stub.calls[0].method, "POST");
   assert.equal(stub.calls[0].headers.authorization, `Bearer ${apiKey}`);
+  assert.ok(stub.calls[0].signal instanceof AbortSignal);
   const verificationBody = JSON.parse(stub.calls[0].body);
   assert.deepEqual(verificationBody, {
     model: "NousResearch/Hermes-4-14B",

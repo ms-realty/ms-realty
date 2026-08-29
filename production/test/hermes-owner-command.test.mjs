@@ -461,7 +461,7 @@ test("OpenRouter owner-command planning uses the provisioned hosted endpoint", a
   assert.equal(result.model, "openrouter/test-model");
 });
 
-test("Hermes prefers the encrypted owner connection and keeps the managed env fallback", async () => {
+test("Hermes uses the encrypted owner OpenRouter connection only when hosted mode is selected", async () => {
   const storedKey = "sk-or-v1-stored-openrouter-key-never-rendered";
   const payload = fakePayload([connectedAiProvider({ apiKey: storedKey })]);
   const timestamps = [STARTED_AT, COMPLETED_AT];
@@ -470,13 +470,8 @@ test("Hermes prefers the encrypted owner connection and keeps the managed env fa
     operator,
     payload,
     secret: SECRET,
-    // This remains the managed-deployment fallback, but must not win over the
-    // owner-managed Payload connection.
     env: {
-      HERMES_PROVIDER_MODE: "self_hosted",
-      HERMES_CHAT_COMPLETIONS_URL: "https://managed-hermes.example/v1/chat/completions",
-      HERMES_API_KEY: "managed-fallback-key-that-must-not-be-used",
-      HERMES_MODEL: "managed/fallback-model",
+      HERMES_PROVIDER_MODE: "openrouter",
     },
     fetchImpl: async (url, init) => {
       providerCalls += 1;
@@ -497,6 +492,36 @@ test("Hermes prefers the encrypted owner connection and keeps the managed env fa
   assert.equal(JSON.stringify(payload.docs).includes(storedKey), false);
 });
 
+test("Hermes does not let an owner OpenRouter credential override the selected self-hosted runtime", async () => {
+  const storedKey = "sk-or-v1-stored-openrouter-key-never-rendered";
+  const payload = fakePayload([connectedAiProvider({ apiKey: storedKey })]);
+  const timestamps = [STARTED_AT, COMPLETED_AT];
+  const result = await runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-managed-policy" }), {
+    operator,
+    payload,
+    secret: SECRET,
+    env: {
+      HERMES_PROVIDER_MODE: "self_hosted",
+      HERMES_CHAT_COMPLETIONS_URL: "https://managed-hermes.example/v1/chat/completions",
+      HERMES_API_KEY: "managed-runtime-key-not-rendered",
+      HERMES_MODEL: "managed/runtime-model",
+    },
+    fetchImpl: async (url, init) => {
+      assert.equal(url, "https://managed-hermes.example/v1/chat/completions");
+      assert.equal(init.headers.authorization, "Bearer managed-runtime-key-not-rendered");
+      assert.equal(init.body.includes(storedKey), false);
+      return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(safePlan()) } }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    },
+    now: () => timestamps.shift() || COMPLETED_AT,
+  });
+  assert.equal(result.status, "planned");
+  assert.equal(result.model, "managed/runtime-model");
+  assert.equal(JSON.stringify(payload.docs).includes(storedKey), false);
+});
+
 test("stored OpenRouter failures expose only a fixed code, never provider or key values", async () => {
   const storedKey = "sk-or-v1-rejected-openrouter-key-never-rendered";
   const payload = fakePayload([connectedAiProvider({ apiKey: storedKey })]);
@@ -507,6 +532,7 @@ test("stored OpenRouter failures expose only a fixed code, never provider or key
       operator,
       payload,
       secret: SECRET,
+      env: { HERMES_PROVIDER_MODE: "openrouter" },
       fetchImpl: async () =>
         new Response(JSON.stringify({ error: { message: `provider rejected ${storedKey}` } }), {
           status: 401,
@@ -672,6 +698,7 @@ test("the connected OpenRouter credential rejects raw contact data before any pr
         operator,
         payload,
         secret: SECRET,
+        env: { HERMES_PROVIDER_MODE: "openrouter" },
         fetchImpl: async () => {
           providerCalls += 1;
           throw new Error("must not call OpenRouter");
