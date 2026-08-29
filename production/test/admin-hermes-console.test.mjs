@@ -25,6 +25,11 @@ const DURABLE_LEAD_STORE = {
   contactSecret: "durable-hermes-contact-secret-32-characters",
   workspaceId: "workspace-sandanski",
 };
+const DURABLE_VIEWING_STORE = {
+  viewingDurableStoreEnabled: true,
+  payloadSecret: "p".repeat(40),
+  databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+};
 
 function appConfig(overrides = {}) {
   return {
@@ -309,7 +314,9 @@ test("Hermes owner command routes pass authoritative business context and provid
     runtimeDataDurableOnly: true,
     payloadListingRuntime: PAYLOAD_RUNTIME,
     leadDurableStore: DURABLE_LEAD_STORE,
+    viewingDurableStore: DURABLE_VIEWING_STORE,
     readLeadIntakesDurably: async () => [],
+    readViewingsDurably: async () => [],
     readSellerPipelineItemsDurably: async () => [],
     hermesOwnerCommandProvider: capturePlan((input) => {
       nextInput = input;
@@ -342,6 +349,7 @@ test("Hermes owner command routes pass authoritative business context and provid
   assert.equal(nextInput.businessContext.counts.listings, PAYLOAD_LISTING_TOTAL);
   const nextOpenRouter = nextInput.businessContext.providers.find((provider) => provider.id === "openrouter");
   assert.equal(Boolean(nextOpenRouter), true);
+  assert.equal(nextOpenRouter.status, "configured");
   assert.equal(nextOpenRouter.last_verified_at, null);
   assert.doesNotMatch(JSON.stringify(nextInput.businessContext), /@|\\+359|openrouter-key-not-rendered/);
 
@@ -352,7 +360,9 @@ test("Hermes owner command routes pass authoritative business context and provid
       payloadListingRuntime: PAYLOAD_RUNTIME,
       payloadAdminAuth: payloadAdminAuth(),
       leadDurableStore: DURABLE_LEAD_STORE,
+      viewingDurableStore: DURABLE_VIEWING_STORE,
       readLeadIntakesDurably: async () => [],
+      readViewingsDurably: async () => [],
       readSellerPipelineItemsDurably: async () => [],
       hermesEnv,
       hermesOwnerCommandProvider: capturePlan((input) => {
@@ -377,6 +387,7 @@ test("Hermes owner command routes pass authoritative business context and provid
   assert.equal(standaloneInput.businessContext.counts.listings, PAYLOAD_LISTING_TOTAL);
   const standaloneOpenRouter = standaloneInput.businessContext.providers.find((provider) => provider.id === "openrouter");
   assert.equal(Boolean(standaloneOpenRouter), true);
+  assert.equal(standaloneOpenRouter.status, "configured");
   assert.equal(standaloneOpenRouter.last_verified_at, null);
 });
 
@@ -412,7 +423,9 @@ test("Hermes owner command fails closed when provider connections are configured
         runtimeDataDurableOnly: true,
         payloadListingRuntime: PAYLOAD_RUNTIME,
         leadDurableStore: DURABLE_LEAD_STORE,
+        viewingDurableStore: DURABLE_VIEWING_STORE,
         readLeadIntakesDurably: async () => [],
+        readViewingsDurably: async () => [],
         readSellerPipelineItemsDurably: async () => [],
         providerConnection,
         readProviderConnections: async () => {
@@ -431,7 +444,9 @@ test("Hermes owner command fails closed when provider connections are configured
       payloadListingRuntime: PAYLOAD_RUNTIME,
       payloadAdminAuth: payloadAdminAuth(),
       leadDurableStore: DURABLE_LEAD_STORE,
+      viewingDurableStore: DURABLE_VIEWING_STORE,
       readLeadIntakesDurably: async () => [],
+      readViewingsDurably: async () => [],
       readSellerPipelineItemsDurably: async () => [],
       hermesEnv,
       providerConnection,

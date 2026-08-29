@@ -1457,6 +1457,9 @@ export function createHttpApp({
   };
   const currentDurableViewingSource = async () => {
     if (!viewingDurableStore?.viewingDurableStoreEnabled) {
+      if (runtimeDataDurableOnly) {
+        throw new ViewingStoreUnavailableError("Production admin viewings require the durable store");
+      }
       return { durable: false, viewings: readViewings(viewingLedgerPath || undefined) };
     }
     if (!isViewingDurableStoreEnabled(viewingDurableStore)) {
@@ -1525,10 +1528,7 @@ export function createHttpApp({
     const leadSource = { durable: leadDurableStore?.leadDurableStoreEnabled === true, leads };
     const filterRows = leadScopedRows(leadSource);
     const ledgers = currentLeadOperationLedgers();
-    const viewingSource =
-      runtimeDataDurableOnly && !viewingDurableStore?.viewingDurableStoreEnabled
-        ? { durable: false, viewings: [] }
-        : await currentDurableViewingSource();
+    const viewingSource = await currentDurableViewingSource();
     try {
       const context = await leadJourneyContextFrom({
         ledgers,
@@ -1607,7 +1607,7 @@ export function createHttpApp({
       const mode = String(hermesEnv.HERMES_PROVIDER_MODE || "self_hosted").trim() || "self_hosted";
       providers.set(mode === "openrouter" ? "openrouter" : "hermes", {
         id: mode === "openrouter" ? "openrouter" : "hermes",
-        status: "connected",
+        status: "configured",
         scopes: ["chat.completions"],
         last_verified_at: null,
       });
@@ -1675,6 +1675,14 @@ export function createHttpApp({
           leadSnoozes: filterRows(await currentLeadSnoozes()),
           brokerContacts: [],
           brokerProfiles: adminBrokerProfiles,
+          dataAvailability: {
+            replies: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            communicationThreads: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            languageRequests: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            translationTasks: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            savedSearches: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+            brokerContacts: { status: "unavailable", reason_key: "durable_projection_unavailable" },
+          },
           hermes: currentHermesAvailability(),
           leadOperations: currentLeadOperations(operatorId),
           operatorViews: [],

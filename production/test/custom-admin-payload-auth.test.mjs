@@ -831,6 +831,12 @@ test("Payload admin can approve and send a durable lead reply without the file o
       contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
       workspaceId: "workspace-sandanski",
     },
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: "payload-secret-for-test",
+      databaseUrl: "postgres://test.invalid/ms_realty",
+    },
+    readViewingsDurably: async () => [],
     readLeadIntakesDurably: async () => [
       {
         lead_id: "lead-durable-1",

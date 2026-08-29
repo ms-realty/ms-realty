@@ -28,6 +28,11 @@ const DURABLE_ENV = {
   MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET,
   MS_REALTY_WORKSPACE_ID: WORKSPACE,
 };
+const DURABLE_VIEWING_STORE = {
+  viewingDurableStoreEnabled: true,
+  payloadSecret: "p".repeat(40),
+  databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+};
 
 // An in-memory stand-in for the lead_operations collection, injected into both
 // runtimes in place of the Payload-backed reader and writer.
@@ -183,6 +188,8 @@ function adapterConfig(store, paths, overrides = {}) {
     readSellerPipelineItemsDurably: async () => [],
     readLeadOperationsDurably: store.readOperations,
     appendLeadOperationDurably: store.appendOperations,
+    viewingDurableStore: DURABLE_VIEWING_STORE,
+    readViewingsDurably: async () => [],
     ...overrides,
   };
 }
@@ -242,6 +249,8 @@ function httpApp(store, paths, overrides = {}) {
     readSellerPipelineItemsDurably: async () => [],
     readLeadOperationsDurably: store.readOperations,
     appendLeadOperationDurably: store.appendOperations,
+    viewingDurableStore: DURABLE_VIEWING_STORE,
+    readViewingsDurably: async () => [],
     ...overrides,
   });
 }
@@ -485,12 +494,37 @@ test("a restarted durable inbox keeps assignments, viewings, deals, seller outco
   assert.equal(slaRow.snooze.status, "active");
   assert.equal(served.body.viewings.length, 1);
   assert.equal(served.body.viewings[0].id, "durable-viewing-1");
+  assert.equal(served.body.dataAvailability.replies.status, "unavailable");
+  assert.equal(served.body.dataAvailability.communicationThreads.status, "unavailable");
+  assert.equal(served.body.summary.replies, null);
+  assert.equal(served.body.summary.communicationThreads, null);
   assert.equal(served.body.deals.length, 1);
   assert.equal(served.body.deals[0].lead_id, buyerLead.lead_id);
   assert.match(JSON.stringify(served.body.leadPipelineQueue.states), /closed/);
   const sellerQueueRow = served.body.sellerPipelineQueue.rows.find((row) => row.seller_pipeline_id === sellerPipelineSeed.id);
   assert.equal(sellerQueueRow.stage, "callback_completed");
   assert.equal(Object.hasOwn(served.body, "leadMatching"), false);
+
+  const html = await dispatchHttp(restarted, {
+    url: "/admin/leads?locale=en",
+    headers: { authorization: `Bearer ${TOKEN}` },
+  });
+  assert.equal(html.status, 200);
+  assert.match(html.body, /data-unavailable-data="replies,communicationThreads,languageRequests,translationTasks,savedSearches,brokerContacts"/);
+  assert.match(html.body, /Data connection required/);
+  assert.doesNotMatch(html.body, /data-communication-thread-empty="true"/);
+});
+
+test("durable-only standalone admin reads fail closed when viewing storage is not configured", async (t) => {
+  const app = httpApp(durableOperationStore(), tempPaths(t), {
+    viewingDurableStore: { viewingDurableStoreEnabled: false },
+  });
+  const response = await dispatchHttp(app, {
+    url: "/api/admin/leads",
+    headers: { authorization: `Bearer ${TOKEN}` },
+  });
+  assert.equal(response.status, 503);
+  assert.equal(response.body.kind, "viewing_store_unavailable");
 });
 
 test("bulk actions fan out to the durable ledgers with one audit entry per enquiry", async (t) => {
@@ -631,6 +665,7 @@ test("both runtimes tell the inbox its leads came from the durable store", async
       runtimeDataDurableOnly: false,
       leadDurableStore: { leadDurableStoreEnabled: false },
       leadOperationsDurableStore: { leadOperationsDurableStoreEnabled: false },
+      viewingDurableStore: { viewingDurableStoreEnabled: false },
     }),
     { url: "/api/admin/leads", headers: { authorization: `Bearer ${TOKEN}` } },
   );

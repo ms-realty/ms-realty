@@ -669,6 +669,9 @@ export function renderAdminTranslationQueuePayload(
 
 export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const dataAvailable = (key) => data.dataAvailability?.[key]?.status !== "unavailable";
+  const availableCount = (key, value) => (dataAvailable(key) ? value : null);
+  const publicRequestsAvailable = dataAvailable("savedSearches") && dataAvailable("languageRequests");
   const {
     leadSla: providedLeadSla,
     leadSlaGeneratedAt,
@@ -774,11 +777,11 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     leadBriefs,
     summary: {
       leads: data.leads.length,
-      replies: data.replies.length,
-      repliesQueued: replyDeliveryQueue.summary.queued,
-      repliesFailed: replyDeliveryQueue.summary.failed,
-      repliesSent: replyDeliveryQueue.summary.sent,
-      communicationThreads: data.communicationThreads?.length || 0,
+      replies: availableCount("replies", data.replies.length),
+      repliesQueued: availableCount("replies", replyDeliveryQueue.summary.queued),
+      repliesFailed: availableCount("replies", replyDeliveryQueue.summary.failed),
+      repliesSent: availableCount("replies", replyDeliveryQueue.summary.sent),
+      communicationThreads: availableCount("communicationThreads", data.communicationThreads?.length || 0),
       buyerPipelineOpen: leadPipelineQueue.summary.buyers_open,
       renterPipelineOpen: leadPipelineQueue.summary.renters_open,
       leadPipelineOverdue: leadPipelineQueue.summary.overdue,
@@ -790,13 +793,13 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
       leadsSnoozed: leadSla.summary.snoozed || 0,
-      languageRequests: data.languageRequests.length,
+      languageRequests: availableCount("languageRequests", data.languageRequests.length),
       viewings: data.viewings.length,
       viewingFollowUpsOpen: viewingFollowUpQueue.summary.open,
       viewingFollowUpsOverdue: viewingFollowUpQueue.summary.overdue,
-      savedSearches: data.savedSearches.length,
-      publicRequestsOpen: publicRequestQueue.summary.open,
-      publicRequestsOverdue: publicRequestQueue.summary.overdue,
+      savedSearches: availableCount("savedSearches", data.savedSearches.length),
+      publicRequestsOpen: publicRequestsAvailable ? publicRequestQueue.summary.open : null,
+      publicRequestsOverdue: publicRequestsAvailable ? publicRequestQueue.summary.overdue : null,
       sellerPipeline: data.sellerPipeline.length,
       sellerPipelineOpen: sellerPipelineQueue.summary.open,
       sellerPipelineOverdue: sellerPipelineQueue.summary.overdue,

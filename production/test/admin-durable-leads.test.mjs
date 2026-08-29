@@ -398,6 +398,40 @@ test("durable admin leads project durable assignments, snoozes, deals, and viewi
   assert.equal(body.deals[0].lead_id, durableLead.lead_id);
   assert.equal(body.viewings.length, 1);
   assert.equal(body.viewings[0].id, "durable-viewing-1");
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(body.dataAvailability).map(([key, value]) => [key, value.status])),
+    {
+      replies: "unavailable",
+      communicationThreads: "unavailable",
+      languageRequests: "unavailable",
+      translationTasks: "unavailable",
+      savedSearches: "unavailable",
+      brokerContacts: "unavailable",
+    },
+  );
+  assert.equal(body.summary.replies, null);
+  assert.equal(body.summary.repliesQueued, null);
+  assert.equal(body.summary.communicationThreads, null);
+  assert.equal(body.summary.languageRequests, null);
+  assert.equal(body.summary.savedSearches, null);
+  assert.equal(body.summary.publicRequestsOpen, null);
+
+  const htmlResponse = await adminGet("/admin/leads?locale=en", routeConfig);
+  const html = await htmlResponse.text();
+  assert.equal(htmlResponse.status, 200);
+  assert.match(html, /data-unavailable-data="replies,communicationThreads,languageRequests,translationTasks,savedSearches,brokerContacts"/);
+  assert.match(html, /Data connection required/);
+  assert.doesNotMatch(html, /data-communication-thread-empty="true"/);
+});
+
+test("durable-only Next admin reads fail closed when viewing storage is not configured", async () => {
+  const routeConfig = config(async () => [durableLead], {
+    runtimeDataDurableOnly: true,
+    payloadListingRuntime: PAYLOAD_DRAFT_RUNTIME,
+  });
+  const response = await adminGet("/api/admin/leads", routeConfig);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).kind, "viewing_store_unavailable");
 });
 
 test("durable admin lead reads return 503 when durable lead operations cannot be read", async () => {
@@ -410,6 +444,12 @@ test("durable admin lead reads return 503 when durable lead operations cannot be
       databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
       workspaceId: "workspace-sandanski",
     },
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true,
+      payloadSecret: "p".repeat(40),
+      databaseUrl: "postgres://payload:secret@db.example.test/ms_realty",
+    },
+    readViewingsDurably: async () => [],
     readLeadOperationsDurably: async () => {
       throw new Error("database unavailable");
     },

@@ -2621,6 +2621,7 @@ const OWNER_CONSOLE_COPY = {
     runtime: {
       roleRestricted: "Този профил няма право да изпълни действието.",
       storageUnavailable: "Правата ви на собственик са активни. Това действие чака връзка с постоянния източник на данни; ролята ви не е ограничена.",
+      unavailable: "Недостъпно",
       title: "Нужна е връзка с данните",
       description: "Тази секция е защитена, но постоянният ѝ източник на данни още не е достъпен в текущата среда.",
       requestedPath: "Заявена секция",
@@ -2731,6 +2732,7 @@ const OWNER_CONSOLE_COPY = {
     runtime: {
       roleRestricted: "У этого профиля нет права выполнить действие.",
       storageUnavailable: "Ваши права владельца активны. Для этого действия ещё не подключён постоянный источник данных; ваша роль не ограничена.",
+      unavailable: "Недоступно",
       title: "Нужно подключение к данным",
       description: "Раздел защищён, но его постоянный источник данных пока недоступен в этой среде.",
       requestedPath: "Запрошенный раздел",
@@ -2841,6 +2843,7 @@ const OWNER_CONSOLE_COPY = {
     runtime: {
       roleRestricted: "This profile does not have permission to perform the action.",
       storageUnavailable: "Your owner permissions are active. This action is waiting for a durable data connection; your role is not restricted.",
+      unavailable: "Unavailable",
       title: "Data connection required",
       description: "This section is protected, but its durable data source is not available in the current environment.",
       requestedPath: "Requested section",
@@ -5980,6 +5983,10 @@ function communicationEventLabel(copy, type) {
   return labels[type] || type.replaceAll("_", " ");
 }
 
+function adminDataUnavailable(page, key) {
+  return page.dataAvailability?.[key]?.status === "unavailable";
+}
+
 function CommunicationThread({ page, thread, copy, ui }) {
   // A lead with no recorded message still shows the section, so the operator
   // can see that nothing has been exchanged rather than an absent control.
@@ -6779,13 +6786,14 @@ function LeadContactChannels({ lead, ui }) {
 function LeadInboxRow({ page, row, ui, locale }) {
   const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age, snooze } = row;
   const selectable = page?.leadOperations?.bulkWritable === true;
+  const repliesUnavailable = adminDataUnavailable(page, "replies");
   return h(
     "li",
     {
       "data-lead-row": "true",
       "data-lead-id": lead.lead_id,
       "data-lead-type": lead.lead_type,
-      "data-lead-replied": delivered ? "true" : "false",
+      ...(repliesUnavailable ? {} : { "data-lead-replied": delivered ? "true" : "false" }),
       "data-lead-snoozed": snooze?.status === "active" ? "true" : undefined,
       hidden: delivered,
     },
@@ -6882,6 +6890,9 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
 function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   const { lead, leadSla, slaStatus, queuedReply, delivery, delivered, brokerId, leadContext, requestDetails, intake, brief, thread } = row;
   const replyOpen = queuedReply && delivery && !delivered;
+  const repliesUnavailable = adminDataUnavailable(page, "replies");
+  const communicationUnavailable = adminDataUnavailable(page, "communicationThreads");
+  const runtimeCopy = ownerConsoleCopy(page).runtime;
   // Hermes availability comes from configuration on the payload, never from a
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
@@ -6900,7 +6911,7 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       "data-admin-locale": lead.admin_locale,
       "data-contact-preference": lead.contact_preference,
       "data-broker-assignment": brokerId,
-      "data-lead-replied": delivered ? "true" : "false",
+      ...(repliesUnavailable ? {} : { "data-lead-replied": delivered ? "true" : "false" }),
       "data-reply-queue-status": delivery && !delivered ? delivery.status : undefined,
       hidden: delivered,
     },
@@ -6977,6 +6988,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         ...(hermesAvailable ? {} : { "data-hermes-state": "unavailable" }),
       },
       h("h3", null, leadColumns.reply),
+      repliesUnavailable
+        ? h(
+            "p",
+            { className: "adm-inline-alert", role: "status", "data-unavailable-domain": "replies" },
+            h("strong", null, runtimeCopy.title),
+            ` ${runtimeCopy.description}`,
+          )
+        : null,
       replyOpen ? h(ReplyDeliveryForm, { page, lead, reply: queuedReply, delivery, copy, ui }) : null,
       page.leadSourceDurable && !replyOpen && pageCan(page, "operations:write") ? h(DirectProviderReplyForm, { page, lead, copy, ui }) : null,
       h(
@@ -7084,7 +7103,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       "div",
       { className: "adm-lead-detail__section" },
       h(LeadAssignmentControl, { page, lead, copy }),
-      h(CommunicationThread, { page, thread, copy, ui }),
+      communicationUnavailable
+        ? h(
+            "p",
+            { className: "adm-inline-alert", role: "status", "data-unavailable-domain": "communicationThreads" },
+            h("strong", null, runtimeCopy.title),
+            ` ${runtimeCopy.description}`,
+          )
+        : h(CommunicationThread, { page, thread, copy, ui }),
       h(
         "details",
         { className: "adm-lead-more" },
@@ -7109,6 +7135,7 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
 function LeadInboxBody({ page }) {
   const ui = workbenchCopy(page);
   const copy = { ...ui, ...adminCopy(page) };
+  const runtimeCopy = ownerConsoleCopy(page).runtime;
   const locale = page.workspace?.locale;
   const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
   const sellerQueue = page.sellerPipelineQueue || { rows: [] };
@@ -7122,9 +7149,13 @@ function LeadInboxBody({ page }) {
   const communicationByLeadId = new Map((page.communicationThreads || []).map((thread) => [thread.lead_id, thread]));
   const briefByLeadId = new Map((page.leadBriefs?.rows || []).map((brief) => [brief.lead_id, brief]));
   const briefOrder = new Map((page.leadBriefs?.rows || []).map((brief, index) => [brief.lead_id, index]));
-  const repliedLeadIds = new Set(
-    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
-  );
+  const repliesUnavailable = adminDataUnavailable(page, "replies");
+  const unavailableDomains = Object.entries(page.dataAvailability || {})
+    .filter(([, value]) => value?.status === "unavailable")
+    .map(([key]) => key);
+  const repliedLeadIds = repliesUnavailable
+    ? new Set()
+    : new Set((page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id));
   const leadPriority = (lead) => {
     const reply = replyByLeadId.get(lead.lead_id);
     const delivery = reply ? deliveryByReplyId.get(reply.id) : null;
@@ -7140,7 +7171,7 @@ function LeadInboxBody({ page }) {
     const briefDifference = (briefOrder.get(left.lead_id) ?? Number.MAX_SAFE_INTEGER) - (briefOrder.get(right.lead_id) ?? Number.MAX_SAFE_INTEGER);
     return briefDifference || leadPriority(left) - leadPriority(right);
   });
-  const needsReply = leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
+  const needsReply = repliesUnavailable ? [] : leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
   const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
   const rows = leads.map((lead) => {
     const leadSla = leadSlaById.get(lead.lead_id);
@@ -7165,9 +7196,9 @@ function LeadInboxBody({ page }) {
   });
   const slaCount = rows.filter((row) => row.slaStatus === "reminder_required" || row.slaStatus === "manager_escalation_required").length;
   const metrics = [
-    [label(copy, "needsReply", "Needs reply"), needsReply.length, "messages-square", "sea"],
-    [label(copy, "repliesQueued", "Replies queued"), page.summary.repliesQueued, "send", "sun"],
-    [statusText(ui, "failed"), page.summary.repliesFailed, "triangle-alert", "brick"],
+    [label(copy, "needsReply", "Needs reply"), repliesUnavailable ? runtimeCopy.unavailable : needsReply.length, "messages-square", "sea"],
+    [label(copy, "repliesQueued", "Replies queued"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesQueued, "send", "sun"],
+    [statusText(ui, "failed"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesFailed, "triangle-alert", "brick"],
     [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
   ];
   const title = label(copy, "leadInbox", "Lead inbox");
@@ -7193,14 +7224,31 @@ function LeadInboxBody({ page }) {
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(StatGrid, { metrics }),
+      unavailableDomains.length
+        ? h(
+            "p",
+            {
+              className: "adm-inline-alert",
+              role: "status",
+              "data-unavailable-data": unavailableDomains.join(","),
+            },
+            h("strong", null, runtimeCopy.title),
+            ` ${runtimeCopy.description}`,
+          )
+        : null,
       h(
         PageToolbar,
         null,
         h(
           "nav",
           { key: "tabs", className: "crm-seg adm-lead-tabs", "aria-label": label(copy, "leadQueues", "Lead queues"), "data-lead-queue-tabs": "true" },
-          h("button", { type: "button", "data-lead-filter": "all", "data-on": "0" }, label(copy, "all", "All"), h("span", { className: "adm-seg-count" }, leads.length)),
-          h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "1" }, label(copy, "needsReply", "Needs reply"), h("span", { className: "adm-seg-count" }, needsReply.length)),
+          h("button", { type: "button", "data-lead-filter": "all", "data-on": repliesUnavailable ? "1" : "0" }, label(copy, "all", "All"), h("span", { className: "adm-seg-count" }, leads.length)),
+          h(
+            "button",
+            { type: "button", "data-lead-filter": "needs_reply", "data-on": repliesUnavailable ? "0" : "1", disabled: repliesUnavailable || undefined },
+            label(copy, "needsReply", "Needs reply"),
+            h("span", { className: "adm-seg-count" }, repliesUnavailable ? runtimeCopy.unavailable : needsReply.length),
+          ),
           h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA"), h("span", { className: "adm-seg-count" }, slaCount)),
         ),
         h(ManualLeadForm, { key: "new", page }),
