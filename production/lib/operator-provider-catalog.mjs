@@ -835,24 +835,30 @@ function openRouterInput({ endpoint, model, apiKey }) {
   return { endpoint: resolvedEndpoint, model: resolvedModel, apiKey: resolvedKey };
 }
 
-// These two zero-token reads prove separate facts before storage: /key proves
-// that the bearer credential is active, while /models confirms the exact model
-// slug. Neither request sends business content.
+// A one-token completion is the smallest authoritative proof that the submitted
+// key may call the exact model through the exact runtime endpoint. The prompt is
+// static and contains no MS Realty or customer data.
 export async function verifyOperatorAiProvider({ endpoint, model, apiKey, fetchImpl = fetch } = {}) {
   const input = openRouterInput({ endpoint, model, apiKey });
-  let keyBody;
-  let modelsBody;
+  let body;
   try {
-    const headers = { accept: "application/json", authorization: `Bearer ${input.apiKey}` };
-    keyBody = await responseJson(
-      await fetchImpl("https://openrouter.ai/api/v1/key", { headers }),
-      "OpenRouter API key readback",
-    );
-    modelsBody = await responseJson(
-      await fetchImpl("https://openrouter.ai/api/v1/models", {
-        headers,
+    body = await responseJson(
+      await fetchImpl(input.endpoint, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          authorization: `Bearer ${input.apiKey}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model: input.model,
+          messages: [{ role: "user", content: "Reply with OK." }],
+          max_tokens: 1,
+          temperature: 0,
+          stream: false,
+        }),
       }),
-      "OpenRouter model readback",
+      "OpenRouter chat-completions readback",
     );
   } catch (cause) {
     throw new OperatorProviderConnectionError(
@@ -861,17 +867,10 @@ export async function verifyOperatorAiProvider({ endpoint, model, apiKey, fetchI
       cause,
     );
   }
-  if (!keyBody?.data || typeof keyBody.data !== "object" || Array.isArray(keyBody.data)) {
+  if (!Array.isArray(body?.choices) || !body.choices[0] || typeof body.choices[0] !== "object") {
     throw new OperatorProviderConnectionError(
       "openrouter_verification_failed",
-      "OpenRouter did not confirm the API key",
-    );
-  }
-  const listed = Array.isArray(modelsBody.data) ? modelsBody.data : [];
-  if (!listed.some((entry) => trimmed(entry?.id) === input.model)) {
-    throw new OperatorProviderConnectionError(
-      "openrouter_model_unavailable",
-      "OpenRouter did not return the selected model",
+      "OpenRouter did not confirm the selected model and API key",
     );
   }
   return {
@@ -885,7 +884,7 @@ export async function verifyOperatorAiProvider({ endpoint, model, apiKey, fetchI
       endpoint: input.endpoint,
       model: input.model,
       key_verified: true,
-      models_listed: listed.length,
+      verification: "one_token_chat_completion",
     },
     credentials: { api_key: input.apiKey, endpoint: input.endpoint, model: input.model },
   };

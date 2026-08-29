@@ -81,7 +81,12 @@ function stubFetch(routes) {
     calls,
     fetchImpl: async (input, init = {}) => {
       const url = String(input?.url || input);
-      calls.push({ url, method: init.method || "GET", headers: init.headers || {} });
+      calls.push({
+        url,
+        method: init.method || "GET",
+        headers: init.headers || {},
+        body: init.body,
+      });
       const match = Object.keys(routes).find((key) => url.startsWith(key));
       if (!match) throw new Error(`unstubbed fetch: ${url}`);
       const route = routes[match];
@@ -596,8 +601,9 @@ test("a pasted key is stored only after the provider itself confirms it", async 
 test("OpenRouter verifies the exact endpoint, key, and selected model before encrypted storage", async () => {
   const apiKey = "sk-or-v1-openrouter-test-key-never-rendered";
   const stub = stubFetch({
-    "https://openrouter.ai/api/v1/key": { body: { data: { label: "ms-realty-owner" } } },
-    "https://openrouter.ai/api/v1/models": { body: { data: [{ id: "NousResearch/Hermes-4-14B" }] } },
+    "https://openrouter.ai/api/v1/chat/completions": {
+      body: { id: "generation-test", choices: [{ message: { content: "OK" } }] },
+    },
   });
   const verified = await verifyOperatorAiProvider({
     endpoint: "https://openrouter.ai/api/v1/chat/completions",
@@ -607,17 +613,23 @@ test("OpenRouter verifies the exact endpoint, key, and selected model before enc
   });
   assert.equal(verified.provider, "ai");
   assert.equal(verified.status, "connected");
-  assert.equal(verified.metadata.models_listed, 1);
+  assert.equal(verified.metadata.key_verified, true);
+  assert.equal(verified.metadata.verification, "one_token_chat_completion");
   assert.equal(verified.metadata.model, "NousResearch/Hermes-4-14B");
-  // The verification call is a zero-token model listing. The verified secret
-  // stays in the internal connection object only long enough for the existing
-  // store to seal it; the public route returns that store's safe projection.
-  assert.deepEqual(stub.calls.map((call) => call.url), [
-    "https://openrouter.ai/api/v1/key",
-    "https://openrouter.ai/api/v1/models",
-  ]);
+  // The verification call spends at most one output token and sends only a
+  // static prompt. The verified secret stays in the internal connection object
+  // only long enough for the existing store to seal it.
+  assert.deepEqual(stub.calls.map((call) => call.url), ["https://openrouter.ai/api/v1/chat/completions"]);
+  assert.equal(stub.calls[0].method, "POST");
   assert.equal(stub.calls[0].headers.authorization, `Bearer ${apiKey}`);
-  assert.equal(stub.calls[1].headers.authorization, `Bearer ${apiKey}`);
+  const verificationBody = JSON.parse(stub.calls[0].body);
+  assert.deepEqual(verificationBody, {
+    model: "NousResearch/Hermes-4-14B",
+    messages: [{ role: "user", content: "Reply with OK." }],
+    max_tokens: 1,
+    temperature: 0,
+    stream: false,
+  });
   assert.deepEqual(verified.credentials, {
     api_key: apiKey,
     endpoint: "https://openrouter.ai/api/v1/chat/completions",
@@ -636,8 +648,7 @@ test("OpenRouter verifies the exact endpoint, key, and selected model before enc
   }
 
   const unavailable = stubFetch({
-    "https://openrouter.ai/api/v1/key": { body: { data: { label: "ms-realty-owner" } } },
-    "https://openrouter.ai/api/v1/models": { body: { data: [{ id: "another/model" }] } },
+    "https://openrouter.ai/api/v1/chat/completions": { ok: false, status: 404, body: { error: { message: "model unavailable" } } },
   });
   await assert.rejects(
     verifyOperatorAiProvider({
@@ -646,7 +657,7 @@ test("OpenRouter verifies the exact endpoint, key, and selected model before enc
       apiKey,
       fetchImpl: unavailable.fetchImpl,
     }),
-    (error) => error.code === "openrouter_model_unavailable" && !error.message.includes(apiKey),
+    (error) => error.code === "openrouter_verification_failed" && !error.message.includes(apiKey),
   );
 });
 

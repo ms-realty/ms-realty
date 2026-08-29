@@ -219,9 +219,13 @@ test("both owner runtimes verify and encrypt OpenRouter without echoing its key"
   const fetchCalls = [];
   const providerFetch = async (url, init = {}) => {
     const requestUrl = String(url);
-    fetchCalls.push({ url: requestUrl, authorization: init.headers?.authorization || "" });
-    const data = requestUrl.endsWith("/key") ? { label: "ms-realty-owner" } : [{ id: model }];
-    return new Response(JSON.stringify({ data }), {
+    fetchCalls.push({
+      url: requestUrl,
+      method: init.method,
+      authorization: init.headers?.authorization || "",
+      body: JSON.parse(init.body),
+    });
+    return new Response(JSON.stringify({ id: "generation-test", choices: [{ message: { content: "OK" } }] }), {
       status: 200,
       headers: { "content-type": "application/json" },
     });
@@ -283,14 +287,12 @@ test("both owner runtimes verify and encrypt OpenRouter without echoing its key"
     model,
   });
 
-  assert.equal(fetchCalls.length, 4);
-  assert.deepEqual(fetchCalls.map((call) => call.url), [
-    "https://openrouter.ai/api/v1/key",
-    "https://openrouter.ai/api/v1/models",
-    "https://openrouter.ai/api/v1/key",
-    "https://openrouter.ai/api/v1/models",
-  ]);
+  assert.equal(fetchCalls.length, 2);
+  assert.ok(fetchCalls.every((call) => call.url === "https://openrouter.ai/api/v1/chat/completions"));
+  assert.ok(fetchCalls.every((call) => call.method === "POST"));
   assert.ok(fetchCalls.every((call) => call.authorization === `Bearer ${apiKey}`));
+  assert.ok(fetchCalls.every((call) => call.body.model === model && call.body.max_tokens === 1));
+  assert.ok(fetchCalls.every((call) => JSON.stringify(call.body.messages) === JSON.stringify([{ role: "user", content: "Reply with OK." }])));
   for (const auditPath of [standaloneAudit, adapterAudit]) {
     const rows = readAuditLog(auditPath).filter((row) => row.action === "provider_connected");
     assert.equal(rows.length, 1);
