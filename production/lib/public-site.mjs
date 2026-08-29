@@ -33,7 +33,12 @@ import {
   sellerPath,
   startPath,
 } from "./seo.mjs";
-import { approvedTranslationRecordsForListing, listingToPublicViewModel, publishedListingTranslationCopy } from "./content.mjs";
+import {
+  approvedTranslationRecordsForListing,
+  listingToPublicViewModel,
+  listingTranslationCopy,
+  publishedListingTranslationCopy,
+} from "./content.mjs";
 import { savedSearchWritesDisabledFromEnv } from "./runtime-data-boundary.mjs";
 import { isLeadDurableStoreEnabled, leadDurableStoreConfigFromEnv } from "./lead-durable-store.mjs";
 import {
@@ -3415,8 +3420,9 @@ export function renderListingPage({
   const view = listingToPublicViewModel(listing);
   const allTranslations = translations || listing.translations || approvedTranslationRecordsForListing(registry, listing);
   const translation = translationFor(allTranslations, locale.code);
-  const translated = translation ? publishedListingTranslationCopy(translation) : null;
-  const translationIndexable = Boolean(translated && isTranslationIndexable(registry, translation));
+  const translated = translation ? listingTranslationCopy(translation) : null;
+  const approvedTranslation = translation ? publishedListingTranslationCopy(translation) : null;
+  const translationIndexable = Boolean(approvedTranslation && isTranslationIndexable(registry, translation));
   const indexable = resolved.available && translationIndexable;
   const path = listingPath(registry, locale.code, listing.id);
   const hreflang = indexable
@@ -3427,7 +3433,7 @@ export function renderListingPage({
       )
     : [];
   const labels = labelsFor(locale.code);
-  const copy = localizedCopy(translationIndexable ? locale.code : view.source_locale, view, translated);
+  const copy = localizedCopy(translated ? locale.code : view.source_locale, view, translated);
   const sourceSeo = locale.code === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
   const translationSeo = locale.code !== view.source_locale ? translated : null;
   const canonical = sourceSeo.canonical_override === path ? sourceSeo.canonical_override : path;
@@ -3465,7 +3471,7 @@ export function renderListingPage({
     canonical,
     indexable,
     fallback: {
-      active: !resolved.available || !translationIndexable,
+      active: !resolved.available || !translated,
       requested_locale: localeCode,
       resolved_locale: locale.code,
     },
@@ -3490,7 +3496,7 @@ export function renderListingPage({
       reviewer: translation?.reviewer || null,
     },
     body: {
-      content_locale: translationIndexable ? locale.code : view.source_locale || registry.source_locale,
+      content_locale: translated ? locale.code : view.source_locale || registry.source_locale,
       h1: copy.h1,
       description: copy.description,
       facts: {

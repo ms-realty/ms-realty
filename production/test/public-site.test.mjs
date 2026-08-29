@@ -60,6 +60,27 @@ function publishedTranslation(locale, copy) {
   };
 }
 
+function pendingTranslation(locale, copy) {
+  return {
+    locale,
+    source_locale: "bg",
+    status: "human_edited",
+    translation_state: "human_edited",
+    source_hash: "test-source-hash",
+    translated_hash: contentHash(copy),
+    ...copy,
+    translator: "codex-manual-translation",
+    content_origin: "manual_translation",
+    reviewer: null,
+    human_approved: false,
+    approved_at: null,
+    publication_authorized_by: "agency_owner",
+    publication_authorized_at: "2026-08-30T00:00:00.000Z",
+    published_at: null,
+    public_indexable: false,
+  };
+}
+
 const translatedListing = {
   ...listing,
   translations: [
@@ -114,6 +135,33 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
       pdf_status: "browser_print_ready",
     },
   );
+});
+
+test("complete pending-review copy is publicly readable but remains outside indexing and hreflang", () => {
+  const copy = {
+    title: "Επαγγελματικό συγκρότημα κοντά στο Σαντάνσκι",
+    description: "Πλήρης ελληνική μετάφραση που αναμένει ανθρώπινο γλωσσικό έλεγχο.",
+    seo_title: "Επαγγελματικό συγκρότημα στο Σαντάνσκι",
+    meta_description: "Πλήρης ελληνική περιγραφή του ακινήτου, διαθέσιμη για ανάγνωση αλλά σε αναμονή ανθρώπινου γλωσσικού ελέγχου πριν από την ευρετηρίαση.",
+  };
+  const page = renderListingPage({
+    registry,
+    listing,
+    localeCode: "el",
+    translations: [...approvedTranslationRecordsForListing(registry, listing), pendingTranslation("el", copy)],
+  });
+
+  assert.equal(page.status, 200);
+  assert.equal(page.body.content_locale, "el");
+  assert.equal(page.body.h1, copy.title);
+  assert.equal(page.body.description, copy.description);
+  assert.equal(page.metadata.title, copy.seo_title);
+  assert.equal(page.indexable, false);
+  assert.equal(page.metadata.robots, "noindex,follow");
+  assert.deepEqual(page.hreflang, []);
+  assert.equal(page.fallback.active, false);
+  assert.equal(page.translation.status, "human_edited");
+  assert.equal(page.translation.human_approved, false);
 });
 
 test("listing language navigation keeps users on the same listing in every public language", () => {
