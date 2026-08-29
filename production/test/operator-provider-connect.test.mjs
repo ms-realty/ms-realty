@@ -806,6 +806,7 @@ test("the assistant's configuration helper stays available as an API and the own
   for (const card of ["google", "whatsapp", "social", "assistant"]) {
     assert.match(html, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
   }
+  assert.match(html, /data-summary-card="assistant" data-summary-tone="success"/);
   assert.match(html, /data-connection-group="assistant"/);
   assert.match(html, /data-connection-list="core"/);
   assert.match(html, /data-connections-stage="true"/);
@@ -829,6 +830,8 @@ test("the assistant's configuration helper stays available as an API and the own
     providerConfig: fullConfig(),
     locale: "bg",
   });
+  assert.match(blocked, /data-summary-card="assistant" data-summary-tone="sun"/);
+  assert.doesNotMatch(blocked, /data-summary-card="assistant" data-summary-tone="success"/);
   assert.match(blocked, /Отвори в Codex/);
   assert.match(blocked, /добавката/);
   assert.equal(blocked.includes('data-copy-block="agent-config"'), false);

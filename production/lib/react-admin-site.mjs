@@ -11538,7 +11538,10 @@ function ConnectionsBody({ page }) {
   const whatsappConnection = connectionById(connections, "whatsapp");
   const primaryConnections = connections.filter((connection) => primaryConnectionIds.has(connection.id));
   const secondaryWorkAccounts = connections.filter((connection) => !primaryConnectionIds.has(connection.id));
-  const assistantReady = Boolean(page.assistant?.credential || page.assistant?.config || page.assistant?.plugin_url);
+  const assistantReady = Boolean(page.assistant?.credential);
+  const assistantInstallReady = !assistantReady && Boolean(page.assistant?.plugin_url || page.assistant?.config);
+  const assistantTone = assistantReady ? "success" : assistantInstallReady ? "sun" : "brick";
+  const assistantStatus = assistantReady ? statusText(ui, "ready") : assistantInstallReady ? statusText(ui, "in_progress") : statusText(ui, "blocked");
   const socialReadyCount = readyCount(socialConnections);
   const summaryCards = [
     google
@@ -11577,10 +11580,10 @@ function ConnectionsBody({ page }) {
     {
       id: "assistant",
       title: page.assistant?.title,
-      value: assistantReady ? statusText(ui, "ready") : statusText(ui, "blocked"),
-      meta: page.assistant?.install_hint || page.assistant?.description,
-      tone: assistantReady ? "success" : "brick",
-      status: { tone: assistantReady ? "success" : "brick", label: assistantReady ? statusText(ui, "ready") : statusText(ui, "blocked") },
+      value: assistantStatus,
+      meta: assistantReady ? page.assistant?.description || page.assistant?.install_hint : page.assistant?.install_hint || page.assistant?.description,
+      tone: assistantTone,
+      status: { tone: assistantTone, label: assistantStatus },
     },
   ];
   return adminShell(page, {
@@ -12026,14 +12029,6 @@ function HermesBody({ page }) {
                 {
                   title: copy.hosted,
                   "data-hermes-runtime-card": runtime.status,
-                  action: h(
-                    "div",
-                    { className: "adm-hermes-panel-actions" },
-                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, h(Icon, { name: "loader-circle", size: 15 }), h("span", null, copy.retry)),
-                    pageCan(page, "settings:manage")
-                      ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 15 }), h("span", null, copy.connections))
-                      : null,
-                  ),
                 },
                 h(
                   "div",
@@ -12075,22 +12070,6 @@ function HermesBody({ page }) {
                         : null,
                     ),
                   ),
-                  !runtime.ready
-                    ? h(
-                        "div",
-                        { className: "adm-hermes-recovery", role: "note", "data-hermes-recovery": "true" },
-                        h(Icon, { name: "link", size: 17 }),
-                        h(
-                          "div",
-                          { className: "adm-hermes-recovery__copy" },
-                          h("strong", null, copy.recoveryTitle),
-                          h("p", null, copy.recoveryDescription),
-                        ),
-                        pageCan(page, "settings:manage")
-                          ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
-                          : null,
-                      )
-                    : null,
                 ),
               ),
               h(
