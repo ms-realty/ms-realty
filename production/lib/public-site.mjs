@@ -2942,10 +2942,9 @@ function listingMetadataTitle(registry, listing, localeCode) {
   const view = listingToPublicViewModel(listing);
   const translations = translationsForSearchListing(registry, listing);
   const translation = translationFor(translations, localeCode);
-  const approved = translation ? publishedListingTranslationCopy(translation) : null;
-  const translated = localeCode === view.source_locale ? null : approved;
-  const translationIndexable = Boolean(approved && isTranslationIndexable(registry, translation));
-  const copy = localizedCopy(translationIndexable ? localeCode : view.source_locale, view, translated);
+  const authorized = translation ? publicationAuthorizedListingTranslationCopy(translation) : null;
+  const translated = localeCode === view.source_locale ? null : authorized;
+  const copy = localizedCopy(translated ? localeCode : view.source_locale, view, translated);
   const sourceSeo = localeCode === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
   return sourceSeo.title || (localeCode !== view.source_locale ? translated?.seo_title : null) || copy.title;
 }

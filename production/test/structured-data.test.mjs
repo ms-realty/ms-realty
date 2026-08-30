@@ -164,8 +164,8 @@ test("structured data warnings use broker-verified property edits", () => {
     generatedAt: "2026-07-05T00:00:00Z",
   });
 
-  assert.equal(reviewed.summary.warnings.missing_price, base.summary.warnings.missing_price - 2);
-  assert.equal(reviewed.summary.warnings.missing_area, base.summary.warnings.missing_area - 2);
+  assert.equal(reviewed.summary.warnings.missing_price, base.summary.warnings.missing_price - 1);
+  assert.equal(reviewed.summary.warnings.missing_area, base.summary.warnings.missing_area - 1);
   assert.equal(reviewed.summary.warnings.missing_bedrooms, base.summary.warnings.missing_bedrooms - 1);
 });
 
@@ -213,7 +213,7 @@ test("generated structured data report covers indexable listing sitemap entries"
   if (!fs.existsSync(file)) return;
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertStructuredDataReport(report), true);
-  assert.equal(report.summary.listing_entries, 166);
+  assert.equal(report.summary.listing_entries, 165);
   assert.equal(report.summary.guide_entries, 5);
   assert.equal(report.summary.failing_entries, 0);
   assert.equal(report.rows.some((row) => row.loc === "/en/guides/foreign-buyers" && row.schema_type === "Article"), true);
