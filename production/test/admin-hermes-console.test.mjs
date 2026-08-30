@@ -154,11 +154,9 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.match(html, /Runtime diagnostics/);
   assert.match(html, /<details class="adm-hermes-safeguards" data-hermes-safeguards="collapsed">/);
   assert.match(html, /class="adm-workbench-disclosure" data-hermes-desktop-card="ready"/);
-  assert.match(html, /data-hermes-next-task="/);
-  const queueCounts = html.match(/data-hermes-task-count="(\d+)" data-hermes-task-visible="(\d+)"/);
-  assert.ok(queueCounts, "remaining queue contract present");
-  assert.ok(Number(queueCounts[2]) < Number(queueCounts[1]), "starting point is removed from the remaining queue");
-  assert.match(html, /data-hermes-next-task="[^"]+"[\s\S]*?class="mk-btn mk-btn--secondary mk-btn--sm"/);
+  assert.match(html, /data-hermes-task-queue="ready"/);
+  assert.match(html, /No safe tasks are waiting\./);
+  assert.doesNotMatch(html, /data-hermes-next-task=|data-hermes-task-count=/);
   assert.doesNotMatch(html, /<form class="adm-hermes-command__form"/);
   assert.match(html, /class="adm-hermes-recovery" role="group" aria-label="Recover the connection" data-hermes-command-recovery="true"[\s\S]*?class="mk-btn mk-btn--primary mk-btn--sm"/);
   assert.match(html, /HERMES_CHAT_COMPLETIONS_URL/);
@@ -178,6 +176,8 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.equal(body.runtime.status, "blocked");
   assert.deepEqual(body.runtime.missing, ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
   assert.equal(body.queue.status, "ready");
+  assert.equal(body.queue.summary.eligible_tasks, 0);
+  assert.deepEqual(body.queue.rows, []);
   assert.equal(body.tools.length, 3);
   assert.deepEqual(body.tools.find((tool) => tool.operation === "hermes_submit_draft").confirmation, {
     kind: "signed_expiring_challenge",
