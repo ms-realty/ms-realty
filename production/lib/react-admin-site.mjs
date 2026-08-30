@@ -2280,6 +2280,14 @@ function formatAdminDateTime(value, locale) {
   return `${day}, ${parts.hour}:${parts.minute}`;
 }
 
+function formatAdminDuration(value, locale) {
+  const milliseconds = Number(value);
+  if (!Number.isFinite(milliseconds) || milliseconds < 0) return "";
+  const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
+  if (milliseconds < 1_000) return `${new Intl.NumberFormat(language).format(Math.round(milliseconds))} ms`;
+  return `${new Intl.NumberFormat(language, { maximumFractionDigits: 1 }).format(milliseconds / 1_000)} s`;
+}
+
 function leadContactActions(lead, copy) {
   const contact = lead.contact || {};
   const contactName = String(contact.name || "").trim();
@@ -2671,11 +2679,14 @@ const OWNER_CONSOLE_COPY = {
       commandDescription: "Опишете желания резултат. Hermes ще върне план от текущата защитена карта на системата и ще попита, ако липсват факти.",
       commandLabel: "Задача за Hermes",
       commandPlaceholder: "Например: Подготви план за днешните запитвания и обяви, които изискват преглед.",
+      todayPrompt: "Подготви безопасен план за днешната приоритетна задача: {action}. Контекст: {title}. Причина: {context}.",
       preparePlan: "Подготви план",
       commandDisabled: "Свържете Hermes и постоянния журнал за разписки, за да подготвяте планове.",
       planReady: "План за преглед",
-      recentReceipts: "Последни разписки",
-      noReceipts: "Още няма записани команди.",
+      recentReceipts: "История на изпълненията",
+      noReceipts: "Още няма изпълнения на Hermes.",
+      duration: "Време",
+      steps: "Стъпки",
       questions: "Въпроси преди работа",
       reviewStep: "Преглед",
       draftStep: "Чернова",
@@ -2783,11 +2794,14 @@ const OWNER_CONSOLE_COPY = {
       commandDescription: "Опишите нужный результат. Hermes вернёт план из текущей защищённой карты системы и задаст вопрос, если фактов недостаточно.",
       commandLabel: "Задача для Hermes",
       commandPlaceholder: "Например: Подготовь план по сегодняшним заявкам и объектам, которым нужна проверка.",
+      todayPrompt: "Подготовь безопасный план для сегодняшней приоритетной задачи: {action}. Контекст: {title}. Причина: {context}.",
       preparePlan: "Подготовить план",
       commandDisabled: "Подключите Hermes и постоянный журнал квитанций, чтобы готовить планы.",
       planReady: "План на проверку",
-      recentReceipts: "Последние квитанции",
-      noReceipts: "Записанных команд пока нет.",
+      recentReceipts: "История запусков",
+      noReceipts: "Запусков Hermes пока нет.",
+      duration: "Время",
+      steps: "Шаги",
       questions: "Вопросы перед работой",
       reviewStep: "Проверка",
       draftStep: "Черновик",
@@ -2895,11 +2909,14 @@ const OWNER_CONSOLE_COPY = {
       commandDescription: "Describe the outcome. Hermes returns a plan from the current guarded operating map and asks when facts are missing.",
       commandLabel: "Task for Hermes",
       commandPlaceholder: "For example: Prepare a plan for today's enquiries and listings that need review.",
+      todayPrompt: "Prepare a safe plan for today's priority task: {action}. Context: {title}. Reason: {context}.",
       preparePlan: "Prepare plan",
       commandDisabled: "Connect Hermes and its durable receipt store before preparing plans.",
       planReady: "Plan for review",
-      recentReceipts: "Recent receipts",
-      noReceipts: "No commands have been recorded yet.",
+      recentReceipts: "Run history",
+      noReceipts: "Hermes has not run yet.",
+      duration: "Duration",
+      steps: "Steps",
       questions: "Questions before work",
       reviewStep: "Review",
       draftStep: "Draft",
@@ -3124,9 +3141,18 @@ function navigationDestination(destination, page, { mobile = false } = {}) {
           ),
         )
       : h(
-          "div",
-          { className: "crm-sb__nested", "data-admin-nav-drilldown": destination.id },
-          ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
+          "details",
+          {
+            className: "crm-sb__more",
+            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
+            "data-admin-nav-drilldown": destination.id,
+          },
+          h("summary", { className: "crm-sb__more-summary" }, moreLabel),
+          h(
+            "div",
+            { className: "crm-sb__nested" },
+            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
+          ),
         )
     : null;
   return h(
@@ -3468,9 +3494,16 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
 function TodayBriefingPanel({ page, rows }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
   const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
+  const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
   const total = rows.length;
   const count = copy.count.replace("{count}", String(total));
+  const prompt = first
+    ? hermesCopy.todayPrompt
+        .replace("{action}", first.action)
+        .replace("{title}", first.title)
+        .replace("{context}", first.context)
+    : "";
   return h(
     Panel,
     {
@@ -3517,15 +3550,27 @@ function TodayBriefingPanel({ page, rows }) {
       : null,
     h("p", { className: "adm-today-briefing__source" }, copy.source),
     h(
-      "div",
-      { className: "adm-today-briefing__hermes", "data-hermes-entry": "today" },
+      "form",
+      { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
       h("h3", null, hermes.title),
       h("p", { className: "adm-hermes-entry__description" }, hermes.description),
+      h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
+      h("label", { htmlFor: "today-hermes-prompt" }, hermesCopy.commandLabel),
+      h("textarea", {
+        id: "today-hermes-prompt",
+        name: "prompt",
+        rows: 2,
+        maxLength: 2000,
+        required: true,
+        defaultValue: prompt,
+        placeholder: hermesCopy.commandPlaceholder,
+        autoComplete: "off",
+      }),
       h(
-        "a",
-        { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes", page), "data-hermes-open": "today" },
-        h("span", null, hermes.open),
-        h(Icon, { name: "arrow-right", size: 15 }),
+        "button",
+        { className: "mk-btn mk-btn--secondary mk-btn--sm", type: "submit", "data-hermes-open": "today" },
+        h(Icon, { name: "sparkles", size: 15 }),
+        h("span", null, hermesCopy.preparePlan),
       ),
     ),
   );
@@ -3811,7 +3856,6 @@ function TodayBody({ page }) {
         PageHeader,
         { title, subtitle: settingsCopy.todayBriefing.description },
         h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes", page) }, h(Icon, { name: "sparkles", size: 16 }), h("span", null, settingsCopy.hermesEntry.open)),
       ),
       h(WorkspaceWelcomeBanner, { page }),
       h(
@@ -11404,6 +11448,58 @@ function AssistantAccess({ assistant, copy }) {
   );
 }
 
+function ConnectionJourney({ steps, copy }) {
+  const complete = steps.filter((step) => step.ready).length;
+  const next = steps.find((step) => !step.ready) || null;
+  return h(
+    "section",
+    {
+      className: "adm-connection-journey",
+      "aria-labelledby": "connection-journey-title",
+      "data-connection-journey": next ? "in-progress" : "complete",
+      "data-connection-progress": `${complete}/${steps.length}`,
+    },
+    h(
+      "header",
+      { className: "adm-connection-journey__header" },
+      h(
+        "div",
+        null,
+        h("span", { className: "adm-connection-journey__eyebrow" }, copy.journeyProgress.replace("{done}", String(complete)).replace("{total}", String(steps.length))),
+        h("h2", { id: "connection-journey-title" }, copy.journeyTitle),
+        h("p", null, next ? copy.journeyDescription : copy.journeyComplete),
+      ),
+      next
+        ? h(
+            "a",
+            { className: "mk-btn mk-btn--primary", href: next.anchor, "data-connection-next": next.id },
+            h("span", null, copy.journeyReview),
+            h(Icon, { name: "arrow-right", size: 16 }),
+          )
+        : h(StatusPill, { tone: "success" }, copy.journeyComplete),
+    ),
+    h("progress", { max: steps.length, value: complete, "aria-label": copy.journeyProgress.replace("{done}", String(complete)).replace("{total}", String(steps.length)) }),
+    h(
+      "ol",
+      { className: "adm-connection-journey__steps" },
+      ...steps.map((step, index) =>
+        h(
+          "li",
+          { key: step.id, "data-connection-step": step.id, "data-status": step.ready ? "complete" : "pending" },
+          h("span", { className: "adm-connection-journey__number", "aria-hidden": "true" }, step.ready ? h(Icon, { name: "check", size: 15 }) : index + 1),
+          h(
+            "a",
+            { href: step.anchor },
+            h("strong", null, step.title),
+            h("small", null, step.description),
+          ),
+          h(StatusPill, { tone: step.tone }, step.statusLabel),
+        ),
+      ),
+    ),
+  );
+}
+
 function ConnectionsBody({ page }) {
   const copy = page.connection_copy || {};
   const ui = workbenchCopy(page);
@@ -11426,49 +11522,44 @@ function ConnectionsBody({ page }) {
   const assistantTone = assistantReady ? "success" : assistantInstallReady ? "sun" : "brick";
   const assistantStatus = assistantReady ? statusText(ui, "ready") : assistantInstallReady ? statusText(ui, "in_progress") : statusText(ui, "blocked");
   const socialReadyCount = readyCount(socialConnections);
-  const summaryCards = [
-    google
+  const aiConnection = connectionById(connections, "ai");
+  const journeyStep = (connection) =>
+    connection
       ? {
-          id: "google",
-          title: google.title,
-          value: google.status_label,
-          meta: google.account_label || google.helper_text || google.description,
-          tone: connectionTone(google.status),
-          status: { tone: connectionTone(google.status), label: google.status_label },
+          id: connection.id,
+          title: connection.title,
+          description: connection.helper_text || connection.description,
+          ready: ["connected", "ready"].includes(connection.status),
+          statusLabel: connection.status_label,
+          tone: connectionTone(connection.status),
+          anchor: `#connection-${connection.id}`,
         }
-      : null,
-    whatsappConnection
-      ? {
-          id: "whatsapp",
-          title: whatsappConnection.title,
-          value: whatsappConnection.status_label,
-          meta: whatsappConnection.helper_text || whatsappConnection.blocked_text || whatsappConnection.description,
-          tone: connectionTone(whatsappConnection.status),
-          status: { tone: connectionTone(whatsappConnection.status), label: whatsappConnection.status_label },
-        }
-      : null,
+      : null;
+  const journeySteps = [
+    journeyStep(google),
+    journeyStep(aiConnection),
+    journeyStep(whatsappConnection),
     socialConnections.length
       ? {
           id: "social",
           title: copy.marketingChannelsTitle || copy.additionalChannelsTitle,
-          value: `${socialReadyCount}/${socialConnections.length}`,
-          meta: socialConnections.map((row) => `${row.title}: ${row.status_label}`).join(" · "),
+          description: copy.marketingChannelsDescription || copy.additionalChannelsDescription,
+          ready: socialReadyCount === socialConnections.length,
+          statusLabel: `${socialReadyCount}/${socialConnections.length}`,
           tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
-          status: {
-            tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
-            label: socialReadyCount === socialConnections.length ? statusText(ui, "ready") : socialReadyCount ? statusText(ui, "in_progress") : statusText(ui, "blocked"),
-          },
+          anchor: `#connection-${socialConnections[0].id}`,
         }
       : null,
     {
       id: "assistant",
       title: page.assistant?.title,
-      value: assistantStatus,
-      meta: assistantReady ? page.assistant?.description || page.assistant?.install_hint : page.assistant?.install_hint || page.assistant?.description,
+      description: page.assistant?.install_hint || page.assistant?.description,
+      ready: assistantReady,
+      statusLabel: assistantStatus,
       tone: assistantTone,
-      status: { tone: assistantTone, label: assistantStatus },
+      anchor: "#connection-assistant",
     },
-  ];
+  ].filter(Boolean);
   return adminShell(page, {
     title: copy.title,
     titleAsHeading: true,
@@ -11496,7 +11587,7 @@ function ConnectionsBody({ page }) {
         { title: copy.title, subtitle: copy.intro },
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/settings", page) }, h(Icon, { name: "settings", size: 16 }), h("span", null, ownerConsoleCopy(page).routes.settings)),
       ),
-      h(SummaryStrip, { cards: summaryCards, "data-summary-kind": "connections" }),
+      h(ConnectionJourney, { steps: journeySteps, copy }),
       h(
         "div",
         { className: "adm-owner-flow adm-owner-flow--connections", "data-connections-layout": "operating-flow" },
@@ -11542,6 +11633,7 @@ function ConnectionsBody({ page }) {
                 {
                   title: page.assistant?.title,
                   className: "adm-assistant-connection",
+                  id: "connection-assistant",
                   "data-connection-group": "assistant",
                   action: h(
                     "a",
@@ -11681,7 +11773,7 @@ function HermesBody({ page }) {
   const visibleTasks = queuedTasks.slice(0, 5);
   const tools = Array.isArray(page.tools) ? page.tools : [];
   const runtimeTone = runtime.ready ? "success" : "brick";
-  const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000 };
+  const commandForm = page.command_form || { enabled: false, idempotency_key: "", max_length: 2000, prefill: "" };
   const runtimeBlocked = runtime.ready !== true || commandForm.enabled !== true;
   const commandResult = page.command_result?.plan ? page.command_result : null;
   const commandError = page.command_error?.kind ? copy.commandErrors[page.command_error.kind] || copy.commandErrors.hermes_unavailable : null;
@@ -11805,6 +11897,7 @@ function HermesBody({ page }) {
                           maxLength: commandForm.max_length,
                           required: true,
                           placeholder: copy.commandPlaceholder,
+                          defaultValue: commandForm.prefill || "",
                           "aria-describedby": "hermes-owner-command-note",
                           autoComplete: "off",
                         }),
@@ -11872,12 +11965,51 @@ function HermesBody({ page }) {
                     ? h(
                         "ul",
                         null,
-                        ...receipts.map((receipt) =>
+                        ...receipts.map((receipt, index) =>
                           h(
                             "li",
-                            { key: receipt.idempotency_key },
-                            h("span", null, h("strong", null, receipt.plan?.summary || receipt.failure_code || receipt.status), h("small", null, formatAdminDateTime(receipt.completed_at || receipt.started_at, page.workspace.locale))),
-                            h(StatusPill, { tone: receipt.status === "planned" ? "success" : receipt.status === "failed" ? "brick" : "sand" }, hermesStateLabel(copy, receipt.status)),
+                            { key: receipt.idempotency_key, "data-hermes-run": receipt.status },
+                            h(
+                              "details",
+                              { className: "adm-hermes-run", open: index === 0 ? true : undefined },
+                              h(
+                                "summary",
+                                null,
+                                h(
+                                  "span",
+                                  null,
+                                  h("strong", null, receipt.plan?.summary || receipt.failure_code || receipt.status),
+                                  h("small", null, formatAdminDateTime(receipt.completed_at || receipt.started_at, page.workspace.locale)),
+                                ),
+                                h(StatusPill, { tone: receipt.status === "planned" ? "success" : receipt.status === "failed" ? "brick" : "sand" }, hermesStateLabel(copy, receipt.status)),
+                              ),
+                              h(
+                                "div",
+                                { className: "adm-hermes-run__body" },
+                                h(
+                                  "dl",
+                                  { className: "adm-hermes-run__meta" },
+                                  h("div", null, h("dt", null, copy.model), h("dd", null, receipt.model || runtime.model || "—")),
+                                  h("div", null, h("dt", null, copy.duration), h("dd", null, formatAdminDuration(receipt.duration_ms, page.workspace.locale) || "—")),
+                                  h("div", null, h("dt", null, copy.steps), h("dd", null, receipt.step_count || 0)),
+                                ),
+                                receipt.plan?.steps?.length
+                                  ? h(
+                                      "ol",
+                                      { className: "adm-hermes-run__steps" },
+                                      ...receipt.plan.steps.map((step, stepIndex) =>
+                                        h(
+                                          "li",
+                                          { key: `${receipt.idempotency_key}-step-${stepIndex}` },
+                                          h("span", { "aria-hidden": "true" }, stepIndex + 1),
+                                          h("div", null, h("strong", null, step.title), h("small", null, step.why)),
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                                h("code", { className: "adm-hermes-run__id" }, receipt.idempotency_key),
+                              ),
+                            ),
                           ),
                         ),
                       )
@@ -12069,11 +12201,6 @@ function SettingsBody({ page }) {
   const notifications = settingsSectionValues(page, "notifications");
   const workspace = settingsSectionValues(page, "workspace");
   const publicSite = settingsSectionValues(page, "public_site");
-  const updatedSections = ["agency", "leads", "notifications", "workspace", "public_site"].filter((section) => page.workspace_settings?.section_updates?.[section]);
-  const liveSectionTitles = [
-    page.workspace_security?.two_factor ? settings.liveSections.security.title : null,
-    page.workspace_security?.exports || page.workspace_security?.audit_retention ? settings.liveSections.data.title : null,
-  ].filter(Boolean);
   const fieldError = (section, field) => settingsFieldError(page, section, field);
   const brokerSelect = (group) =>
     h(
@@ -12164,42 +12291,6 @@ function SettingsBody({ page }) {
       }),
     ),
   );
-  const settingsSummaryCards = [
-    {
-      id: "agency-profile",
-      title: settings.sections.agency.title,
-      value: agency.text("name") || settings.notConfirmed,
-      meta: [agency.text("email"), agency.text("phone")].filter(Boolean).join(" · ") || settings.fields.officesHint,
-      tone: agency.text("name") ? "sea" : "sand",
-    },
-    {
-      id: "lead-sla",
-      title: settings.sections.leads.title,
-      value: `${leads.text("first_reply_target_minutes", "15")} ${ui.minutesShort}`,
-      meta: `${settings.fields.manager_escalation_minutes}: ${leads.text("manager_escalation_minutes", "60")} ${ui.minutesShort}`,
-      tone: "ink",
-    },
-    {
-      id: "workspace",
-      title: settings.sections.workspace.title,
-      value: settings.locales[workspace.text("default_locale", "en")] || workspace.text("default_locale", "en").toUpperCase(),
-      meta: [workspace.text("timezone", "Europe/Sofia"), workspace.text("date_format", "locale") === "locale" ? settings.fields.dateFormatLocale : workspace.text("date_format", "locale")].join(" · "),
-      tone: "ink",
-    },
-    {
-      id: "settings-state",
-      title: page.onboarding ? settings.onboarding.title : settings.sectionsNav,
-      value: page.onboarding ? `${page.onboarding.done}/${page.onboarding.total}` : `${updatedSections.length}/5`,
-      meta: page.onboarding
-        ? settings.onboarding.progress.replace("{done}", String(page.onboarding.done)).replace("{total}", String(page.onboarding.total))
-        : liveSectionTitles.join(" · ") || settings.notConfirmed,
-      tone: (page.onboarding?.done || updatedSections.length) ? "sea" : "sand",
-      status: {
-        tone: (page.onboarding?.done || updatedSections.length) ? "sea" : "ink",
-        label: (page.onboarding?.done || updatedSections.length) ? settings.sectionState.updated : settings.sectionState.defaults,
-      },
-    },
-  ];
   return adminShell(page, {
     title,
     titleAsHeading: true,
@@ -12215,7 +12306,6 @@ function SettingsBody({ page }) {
         { title, subtitle: settings.description },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, owner.routes.integrations)),
       ),
-      h(SummaryStrip, { cards: settingsSummaryCards, "data-summary-kind": "settings" }),
       // The store being unconfigured is one fact about the environment, said
       // once - not restated under every section.
       storeMissing

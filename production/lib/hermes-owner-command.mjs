@@ -490,6 +490,12 @@ function openedReceipt(document, secret) {
   return payload;
 }
 
+function receiptDurationMs(startedAt, completedAt) {
+  const started = Date.parse(String(startedAt || ""));
+  const completed = Date.parse(String(completedAt || ""));
+  return Number.isFinite(started) && Number.isFinite(completed) ? Math.max(0, completed - started) : null;
+}
+
 function safeReceipt(document, secret, { idempotent = false } = {}) {
   if (!document || !STATUSES.has(String(document.status))) {
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
@@ -501,14 +507,17 @@ function safeReceipt(document, secret, { idempotent = false } = {}) {
   if (document.status === "planned" && (!opened.plan || typeof opened.plan !== "object" || Array.isArray(opened.plan))) {
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
   }
+  const plan = document.status === "planned" ? opened.plan : null;
   return {
     idempotency_key: String(document.idempotency_key),
     status: String(document.status),
     model: String(document.model),
     started_at: document.started_at || null,
     completed_at: document.completed_at || null,
+    duration_ms: receiptDurationMs(document.started_at, document.completed_at),
+    step_count: Array.isArray(plan?.steps) ? plan.steps.length : 0,
     failure_code: document.failure_code || null,
-    plan: document.status === "planned" ? opened.plan : null,
+    plan,
     idempotent,
   };
 }

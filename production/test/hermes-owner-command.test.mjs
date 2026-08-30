@@ -171,6 +171,8 @@ test("Hermes owner commands persist an encrypted fence, return a non-executing p
 
   const result = await runHermesOwnerCommand(command(), options);
   assert.equal(result.status, "planned");
+  assert.equal(result.duration_ms, 1_000);
+  assert.equal(result.step_count, 1);
   assert.equal(result.plan.steps[0].admin_path, "/admin/leads");
   assert.equal(result.plan.steps[0].requires_human_approval, true);
   assert.equal(result.plan.steps[0].can_execute, false);
@@ -190,6 +192,29 @@ test("Hermes owner commands persist an encrypted fence, return a non-executing p
   assert.deepEqual(await readHermesOwnerReceipts({ payload, operatorId: operator.id, secret: SECRET }), [
     { ...result, idempotent: false },
   ]);
+});
+
+test("Hermes receipt observability remains safe for invalid timestamps and clock skew", async () => {
+  const invalidInput = command({ idempotencyKey: "hermes-owner-invalid-duration" });
+  const invalid = storedReceipt(invalidInput, { status: "failed", failureCode: "hermes_unavailable" });
+  invalid.completed_at = "not-a-timestamp";
+  const skewedInput = command({ idempotencyKey: "hermes-owner-clock-skew" });
+  const skewed = storedReceipt(skewedInput, {
+    status: "planned",
+    startedAt: "2026-08-28T12:00:02.000Z",
+    plan: safePlan(),
+  });
+  const receipts = await readHermesOwnerReceipts({
+    payload: fakePayload([invalid, skewed]),
+    operatorId: operator.id,
+    secret: SECRET,
+  });
+
+  assert.equal(receipts.find((receipt) => receipt.idempotency_key === invalidInput.idempotencyKey).duration_ms, null);
+  assert.equal(receipts.find((receipt) => receipt.idempotency_key === invalidInput.idempotencyKey).step_count, 0);
+  assert.equal(receipts.find((receipt) => receipt.idempotency_key === skewedInput.idempotencyKey).duration_ms, 0);
+  assert.equal(receipts.find((receipt) => receipt.idempotency_key === skewedInput.idempotencyKey).step_count, 1);
+  assert.doesNotMatch(JSON.stringify(receipts), /Prepare a review plan/);
 });
 
 test("Hermes owner command rejects provider tool calls and records only a fixed failure code", async () => {

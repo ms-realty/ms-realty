@@ -278,11 +278,9 @@ test("settings screen renders working sections and an in-flow owner overview", a
     assert.match(page.body, /class="crm-ph"/);
     assert.match(page.body, /<h1>Settings<\/h1>/);
     assert.match(page.body, /Agency profile, lead reply targets, notifications,/);
-    assert.match(page.body, /data-summary-kind="settings"/);
-    for (const card of ["agency-profile", "lead-sla", "workspace", "settings-state"]) {
-      assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
-    }
-    assert.match(page.body, /data-summary-card="settings-state"[\s\S]*?Set up your workspace[\s\S]*?0\/5[\s\S]*?0 of 5 done/);
+    assert.doesNotMatch(page.body, /data-summary-kind="settings"|data-summary-card="settings-state"/);
+    assert.match(page.body, /data-settings-overview="true"[\s\S]*?data-settings-index="true"/);
+    assert.match(page.body, /Set up your workspace[\s\S]*?0 of 5 done/);
     for (const section of ["agency", "leads", "notifications", "workspace", "public_site"]) {
       assert.match(page.body, new RegExp(`data-settings-section="${section}"`), `${section} panel`);
       assert.match(page.body, new RegExp(`data-workspace-settings-form="${section}"`), `${section} form`);
@@ -623,7 +621,9 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(empty.body, /data-today-briefing="true" data-today-primary-action="none" data-today-priority-count="0"/);
     assert.match(empty.body, /data-hermes-entry="today"/);
     assert.match(empty.body, /data-hermes-open="today"/);
-    assert.match(empty.body, /href="\/admin\/hermes"/);
+    assert.match(empty.body, /name="prompt"/);
+    assert.match(empty.body, /<form class="adm-today-briefing__hermes" method="get" action="\/admin\/hermes" data-hermes-entry="today">/);
+    assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
     assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
@@ -669,6 +669,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
+    assert.match(populated.body, /name="prompt"[\s\S]*?Prepare a safe plan for today's priority task:/);
     assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
     assert.match(populated.body, /data-next-action-count="1" data-next-action-total="2" data-next-action-visible="1"/);

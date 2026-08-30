@@ -868,15 +868,15 @@ test("the assistant's configuration helper stays available as an API and the own
   });
   // The owner page exposes the short-lived credential once in a masked,
   // read-only field and keeps the copied configuration token-free.
-  assert.match(html, /data-summary-kind="connections"/);
-  for (const card of ["google", "whatsapp", "social", "assistant"]) {
-    assert.match(html, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
+  assert.match(html, /data-connection-journey="in-progress"/);
+  assert.match(html, /data-connection-progress="1\/5"/);
+  for (const step of ["google", "ai", "whatsapp", "social", "assistant"]) {
+    assert.match(html, new RegExp(`data-connection-step="${step}"`), `${step} journey step`);
   }
-  assert.match(html, /data-summary-card="social"/);
   assert.match(html, /<details class="adm-workbench-disclosure" data-connection-group="secondary-work-accounts">[\s\S]*?Маркетинг канали · 2/);
   assert.match(html, /<details class="adm-workbench-disclosure" data-connection-group="supporting-disclosure">/);
   assert.doesNotMatch(html, /Работни акаунти · 2/);
-  assert.match(html, /data-summary-card="assistant" data-summary-tone="success"/);
+  assert.match(html, /data-connection-step="assistant" data-status="complete"/);
   assert.match(html, /data-connection-group="assistant"/);
   assert.match(html, /data-connection-list="core"/);
   assert.match(html, /data-connections-stage="true"/);
@@ -900,8 +900,8 @@ test("the assistant's configuration helper stays available as an API and the own
     providerConfig: fullConfig(),
     locale: "bg",
   });
-  assert.match(blocked, /data-summary-card="assistant" data-summary-tone="sun"/);
-  assert.doesNotMatch(blocked, /data-summary-card="assistant" data-summary-tone="success"/);
+  assert.match(blocked, /data-connection-step="assistant" data-status="pending"[\s\S]*?data-tone="sun"/);
+  assert.doesNotMatch(blocked, /data-connection-step="assistant" data-status="complete"/);
   assert.match(blocked, /Отвори в Codex/);
   assert.match(blocked, /добавката/);
   assert.equal(blocked.includes('data-copy-block="agent-config"'), false);
