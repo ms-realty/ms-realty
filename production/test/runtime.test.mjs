@@ -299,7 +299,10 @@ test("runtime search uses CMS seed listings and keeps mobile-first contract", ()
   assert.ok(search.search.total_matches > search.cards.length);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
-  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "fallback_source_locale");
+  const pendingHebrewCard = search.cards.find((card) => card.id === "MS-CRAWL-0001");
+  assert.equal(pendingHebrewCard.translation_display, "fallback_source_locale");
+  assert.equal(pendingHebrewCard.translation_indexable, false);
+  assert.equal(pendingHebrewCard.content_locale, pendingHebrewCard.source_locale);
   assert.ok(apartmentSearch.cards.every((card) => card.property_type === "apartment"));
   assert.ok(apartmentSearch.search.total_matches > apartmentSearch.cards.length);
 });
