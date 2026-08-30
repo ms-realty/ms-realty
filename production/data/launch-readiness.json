@@ -86,7 +86,7 @@
           "artifact_id": "20260817-deterministic-launch-freeze",
           "approval_id": "MSR-LAUNCH-FREEZE-1",
           "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-          "source_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
+          "source_sha256": "873f35430afddb7c35f62ba1038a30da114b5ec91d11a0005701c29932590e03",
           "approved_homepage_redirects": 5,
           "approved_homepage_decisions": 15
         },
@@ -170,7 +170,7 @@
         "mode": "operator_publication_of_freeze_active",
         "path": "production/data/listing-publication-approval.json",
         "approval_id": "MSR-LISTING-PUBLICATION-1",
-        "freeze_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
+        "freeze_sha256": "873f35430afddb7c35f62ba1038a30da114b5ec91d11a0005701c29932590e03",
         "freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
         "approved_by": "agency_owner",
         "approved_at": "2026-08-30T00:00:00.000+03:00",

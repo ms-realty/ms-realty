@@ -91,6 +91,25 @@ test("admin-added public Hermes locales receive draft queues without publish rig
   assert.equal(spanish.task.owner, "translator_es");
 });
 
+test("completed Hermes drafts stay in human review instead of reopening the model queue", () => {
+  const registry = loadLocaleRegistry();
+  const seed = oneListingSeed();
+  seed.records[0].translations.push({
+    locale: "he",
+    status: "human_edited",
+    source_hash: "source-bg",
+    human_approved: false,
+    public_indexable: false,
+  });
+  const coverage = buildTranslationCoverageReport({ registry, seed, translationTasks: [] });
+  const report = buildLocaleRolloutReport({ registry, languageRequests: [], translationCoverage: coverage });
+  const hebrew = report.hermes_draft_queues.find((row) => row.locale === "he");
+
+  assert.equal(hebrew.open_task_count, 0);
+  assert.equal(hebrew.status, "clear");
+  assert.equal(hebrew.task, null);
+});
+
 test("generated locale rollout report is valid when present", () => {
   const file = fromRoot("production", "data", "locale-rollout-report.json");
   if (!fs.existsSync(file)) return;

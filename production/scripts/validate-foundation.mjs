@@ -1036,8 +1036,8 @@ if (
   localeRollout.summary.activation_tasks !== 1 ||
   localeRollout.activation_tasks[0].locale !== "fr" ||
   localeRollout.summary.hermes_queue_locales !== 4 ||
-  localeRollout.summary.open_hermes_tasks !== 659 ||
-  localeRollout.hermes_draft_queues.find((row) => row.locale === "he")?.open_task_count !== 164
+  localeRollout.summary.open_hermes_tasks !== 0 ||
+  localeRollout.hermes_draft_queues.find((row) => row.locale === "he")?.open_task_count !== 0
 ) {
   throw new Error("Locale rollout report must connect language requests and Hermes draft queues");
 }

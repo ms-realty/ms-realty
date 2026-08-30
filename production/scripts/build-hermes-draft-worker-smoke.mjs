@@ -1,4 +1,5 @@
 import { resetAuditLog } from "../lib/audit-log.mjs";
+import { buildHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import {
   DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH,
@@ -20,9 +21,25 @@ function smokeProvider(row) {
   };
 }
 
+const dispatch = buildHermesDraftDispatch({
+  generatedAt: "2026-07-06T00:00:00Z",
+  limit: 2,
+  translationCoverage: {
+    rows: ["el", "he"].map((targetLocale) => ({
+      listing_id: "MS-CRAWL-0001",
+      target_locale: targetLocale,
+      task_type: "hermes_draft_required",
+      provider_mode: "hermes_draft",
+      admin_path: `/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=${targetLocale}`,
+      task: { id: `translation-MS-CRAWL-0001-${targetLocale}` },
+    })),
+  },
+});
+
 resetTranslationLedger(DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH, { auditPath: DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH });
 resetAuditLog(DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH);
 const report = await runHermesDraftWorker({
+  dispatch,
   provider: smokeProvider,
   filePath: DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH,
   auditPath: DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH,

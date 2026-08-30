@@ -80,8 +80,8 @@
       "public_indexable": false
     },
     {
-      "id": "translation-listing-MS-3000-de",
-      "target_locale": "de",
+      "id": "translation-listing-MS-CRAWL-0001-he",
+      "target_locale": "he",
       "status": "hermes_drafted",
       "public_indexable": false
     }
