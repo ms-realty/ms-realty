@@ -3670,7 +3670,15 @@ function appendApprovedTranslation(registry, input, config) {
 function appendPublishedTranslation(registry, input, config) {
   const task = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)).find((row) => row.id === input.taskId);
   if (!task) throw new Error("Known translation task is required");
-  const published = appendTranslationTask(publishApprovedTranslation(registry, task), { filePath: config.translationLedgerPath });
+  const published = appendTranslationTask(
+    publishApprovedTranslation(
+      registry,
+      task,
+      config.adminPrincipal?.id || task.reviewer,
+      config.reviewedAt || new Date().toISOString(),
+    ),
+    { filePath: config.translationLedgerPath },
+  );
   recordAudit(
     {
       action: "translation_published",

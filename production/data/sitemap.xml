@@ -80,13 +80,6 @@
   <url>
     <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/imoti/MS-CRAWL-0001</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/imoti/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/imoti/MS-CRAWL-0001" />
-  </url>
-  <url>
-    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001</loc>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/imoti/MS-CRAWL-0001" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/imoti/MS-CRAWL-0001" />
   </url>
   <url>
@@ -702,6 +695,10 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0126" />
   </url>
   <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0127</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0127" />
+  </url>
+  <url>
     <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0128</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0128" />
   </url>
@@ -826,6 +823,10 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0158" />
   </url>
   <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0159</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0159" />
+  </url>
+  <url>
     <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0160</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/properties/MS-CRAWL-0160" />
   </url>
@@ -852,21 +853,12 @@
   <url>
     <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/locations/sandanski" />
-    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/locations/sandanski" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski" />
-  </url>
-  <url>
-    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/locations/sandanski</loc>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski" />
   </url>
   <url>
     <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/locations/sandanski</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski" />
-    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/locations/sandanski" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/sandanski" />
   </url>
@@ -885,6 +877,13 @@
   <url>
     <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/hotovo</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/hotovo" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/locations/hotovo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/hotovo" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/locations/hotovo</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/hotovo" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/locations/hotovo" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/lokacii/hotovo" />
   </url>
   <url>

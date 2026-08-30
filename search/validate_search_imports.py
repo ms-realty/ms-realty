@@ -51,8 +51,8 @@ def main() -> int:
 
     if len(source_docs) != 165:
         raise SystemExit("Expected 165 source listing docs")
-    if len(index_docs) != 167 or typesense_docs != index_docs or meili_common_docs != index_docs:
-        raise SystemExit("Search import feeds must match the 167-document locale index")
+    if len(index_docs) != 165 or typesense_docs != index_docs or meili_common_docs != index_docs:
+        raise SystemExit("Search import feeds must match the 165-document source index")
 
     ids = [doc["id"] for doc in index_docs]
     if len(ids) != len(set(ids)):
@@ -87,19 +87,23 @@ def main() -> int:
         if attr not in fields:
             raise SystemExit(f"Meilisearch filterable attribute not in Typesense schema: {attr}")
 
-    approved = [doc for doc in index_docs if doc["search_document_type"] == "approved_translation"]
-    if {(doc["source_listing_id"], doc["locale"]) for doc in approved} != {("MS-CRAWL-0001", "el"), ("MS-CRAWL-0001", "he")}:
-        raise SystemExit("Expected only approved Greek and Hebrew translation search docs")
-    if any(doc["locale"] == "fr" or doc["translation_indexable"] is not True for doc in index_docs):
-        raise SystemExit("Search import must exclude French and non-indexable docs")
+    if any(
+        doc["search_document_type"] != "source"
+        or doc["source_listing_id"] != source["id"]
+        or doc["locale"] != source["locale"]
+        or doc["translation_source_locale"] != source["locale"]
+        or doc["translation_indexable"] is not True
+        for doc, source in zip(index_docs, source_docs, strict=True)
+    ):
+        raise SystemExit("Search import must contain only indexable source-language documents")
 
     reviewed_source = next((doc for doc in source_docs if doc["id"] == "MS-CRAWL-0001"), None)
     if reviewed_source is None:
         raise SystemExit("Reviewed source listing is missing from search imports")
     reviewed_description = str(reviewed_source["description"])
     reviewed_docs = [doc for doc in index_docs if doc["source_listing_id"] == "MS-CRAWL-0001"]
-    if {doc["locale"] for doc in reviewed_docs} != {"bg", "el", "he"}:
-        raise SystemExit("Reviewed listing must export BG source plus Greek and Hebrew search docs")
+    if {doc["locale"] for doc in reviewed_docs} != {"bg"}:
+        raise SystemExit("Reviewed listing must export only its Bulgarian source search document")
     if any(doc["description"] != reviewed_description or reviewed_description not in doc["search_text"] for doc in reviewed_docs):
         raise SystemExit("Search imports must apply reviewed CMS listing edits before export")
     if any(not str(doc.get("thumbnail_url") or "").startswith("https://") for doc in reviewed_docs):

@@ -106,7 +106,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 ## Production Recovery
 
 - Current gate: blocked
-- Current evidence: missing_report (production/data/production-recovery-report.json)
+- Current evidence: invalid_report (production/data/production-recovery-report.json) — MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY is required to verify production recovery evidence
 - Private report: `production/data/production-recovery-report.json` (ignored)
 - Report example: `production/data/production-recovery-report.json.example` (shape reference only; it cannot clear readiness)
 - Admin template endpoint: `GET /api/admin/production-recovery-template`
@@ -144,12 +144,10 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
-- structured_data.missing_location: 2
-- structured_data.missing_area: 166
+- structured_data.missing_area: 165
 - structured_data.missing_bedrooms: 10
 - structured_data.missing_public_images: 9
 - listing_quality.missing_area: 165
-- listing_quality.missing_location: 2
 - listing_quality.thin_public_gallery: 18
 
 ## Manual Source Audit (Non-Approval Evidence)
@@ -158,7 +156,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Coverage: 165/165 source rows (pass: 30, review: 75, hold: 52, source unavailable: 8).
 - Broker approvals in this artifact: 0; broker confirmations still required: 165.
 - Broker packet: `production/data/launch-candidate30-broker-packet.json` — 30 candidates, 0 publish-ready; selection: manual_source_pass_then_live_selection_score; overlap with prior automatic shortlist: 6.
-- This evidence classifies the freeze catalog only. MSR-LISTING-PUBLICATION-1 publishes 163 listings from the full freeze catalog as source-locale inventory; 2 excluded by the approval. Archived freeze rows stay out of active search.
+- This evidence classifies the freeze catalog only. MSR-LISTING-PUBLICATION-1 publishes 165 listings from the full freeze catalog as source-locale inventory. Archived freeze rows stay out of active search.
 
 ## Broker Verification
 
@@ -176,7 +174,7 @@ Blockers: live_services, monitoring_rollback, payload_runtime, production_recove
 - Monitoring sources: privacy_events: imported, analytics_export: missing_export
 - Rollback steps: 4
 - Current machine evidence:
-- missing (path production/data/monitoring-rollback-report.json)
+- expired (path production/data/monitoring-rollback-report.json; age 510309166ms; oldest proof 510841632ms; maximum age 86400000ms)
 - Private report: `production/data/monitoring-rollback-report.json` (ignored); template: `production/data/monitoring-rollback-report.json.example`.
 - Path override: `MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH`; validate it with `npm run monitoring:preflight`.
 - Required machine proof: a redacted production report less than 24 hours old, a passing public HTTPS endpoint and alert, an automated rollback policy, a passing canary, and a verified isolated rollback drill.

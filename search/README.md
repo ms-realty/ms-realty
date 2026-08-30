@@ -46,7 +46,7 @@ npm run search:projection -- --input /secure/joined-listings.json --out /tmp/ms-
 
 The no-Docker benchmark harness has a separate tested-image baseline of
 Typesense `30.2` and Meilisearch `v1.11.3`. Its declared default corpus is
-`legacy_fixture_v1`, the checked-in 167-document fixture: it filters on
+`legacy_fixture_v1`, the checked-in 165-document source fixture: it filters on
 `locale_is_indexable` and `translation_status`, not the production-only
 `publication_state` / `locale_indexable` fields. Use
 `--corpus-schema approved_projection_v1 --data-dir /path/to/projection` only
@@ -83,8 +83,8 @@ npm run search:benchmark -- \
 If you launch temporary containers for this benchmark, stop and remove only
 those explicitly named benchmark containers after preserving the report.
 
-The checked-in [local benchmark result](data/search-engine-benchmark-20260730.json)
-used that exact sequence against the 167-document BG crawl corpus. Both engines
+The archived [local benchmark result](data/search-engine-benchmark-20260730.json)
+used that exact sequence against the former 167-document crawl corpus. Both engines
 returned 109 matches; the local repeated-query result was Typesense p50/p95
 `8.779`/`9.957` ms and Meilisearch p50/p95 `3.688`/`5.495` ms. This is a
 reproducible local latency observation, not a production-selection decision:
@@ -94,13 +94,13 @@ operational/relevance sign-off.
 Generated files:
 
 - `search/data/listings.json` - 165 source listings used by CMS/import prototypes.
-- `search/data/index-listings.json` - 167 locale-scoped search documents, including approved Greek and Hebrew translations for `MS-CRAWL-0001`.
+- `search/data/index-listings.json` - 165 indexable source-language search documents; pending translations are excluded.
 - `search/data/typesense-schema.json` - Typesense collection schema.
 - `search/data/typesense-listings.jsonl` - Typesense JSONL import body.
 - `search/data/meilisearch-settings.json` - Meilisearch index settings.
 - `search/data/meilisearch-listings.ndjson` - Meilisearch NDJSON import body.
 - `search/data/search-fixture-summary.json` - corpus counts and inferred facets.
-- `production/data/search-engine-sync-smoke.json` - local proof that the same 167 documents are sent to both engine APIs.
+- `production/data/search-engine-sync-smoke.json` - local proof that the selected approved projection is sent to both engine APIs.
 - `production/data/search-engine-query-smoke.json` - local proof that both engine query APIs return the reviewed BG listing document.
 
 `validate_search_imports.py` checks that the Typesense JSONL and Meilisearch
@@ -113,9 +113,9 @@ Locale fields in each search index document:
 - `locale_prefix` - production URL prefix candidate.
 - `locale_path` - locale-prefixed production listing path.
 - `locale_is_indexable` - true only for approved public locales.
-- `translation_status` - `published` for source rows or `approved` for approved translation rows.
+- `translation_status` - `published` for the source rows in this fixture.
 - `translation_indexable` - true only when the locale document can be public/indexed.
-- `search_document_type` - `source` or `approved_translation`.
+- `search_document_type` - `source`; approved translations enter production through the separate approved projection.
 
 ## Typesense Smoke
 

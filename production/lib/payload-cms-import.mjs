@@ -109,13 +109,16 @@ function summarizePlan(operations, conflicts) {
 }
 
 function buildTargetSummary(seed, registry) {
-  const translationCount = seed.records.reduce((total, record) => total + (record.translations || []).length, 0);
+  const translationRows = seed.records.flatMap((record) => record.translations || []);
+  const translationCount = translationRows.length;
   const mediaCount = new Set(seed.records.flatMap((record) => (record.media || []).map((item) => item.url))).size;
   const tourCount = seed.records.filter((record) => record.tour).length;
   return {
     locales: registry.locales.length,
     listings: seed.records.length,
     listing_translations: translationCount,
+    listing_translation_statuses: countBy(translationRows, (row) => row.status || "missing"),
+    listing_translations_public_indexable: translationRows.filter((row) => row.public_indexable === true).length,
     listing_tours: tourCount,
     listing_enrichment_tasks: (seed.enrichment_tasks || []).length,
     locations: (seed.locations || []).length,
@@ -232,14 +235,25 @@ function desiredTranslations(seed, localeIds) {
         listing: record.id,
         locale: requiredMapValue(localeIds, translation.locale, "Translation locale"),
         source_locale: requiredMapValue(localeIds, translation.source_locale, "Translation source locale"),
-        status: "draft",
-        translation_state: "draft",
+        status: translation.status,
+        translation_state: translation.translation_state || translation.status,
         source_hash: translation.source_hash,
         translated_hash: translation.translated_hash,
+        title: translation.title,
+        description: translation.description,
+        seo_title: translation.seo_title,
+        meta_description: translation.meta_description,
+        translator: translation.translator || null,
+        content_origin: translation.content_origin,
         reviewer: translation.reviewer || null,
-        approved_at: null,
+        human_approved: translation.human_approved === true,
+        approved_at: translation.approved_at || null,
+        publication_authorized_by: translation.publication_authorized_by || null,
+        publication_authorized_at: translation.publication_authorized_at || null,
+        published_at: translation.published_at || null,
         direction: translation.direction || null,
-        public_indexable: false,
+        public_indexable: translation.public_indexable === true,
+        citations: clone(translation.citations || []),
       },
       key: relationKey(record.id, translation.locale),
       match: { listing: record.id, locale: requiredMapValue(localeIds, translation.locale, "Translation locale") },
@@ -603,11 +617,21 @@ function projectedTranslation(document, snapshot) {
     status: translationState,
     source_hash: document.source_hash,
     translated_hash: document.translated_hash,
+    title: document.title || "",
+    description: document.description || "",
+    seo_title: document.seo_title || "",
+    meta_description: document.meta_description || "",
+    translator: document.translator || null,
+    content_origin: document.content_origin || null,
     reviewer: document.reviewer || null,
+    human_approved: document.human_approved === true,
     approved_at: document.approved_at || null,
+    publication_authorized_by: document.publication_authorized_by || null,
+    publication_authorized_at: document.publication_authorized_at || null,
+    published_at: document.published_at || null,
     direction: document.direction || null,
     public_indexable: document.public_indexable === true,
-    human_approved: ["approved", "published"].includes(String(translationState || "").trim().toLowerCase()),
+    citations: clone(document.citations || []),
     translation_state: translationState,
     listing: relationId(document.listing),
   };
@@ -867,6 +891,9 @@ function aggregateReadback(snapshot, beforeSnapshot, target, seed, registry) {
         keys: [...targets.translationsByKey.keys()].sort(),
         by_status: countBy(targets.translations, (row) => row.status || "missing"),
         public_indexable_true: targets.translations.filter((row) => row.public_indexable === true).length,
+        complete_copy: targets.translations.filter(
+          (row) => row.title && row.description && row.seo_title && row.meta_description && row.content_origin,
+        ).length,
         published_docs: targets.translations.filter((row) => String(row._status || "").trim().toLowerCase() === "published").length,
       },
       media_assets: {
@@ -927,10 +954,11 @@ function aggregateReadback(snapshot, beforeSnapshot, target, seed, registry) {
       observed: readback.target.listings,
     },
     {
-      id: "translations_non_public_drafts",
+      id: "translation_copy_and_publication_state_match_seed",
       ok:
-        (readback.target.listing_translations.by_status.draft || 0) === target.listing_translations &&
-        readback.target.listing_translations.public_indexable_true === 0 &&
+        equalNormalized(readback.target.listing_translations.by_status, target.listing_translation_statuses) &&
+        readback.target.listing_translations.public_indexable_true === target.listing_translations_public_indexable &&
+        readback.target.listing_translations.complete_copy === target.listing_translations &&
         readback.target.listing_translations.published_docs === 0,
       observed: readback.target.listing_translations,
     },

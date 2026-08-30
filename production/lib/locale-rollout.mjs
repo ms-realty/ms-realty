@@ -48,7 +48,7 @@ function draftQueueRows(registry, coverage) {
     .map((locale) => {
       const rows = coverage.rows.filter((row) => row.target_locale === locale.code);
       const openTasks = rows.filter((row) =>
-        ["hermes_draft_required", "draft_review_required", "stale_review_required"].includes(row.task_type),
+        ["hermes_draft_required", "stale_review_required"].includes(row.task_type),
       ).length;
       return {
         locale: locale.code,

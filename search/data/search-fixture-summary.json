@@ -5,7 +5,7 @@
   "location_reviews_path": "production/data/location-reviews.json",
   "geography_registry_path": "production/data/geography-registry.json",
   "source_listing_count": 165,
-  "index_document_count": 167,
+  "index_document_count": 165,
   "domains": [
     "makler-realty.com",
     "makler-realty.ru"
@@ -16,8 +16,6 @@
   ],
   "index_languages": [
     "bg",
-    "el",
-    "he",
     "ru"
   ],
   "admin_locales": [

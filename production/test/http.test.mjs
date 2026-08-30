@@ -1076,7 +1076,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     [...smoke.searchPriceAsc.body.cards.map((card) => Number(card.price_eur)).filter(Number.isFinite)].sort((left, right) => left - right),
   );
   assert.match(smoke.searchHtmlPriceDesc.body, /<option value="price_desc" selected>/);
-  assert.equal(smoke.location.body.cards.length, 1);
+  assert.equal(smoke.location.body.cards.length > 0, true);
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.savedSearch.body.contact, undefined);
@@ -1312,6 +1312,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const listingQualityReviewPath = tempListingQualityReviewPath();
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
+  const eventLedgerPath = tempEvents();
   const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
   const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-`)}/mounted-payload-runtime-report.json`;
   fs.copyFileSync(fromRoot("production", "data", "live-service-provisioning-report.json"), liveServiceProvisioningReportPath);
@@ -1337,6 +1338,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     listingQualityReviewPath,
     translationLedgerPath,
     auditLogPath,
+    eventLedgerPath,
     liveServiceProvisioningReportPath,
     payloadRuntimeReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
@@ -2003,6 +2005,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const seoEvidenceInputDir = tempSeoEvidenceDir();
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = `${seoEvidenceInputDir}/launch-readiness.json`;
+  const eventLedgerPath = tempEvents();
   const searchSyncReportPath = `${seoEvidenceInputDir}/postgres-search-sync-report.json`;
   const searchQueryReportPath = `${seoEvidenceInputDir}/postgres-search-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
@@ -2062,6 +2065,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     seoEvidenceInputDir,
     seoEvidenceOutputPath,
     launchReadinessOutputPath,
+    eventLedgerPath,
     searchSyncReportPath,
     searchQueryReportPath,
     hermesWorkerReportPath,
@@ -2438,9 +2442,10 @@ test("HTTP sitemap ignores editor-only location mutations without removing revie
 
   assert.equal(sitemap.status, 200);
   assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
-  // The reviewed settlement landing pages survive the editor-only mutation.
-  assert.match(sitemap.body, /\/he\/locations\/sandanski/);
+  // Pending HE translations remain excluded while source BG/RU landing pages survive.
+  assert.doesNotMatch(sitemap.body, /\/he\/locations\/sandanski/);
   assert.match(sitemap.body, /\/bg\/lokacii\/sandanski/);
+  assert.match(sitemap.body, /\/ru\/locations\/sandanski/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

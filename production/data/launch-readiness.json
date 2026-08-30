@@ -10,12 +10,8 @@
   ],
   "warnings": [
     {
-      "id": "structured_data.missing_location",
-      "count": 2
-    },
-    {
       "id": "structured_data.missing_area",
-      "count": 166
+      "count": 165
     },
     {
       "id": "structured_data.missing_bedrooms",
@@ -28,10 +24,6 @@
     {
       "id": "listing_quality.missing_area",
       "count": 165
-    },
-    {
-      "id": "listing_quality.missing_location",
-      "count": 2
     },
     {
       "id": "listing_quality.thin_public_gallery",
@@ -94,7 +86,7 @@
           "artifact_id": "20260817-deterministic-launch-freeze",
           "approval_id": "MSR-LAUNCH-FREEZE-1",
           "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-          "source_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
+          "source_sha256": "873f35430afddb7c35f62ba1038a30da114b5ec91d11a0005701c29932590e03",
           "approved_homepage_redirects": 5,
           "approved_homepage_decisions": 15
         },
@@ -108,38 +100,38 @@
       "evidence": {
         "listings": 165,
         "home_pages": 7,
-        "listing_entries": 166,
+        "listing_entries": 165,
         "location_pages": 6,
         "seller_pages": 7,
         "contact_pages": 7,
         "guide_pages": 5,
-        "entries": 198,
+        "entries": 197,
         "byLocale": {
           "bg": 122,
           "en": 5,
           "de": 3,
           "nl": 3,
-          "ru": 57,
+          "ru": 58,
           "el": 3,
-          "he": 5
+          "he": 3
         },
         "public": {
-          "listings": 163,
+          "listings": 165,
           "home_pages": 7,
-          "listing_entries": 164,
+          "listing_entries": 165,
           "location_pages": 6,
           "seller_pages": 7,
           "contact_pages": 7,
           "guide_pages": 5,
-          "entries": 196,
+          "entries": 197,
           "byLocale": {
             "bg": 122,
             "en": 5,
             "de": 3,
             "nl": 3,
-            "ru": 55,
+            "ru": 58,
             "el": 3,
-            "he": 5
+            "he": 3
           }
         }
       }
@@ -150,21 +142,20 @@
       "message": "Schema can pass while content warnings remain separate.",
       "evidence": {
         "generated_at": "2026-07-05T00:00:00Z",
-        "listing_entries": 166,
+        "listing_entries": 165,
         "guide_entries": 5,
         "failing_entries": 0,
         "entries_with_offer": 134,
         "warnings": {
-          "missing_location": 2,
+          "missing_location": 0,
           "missing_price": 0,
-          "missing_area": 166,
+          "missing_area": 165,
           "missing_bedrooms": 10,
           "missing_public_images": 9,
           "media_review_pending": 0
         },
         "by_locale": {
           "bg": 116,
-          "he": 1,
           "ru": 52,
           "en": 2
         }
@@ -173,19 +164,19 @@
     {
       "id": "listing_quality_review",
       "status": "pass",
-      "message": "MSR-LISTING-PUBLICATION-1 publishes 163 listings from the full freeze catalog as source-locale inventory; 2 excluded by the approval.",
+      "message": "MSR-LISTING-PUBLICATION-1 publishes 165 listings from the full freeze catalog as source-locale inventory.",
       "evidence": {
         "status": "pass",
         "mode": "operator_publication_of_freeze_active",
         "path": "production/data/listing-publication-approval.json",
         "approval_id": "MSR-LISTING-PUBLICATION-1",
-        "freeze_sha256": "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
+        "freeze_sha256": "873f35430afddb7c35f62ba1038a30da114b5ec91d11a0005701c29932590e03",
         "freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
         "approved_by": "agency_owner",
-        "approved_at": "2026-08-24T00:00:00.000Z",
+        "approved_at": "2026-08-30T00:00:00.000+03:00",
         "decision": "publish_source_as_is",
-        "reason": "Owner directive of 2026-08-24, given in the operations session: publish all listings without additional verification; keep every admin review queue.",
-        "publication_boundary": "Owner-directed publication of the entire 165-listing freeze catalog as source-locale public inventory, without further per-listing verification. Every admin quality, verification, media and translation queue keeps its outstanding work: publication changes cms_status and publish_approved only. Non-source translations stay unpublished until a human approves them.",
+        "reason": "Owner directive of 2026-08-30, given in the operations session: complete every listing translation and publish everything; keep every admin review queue.",
+        "publication_boundary": "Owner-directed publication of the entire 165-listing freeze catalog as source-locale public inventory after reconciling the two previously missing reviewed location relations. Every admin quality, verification, media and translation queue keeps its outstanding work; translated copy remains governed by its separate human-approval and indexability gate.",
         "summary": {
           "expected_review_rows": 165,
           "review_rows": 165,
@@ -196,8 +187,8 @@
           "archived_listings": 135,
           "scope": "full_freeze_catalog",
           "catalog_listing_ids": 165,
-          "published_listing_ids": 163,
-          "excluded_listing_ids": 2,
+          "published_listing_ids": 165,
+          "excluded_listing_ids": 0,
           "source_locales_only": true
         }
       }
@@ -416,8 +407,11 @@
         "analytics_export_status": "missing_export",
         "rollback_steps": 4,
         "machine_evidence": {
-          "status": "missing",
-          "path": "production/data/monitoring-rollback-report.json"
+          "status": "expired",
+          "path": "production/data/monitoring-rollback-report.json",
+          "age_ms": 510309166,
+          "evidence_age_ms": 510841632,
+          "max_age_ms": 86400000
         }
       },
       "next_actions": [
@@ -444,11 +438,12 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "missing_report",
+        "status": "invalid_report",
         "path": "production/data/payload-runtime-report.json",
+        "error": "Payload runtime report must include Payload config evidence",
         "next_actions": [
-          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime, then npm run payload:preflight."
+          "Regenerate the Payload runtime report with npm run payload:runtime.",
+          "Run npm run payload:preflight before launch:preflight."
         ],
         "freshness": {
           "id": "payload_runtime",
@@ -467,7 +462,7 @@
       "message": "The workers.dev release has complete R2 coverage for every runtime-normalized media asset.",
       "evidence": {
         "status": "pass",
-        "path": "/private/tmp/msr-r2-redownload-33074900327/r2-media-coverage-40695ab-integrated.json",
+        "path": "/tmp/msr-r2-media-coverage-preserved.json",
         "generated_at": "2026-08-27T14:16:20.632Z",
         "freshness": {
           "id": "r2_media_coverage",
@@ -576,8 +571,9 @@
       "status": "blocked",
       "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
       "evidence": {
-        "status": "missing_report",
+        "status": "invalid_report",
         "path": "production/data/production-recovery-report.json",
+        "error": "MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY is required to verify production recovery evidence",
         "freshness": {
           "id": "production_recovery",
           "status": "invalid",

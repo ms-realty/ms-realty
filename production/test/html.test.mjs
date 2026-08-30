@@ -149,7 +149,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-listing-action="print"/);
   assert.match(listingHtml, /data-client-save-listing="MS-CRAWL-0001"/);
   assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/makler-realty\.com\/wp-content\/uploads\//);
-  assert.match(listingHtml, /hreflang="el"/);
+  assert.match(listingHtml, /<meta name="robots" content="noindex,follow">/);
+  assert.doesNotMatch(listingHtml, /hreflang=/);
   // The verified brand line (footer) is allowed everywhere; any OTHER tel:
   // on a listing still requires the per-listing verified broker contact.
   assert.doesNotMatch(listingHtml, /href="tel:(?!\+359879696870")/);

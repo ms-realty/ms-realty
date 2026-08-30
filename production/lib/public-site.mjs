@@ -33,7 +33,12 @@ import {
   sellerPath,
   startPath,
 } from "./seo.mjs";
-import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import {
+  approvedTranslationRecordsForListing,
+  listingToPublicViewModel,
+  publicationAuthorizedListingTranslationCopy,
+  publishedListingTranslationCopy,
+} from "./content.mjs";
 import { savedSearchWritesDisabledFromEnv } from "./runtime-data-boundary.mjs";
 import { isLeadDurableStoreEnabled, leadDurableStoreConfigFromEnv } from "./lead-durable-store.mjs";
 import {
@@ -2842,7 +2847,16 @@ function descriptionFor(listing) {
   return listing.description || listing.h1 || listing.title || `MS Realty listing ${listing.id}`;
 }
 
-function localizedCopy(localeCode, view) {
+function localizedCopy(localeCode, view, translated = null) {
+  if (translated) {
+    return {
+      title: translated.title,
+      h1: translated.title,
+      description: translated.description,
+      seo_title: translated.seo_title,
+      meta_description: translated.meta_description,
+    };
+  }
   const template = PUBLIC_COPY[localeCode];
   if (!template || localeCode === view.source_locale) {
     const sourceTitle = view.h1 || view.title;
@@ -2928,10 +2942,11 @@ function listingMetadataTitle(registry, listing, localeCode) {
   const view = listingToPublicViewModel(listing);
   const translations = translationsForSearchListing(registry, listing);
   const translation = translationFor(translations, localeCode);
-  const translationIndexable = translation ? isTranslationIndexable(registry, translation) : false;
-  const copy = localizedCopy(translationIndexable ? localeCode : view.source_locale, view);
+  const authorized = translation ? publicationAuthorizedListingTranslationCopy(translation) : null;
+  const translated = localeCode === view.source_locale ? null : authorized;
+  const copy = localizedCopy(translated ? localeCode : view.source_locale, view, translated);
   const sourceSeo = localeCode === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
-  return sourceSeo.title || copy.title;
+  return sourceSeo.title || (localeCode !== view.source_locale ? translated?.seo_title : null) || copy.title;
 }
 
 function uniqueListingMetadataTitle({ registry, listing, localeCode, baseTitle, allListings }) {
@@ -2957,7 +2972,8 @@ export function isActiveListing(listing) {
 
 function searchTranslationState(registry, listing, locale) {
   const translation = translationFor(translationsForSearchListing(registry, listing), locale.code);
-  const indexable = translation ? isTranslationIndexable(registry, translation) : false;
+  const copy = translation ? publishedListingTranslationCopy(translation) : null;
+  const indexable = Boolean(copy && isTranslationIndexable(registry, translation));
   const display = indexable
     ? "reviewed_translation"
     : translation?.status === "stale"
@@ -2966,6 +2982,7 @@ function searchTranslationState(registry, listing, locale) {
 
   return {
     translation,
+    copy,
     indexable,
     display,
   };
@@ -2975,7 +2992,7 @@ function listingCard(registry, listing, locale) {
   const view = listingToPublicViewModel(listing);
   const state = searchTranslationState(registry, listing, locale);
   const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
-  const copy = localizedCopy(copyLocale, view);
+  const copy = localizedCopy(copyLocale, view, copyLocale === view.source_locale ? null : state.copy);
   const ui = uiCopyFor(locale.code);
   const reviewedTranslation = state.indexable && copyLocale !== view.source_locale && state.translation?.human_approved === true;
   const publicMedia = publicMediaLibrary(view.media, {
@@ -3401,30 +3418,40 @@ export function renderListingPage({
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const view = listingToPublicViewModel(listing);
-  const allTranslations = translations || approvedTranslationRecordsForListing(registry, listing);
+  const allTranslations = translations || listing.translations || approvedTranslationRecordsForListing(registry, listing);
   const translation = translationFor(allTranslations, locale.code);
-  const translationIndexable = translation ? isTranslationIndexable(registry, translation) : false;
+  const authorizedTranslation = translation ? publicationAuthorizedListingTranslationCopy(translation) : null;
+  const translated = locale.code === view.source_locale ? null : authorizedTranslation;
+  const approvedTranslation = translation ? publishedListingTranslationCopy(translation) : null;
+  const translationIndexable = Boolean(approvedTranslation && isTranslationIndexable(registry, translation));
   const indexable = resolved.available && translationIndexable;
   const path = listingPath(registry, locale.code, listing.id);
-  const hreflang = indexable ? hreflangForListing(registry, listing.id, allTranslations) : [];
+  const hreflang = indexable
+    ? hreflangForListing(
+        registry,
+        listing.id,
+        allTranslations.filter((candidate) => publishedListingTranslationCopy(candidate)),
+      )
+    : [];
   const labels = labelsFor(locale.code);
-  const copy = localizedCopy(translationIndexable ? locale.code : view.source_locale, view);
+  const copy = localizedCopy(translated ? locale.code : view.source_locale, view, translated);
   const sourceSeo = locale.code === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
+  const translationSeo = locale.code !== view.source_locale ? translated : null;
   const canonical = sourceSeo.canonical_override === path ? sourceSeo.canonical_override : path;
   const metadataTitle = uniqueListingMetadataTitle({
     registry,
     listing,
     localeCode: locale.code,
-    baseTitle: sourceSeo.title || copy.title,
+    baseTitle: sourceSeo.title || translationSeo?.seo_title || copy.title,
     allListings,
   });
-  const ogTitleBase = sourceSeo.og_title || sourceSeo.title || copy.title;
-  const metadataOgTitle = metadataTitle === (sourceSeo.title || copy.title) ? ogTitleBase : `${ogTitleBase} · ${listing.id}`;
+  const ogTitleBase = sourceSeo.og_title || sourceSeo.title || translationSeo?.seo_title || copy.title;
+  const metadataOgTitle = metadataTitle === (sourceSeo.title || translationSeo?.seo_title || copy.title) ? ogTitleBase : `${ogTitleBase} · ${listing.id}`;
   // The head snippet is capped; the structured data keeps the whole approved
   // text, because schema.org has no length policy and truncating it would throw
   // away a fact the agency actually published.
-  const listingDescription = sourceSeo.description || copy.description;
-  const metadataDescription = metaDescription(listingDescription);
+  const listingDescription = copy.description;
+  const metadataDescription = metaDescription(sourceSeo.description || translationSeo?.meta_description || listingDescription);
   const publicMedia = publicMediaLibrary(view.media, {
     fallback: view.thumbnail_url
       ? {
@@ -3445,7 +3472,7 @@ export function renderListingPage({
     canonical,
     indexable,
     fallback: {
-      active: !resolved.available || !translationIndexable,
+      active: !resolved.available || !authorizedTranslation,
       requested_locale: localeCode,
       resolved_locale: locale.code,
     },
@@ -3470,7 +3497,7 @@ export function renderListingPage({
       reviewer: translation?.reviewer || null,
     },
     body: {
-      content_locale: translationIndexable ? locale.code : view.source_locale || registry.source_locale,
+      content_locale: authorizedTranslation ? locale.code : view.source_locale || registry.source_locale,
       h1: copy.h1,
       description: copy.description,
       facts: {

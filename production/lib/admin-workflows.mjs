@@ -1441,16 +1441,39 @@ export function approveTranslationTask(registry, task, reviewer, approvedAt = "2
   };
 }
 
-export function publishApprovedTranslation(registry, task) {
+export function publishApprovedTranslation(
+  registry,
+  task,
+  publisher = task.reviewer,
+  publishedAt = task.approved_at,
+) {
   getLocale(registry, task.target_locale);
   if (task.status !== "approved" || task.human_approved !== true) {
     throw new Error("Only human-approved translations can be published");
   }
   assertValidatedTranslationOutput(task);
   assertHermesActionAllowed("draft_translation");
+  if (!publisher) throw new Error("publisher is required");
+  if (!publishedAt || Number.isNaN(Date.parse(publishedAt))) throw new Error("publishedAt must be a valid date and time");
+  const output = task.human?.output || task.hermes?.output;
+  const copy = {
+    title: output.title,
+    description: output.description || output.body,
+    seo_title: output.seo_title,
+    meta_description: output.meta_description,
+  };
   return {
     ...task,
+    locale: task.target_locale,
     status: "published",
+    translation_state: "published",
+    ...copy,
+    translated_hash: contentHash(copy),
+    content_origin: task.human ? "manual_translation" : "human_reviewed_hermes_draft",
+    citations: output.citations || [],
+    publication_authorized_by: publisher,
+    publication_authorized_at: publishedAt,
+    published_at: publishedAt,
     published: true,
     public_indexable: task.public_indexable === true,
   };

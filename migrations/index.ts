@@ -24,6 +24,7 @@ import * as migration_20260828_120000_hermes_owner_receipts from './20260828_120
 import * as migration_20260828_130000_workspace_settings from './20260828_130000_workspace_settings';
 import * as migration_20260829_120000_durable_viewing_trip_requests from './20260829_120000_durable_viewing_trip_requests';
 import * as migration_20260829_170000_social_marketing_publications from './20260829_170000_social_marketing_publications';
+import * as migration_20260830_120000_listing_translation_copy from './20260830_120000_listing_translation_copy';
 
 export const migrations = [
   {
@@ -155,5 +156,10 @@ export const migrations = [
     up: migration_20260829_170000_social_marketing_publications.up,
     down: migration_20260829_170000_social_marketing_publications.down,
     name: '20260829_170000_social_marketing_publications',
+  },
+  {
+    up: migration_20260830_120000_listing_translation_copy.up,
+    down: migration_20260830_120000_listing_translation_copy.down,
+    name: '20260830_120000_listing_translation_copy',
   },
 ];

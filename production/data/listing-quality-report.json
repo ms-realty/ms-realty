@@ -7,7 +7,7 @@
       "missing_price": 0,
       "missing_area": 165,
       "missing_bedrooms": 0,
-      "missing_location": 2,
+      "missing_location": 0,
       "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
@@ -8158,15 +8158,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0127",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "area_sqm",
-        "location"
+        "area_sqm"
       ],
       "title": "Продажа большого участка рядом с мин.водой",
-      "location": "",
+      "location": "Hotovo",
       "description": "Участок площадью около 3,8 га в поселке Хотово, в непосредственной близости от минеральной бани и в нескольких минутах от главной трассы Сандански—Мелник.",
       "issues": [
-        "missing_area",
-        "missing_location"
+        "missing_area"
       ],
       "price_eur": 50000,
       "price_on_request": false,
@@ -10207,15 +10205,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0159",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "area_sqm",
-        "location"
+        "area_sqm"
       ],
       "title": "Центр профилактики, реабилитации и косметических процедур — продажа",
-      "location": "",
+      "location": "Sandanski",
       "description": "Продажа центра профилактики, реабилитации и косметических процедур в бальнеологическом курорте Сандански, Болгария. Площадь 165 кв.м., цена 185 000 Евро",
       "issues": [
-        "missing_area",
-        "missing_location"
+        "missing_area"
       ],
       "price_eur": 185000,
       "price_on_request": false,

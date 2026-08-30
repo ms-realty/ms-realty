@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { renderAboutPage, renderContactPage, renderListingPage } from "../lib/public-site.mjs";
@@ -10,14 +9,9 @@ import { aboutPath, startPath } from "../lib/seo.mjs";
 import { loadLocalizedSitemap } from "../lib/seo-files.mjs";
 
 const registry = loadLocaleRegistry();
-const listings = loadListings();
 const seed = loadCmsSeed();
+const listings = seed.records.filter((record) => record.collection === "listings");
 const publicLocales = registry.locales.filter((locale) => locale.public_enabled).map((locale) => locale.code);
-const knownDuplicateGroups = [
-  ["MS-CRAWL-0007", "MS-CRAWL-0027"],
-  ["MS-CRAWL-0055", "MS-CRAWL-0056", "MS-CRAWL-0088"],
-  ["MS-CRAWL-0101", "MS-CRAWL-0109"],
-];
 const designSystemOfficeFiles = [
   "makler-realty-design-system/project/_ds_bundle.js",
   "makler-realty-design-system/project/_ds_manifest.json",
@@ -46,24 +40,28 @@ test("duplicate listing metadata titles receive reference suffixes in every publ
   for (const localeCode of publicLocales) {
     const baseTitles = new Map();
     for (const listing of listings) {
-      const page = renderListingPage({ registry, listing, localeCode });
+      const page = renderListingPage({ registry, listing, localeCode, translations: listing.translations });
       const title = page.metadata.title;
-      if (!baseTitles.has(title)) baseTitles.set(title, []);
-      baseTitles.get(title).push(listing.id);
+      const suffix = ` · ${listing.id}`;
+      const baseTitle = title.endsWith(suffix) ? title.slice(0, -suffix.length) : title;
+      if (!baseTitles.has(baseTitle)) baseTitles.set(baseTitle, []);
+      baseTitles.get(baseTitle).push(listing.id);
     }
     const duplicateGroups = [...baseTitles.values()].filter((ids) => ids.length > 1).map((ids) => [...ids].sort());
-    assert.deepEqual(duplicateGroups, knownDuplicateGroups.map((ids) => [...ids].sort()), `${localeCode} collision groups`);
 
     for (const ids of duplicateGroups) {
       for (const id of ids) {
         const listing = listings.find((candidate) => candidate.id === id);
         const page = renderRuntimePath(registry, seed, listingPath(localeCode, id));
-        const sourcePage = renderListingPage({ registry, listing, localeCode });
+        const sourcePage = renderListingPage({ registry, listing, localeCode, translations: listing.translations });
         assert.match(page.metadata.title, new RegExp(`\\u00b7 ${id}$`), `${localeCode} ${id} metadata suffix`);
         assert.match(page.metadata.og_title, new RegExp(`\\u00b7 ${id}$`), `${localeCode} ${id} OG suffix`);
         assert.equal(page.body.h1, sourcePage.body.h1, `${localeCode} ${id} H1 remains source text`);
       }
     }
+
+    const runtimeTitles = listings.map((listing) => renderRuntimePath(registry, seed, listingPath(localeCode, listing.id)).metadata.title);
+    assert.equal(new Set(runtimeTitles).size, listings.length, `${localeCode} runtime metadata titles are unique`);
   }
 });
 

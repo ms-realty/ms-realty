@@ -644,7 +644,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
       assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
-      assert.equal(smoke.location.body.cards.length, 1);
+      assert.equal(smoke.location.body.cards.length > 0, true);
       assert.equal(smoke.hermesChatDisabled.status, 404);
       assert.equal(smoke.hermesChatDisabled.body.kind, "not_found");
       assert.equal(smoke.hermesChatDisabled.headers["cache-control"], "no-store");

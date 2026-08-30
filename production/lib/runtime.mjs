@@ -568,12 +568,12 @@ export function assertRuntimeSmoke(smoke) {
   if (
     smoke.listing_en_fallback.status !== 200 ||
     smoke.listing_en_fallback.kind !== "listing" ||
-    smoke.listing_en_fallback.fallback.active !== true ||
+    smoke.listing_en_fallback.fallback.active !== false ||
     smoke.listing_en_fallback.indexable !== false ||
     smoke.listing_en_fallback.metadata.robots !== "noindex,follow" ||
-    smoke.listing_en_fallback.body.content_locale !== "bg"
+    smoke.listing_en_fallback.body.content_locale !== "en"
   ) {
-    throw new Error("Runtime search fallback must open a source-language noindex listing page");
+    throw new Error("Runtime pending translation must open translated copy on a noindex listing page");
   }
   if (smoke.listing_ru.status !== 200 || !smoke.listing_ru.path.startsWith("/ru/")) {
     throw new Error("Runtime Russian listing route missing");
@@ -604,8 +604,14 @@ export function assertRuntimeSmoke(smoke) {
   if (smoke.location_he.status !== 200 || smoke.location_he.kind !== "location" || smoke.location_he.body.location !== "Sandanski") {
     throw new Error("Runtime location page must render reviewed Sandanski inventory");
   }
-  if (!smoke.location_he.cards.length || smoke.location_he.cards.some((card) => card.translation_indexable !== true)) {
-    throw new Error("Runtime location page must only expose indexable locale cards");
+  if (
+    smoke.location_he.indexable !== false ||
+    !smoke.location_he.cards.length ||
+    smoke.location_he.cards.some(
+      (card) => card.translation_indexable !== false || card.content_locale !== card.source_locale,
+    )
+  ) {
+    throw new Error("Runtime pending-locale location page must keep source-fallback cards non-indexable");
   }
   if (
     smoke.sold_listing_he.status !== 200 ||

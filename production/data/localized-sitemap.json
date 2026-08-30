@@ -3,38 +3,38 @@
   "summary": {
     "listings": 165,
     "home_pages": 7,
-    "listing_entries": 166,
+    "listing_entries": 165,
     "location_pages": 6,
     "seller_pages": 7,
     "contact_pages": 7,
     "guide_pages": 5,
-    "entries": 198,
+    "entries": 197,
     "byLocale": {
       "bg": 122,
       "en": 5,
       "de": 3,
       "nl": 3,
-      "ru": 57,
+      "ru": 58,
       "el": 3,
-      "he": 5
+      "he": 3
     },
     "public": {
-      "listings": 163,
+      "listings": 165,
       "home_pages": 7,
-      "listing_entries": 164,
+      "listing_entries": 165,
       "location_pages": 6,
       "seller_pages": 7,
       "contact_pages": 7,
       "guide_pages": 5,
-      "entries": 196,
+      "entries": 197,
       "byLocale": {
         "bg": 122,
         "en": 5,
         "de": 3,
         "nl": 3,
-        "ru": 55,
+        "ru": 58,
         "el": 3,
-        "he": 5
+        "he": 3
       }
     }
   },
@@ -327,30 +327,6 @@
         {
           "hreflang": "bg",
           "href": "/bg/imoti/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "he",
-          "href": "/he/properties/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "x-default",
-          "href": "/bg/imoti/MS-CRAWL-0001"
-        }
-      ],
-      "public": true
-    },
-    {
-      "type": "listing",
-      "locale": "he",
-      "loc": "/he/properties/MS-CRAWL-0001",
-      "hreflang": [
-        {
-          "hreflang": "bg",
-          "href": "/bg/imoti/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "he",
-          "href": "/he/properties/MS-CRAWL-0001"
         },
         {
           "hreflang": "x-default",
@@ -2317,7 +2293,7 @@
           "href": "/ru/properties/MS-CRAWL-0127"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2701,7 +2677,7 @@
           "href": "/ru/properties/MS-CRAWL-0159"
         }
       ],
-      "public": false
+      "public": true
     },
     {
       "type": "listing",
@@ -2786,35 +2762,6 @@
           "href": "/bg/lokacii/sandanski"
         },
         {
-          "hreflang": "he",
-          "href": "/he/locations/sandanski"
-        },
-        {
-          "hreflang": "ru",
-          "href": "/ru/locations/sandanski"
-        },
-        {
-          "hreflang": "x-default",
-          "href": "/bg/lokacii/sandanski"
-        }
-      ],
-      "public": true
-    },
-    {
-      "type": "location",
-      "locale": "he",
-      "location": "Sandanski",
-      "loc": "/he/locations/sandanski",
-      "hreflang": [
-        {
-          "hreflang": "bg",
-          "href": "/bg/lokacii/sandanski"
-        },
-        {
-          "hreflang": "he",
-          "href": "/he/locations/sandanski"
-        },
-        {
           "hreflang": "ru",
           "href": "/ru/locations/sandanski"
         },
@@ -2834,10 +2781,6 @@
         {
           "hreflang": "bg",
           "href": "/bg/lokacii/sandanski"
-        },
-        {
-          "hreflang": "he",
-          "href": "/he/locations/sandanski"
         },
         {
           "hreflang": "ru",
@@ -2901,6 +2844,31 @@
         {
           "hreflang": "bg",
           "href": "/bg/lokacii/hotovo"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/hotovo"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/hotovo"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "location",
+      "locale": "ru",
+      "location": "Hotovo",
+      "loc": "/ru/locations/hotovo",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/hotovo"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/hotovo"
         },
         {
           "hreflang": "x-default",

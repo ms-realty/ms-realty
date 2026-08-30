@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { approvedContentDocumentsForPath, readApprovedCmsContent } from "../lib/approved-content.mjs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
-import { findListingById, loadListings } from "../lib/content.mjs";
+import { approvedTranslationRecordsForListing, findListingById, loadListings } from "../lib/content.mjs";
+import { loadListingTranslationsCatalog } from "../lib/listing-translations-catalog.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { publicMediaLibrary } from "../lib/media.mjs";
 import { absolutePublicUrl } from "../lib/public-origin.mjs";
@@ -25,6 +26,7 @@ import {
   renderStartPage,
 } from "../lib/public-site.mjs";
 import { CANONICAL_PROPERTY_FAMILIES } from "../lib/listing-facts.mjs";
+import { contentHash } from "../lib/translations.mjs";
 
 Object.assign(process.env, {
   MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
@@ -38,10 +40,72 @@ const registry = loadLocaleRegistry();
 const listings = loadListings();
 const listing = findListingById(listings, "MS-CRAWL-0001");
 
+function publishedTranslation(locale, copy) {
+  const approvedAt = "2026-08-30T08:00:00.000Z";
+  return {
+    locale,
+    source_locale: "bg",
+    status: "published",
+    translation_state: "published",
+    source_hash: "test-source-hash",
+    translated_hash: contentHash(copy),
+    ...copy,
+    content_origin: "manual_translation",
+    reviewer: `editor_${locale}`,
+    human_approved: true,
+    approved_at: approvedAt,
+    publication_authorized_by: "owner",
+    publication_authorized_at: approvedAt,
+    published_at: approvedAt,
+    public_indexable: true,
+  };
+}
+
+function pendingTranslation(locale, copy) {
+  return {
+    locale,
+    source_locale: "bg",
+    status: "human_edited",
+    translation_state: "human_edited",
+    source_hash: "test-source-hash",
+    translated_hash: contentHash(copy),
+    ...copy,
+    translator: "codex-manual-translation",
+    content_origin: "manual_translation",
+    reviewer: null,
+    human_approved: false,
+    approved_at: null,
+    publication_authorized_by: "agency_owner",
+    publication_authorized_at: "2026-08-30T00:00:00.000Z",
+    published_at: null,
+    public_indexable: false,
+  };
+}
+
+const translatedListing = {
+  ...listing,
+  translations: [
+    ...approvedTranslationRecordsForListing(registry, listing),
+    publishedTranslation("el", {
+      title: "Επαγγελματικό ακίνητο στο Σαντάνσκι",
+      description: "Εγκεκριμένη ελληνική περιγραφή του ακινήτου.",
+      seo_title: "Επαγγελματικό ακίνητο στο Σαντάνσκι",
+      meta_description: "Εγκεκριμένη ελληνική περιγραφή του ακινήτου στο Σαντάνσκι.",
+    }),
+    publishedTranslation("he", {
+      title: "נכס מסחרי בסנדנסקי",
+      description: "תיאור עברי מאושר של הנכס.",
+      seo_title: "נכס מסחרי בסנדנסקי",
+      meta_description: "תיאור עברי מאושר של הנכס בסנדנסקי.",
+    }),
+  ],
+};
+const translatedListings = listings.map((candidate) => (candidate.id === translatedListing.id ? translatedListing : candidate));
+
 test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages", () => {
-  const bg = renderListingPage({ registry, listing, localeCode: "bg" });
-  const el = renderListingPage({ registry, listing, localeCode: "el" });
-  const he = renderListingPage({ registry, listing, localeCode: "he" });
+  const bg = renderListingPage({ registry, listing: translatedListing, localeCode: "bg" });
+  const el = renderListingPage({ registry, listing: translatedListing, localeCode: "el" });
+  const he = renderListingPage({ registry, listing: translatedListing, localeCode: "he" });
 
   assert.equal(bg.status, 200);
   assert.equal(bg.path, `/bg/imoti/${listing.id}`);
@@ -49,6 +113,7 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   assert.equal(he.path, `/he/properties/${listing.id}`);
   assert.equal(he.dir, "rtl");
   assert.equal(he.indexable, true);
+  assert.equal(he.body.h1, "נכס מסחרי בסנדנסקי");
   assert.equal(he.body.actions.sticky_mobile, true);
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.contact_preference, "phone");
   assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.source, "website_viewing_request");
@@ -71,6 +136,76 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
       pdf_status: "browser_print_ready",
     },
   );
+});
+
+test("complete pending-review copy is publicly readable but remains outside indexing and hreflang", () => {
+  const copy = {
+    title: "Επαγγελματικό συγκρότημα κοντά στο Σαντάνσκι",
+    description: "Πλήρης ελληνική μετάφραση που αναμένει ανθρώπινο γλωσσικό έλεγχο.",
+    seo_title: "Επαγγελματικό συγκρότημα στο Σαντάνσκι",
+    meta_description: "Πλήρης ελληνική περιγραφή του ακινήτου, διαθέσιμη για ανάγνωση αλλά σε αναμονή ανθρώπινου γλωσσικού ελέγχου πριν από την ευρετηρίαση.",
+  };
+  const page = renderListingPage({
+    registry,
+    listing,
+    localeCode: "el",
+    translations: [...approvedTranslationRecordsForListing(registry, listing), pendingTranslation("el", copy)],
+  });
+
+  assert.equal(page.status, 200);
+  assert.equal(page.body.content_locale, "el");
+  assert.equal(page.body.h1, copy.title);
+  assert.equal(page.body.description, copy.description);
+  assert.equal(page.metadata.title, copy.seo_title);
+  assert.equal(page.indexable, false);
+  assert.equal(page.metadata.robots, "noindex,follow");
+  assert.deepEqual(page.hreflang, []);
+  assert.equal(page.fallback.active, false);
+  assert.equal(page.translation.status, "human_edited");
+  assert.equal(page.translation.human_approved, false);
+
+  const unauthorized = renderListingPage({
+    registry,
+    listing,
+    localeCode: "el",
+    translations: [
+      ...approvedTranslationRecordsForListing(registry, listing),
+      { ...pendingTranslation("el", copy), publication_authorized_by: null, publication_authorized_at: null },
+    ],
+  });
+  assert.equal(unauthorized.fallback.active, true);
+  assert.equal(unauthorized.body.content_locale, "bg");
+  assert.notEqual(unauthorized.body.h1, copy.title);
+});
+
+test("every owner-authorized catalog translation renders publicly without becoming indexable", () => {
+  const catalog = loadListingTranslationsCatalog({ listings, registry });
+  const translationsByListing = Map.groupBy(catalog.translationRows, (translation) => translation.listing);
+
+  for (const translation of catalog.translationRows) {
+    const sourceListing = findListingById(listings, translation.listing);
+    const page = renderListingPage({
+      registry,
+      listing: sourceListing,
+      localeCode: translation.locale,
+      translations: [
+        ...approvedTranslationRecordsForListing(registry, sourceListing),
+        ...(translationsByListing.get(translation.listing) || []),
+      ],
+    });
+    const id = `${translation.listing}:${translation.locale}`;
+
+    assert.equal(page.status, 200, id);
+    assert.equal(page.body.content_locale, translation.locale, id);
+    assert.equal(page.body.h1, translation.title, id);
+    assert.equal(page.body.description, translation.description, id);
+    assert.equal(page.metadata.title, translation.seo_title, id);
+    assert.equal(page.metadata.description, translation.meta_description, id);
+    assert.equal(page.fallback.active, false, id);
+    assert.equal(page.indexable, false, id);
+    assert.equal(page.metadata.robots, "noindex,follow", id);
+    assert.deepEqual(page.hreflang, [], id);
+  }
 });
 
 test("listing language navigation keeps users on the same listing in every public language", () => {
@@ -250,7 +385,7 @@ test("approved broker contact data enables direct listing contact links", () => 
 });
 
 test("listing SEO includes approved hreflang and excludes unavailable draft locales", () => {
-  const page = renderListingPage({ registry, listing, localeCode: "he" });
+  const page = renderListingPage({ registry, listing: translatedListing, localeCode: "he" });
   const hreflangCodes = page.hreflang.map((link) => link.hreflang);
 
   assert.ok(hreflangCodes.includes("x-default"));
@@ -344,7 +479,7 @@ test("unapproved French route falls back without becoming indexable", () => {
 });
 
 test("search route is locale-scoped and list-first on mobile", () => {
-  const search = renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" });
+  const search = renderSearchPage({ registry, listings: translatedListings, localeCode: "he", query: "Sandanski" });
 
   assert.equal(search.path, "/he/search");
   assert.equal(search.dir, "rtl");
@@ -889,9 +1024,9 @@ test("English home makes every approved buyer guide discoverable without expandi
 });
 
 test("location page keeps reviewed inventory indexable and serves source fallback without a soft 404", () => {
-  const he = renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" });
-  const fallback = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
-  const englishFallback = renderLocationPage({ registry, listings, localeCode: "en", location: "Sandanski" });
+  const he = renderLocationPage({ registry, listings: translatedListings, localeCode: "he", location: "Sandanski" });
+  const fallback = renderLocationPage({ registry, listings: translatedListings, localeCode: "he", location: "Petrich" });
+  const englishFallback = renderLocationPage({ registry, listings: translatedListings, localeCode: "en", location: "Sandanski" });
   const html = renderReactPublicBody(he);
 
   assert.equal(he.status, 200);

@@ -154,14 +154,13 @@ for (const field of ["locale", "locale_prefix", "locale_is_indexable", "translat
   if (!(field in listings[0])) throw new Error(`Search fixture missing ${field}`);
 }
 const searchIndexDocs = JSON.parse(fs.readFileSync(fromRoot("search", "data", "index-listings.json"), "utf8"));
-if (searchIndexDocs.length !== 167) throw new Error("Search index fixture must include 165 source docs plus Greek/Hebrew approvals");
+if (searchIndexDocs.length !== 165) throw new Error("Search index fixture must include 165 source-language documents");
 const searchIndexLanguages = new Set(searchIndexDocs.map((doc) => doc.locale));
-for (const code of ["bg", "ru", "el", "he"]) {
+for (const code of ["bg", "ru"]) {
   if (!searchIndexLanguages.has(code)) throw new Error(`Search index fixture missing ${code} documents`);
 }
-const hebrewSearchDoc = searchIndexDocs.find((doc) => doc.source_listing_id === "MS-CRAWL-0001" && doc.locale === "he");
-if (hebrewSearchDoc?.search_document_type !== "approved_translation" || hebrewSearchDoc.translation_indexable !== true) {
-  throw new Error("Search index fixture must include approved Hebrew translation document");
+if (searchIndexDocs.some((doc) => doc.search_document_type !== "source" || doc.locale !== doc.translation_source_locale)) {
+  throw new Error("Search index fixture must contain only source-language documents");
 }
 const searchEngineSyncSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-smoke.json"), "utf8"));
 assertSearchEngineSyncReport(searchEngineSyncSmoke);
@@ -253,7 +252,7 @@ if (redirectApprovals.length !== routeMap.summary.mappedListings) {
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
 if (
   sitemap.summary.home_pages !== 7 ||
-  sitemap.summary.listing_entries !== 166 ||
+  sitemap.summary.listing_entries !== 165 ||
   sitemap.summary.location_pages < 6 ||
   sitemap.summary.seller_pages !== 7 ||
   sitemap.summary.contact_pages !== 7 ||
@@ -271,11 +270,11 @@ const expectedSitemapEntries =
 if (sitemap.summary.entries !== expectedSitemapEntries) {
   throw new Error("Localized sitemap route count must match approved route buckets");
 }
-if (sitemap.summary.byLocale.bg < 118 || sitemap.summary.byLocale.ru !== 57) {
+if (sitemap.summary.byLocale.bg < 118 || sitemap.summary.byLocale.ru !== 58) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 5) {
-  throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
+if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 3) {
+  throw new Error("Localized sitemap must include approved Greek and Hebrew static routes");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
 
@@ -305,7 +304,7 @@ const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
-  appRouteManifest.summary.routes !== 205 ||
+  appRouteManifest.summary.routes !== 204 ||
   appRouteManifest.summary.eligible_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.public.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
@@ -351,8 +350,8 @@ if (cmsSeed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes mus
 if (cmsSeed.summary.translationLocales.fr) throw new Error("CMS seed must not include unapproved French translations");
 const cmsCollections = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-collections.json"), "utf8"));
 const cmsCollectionSummary = assertCmsCollections(cmsCollections);
-if (cmsCollectionSummary.records.listing_translations !== 167) {
-  throw new Error("CMS collection manifest must include approved source plus Greek/Hebrew translations");
+if (cmsCollectionSummary.records.listing_translations !== 1155) {
+  throw new Error("CMS collection manifest must include all 1,155 source and target-locale translation records");
 }
 
 const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
@@ -488,8 +487,23 @@ if (
 ) {
   throw new Error("Runtime smoke contact callback lead must route through CRM");
 }
-if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
-  throw new Error("Runtime smoke search must show reviewed Hebrew translation state");
+const pendingHebrewListing = runtimeSmoke.listing_he;
+if (
+  pendingHebrewListing.status !== 200 ||
+  pendingHebrewListing.indexable !== false ||
+  pendingHebrewListing.metadata?.robots !== "noindex,follow" ||
+  pendingHebrewListing.fallback?.active !== false ||
+  pendingHebrewListing.body?.content_locale !== "he"
+) {
+  throw new Error("Runtime smoke must keep pending owner-authorized Hebrew copy readable and noindex");
+}
+const pendingHebrewSearchCard = runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001");
+if (
+  pendingHebrewSearchCard?.translation_display !== "fallback_source_locale" ||
+  pendingHebrewSearchCard.translation_indexable !== false ||
+  pendingHebrewSearchCard.content_locale !== pendingHebrewSearchCard.source_locale
+) {
+  throw new Error("Runtime smoke search must keep pending Hebrew listings on their source-locale card fallback");
 }
 if (runtimeSmoke.search_he.search.total_matches <= runtimeSmoke.search_he.cards.length) {
   throw new Error("Runtime smoke search must expose total matches before pagination");
@@ -1022,8 +1036,8 @@ if (
   localeRollout.summary.activation_tasks !== 1 ||
   localeRollout.activation_tasks[0].locale !== "fr" ||
   localeRollout.summary.hermes_queue_locales !== 4 ||
-  localeRollout.summary.open_hermes_tasks !== 659 ||
-  localeRollout.hermes_draft_queues.find((row) => row.locale === "he")?.open_task_count !== 164
+  localeRollout.summary.open_hermes_tasks !== 0 ||
+  localeRollout.hermes_draft_queues.find((row) => row.locale === "he")?.open_task_count !== 0
 ) {
   throw new Error("Locale rollout report must connect language requests and Hermes draft queues");
 }
@@ -1046,19 +1060,25 @@ assertTranslationLedger(translationTaskEvents);
 const currentGreekTask = latestTranslationTasks(translationTaskEvents).find(
   (task) => task.id === "translation-listing-MS-CRAWL-0001-el",
 );
-if (currentGreekTask?.status !== "stale" || currentGreekTask.public_indexable !== false) {
-  throw new Error("Translation task artifact must retain the latest Greek listing task as stale and non-indexable");
+if (
+  currentGreekTask?.status !== "human_edited" ||
+  currentGreekTask.public_indexable !== false ||
+  currentGreekTask.human_approved !== false ||
+  currentGreekTask.published !== false
+) {
+  throw new Error("Translation task artifact must keep the latest human-edited Greek listing pending approval and non-indexable");
 }
 const translationCoverage = JSON.parse(fs.readFileSync(fromRoot("production", "data", "translation-coverage-report.json"), "utf8"));
 assertTranslationCoverageReport(translationCoverage);
 if (
-  translationCoverage.summary.open_translation_tasks !== 989 ||
-  translationCoverage.summary.stale_translation_tasks !== 1 ||
-  translationCoverage.summary.by_task_type.hermes_draft_required !== 658 ||
+  translationCoverage.summary.open_translation_tasks !== 990 ||
+  translationCoverage.summary.missing_translation_tasks !== 0 ||
+  translationCoverage.summary.stale_translation_tasks !== 0 ||
+  translationCoverage.summary.by_task_type.draft_review_required !== 990 ||
   translationCoverage.rows.find((row) => row.listing_id === "MS-CRAWL-0001" && row.target_locale === "el")?.task_type !==
-    "stale_review_required"
+    "draft_review_required"
 ) {
-  throw new Error("Translation coverage report must open missing and stale translation review tasks");
+  throw new Error("Translation coverage report must route every human-edited translation through approval review");
 }
 const hermesAudit = fs
   .readFileSync(fromRoot("production", "data", "hermes-audit.jsonl"), "utf8")
@@ -1074,13 +1094,13 @@ if (!["hermes_drafted", "published", "stale"].every((status) => greekAuditHistor
 const hermesDraftDispatch = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-dispatch.json"), "utf8"));
 assertHermesDraftDispatch(hermesDraftDispatch);
 if (
-  hermesDraftDispatch.summary.eligible_tasks !== 659 ||
-  hermesDraftDispatch.summary.batch_size !== 25 ||
-  hermesDraftDispatch.summary.remaining_after_batch !== 634 ||
-  hermesDraftDispatch.rows[0].task_type !== "stale_review_required" ||
+  hermesDraftDispatch.summary.eligible_tasks !== 0 ||
+  hermesDraftDispatch.summary.batch_size !== 0 ||
+  hermesDraftDispatch.summary.remaining_after_batch !== 0 ||
+  hermesDraftDispatch.rows.length !== 0 ||
   hermesDraftDispatch.rows.some((row) => row.can_publish || row.public_indexable)
 ) {
-  throw new Error("Hermes draft dispatch must batch safe non-publishing translation tasks");
+  throw new Error("Hermes draft dispatch must stay empty after every translation has entered human review");
 }
 const hermesDraftWorkerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-smoke.json"), "utf8"));
 assertHermesDraftWorkerReport(hermesDraftWorkerSmoke);
@@ -1195,7 +1215,7 @@ for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
 
 const structuredData = JSON.parse(fs.readFileSync(fromRoot("production", "data", "structured-data-report.json"), "utf8"));
 if (
-  structuredData.summary.listing_entries !== 166 ||
+  structuredData.summary.listing_entries !== 165 ||
   structuredData.summary.guide_entries !== 5 ||
   structuredData.summary.failing_entries !== 0
 ) {

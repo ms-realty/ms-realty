@@ -130,25 +130,47 @@ function minimalSeed() {
             status: "published",
             source_hash: "source-bg",
             translated_hash: "translated-bg",
+            title: "Seed title",
+            description: "Seed description",
+            seo_title: "Seed title",
+            meta_description: "Seed description",
+            translator: "editor_bg",
+            content_origin: "legacy_source_import",
             reviewer: "editor_bg",
+            human_approved: true,
             approved_at: "2026-08-10T00:00:00.000Z",
+            publication_authorized_by: "owner",
+            publication_authorized_at: "2026-08-10T00:00:00.000Z",
+            published_at: "2026-08-10T00:00:00.000Z",
             direction: "ltr",
             public_indexable: true,
+            citations: ["https://makler-realty.com/listing/test-1"],
             listing: "MS-TEST-0001",
             translation_state: "published",
           },
           {
             locale: "en",
             source_locale: "bg",
-            status: "approved",
+            status: "human_edited",
             source_hash: "source-en",
             translated_hash: "translated-en",
+            title: "Seed title in English",
+            description: "Seed description in English",
+            seo_title: "Seed title in English",
+            meta_description: "Seed description in English",
+            translator: "editor_en",
+            content_origin: "manual_translation",
             reviewer: "editor_en",
-            approved_at: "2026-08-10T00:00:00.000Z",
+            human_approved: false,
+            approved_at: null,
+            publication_authorized_by: null,
+            publication_authorized_at: null,
+            published_at: null,
             direction: "ltr",
-            public_indexable: true,
+            public_indexable: false,
+            citations: ["https://makler-realty.com/listing/test-1"],
             listing: "MS-TEST-0001",
-            translation_state: "approved",
+            translation_state: "human_edited",
           },
         ],
         media: [
@@ -513,8 +535,9 @@ test("Payload CMS importer commits one durable draft graph and reuses it on reru
   assert.equal(first.status, "committed");
   assert.equal(first.integrity.ok, true);
   assert.equal(first.integrity.readback.collections.listings, 2);
-  assert.equal(first.integrity.readback.target.listing_translations.by_status.draft, 2);
-  assert.equal(first.integrity.readback.target.listing_translations.public_indexable_true, 0);
+  assert.deepEqual(first.integrity.readback.target.listing_translations.by_status, { human_edited: 1, published: 1 });
+  assert.equal(first.integrity.readback.target.listing_translations.public_indexable_true, 1);
+  assert.equal(first.integrity.readback.target.listing_translations.complete_copy, 2);
   assert.equal(first.integrity.readback.target.media_assets.public_true, 0);
   assert.equal(first.integrity.readback.target.search_outbox.delta, 0);
   const importedListing = target.rows.listings.find((row) => row.id === "MS-TEST-0001");
@@ -892,7 +915,8 @@ test("Payload CMS projection overlays durable draft rows onto the seed shape", a
 
   assert.equal(overlay.records[0].facts.title, "Payload draft title");
   assert.equal(overlay.records[0].seo.title, "Payload SEO title");
-  assert.equal(overlay.records[0].translations.every((row) => row.status === "draft"), true);
+  assert.deepEqual(overlay.records[0].translations.map((row) => row.status).sort(), ["human_edited", "published"]);
+  assert.equal(overlay.records[0].translations.find((row) => row.locale === "en").title, "Seed title in English");
   assert.equal(overlay.records[0].media_workflow.total_assets, 2);
   assert.equal(overlay.payload_overlay.source, "payload_draft_overlay");
 });

@@ -54,12 +54,12 @@ function entryFromSitemap(registry, entry) {
     app_module: route.module,
     renderer: route.renderer,
     dynamic: route.dynamic,
-    // sitemap_indexable mirrors the runtime publication gate: false while the
-    // entry is eligible but not yet publicly served. public_indexable stays
-    // true for every eligible content route (it renders indexable once
-    // approved; utility routes stay false).
+    // Both fields describe the current runtime publication gate. An eligible
+    // route can remain in this audit manifest while its public page is noindex,
+    // but it must not claim current public indexability until it is served in
+    // the public sitemap.
     sitemap_indexable: entry.public !== false,
-    public_indexable: true,
+    public_indexable: entry.public !== false,
     cache: "public, max-age=300, s-maxage=3600",
     params: {
       locale: locale.code,

@@ -4,7 +4,7 @@
     "requested_locales": 1,
     "activation_tasks": 1,
     "hermes_queue_locales": 4,
-    "open_hermes_tasks": 659
+    "open_hermes_tasks": 0
   },
   "activation_tasks": [
     {
@@ -28,58 +28,42 @@
     {
       "locale": "de",
       "reviewer_role": "translator_de",
-      "open_task_count": 165,
-      "status": "open",
+      "open_task_count": 0,
+      "status": "clear",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
-      "task": {
-        "id": "hermes-draft-queue-de",
-        "owner": "translator_de",
-        "status": "open"
-      }
+      "task": null
     },
     {
       "locale": "nl",
       "reviewer_role": "translator_nl",
-      "open_task_count": 165,
-      "status": "open",
+      "open_task_count": 0,
+      "status": "clear",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
-      "task": {
-        "id": "hermes-draft-queue-nl",
-        "owner": "translator_nl",
-        "status": "open"
-      }
+      "task": null
     },
     {
       "locale": "el",
       "reviewer_role": "translator_el",
-      "open_task_count": 165,
-      "status": "open",
+      "open_task_count": 0,
+      "status": "clear",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
-      "task": {
-        "id": "hermes-draft-queue-el",
-        "owner": "translator_el",
-        "status": "open"
-      }
+      "task": null
     },
     {
       "locale": "he",
       "reviewer_role": "translator_he",
-      "open_task_count": 164,
-      "status": "open",
+      "open_task_count": 0,
+      "status": "clear",
       "public_indexable": false,
       "requires_human_approval": true,
       "can_publish": false,
-      "task": {
-        "id": "hermes-draft-queue-he",
-        "owner": "translator_he",
-        "status": "open"
-      }
+      "task": null
     }
   ]
 }

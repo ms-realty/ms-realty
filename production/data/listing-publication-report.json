@@ -15,11 +15,9 @@
       "listing_status": "available",
       "primary_path": "/bg/imoti/MS-CRAWL-0001",
       "sitemap_paths": [
-        "/bg/imoti/MS-CRAWL-0001",
-        "/el/akinita/MS-CRAWL-0001",
-        "/he/properties/MS-CRAWL-0001"
+        "/bg/imoti/MS-CRAWL-0001"
       ],
-      "sitemap_entry_count": 3,
+      "sitemap_entry_count": 1,
       "internal_link_suggestions": [
         {
           "kind": "homepage_feature",
@@ -5547,10 +5545,10 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0159",
+          "kind": "location_page",
+          "from_path": "/ru/locations/hotovo",
           "to_path": "/ru/properties/MS-CRAWL-0127",
-          "label": "Add as related listing"
+          "label": "Add to location inventory"
         }
       ],
       "internal_link_suggestion_count": 2,
@@ -6914,13 +6912,25 @@
           "label": "Add to featured listings"
         },
         {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0159",
+          "label": "Add to location inventory"
+        },
+        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0127",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0159",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
           "to_path": "/ru/properties/MS-CRAWL-0159",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 2,
+      "internal_link_suggestion_count": 4,
       "publication_readiness": {
         "ready": false,
         "blocking_fields": [

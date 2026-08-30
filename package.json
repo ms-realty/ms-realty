@@ -70,6 +70,8 @@
     "runtime:build": "node production/scripts/build-runtime-smoke.mjs",
     "http:build": "node production/scripts/build-http-smoke.mjs",
     "translation:coverage": "node production/scripts/build-translation-coverage-report.mjs",
+    "translation:catalog": "node production/scripts/build-listing-translations.mjs",
+    "translation:catalog:published": "node production/scripts/build-listing-translations.mjs --require-published",
     "locale:rollout": "node production/scripts/build-locale-rollout-report.mjs",
     "hermes:mcp": "node production/scripts/hermes-mcp-server.mjs",
     "hermes:provisioning": "node production/scripts/build-hermes-provider-provisioning-report.mjs",

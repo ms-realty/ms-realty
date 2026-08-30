@@ -1,21 +1,20 @@
 {
   "summary": {
     "generated_at": "2026-07-05T00:00:00Z",
-    "listing_entries": 166,
+    "listing_entries": 165,
     "guide_entries": 5,
     "failing_entries": 0,
     "entries_with_offer": 134,
     "warnings": {
-      "missing_location": 2,
+      "missing_location": 0,
       "missing_price": 0,
-      "missing_area": 166,
+      "missing_area": 165,
       "missing_bedrooms": 10,
       "missing_public_images": 9,
       "media_review_pending": 0
     },
     "by_locale": {
       "bg": 116,
-      "he": 1,
       "ru": 52,
       "en": 2
     }
@@ -24,20 +23,6 @@
     {
       "loc": "/bg/imoti/MS-CRAWL-0001",
       "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0001",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 17,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/he/properties/MS-CRAWL-0001",
-      "locale": "he",
       "page_type": "listing",
       "listing_id": "MS-CRAWL-0001",
       "indexable": true,
@@ -1825,7 +1810,6 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_location",
         "missing_area"
       ]
     },
@@ -2278,7 +2262,6 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_location",
         "missing_area"
       ]
     },

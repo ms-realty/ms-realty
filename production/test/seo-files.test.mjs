@@ -74,8 +74,8 @@ test("runtime sitemap keeps sold listings but not sold-only location pages", () 
   ]);
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), seed);
 
-  assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/properties/MS-CRAWL-0001"), true);
-  assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/locations/sold-only-runtime-city"), false);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/imoti/MS-CRAWL-0001"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc.endsWith("/locations/sold-only-runtime-city")), false);
 });
 
 test("runtime sitemap exposes only official reviewed location scopes", () => {

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
-import { approvedTranslationRecordsForListing, listingSourceSnapshot } from "./content.mjs";
+import { approvedTranslationRecordsForListing, listingSourceSnapshot, listingTranslationCopy } from "./content.mjs";
 import {
   derivePrimaryAreaSqm,
   enrichmentChecklistFor,
@@ -14,6 +14,7 @@ import { mediaWorkflow, normalizeMediaAsset } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
 import { isTranslationIndexable } from "./seo.mjs";
 import { TOUR_PROVIDERS, TOUR_REVIEW_STATUSES, createTourField } from "./tours.mjs";
+import { contentHash } from "./translations.mjs";
 
 export const DEFAULT_MEDIA_INVENTORY_PATH = fromRoot("migration", "artifacts", "20260704-211155", "media-inventory.csv");
 export const DEFAULT_CMS_SEED_OUTPUT = fromRoot("production", "data", "cms-seed.json");
@@ -246,10 +247,55 @@ function publishedListingState(approval, listingId) {
   };
 }
 
-export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows, publicationApproval = null }) {
+function catalogTranslationForListing(registry, listing, source, row) {
+  const listingId = row.listing || row.listing_id;
+  if (listingId !== listing.id) throw new Error(`Translation listing id mismatch for ${listingId || "missing"}`);
+  if (row.source_locale !== listing.locale) throw new Error(`Translation source locale mismatch for ${listing.id}:${row.locale}`);
+  const sourceHash = contentHash(source);
+  if (row.source_hash !== sourceHash) throw new Error(`Translation source hash is stale for ${listing.id}:${row.locale}`);
+  const locale = getLocale(registry, row.locale);
+  const copy = {
+    title: String(row.title || "").trim(),
+    description: String(row.description || "").trim(),
+    seo_title: String(row.seo_title || "").trim(),
+    meta_description: String(row.meta_description || "").trim(),
+  };
+  if (Object.values(copy).some((value) => !value)) throw new Error(`Translation copy is incomplete for ${listing.id}:${row.locale}`);
+  const published = row.status === "published";
+  const reviewer = row.reviewer || row.reviewed_by || null;
+  const reviewedAt = row.approved_at || row.reviewed_at || null;
+  const authorizedAt = row.publication_authorized_at || row.published_at || null;
+  const publishedAt = row.published_at || authorizedAt;
+  const humanApproved = published && row.human_approved === true && Boolean(reviewer && reviewedAt);
+  const publicIndexable = humanApproved && row.public_indexable === true && Boolean(row.publication_authorized_by && authorizedAt && publishedAt);
+  return {
+    listing: listing.id,
+    locale: locale.code,
+    source_locale: listing.locale,
+    status: published ? "published" : "human_edited",
+    translation_state: published ? "published" : "human_edited",
+    source_hash: sourceHash,
+    translated_hash: contentHash(copy),
+    ...copy,
+    translator: row.translator || null,
+    content_origin: row.content_origin,
+    reviewer,
+    human_approved: humanApproved,
+    approved_at: reviewedAt,
+    publication_authorized_by: row.publication_authorized_by || null,
+    publication_authorized_at: authorizedAt,
+    published_at: published ? publishedAt : null,
+    direction: locale.direction,
+    public_indexable: publicIndexable,
+    citations: Array.isArray(row.citations) ? row.citations : [],
+  };
+}
+
+export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows, publicationApproval = null, translationRecords = [] }) {
   const migrationByUrl = new Map(migrationRecords.map((record) => [record.old_url, record]));
   const routeByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const mediaByUrl = groupBy(mediaRows, (row) => row.page_url);
+  const translationsByListing = groupBy(translationRecords, (row) => row.listing || row.listing_id);
 
   const locationsById = new Map();
   const properties = [];
@@ -257,18 +303,31 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
   const records = listings.map((listing) => {
     const migration = migrationByUrl.get(listing.url);
     const route = routeByUrl.get(listing.url);
-    const translations = approvedTranslationRecordsForListing(registry, listing).map((translation) => {
+    const source = listingSourceSnapshot(listing);
+    const translations = [
+      ...approvedTranslationRecordsForListing(registry, listing),
+      ...(translationsByListing.get(listing.id) || []).map((row) => catalogTranslationForListing(registry, listing, source, row)),
+    ].map((translation) => {
       const locale = getLocale(registry, translation.locale);
+      const sourceTranslation = translation.locale === listing.locale;
+      const publicationAuthorized = publicationApproval?.listing_ids?.includes(listing.id);
       return {
         ...translation,
+        ...(sourceTranslation && publicationAuthorized
+          ? {
+              publication_authorized_by: publicationApproval.approved_by,
+              publication_authorized_at: publicationApproval.approved_at,
+              published_at: publicationApproval.approved_at,
+            }
+          : {}),
         direction: locale.direction,
-        public_indexable: isTranslationIndexable(registry, translation),
+        public_indexable: translation.public_indexable === true && isTranslationIndexable(registry, translation),
       };
     });
 
     const fallbackAlt = listing.h1 || listing.title || listing.id;
     const media = (mediaByUrl.get(listing.url) || []).map((row) => mediaEntry(row, fallbackAlt));
-    const snapshot = withPlausibleRent(listingSourceSnapshot(listing));
+    const snapshot = withPlausibleRent(source);
     if (snapshot.price_on_request) snapshot.price_eur = null;
     const locationId = locationIdForLabel(snapshot.location);
     if (locationId) {
@@ -407,10 +466,27 @@ export function assertCmsSeed(seed) {
   if (seed.summary.enrichmentTasks !== seed.summary.listings) throw new Error("Every legacy listing must receive one enrichment task");
   if (seed.summary.bySourceLocale.bg !== 113) throw new Error("Expected 113 BG CMS source listings");
   if (seed.summary.bySourceLocale.ru !== 52) throw new Error("Expected 52 RU CMS source listings");
-  if (seed.summary.translationLocales.el !== 1 || seed.summary.translationLocales.he !== 1) {
-    throw new Error("Expected one approved Greek and Hebrew translation seed");
-  }
   if (seed.summary.translationLocales.fr) throw new Error("French CMS translations must not be seeded before approval");
+  const translations = seed.records.flatMap((record) => record.translations || []);
+  if (translations.some((translation) => !listingTranslationCopy(translation))) {
+    throw new Error("Every CMS translation must persist complete copy with a matching translated hash");
+  }
+  if (
+    translations.some(
+      (translation) =>
+        translation.public_indexable === true &&
+        (translation.status !== "published" ||
+          translation.translation_state !== "published" ||
+          translation.human_approved !== true ||
+          !translation.reviewer ||
+          !translation.approved_at ||
+          !translation.publication_authorized_by ||
+          !translation.publication_authorized_at ||
+          !translation.published_at),
+    )
+  ) {
+    throw new Error("Indexable CMS translations require review and publication authority metadata");
+  }
   if (seed.summary.mediaAssets !== 4978) throw new Error(`Expected 4978 listing media rows, got ${seed.summary.mediaAssets}`);
   if (seed.summary.publicGalleryAssets <= 0) throw new Error("CMS seed must expose reviewed imported photo gallery assets");
   if (seed.summary.mediaReviewGatedAssets <= 0) throw new Error("CMS seed must keep non-gallery media review-gated");
@@ -474,6 +550,12 @@ const REQUIRED_COLLECTION_FIELDS = {
     translation_state: "select",
     source_hash: "text",
     translated_hash: "text",
+    title: "text",
+    description: "textarea",
+    seo_title: "text",
+    meta_description: "textarea",
+    content_origin: "text",
+    human_approved: "checkbox",
   },
   media_assets: {
     url: "url",
@@ -658,10 +740,21 @@ export function buildCmsCollections(seed) {
           }),
           collectionField("source_hash", "text", { required: true }),
           collectionField("translated_hash", "text", { required: true }),
+          collectionField("title", "text", { required: true }),
+          collectionField("description", "textarea", { required: true }),
+          collectionField("seo_title", "text", { required: true }),
+          collectionField("meta_description", "textarea", { required: true }),
+          collectionField("translator", "text"),
+          collectionField("content_origin", "text", { required: true }),
           collectionField("reviewer", "text"),
+          collectionField("human_approved", "checkbox", { required: true, admin: { readOnly: true } }),
           collectionField("approved_at", "date", { required_when: ["approved", "published"] }),
+          collectionField("publication_authorized_by", "text", { required_when: ["published"] }),
+          collectionField("publication_authorized_at", "date", { required_when: ["published"] }),
+          collectionField("published_at", "date", { required_when: ["published"] }),
           collectionField("direction", "select", { options: ["ltr", "rtl"] }),
           collectionField("public_indexable", "checkbox", { admin: { readOnly: true } }),
+          collectionField("citations", "json"),
         ],
       },
       {
