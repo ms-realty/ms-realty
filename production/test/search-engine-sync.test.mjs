@@ -921,9 +921,9 @@ test("search outbox is idempotent, retryable, and reconciles delete tombstones",
   assert.equal(reconciliation.deleted[0].message_id, queued.message_id);
 });
 
-test("benchmark legacy corpus filters only fields declared by the checked-in 167-document schema", () => {
+test("benchmark legacy corpus filters only fields declared by the checked-in 165-document source schema", () => {
   const corpus = loadBenchmarkCorpus({ dataDir: fromRoot("search", "data"), corpusSchema: "legacy_fixture_v1" });
-  assert.equal(corpus.document_count, 167);
+  assert.equal(corpus.document_count, 165);
   assert.deepEqual(corpus.filter_fields, [
     "translation_indexable",
     "translation_human_approved",
@@ -984,7 +984,7 @@ test("benchmark bootstrap imports the declared corpus and waits for Meilisearch 
     meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
     fetchImpl,
   });
-  assert.equal(result.corpus.documents, 167);
+  assert.equal(result.corpus.documents, 165);
   assert.deepEqual(result.meilisearch.tasks, [
     { task_uid: "11", status: "succeeded" },
     { task_uid: "12", status: "succeeded" },
@@ -1238,7 +1238,7 @@ test("Typesense sync accepts existing collection response before upsert import",
     fetchImpl: fakeFetch(calls, [409, 201]),
   });
 
-  assert.equal(report.documents, 167);
+  assert.equal(report.documents, 165);
   assert.equal(report.operations[0].status, 409);
   assert.equal(report.operations[1].status, 201);
 });
@@ -1313,7 +1313,7 @@ test("search fixture builder honors mounted locale registry and listing edits", 
   assert.equal(summary.locale_registry_path, registryPath);
   assert.equal(summary.listing_edits_path, listingEditPath);
   assert.equal(summary.public_indexable_locales.includes("he"), false);
-  assert.deepEqual(new Set(reviewed.map((doc) => doc.locale)), new Set(["bg", "el"]));
+  assert.deepEqual(new Set(reviewed.map((doc) => doc.locale)), new Set(["bg"]));
   assert.equal(reviewed.every((doc) => doc.description === "Mounted search description."), true);
   assert.equal(reviewed.every((doc) => doc.thumbnail_url.includes("/wp-content/uploads/")), true);
   assert.equal(reviewed.every((doc) => doc.thumbnail_alt), true);

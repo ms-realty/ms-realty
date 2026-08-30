@@ -44,7 +44,6 @@ TYPE_PATTERNS = [
     ("hotel", re.compile(r"\b(hotel|хотел)\b", re.I)),
 ]
 
-APPROVED_TRANSLATION_SEEDS = {"MS-CRAWL-0001": ["el", "he"]}
 PUBLIC_TRANSLATION_STATES = {"approved", "published"}
 
 CYRILLIC_TO_LATIN = {
@@ -380,44 +379,8 @@ def source_index_doc(doc: dict[str, object], registry: dict[str, object]) -> dic
     }
 
 
-def approved_translation_index_doc(doc: dict[str, object], locale: str, registry: dict[str, object]) -> dict[str, object]:
-    listing_id = str(doc["id"])
-    source_locale = str(doc["locale"])
-    return {
-        **doc,
-        "id": f"{listing_id}:{locale}",
-        "source_listing_id": listing_id,
-        "search_document_type": "approved_translation",
-        "language": locale,
-        "locale": locale,
-        "locale_prefix": f"/{locale}/",
-        "locale_is_indexable": locale in public_indexable_locales(registry),
-        "locale_path": listing_path(registry, locale, listing_id),
-        "translation_status": "approved",
-        "translation_source_locale": source_locale,
-        "translation_human_approved": True,
-        "translation_indexable": translation_indexable("approved", True, locale, registry),
-        **review_search_fields(doc, listing_id),
-    }
-
-
 def build_index_docs(source_docs: list[dict[str, object]], registry: dict[str, object]) -> list[dict[str, object]]:
-    index_docs: list[dict[str, object]] = []
-    by_id = {str(doc["id"]): doc for doc in source_docs}
-
-    for doc in source_docs:
-        index_docs.append(source_index_doc(doc, registry))
-
-    for listing_id, locales in APPROVED_TRANSLATION_SEEDS.items():
-        source = by_id.get(listing_id)
-        if not source:
-            continue
-        for locale in locales:
-            if locale not in public_indexable_locales(registry):
-                continue
-            index_docs.append(approved_translation_index_doc(source, locale, registry))
-
-    return index_docs
+    return [source_index_doc(doc, registry) for doc in source_docs]
 
 
 # The lev is pegged to the euro, so a per-square-metre rate quoted in leva is
