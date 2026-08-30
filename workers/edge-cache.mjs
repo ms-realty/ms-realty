@@ -34,6 +34,7 @@ const ROUTER_HEADERS = [
 // Folded into the cache key rather than left to `Vary`, see edgeCacheKey.
 const COLOR_SCHEME_HEADER = "sec-ch-prefers-color-scheme";
 const COLOR_SCHEME_KEY = "__ms_scheme";
+const RELEASE_KEY = "__ms_release";
 
 // Cloudflare's cache does not split entries on an arbitrary `Vary`, so a header
 // it cannot act on is worse than useless: it either makes every lookup miss or
@@ -98,11 +99,14 @@ export function responseMayBeShared(response) {
 // Vary header. Folding the hint into the key means a dark-mode and a light-mode
 // visitor can never be served each other's document, whether or not the origin
 // currently bothers to render them differently.
-export function edgeCacheKey(request) {
+export function edgeCacheKey(request, releaseMarker = "") {
   const url = new URL(request.url);
   url.searchParams.delete(COLOR_SCHEME_KEY);
+  url.searchParams.delete(RELEASE_KEY);
   const hint = (request.headers.get(COLOR_SCHEME_HEADER) || "").trim().toLowerCase();
   if (hint) url.searchParams.set(COLOR_SCHEME_KEY, hint === "dark" ? "dark" : "light");
+  const release = String(releaseMarker || "").trim().toLowerCase();
+  if (/^[0-9a-f]{40}$/.test(release)) url.searchParams.set(RELEASE_KEY, release);
   return new Request(url.toString(), { method: "GET" });
 }
 
