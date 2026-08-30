@@ -1731,7 +1731,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   main[data-react-admin-ui] .mk-btn--md { height: auto; }
   main[data-react-admin-ui] input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
   main[data-react-admin-ui] select,
-  main[data-react-admin-ui] textarea { min-height: 44px; }
+  main[data-react-admin-ui] textarea { min-height: 44px; font-size: 16px; }
   .crm-app main select:not([multiple]):not([size]) { height: 44px; min-height: 44px; }
   main[data-react-admin-ui] .adm-check,
   main[data-react-admin-ui] label:has(input[type="checkbox"]) { min-height: 44px; align-items: center; }

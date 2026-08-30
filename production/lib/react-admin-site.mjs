@@ -3855,7 +3855,7 @@ function TodayBody({ page }) {
       h(
         PageHeader,
         { title, subtitle: settingsCopy.todayBriefing.description },
-        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
       ),
       h(WorkspaceWelcomeBanner, { page }),
       h(
@@ -11638,7 +11638,7 @@ function ConnectionsBody({ page }) {
                   action: h(
                     "a",
                     {
-                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                      className: "mk-btn mk-btn--secondary mk-btn--sm",
                       href: page.assistant?.plugin_url,
                       rel: "noopener",
                       "data-codex-plugin-install": "ms-realty-operator",

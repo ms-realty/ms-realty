@@ -356,6 +356,7 @@ test("owner screens keep one page heading after moving titles into PageHeader", 
     assert.equal(headingCount(hermes.body), 1, "Hermes has exactly one h1");
     assert.equal(headingCount(connections.body), 1, "Connections has exactly one h1");
     assert.equal(headingCount(settings.body), 1, "Settings has exactly one h1");
+    assert.equal((connections.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the connection journey owns the page-primary action");
   });
 });
 
@@ -625,6 +626,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(empty.body, /data-hermes-open="today"/);
     assert.match(empty.body, /name="prompt"/);
     assert.match(empty.body, /<form class="adm-today-briefing__hermes" method="get" action="\/admin\/hermes" data-hermes-entry="today">/);
+    assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
     assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
@@ -671,6 +673,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
+    assert.equal((populated.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the ranked task is the only page-primary action");
     assert.match(populated.body, /name="prompt"[\s\S]*?Prepare a safe plan for today's priority task:/);
     assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
