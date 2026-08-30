@@ -58,7 +58,7 @@ test("local Docker startup recreates the edge after an app update", () => {
   const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
   const importer = fs.readFileSync(fromRoot("production", "scripts", "run-payload-cms-import.mjs"), "utf8");
   const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
-  const importAt = start.indexOf('"payload:cms:import", "--", "--skip-if-initialized"');
+  const importAt = start.indexOf('"payload:cms:import", "--", "--overwrite-existing"');
   const searchAt = start.indexOf('"search-seed"');
   const hermesRuntimeAt = start.indexOf('"hermes:runtime"');
   const liveProvisioningAt = start.indexOf('"live:provisioning"');
@@ -78,8 +78,8 @@ test("local Docker startup recreates the edge after an app update", () => {
       liveCaptureAt < livePreflightAt &&
       livePreflightAt < readinessAt,
   );
-  assert.match(importer, /--skip-if-initialized/);
-  assert.match(importer, /collection: "listings", depth: 0, draft: true, limit: 1, overrideAccess: true/);
+  assert.match(importer, /--overwrite-existing/);
+  assert.doesNotMatch(start, /--skip-if-initialized/);
 });
 
 test("the up flow projects the seed's recorded publication state after the import and before search re-seeding", () => {
@@ -87,7 +87,7 @@ test("the up flow projects the seed's recorded publication state after the impor
   const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
   const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
 
-  const importAt = start.indexOf('"payload:cms:import", "--", "--skip-if-initialized"');
+  const importAt = start.indexOf('"payload:cms:import", "--", "--overwrite-existing"');
   const publicationAt = start.indexOf('"payload:publication:sync"');
   const searchAt = start.indexOf('"search-seed"');
 

@@ -441,11 +441,11 @@ async function start(env, { withHermes = false } = {}) {
     waitFor(`http://127.0.0.1:${env.MS_REALTY_MEILI_PORT}/health`),
   ]);
 
-  compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", "--skip-if-initialized"], { envOverrides });
-  // The importer never publishes, and it is skipped once the database is
-  // initialized, so the owner's recorded publication decision would otherwise
-  // never reach Postgres. The projector carries it across on every deploy; it
-  // is idempotent and refuses anything the committed seed does not approve.
+  compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", "--overwrite-existing"], { envOverrides });
+  // Reconcile the latest drafts on every release so new listings, translations,
+  // and approval fields reach an initialized database. The importer never
+  // changes published versions; the projector below remains the only step that
+  // may publish, and it refuses anything the committed approval does not name.
   // search-seed runs after it because the search projection only indexes
   // listings whose row is cms_status=published with publish_approved.
   compose(["exec", "-T", "app", "npm", "run", "payload:publication:sync"], { envOverrides });
