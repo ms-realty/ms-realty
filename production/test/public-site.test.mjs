@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { approvedContentDocumentsForPath, readApprovedCmsContent } from "../lib/approved-content.mjs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { approvedTranslationRecordsForListing, findListingById, loadListings } from "../lib/content.mjs";
+import { loadListingTranslationsCatalog } from "../lib/listing-translations-catalog.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { publicMediaLibrary } from "../lib/media.mjs";
 import { absolutePublicUrl } from "../lib/public-origin.mjs";
@@ -175,6 +176,36 @@ test("complete pending-review copy is publicly readable but remains outside inde
   assert.equal(unauthorized.fallback.active, true);
   assert.equal(unauthorized.body.content_locale, "bg");
   assert.notEqual(unauthorized.body.h1, copy.title);
+});
+
+test("every owner-authorized catalog translation renders publicly without becoming indexable", () => {
+  const catalog = loadListingTranslationsCatalog({ listings, registry });
+  const translationsByListing = Map.groupBy(catalog.translationRows, (translation) => translation.listing);
+
+  for (const translation of catalog.translationRows) {
+    const sourceListing = findListingById(listings, translation.listing);
+    const page = renderListingPage({
+      registry,
+      listing: sourceListing,
+      localeCode: translation.locale,
+      translations: [
+        ...approvedTranslationRecordsForListing(registry, sourceListing),
+        ...(translationsByListing.get(translation.listing) || []),
+      ],
+    });
+    const id = `${translation.listing}:${translation.locale}`;
+
+    assert.equal(page.status, 200, id);
+    assert.equal(page.body.content_locale, translation.locale, id);
+    assert.equal(page.body.h1, translation.title, id);
+    assert.equal(page.body.description, translation.description, id);
+    assert.equal(page.metadata.title, translation.seo_title, id);
+    assert.equal(page.metadata.description, translation.meta_description, id);
+    assert.equal(page.fallback.active, false, id);
+    assert.equal(page.indexable, false, id);
+    assert.equal(page.metadata.robots, "noindex,follow", id);
+    assert.deepEqual(page.hreflang, [], id);
+  }
 });
 
 test("listing language navigation keeps users on the same listing in every public language", () => {
