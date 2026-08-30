@@ -94,9 +94,13 @@ test("Hermes translation tasks are drafts until human approval and publication",
   assert.equal(approved.status, "approved");
   assert.equal(approved.public_indexable, true);
 
-  const published = publishApprovedTranslation(registry, approved);
+  const published = publishApprovedTranslation(registry, approved, "payload-owner", "2026-08-30T00:00:00+03:00");
   assert.equal(published.status, "published");
   assert.equal(published.public_indexable, true);
+  assert.equal(published.description, approved.hermes.output.body);
+  assert.equal(published.content_origin, "human_reviewed_hermes_draft");
+  assert.equal(published.publication_authorized_by, "payload-owner");
+  assert.equal(published.published_at, "2026-08-30T00:00:00+03:00");
 });
 
 test("human translation mode can be edited, approved, and published without impersonating Hermes", () => {

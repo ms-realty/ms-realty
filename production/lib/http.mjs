@@ -5921,7 +5921,12 @@ export function createHttpApp({
         const input = parseJsonBody(request);
         const task = latestTranslationTasks(currentTranslationTasks()).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
-        const published = publishApprovedTranslation(activeRegistry, task);
+        const published = publishApprovedTranslation(
+          activeRegistry,
+          task,
+          principal?.id || task.reviewer,
+          reviewedAt || new Date().toISOString(),
+        );
         const persisted = appendTranslationTask(published, { filePath: translationLedgerPath || undefined });
         recordAudit({
           action: "translation_published",
