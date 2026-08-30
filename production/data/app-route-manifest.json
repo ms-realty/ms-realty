@@ -1,15 +1,15 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
-  "source_sitemap_entries": 198,
+  "source_sitemap_entries": 197,
   "summary": {
-    "routes": 205,
-    "eligible_routes": 198,
-    "sitemap_indexable_routes": 196,
+    "routes": 204,
+    "eligible_routes": 197,
+    "sitemap_indexable_routes": 197,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
       "guide": 5,
-      "listing": 166,
+      "listing": 165,
       "contact": 7,
       "location": 6,
       "seller": 7,
@@ -20,9 +20,9 @@
       "de": 4,
       "el": 4,
       "en": 6,
-      "he": 6,
+      "he": 4,
       "nl": 4,
-      "ru": 58
+      "ru": 59
     }
   },
   "routes": [
@@ -173,7 +173,7 @@
         "locale": "bg",
         "listingId": "MS-CRAWL-0001"
       },
-      "hreflang_count": 3
+      "hreflang_count": 2
     },
     {
       "type": "listing",
@@ -2997,7 +2997,7 @@
         "locale": "bg",
         "location": "hotovo"
       },
-      "hreflang_count": 2
+      "hreflang_count": 3
     },
     {
       "type": "location",
@@ -3047,7 +3047,7 @@
         "locale": "bg",
         "location": "sandanski"
       },
-      "hreflang_count": 4
+      "hreflang_count": 3
     },
     {
       "type": "seller",
@@ -3484,56 +3484,6 @@
       "hreflang_count": 8
     },
     {
-      "type": "location",
-      "path": "/he/locations/sandanski",
-      "locale": "he",
-      "lang": "he",
-      "dir": "rtl",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderLocationPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "he",
-        "location": "sandanski"
-      },
-      "hreflang_count": 4
-    },
-    {
-      "type": "listing",
-      "path": "/he/properties/MS-CRAWL-0001",
-      "locale": "he",
-      "lang": "he",
-      "dir": "rtl",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "he",
-        "listingId": "MS-CRAWL-0001"
-      },
-      "hreflang_count": 3
-    },
-    {
       "type": "search",
       "path": "/he/search",
       "locale": "he",
@@ -3727,6 +3677,31 @@
     },
     {
       "type": "location",
+      "path": "/ru/locations/hotovo",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderLocationPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "location": "hotovo"
+      },
+      "hreflang_count": 3
+    },
+    {
+      "type": "location",
       "path": "/ru/locations/petrich",
       "locale": "ru",
       "lang": "ru",
@@ -3773,7 +3748,7 @@
         "locale": "ru",
         "location": "sandanski"
       },
-      "hreflang_count": 4
+      "hreflang_count": 3
     },
     {
       "type": "listing",
@@ -4116,7 +4091,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
@@ -4916,7 +4891,7 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": false,
+      "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {

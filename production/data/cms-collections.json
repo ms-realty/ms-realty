@@ -73,7 +73,7 @@
       "listings": 165,
       "properties": 165,
       "locations": 31,
-      "listing_translations": 167,
+      "listing_translations": 1155,
       "media_assets": 4978,
       "listing_tours": 165,
       "listing_enrichment_tasks": 165,
@@ -279,7 +279,7 @@
     },
     {
       "slug": "listing_translations",
-      "records": 167,
+      "records": 1155,
       "source": "listings.translations",
       "workflow": [
         "missing",
@@ -356,10 +356,55 @@
           "localized": false
         },
         {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "description",
+          "type": "textarea",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "seo_title",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "meta_description",
+          "type": "textarea",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "translator",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "content_origin",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
           "name": "reviewer",
           "type": "text",
           "required": false,
           "localized": false
+        },
+        {
+          "name": "human_approved",
+          "type": "checkbox",
+          "required": true,
+          "localized": false,
+          "admin": {
+            "readOnly": true
+          }
         },
         {
           "name": "approved_at",
@@ -368,6 +413,33 @@
           "localized": false,
           "required_when": [
             "approved",
+            "published"
+          ]
+        },
+        {
+          "name": "publication_authorized_by",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "required_when": [
+            "published"
+          ]
+        },
+        {
+          "name": "publication_authorized_at",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "required_when": [
+            "published"
+          ]
+        },
+        {
+          "name": "published_at",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "required_when": [
             "published"
           ]
         },
@@ -389,6 +461,12 @@
           "admin": {
             "readOnly": true
           }
+        },
+        {
+          "name": "citations",
+          "type": "json",
+          "required": false,
+          "localized": false
         }
       ]
     },

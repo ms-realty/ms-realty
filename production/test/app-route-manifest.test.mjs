@@ -71,7 +71,7 @@ test("generated App Router manifest is valid when present", () => {
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.routes, 205);
+  assert.equal(manifest.summary.routes, 204);
   assert.equal(manifest.summary.eligible_routes, sitemap.summary.entries);
   assert.equal(manifest.summary.sitemap_indexable_routes, sitemap.summary.public.entries);
   assert.equal(manifest.summary.by_type.search, 7);
@@ -180,8 +180,9 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   });
   assert.equal(listingFallback.status, 200);
   assert.equal(listingFallback.rendered.kind, "listing");
-  assert.equal(listingFallback.rendered.fallback.active, true);
-  assert.equal(listingFallback.rendered.body.content_locale, "bg");
+  assert.equal(listingFallback.rendered.fallback.active, false);
+  assert.equal(listingFallback.rendered.body.content_locale, "en");
+  assert.match(listingFallback.html, /Commercial complex for rent near Sandanski/);
   assert.match(listingFallback.html, /<meta name="robots" content="noindex,follow">/);
 
   const listingPrint = renderAppRoute({
@@ -353,12 +354,13 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(sitemap.sitemap.summary.entries, manifest.summary.eligible_routes - blockedListingRoutes.length);
-  // The owner-approved catalog leaves no listing route behind a preservation page.
-  // The one recorded exclusion keeps its route out of the sitemap.
-  assert.equal(blockedListingRoutes.length, 2);
-  assert.equal(approvedPublicListingIds.size, 163);
+  // All source listings are published. Pending target-language translations
+  // remain readable via the dynamic route but stay outside this sitemap.
+  assert.equal(blockedListingRoutes.length, 0);
+  assert.equal(approvedPublicListingIds.size, 165);
   assert.match(sitemap.body, /<loc>https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/he<\/loc>/);
-  assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
+  assert.match(sitemap.body, /\/bg\/imoti\/MS-CRAWL-0001/);
+  assert.doesNotMatch(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);
   assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-CRAWL-0001/);
   assert.doesNotMatch(sitemap.body, /\/fr\//);
