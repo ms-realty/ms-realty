@@ -142,6 +142,15 @@ test("390px mobile contracts keep one dominant action per owner screen", () => {
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-command__starting-point \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
 });
 
+test("mobile text inputs outrank the desktop field-size selector", () => {
+  for (const css of [adminAdapterCss, generatedDesignCss]) {
+    assert.match(
+      touchBlock(css),
+      /\.crm-app\s+main\[data-react-admin-ui\]\s+input:not\(\[type="hidden"\]\):not\(\[type="checkbox"\]\):not\(\[type="radio"\]\),[\s\S]*?font-size:\s*16px/,
+    );
+  }
+});
+
 test("mobile owner pages retain their title and use a dense media review grid", () => {
   assert.match(adminAdapterCss, /\.crm-top > div:first-child\s*\{[^}]*display:\s*grid/);
   assert.match(adminAdapterCss, /data-react-admin-ui="listing-editor"\]\s+\.adm-media-manager\s*\{[^}]*grid-template-columns:\s*repeat\(2/);
