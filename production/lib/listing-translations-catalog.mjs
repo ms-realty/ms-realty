@@ -34,6 +34,7 @@ const REQUIRED_FIELDS = [
   "content_origin",
   "reviewed_by",
   "reviewed_at",
+  "human_approved",
   "publication_authorized_by",
   "publication_authorized_at",
   "status",
@@ -117,6 +118,7 @@ function normalizeRecord(record, { listing, locale, sourceHash }) {
     content_origin: text(record.content_origin, "content_origin", id),
     reviewed_by: nullableText(record.reviewed_by, "reviewed_by", id),
     reviewed_at: validDate(record.reviewed_at, "reviewed_at", id),
+    human_approved: record.human_approved,
     publication_authorized_by: nullableText(record.publication_authorized_by, "publication_authorized_by", id),
     publication_authorized_at: validDate(record.publication_authorized_at, "publication_authorized_at", id),
     status: text(record.status, "status", id),
@@ -127,6 +129,10 @@ function normalizeRecord(record, { listing, locale, sourceHash }) {
   if (normalized.locale === normalized.source_locale) throw new Error(`${id} cannot translate into its source locale`);
   if (normalized.source_hash !== sourceHash) throw new Error(`${id} has stale source_hash`);
   if (!LISTING_TRANSLATION_STATUSES.includes(normalized.status)) throw new Error(`${id} has invalid status ${normalized.status}`);
+  if (typeof normalized.human_approved !== "boolean") throw new Error(`${id} requires boolean human_approved`);
+  if (normalized.human_approved !== (normalized.status === "published")) {
+    throw new Error(`${id} human_approved must match publication status`);
+  }
   if (normalized.content_origin !== "manual_translation") throw new Error(`${id} must be a manual translation`);
   if (!normalized.publication_authorized_by || !normalized.publication_authorized_at) {
     throw new Error(`${id} requires publication authorization`);
@@ -192,7 +198,7 @@ function schemaRow(record, locale) {
     content_origin: record.content_origin,
     reviewer: record.reviewed_by,
     approved_at: record.reviewed_at,
-    human_approved: published,
+    human_approved: record.human_approved,
     publication_authorized_by: record.publication_authorized_by,
     publication_authorized_at: record.publication_authorized_at,
     published_at: published ? record.publication_authorized_at : null,

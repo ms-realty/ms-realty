@@ -63,6 +63,7 @@ function catalogRecord(listing, locale) {
     content_origin: "manual_translation",
     reviewed_by: null,
     reviewed_at: null,
+    human_approved: false,
     publication_authorized_by: "agency_owner",
     publication_authorized_at: "2026-08-30T00:00:00Z",
     status: "human_review_pending",
@@ -122,6 +123,7 @@ test("published catalog rows require review and publication authorization", () =
   const published = {
     ...pending,
     status: "published",
+    human_approved: true,
     reviewed_by: "translator_en",
     reviewed_at: "2026-08-30T08:00:00Z",
     publication_authorized_by: "agency_owner",
@@ -260,6 +262,15 @@ test("catalog validation rejects incomplete, duplicate, stale, placeholder, SEO,
         requireComplete: false,
       }),
     /requires publication authorization/,
+  );
+  assert.throws(
+    () =>
+      validateListingTranslationsCatalog([{ ...records[0], human_approved: true }], {
+        listings,
+        registry,
+        requireComplete: false,
+      }),
+    /human_approved must match publication status/,
   );
 });
 
