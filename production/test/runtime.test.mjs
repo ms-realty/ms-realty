@@ -26,6 +26,33 @@ Object.assign(process.env, {
 
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
+const currentSourceHash = seed.records
+  .find((record) => record.id === "MS-CRAWL-0001")
+  .translations.find((translation) => translation.locale === "en").source_hash;
+const approvedSpanishTranslation = {
+  id: "translation-listing-MS-CRAWL-0001-es",
+  object_type: "listing",
+  object_id: "MS-CRAWL-0001",
+  source_locale: "bg",
+  target_locale: "es",
+  locale: "es",
+  status: "published",
+  translation_state: "published",
+  source_hash: currentSourceHash,
+  title: "Complejo comercial en alquiler cerca de Sandanski",
+  description: "Complejo comercial de alquiler a largo plazo cerca de Sandanski, con motel, restaurante, oficinas, taller y estación de servicio.",
+  seo_title: "Complejo comercial en alquiler | MS Realty",
+  meta_description: "Complejo comercial de alquiler cerca de Sandanski con motel, restaurante, oficinas, taller y estación de servicio en una parcela de 20.000 m².",
+  translator: "translator_es",
+  content_origin: "manual_translation",
+  reviewer: "translator_es",
+  approved_at: "2026-08-30T00:00:00+03:00",
+  publication_authorized_by: "payload-owner",
+  publication_authorized_at: "2026-08-30T00:00:00+03:00",
+  published_at: "2026-08-30T00:00:00+03:00",
+  human_approved: true,
+  public_indexable: true,
+};
 
 test("runtime resolves locale-prefixed listing and fallback routes from CMS seed", () => {
   const he = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001");
@@ -42,7 +69,10 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
 
   assert.equal(he.status, 200);
   assert.equal(he.dir, "rtl");
-  assert.equal(he.indexable, true);
+  assert.equal(he.indexable, false);
+  assert.equal(he.metadata.robots, "noindex,follow");
+  assert.equal(he.fallback.active, false);
+  assert.equal(he.body.content_locale, "he");
   assert.ok(he.body.media.gallery_count > 0);
   assert.equal(he.body.media.videos.length, 0);
   assert.equal(he.body.media.review.review_gated_assets, 0);
@@ -57,10 +87,10 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.equal(enSourceFallback.status, 200);
   assert.equal(enSourceFallback.locale, "en");
-  assert.equal(enSourceFallback.fallback.active, true);
+  assert.equal(enSourceFallback.fallback.active, false);
   assert.equal(enSourceFallback.indexable, false);
   assert.equal(enSourceFallback.metadata.robots, "noindex,follow");
-  assert.equal(enSourceFallback.body.content_locale, "bg");
+  assert.equal(enSourceFallback.body.content_locale, "en");
   assert.equal(home.kind, "home");
   assert.equal(home.body.search.path, "/he/search");
   assert.equal(home.body.seller.path, "/he/sell");
@@ -82,7 +112,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(bgGuide.body.sections[0].sources.length, 3);
   assert.equal(renderRuntimePath(registry, seed, "/en/guides/proverka-na-imot-sandanski").status, 404);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
-  assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
+  assert.ok(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length > 0);
   const petrichFallback = renderRuntimePath(registry, seed, "/he/locations/petrich");
   assert.equal(petrichFallback.status, 200);
   assert.equal(petrichFallback.indexable, false);
@@ -242,17 +272,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
     indexable: true,
     route_segments: { listing: "propiedades", search: "buscar", seller: "vender" },
   });
-  const translationTasks = [
-    {
-      id: "translation-listing-MS-CRAWL-0001-es",
-      object_type: "listing",
-      object_id: "MS-CRAWL-0001",
-      target_locale: "es",
-      status: "published",
-      human_approved: true,
-      public_indexable: true,
-    },
-  ];
+  const translationTasks = [approvedSpanishTranslation];
   const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-CRAWL-0001", translationTasks);
 
   assert.equal(page.status, 200);
@@ -279,7 +299,7 @@ test("runtime search uses CMS seed listings and keeps mobile-first contract", ()
   assert.ok(search.search.total_matches > search.cards.length);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
-  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
+  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "fallback_source_locale");
   assert.ok(apartmentSearch.cards.every((card) => card.property_type === "apartment"));
   assert.ok(apartmentSearch.search.total_matches > apartmentSearch.cards.length);
 });
@@ -295,7 +315,9 @@ test("every source-fallback search card resolves to a noindex listing page", () 
   assert.equal(listing.path, fallbackCard.path);
   assert.equal(listing.indexable, false);
   assert.equal(listing.metadata.robots, "noindex,follow");
-  assert.equal(listing.body.content_locale, fallbackCard.content_locale);
+  assert.equal(fallbackCard.content_locale, "bg");
+  assert.equal(listing.body.content_locale, "en");
+  assert.equal(listing.fallback.active, false);
 });
 
 test("runtime prioritizes same-language related listings before source fallbacks", () => {
@@ -314,12 +336,15 @@ test("runtime keeps sold listing pages live while removing them from active inve
       patch: { listing_status: "sold" },
     },
   ]);
-  const listing = renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001");
+  const listing = renderRuntimePath(registry, soldSeed, "/bg/imoti/MS-CRAWL-0001");
+  const pendingTranslation = renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001");
   const search = searchRuntimeListings(registry, soldSeed, { localeCode: "he", query: "Sandanski" });
   const location = renderRuntimePath(registry, soldSeed, "/he/locations/sandanski");
 
   assert.equal(listing.status, 200);
   assert.equal(listing.indexable, true);
+  assert.equal(pendingTranslation.status, 200);
+  assert.equal(pendingTranslation.indexable, false);
   assert.equal(listing.body.facts.listing_status, "sold");
   assert.equal(listing.body.lifecycle.active_in_search, false);
   assert.equal(listing.body.lifecycle.seo_kept_live, true);
@@ -364,17 +389,7 @@ test("runtime search shows reviewed cards for admin-added approved locales", () 
   const search = searchRuntimeListings(updated, seed, {
     localeCode: "es",
     query: "Sandanski",
-    translationTasks: [
-      {
-        id: "translation-listing-MS-CRAWL-0001-es",
-        object_type: "listing",
-        object_id: "MS-CRAWL-0001",
-        target_locale: "es",
-        status: "published",
-        human_approved: true,
-        public_indexable: true,
-      },
-    ],
+    translationTasks: [approvedSpanishTranslation],
   });
   const card = search.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
 

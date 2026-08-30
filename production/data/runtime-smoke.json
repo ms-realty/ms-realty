@@ -9,37 +9,20 @@
     "dir": "rtl",
     "path": "/he/properties/MS-CRAWL-0001",
     "canonical": "/he/properties/MS-CRAWL-0001",
-    "indexable": true,
+    "indexable": false,
     "fallback": {
       "active": false,
       "requested_locale": "he",
       "resolved_locale": "he"
     },
     "metadata": {
-      "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
-      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "og_description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
-      "robots": "index,follow"
+      "title": "מתחם מסחרי להשכרה ליד סנדנסקי",
+      "description": "מתחם לטווח ארוך במרחק 8 ק״מ מסנדנסקי: מוטל, מסעדה, אולם תיקונים 600 מ״ר, תחנת דלק ואפשרות לחניון משאיות, במגרש של 20 דונם.",
+      "og_title": "מתחם מסחרי להשכרה ליד סנדנסקי",
+      "og_description": "מתחם לטווח ארוך במרחק 8 ק״מ מסנדנסקי: מוטל, מסעדה, אולם תיקונים 600 מ״ר, תחנת דלק ואפשרות לחניון משאיות, במגרש של 20 דונם.",
+      "robots": "noindex,follow"
     },
-    "hreflang": [
-      {
-        "hreflang": "bg",
-        "href": "/bg/imoti/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "el",
-        "href": "/el/akinita/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "he",
-        "href": "/he/properties/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "x-default",
-        "href": "/bg/imoti/MS-CRAWL-0001"
-      }
-    ],
+    "hreflang": [],
     "chrome": {
       "copy": {
         "navBuy": "קנייה",
@@ -199,8 +182,8 @@
       "@id": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001#listing",
       "url": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "name": "מתחם מסחרי להשכרה ליד סנדנסקי",
+      "description": "מתחם להשכרה לטווח ארוך על הכביש המהיר סופיה–קולאטה, כ־8 ק״מ מסנדנסקי, עם כניסה ויציאה נפרדות. הנכס משתרע על מגרש של 20 דונם וכולל מוטל עם מסעדה, משרדים, אולם תיקונים, תחנת דלק ואפשרות לחניון משאיות. למוטל שטח בנוי כולל של 794 מ״ר בשתי קומות: מסעדה ומטבח בקומה הראשונה ו־9 חדרים עם חדרי רחצה פרטיים בקומה השנייה. אולם התיקונים בשטח 600 מ״ר, בגובה 8–11 מ׳, ומצויד לתיקון ולתחזוקה של מכוניות ומשאיות. המוטל והמסעדה אינם פעילים כבר כמה שנים וזקוקים לרענון ולהחלפה חלקית של הריהוט. ניתן לשכור חלקים נפרדים או את המתחם כולו.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
@@ -235,14 +218,14 @@
     },
     "translation": {
       "locale": "he",
-      "status": "approved",
-      "human_approved": true,
-      "reviewer": "translator_he"
+      "status": "human_edited",
+      "human_approved": false,
+      "reviewer": null
     },
     "body": {
       "content_locale": "he",
-      "h1": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "h1": "מוסך רכב, מוטל ותחנת דלק עסקית – להשכרה לטווח ארוך!",
+      "description": "מתחם להשכרה לטווח ארוך על הכביש המהיר סופיה–קולאטה, כ־8 ק״מ מסנדנסקי, עם כניסה ויציאה נפרדות. הנכס משתרע על מגרש של 20 דונם וכולל מוטל עם מסעדה, משרדים, אולם תיקונים, תחנת דלק ואפשרות לחניון משאיות. למוטל שטח בנוי כולל של 794 מ״ר בשתי קומות: מסעדה ומטבח בקומה הראשונה ו־9 חדרים עם חדרי רחצה פרטיים בקומה השנייה. אולם התיקונים בשטח 600 מ״ר, בגובה 8–11 מ׳, ומצויד לתיקון ולתחזוקה של מכוניות ומשאיות. המוטל והמסעדה אינם פעילים כבר כמה שנים וזקוקים לרענון ולהחלפה חלקית של הריהוט. ניתן לשכור חלקים נפרדים או את המתחם כולו.",
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "סנדנסקי",
@@ -268,7 +251,7 @@
         "active_in_search": true,
         "seo_kept_live": true,
         "publish_approved": true,
-        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_at": "2026-08-29T21:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -706,7 +689,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -759,7 +742,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -817,7 +800,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -888,15 +871,15 @@
     "canonical": "/en/properties/MS-CRAWL-0001",
     "indexable": false,
     "fallback": {
-      "active": true,
+      "active": false,
       "requested_locale": "en",
       "resolved_locale": "en"
     },
     "metadata": {
-      "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва…",
-      "og_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "og_description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва…",
+      "title": "Commercial complex for rent near Sandanski",
+      "description": "Long-term rental complex 8 km from Sandanski with a motel, restaurant, 600 sq.m repair hall, fuel station and possible truck parking.",
+      "og_title": "Commercial complex for rent near Sandanski",
+      "og_description": "Long-term rental complex 8 km from Sandanski with a motel, restaurant, 600 sq.m repair hall, fuel station and possible truck parking.",
       "robots": "noindex,follow"
     },
     "hreflang": [],
@@ -1079,8 +1062,8 @@
       "@id": "https://ms-realty.ms-realty-bg.workers.dev/en/properties/MS-CRAWL-0001#listing",
       "url": "https://ms-realty.ms-realty-bg.workers.dev/en/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
+      "name": "Commercial complex for rent near Sandanski",
+      "description": "A complex for long-term rental on the Sofia–Kulata motorway, about 8 km from Sandanski, with separate entrance and exit. The property occupies a 20-decare plot and includes a motel with a restaurant, office premises, a repair hall, a fuel station and the possibility of a truck parking area. The motel has a gross floor area of 794 sq.m over two floors, with a restaurant and kitchen on the first floor and 9 rooms with private bathrooms on the second. The hall is 600 sq.m, has a height of 8–11 m and is equipped for repairing and servicing cars and trucks. The motel and restaurant have not operated for several years and need refreshing and partial replacement of the furniture. Separate parts or the entire complex may be rented.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
@@ -1115,14 +1098,14 @@
     },
     "translation": {
       "locale": "en",
-      "status": "missing",
+      "status": "human_edited",
       "human_approved": false,
       "reviewer": null
     },
     "body": {
-      "content_locale": "bg",
-      "h1": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "description": "Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
+      "content_locale": "en",
+      "h1": "Auto repair workshop, motel and company fuel station – long-term lease!",
+      "description": "A complex for long-term rental on the Sofia–Kulata motorway, about 8 km from Sandanski, with separate entrance and exit. The property occupies a 20-decare plot and includes a motel with a restaurant, office premises, a repair hall, a fuel station and the possibility of a truck parking area. The motel has a gross floor area of 794 sq.m over two floors, with a restaurant and kitchen on the first floor and 9 rooms with private bathrooms on the second. The hall is 600 sq.m, has a height of 8–11 m and is equipped for repairing and servicing cars and trucks. The motel and restaurant have not operated for several years and need refreshing and partial replacement of the furniture. Separate parts or the entire complex may be rented.",
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
@@ -1148,7 +1131,7 @@
         "active_in_search": true,
         "seo_kept_live": true,
         "publish_approved": true,
-        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_at": "2026-08-29T21:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -1586,7 +1569,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "en",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -1639,7 +1622,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "en",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -1697,7 +1680,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "en",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -2006,7 +1989,7 @@
         "active_in_search": true,
         "seo_kept_live": true,
         "publish_approved": true,
-        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_at": "2026-08-29T21:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -3504,12 +3487,12 @@
         {
           "location": "סנדנסקי",
           "path": "/he/locations/sandanski",
-          "listing_count": 1,
+          "listing_count": 81,
           "image": {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "listing_id": "MS-CRAWL-0001",
-            "path": "/he/properties/MS-CRAWL-0001"
+            "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
+            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+            "listing_id": "MS-CRAWL-0002",
+            "path": "/he/properties/MS-CRAWL-0002"
           }
         },
         {
@@ -3539,16 +3522,16 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+        "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
         "path": "/he/properties/MS-CRAWL-0001",
-        "review_badge": "reviewed_translation",
-        "translation_display": "reviewed_translation",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "approved",
-        "translation_indexable": true,
-        "translation_human_approved": true,
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
         "source_locale": "bg",
-        "content_locale": "he",
+        "content_locale": "bg",
         "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -3602,7 +3585,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -3660,7 +3643,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -3718,7 +3701,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -3776,7 +3759,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -3834,7 +3817,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -4646,34 +4629,13 @@
     "dir": "rtl",
     "path": "/he/locations/sandanski",
     "canonical": "/he/locations/sandanski",
-    "indexable": true,
+    "indexable": false,
     "metadata": {
       "title": "נכסים ב-סנדנסקי | MS Realty",
       "description": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
-      "robots": "index,follow"
+      "robots": "noindex,follow"
     },
-    "hreflang": [
-      {
-        "hreflang": "bg",
-        "href": "/bg/lokacii/sandanski"
-      },
-      {
-        "hreflang": "ru",
-        "href": "/ru/locations/sandanski"
-      },
-      {
-        "hreflang": "el",
-        "href": "/el/topothesies/sandanski"
-      },
-      {
-        "hreflang": "he",
-        "href": "/he/locations/sandanski"
-      },
-      {
-        "hreflang": "x-default",
-        "href": "/bg/lokacii/sandanski"
-      }
-    ],
+    "hreflang": [],
     "chrome": {
       "copy": {
         "navBuy": "קנייה",
@@ -4830,14 +4792,56 @@
     "body": {
       "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
-      "listing_count": 1,
+      "listing_count": 81,
       "intro": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
       "sub_areas": [
         {
           "id": "BG:settlement:65334",
-          "count": 1,
+          "count": 62,
           "label": "סנדנסקי",
           "href": "/he/search?region_id=BG%3Asettlement%3A65334"
+        },
+        {
+          "id": "BG:settlement:77361",
+          "count": 4,
+          "label": "חוטובו",
+          "href": "/he/search?region_id=BG%3Asettlement%3A77361"
+        },
+        {
+          "id": "BG:settlement:57176",
+          "count": 4,
+          "label": "Polenitsa",
+          "href": "/he/search?region_id=BG%3Asettlement%3A57176"
+        },
+        {
+          "id": "BG:settlement:20780",
+          "count": 3,
+          "label": "Dzhigurovo",
+          "href": "/he/search?region_id=BG%3Asettlement%3A20780"
+        },
+        {
+          "id": "BG:settlement:43565",
+          "count": 2,
+          "label": "Leshnitsa",
+          "href": "/he/search?region_id=BG%3Asettlement%3A43565"
+        },
+        {
+          "id": "BG:settlement:43243",
+          "count": 2,
+          "label": "Levunovo",
+          "href": "/he/search?region_id=BG%3Asettlement%3A43243"
+        },
+        {
+          "id": "BG:settlement:43150",
+          "count": 1,
+          "label": "Laskarevo",
+          "href": "/he/search?region_id=BG%3Asettlement%3A43150"
+        },
+        {
+          "id": "BG:settlement:56410",
+          "count": 1,
+          "label": "Pirin",
+          "href": "/he/search?region_id=BG%3Asettlement%3A56410"
         }
       ],
       "guides": [],
@@ -4858,16 +4862,16 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+        "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
         "path": "/he/properties/MS-CRAWL-0001",
-        "review_badge": "reviewed_translation",
-        "translation_display": "reviewed_translation",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "approved",
-        "translation_indexable": true,
-        "translation_human_approved": true,
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
         "source_locale": "bg",
-        "content_locale": "he",
+        "content_locale": "bg",
         "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -4913,6 +4917,639 @@
             "listing_id": "MS-CRAWL-0001"
           }
         }
+      },
+      {
+        "id": "MS-CRAWL-0002",
+        "title": "Апартаменти в парка на Сандански. Затворен комплекс",
+        "path": "/he/properties/MS-CRAWL-0002",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 2,
+        "legacy_image_count": 20,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
+          "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0002"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0002",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0002"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0003",
+        "title": "Тристаен апартамент под наем в Сандански + паркомясто",
+        "path": "/he/properties/MS-CRAWL-0003",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": 2,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 600,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 14,
+        "legacy_image_count": 32,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
+          "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0003"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0003",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0003"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0004",
+        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0004",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 355,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 8,
+        "legacy_image_count": 26,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
+          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0004"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0004",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0004"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0005",
+        "title": "Апартамент под наем в гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0005",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": 2,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 8,
+        "legacy_image_count": 26,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg",
+          "alt": "Апартамент под наем в гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0005"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0005",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0005"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0006",
+        "title": "Дава под наем промишлена сграда в Сандански",
+        "path": "/he/properties/MS-CRAWL-0006",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 0,
+        "legacy_image_count": 18,
+        "thumbnail": null,
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0006"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0006",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0006"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0007",
+        "title": "Продава двустаен апартамент в гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0007",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 53289,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 6,
+        "legacy_image_count": 24,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg",
+          "alt": "Продава двустаен апартамент в гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0007"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0007",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0007"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0008",
+        "title": "Двустаен апартамент в центъра на Сандански – наем",
+        "path": "/he/properties/MS-CRAWL-0008",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 350,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 17,
+        "legacy_image_count": 35,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg",
+          "alt": "Двустаен апартамент в центъра на Сандански – наем",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0008"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0008",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0008"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0009",
+        "title": "Двустаен апартамент под наем в парка на Сандански",
+        "path": "/he/properties/MS-CRAWL-0009",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 400,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 8,
+        "legacy_image_count": 26,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg",
+          "alt": "Двустаен апартамент под наем в парка на Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0009"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0009",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0009"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0010",
+        "title": "Двустаен апартамент в идеалния център на гр. Сандански",
+        "path": "/he/properties/MS-CRAWL-0010",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "apartment",
+        "property_type_label": "דירה",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 130000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 16,
+        "legacy_image_count": 34,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg",
+          "alt": "Двустаен апартамент в идеалния център на гр. Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0010"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0010",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0010"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0011",
+        "title": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+        "path": "/he/properties/MS-CRAWL-0011",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "hotel",
+        "property_type_label": "מלון",
+        "offer_type": "rent",
+        "offer_type_label": "להשכרה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 20,
+        "legacy_image_count": 38,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg",
+          "alt": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0011"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0011",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0011"
+          }
+        }
+      },
+      {
+        "id": "MS-CRAWL-0012",
+        "title": "Инвестиционен проект в Сандански – хотел ресторант",
+        "path": "/he/properties/MS-CRAWL-0012",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "content_locale": "bg",
+        "location": "סנדנסקי",
+        "property_type": "hotel",
+        "property_type_label": "מלון",
+        "offer_type": "sale",
+        "offer_type_label": "למכירה",
+        "bedrooms": null,
+        "bedrooms_not_applicable": true,
+        "area_sqm": null,
+        "land_area_sqm": null,
+        "price_eur": 950000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 1,
+        "legacy_image_count": 19,
+        "thumbnail": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg",
+          "alt": "Инвестиционен проект в Сандански – хотел ресторант",
+          "width": null,
+          "height": null
+        },
+        "actions": {
+          "detail": {
+            "label": "פרטים",
+            "href": "/he/properties/MS-CRAWL-0012"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0012",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "saved_label": "נשמר",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0012"
+          }
+        }
       }
     ]
   },
@@ -4925,37 +5562,20 @@
     "dir": "rtl",
     "path": "/he/properties/MS-CRAWL-0001",
     "canonical": "/he/properties/MS-CRAWL-0001",
-    "indexable": true,
+    "indexable": false,
     "fallback": {
       "active": false,
       "requested_locale": "he",
       "resolved_locale": "he"
     },
     "metadata": {
-      "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
-      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "og_description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
-      "robots": "index,follow"
+      "title": "מתחם מסחרי להשכרה ליד סנדנסקי",
+      "description": "מתחם לטווח ארוך במרחק 8 ק״מ מסנדנסקי: מוטל, מסעדה, אולם תיקונים 600 מ״ר, תחנת דלק ואפשרות לחניון משאיות, במגרש של 20 דונם.",
+      "og_title": "מתחם מסחרי להשכרה ליד סנדנסקי",
+      "og_description": "מתחם לטווח ארוך במרחק 8 ק״מ מסנדנסקי: מוטל, מסעדה, אולם תיקונים 600 מ״ר, תחנת דלק ואפשרות לחניון משאיות, במגרש של 20 דונם.",
+      "robots": "noindex,follow"
     },
-    "hreflang": [
-      {
-        "hreflang": "bg",
-        "href": "/bg/imoti/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "el",
-        "href": "/el/akinita/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "he",
-        "href": "/he/properties/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "x-default",
-        "href": "/bg/imoti/MS-CRAWL-0001"
-      }
-    ],
+    "hreflang": [],
     "chrome": {
       "copy": {
         "navBuy": "קנייה",
@@ -5115,8 +5735,8 @@
       "@id": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001#listing",
       "url": "https://ms-realty.ms-realty-bg.workers.dev/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "name": "מתחם מסחרי להשכרה ליד סנדנסקי",
+      "description": "מתחם להשכרה לטווח ארוך על הכביש המהיר סופיה–קולאטה, כ־8 ק״מ מסנדנסקי, עם כניסה ויציאה נפרדות. הנכס משתרע על מגרש של 20 דונם וכולל מוטל עם מסעדה, משרדים, אולם תיקונים, תחנת דלק ואפשרות לחניון משאיות. למוטל שטח בנוי כולל של 794 מ״ר בשתי קומות: מסעדה ומטבח בקומה הראשונה ו־9 חדרים עם חדרי רחצה פרטיים בקומה השנייה. אולם התיקונים בשטח 600 מ״ר, בגובה 8–11 מ׳, ומצויד לתיקון ולתחזוקה של מכוניות ומשאיות. המוטל והמסעדה אינם פעילים כבר כמה שנים וזקוקים לרענון ולהחלפה חלקית של הריהוט. ניתן לשכור חלקים נפרדים או את המתחם כולו.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
@@ -5151,14 +5771,14 @@
     },
     "translation": {
       "locale": "he",
-      "status": "approved",
-      "human_approved": true,
-      "reviewer": "translator_he"
+      "status": "human_edited",
+      "human_approved": false,
+      "reviewer": null
     },
     "body": {
       "content_locale": "he",
-      "h1": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
-      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "h1": "מוסך רכב, מוטל ותחנת דלק עסקית – להשכרה לטווח ארוך!",
+      "description": "מתחם להשכרה לטווח ארוך על הכביש המהיר סופיה–קולאטה, כ־8 ק״מ מסנדנסקי, עם כניסה ויציאה נפרדות. הנכס משתרע על מגרש של 20 דונם וכולל מוטל עם מסעדה, משרדים, אולם תיקונים, תחנת דלק ואפשרות לחניון משאיות. למוטל שטח בנוי כולל של 794 מ״ר בשתי קומות: מסעדה ומטבח בקומה הראשונה ו־9 חדרים עם חדרי רחצה פרטיים בקומה השנייה. אולם התיקונים בשטח 600 מ״ר, בגובה 8–11 מ׳, ומצויד לתיקון ולתחזוקה של מכוניות ומשאיות. המוטל והמסעדה אינם פעילים כבר כמה שנים וזקוקים לרענון ולהחלפה חלקית של הריהוט. ניתן לשכור חלקים נפרדים או את המתחם כולו.",
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "סנדנסקי",
@@ -5184,7 +5804,7 @@
         "active_in_search": false,
         "seo_kept_live": true,
         "publish_approved": true,
-        "publish_approved_at": "2026-08-24T00:00:00.000Z",
+        "publish_approved_at": "2026-08-29T21:00:00.000Z",
         "last_edited_at": null
       },
       "verification": {
@@ -5622,7 +6242,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -5675,7 +6295,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -5733,7 +6353,7 @@
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
-          "translation_status": "missing",
+          "translation_status": "human_edited",
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
@@ -6711,7 +7331,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -6769,7 +7389,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -6827,7 +7447,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -6885,7 +7505,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -6943,7 +7563,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -6996,7 +7616,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7054,7 +7674,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7112,7 +7732,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7170,7 +7790,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7228,7 +7848,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7286,7 +7906,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7344,7 +7964,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7644,7 +8264,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7702,7 +8322,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7760,7 +8380,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7818,7 +8438,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7876,7 +8496,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7929,7 +8549,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -7987,7 +8607,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -8045,7 +8665,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -8103,7 +8723,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -8161,7 +8781,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -8219,7 +8839,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -8277,7 +8897,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9449,16 +10069,16 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+        "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
         "path": "/he/properties/MS-CRAWL-0001",
-        "review_badge": "reviewed_translation",
-        "translation_display": "reviewed_translation",
+        "review_badge": null,
+        "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "approved",
-        "translation_indexable": true,
-        "translation_human_approved": true,
+        "translation_status": "human_edited",
+        "translation_indexable": false,
+        "translation_human_approved": false,
         "source_locale": "bg",
-        "content_locale": "he",
+        "content_locale": "bg",
         "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -9512,7 +10132,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9570,7 +10190,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9628,7 +10248,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9686,7 +10306,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9744,7 +10364,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9797,7 +10417,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9855,7 +10475,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9913,7 +10533,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -9971,7 +10591,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -10029,7 +10649,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -10087,7 +10707,7 @@
         "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
-        "translation_status": "missing",
+        "translation_status": "human_edited",
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
@@ -10141,9 +10761,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-604af9ae-189b-4b40-b761-e55189bd9406",
+    "id": "inbox-lead-draft-3428c75f-a28e-463b-961d-e50fd6d95785",
     "lead": {
-      "id": "lead-draft-604af9ae-189b-4b40-b761-e55189bd9406",
+      "id": "lead-draft-3428c75f-a28e-463b-961d-e50fd6d95785",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10244,9 +10864,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-077fadea-751f-4caf-ab9f-4a2845569f06",
+    "id": "inbox-lead-draft-3c9624ad-26db-47f3-a1f8-13d4db0d753b",
     "lead": {
-      "id": "lead-draft-077fadea-751f-4caf-ab9f-4a2845569f06",
+      "id": "lead-draft-3c9624ad-26db-47f3-a1f8-13d4db0d753b",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10350,9 +10970,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-cf81f20d-229d-4689-baf9-af26335d74df",
+    "id": "inbox-lead-draft-6c9d5acf-9d8d-4458-8bee-d8e1fcd13f52",
     "lead": {
-      "id": "lead-draft-cf81f20d-229d-4689-baf9-af26335d74df",
+      "id": "lead-draft-6c9d5acf-9d8d-4458-8bee-d8e1fcd13f52",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",
