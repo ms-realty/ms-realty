@@ -18,7 +18,10 @@ import {
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
 } from "../lib/hermes-provider-provisioning.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
-import { HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "../lib/hermes-draft-dispatch.mjs";
+import {
+  DEFAULT_HERMES_DRAFT_DISPATCH_PATH,
+  HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
+} from "../lib/hermes-draft-dispatch.mjs";
 import { fromRoot, repoRelativePath } from "../lib/paths.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
@@ -71,11 +74,46 @@ function validDraft() {
   };
 }
 
-function runScript(script, env) {
+function isolatedDispatch(rows = [dispatchRow()]) {
+  return {
+    generated_at: "2026-08-30T00:00:00Z",
+    summary: {
+      eligible_tasks: rows.length,
+      batch_limit: rows.length,
+      batch_size: rows.length,
+      remaining_after_batch: 0,
+      by_target_locale: rows.reduce((counts, row) => {
+        counts[row.target_locale] = (counts[row.target_locale] || 0) + 1;
+        return counts;
+      }, {}),
+    },
+    rows,
+  };
+}
+
+function runScript(script, env, { dispatch } = {}) {
   return new Promise((resolve) => {
+    const childEnv = { ...env };
+    if (dispatch) {
+      const fixtureDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-dispatch-`);
+      const fixturePath = `${fixtureDir}/hermes-draft-dispatch.json`;
+      const preloadPath = `${fixtureDir}/inject-hermes-dispatch.mjs`;
+      fs.writeFileSync(fixturePath, `${JSON.stringify(dispatch, null, 2)}\n`);
+      fs.writeFileSync(
+        preloadPath,
+        [
+          'import fs from "node:fs";',
+          "const originalReadFileSync = fs.readFileSync.bind(fs);",
+          `const dispatchPath = ${JSON.stringify(DEFAULT_HERMES_DRAFT_DISPATCH_PATH)};`,
+          `const fixturePath = ${JSON.stringify(fixturePath)};`,
+          "fs.readFileSync = (filePath, ...args) => filePath === dispatchPath ? originalReadFileSync(fixturePath, ...args) : originalReadFileSync(filePath, ...args);",
+        ].join("\n"),
+      );
+      childEnv.NODE_OPTIONS = [childEnv.NODE_OPTIONS, `--import=${preloadPath}`].filter(Boolean).join(" ");
+    }
     const child = spawn(process.execPath, [fromRoot("production", "scripts", script)], {
       cwd: fromRoot(),
-      env,
+      env: childEnv,
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -90,14 +128,7 @@ function runScript(script, env) {
   });
 }
 
-async function withHermesServer(fn) {
-  const draft = {
-    title: "MS-CRAWL-0001 Sandanski commercial rent",
-    body: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    seo_title: "MS-CRAWL-0001 Sandanski commercial rent",
-    meta_description: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    citations: [{ source: "cms_seed", object_id: "MS-CRAWL-0001" }],
-  };
+async function withHermesServer(fn, draft = validDraft()) {
   const server = http.createServer((request, response) => {
     request.resume();
     request.on("end", () => {
@@ -567,16 +598,20 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
     const ledgerPath = `${dir}/translation-tasks.jsonl`;
     const auditPath = `${dir}/hermes-audit.jsonl`;
     const auditLogPath = `${dir}/audit-log.jsonl`;
-    const result = await runScript("run-hermes-draft-worker.mjs", {
-      ...process.env,
-      HERMES_CHAT_COMPLETIONS_URL: endpoint,
-      HERMES_API_KEY: "test-key",
-      HERMES_DRAFT_LIMIT: "1",
-      MS_REALTY_HERMES_WORKER_REPORT_PATH: reportPath,
-      MS_REALTY_TRANSLATION_LEDGER_PATH: ledgerPath,
-      MS_REALTY_HERMES_AUDIT_PATH: auditPath,
-      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
-    });
+    const result = await runScript(
+      "run-hermes-draft-worker.mjs",
+      {
+        ...process.env,
+        HERMES_CHAT_COMPLETIONS_URL: endpoint,
+        HERMES_API_KEY: "test-key",
+        HERMES_DRAFT_LIMIT: "1",
+        MS_REALTY_HERMES_WORKER_REPORT_PATH: reportPath,
+        MS_REALTY_TRANSLATION_LEDGER_PATH: ledgerPath,
+        MS_REALTY_HERMES_AUDIT_PATH: auditPath,
+        MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      },
+      { dispatch: isolatedDispatch() },
+    );
 
     assert.equal(result.status, 0, result.stderr);
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));

@@ -6,6 +6,10 @@ import path from "node:path";
 import { readAuditLog } from "../lib/audit-log.mjs";
 import { adminSessionFingerprint } from "../lib/admin-sessions.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import {
+  buildHermesDraftDispatch,
+  DEFAULT_HERMES_DRAFT_DISPATCH_PATH,
+} from "../lib/hermes-draft-dispatch.mjs";
 import { readLeadAssignments } from "../lib/lead-assignments.mjs";
 import {
   mcpConfigFromEnv,
@@ -30,6 +34,36 @@ const BROKER_PROFILES = [
   { id: "mcp_broker", languages: ["en"] },
   { id: "broker_ru", languages: ["ru"] },
 ];
+
+function isolatedEligibleHermesDispatch() {
+  return buildHermesDraftDispatch({
+    generatedAt: "2026-08-30T00:00:00Z",
+    limit: 1,
+    translationCoverage: {
+      rows: [
+        {
+          listing_id: "MS-CRAWL-0001",
+          target_locale: "he",
+          task_type: "hermes_draft_required",
+          provider_mode: "hermes_draft",
+          admin_path: "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=he",
+          task: { id: "translation-MS-CRAWL-0001-he" },
+        },
+      ],
+    },
+  });
+}
+
+function installHermesDispatchFixture(t, dispatch) {
+  const originalReadFileSync = fs.readFileSync;
+  fs.readFileSync = function readFileSync(filePath, ...args) {
+    if (filePath === DEFAULT_HERMES_DRAFT_DISPATCH_PATH) return JSON.stringify(dispatch);
+    return originalReadFileSync.call(fs, filePath, ...args);
+  };
+  t.after(() => {
+    fs.readFileSync = originalReadFileSync;
+  });
+}
 
 function jsonl(directory, name, rows = []) {
   const filePath = path.join(directory, `${name}.jsonl`);
@@ -186,7 +220,8 @@ test("MCP separates anonymous public discovery from role-bound operator tools", 
   }
 });
 
-test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and adapter-audited", async () => {
+test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and adapter-audited", async (t) => {
+  installHermesDispatchFixture(t, isolatedEligibleHermesDispatch());
   const { config, durableListingAudits, paths, runtime } = fixture();
   const auth = { authorization: `Bearer ${EDITOR_TOKEN}` };
   const context = await callTool(config, "ms_realty_admin_context", {}, auth);

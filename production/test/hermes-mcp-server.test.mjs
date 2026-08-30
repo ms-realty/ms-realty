@@ -70,5 +70,9 @@ test("Hermes stdio MCP initializes and exposes the guarded bridge tools", async 
 
   const status = await send("tools/call", { name: "hermes_status", arguments: {} });
   assert.equal(status.structuredContent.provider.mode, "desktop_subscription");
-  assert.ok(status.structuredContent.eligible_for_desktop > 0);
+  assert.equal(status.structuredContent.eligible_for_desktop, 0);
+  assert.equal(status.structuredContent.withheld_sensitive, 0);
+
+  const nextTasks = await send("tools/call", { name: "hermes_next_tasks", arguments: { limit: 3 } });
+  assert.deepEqual(nextTasks.structuredContent.result, []);
 });
