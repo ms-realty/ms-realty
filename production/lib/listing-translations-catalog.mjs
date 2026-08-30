@@ -11,7 +11,15 @@ export const EXPECTED_LISTING_COUNT = 165;
 export const EXPECTED_TRANSLATIONS_PER_LISTING = 6;
 
 const BATCH_FILE = /^batch-\d{3,}\.json$/;
-const HEBREW = /[\u0590-\u05ff]/u;
+const COPY_SCRIPT_BY_LOCALE = Object.freeze({
+  bg: ["Cyrillic", /\p{Script=Cyrillic}/u],
+  en: ["Latin", /\p{Script=Latin}/u],
+  de: ["Latin", /\p{Script=Latin}/u],
+  nl: ["Latin", /\p{Script=Latin}/u],
+  ru: ["Cyrillic", /\p{Script=Cyrillic}/u],
+  el: ["Greek", /\p{Script=Greek}/u],
+  he: ["Hebrew", /\p{Script=Hebrew}/u],
+});
 const PLACEHOLDER = /(?:\b(?:todo|tbd|placeholder|lorem ipsum|translation pending|needs translation)\b|нужен перевод|очаква превод|דרוש תרגום)/iu;
 const REQUIRED_FIELDS = [
   "listing_id",
@@ -146,11 +154,12 @@ function normalizeRecord(record, { listing, locale, sourceHash }) {
   ) {
     throw new Error(`${id} does not preserve every numeric source fact`);
   }
-  if (normalized.locale === "he") {
-    if (locale.direction !== "rtl") throw new Error("Hebrew locale metadata must be RTL");
-    if (!HEBREW.test(`${normalized.title}\n${normalized.description}\n${normalized.meta_description}`)) {
-      throw new Error(`${id} must contain Hebrew copy`);
-    }
+  if (normalized.locale === "he" && locale.direction !== "rtl") {
+    throw new Error("Hebrew locale metadata must be RTL");
+  }
+  const [scriptName, script] = COPY_SCRIPT_BY_LOCALE[normalized.locale] || [];
+  for (const field of ["title", "description", "seo_title", "meta_description"]) {
+    if (script && !script.test(normalized[field])) throw new Error(`${id} ${field} must contain ${scriptName} script`);
   }
 
   assertCitations(record.citations, listing, id);

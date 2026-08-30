@@ -38,22 +38,26 @@ function fixedLength(value, length = 130) {
 }
 
 function catalogRecord(listing, locale) {
-  const hebrew = locale === "he";
   const fact = String(Number(listing.id.slice(-4)));
+  const localeWord = {
+    bg: "Имот",
+    en: "Property",
+    de: "Immobilie",
+    nl: "Woning",
+    ru: "Объект",
+    el: "Ακίνητο",
+    he: "נכס",
+  }[locale];
   return {
     listing_id: listing.id,
     source_locale: listing.locale,
     locale,
     source_hash: contentHash(listingSourceSnapshot(listing)),
-    title: hebrew ? `נכס למכירה עם נתון ${fact}` : `${locale.toUpperCase()} translated property title ${fact}`,
-    description: hebrew
-      ? `תיאור מלא ומדויק של הנכס עם כל הפרטים שנמסרו במקור, כולל נתון ${fact}.`
-      : `${locale.toUpperCase()} translated description with every source property detail preserved, including value ${fact}.`,
-    seo_title: hebrew ? `נכס ${listing.id}` : `${locale.toUpperCase()} property ${listing.id}`,
+    title: `${localeWord} translated title ${fact}`,
+    description: `${localeWord} translated description with every source property detail preserved, including value ${fact}.`,
+    seo_title: `${localeWord} ${listing.id}`,
     meta_description: fixedLength(
-      hebrew
-        ? `תיאור מדויק של הנכס ${listing.id} עם פרטי המיקום והמאפיינים שנמסרו במקור בלבד. `
-        : `${locale.toUpperCase()} accurate property summary for ${listing.id}, preserving the source location and stated facts only. `,
+      `${localeWord} accurate property summary for ${listing.id}, preserving the source location and stated facts only. `,
     ),
     translator: "catalog-test-translator",
     content_origin: "manual_translation",
@@ -192,7 +196,23 @@ test("catalog validation rejects incomplete, duplicate, stale, placeholder, SEO,
         [{ ...hebrew, title: "English 1", description: "English description 1", meta_description: fixedLength("English metadata. ") }],
         { listings, registry, requireComplete: false },
       ),
-    /must contain Hebrew copy/,
+    /title must contain Hebrew script/,
+  );
+  assert.throws(
+    () =>
+      validateListingTranslationsCatalog(
+        [
+          {
+            ...records[0],
+            title: "Объект 1",
+            description: "Описание объекта с сохранением исходных данных 1.",
+            seo_title: "Объект 1",
+            meta_description: fixedLength("Описание объекта с сохранением исходных данных. "),
+          },
+        ],
+        { listings, registry, requireComplete: false },
+      ),
+    /title must contain Latin script/,
   );
   assert.throws(
     () =>
