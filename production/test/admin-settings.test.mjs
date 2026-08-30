@@ -322,7 +322,7 @@ test("settings screen renders working sections and an in-flow owner overview", a
   });
 });
 
-test("settings screen speaks Bulgarian and Russian and links from the workspace nav group", async () => {
+test("settings screen speaks Bulgarian and Russian and uses the five owner navigation groups", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const bulgarian = await dispatchHttp(app, { url: "/admin/settings?locale=bg", headers: HEADERS });
@@ -330,13 +330,15 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
     assert.match(bulgarian.body, /lang="bg"/);
     assert.match(bulgarian.body, /Профил на агенцията/);
     assert.match(bulgarian.body, /Работно пространство/);
+    for (const group of ["Работа", "Имоти и съдържание", "Система"]) assert.match(bulgarian.body, new RegExp(`>${group}<`));
     const russian = await dispatchHttp(app, { url: "/admin/settings?locale=ru", headers: HEADERS });
     assert.match(russian.body, /Профиль агентства/);
     assert.match(russian.body, /Сроки ответа|Заявки и сроки/);
+    for (const group of ["Работа", "Объекты и контент", "Система"]) assert.match(russian.body, new RegExp(`>${group}<`));
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    assert.match(today.body, />Workspace</);
+    for (const group of ["Today", "Work", "Properties &amp; Content", "Hermes", "System"]) assert.match(today.body, new RegExp(`>${group}<`));
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
