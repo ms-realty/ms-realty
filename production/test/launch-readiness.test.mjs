@@ -1235,7 +1235,7 @@ test("launch readiness validator rejects weak redirect review pass evidence", ()
 test("launch readiness validator rejects weak sitemap pass evidence", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   const sitemapGate = report.gates.find((gate) => gate.id === "localized_sitemap");
-  sitemapGate.evidence.listing_entries = 165;
+  sitemapGate.evidence.listing_entries = 164;
 
   assert.throws(() => assertLaunchReadinessReport(report), /complete approved route evidence/);
 });

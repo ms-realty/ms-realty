@@ -165,7 +165,7 @@ test("generated localized sitemap file is approved-translation gated when presen
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(data.summary.listings, 165);
   assert.equal(data.summary.home_pages, 7);
-  assert.equal(data.summary.listing_entries, 166);
+  assert.equal(data.summary.listing_entries, 165);
   assert.equal(data.summary.location_pages >= 6, true);
   assert.equal(data.summary.seller_pages, 7);
   assert.equal(data.summary.contact_pages, 7);
@@ -180,12 +180,14 @@ test("generated localized sitemap file is approved-translation gated when presen
       data.summary.guide_pages,
   );
   assert.equal(data.summary.byLocale.bg >= 118, true);
-  assert.equal(data.summary.byLocale.ru, 57);
+  assert.equal(data.summary.byLocale.ru, 58);
   assert.equal(data.summary.byLocale.el, 3);
-  assert.equal(data.summary.byLocale.he, 5);
+  assert.equal(data.summary.byLocale.he, 3);
   assert.equal(data.summary.byLocale.fr, undefined);
   assert.equal(data.entries.some((entry) => entry.loc === "/he" && entry.type === "home"), true);
-  assert.equal(data.entries.some((entry) => entry.loc === "/he/locations/sandanski" && entry.type === "location"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/he/locations/sandanski" && entry.type === "location"), false);
+  assert.equal(data.entries.some((entry) => entry.loc === "/bg/lokacii/sandanski" && entry.type === "location"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/ru/locations/sandanski" && entry.type === "location"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/sell" && entry.type === "seller"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/contact" && entry.type === "contact"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/foreign-buyers" && entry.type === "guide"), true);

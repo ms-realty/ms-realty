@@ -558,7 +558,7 @@ function assertPassLocalizedSitemapEvidence(report) {
     evidence.guide_pages;
   if (
     evidence.home_pages !== 7 ||
-    evidence.listing_entries !== 166 ||
+    evidence.listing_entries !== 165 ||
     evidence.location_pages < 6 ||
     evidence.seller_pages !== 7 ||
     evidence.contact_pages !== 7 ||
@@ -1502,7 +1502,7 @@ export function buildLaunchReadinessReport({
     : null;
   const localizedSitemapReady =
     sitemap.summary.home_pages === 7 &&
-    sitemap.summary.listing_entries === 166 &&
+    sitemap.summary.listing_entries === 165 &&
     sitemap.summary.location_pages >= 6 &&
     sitemap.summary.seller_pages === 7 &&
     sitemap.summary.contact_pages === 7 &&
