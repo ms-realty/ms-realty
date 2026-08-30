@@ -58,7 +58,7 @@ test("local Docker startup recreates the edge after an app update", () => {
   const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
   const importer = fs.readFileSync(fromRoot("production", "scripts", "run-payload-cms-import.mjs"), "utf8");
   const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
-  const importAt = start.indexOf('"payload:cms:import", "--", "--overwrite-existing"');
+  const importAt = start.indexOf('"payload:cms:import", "--", ...importArgs');
   const searchAt = start.indexOf('"search-seed"');
   const hermesRuntimeAt = start.indexOf('"hermes:runtime"');
   const liveProvisioningAt = start.indexOf('"live:provisioning"');
@@ -67,8 +67,12 @@ test("local Docker startup recreates the edge after an app update", () => {
   const livePreflightAt = start.indexOf('"live:preflight"');
   const readinessAt = start.indexOf("materializeLocalReadinessInApp(envOverrides)");
   assert.match(script, /Caddy resolves the app service address when it starts/);
+  assert.match(script, /function payloadCmsImportArgs\(env = process\.env\)/);
+  assert.match(script, /if \(!mode \|\| mode === "skip-if-initialized"\) return \["--skip-if-initialized"\]/);
+  assert.match(script, /if \(mode === "overwrite-existing"\) return \["--overwrite-existing"\]/);
   assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
   assert.ok(importAt >= 0 && searchAt > importAt);
+  assert.match(start, /const importArgs = payloadCmsImportArgs\(\{ \.\.\.env, \.\.\.process\.env, \.\.\.envOverrides \}\)/);
   assert.match(start, /"exec", "-T", "--env", "HERMES_DRAFT_LIMIT=1", "app", "npm", "run", "live:capture"/);
   assert.ok(
     searchAt < hermesRuntimeAt &&
@@ -78,8 +82,8 @@ test("local Docker startup recreates the edge after an app update", () => {
       liveCaptureAt < livePreflightAt &&
       livePreflightAt < readinessAt,
   );
+  assert.match(importer, /--skip-if-initialized/);
   assert.match(importer, /--overwrite-existing/);
-  assert.doesNotMatch(start, /--skip-if-initialized/);
 });
 
 test("the up flow projects the seed's recorded publication state after the import and before search re-seeding", () => {
@@ -87,7 +91,7 @@ test("the up flow projects the seed's recorded publication state after the impor
   const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
   const start = script.slice(script.indexOf("async function start("), script.indexOf("\ntry {", script.indexOf("async function start(")));
 
-  const importAt = start.indexOf('"payload:cms:import", "--", "--overwrite-existing"');
+  const importAt = start.indexOf('"payload:cms:import", "--", ...importArgs');
   const publicationAt = start.indexOf('"payload:publication:sync"');
   const searchAt = start.indexOf('"search-seed"');
 

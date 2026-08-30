@@ -160,6 +160,13 @@ function hermesAgentAppEnv(env) {
   };
 }
 
+function payloadCmsImportArgs(env = process.env) {
+  const mode = String(env.MS_REALTY_CMS_IMPORT_MODE || "").trim();
+  if (!mode || mode === "skip-if-initialized") return ["--skip-if-initialized"];
+  if (mode === "overwrite-existing") return ["--overwrite-existing"];
+  throw new Error("MS_REALTY_CMS_IMPORT_MODE must be skip-if-initialized or overwrite-existing");
+}
+
 function localReadinessMaxAgeMs(env) {
   const seconds = Number(env.MS_REALTY_LOCAL_READINESS_MAX_AGE_SECONDS || "900");
   if (!Number.isInteger(seconds) || seconds < 1) {
@@ -410,6 +417,7 @@ async function start(env, { withHermes = false } = {}) {
   const hermesEnv = withHermes ? hermesAgentEnvironment(env) : env;
   const envOverrides = withHermes ? hermesAgentAppEnv(hermesEnv) : {};
   const profile = withHermes ? ["--profile", "hermes"] : [];
+  const importArgs = payloadCmsImportArgs({ ...env, ...process.env, ...envOverrides });
   if (withHermes) compose([...profile, "run", "--rm", "hermes-agent-bootstrap"], { envOverrides });
   // payload-migrate and runtime-init share the app image but do not have a
   // build stanza themselves. Build it before Compose starts either service.
@@ -441,13 +449,14 @@ async function start(env, { withHermes = false } = {}) {
     waitFor(`http://127.0.0.1:${env.MS_REALTY_MEILI_PORT}/health`),
   ]);
 
-  compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", "--overwrite-existing"], { envOverrides });
-  // Reconcile the latest drafts on every release so new listings, translations,
-  // and approval fields reach an initialized database. The importer never
-  // changes published versions; the projector below remains the only step that
-  // may publish, and it refuses anything the committed approval does not name.
-  // search-seed runs after it because the search projection only indexes
-  // listings whose row is cms_status=published with publish_approved.
+  // Local preview preserves operator drafts by default. Production deploys can
+  // opt into overwrite-existing so the committed seed reconciles initialized
+  // draft rows without touching the published base.
+  compose(["exec", "-T", "app", "npm", "run", "payload:cms:import", "--", ...importArgs], { envOverrides });
+  // The importer never publishes. The projector carries the seed's recorded
+  // publication decision into Postgres on every deploy, and search-seed runs
+  // after it because the search projection only indexes listings whose row is
+  // cms_status=published with publish_approved.
   compose(["exec", "-T", "app", "npm", "run", "payload:publication:sync"], { envOverrides });
   compose(["--profile", "tools", "run", "--rm", "search-seed"], { envOverrides });
   compose(["exec", "-T", "app", "npm", "run", "payload:runtime"], { envOverrides });
