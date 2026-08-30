@@ -7514,9 +7514,16 @@ export function assertHttpSmoke(smoke) {
     smoke.location.status !== 200 ||
     smoke.location.body.kind !== "location" ||
     smoke.location.body.body.location !== "Sandanski" ||
-    smoke.location.body.cards.some((card) => card.translation_indexable !== true)
+    smoke.location.body.indexable !== false ||
+    smoke.location.body.cards.length === 0 ||
+    smoke.location.body.cards.some(
+      (card) =>
+        card.translation_display !== "fallback_source_locale" ||
+        card.translation_indexable !== false ||
+        card.content_locale !== card.source_locale,
+    )
   ) {
-    throw new Error("HTTP smoke must serve reviewed location inventory pages");
+    throw new Error("HTTP smoke must serve source-backed location inventory without indexing pending translations");
   }
   if (
     smoke.searchFiltered.status !== 200 ||

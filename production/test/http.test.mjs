@@ -1076,7 +1076,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     [...smoke.searchPriceAsc.body.cards.map((card) => Number(card.price_eur)).filter(Number.isFinite)].sort((left, right) => left - right),
   );
   assert.match(smoke.searchHtmlPriceDesc.body, /<option value="price_desc" selected>/);
-  assert.equal(smoke.location.body.cards.length, 1);
+  assert.equal(smoke.location.body.cards.length > 0, true);
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.savedSearch.body.contact, undefined);
