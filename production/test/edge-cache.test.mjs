@@ -112,6 +112,23 @@ test("the cache key splits on the colour-scheme hint the origin varies on", () =
   assert.notEqual(edgeCacheKey(new Request("https://ms-realty.test/bg?page=2")).url, plain.url);
 });
 
+test("the cache key splits on the trusted release marker and rejects query spoofing", () => {
+  const currentMarker = "a".repeat(40);
+  const nextMarker = "b".repeat(40);
+  const current = edgeCacheKey(new Request("https://ms-realty.test/bg"), currentMarker);
+  const next = edgeCacheKey(new Request("https://ms-realty.test/bg"), nextMarker);
+
+  assert.notEqual(current.url, next.url);
+  assert.equal(new URL(current.url).searchParams.get("__ms_release"), currentMarker);
+
+  const spoofed = edgeCacheKey(
+    new Request(`https://ms-realty.test/bg?__ms_release=${nextMarker}&__ms_scheme=dark`),
+    currentMarker,
+  );
+  assert.equal(spoofed.url, current.url);
+  assert.equal(edgeCacheKey(new Request(`https://ms-realty.test/bg?__ms_release=${nextMarker}`), "not-a-release").url, "https://ms-realty.test/bg");
+});
+
 test("storing is skipped for anything the gate rejects and marks what it keeps", async () => {
   const puts = [];
   const cache = { put: async (key, value) => puts.push([key.url, value.status]) };
@@ -145,6 +162,7 @@ test("the Worker consults the edge cache before waking the origin", () => {
   assert.match(workerSource, /requestMayUseEdgeCache\(request\)/);
   assert.match(workerSource, /caches\?\.default/);
   assert.match(workerSource, /storeInEdgeCache\(response, cacheKey, ctx, cache\)/);
+  assert.match(workerSource, /edgeCacheKey\(request, env\.MS_REALTY_EDGE_BUILD_MARKER\)/);
   // The private-path, ingest and media guards must still run first.
   assert.ok(
     workerSource.indexOf("if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();") <

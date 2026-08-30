@@ -327,7 +327,9 @@ export default {
     // anonymous plain navigation consults the shared cache, and only a response
     // the runtime itself marked `public` with an `s-maxage` is ever stored.
     const cache = globalThis.caches?.default ?? null;
-    const cacheKey = cache && requestMayUseEdgeCache(request) ? edgeCacheKey(request) : null;
+    const cacheKey = cache && requestMayUseEdgeCache(request)
+      ? edgeCacheKey(request, env.MS_REALTY_EDGE_BUILD_MARKER)
+      : null;
     if (cacheKey) {
       const cached = await cache.match(cacheKey);
       if (cached) return edgeCacheHit(cached);

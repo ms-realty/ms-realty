@@ -17,6 +17,7 @@ const durableLeadSideEffectsMigration = fromRoot("migrations", "20260813_120000_
 const workspaceSettingsMigration = fromRoot("migrations", "20260828_130000_workspace_settings.ts");
 const durableViewingTripRequestsMigration = fromRoot("migrations", "20260829_120000_durable_viewing_trip_requests.ts");
 const listingTranslationCopyMigration = fromRoot("migrations", "20260830_120000_listing_translation_copy.ts");
+const listingTranslationWorkflowStatusMigration = fromRoot("migrations", "20260830_130000_listing_translation_workflow_status.ts");
 
 function tableSql(source, name) {
   const start = [`CREATE TABLE "${name}" (`, `CREATE TABLE IF NOT EXISTS "${name}" (`]
@@ -50,6 +51,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260828_130000_workspace_settings.ts",
     "20260829_120000_durable_viewing_trip_requests.ts",
     "20260830_120000_listing_translation_copy.ts",
+    "20260830_130000_listing_translation_workflow_status.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -121,6 +123,29 @@ test("Payload migration boot configuration and generated constraints stay runnab
     assert.match(listingTranslationCopy, new RegExp(`ALTER TABLE "_listing_translations_v" ADD COLUMN IF NOT EXISTS "version_${column}"`));
   }
   assert.match(listingTranslationCopy, /ensurePostgresSearchView\(args, \{ localizedTranslations: true \}\)/);
+
+  const listingTranslationWorkflowStatus = fs.readFileSync(listingTranslationWorkflowStatusMigration, "utf8");
+  for (const enumName of [
+    "enum_listing_translations_status",
+    "enum__listing_translations_v_version_status",
+  ]) {
+    for (const status of ["missing", "hermes_drafted", "human_edited", "approved", "stale"]) {
+      assert.match(
+        listingTranslationWorkflowStatus,
+        new RegExp(`ALTER TYPE "public"\\."${enumName}" ADD VALUE IF NOT EXISTS '${status}'`),
+      );
+    }
+  }
+  const listingTranslationWorkflowStatusDown = listingTranslationWorkflowStatus.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.match(listingTranslationWorkflowStatusDown, /void db/);
+  assert.doesNotMatch(listingTranslationWorkflowStatusDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TYPE\b/);
+  const migrationIndex = fs.readFileSync(fromRoot("migrations", "index.ts"), "utf8");
+  assert.match(migrationIndex, /import \* as migration_20260830_130000_listing_translation_workflow_status/);
+  assert.match(
+    migrationIndex,
+    /up: migration_20260830_130000_listing_translation_workflow_status\.up,\s+down: migration_20260830_130000_listing_translation_workflow_status\.down,\s+name: '20260830_130000_listing_translation_workflow_status'/,
+  );
+
   const localizedPublicSearch = fs.readFileSync(publicSearchMigration, "utf8");
   assert.match(localizedPublicSearch, /lt\."title"/);
   assert.match(localizedPublicSearch, /lt\."human_approved" = true/);
