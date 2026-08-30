@@ -4149,6 +4149,7 @@ export function createHttpApp({
             hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
           commandResult,
           commandError,
+          commandPrefill: url.searchParams.get("prompt") || "",
         }),
         );
       if (request.method === "GET") {

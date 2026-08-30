@@ -232,6 +232,33 @@ test("Hermes console proves authenticated runtime capabilities without exposing 
   assert.equal(typeof apiRoute.POST, "function");
 });
 
+test("Today can prefill the guarded Hermes command without executing it", async () => {
+  const payload = fakeHermesReceiptPayload();
+  const prompt = "Prepare a safe plan for today's urgent listing review.";
+  const hermesEnv = {
+    NODE_ENV: "production",
+    HERMES_CHAT_COMPLETIONS_URL: "https://hermes.example/v1/chat/completions",
+    HERMES_API_KEY: "prefill-key-not-rendered",
+    MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: "live",
+  };
+  const config = appConfig({
+    authEnv: hermesEnv,
+    hermesAgentFetch: healthyHermesFetch([]),
+    hermesOwnerCommandProvider: async () => ownerPlan(),
+    hermesReceiptPayload: payload,
+    hermesReceiptSecret: RECEIPT_SECRET,
+  });
+  const response = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/admin/hermes?locale=en&prompt=${encodeURIComponent(prompt)}`),
+    { config },
+  );
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /data-hermes-command-panel="ready"/);
+  assert.match(html, /<textarea[^>]*id="hermes-owner-command"[^>]*>Prepare a safe plan for today(?:'|&#x27;)s urgent listing review\.<\/textarea>/);
+  assert.equal(payload.docs.length, 0, "prefilling never creates a Hermes receipt");
+});
+
 test("Hermes owner command renders the same guarded durable plan in Next and standalone admin runtimes", async () => {
   const payload = fakeHermesReceiptPayload();
   const config = appConfig({

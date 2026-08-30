@@ -66,6 +66,7 @@ export async function buildAdminHermesPayload({
   receiptSecret = "",
   commandResult = null,
   commandError = null,
+  commandPrefill = "",
 } = {}) {
   const availability = hermesReplyAvailability({ env: hermesEnv, provider, fetchImpl });
   const commandAvailability = hermesOwnerCommandAvailability({ env: hermesEnv, provider: commandProvider, fetchImpl });
@@ -134,6 +135,7 @@ export async function buildAdminHermesPayload({
       enabled: commandAvailability.available === true && receiptStore.status === "ready" && operator?.roles?.includes("admin"),
       idempotency_key: createHermesOwnerCommandIdempotencyKey(),
       max_length: HERMES_OWNER_COMMAND_MAX_LENGTH,
+      prefill: String(commandPrefill || "").trim().slice(0, HERMES_OWNER_COMMAND_MAX_LENGTH),
     },
     command_result: commandResult,
     command_error: commandError,
