@@ -2942,8 +2942,9 @@ function listingMetadataTitle(registry, listing, localeCode) {
   const view = listingToPublicViewModel(listing);
   const translations = translationsForSearchListing(registry, listing);
   const translation = translationFor(translations, localeCode);
-  const translated = translation ? publishedListingTranslationCopy(translation) : null;
-  const translationIndexable = Boolean(translated && isTranslationIndexable(registry, translation));
+  const approved = translation ? publishedListingTranslationCopy(translation) : null;
+  const translated = localeCode === view.source_locale ? null : approved;
+  const translationIndexable = Boolean(approved && isTranslationIndexable(registry, translation));
   const copy = localizedCopy(translationIndexable ? localeCode : view.source_locale, view, translated);
   const sourceSeo = localeCode === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
   return sourceSeo.title || (localeCode !== view.source_locale ? translated?.seo_title : null) || copy.title;
@@ -2992,7 +2993,7 @@ function listingCard(registry, listing, locale) {
   const view = listingToPublicViewModel(listing);
   const state = searchTranslationState(registry, listing, locale);
   const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
-  const copy = localizedCopy(copyLocale, view, state.copy);
+  const copy = localizedCopy(copyLocale, view, copyLocale === view.source_locale ? null : state.copy);
   const ui = uiCopyFor(locale.code);
   const reviewedTranslation = state.indexable && copyLocale !== view.source_locale && state.translation?.human_approved === true;
   const publicMedia = publicMediaLibrary(view.media, {
@@ -3420,7 +3421,8 @@ export function renderListingPage({
   const view = listingToPublicViewModel(listing);
   const allTranslations = translations || listing.translations || approvedTranslationRecordsForListing(registry, listing);
   const translation = translationFor(allTranslations, locale.code);
-  const translated = translation ? publicationAuthorizedListingTranslationCopy(translation) : null;
+  const authorizedTranslation = translation ? publicationAuthorizedListingTranslationCopy(translation) : null;
+  const translated = locale.code === view.source_locale ? null : authorizedTranslation;
   const approvedTranslation = translation ? publishedListingTranslationCopy(translation) : null;
   const translationIndexable = Boolean(approvedTranslation && isTranslationIndexable(registry, translation));
   const indexable = resolved.available && translationIndexable;
@@ -3471,7 +3473,7 @@ export function renderListingPage({
     canonical,
     indexable,
     fallback: {
-      active: !resolved.available || !translated,
+      active: !resolved.available || !authorizedTranslation,
       requested_locale: localeCode,
       resolved_locale: locale.code,
     },
@@ -3496,7 +3498,7 @@ export function renderListingPage({
       reviewer: translation?.reviewer || null,
     },
     body: {
-      content_locale: translated ? locale.code : view.source_locale || registry.source_locale,
+      content_locale: authorizedTranslation ? locale.code : view.source_locale || registry.source_locale,
       h1: copy.h1,
       description: copy.description,
       facts: {
