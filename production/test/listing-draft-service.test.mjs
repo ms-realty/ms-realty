@@ -11,6 +11,7 @@ import {
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const principal = { id: "editor_bg", roles: ["editor"], source: "credential_registry", can_mutate: true };
+const targetLocales = ["de", "el", "en", "he", "nl", "ru"];
 
 function localeCodes(runtime) {
   return new Map(runtime.currentRows().locales.map((locale) => [String(locale.id), locale.code]));
@@ -69,10 +70,10 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
   );
   assert.deepEqual(
     result.staleTranslations.map((translation) => translation.locale).sort(),
-    ["el", "he"],
+    targetLocales,
   );
-  assert.equal(result.staleTranslations.every((translation) => translation.previous_status === "approved"), true);
-  for (const locale of ["el", "he"]) {
+  assert.equal(result.staleTranslations.every((translation) => translation.previous_status === "human_edited"), true);
+  for (const locale of targetLocales) {
     const translationRow = listingTranslationRow(runtime, "MS-CRAWL-0001", locale);
     assert.equal(translationRow.status, "draft");
     assert.equal(translationRow.translation_state, "stale");
@@ -91,7 +92,7 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
   assert.equal(runtime.payload.calls.find.every((call) => call.transactionID === "tx-1"), true);
   assert.equal(runtime.payload.calls.update[0].context.ms_realty_operator.id, "editor_bg");
   const event = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
-  assert.deepEqual({ ...event, source_hash_before: "hash", source_hash_after: "hash" }, {
+  assert.deepEqual({ ...event, stale_locales: [...event.stale_locales].sort(), source_hash_before: "hash", source_hash_after: "hash" }, {
     actor_id: "editor_bg",
     auth_source: "credential_registry",
     channel: "admin",
@@ -100,8 +101,8 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
     source_hash_before: "hash",
     source_hash_after: "hash",
     source_locale: "bg",
-    stale_locales: ["el", "he"],
-    stale_translation_count: 2,
+    stale_locales: targetLocales,
+    stale_translation_count: 6,
   });
   assert.match(event.source_hash_before, /^[a-f0-9]{64}$/);
   assert.match(event.source_hash_after, /^[a-f0-9]{64}$/);
@@ -243,7 +244,7 @@ test("saveListingDraft is idempotent when the same patch is already present", as
   assert.equal(first.staleTranslations.length > 0, true);
   assert.equal(second.staleTranslations.length, 0);
   assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listings").length, 1);
-  assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listing_translations").length, 2);
+  assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listing_translations").length, 6);
 });
 
 test("saveListingDraft retries one exact concurrent enrichment-task id duplicate in a fresh transaction", async () => {
@@ -364,6 +365,7 @@ test("saveListingDraft rolls back the draft mutation when readback fails", async
       return null;
     },
   });
+  const preservedBefore = listingTranslationRows(runtime, "MS-CRAWL-0001").filter((row) => row.locale !== "bg");
 
   await assert.rejects(
     () =>
@@ -380,8 +382,7 @@ test("saveListingDraft rolls back the draft mutation when readback fails", async
   assert.equal(runtime.payload.calls.rollback, 1);
   assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Should roll back");
   const preservedRows = listingTranslationRows(runtime, "MS-CRAWL-0001").filter((row) => row.locale !== "bg");
-  assert.equal(preservedRows.every((row) => row.translation_state === "approved"), true);
-  assert.equal(preservedRows.every((row) => row.public_indexable === true), true);
+  assert.deepEqual(preservedRows, preservedBefore);
 });
 
 test("projectListingDraftSeed overlays durable draft rows without requiring a second writer path", async () => {
@@ -418,14 +419,14 @@ test("saveBulkListingStatusDrafts keeps the batch durable and idempotent", async
   assert.deepEqual(
     first.edits.map((edit) => ({ listingId: edit.listing_id, staleCount: edit.staleTranslations.length })),
     [
-      { listingId: "MS-CRAWL-0001", staleCount: 2 },
-      { listingId: "MS-CRAWL-0002", staleCount: 0 },
+      { listingId: "MS-CRAWL-0001", staleCount: 6 },
+      { listingId: "MS-CRAWL-0002", staleCount: 6 },
     ],
   );
   assert.equal(second.edits.filter((edit) => edit.idempotent).length, 2);
   assert.equal(second.staleTranslations.length, 0);
   assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listings").length, 2);
-  assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listing_translations").length >= 2, true);
+  assert.equal(runtime.payload.calls.update.filter((call) => call.collection === "listing_translations").length, 12);
   assert.equal(runtime.payload.calls.find.filter((call) => call.collection === "listing_translations").length, 4);
 });
 
