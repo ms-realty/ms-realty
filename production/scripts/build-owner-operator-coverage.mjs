@@ -16,6 +16,24 @@ import {
 } from "../lib/operator-provider-catalog.mjs";
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+const EXECUTABLE_PROOF = Object.freeze({
+  admin_pages: Object.freeze({
+    test_file: "production/test/owner-operator-coverage.test.mjs",
+    test_name: "every authorized admin page renders for a full-scope owner session",
+  }),
+  admin_routes: Object.freeze({
+    test_file: "production/test/app-route-parity.test.mjs",
+    test_name: "every App Router route file reaches an adapter branch instead of the bare 405",
+  }),
+  hermes_tools: Object.freeze({
+    test_file: "production/test/admin-hermes-console.test.mjs",
+    test_name: "Hermes console proves authenticated runtime capabilities without exposing the API key",
+  }),
+  provider_matrix: Object.freeze({
+    test_file: "production/test/operator-provider-connect.test.mjs",
+    test_name: "a configured owner page offers five one-click handoffs and no raw credential form",
+  }),
+});
 
 function routePathFromFile(root, file) {
   const relative = path.relative(root, file).split(path.sep);
@@ -139,9 +157,10 @@ export function buildOwnerOperatorCoverage({ adminRoot = fromRoot("app", "api", 
   ].filter(Boolean).length;
   return {
     schema_version: 3,
-    proof_kind: "structural_inventory",
+    proof_kind: "source_and_executable_contract",
     plugin_id: OWNER_OPERATOR_PLUGIN_ID,
     generated_by: "production/scripts/build-owner-operator-coverage.mjs",
+    executable_proof: EXECUTABLE_PROOF,
     summary: {
       admin_route_files: new Set(discovered.map((row) => row.source_file)).size,
       admin_methods: adminRoutes.length,

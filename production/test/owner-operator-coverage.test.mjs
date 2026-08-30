@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { appendAdminSessionEvent, createAdminSessionOpened } from "../lib/admin-sessions.mjs";
+import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
   ADMIN_PAGE_SURFACES,
@@ -77,6 +81,8 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   const coverage = buildOwnerOperatorCoverage();
   const artifact = JSON.parse(fs.readFileSync(fromRoot("production", "data", "owner-operator-coverage.json"), "utf8"));
   assert.deepEqual(artifact, coverage);
+  assert.equal(artifact.proof_kind, "source_and_executable_contract");
+  assert.deepEqual(Object.keys(artifact.executable_proof), ["admin_pages", "admin_routes", "hermes_tools", "provider_matrix"]);
   assert.deepEqual(artifact.summary, {
     admin_route_files: 104,
     admin_methods: 119,
@@ -108,6 +114,62 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
     assert.ok(row.prohibited_actions.includes("publish"));
     assert.ok(row.prohibited_actions.includes("send"));
     assert.ok(row.prohibited_actions.includes("mark_indexable"));
+  }
+});
+
+test("every authorized admin page renders for a full-scope owner session", async (t) => {
+  const token = "owner-coverage-session";
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-owner-pages-"));
+  const sessionLedgerPath = path.join(directory, "admin-sessions.jsonl");
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const user = {
+    id: "owner-coverage",
+    email: "owner@example.test",
+    name: "Owner coverage",
+    role: "admin",
+    workspace_ids: [],
+    password_change_required: false,
+  };
+  const principal = {
+    id: user.id,
+    source: "payload_session",
+    can_mutate: true,
+    roles: ["admin"],
+    workspace_ids: [],
+    capabilities: ["*"],
+  };
+  appendAdminSessionEvent(
+    createAdminSessionOpened({ token, operatorId: principal.id, source: "payload_session", client: "test" }),
+    { filePath: sessionLedgerPath },
+  );
+  const payloadAdminAuth = {
+    async resolve(value) {
+      return value === token ? { principal, user } : null;
+    },
+    async listOperators() {
+      return [user];
+    },
+  };
+  const config = {
+    ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+    authEnv: { NODE_ENV: "test" },
+    adminSessionLedgerPath: sessionLedgerPath,
+    payloadAdminAuth,
+    readProviderConnections: async () => [],
+    readProviderCredentials: async () => [],
+  };
+
+  for (const page of ADMIN_PAGE_SURFACES) {
+    const response = await renderAppAdminResponse(
+      new Request(`https://ms-realty.example${page.path}?locale=en`, {
+        headers: { accept: "text/html", cookie: `ms_admin=${token}` },
+      }),
+      { config },
+    );
+    const html = await response.text();
+    assert.equal(response.status, 200, page.id);
+    assert.match(response.headers.get("content-type") || "", /^text\/html/, page.id);
+    assert.equal((html.match(/<h1\b/g) || []).length, 1, `${page.id} has one h1`);
   }
 });
 

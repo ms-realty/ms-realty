@@ -2631,7 +2631,7 @@ function ActionDisclosure({ summary, icon = "plus", tone = "primary", className 
 
 const OWNER_CONSOLE_COPY = {
   bg: {
-    groups: { today: "Днес", crm: "CRM", cms: "CMS", hermes: "Hermes", workspace: "Работно пространство" },
+    groups: { today: "Днес", crm: "Работа", cms: "Имоти и съдържание", hermes: "Hermes", workspace: "Система" },
     routes: { today: "Днес", leads: "Запитвания", listings: "Имоти", translations: "Преводи", hermes: "Hermes", integrations: "Интеграции", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
     navMore: "Още в {group}",
     profile: {
@@ -2746,7 +2746,7 @@ const OWNER_CONSOLE_COPY = {
     },
   },
   ru: {
-    groups: { today: "Сегодня", crm: "CRM", cms: "CMS", hermes: "Hermes", workspace: "Рабочее пространство" },
+    groups: { today: "Сегодня", crm: "Работа", cms: "Объекты и контент", hermes: "Hermes", workspace: "Система" },
     routes: { today: "Сегодня", leads: "Заявки", listings: "Объекты", translations: "Переводы", hermes: "Hermes", integrations: "Интеграции", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
     navMore: "Ещё в группе {group}",
     profile: {
@@ -2861,7 +2861,7 @@ const OWNER_CONSOLE_COPY = {
     },
   },
   en: {
-    groups: { today: "Today", crm: "CRM", cms: "CMS", hermes: "Hermes", workspace: "Workspace" },
+    groups: { today: "Today", crm: "Work", cms: "Properties & Content", hermes: "Hermes", workspace: "System" },
     routes: { today: "Today", leads: "Leads", listings: "Listings", translations: "Translations", hermes: "Hermes", integrations: "Integrations", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
     navMore: "More in {group}",
     profile: {
@@ -3855,7 +3855,7 @@ function TodayBody({ page }) {
       h(
         PageHeader,
         { title, subtitle: settingsCopy.todayBriefing.description },
-        h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
       ),
       h(WorkspaceWelcomeBanner, { page }),
       h(
@@ -11638,7 +11638,7 @@ function ConnectionsBody({ page }) {
                   action: h(
                     "a",
                     {
-                      className: "mk-btn mk-btn--primary mk-btn--sm",
+                      className: "mk-btn mk-btn--secondary mk-btn--sm",
                       href: page.assistant?.plugin_url,
                       rel: "noopener",
                       "data-codex-plugin-install": "ms-realty-operator",

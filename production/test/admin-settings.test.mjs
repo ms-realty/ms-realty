@@ -322,7 +322,7 @@ test("settings screen renders working sections and an in-flow owner overview", a
   });
 });
 
-test("settings screen speaks Bulgarian and Russian and links from the workspace nav group", async () => {
+test("settings screen speaks Bulgarian and Russian and uses the five owner navigation groups", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const bulgarian = await dispatchHttp(app, { url: "/admin/settings?locale=bg", headers: HEADERS });
@@ -330,13 +330,15 @@ test("settings screen speaks Bulgarian and Russian and links from the workspace 
     assert.match(bulgarian.body, /lang="bg"/);
     assert.match(bulgarian.body, /Профил на агенцията/);
     assert.match(bulgarian.body, /Работно пространство/);
+    for (const group of ["Работа", "Имоти и съдържание", "Система"]) assert.match(bulgarian.body, new RegExp(`>${group}<`));
     const russian = await dispatchHttp(app, { url: "/admin/settings?locale=ru", headers: HEADERS });
     assert.match(russian.body, /Профиль агентства/);
     assert.match(russian.body, /Сроки ответа|Заявки и сроки/);
+    for (const group of ["Работа", "Объекты и контент", "Система"]) assert.match(russian.body, new RegExp(`>${group}<`));
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    assert.match(today.body, />Workspace</);
+    for (const group of ["Today", "Work", "Properties &amp; Content", "Hermes", "System"]) assert.match(today.body, new RegExp(`>${group}<`));
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
@@ -354,6 +356,7 @@ test("owner screens keep one page heading after moving titles into PageHeader", 
     assert.equal(headingCount(hermes.body), 1, "Hermes has exactly one h1");
     assert.equal(headingCount(connections.body), 1, "Connections has exactly one h1");
     assert.equal(headingCount(settings.body), 1, "Settings has exactly one h1");
+    assert.equal((connections.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the connection journey owns the page-primary action");
   });
 });
 
@@ -623,6 +626,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(empty.body, /data-hermes-open="today"/);
     assert.match(empty.body, /name="prompt"/);
     assert.match(empty.body, /<form class="adm-today-briefing__hermes" method="get" action="\/admin\/hermes" data-hermes-entry="today">/);
+    assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
     assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
@@ -669,6 +673,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
+    assert.equal((populated.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the ranked task is the only page-primary action");
     assert.match(populated.body, /name="prompt"[\s\S]*?Prepare a safe plan for today's priority task:/);
     assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);

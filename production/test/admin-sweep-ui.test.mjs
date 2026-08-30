@@ -133,9 +133,12 @@ test("technical Hermes and assistant setup content is collapsed without JavaScri
 });
 
 test("390px mobile contracts keep one dominant action per owner screen", () => {
-  assert.match(adminSettingsCss, /\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
+  assert.match(adminSettingsCss, /\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*40px;[^}]*justify-content:\s*center/);
+  assert.match(adminSettingsCss, /\.adm-onboarding__copy > a\s*\{[^}]*min-height:\s*24px/);
   assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-today-briefing__action \.mk-btn,[\s\S]*?min-height:\s*44px/);
   assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-next-actions__action \.mk-btn[\s\S]*?width:\s*100%/);
+  assert.match(adminSettingsCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-onboarding__copy > a\s*\{[^}]*min-height:\s*44px/);
+  assert.match(adminAdapterCss, /@media \(max-width: 1023px\)[\s\S]*?main\[data-react-admin-ui\] textarea\s*\{[^}]*min-height:\s*44px;\s*font-size:\s*16px/);
   assert.match(adminAdapterCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-hermes-command__starting-point \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*justify-content:\s*center/);
 });
 
