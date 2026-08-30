@@ -21,6 +21,7 @@ import {
   writeLiveServiceReport,
 } from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
+import { APPROVED_LAUNCH_FREEZE_SHA256 } from "../lib/launch-freeze.mjs";
 import {
   HERMES_AGENT_MESSAGING_PLATFORMS,
   HERMES_AGENT_TERMINAL_BACKENDS,
@@ -874,7 +875,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
       artifact_id: "20260817-deterministic-launch-freeze",
       approval_id: "MSR-LAUNCH-FREEZE-1",
       based_on_commit: "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-      source_sha256: "05180b3d2b2ba7af2c2f9dbcf9fc30b0250e277837da8cbc0d5facf5316fcbad",
+      source_sha256: APPROVED_LAUNCH_FREEZE_SHA256,
       approved_homepage_redirects: 5,
       approved_homepage_decisions: 15,
     },
