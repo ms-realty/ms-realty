@@ -89,7 +89,7 @@ function assertCitations(citations, listing, id) {
 function factDigits(value) {
   return [
     ...String(value || "")
-      .replace(/(?<!\p{L})([mм])\s*[²2](?=\b|\p{P}|\s|$)/giu, "$1²")
+      .replace(/(?<!\p{L})([mм])\s*[²2](?=\b|\p{P}|\s|$|[mм]\s*[²2])/giu, "$1²")
       .matchAll(/\p{Nd}/gu),
   ]
     .map((match) => match[0])

@@ -241,6 +241,17 @@ test("catalog validation rejects incomplete, duplicate, stale, placeholder, SEO,
       { listings, registry, requireComplete: false },
     ),
   );
+  const repeatedUnitListing = {
+    ...listings[1],
+    description: "Площ 234,70 м2м2 и 2 етажа.",
+  };
+  const repeatedUnitRecord = catalogRecord(repeatedUnitListing, "en");
+  assert.doesNotThrow(() =>
+    validateListingTranslationsCatalog(
+      [{ ...repeatedUnitRecord, description: "Area 234,70 m2m2 and 2 floors." }],
+      { listings: [repeatedUnitListing], registry, requireComplete: false },
+    ),
+  );
   assert.throws(
     () =>
       validateListingTranslationsCatalog([{ ...records[0], publication_authorized_by: null, publication_authorized_at: null }], {
