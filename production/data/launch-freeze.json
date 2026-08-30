@@ -25,7 +25,7 @@
     },
     "app_route_manifest": {
       "path": "production/data/app-route-manifest.json",
-      "sha256": "dc35de2801e9fc455fffddf832407c9664f58d9dc572c29e99505a6a0d96e03f"
+      "sha256": "2d3b03c7dd2a94b4f130777a27551bd25103cf7d34b0cd78257701fb55c10601"
     },
     "launch_freeze_approval": {
       "path": "production/data/launch-freeze-approval.json",
