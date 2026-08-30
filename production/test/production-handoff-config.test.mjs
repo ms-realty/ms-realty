@@ -171,6 +171,7 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(deployScript, /run_stack "\$previous" docker:backup/);
   assert.match(deployScript, /run_stack "\$release" docker:status "\$release_id"/);
   assert.match(deployScript, /run_stack "\$release" docker:hermes:up "\$release_id" \|\| rollback "\$\?"/);
+  assert.match(deployScript, /MS_REALTY_CMS_IMPORT_MODE=overwrite-existing/);
   assert.match(deployScript, /d\.build_marker !== process\.argv\[2\]/);
   assert.match(deployScript, /deployment failed; restoring \$previous/);
   assert.equal(deployScript.match(/^reclaim$/gm)?.length, 1);

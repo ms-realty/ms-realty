@@ -124,6 +124,7 @@ run_stack() {
   (
     cd "$target"
     MS_REALTY_ENV_FILE="$env_file" \
+      MS_REALTY_CMS_IMPORT_MODE=overwrite-existing \
       MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml \
       MS_REALTY_BUILD_MARKER="$marker" \
       npm run "$command"
