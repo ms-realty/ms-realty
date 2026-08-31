@@ -44,7 +44,7 @@ import {
 } from "./admin-sessions.mjs";
 import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperatorTwoFactorEvents } from "./operator-two-factor.mjs";
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
-import { renderAdminTeamPage } from "./admin-team.mjs";
+import { renderAdminTeamPayload } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
@@ -65,7 +65,7 @@ import {
   workspaceSettingsStoreConfigured,
   WorkspaceSettingsStoreUnavailableError,
 } from "./workspace-settings.mjs";
-import { assignableBrokerProfiles, getPayloadAdminAuthService } from "./payload-admin-auth.mjs";
+import { assignableBrokerProfiles, getPayloadAdminAuthService, payloadAdminOwnerProfile } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
   deleteProviderConnection,
@@ -642,6 +642,9 @@ function withWorkspaceSettings(payload, config) {
 
 function withOwnerProfile(payload, config) {
   if (!payload || typeof payload !== "object" || payload.owner_profile) return payload;
+  if (config.payloadAdminSession?.user) {
+    return { ...payload, owner_profile: payloadAdminOwnerProfile(config.payloadAdminSession) };
+  }
   const principal = config.adminPrincipal || {};
   const user = config.payloadAdminSession?.user || {};
   const roles = Array.isArray(principal.roles) ? principal.roles.map(String).filter(Boolean) : [];
@@ -735,7 +738,7 @@ function workspaceSettingsPayload(
     onboarding = null,
   } = {},
 ) {
-  return withWorkspaceSettings(
+  const payload = withWorkspaceSettings(
     renderAdminWorkspaceSettingsPayload(registry, requestedLocale, {
       settings,
       operator: config.adminPrincipal,
@@ -750,6 +753,8 @@ function workspaceSettingsPayload(
     }),
     config,
   );
+  const profileNotice = url.searchParams.get("profile");
+  return profileNotice ? { ...payload, profile_notice: profileNotice } : payload;
 }
 
 function jsonResponse(status, body) {
@@ -4280,36 +4285,75 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     ) {
       return adminForbidden("workspace:access");
     }
+    if (url.pathname === "/api/admin/profile") {
+      const service = await payloadAdminAuth();
+      if (!payloadSession || !service) return adminForbidden("payload_session");
+      if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+      const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
+      try {
+        const operator = await service.updateProfile(
+          payloadSession,
+          parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        );
+        if (formRequest) {
+          const target = new URL("/admin/settings", "http://localhost");
+          if (url.searchParams.get("locale")) target.searchParams.set("locale", url.searchParams.get("locale"));
+          target.searchParams.set("profile", "updated");
+          return new Response(null, {
+            status: 303,
+            headers: { location: `${target.pathname}${target.search}#owner-profile`, "cache-control": "no-store" },
+          });
+        }
+        return jsonResponse(200, { kind: "admin_profile", operator });
+      } catch (error) {
+        if (formRequest) {
+          const target = new URL("/admin/settings", "http://localhost");
+          if (url.searchParams.get("locale")) target.searchParams.set("locale", url.searchParams.get("locale"));
+          target.searchParams.set("profile", "error");
+          return new Response(null, {
+            status: 303,
+            headers: { location: `${target.pathname}${target.search}#owner-profile`, "cache-control": "no-store" },
+          });
+        }
+        throw error;
+      }
+    }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
       const service = await payloadAdminAuth();
       if (!payloadSession || !service) return adminForbidden("payload_session");
       if (request.method === "GET") {
         const operators = await service.listOperators(payloadSession);
-        if (url.pathname === "/api/admin/team") return jsonResponse(200, { kind: "admin_team", operators });
-        return new Response(
-          renderAdminTeamPage({
-            operators,
-            created: url.searchParams.get("created") === "1",
-            error: url.searchParams.get("error") === "1",
-            locale: url.searchParams.get("locale") || "bg",
-          }),
-          { status: 200, headers: PRIVATE_HTML_HEADERS },
-        );
+        const payload = renderAdminTeamPayload({
+          registry: loadLocaleRegistry(config.localeRegistryPath),
+          requestedLocale: adminLocaleParam(url, config),
+          operators,
+          currentOperatorId: payloadSession.user.id,
+          notice: url.searchParams.get("created") === "1"
+            ? "created"
+            : url.searchParams.get("updated") === "1"
+              ? "updated"
+              : url.searchParams.get("error") === "1"
+                ? "error"
+                : null,
+        });
+        if (url.pathname === "/api/admin/team") return jsonResponse(200, payload);
+        return htmlResponse(payload);
       }
       if (request.method === "POST" && url.pathname === "/api/admin/team") {
         const formRequest = (request.headers.get("content-type") || "").includes("application/x-www-form-urlencoded");
         try {
-          const operator = await service.createOperator(
-            payloadSession,
-            parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
-          );
+          const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+          const updating = String(input?.action || "") === "update";
+          const operator = updating
+            ? await service.updateOperator(payloadSession, input)
+            : await service.createOperator(payloadSession, input);
           if (formRequest) {
             return new Response(null, {
               status: 303,
-              headers: { location: "/admin/team?created=1", "cache-control": "no-store" },
+              headers: { location: `/admin/team?${updating ? "updated" : "created"}=1`, "cache-control": "no-store" },
             });
           }
-          return jsonResponse(201, { kind: "admin_team_operator", operator });
+          return jsonResponse(updating ? 200 : 201, { kind: "admin_team_operator", operator });
         } catch (error) {
           if (formRequest) {
             return new Response(null, {

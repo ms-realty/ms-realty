@@ -87,6 +87,22 @@ export function payloadAdminPrincipal(value) {
   };
 }
 
+export function payloadAdminOwnerProfile(session) {
+  const user = session?.user || {};
+  const principal = session?.principal || payloadAdminPrincipal(user) || {};
+  const roles = Array.isArray(principal.roles) ? principal.roles.map(String).filter(Boolean) : [];
+  const assignedWorkspaces = workspaceIds(principal.workspace_ids);
+  return {
+    id: String(principal.id || ""),
+    name: String(user.name || "").trim(),
+    email: String(user.email || principal.email || "").trim().toLowerCase(),
+    roles,
+    workspace_ids: assignedWorkspaces,
+    full_workspace_access: roles.includes("admin") && assignedWorkspaces.length === 0,
+    editable: Boolean(user.id),
+  };
+}
+
 function normalizedCredentials(input) {
   const email = String(input?.email || "").trim().toLowerCase();
   const password = typeof input?.password === "string" ? input.password : "";
@@ -110,6 +126,30 @@ function normalizedOperatorInput(input) {
     workspace_ids: workspaceIds(input?.workspace_ids),
     password_change_required: true,
   };
+}
+
+function normalizedProfileInput(input) {
+  const name = String(input?.name || "").trim();
+  if (!name) throw new Error("Name is required");
+  if (name.length > 120) throw new Error("Name must be at most 120 characters");
+  return { name };
+}
+
+function normalizedOperatorUpdateInput(session, input) {
+  const id = String(input?.operator_id || input?.id || "").trim();
+  const role = String(input?.role || "").trim().toLowerCase();
+  const name = normalizedProfileInput(input).name;
+  const assignedWorkspaces = workspaceIds(input?.workspace_ids);
+  if (!id) throw new Error("Operator id is required");
+  if (!PAYLOAD_ADMIN_ROLES.includes(role)) throw new Error("A valid operator role is required");
+  if (String(session?.user?.role || "") !== "admin") throw new Error("Only an administrator may manage operator access");
+  if (String(session.user.id) === id) {
+    const currentWorkspaces = workspaceIds(session.user.workspace_ids);
+    if (role !== "admin" || currentWorkspaces.join("\n") !== assignedWorkspaces.join("\n")) {
+      throw new Error("Use another administrator to change your own access");
+    }
+  }
+  return { id, data: { name, role, workspace_ids: assignedWorkspaces } };
 }
 
 function normalizedPasswordChangeInput(input) {
@@ -236,6 +276,33 @@ export function createPayloadAdminAuthService(
       const operator = await payload.create({
         collection: PAYLOAD_ADMIN_COLLECTION,
         data: normalizedOperatorInput(input),
+        depth: 0,
+        overrideAccess: false,
+        user: session.user,
+      });
+      return safeOperator(operator);
+    },
+
+    async updateProfile(session, input) {
+      if (!session?.user) throw new Error("An authenticated Payload session is required");
+      const operator = await payload.update({
+        collection: PAYLOAD_ADMIN_COLLECTION,
+        id: session.user.id,
+        data: normalizedProfileInput(input),
+        depth: 0,
+        overrideAccess: false,
+        user: session.user,
+      });
+      return safeOperator(operator);
+    },
+
+    async updateOperator(session, input) {
+      if (!session?.user) throw new Error("An authenticated Payload session is required");
+      const update = normalizedOperatorUpdateInput(session, input);
+      const operator = await payload.update({
+        collection: PAYLOAD_ADMIN_COLLECTION,
+        id: update.id,
+        data: update.data,
         depth: 0,
         overrideAccess: false,
         user: session.user,

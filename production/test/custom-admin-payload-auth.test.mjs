@@ -192,6 +192,41 @@ test("Payload Local API backs login, validation, revocation, and access-controll
   assert.equal(await service.logout("tampered"), false);
 });
 
+test("Payload profile and team updates keep privileged fields behind the admin boundary", async () => {
+  const payload = fakePayload({ workspace_ids: [] });
+  const service = createPayloadAdminAuthService(payload, { revokePayloadSession: async () => true });
+  const session = await service.resolve("payload.jwt.session");
+
+  const profile = await service.updateProfile(session, { name: "Ivan Peychev" });
+  assert.equal(profile.name, "Ivan Peychev");
+  let update = payload.calls.filter(([name]) => name === "update").at(-1)[1];
+  assert.equal(update.id, 1);
+  assert.deepEqual(update.data, { name: "Ivan Peychev" });
+  assert.equal(update.overrideAccess, false);
+  assert.equal(update.user.id, 1);
+
+  await service.updateOperator(session, {
+    operator_id: "2",
+    name: "Second Owner",
+    role: "admin",
+    workspace_ids: "",
+  });
+  update = payload.calls.filter(([name]) => name === "update").at(-1)[1];
+  assert.equal(update.id, "2");
+  assert.deepEqual(update.data, { name: "Second Owner", role: "admin", workspace_ids: [] });
+  assert.equal(update.overrideAccess, false);
+
+  await assert.rejects(
+    service.updateOperator(session, {
+      operator_id: "1",
+      name: "Ivan Peychev",
+      role: "broker",
+      workspace_ids: "sandanski",
+    }),
+    /another administrator/,
+  );
+});
+
 test("password-change failures expose only fixed safe reason codes", async () => {
   const service = createPayloadAdminAuthService(fakePayload({ password_change_required: true }), {
     revokePayloadSession: async () => true,
@@ -623,7 +658,9 @@ test("credential-registry case access is workspace-scoped on both admin runtimes
 
 test("team registration is admin-only and executes through Payload access", async () => {
   const created = [];
-  const baseSession = { user: user(), principal: payloadAdminPrincipal(user()) };
+  const updated = [];
+  const owner = user({ name: "Ivan Peychev", workspace_ids: [] });
+  const baseSession = { user: owner, principal: payloadAdminPrincipal(owner) };
   const service = {
     async resolve(token) {
       if (token === "admin-session") return baseSession;
@@ -634,13 +671,32 @@ test("team registration is admin-only and executes through Payload access", asyn
       return null;
     },
     async listOperators() {
-      return [user()];
+      return [owner, user({ id: 2, email: "second-owner@example.com", name: "Second Owner", workspace_ids: [] })];
     },
     async createOperator(_session, input) {
       created.push(input);
       return user({ id: 4, ...input });
     },
+    async updateOperator(_session, input) {
+      updated.push(input);
+      return user({ id: input.operator_id, ...input });
+    },
   };
+
+  const page = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/team?locale=en`, {
+      headers: { cookie: "ms_admin=admin-session", accept: "text/html" },
+    }),
+    { config: adapterConfig(service) },
+  );
+  const html = await page.text();
+  assert.equal(page.status, 200);
+  assert.match(html, /class="crm-app"/);
+  assert.match(html, /data-react-admin-ui="team"/);
+  assert.match(html, /data-current-operator="true"/);
+  assert.match(html, /Ivan Peychev · Administrator · All workspaces · You/);
+  assert.match(html, /Second Owner · Administrator · All workspaces/);
+  assert.doesNotMatch(html, /team-page|>None</);
 
   const input = {
     email: "new-broker@example.com",
@@ -672,6 +728,82 @@ test("team registration is admin-only and executes through Payload access", asyn
   assert.equal(admin.status, 201);
   assert.equal((await admin.json()).operator.email, input.email);
   assert.equal(created.length, 1);
+
+  const access = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/team`, {
+      method: "POST",
+      headers: { cookie: "ms_admin=admin-session", "content-type": "application/json" },
+      body: JSON.stringify({
+        action: "update",
+        operator_id: "2",
+        name: "Second Owner",
+        role: "admin",
+        workspace_ids: "",
+      }),
+    }),
+    { config: adapterConfig(service) },
+  );
+  assert.equal(access.status, 200);
+  assert.deepEqual(updated[0], {
+    action: "update",
+    operator_id: "2",
+    name: "Second Owner",
+    role: "admin",
+    workspace_ids: "",
+  });
+});
+
+test("a Payload operator can update only their own profile through the owner shell route", async () => {
+  const broker = user({ id: 3, email: "broker@ms.test", name: "Broker", role: "broker" });
+  const updates = [];
+  const service = {
+    async resolve() {
+      return { user: broker, principal: payloadAdminPrincipal(broker) };
+    },
+    async updateProfile(session, input) {
+      updates.push({ session, input });
+      return { ...broker, name: input.name };
+    },
+  };
+  const response = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/api/admin/profile`, {
+      method: "POST",
+      headers: {
+        cookie: "ms_admin=broker-session",
+        "content-type": "application/json",
+        host: "ms-realty.ms-realty-bg.workers.dev",
+        origin: BASE_URL,
+        "sec-fetch-site": "same-origin",
+      },
+      body: JSON.stringify({ name: "Broker Name" }),
+    }),
+    { config: adapterConfig(service) },
+  );
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).operator.name, "Broker Name");
+  assert.equal(updates.length, 1);
+
+  const legacy = await dispatchHttp(createHttpApp({ payloadAdminAuth: service, nowSeconds: () => NOW_SECONDS }), {
+    method: "POST",
+    url: "/api/admin/profile",
+    headers: {
+      cookie: "ms_admin=broker-session",
+      "content-type": "application/json",
+      host: "localhost",
+      origin: "http://localhost",
+      "sec-fetch-site": "same-origin",
+    },
+    body: { name: "Broker Legacy" },
+  });
+  assert.equal(legacy.status, 200);
+  assert.equal(legacy.body.operator.name, "Broker Legacy");
+  assert.equal(updates.length, 2);
+
+  const team = await renderAppAdminResponse(
+    new Request(`${BASE_URL}/admin/team`, { headers: { cookie: "ms_admin=broker-session" } }),
+    { config: adapterConfig(service) },
+  );
+  assert.equal(team.status, 403, "self-service profile access does not grant team management");
 });
 
 test("both custom-admin routes reject operator passwords shorter than 12 characters", async () => {

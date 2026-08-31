@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
-import { renderAdminTeamPage } from "../lib/admin-team.mjs";
+import { renderAdminTeamPayload } from "../lib/admin-team.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 // Contracts from the admin workbench quality sweep: the mobile navigation
@@ -230,14 +232,15 @@ test("connect page uses the persistent workbench shell and responsive connection
   assert.doesNotMatch(html, /#1d4ed8/);
 });
 
-test("team page controls outrank the adapter's generic main field rules", () => {
-  const html = renderAdminTeamPage({ operators: [] });
-  assert.match(html, /\.team-page \.team__form input,\s*\.team-page \.team__form select \{/);
-  assert.match(html, /\.team-page \.team__form select \{[^}]*background-image: url/);
-  // The page now speaks one workbench language at a time instead of stacking
-  // "Bulgarian / English" into every string, so the empty state is Bulgarian
-  // by default and Russian and English come from ?locale=.
+test("team page uses the persistent owner shell and its shared form controls", () => {
+  const registry = loadLocaleRegistry();
+  const render = (locale) => renderReactAdminBody(renderAdminTeamPayload({ registry, requestedLocale: locale, operators: [] }));
+  const html = render("bg");
+  assert.match(html, /class="crm-app"/);
+  assert.match(html, /data-react-admin-ui="team"/);
+  assert.match(html, /class="adm-settings-form"/);
+  assert.doesNotMatch(html, /team-page|team__form/);
   assert.match(html, /Още няма оператори\./);
-  assert.match(renderAdminTeamPage({ operators: [], locale: "ru" }), /Операторов пока нет\./);
-  assert.match(renderAdminTeamPage({ operators: [], locale: "en" }), /No operators yet\./);
+  assert.match(render("ru"), /Операторов пока нет\./);
+  assert.match(render("en"), /No operators yet\./);
 });

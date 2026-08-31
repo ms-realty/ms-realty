@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import { renderAdminLoginPage } from "../lib/admin-login.mjs";
-import { renderAdminTeamPage } from "../lib/admin-team.mjs";
+import { renderAdminTeamPayload } from "../lib/admin-team.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
 
 // Contracts for the CMS and launch screens (package A2): the shared shell of
@@ -273,6 +275,7 @@ test("the CMS sheet ships after the shared admin sheet and reuses the CRM vocabu
 });
 
 test("the standalone pages speak the three workbench languages and carry their states", () => {
+  const registry = loadLocaleRegistry();
   for (const [locale, marker] of [
     ["bg", "Вход за екипа на MS Realty"],
     ["ru", "Вход для команды MS Realty"],
@@ -297,17 +300,26 @@ test("the standalone pages speak the three workbench languages and carry their s
     ["ru", "Операторов пока нет."],
     ["en", "No operators yet."],
   ]) {
-    const html = renderAdminTeamPage({ operators: [], locale });
-    assert.match(html, new RegExp(`<html lang="${locale}">`), locale);
+    const page = renderAdminTeamPayload({ registry, requestedLocale: locale, operators: [] });
+    const html = renderReactAdminBody(page);
+    assert.equal(page.lang, locale);
     assert.ok(html.includes(marker), `${locale} empty state`);
     assert.match(html, /data-team-empty="true"/);
+    assert.match(html, /class="crm-app"/);
+    assert.match(html, /data-react-admin-ui="team"/);
   }
-  assert.match(renderAdminTeamPage({ operators: [], error: true }), /data-team-state="error"/);
-  assert.match(renderAdminTeamPage({ operators: [], created: true }), /data-team-state="created"/);
+  assert.match(renderReactAdminBody(renderAdminTeamPayload({ registry, operators: [], notice: "error" })), /data-team-state="error"/);
+  assert.match(renderReactAdminBody(renderAdminTeamPayload({ registry, operators: [], notice: "created" })), /data-team-state="created"/);
   // Roles read as names in the workbench language and keep their stored id.
-  const team = renderAdminTeamPage({ operators: [{ email: "a@b.c", role: "admin", workspace_ids: [] }], locale: "en" });
-  assert.match(team, /<span class="team__role" data-role="admin">Administrator<\/span>/);
-  assert.match(team, /<option value="admin">Administrator<\/option>/);
+  const team = renderReactAdminBody(
+    renderAdminTeamPayload({
+      registry,
+      requestedLocale: "en",
+      operators: [{ id: "a", email: "a@b.c", role: "admin", workspace_ids: [] }],
+    }),
+  );
+  assert.match(team, /Administrator · All workspaces/);
+  assert.match(team, /<option value="admin" selected>Administrator<\/option>/);
 });
 
 test("the connect page never renders an operator bearer token or credential field", () => {

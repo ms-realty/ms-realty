@@ -2668,6 +2668,11 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Всички работни пространства",
       scopedAccess: "Ограничен достъп до {count} работни пространства",
       scopeUnavailable: "Тази среда не е предоставила обхвата на работните пространства",
+      editName: "Име в работното пространство",
+      saveName: "Запази името",
+      saving: "Запазване…",
+      saved: "Профилът е обновен.",
+      saveFailed: "Профилът не беше обновен.",
       changePassword: "Смяна на парола",
       manageTeam: "Управление на екипа",
       manageConnections: "Връзки и интеграции",
@@ -2783,6 +2788,11 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Все рабочие пространства",
       scopedAccess: "Доступ к {count} рабочим пространствам",
       scopeUnavailable: "Эта среда не передала доступ к рабочим пространствам",
+      editName: "Имя в рабочем пространстве",
+      saveName: "Сохранить имя",
+      saving: "Сохранение…",
+      saved: "Профиль обновлён.",
+      saveFailed: "Профиль не обновлён.",
       changePassword: "Изменить пароль",
       manageTeam: "Управление командой",
       manageConnections: "Подключения и интеграции",
@@ -2898,6 +2908,11 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "All workspaces",
       scopedAccess: "Access to {count} workspaces",
       scopeUnavailable: "Workspace scope was not provided by this runtime",
+      editName: "Workspace name",
+      saveName: "Save name",
+      saving: "Saving…",
+      saved: "Profile updated.",
+      saveFailed: "Profile was not updated.",
       changePassword: "Change password",
       manageTeam: "Manage team",
       manageConnections: "Connections and integrations",
@@ -11306,6 +11321,7 @@ function OwnerProfileSection({ page }) {
   const copy = ownerConsoleCopy(page).profile;
   const scope = ownerWorkspaceScope(page, copy);
   const role = ownerRoleLabel(page, copy);
+  const profileNotice = page.profile_notice === "updated" ? copy.saved : page.profile_notice === "error" ? copy.saveFailed : "";
   const fields = [
     [copy.name, profile.name || ownerIdentityName(page)],
     [copy.email, profile.email],
@@ -11326,6 +11342,50 @@ function OwnerProfileSection({ page }) {
       { className: "adm-owner-profile__details" },
       ...fields.map(([term, value]) => h("div", { key: term }, h("dt", null, term), h("dd", null, h("bdi", null, value)))),
     ),
+    profile.editable
+      ? h(
+          "form",
+          {
+            method: "post",
+            action: adminHref("/api/admin/profile", page),
+            className: "adm-settings-form",
+            "data-admin-mutation-form": "owner-profile",
+            "data-admin-mutation-saving": copy.saving,
+            "data-admin-mutation-success": copy.saved,
+            "data-admin-mutation-failure": copy.saveFailed,
+          },
+          h(
+            "div",
+            { className: "adm-settings-grid" },
+            h(SettingsField, {
+              labelText: copy.editName,
+              control: h("input", {
+                name: "name",
+                defaultValue: profile.name || "",
+                autoComplete: "name",
+                maxLength: 120,
+                required: true,
+              }),
+            }),
+          ),
+          h(
+            "div",
+            { className: "adm-settings-actions" },
+            h(
+              "p",
+              {
+                className: "adm-settings-status",
+                role: "status",
+                "aria-live": "polite",
+                "data-admin-mutation-status": "true",
+                ...(profileNotice ? { "data-state": page.profile_notice === "updated" ? "success" : "error" } : {}),
+              },
+              profileNotice,
+            ),
+            h("button", { className: "mk-btn mk-btn--primary", type: "submit" }, copy.saveName),
+          ),
+        )
+      : null,
     h(
       "div",
       { className: "adm-owner-profile__actions" },
@@ -12269,6 +12329,164 @@ function HermesBody({ page }) {
   });
 }
 
+function TeamBody({ page }) {
+  const copy = page.team?.copy || {};
+  const roles = page.team?.roles || [];
+  const notice = page.team?.notice;
+  const noticeText = notice === "created" ? copy.created : notice === "updated" ? copy.updated : notice === "error" ? copy.error : "";
+  const roleOptions = (selected) =>
+    roles.map((role) =>
+      h("option", { key: role, value: role, selected: role === selected ? true : undefined }, copy.roleNames?.[role] || role),
+    );
+  const mutationActions = (id, buttonLabel) =>
+    h(
+      "div",
+      { className: "adm-settings-actions" },
+      h("p", { className: "adm-settings-status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h("button", { className: "mk-btn mk-btn--primary", type: "submit" }, buttonLabel),
+    );
+  const formAttrs = (id) => ({
+    method: "post",
+    className: "adm-settings-form",
+    "data-admin-mutation-form": id,
+    "data-admin-mutation-saving": copy.saving,
+    "data-admin-mutation-success": copy.saved,
+    "data-admin-mutation-failure": copy.saveFailed,
+  });
+  const operatorEditor = (operator) => {
+    const name = operator.name || operator.email;
+    const role = copy.roleNames?.[operator.role] || operator.role;
+    const scope = operator.full_workspace_access
+      ? copy.fullAccess
+      : operator.workspace_ids?.length
+        ? operator.workspace_ids.join(", ")
+        : copy.noWorkspace;
+    const summary = [name, role, scope, operator.is_current ? copy.current : null].filter(Boolean).join(" · ");
+    const ownProfile = operator.is_current;
+    return h(
+      WorkbenchDisclosure,
+      { key: operator.id, summary, "data-team-operator": operator.id, ...(ownProfile ? { "data-current-operator": "true" } : {}) },
+      h(
+        "form",
+        {
+          ...formAttrs(`team-operator-${operator.id}`),
+          action: adminHref(ownProfile ? "/api/admin/profile" : "/api/admin/team", page),
+        },
+        ownProfile ? null : h("input", { type: "hidden", name: "action", value: "update" }),
+        ownProfile ? null : h("input", { type: "hidden", name: "operator_id", value: operator.id }),
+        h(
+          "div",
+          { className: "adm-settings-grid" },
+          h(SettingsField, {
+            labelText: copy.name,
+            control: h("input", { name: "name", defaultValue: operator.name || "", autoComplete: "name", maxLength: 120, required: true }),
+          }),
+          h(SettingsField, {
+            labelText: copy.email,
+            control: h("input", { value: operator.email || "", readOnly: true, type: "email" }),
+          }),
+          ownProfile
+            ? null
+            : h(SettingsField, {
+                labelText: copy.role,
+                control: h("select", { name: "role", required: true }, ...roleOptions(operator.role)),
+              }),
+          ownProfile
+            ? null
+            : h(SettingsField, {
+                labelText: copy.workspaces,
+                hint: copy.workspacesHint,
+                wide: true,
+                control: h("input", { name: "workspace_ids", defaultValue: (operator.workspace_ids || []).join(", ") }),
+              }),
+          operator.password_change_required
+            ? h("p", { className: "adm-settings-note", role: "note" }, h(Icon, { name: "key", size: 15 }), h("span", null, copy.firstLogin))
+            : null,
+        ),
+        mutationActions(operator.id, copy.save),
+      ),
+    );
+  };
+  return adminShell(page, {
+    title: copy.title,
+    titleAsHeading: true,
+    mainAttrs: {
+      "data-kind": "admin-team",
+      "data-react-admin-ui": "team",
+      "data-admin-workbench": "workspace",
+      "data-admin-locale": page.workspace.locale,
+      "data-team-state": notice || "idle",
+    },
+    children: [
+      h(PageHeader, { title: copy.title, subtitle: copy.intro }),
+      noticeText
+        ? h(
+            "p",
+            {
+              className: `adm-settings-note${notice === "error" ? " adm-settings-note--blocked" : ""}`,
+              role: notice === "error" ? "alert" : "status",
+              "data-team-notice": notice,
+            },
+            h(Icon, { name: notice === "error" ? "triangle-alert" : "check", size: 15 }),
+            h("span", null, noticeText),
+          )
+        : null,
+      h(
+        "div",
+        { className: "adm-owner-flow adm-owner-flow__stack", "data-team-layout": "unified" },
+        h(
+          Panel,
+          { title: copy.newOperator, "data-team-create": "true" },
+          h(
+            "form",
+            { ...formAttrs("team-create"), action: adminHref("/api/admin/team", page) },
+            h("input", { type: "hidden", name: "action", value: "create" }),
+            h(
+              "div",
+              { className: "adm-settings-grid" },
+              h(SettingsField, {
+                labelText: copy.name,
+                control: h("input", { name: "name", autoComplete: "name", maxLength: 120, required: true }),
+              }),
+              h(SettingsField, {
+                labelText: copy.email,
+                control: h("input", { name: "email", type: "email", autoComplete: "off", required: true }),
+              }),
+              h(SettingsField, {
+                labelText: copy.password,
+                hint: copy.passwordHint,
+                control: h("input", { name: "password", type: "password", autoComplete: "new-password", minLength: 12, required: true }),
+              }),
+              h(SettingsField, {
+                labelText: copy.role,
+                control: h("select", { name: "role", required: true }, ...roleOptions("broker")),
+              }),
+              h(SettingsField, {
+                labelText: copy.workspaces,
+                hint: copy.workspacesHint,
+                wide: true,
+                control: h("input", { name: "workspace_ids" }),
+              }),
+            ),
+            mutationActions("create", copy.create),
+          ),
+        ),
+        h(
+          Panel,
+          {
+            title: copy.operators,
+            action: h(StatusPill, { tone: "ink", "data-team-count": page.operators?.length || 0 }, String(page.operators?.length || 0)),
+            "data-team-list": "true",
+          },
+          page.operators?.length
+            ? h("div", { className: "adm-owner-flow__stack" }, ...page.operators.map(operatorEditor))
+            : h("p", { className: "adm-empty", "data-team-empty": "true" }, copy.empty),
+        ),
+      ),
+    ],
+  });
+}
+
 function SettingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -12733,6 +12951,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_runtime_unavailable") return renderStaticElement(h(RuntimeUnavailableBody, { page }));
   if (page.kind === "admin_hermes") return renderStaticElement(h(HermesBody, { page }));
   if (page.kind === "admin_connections") return renderStaticElement(h(ConnectionsBody, { page }));
+  if (page.kind === "admin_team") return renderStaticElement(h(TeamBody, { page }));
   if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));
