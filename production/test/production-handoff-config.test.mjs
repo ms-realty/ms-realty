@@ -71,7 +71,9 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(compose, /MS_REALTY_MCP_ALLOWED_ORIGINS: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev/);
   assert.match(compose, /MS_REALTY_BUILD_MARKER: \$\{MS_REALTY_BUILD_MARKER:-unversioned\}/);
   assert.match(compose, /MS_REALTY_RUNTIME_DATA_AUTHORITY: payload/);
+  assert.match(compose, /MS_REALTY_ADMIN_RUNTIME_VOLUME_ENABLED: "true"/);
   assert.match(compose, /MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true"/);
+  assert.match(compose, /MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "true"/);
   assert.match(compose, /MS_REALTY_EVENT_DURABLE_STORE_ENABLED: "true"/);
   assert.match(compose, /MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true"/);
   assert.match(compose, /MS_REALTY_CASE_PAYLOAD_AUTHORITY_ENABLED: "true"/);
@@ -86,6 +88,7 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
   assert.match(cloudflareDockerfile, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH=\/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
+  assert.doesNotMatch(worker, /MS_REALTY_ADMIN_RUNTIME_VOLUME_ENABLED/);
 });
 
 test("production compose forwards provider setup and canonical Hermes configuration", () => {
