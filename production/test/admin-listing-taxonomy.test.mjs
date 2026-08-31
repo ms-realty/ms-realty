@@ -260,6 +260,18 @@ function todayPage(data, locale = "bg") {
   });
 }
 
+test("admin Today never exposes an internal Payload id as the owner's name", () => {
+  const page = todayPage({}, "en");
+  page.welcome = true;
+  page.workspace = { ...page.workspace, locale: "en", operator_id: "payload-3" };
+  page.owner_profile = { id: "payload-3", name: "", email: "owner@example.test", roles: ["admin"], workspace_ids: [] };
+
+  const html = renderReactAdminBody(page);
+  assert.match(html, />Welcome\.<\/strong>/);
+  assert.doesNotMatch(html, />Welcome, payload-3\.<\/strong>/);
+  assert.match(html, />owner@example\.test<\/strong>/);
+});
+
 test("admin Today ranks pipeline and follow-up work in one priority list", () => {
   const html = renderReactAdminBody(
     todayPage({

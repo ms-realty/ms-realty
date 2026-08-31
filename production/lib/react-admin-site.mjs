@@ -3046,7 +3046,7 @@ function MutationAvailabilityNote({ page, capability, pathname }) {
 
 function ownerIdentityName(page) {
   const profile = page.owner_profile || {};
-  return profile.name || profile.email || profile.id || page.workspace?.title || "MS Realty";
+  return profile.name || profile.email || page.workspace?.title || "MS Realty";
 }
 
 function ownerInitials(value) {
@@ -3698,7 +3698,7 @@ function NextActionsPanel({ page, rows, total }) {
 function WorkspaceWelcomeBanner({ page }) {
   if (!page.welcome) return null;
   const copy = settingsCopy(page).welcome;
-  const operator = page.workspace?.operator_id || "";
+  const operator = String(page.owner_profile?.name || "").trim();
   return h(
     "aside",
     {
