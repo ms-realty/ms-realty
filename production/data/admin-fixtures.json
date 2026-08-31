@@ -2292,9 +2292,9 @@
         "ru",
         "en"
       ],
-      "title": "MS Realty Admin",
+      "title": "MS Realty",
       "copy": {
-        "workspaceTitle": "MS Realty Admin",
+        "workspaceTitle": "MS Realty",
         "crm": "CRM",
         "cms": "CMS",
         "listingManager": "Listings",
@@ -2846,9 +2846,9 @@
         "locale": "en",
         "lang": "en",
         "dir": "ltr",
-        "title": "MS Realty Admin",
+        "title": "MS Realty",
         "copy": {
-          "workspaceTitle": "MS Realty Admin",
+          "workspaceTitle": "MS Realty",
           "crm": "CRM",
           "cms": "CMS",
           "listingManager": "Listings",
@@ -3411,9 +3411,9 @@
         "ru",
         "en"
       ],
-      "title": "MS Realty Admin",
+      "title": "MS Realty",
       "copy": {
-        "workspaceTitle": "MS Realty Admin",
+        "workspaceTitle": "MS Realty",
         "crm": "CRM",
         "cms": "CMS",
         "listingManager": "Listings",
@@ -3965,9 +3965,9 @@
         "locale": "en",
         "lang": "en",
         "dir": "ltr",
-        "title": "MS Realty Admin",
+        "title": "MS Realty",
         "copy": {
-          "workspaceTitle": "MS Realty Admin",
+          "workspaceTitle": "MS Realty",
           "crm": "CRM",
           "cms": "CMS",
           "listingManager": "Listings",
@@ -4878,14 +4878,31 @@
       "reviewer": "translator_el",
       "approved_at": "2026-07-04T00:00:00Z",
       "human_approved": true,
+      "locale": "el",
+      "translation_state": "published",
+      "title": "MS-CRAWL-0001 Sandanski el",
+      "description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft",
+      "seo_title": "MS-CRAWL-0001 Sandanski",
+      "meta_description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
+      "translated_hash": "ec8007f6a1bfe9230a4e6470aa580b21fb47978bf4c4ba293dd0e642cd6dac48",
+      "content_origin": "human_reviewed_hermes_draft",
+      "citations": [
+        {
+          "source": "cms",
+          "field": "title"
+        }
+      ],
+      "publication_authorized_by": "translator_el",
+      "publication_authorized_at": "2026-07-04T00:00:00Z",
+      "published_at": "2026-07-04T00:00:00Z",
       "published": true
     }
   },
   "crm_inbox": {
     "buyer_he": {
-      "id": "inbox-lead-draft-c8e5e111-c2db-4035-95c5-f497d20069c9",
+      "id": "inbox-lead-draft-8a91e8a0-987e-4d1a-843d-d0cd1b172c19",
       "lead": {
-        "id": "lead-draft-c8e5e111-c2db-4035-95c5-f497d20069c9",
+        "id": "lead-draft-8a91e8a0-987e-4d1a-843d-d0cd1b172c19",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": null,
@@ -4945,14 +4962,14 @@
       },
       "message_original": "Interested in this listing.",
       "broker_assignment": {
-        "status": "assigned",
-        "method": "rules",
-        "broker_id": "broker_international",
+        "status": "unassigned",
+        "method": "manager_queue",
+        "broker_id": null,
         "criteria": {
           "language": "he",
           "admin_locale": "en",
-          "location": "Sandanski",
-          "property_type": "commercial",
+          "location": null,
+          "property_type": null,
           "lead_type": "buyer"
         }
       },
@@ -4975,9 +4992,9 @@
       }
     },
     "seller_el": {
-      "id": "inbox-lead-draft-b61427ec-eda0-4315-a522-d758b5d011f5",
+      "id": "inbox-lead-draft-0ead9372-c336-46f0-a5ce-28a2d3cc8e2c",
       "lead": {
-        "id": "lead-draft-b61427ec-eda0-4315-a522-d758b5d011f5",
+        "id": "lead-draft-0ead9372-c336-46f0-a5ce-28a2d3cc8e2c",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": null,
@@ -5046,9 +5063,9 @@
       },
       "message_original": "I want a valuation for my property.",
       "broker_assignment": {
-        "status": "assigned",
-        "method": "rules",
-        "broker_id": "broker_international",
+        "status": "unassigned",
+        "method": "manager_queue",
+        "broker_id": null,
         "criteria": {
           "language": "el",
           "admin_locale": "en",

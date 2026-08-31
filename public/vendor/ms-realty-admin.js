@@ -1630,8 +1630,12 @@
     var appId = root.getAttribute("data-whatsapp-app-id");
     var configId = root.getAttribute("data-whatsapp-config-id");
     var version = root.getAttribute("data-whatsapp-version");
-    if (!button || !status || !appId || !configId || !version) return;
+    if (!button || !status) return;
     var copy = function (name, fallback) { return root.getAttribute("data-meta-" + name) || fallback; };
+    if (!appId || !configId || !version) {
+      status.textContent = copy("no-server", "WhatsApp setup is incomplete.");
+      return;
+    }
     var signup = null;
     var code = null;
     var fail = function (message) {
@@ -1672,13 +1676,18 @@
       button.disabled = false;
       status.textContent = copy("ready", "Ready to open Meta.");
     };
-    var script = document.createElement("script");
-    script.async = true;
-    script.src = "https://connect.facebook.net/en_US/sdk.js";
-    script.onerror = function () { fail(copy("sdk-failed", "The Meta SDK did not load.")); };
-    document.head.append(script);
+    var loadSdk = function () {
+      button.disabled = true;
+      status.textContent = copy("checking", "Loading Meta…");
+      var script = document.createElement("script");
+      script.async = true;
+      script.src = "https://connect.facebook.net/en_US/sdk.js";
+      script.onerror = function () { fail(copy("sdk-failed", "The Meta SDK did not load.")); };
+      document.head.append(script);
+    };
+    loadSdk();
     button.addEventListener("click", function () {
-      if (!window.FB) return fail(copy("sdk-not-ready", "Meta is not ready yet."));
+      if (!window.FB) return loadSdk();
       button.disabled = true;
       status.textContent = copy("opening", "Opening Meta…");
       window.FB.login(function (response) {
