@@ -9145,12 +9145,12 @@ function ListingEditorBody({ page }) {
               { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
               reviewableMedia.length
                 ? reviewableMedia.map((item) => {
-                    const sourceUrl = item.asset_url || item.url || "";
+                    const sourceUrl = item.source_url || item.url || item.asset_url || "";
                     // The preview box is a small 16:10 card. Painting a 2560px
                     // photo into it downloads the whole photograph to draw a
                     // thumbnail, which is what the 640px rendition exists to
                     // stop. The full asset is still one click away below.
-                    const previewUrl = item.thumbnail_url || sourceUrl;
+                    const previewUrl = item.thumbnail_url || item.asset_url || sourceUrl;
                     const published = item.is_public === true;
                     const hasImagePreview = Boolean(sourceUrl && item.kind !== "video");
                     const previewState = hasImagePreview ? "loading" : sourceUrl ? "video" : "empty";

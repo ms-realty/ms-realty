@@ -107,18 +107,17 @@ export class MsRealtyContainer extends Container {
 // resolving at their original paths. Serving them from R2 at the edge also
 // avoids waking the container for what is just a byte range.
 const MEDIA_PREFIX = "/wp-content/uploads/";
+const OWNED_MEDIA_PREFIX = "/media/";
 const MEDIA_TYPES = {
   avif: "image/avif", gif: "image/gif", jpeg: "image/jpeg", jpg: "image/jpeg",
   mp4: "video/mp4", pdf: "application/pdf", png: "image/png",
   svg: "image/svg+xml", webm: "video/webm", webp: "image/webp",
 };
 
-async function serveMedia(request, env, url) {
+async function serveMedia(request, env, url, candidates = mediaCandidateKeys(url.hostname, url.pathname)) {
   // Mirror keys are host-prefixed so the two legacy domains cannot collide on a
   // shared upload path. The public workers.dev origin is a read-through for
   // both historical host namespaces; direct legacy hosts retain their own key.
-  const candidates = mediaCandidateKeys(url.hostname, url.pathname);
-
   for (const key of candidates) {
     // The runtime rejects malformed percent-encoding before we run, but a
     // decode failure here must degrade to "not found", never to a 500.
@@ -143,6 +142,15 @@ async function serveMedia(request, env, url) {
     return new Response(object.body, { headers });
   }
   return null;
+}
+
+function ownedMediaKey(pathname) {
+  const relative = pathname.slice(OWNED_MEDIA_PREFIX.length);
+  const slash = relative.indexOf("/");
+  const host = relative.slice(0, slash);
+  const mediaPath = relative.slice(slash);
+  if (slash < 1 || !["makler-realty.com", "makler-realty.ru"].includes(host) || !mediaPath.startsWith(MEDIA_PREFIX)) return "";
+  return `${host}${mediaPath}`;
 }
 
 // Bulk media ingest. The obvious route — `wrangler r2 object put` — goes
@@ -309,7 +317,7 @@ export default {
     if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
     if (preview && url.pathname === "/robots.txt") return previewRobotsResponse();
-    if (url.pathname.startsWith(MEDIA_PREFIX)) {
+    if (url.pathname.startsWith(MEDIA_PREFIX) || url.pathname.startsWith(OWNED_MEDIA_PREFIX)) {
       // Media paths are static bytes: only GET/HEAD mean anything here, and a
       // DELETE must not wake the container or pretend to have deleted a file.
       if (request.method !== "GET" && request.method !== "HEAD") {
@@ -318,8 +326,13 @@ export default {
           headers: { allow: "GET, HEAD", "content-type": "text/plain; charset=utf-8" },
         });
       }
-      const media = await serveMedia(request, env, url);
+      const ownedKey = url.pathname.startsWith(OWNED_MEDIA_PREFIX) ? ownedMediaKey(url.pathname) : "";
+      if (url.pathname.startsWith(OWNED_MEDIA_PREFIX) && !ownedKey) {
+        return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
+      }
+      const media = await serveMedia(request, env, url, ownedKey ? [ownedKey] : undefined);
       if (media) return media;
+      if (ownedKey) return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
       if (env.MS_REALTY_ORIGIN_URL) return proxyDurableOrigin(request, env, url, preview);
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
     }

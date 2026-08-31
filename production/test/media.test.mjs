@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mediaWorkflow, normalizeMediaAsset, publicMediaLibrary, selectPublicThumbnail } from "../lib/media.mjs";
+import { mediaWorkflow, normalizeMediaAsset, ownedMediaUrl, publicMediaLibrary, selectPublicThumbnail } from "../lib/media.mjs";
+
+const PRODUCTION_MEDIA_PREFIX = "https://ms-realty.ms-realty-bg.workers.dev/media/";
 
 test("media library exposes imported photos and gates plans or videos for review", () => {
   const media = [
@@ -21,7 +23,7 @@ test("media library exposes imported photos and gates plans or videos for review
   assert.equal(media[0].review_status, "reviewed_private");
   assert.equal(library.gallery_count, 1);
   assert.equal(mediaWorkflow(media).public_gallery_assets, 1);
-  assert.equal(library.gallery[0].url, "https://makler-realty.com/wp-content/uploads/2025/04/front.jpg");
+  assert.equal(library.gallery[0].url, "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/front.jpg");
   assert.equal(library.floor_plans.length, 0);
   assert.equal(library.videos.length, 0);
   assert.equal(library.review.floor_plan_candidates, 1);
@@ -101,7 +103,7 @@ test("large source imagery outranks an inherited 45px homepage thumbnail", () =>
   const thumbnail = selectPublicThumbnail(media);
   const gallery = publicMediaLibrary(media);
 
-  assert.equal(thumbnail.url, "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg");
+  assert.equal(thumbnail.url, "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg");
   assert.equal(gallery.gallery[0].url, thumbnail.url);
   assert.equal(gallery.gallery.length, 1);
 });
@@ -141,8 +143,17 @@ test("WordPress thumbnail derivatives recover originals without exposing tiny pu
   assert.equal(gallery.gallery_count, 2);
   assert.equal(gallery.review.public_gallery_assets, 2);
   assert.equal(gallery.review.suppressed_public_assets, 0);
-  assert.equal(gallery.gallery[0].url, "https://makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg");
+  assert.equal(gallery.gallery[0].url, "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg");
   assert.equal(gallery.gallery[0].fallback_url, undefined);
   assert.equal(media[0].width, null);
   assert.equal(media[0].height, null);
+});
+
+test("legacy media keeps provenance while browsers load the exact owned R2 object", () => {
+  const source = "https://makler-realty.ru/wp-content/uploads/2025/04/%D1%81%D1%85%D0%B5%D0%BC%D0%B0.jpg";
+  const media = normalizeMediaAsset({ image_url: source, alt: "Floor plan" });
+
+  assert.equal(media.source_url, source);
+  assert.equal(media.asset_url, `${PRODUCTION_MEDIA_PREFIX}makler-realty.ru/wp-content/uploads/2025/04/%D1%81%D1%85%D0%B5%D0%BC%D0%B0.jpg`);
+  assert.equal(ownedMediaUrl("https://cdn.example.test/photo.jpg"), "https://cdn.example.test/photo.jpg");
 });
