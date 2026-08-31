@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { mediaWorkflow } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
+import { PRODUCTION_PUBLIC_HOST } from "../../workers/preview-host.mjs";
 
 export const DEFAULT_MEDIA_REVIEW_LEDGER_PATH = fromRoot("production", "data", "media-reviews.jsonl");
 
@@ -22,6 +23,19 @@ function sourceAssetUrl(item = {}) {
 function httpsUrl(value) {
   try {
     return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function ownedImageUrl(value) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === PRODUCTION_PUBLIC_HOST &&
+      (url.pathname.startsWith("/media/") || url.pathname.startsWith("/wp-content/uploads/"))
+    );
   } catch {
     return false;
   }
@@ -79,7 +93,9 @@ function validatedPublicUrl(value, kind) {
   const url = String(value || "").trim();
   if (!httpsUrl(url)) throw new Error("Published media requires an HTTPS asset URL");
   if (kind === "video" && !VIDEO_URL.test(url)) throw new Error("Published video requires a supported video URL");
-  if (kind !== "video" && !IMAGE_URL.test(url)) throw new Error("Published photo or floor plan requires an image URL");
+  if (kind !== "video" && (!IMAGE_URL.test(url) || !ownedImageUrl(url))) {
+    throw new Error("Published photo or floor plan requires an owned storage URL");
+  }
   return url;
 }
 

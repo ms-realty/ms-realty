@@ -461,8 +461,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const documentChecklistLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-documents-`)}/outcomes.jsonl`;
   const slugHistoryPath = tempSlugHistory();
   const hermesReplyPrompts = [];
+  const publicSeed = approvedPublicSeedFixture();
   const app = createHttpApp({
-    seed: approvedPublicSeedFixture(),
+    seed: publicSeed,
     // This integration fixture exercises the legacy file adapter. The
     // process-level durable env above is only for the public UI contract.
     leadDurableStore: { leadDurableStoreEnabled: false },
@@ -942,7 +943,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/admin/migration/review?locale=bg",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
-  const reviewedAssetId = mediaAssetId({ asset_url: smoke.listing.body.body.media.gallery[0].url });
+  const reviewedAsset = publicSeed.records
+    .find((record) => record.id === "MS-CRAWL-0001")
+    .media.find((item) => item.asset_url === smoke.listing.body.body.media.gallery[0].url);
+  assert.ok(reviewedAsset, "public gallery asset must remain linked to its source-backed CMS media row");
+  const reviewedAssetId = mediaAssetId(reviewedAsset);
   smoke.mediaReview = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/media/reviews",
@@ -953,7 +958,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       decision: "publish",
       kind: "floor_plan",
       alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
-      replacementUrl: "https://cdn.example.test/listings/MS-CRAWL-0001-floor-plan.webp",
+      replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0001-floor-plan.webp",
       reviewer: "media_editor",
       reviewConfirmed: true,
     },

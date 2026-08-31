@@ -144,7 +144,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /data-filter-form-id="sr-mobile"/);
   assert.match(search.html, /data-filter-chip="property_family"/);
   assert.match(search.html, /data-card-thumbnail="true"/);
-  assert.match(search.html, /<img src="https:\/\/makler-realty\./);
+  assert.match(search.html, /<img src="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/media\/makler-realty\.(?:com|ru)\/wp-content\/uploads\//);
   assert.match(search.html, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
   assert.match(search.html, /data-ms-realty-public-client/);
   assert.doesNotMatch(search.html, /function submitHermesChat/);

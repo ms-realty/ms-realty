@@ -103,12 +103,12 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
 function publicAsset(item) {
   const fallbackUrl = item.fallback_asset_url || "";
   return {
-    url: item.asset_url || item.url,
+    url: ownedMediaUrl(item.asset_url || item.url),
     // A recovered WordPress original is suitable for the public gallery, but
     // its tiny crawl thumbnail is not. Keep that derivative on the CMS record
     // for provenance without letting an image error turn a full-width hero
     // into a visibly pixelated 72px fallback.
-    fallback_url: fallbackUrl && !isSmallDerivative(fallbackUrl) ? fallbackUrl : undefined,
+    fallback_url: fallbackUrl && !isSmallDerivative(fallbackUrl) ? ownedMediaUrl(fallbackUrl) : undefined,
     alt: item.alt || "Property photo",
     width: item.width,
     height: item.height,
@@ -223,7 +223,7 @@ export function selectPublicThumbnail(media = [], fallback = null) {
 
   // Do not render an unsafe legacy thumbnail. The design system has a stable
   // photo placeholder for listings awaiting a human media review.
-  if (fallback && !NON_PROPERTY_MEDIA.test(`${fallback.url || ""} ${fallback.alt || ""}`)) return fallback;
+  if (fallback && !NON_PROPERTY_MEDIA.test(`${fallback.url || ""} ${fallback.alt || ""}`)) return publicAsset(fallback);
   return null;
 }
 
