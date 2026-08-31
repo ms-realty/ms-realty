@@ -453,6 +453,7 @@ jobs:
           [[ "$container" =~ ^[0-9a-f]+$ ]]
           docker cp "$report" "${container}:/runtime-evidence/.monitoring-rollback-report.json"
           docker exec --user 0 "$container" sh -c 'chmod 0444 /runtime-evidence/.monitoring-rollback-report.json && mv -f /runtime-evidence/.monitoring-rollback-report.json /runtime-evidence/monitoring-rollback-report.json'
+          docker exec --user 1001:1001 "$container" sh -c 'node production/scripts/validate-monitoring-rollback-report.mjs && node production/scripts/build-launch-readiness.mjs'
           rm -f "$report"
           REMOTE
 
