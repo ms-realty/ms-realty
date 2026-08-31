@@ -298,7 +298,8 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(rollbackBlock, /mv -Tf .*link.*\/opt\/ms-realty\/current/);
   assert.match(rollbackBlock, /d\.origin_build_marker !== origin/);
   assert.match(rollbackBlock, /rollback-ready\.json/);
-  assert.match(rollbackBlock, /d\.launch_ready !== true/);
+  assert.match(rollbackBlock, /d\.launch_ready !== ready/);
+  assert.match(rollbackBlock, /JSON\.stringify\(actual\) !== JSON\.stringify\(blockers\)/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
 
