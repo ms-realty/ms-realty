@@ -14,7 +14,7 @@ import {
   isPayloadPrivatePath,
   secretMatches,
 } from "./durable-case-authority.mjs";
-import { PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
+import { PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, canonicalLegacyHost, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
 import {
   OriginProxyError,
   requestForOrigin,
@@ -312,6 +312,11 @@ async function serveFromContainer(request, env, url, preview) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const canonicalHost = canonicalLegacyHost(url.hostname);
+    if (canonicalHost) {
+      url.hostname = canonicalHost;
+      return Response.redirect(url, 301);
+    }
     const preview = isPreviewHost(url.hostname);
     if (preview && isPublicAdminPath(url.pathname)) return payloadPrivateResponse();
     if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();
