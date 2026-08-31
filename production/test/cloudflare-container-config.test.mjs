@@ -114,6 +114,17 @@ test("Cloudflare Container search depends only on Payload Postgres", () => {
   assert.match(workerSource, /DATABASE_URL: this\.env\.DATABASE_URL/);
 });
 
+test("Cloudflare deployment enables the canonical durable owner workspace", () => {
+  for (const [name, value] of Object.entries({
+    MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_VIEWING_DURABLE_STORE_ENABLED: "true",
+    MS_REALTY_WORKSPACE_ID: "workspace-sandanski",
+  })) {
+    assert.match(wranglerConfig, new RegExp(`"${name}"\\s*:\\s*"${value}"`), name);
+  }
+});
+
 test("every forwarded binding is actually read by the running app", () => {
   const forwarded = [...workerSource.matchAll(/^\s+(MS_REALTY_[A-Z0-9_]+|PAYLOAD_SECRET|DATABASE_URL|TYPESENSE_[A-Z_]+|MEILI_[A-Z_]+|HERMES_[A-Z_]+): this\.env\./gm)].map(
     ([, name]) => name,
