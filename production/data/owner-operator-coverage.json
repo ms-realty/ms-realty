@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 104,
-    "admin_methods": 119,
+    "admin_route_files": 105,
+    "admin_methods": 120,
     "admin_pages": 19,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 141,
-    "structurally_covered_workflows": 141,
+    "authorized_workflows": 142,
+    "structurally_covered_workflows": 142,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -2271,6 +2271,35 @@
       "ui_path": "/admin/migration/review",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/production-recovery/import/route.js",
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
+    },
+    {
+      "operation": "admin_post_profile",
+      "method": "POST",
+      "pathname": "/api/admin/profile",
+      "family": "administration",
+      "tool": "ms_realty_admin_write",
+      "capability": "workspace:read",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "browser_session",
+      "ui_path": "/admin/settings#owner-profile",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/profile/route.js",
       "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
