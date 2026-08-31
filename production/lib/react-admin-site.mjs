@@ -708,7 +708,7 @@ const ADMIN_UI_COPY = {
         clear: "Няма отворени приоритети",
         clearWhy: "Текущите опашки не показват причина за действие.",
         clearNext: "Провери отново по-късно.",
-        source: "Източник: запитвания, последващи действия, заявки от сайта и възможности.",
+        source: "Източник: запитвания, последващи действия, заявки от сайта, възможности и цялост на данните.",
       },
       hermesEntry: {
         title: "Попитай Hermes",
@@ -724,8 +724,12 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Нищо в този изглед.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност" },
-        actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността" },
+        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност", integrity: "Цялост на данните" },
+        actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността", inspectTracking: "Провери отчета" },
+        trackingTitle: "Запитванията от сайта не съвпадат с CRM",
+        trackingMissing: "CRM запитвания без събитие за изпращане: {count}.",
+        trackingOrphaned: "Отчетени изпращания, които липсват в постоянния CRM: {count}.",
+        trackingUnavailable: "Събитията от сайта не могат да бъдат проверени.",
         priorities: { critical: "Критично", urgent: "Спешно", normal: "Нормално" },
       },
     },
@@ -1394,7 +1398,7 @@ const ADMIN_UI_COPY = {
         clear: "Открытых приоритетов нет",
         clearWhy: "Текущие очереди не показывают причины для действий.",
         clearNext: "Проверьте позже.",
-        source: "Источник: заявки, последующие действия, запросы с сайта и возможности.",
+        source: "Источник: заявки, последующие действия, запросы с сайта, возможности и целостность данных.",
       },
       hermesEntry: {
         title: "Спросить Hermes",
@@ -1410,8 +1414,12 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "В этом виде ничего нет.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность" },
-        actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность" },
+        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность", integrity: "Целостность данных" },
+        actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность", inspectTracking: "Проверить отчёт" },
+        trackingTitle: "Заявки с сайта не совпадают с CRM",
+        trackingMissing: "Заявки CRM без события отправки: {count}.",
+        trackingOrphaned: "Отмеченные отправки, отсутствующие в постоянной CRM: {count}.",
+        trackingUnavailable: "События сайта сейчас нельзя проверить.",
         priorities: { critical: "Критично", urgent: "Срочно", normal: "Обычно" },
       },
     },
@@ -2080,7 +2088,7 @@ const ADMIN_UI_COPY = {
         clear: "No open priorities",
         clearWhy: "The current queues show no reason to act.",
         clearNext: "Check again later.",
-        source: "Source: enquiries, follow-ups, website requests, and opportunities.",
+        source: "Source: enquiries, follow-ups, website requests, opportunities, and data integrity.",
       },
       hermesEntry: {
         title: "Ask Hermes",
@@ -2096,8 +2104,12 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Nothing in this view.",
         due: "Due",
         overdue: "Overdue",
-        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity" },
-        actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity" },
+        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity", integrity: "Data integrity" },
+        actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity", inspectTracking: "Inspect report" },
+        trackingTitle: "Website submissions do not match CRM",
+        trackingMissing: "Durable CRM leads without a submission event: {count}.",
+        trackingOrphaned: "Tracked submissions absent from durable CRM: {count}.",
+        trackingUnavailable: "Website submission events cannot be verified.",
         priorities: { critical: "Critical", urgent: "Urgent", normal: "Normal" },
       },
     },
@@ -3387,6 +3399,26 @@ const NEXT_ACTION_PRIORITY_RANK = { critical: 0, urgent: 1, normal: 2 };
 function todayNextActions(page, copy, ui, queue, inboxHref) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
   const rows = [];
+  const trackingStatus = page.website_funnel?.lead_tracking_status;
+  const trackingGap = Number(page.website_funnel?.lead_tracking_gap || 0);
+  if (trackingStatus === "mismatch" || trackingStatus === "unavailable") {
+    rows.push({
+      key: "integrity:website-leads",
+      kind: "integrity",
+      tags: "requests",
+      priority: "critical",
+      dueAt: null,
+      overdue: true,
+      title: na.trackingTitle,
+      context:
+        trackingStatus === "unavailable"
+          ? na.trackingUnavailable
+          : (trackingGap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(trackingGap))),
+      reference: "website-lead-tracking",
+      href: `${adminHref("/admin/reports", page)}#website-funnel`,
+      action: na.actions.inspectTracking,
+    });
+  }
   for (const lead of queue.pending) {
     const sla = queue.leadSlaById.get(lead.lead_id);
     const delivery = queue.deliveryByLeadId.get(lead.lead_id);

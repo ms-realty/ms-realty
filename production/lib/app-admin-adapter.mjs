@@ -290,7 +290,7 @@ import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
-import { buildOperationsReport, renderOperationsReportCsv } from "./operations-report.mjs";
+import { buildOperationsReport, buildWebsiteFunnel, renderOperationsReportCsv } from "./operations-report.mjs";
 import {
   DEFAULT_REALTY_CASE_LEDGER_PATH,
   appendRealtyCaseAction,
@@ -1370,7 +1370,12 @@ async function adminLeadSource(config) {
 
 async function adminEventSource(config) {
   const durableStore = config.eventDurableStore || {};
-  if (!durableStore.eventDurableStoreEnabled) return readEventLedger(config.eventLedgerPath);
+  if (!durableStore.eventDurableStoreEnabled) {
+    if (config.runtimeDataDurableOnly) {
+      throw new EventStoreUnavailableError("Production reports require the durable funnel event store");
+    }
+    return readEventLedger(config.eventLedgerPath);
+  }
   if (!isEventDurableStoreEnabled(durableStore)) {
     throw new EventStoreUnavailableError("Durable funnel event store is enabled but not fully configured");
   }
@@ -1987,12 +1992,27 @@ async function operationalQueuePayload(registry, url, config, { kind, path, titl
 }
 
 async function todayPayload(registry, url, config) {
-  return operationalQueuePayload(registry, url, config, {
+  const payload = await leadInboxPayload(registry, url, config);
+  let websiteFunnel;
+  try {
+    websiteFunnel = buildWebsiteFunnel(
+      await adminEventSource(config),
+      payload.leads,
+      config.reviewedAt || config.editedAt || new Date().toISOString(),
+    );
+  } catch (error) {
+    if (!(error instanceof EventStoreUnavailableError)) throw error;
+    websiteFunnel = { lead_tracking_status: "unavailable", lead_tracking_gap: null };
+  }
+  return {
+    ...renderAdminOperationalQueuePayload(payload, {
     kind: "admin_today",
     path: "/admin/today",
     titleKey: "today",
     descriptionKey: "todayDescription",
-  });
+    }),
+    website_funnel: websiteFunnel,
+  };
 }
 
 async function viewingsPayload(registry, url, config) {

@@ -179,7 +179,7 @@ function containsPrivateField(value) {
   return Object.entries(value).some(([key, child]) => PRIVATE_KEYS.has(key) || containsPrivateField(child));
 }
 
-function websiteFunnel(events, leads, generatedAt) {
+export function buildWebsiteFunnel(events, leads, generatedAt) {
   const count = (type) => events.filter((event) => event.type === type).length;
   const pageViews = count("page_view");
   const searches = count("search");
@@ -305,7 +305,7 @@ export function buildOperationsReport({
     task_health: tasks,
     listing_inventory: inventory,
     search: searchAnalytics.summary,
-    website_funnel: websiteFunnel(funnelEvents, leads, generatedAt),
+    website_funnel: buildWebsiteFunnel(funnelEvents, leads, generatedAt),
   };
   assertOperationsReport(report);
   return report;
