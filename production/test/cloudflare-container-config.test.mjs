@@ -332,6 +332,12 @@ test("Cloudflare Container refreshes Payload evidence before serving readiness",
   assert.match(dockerignore, /^!workers\/index\.js$/m, "runtime evidence must be able to inspect the Worker boundary");
 });
 
+test("Cloudflare Container includes shared Worker media modules used by the Next build", () => {
+  for (const file of ["media-ingest-auth.mjs", "preview-host.mjs"]) {
+    assert.match(dockerignore, new RegExp(`^!workers/${file.replaceAll(".", "\\.")}$`, "m"), file);
+  }
+});
+
 test("validation fixtures cannot become Container lead workflow state", () => {
   assert.doesNotMatch(httpSmokeSource, /fs\.copyFileSync\(/);
   for (const ledger of [
