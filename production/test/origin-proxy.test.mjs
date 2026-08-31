@@ -30,9 +30,19 @@ test("origin proxy preserves the request while translating a same-origin browser
   assert.equal(proxied.method, "POST");
   assert.equal(proxied.headers.get("authorization"), "Basic preview");
   assert.equal(proxied.headers.get("origin"), ORIGIN_URL);
-  assert.equal(proxied.headers.get("x-forwarded-host"), null);
+  assert.equal(proxied.headers.get("x-forwarded-host"), new URL(PUBLIC_URL).host);
   assert.equal(proxied.headers.get("x-ms-realty-origin-token"), ORIGIN_TOKEN);
   assert.deepEqual(await proxied.json(), { name: "Owner" });
+});
+
+test("origin proxy forwards the trusted legacy hostname instead of a client spoof", () => {
+  for (const host of ["makler-realty.com", "makler-realty.ru"]) {
+    const request = new Request(`https://${host}/legacy-path`, {
+      headers: { "x-forwarded-host": "spoofed.example" },
+    });
+    const proxied = requestForOrigin(request, ORIGIN_URL, ORIGIN_TOKEN);
+    assert.equal(proxied.headers.get("x-forwarded-host"), host);
+  }
 });
 
 test("origin proxy rejects cross-site writes and unsafe origin configuration", () => {

@@ -71,6 +71,7 @@ export function requestForOrigin(request, originValue, originTokenValue) {
   headers.delete("x-forwarded-host");
   headers.delete("x-forwarded-proto");
   headers.delete(ORIGIN_TOKEN_HEADER);
+  headers.set("x-forwarded-host", publicUrl.host);
   headers.set(ORIGIN_TOKEN_HEADER, originToken);
   if (headers.has("origin")) headers.set("origin", origin.origin);
 
