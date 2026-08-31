@@ -78,5 +78,6 @@ test("monitoring drill closes the alert and runtime evidence loop", () => {
   assert.match(workflow, /npm run monitoring:report/);
   assert.match(workflow, /npm run monitoring:preflight/);
   assert.match(workflow, /docker cp "\$report" "\$\{container\}:\/runtime-evidence\/\.monitoring-rollback-report\.json"/);
+  assert.match(workflow, /docker exec --user 1001:1001 "\$container" sh -c 'node production\/scripts\/validate-monitoring-rollback-report\.mjs && node production\/scripts\/build-launch-readiness\.mjs'/);
   assert.match(workflow, /blockers\.includes\("monitoring_rollback"\)/);
 });
