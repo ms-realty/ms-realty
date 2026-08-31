@@ -701,7 +701,7 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
   min-width: 0;
 }
 .adm-owner-stage {
-  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 .adm-owner-flow--today [data-readiness-support="true"] {
@@ -709,12 +709,6 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
 }
 .adm-owner-flow--settings [data-settings-overview="true"] {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-.adm-owner-stage--connections {
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
-}
-.adm-owner-stage--hermes {
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
 }
 .adm-owner-flow--connections [data-connections-support="true"],
 .adm-owner-flow--hermes [data-hermes-support="true"],
