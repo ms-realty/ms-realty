@@ -85,6 +85,9 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(compose, /MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: \$\{MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:\?/);
   assert.match(compose, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: \/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
+  assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_DRIVER: r2/);
+  assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_HOST: ms-realty\.ms-realty-bg\.workers\.dev/);
+  assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_R2_ENDPOINT: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/__media\//);
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
   assert.match(cloudflareDockerfile, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH=\/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);

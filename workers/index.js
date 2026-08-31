@@ -22,6 +22,7 @@ import {
   responseWithEdgeBuildMarker,
 } from "./origin-proxy.mjs";
 import { edgeCacheHit, edgeCacheKey, requestMayUseEdgeCache, storeInEdgeCache } from "./edge-cache.mjs";
+import { mediaIngestCredential } from "./media-ingest-auth.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -149,7 +150,8 @@ async function serveMedia(request, env, url) {
 // reports "Upload complete" on a throttled write; pushing 1714 objects that
 // way silently dropped most of them. Writing through this binding is the same
 // code path the site reads from, so a 200 here means the object is really
-// there. The endpoint does not exist unless MEDIA_INGEST_SECRET is set.
+// there. The endpoint does not exist unless an explicit media secret or the
+// origin credential needed to derive a media-only credential is set.
 const INGEST_PREFIX = "/__media/";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 // R2 keys are arbitrary UTF-8, and 13 years of WordPress uploads include
@@ -172,7 +174,7 @@ const INGEST_KEY_PREFIXES = [
 const MAX_INGEST_BYTES = 32 * 1024 * 1024;
 
 async function ingestMedia(request, env, url) {
-  const expected = env.MEDIA_INGEST_SECRET;
+  const expected = env.MEDIA_INGEST_SECRET || (await mediaIngestCredential(env.MS_REALTY_ORIGIN_TOKEN));
   if (!expected) return new Response("Not found", { status: 404 });
   if (request.method !== "PUT") return new Response("Method not allowed", { status: 405 });
 
