@@ -13,6 +13,7 @@ import { imageOptimizationFromEnv } from "./image-optimizer.mjs";
 import {
   MediaUploadError,
   appendMediaUpload,
+  assertReplacementAsset,
   assertUploadEnquiry,
   assertUploadListing,
   createMediaUploadRecord,
@@ -68,12 +69,21 @@ async function storeFiles(files, options) {
     uploadedAt,
     recordAudit,
     auditKey,
+    replacesAssetId = null,
   } = options;
   const accepted = [];
   const rejected = [];
   for (const [index, file] of files.entries()) {
     try {
-      const prepared = await prepareMediaUpload(file, { scope, subjectId, kind, limits, imageSettings, uploadedAt });
+      const prepared = await prepareMediaUpload(file, {
+        scope,
+        subjectId,
+        kind,
+        limits,
+        imageSettings,
+        replacesAssetId,
+        uploadedAt,
+      });
       const stored = await storage.put({ key: prepared.storageKey, bytes: prepared.bytes, contentType: prepared.mime });
       // The rendition is written after the photo it belongs to. If it fails,
       // the upload still succeeded — a missing thumbnail costs the reviewer a
@@ -166,7 +176,14 @@ export async function handleAdminMediaUpload({
     const record = assertUploadListing(seed, parsed.fields.listingId || parsed.fields.listing_id);
     listingId = record.id;
     const kind = normalizeUploadKind(parsed.fields.kind || "photo");
+    const replacesAssetId = assertReplacementAsset(
+      record,
+      parsed.fields.replacesAssetId || parsed.fields.replaces_asset_id || parsed.fields.replacementAssetId,
+    );
     assertBatch(parsed.files, limits);
+    if (replacesAssetId && parsed.files.length !== 1) {
+      throw new MediaUploadError("A media replacement requires exactly one file", { code: "replacement_file_count" });
+    }
 
     const { accepted, rejected } = await storeFiles(parsed.files, {
       scope: "listing",
@@ -181,6 +198,7 @@ export async function handleAdminMediaUpload({
       uploadedAt,
       recordAudit,
       auditKey: "listing_id",
+      replacesAssetId,
     });
 
     if (acceptsHtml) {

@@ -1479,8 +1479,7 @@
   // Listing photo upload inside the media manager. Without JavaScript the same
   // form posts multipart and the server redirects back to this panel; here it
   // becomes inline progress with a per-file outcome list.
-  function initMediaUploadForm() {
-    var form = document.querySelector("[data-media-upload-form]");
+  function initMediaUploadForm(form) {
     if (!form || !window.FormData || !window.XMLHttpRequest) return;
     var input = form.querySelector("[data-media-upload-input]");
     var status = form.querySelector("[data-media-upload-status]");
@@ -1810,7 +1809,10 @@
   initListingMediaPreviews();
   initRouteDecisionForms();
   initAdminMutationForms();
-  initMediaUploadForm();
+  var mediaUploadForms = document.querySelectorAll("[data-media-upload-form]");
+  for (var mediaUploadIndex = 0; mediaUploadIndex < mediaUploadForms.length; mediaUploadIndex += 1) {
+    initMediaUploadForm(mediaUploadForms[mediaUploadIndex]);
+  }
   initWorkspaceOnboarding();
   initWorkspaceSettingsForms();
   initLeadBulkForm();

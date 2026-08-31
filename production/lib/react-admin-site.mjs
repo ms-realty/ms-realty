@@ -376,6 +376,9 @@ const ADMIN_UI_COPY = {
     mediaUploadSuccess: "Снимките са качени и чакат преглед.",
     mediaUploadFailed: "Снимките не бяха качени.",
     mediaUploadRejected: "Отказан файл",
+    replaceMedia: "Смени файла",
+    replaceMediaFile: "Избери нов файл",
+    mediaReplacementHint: "Текущият файл остава активен, докато човек не одобри замяната.",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourProvider: "Визуализатор на обиколката",
@@ -1059,6 +1062,9 @@ const ADMIN_UI_COPY = {
     mediaUploadSuccess: "Фотографии загружены и ждут проверки.",
     mediaUploadFailed: "Не удалось загрузить фотографии.",
     mediaUploadRejected: "Файл отклонён",
+    replaceMedia: "Заменить файл",
+    replaceMediaFile: "Выберите новый файл",
+    mediaReplacementHint: "Текущий файл останется активным, пока человек не одобрит замену.",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourProvider: "Просмотр тура",
@@ -1742,6 +1748,9 @@ const ADMIN_UI_COPY = {
     mediaUploadSuccess: "Photos uploaded and waiting for review.",
     mediaUploadFailed: "Could not upload the photos.",
     mediaUploadRejected: "File refused",
+    replaceMedia: "Replace file",
+    replaceMediaFile: "Choose replacement file",
+    mediaReplacementHint: "The current file stays live until a person approves the replacement.",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourProvider: "Tour viewer",
@@ -9198,6 +9207,47 @@ function ListingEditorBody({ page }) {
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
+                      canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
+                        ? h(
+                            "details",
+                            { className: "adm-media-review", "data-media-replacement": item.asset_id },
+                            h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
+                            h(
+                              "form",
+                              {
+                                method: "post",
+                                action: "/api/admin/media/uploads",
+                                enctype: "multipart/form-data",
+                                className: "adm-form adm-media-upload",
+                                "data-media-upload-form": "replacement",
+                                "data-media-upload-pending": ui.mediaUploadPending,
+                                "data-media-upload-success": ui.mediaUploadSuccess,
+                                "data-media-upload-failure": ui.mediaUploadFailed,
+                                "data-media-upload-rejected": ui.mediaUploadRejected,
+                              },
+                              h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+                              h("input", { type: "hidden", name: "replacesAssetId", defaultValue: item.asset_id }),
+                              h("input", { type: "hidden", name: "kind", defaultValue: item.kind === "floor_plan" ? "floor_plan" : "photo" }),
+                              h(
+                                "label",
+                                null,
+                                ui.replaceMediaFile,
+                                h("input", {
+                                  type: "file",
+                                  name: "photo",
+                                  required: true,
+                                  accept: "image/jpeg,image/png,image/webp,image/avif",
+                                  "data-media-upload-input": "true",
+                                }),
+                              ),
+                              h("p", { className: "adm-note" }, ui.mediaReplacementHint),
+                              h("progress", { max: "100", value: "0", hidden: true, "data-media-upload-progress": "true", "aria-label": ui.mediaUploadPending }),
+                              h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-media-upload-status": "true" }),
+                              h("ul", { className: "adm-media-upload__results", "data-media-upload-results": "true" }),
+                              h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", "data-media-upload-submit": "true" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
+                            ),
+                          )
+                        : null,
                       canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/reviews")
                         ? h(
                             "details",
@@ -9245,7 +9295,9 @@ function ListingEditorBody({ page }) {
                                   ),
                                 ),
                                 h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
-                                h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.webp" })),
+                                item.kind === "video"
+                                  ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
+                                  : null,
                                 h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
                                 h(
                                   "label",

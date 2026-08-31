@@ -2058,7 +2058,7 @@ test("Next admin listing-quality import persists complete launch review CSV", as
       );
       const readinessBody = await readiness.json();
 
-      assert.equal(imported.status, 201);
+      assert.equal(imported.status, 201, JSON.stringify(importedBody));
       assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
       assert.equal(importedBody.reviewPersisted, true);
       assert.equal(importedBody.reviewImport.ready, true);

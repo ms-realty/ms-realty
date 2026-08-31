@@ -14,9 +14,11 @@
 // listing payload, a gallery, or a search document. That is a structural
 // guarantee, not a flag someone can flip by mistake.
 
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { mediaWorkflow } from "./media.mjs";
+import { mediaAssetId } from "./media-reviews.mjs";
 import { fromRoot } from "./paths.mjs";
 import { newRecordId } from "./record-ids.mjs";
 import { imageOptimizationFromEnv, optimizeImageUpload } from "./image-optimizer.mjs";
@@ -120,6 +122,15 @@ export function assertUploadListing(seed, listingId) {
   return record;
 }
 
+export function assertReplacementAsset(record, value) {
+  const assetId = String(value || "").trim();
+  if (!assetId) return null;
+  if (!(record?.media || []).some((item) => mediaAssetId(item) === assetId)) {
+    throw new MediaUploadError("Known replacement assetId is required", { status: 404, code: "unknown_media_asset" });
+  }
+  return assetId;
+}
+
 export function assertUploadEnquiry(enquiryId, sellerEnquiries) {
   const id = String(enquiryId || "").trim();
   if (!ENQUIRY_ID.test(id)) throw new MediaUploadError("enquiryId is required");
@@ -150,6 +161,7 @@ export async function prepareMediaUpload(
     limits = mediaUploadLimitsFromEnv(),
     imageSettings = imageOptimizationFromEnv(),
     host,
+    replacesAssetId = null,
     uploadedAt = new Date().toISOString(),
   },
 ) {
@@ -206,7 +218,8 @@ export async function prepareMediaUpload(
     contentHash,
     storageKey,
     assetUrl: scope === "listing" ? mediaUploadPublicUrl(storageKey) : null,
-    assetId: `media-${contentHash.slice(0, 20)}`,
+    assetId: `media-${createHash("sha256").update(replacesAssetId ? `${contentHash}:${replacesAssetId}` : contentHash).digest("hex").slice(0, 20)}`,
+    replacesAssetId,
     format: optimized.format,
     mime: optimized.mime,
     storedBytes: optimized.bytes_after,
@@ -281,18 +294,19 @@ export function createMediaUploadRecord(prepared, { uploadedBy, source, storageD
     metadata_removed_bytes: prepared.metadataRemovedBytes,
     uploaded_by: actor,
     source: String(source || "admin_listing_editor"),
+    ...(prepared.replacesAssetId ? { replaces_asset_id: prepared.replacesAssetId } : {}),
   };
 }
 
 export function appendMediaUpload(record, { filePath = DEFAULT_MEDIA_UPLOAD_LEDGER_PATH } = {}) {
   const rows = readMediaUploads(filePath);
-  // Content-addressed: re-sending the same photo for the same subject is a
-  // retry, not a second asset.
+  // Content plus replacement intent is the identity: re-sending the same
+  // operation is a retry, while reusing bytes for another asset stays valid.
   const existing = rows.find(
     (row) =>
       row.subject_type === record.subject_type &&
       row.subject_id === record.subject_id &&
-      row.content_hash === record.content_hash,
+      row.asset_id === record.asset_id,
   );
   if (existing) return { ...existing, idempotent: true };
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -339,6 +353,7 @@ export function applyMediaUploads(seed, uploads = []) {
           storage_driver: row.storage_driver,
           storage_key: row.storage_key,
           origin: "operator_upload",
+          ...(row.replaces_asset_id ? { replaces_asset_id: row.replaces_asset_id } : {}),
         }));
       if (!added.length) return record;
       const media = [...(record.media || []), ...added];
@@ -452,6 +467,7 @@ export function publicMediaUpload(row) {
     uploaded_by: row.uploaded_by,
     source: row.source,
     storage_driver: row.storage_driver,
+    replaces_asset_id: row.replaces_asset_id || null,
     asset_url: row.asset_url || null,
     is_public: false,
     review_status: row.review_status,
@@ -478,6 +494,9 @@ export function assertMediaUploads(rows) {
     }
     if (row.subject_type === "enquiry" && row.asset_url) {
       throw new Error("Enquiry uploads must not carry a public asset URL");
+    }
+    if (row.replaces_asset_id && !/^media-[a-f0-9]{20}$/.test(row.replaces_asset_id)) {
+      throw new Error("Media replacement must name a stable asset id");
     }
     if ("email" in row || "phone" in row || "message" in row || "contact" in row) {
       throw new Error("Media upload rows must not contain private contact data");

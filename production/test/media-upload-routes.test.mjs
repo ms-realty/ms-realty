@@ -8,6 +8,8 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { sniffImageFormat } from "../lib/image-sanitizer.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
+import { mediaAssetId } from "../lib/media-reviews.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
 import {
   avifWithExif,
@@ -155,7 +157,7 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
       reviewConfirmed: true,
     },
   });
-  assert.equal(review.status, 201);
+  assert.equal(review.status, 201, JSON.stringify(review.body));
   assert.equal(review.body.is_public, true);
   assert.equal(review.body.review_status, "approved_by_human");
   assert.equal(review.body.public_url, asset.asset_url);
@@ -180,6 +182,59 @@ test("uploading the same photo twice is a retry, not a second asset", async () =
   assert.equal(retry.body.uploaded[0].asset_id, first.body.uploaded[0].asset_id);
   assert.equal(readMediaUploads(context.mediaUploadLedgerPath).length, 1);
   assert.equal(readAuditLog(context.auditLogPath).filter((row) => row.action === "media_uploaded").length, 1);
+});
+
+test("an approved reupload replaces one public asset without a publication gap", async () => {
+  const context = workspace();
+  const before = await dispatchHttp(context.app, { url: LISTING_PATH });
+  const beforeUrls = before.body.body.media.gallery.map((item) => item.url);
+  const listing = loadCmsSeed().records.find((row) => row.id === LISTING_ID);
+  const replaced = listing.media.find((item) => beforeUrls.includes(item.asset_url));
+  assert.ok(replaced, "fixture must expose a public source asset to replace");
+  const replacedAssetId = mediaAssetId(replaced);
+
+  const replacementPhoto = await photoJpegWithGpsExif({ width: 900, height: 675 });
+  const created = await post(
+    context.app,
+    "/api/admin/media/uploads",
+    adminUpload(
+      [{ name: "replacement.jpg", bytes: replacementPhoto }],
+      { listingId: LISTING_ID, replacesAssetId: replacedAssetId, kind: "photo" },
+    ),
+    ADMIN,
+  );
+  assert.equal(created.status, 201);
+  const replacement = created.body.uploaded[0];
+  assert.equal(replacement.replaces_asset_id, replacedAssetId);
+
+  const pending = await dispatchHttp(context.app, { url: LISTING_PATH });
+  assert.ok(pending.body.body.media.gallery.some((item) => item.url === replaced.asset_url));
+  assert.ok(!pending.body.body.media.gallery.some((item) => item.url === replacement.asset_url));
+
+  const review = await dispatchHttp(context.app, {
+    method: "POST",
+    url: "/api/admin/media/reviews",
+    headers: ADMIN,
+    body: {
+      listingId: LISTING_ID,
+      assetId: replacement.asset_id,
+      decision: "publish",
+      kind: "photo",
+      alt: "Replacement property photograph",
+      reviewer: "media_editor",
+      reviewConfirmed: true,
+    },
+  });
+  assert.equal(review.status, 201, JSON.stringify(review.body));
+
+  const published = await dispatchHttp(context.app, { url: LISTING_PATH });
+  const publishedUrls = published.body.body.media.gallery.map((item) => item.url);
+  assert.ok(publishedUrls.includes(replacement.asset_url));
+  assert.ok(!publishedUrls.includes(replaced.asset_url));
+
+  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}`, headers: ADMIN });
+  assert.match(editor.body, new RegExp(`data-media-replacement="${replacement.asset_id}"`));
+  assert.match(editor.body, /name="replacesAssetId"/);
 });
 
 /* ---------------------------------------------------------- admin refusals */

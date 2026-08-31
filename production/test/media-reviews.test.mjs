@@ -44,8 +44,8 @@ test("human media review publishes a replacement floor plan without losing its s
 
   assert.equal(review.is_public, true);
   assert.equal(review.review_status, "approved_by_human");
-  assert.equal(review.source_url, asset.asset_url);
-  assert.equal(reviewedAsset.source_url, asset.url);
+  assert.equal(review.source_url, asset.source_url);
+  assert.equal(reviewedAsset.source_url, asset.source_url);
   assert.equal(reviewedAsset.asset_url, "https://cdn.example.test/listings/MS-CRAWL-0037/floor-plan.webp");
   assert.equal(reviewedAsset.media_reviewer, "media_editor");
   assert.equal(listing.media_workflow.review_gated_assets, 0);

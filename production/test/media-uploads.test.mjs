@@ -18,6 +18,7 @@ import {
   appendMediaUpload,
   applyMediaUploads,
   assertMediaUploads,
+  assertReplacementAsset,
   assertUploadEnquiry,
   assertUploadListing,
   createMediaUploadRecord,
@@ -279,6 +280,13 @@ test("an uploaded asset is written unreviewed, is idempotent, and joins the list
   resetMediaUploads(file);
   const seed = loadCmsSeed();
   const record = assertUploadListing(seed, "MS-CRAWL-0001");
+  const replacementTarget = mediaAssetId(record.media.find((item) => item.is_public));
+  assert.equal(assertReplacementAsset(record, replacementTarget), replacementTarget);
+  assert.equal(assertReplacementAsset(record, ""), null);
+  assert.throws(
+    () => assertReplacementAsset(record, "media-00000000000000000000"),
+    (error) => error.status === 404 && error.code === "unknown_media_asset",
+  );
 
   const prepared = await prepareMediaUpload(
     { bytes: jpegWithGpsExif(), filename: "kitchen.jpg", contentType: "image/jpeg" },
