@@ -372,7 +372,11 @@ import {
 } from "./tours.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
-import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
+import {
+  adminRuntimeDataDurableOnlyFromEnv,
+  productionRuntimeDataUnavailable,
+  runtimeDataUnavailablePayload,
+} from "./runtime-data-boundary.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -468,7 +472,7 @@ function bytesFrom(value) {
 }
 
 export function appAdminConfigFromEnv(env = process.env) {
-  const durableOnly = env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
+  const durableOnly = adminRuntimeDataDurableOnlyFromEnv(env);
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,

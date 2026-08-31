@@ -9,7 +9,10 @@ import { appRouterConfigFromEnv, renderAppRoute, renderAppRouteResponse } from "
 import { appendBrokerContact, createBrokerContact } from "../lib/broker-contacts.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
-import { productionRuntimeDataUnavailable } from "../lib/runtime-data-boundary.mjs";
+import {
+  adminRuntimeDataDurableOnlyFromEnv,
+  productionRuntimeDataUnavailable,
+} from "../lib/runtime-data-boundary.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { appendSlugChange } from "../lib/slug-history.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -178,6 +181,11 @@ test("only the explicit live runtime marker activates durable-only behavior", ()
   assert.equal(appRouterConfigFromEnv(LIVE_ENV).runtimeDataDurableOnly, true);
   assert.equal(appApiConfigFromEnv(LIVE_ENV).runtimeDataDurableOnly, true);
   assert.equal(appAdminConfigFromEnv(LIVE_ENV).runtimeDataDurableOnly, true);
+  const persistentAdminEnv = { ...LIVE_ENV, MS_REALTY_ADMIN_RUNTIME_VOLUME_ENABLED: "true" };
+  assert.equal(adminRuntimeDataDurableOnlyFromEnv(persistentAdminEnv), false);
+  assert.equal(appAdminConfigFromEnv(persistentAdminEnv).runtimeDataDurableOnly, false);
+  assert.equal(appRouterConfigFromEnv(persistentAdminEnv).runtimeDataDurableOnly, true);
+  assert.equal(appApiConfigFromEnv(persistentAdminEnv).runtimeDataDurableOnly, true);
   assert.equal(
     productionRuntimeDataUnavailable({ durableOnly: true, durableEvent: true, method: "POST", pathname: "/api/events" }),
     false,
@@ -207,6 +215,29 @@ test("only the explicit live runtime marker activates durable-only behavior", ()
     config: appRouterConfigFromEnv({ NODE_ENV: "production" }),
   });
   assert.equal(build.status, 200);
+});
+
+test("the fixed-origin admin volume unlocks owner routes without weakening public Payload authority", async () => {
+  const env = { ...LIVE_ENV, MS_REALTY_ADMIN_RUNTIME_VOLUME_ENABLED: "true" };
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-admin-volume-`);
+  const auditLogPath = `${directory}/audit-log.jsonl`;
+  fs.writeFileSync(auditLogPath, "");
+
+  const admin = await renderAppAdminResponse(new Request("https://live.test/admin/activity?locale=en"), {
+    config: { ...appAdminConfigFromEnv(env), adminPrincipal: principal, auditLogPath },
+  });
+  const html = await admin.text();
+  assert.equal(admin.status, 200);
+  assert.match(html, /data-react-admin-ui="activity"/);
+  assert.doesNotMatch(html, /data-react-admin-ui="runtime-unavailable"/);
+
+  const publicPage = await renderAppRouteResponse({
+    pathname: "/bg",
+    url: "https://live.test/bg",
+    config: appRouterConfigFromEnv(env),
+  });
+  assert.equal(publicPage.status, 503);
+  assert.equal((await publicPage.json()).kind, "payload_draft_unavailable");
 });
 
 test("Next public entry paths fail closed without Payload instead of serving the baked fixture", async () => {

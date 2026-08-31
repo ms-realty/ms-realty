@@ -6,6 +6,7 @@ import { DEFAULT_WORKSPACE_EXPORT_DIR, DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } fr
 import { DEFAULT_AUDIT_LOG_PATH } from "./audit-log.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lead-ledger.mjs";
 import { DEFAULT_WORKSPACE_SETTINGS_PATH } from "./workspace-settings.mjs";
+import { adminRuntimeDataDurableOnlyFromEnv } from "./runtime-data-boundary.mjs";
 
 // App Router handoff for the workspace security, data and sign-in routes.
 //
@@ -36,7 +37,7 @@ function appConfig(env) {
     workspaceExportDir: env.MS_REALTY_WORKSPACE_EXPORT_DIR || DEFAULT_WORKSPACE_EXPORT_DIR,
     workspaceExportTtlSeconds: env.MS_REALTY_WORKSPACE_EXPORT_TTL_SECONDS,
     auditRetentionWindowDays: env.MS_REALTY_AUDIT_RETENTION_DAYS,
-    runtimeDataDurableOnly: env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload",
+    runtimeDataDurableOnly: adminRuntimeDataDurableOnlyFromEnv(env),
     // The sign-in throttle needs to know whether a forwarded client address
     // may be believed; behind Cloudflare it may, and the deployment says so.
     trustProxy: env.MS_REALTY_TRUST_PROXY === "1",

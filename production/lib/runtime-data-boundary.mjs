@@ -89,6 +89,14 @@ export function runtimeDataDurableOnlyFromEnv(env = process.env) {
   return env.NODE_ENV === "production" && env.MS_REALTY_RUNTIME_DATA_AUTHORITY === "payload";
 }
 
+// The fixed origin has a named runtime-data volume that is captured together
+// with Postgres before every release. Its owner/admin ledgers therefore survive
+// deploys; the Cloudflare fallback container does not set this marker and stays
+// Payload-only/fail-closed.
+export function adminRuntimeDataDurableOnlyFromEnv(env = process.env) {
+  return runtimeDataDurableOnlyFromEnv(env) && env.MS_REALTY_ADMIN_RUNTIME_VOLUME_ENABLED !== "true";
+}
+
 export function savedSearchWritesDisabledFromEnv(env = process.env) {
   return productionRuntimeDataUnavailable({
     durableOnly: runtimeDataDurableOnlyFromEnv(env),
