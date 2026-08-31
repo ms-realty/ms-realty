@@ -11362,7 +11362,7 @@ function connectionIcon(connection) {
 }
 
 function ConnectionAction({ connection }) {
-  if (connection.id === "whatsapp") {
+  if (connection.id === "whatsapp" && connection.status !== "needs_setup") {
     if (!connection.can_manage) return null;
     return h(
       "button",

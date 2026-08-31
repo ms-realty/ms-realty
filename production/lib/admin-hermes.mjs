@@ -5,6 +5,7 @@ import { bridgeNextTasks, bridgeStatus } from "./hermes-desktop-bridge.mjs";
 import { buildHermesDraftDispatch } from "./hermes-draft-dispatch.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { HERMES_TOOL_COVERAGE } from "./owner-operator-catalog.mjs";
+import { readProviderConnections } from "./provider-connections.mjs";
 import {
   HERMES_OWNER_COMMAND_MAX_LENGTH,
   createHermesOwnerCommandIdempotencyKey,
@@ -64,12 +65,32 @@ export async function buildAdminHermesPayload({
   probeTimeoutMs = 5_000,
   receiptPayload = payload,
   receiptSecret = "",
+  providerConnectionPayload = null,
+  readConnections = readProviderConnections,
   commandResult = null,
   commandError = null,
   commandPrefill = "",
 } = {}) {
   const availability = hermesReplyAvailability({ env: hermesEnv, provider, fetchImpl });
-  const commandAvailability = hermesOwnerCommandAvailability({ env: hermesEnv, provider: commandProvider, fetchImpl });
+  let commandAvailability = hermesOwnerCommandAvailability({ env: hermesEnv, provider: commandProvider, fetchImpl });
+  if (!commandAvailability.available && !commandProvider && providerConnectionPayload) {
+    try {
+      const connections = await readConnections({ payload: providerConnectionPayload });
+      const connectedProviderMode = connections.some(
+        (connection) => connection?.provider === "ai" && connection?.status === "connected",
+      )
+        ? "openrouter"
+        : null;
+      commandAvailability = hermesOwnerCommandAvailability({
+        env: hermesEnv,
+        provider: commandProvider,
+        connectedProviderMode,
+        fetchImpl,
+      });
+    } catch {
+      // The owner gets the existing fixed recovery state; storage details stay private.
+    }
+  }
   const runtime = await probeHermesAgentRuntime({
     endpoint: hermesEnv.HERMES_CHAT_COMPLETIONS_URL,
     apiKey: hermesEnv.HERMES_API_KEY,

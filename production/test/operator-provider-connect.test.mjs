@@ -224,6 +224,8 @@ test("a provider without an active authorization path stays unavailable without 
   assert.doesNotMatch(html, /Свързването е достъпно само във влязла сесия/);
   assert.doesNotMatch(html, /MS_REALTY_[A-Z0-9_]+/);
   assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
+  assert.doesNotMatch(html, /data-whatsapp-connect="true"/);
+  assert.match(html, /href="https:\/\/developers\.facebook\.com\/apps"/);
   assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
   assert.match(html, /data-managed-system="neon" data-status="managed"/);
   assert.equal((html.match(/<input\b/g) || []).length, 0);
@@ -321,6 +323,36 @@ test("a stored OpenRouter authorization stays inactive while Hermes runs self-ho
   assert.match(html, /Connected · not active/);
   assert.match(html, /data-managed-system="hermes" data-status="ready"/);
   assert.match(html, /Hermes uses the configured self-hosted model runtime/);
+});
+
+test("a stored OpenRouter authorization activates Hermes when no self-hosted runtime is configured", () => {
+  const config = fullConfig({
+    hermes: {
+      mode: "self_hosted",
+      endpoint: "",
+      endpoint_redacted: null,
+      model: "NousResearch/Hermes-4-14B",
+      has_api_key: false,
+    },
+  });
+  const connections = [{
+    provider: "ai",
+    status: "connected",
+    account_label: "OpenRouter",
+    last_verified_at: "2026-08-24T12:00:00.000Z",
+    metadata: { model: "openrouter/auto" },
+  }];
+  const html = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections,
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(html, /data-provider="ai" data-status="connected"/);
+  assert.match(html, /data-managed-system="hermes" data-status="ready"/);
+  assert.match(html, /Hermes uses the OpenRouter-authorized key/);
 });
 
 test("a configured owner page offers five one-click handoffs and no raw credential form", () => {

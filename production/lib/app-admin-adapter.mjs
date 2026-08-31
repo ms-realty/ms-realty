@@ -2214,6 +2214,8 @@ async function hermesConsolePayload(registry, url, config, { commandResult = nul
     probeTimeoutMs: config.hermesAgentProbeTimeoutMs || 5_000,
     receiptPayload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
     receiptSecret: config.hermesReceiptSecret || env.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+    providerConnectionPayload: config.providerConnectionPayload || config.payloadListingRuntime || null,
+    readConnections: config.readProviderConnections || readProviderConnections,
     commandResult,
     commandError,
     commandPrefill: url.searchParams.get("prompt") || "",

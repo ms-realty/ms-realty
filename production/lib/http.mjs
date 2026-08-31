@@ -4147,6 +4147,8 @@ export function createHttpApp({
           receiptPayload: hermesReceiptPayload || payloadListingRuntime,
           receiptSecret:
             hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+          providerConnectionPayload: providerConnectionPayload || payloadListingRuntime || null,
+          readConnections: readProviderConnections,
           commandResult,
           commandError,
           commandPrefill: url.searchParams.get("prompt") || "",

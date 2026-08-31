@@ -317,10 +317,11 @@ export function buildOperatorConnectPayload({
   const hermesRuntimeConfigured = Boolean(
     providerConfig?.hermes?.endpoint && providerConfig?.hermes?.has_api_key,
   );
+  const connectedAi = ai?.status === "connected";
+  const selfHostedHermesReady = hermesMode === "self_hosted" && hermesRuntimeConfigured;
+  const connectedAiIsActive = connectedAi && !selfHostedHermesReady;
   const hermesReady =
-    hermesMode === "openrouter"
-      ? ai?.status === "connected" || hermesRuntimeConfigured
-      : hermesMode === "self_hosted" && hermesRuntimeConfigured;
+    connectedAiIsActive || (hermesMode === "openrouter" ? hermesRuntimeConfigured : selfHostedHermesReady);
   const operatorId = workspace.operator_id || operator?.id || "operator";
   const assistantConfig = agentToken
     ? operatorAgentConfigBlock({
@@ -358,7 +359,7 @@ export function buildOperatorConnectPayload({
         title: copy.managedHermesTitle,
         description: copy.managedHermesDescription,
         helper_text:
-          hermesMode === "openrouter"
+          connectedAiIsActive || hermesMode === "openrouter"
             ? copy.aiUsage
             : hermesMode === "self_hosted"
               ? copy.managedHermesSelfHostedUsage

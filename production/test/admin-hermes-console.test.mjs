@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { createPrivateContactEnvelope } from "../lib/private-contact-vault.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
@@ -80,12 +81,13 @@ function healthyHermesFetch(calls) {
   };
 }
 
-function fakeHermesReceiptPayload() {
-  const docs = [];
+function fakeHermesReceiptPayload(seed = []) {
+  const docs = seed.map((document, index) => ({ id: index + 1, ...document }));
   return {
     docs,
     async find({ where, limit = 10 }) {
       let rows = [...docs];
+      if (where?.provider?.equals) rows = rows.filter((doc) => doc.provider === where.provider.equals);
       if (where?.idempotency_key?.equals) rows = rows.filter((doc) => doc.idempotency_key === where.idempotency_key.equals);
       if (where?.operator_id?.equals) rows = rows.filter((doc) => doc.operator_id === where.operator_id.equals);
       return { docs: rows.slice(0, limit) };
@@ -113,6 +115,29 @@ function fakeHermesReceiptPayload() {
       docs[index] = { ...docs[index], ...data };
       return docs[index];
     },
+  };
+}
+
+function connectedAiProvider(apiKey) {
+  const endpoint = "https://openrouter.ai/api/v1/chat/completions";
+  const model = "NousResearch/Hermes-4-14B";
+  return {
+    provider: "ai",
+    status: "connected",
+    connected_by: principal.id,
+    account_label: model,
+    external_account_id: model,
+    scopes: ["chat.completions"],
+    metadata: { mode: "openrouter", endpoint, model },
+    credential_envelope: createPrivateContactEnvelope(
+      {
+        subjectType: "provider_connection",
+        subjectId: "ai",
+        payload: { api_key: apiKey, endpoint, model },
+      },
+      { secret: RECEIPT_SECRET, secretName: "MS_REALTY_PROVIDER_TOKEN_KEY", storedAt: GENERATED_AT },
+    ),
+    last_verified_at: GENERATED_AT,
   };
 }
 
@@ -230,6 +255,66 @@ test("Hermes console proves authenticated runtime capabilities without exposing 
   assert.equal(typeof htmlRoute.POST, "function");
   assert.equal(typeof apiRoute.GET, "function");
   assert.equal(typeof apiRoute.POST, "function");
+});
+
+test("a connected OpenRouter account enables owner planning without an environment-mode switch", async () => {
+  const apiKey = "sk-or-v1-connected-owner-key-never-rendered";
+  const payload = fakeHermesReceiptPayload([connectedAiProvider(apiKey)]);
+  const config = appConfig({
+    hermesReceiptPayload: payload,
+    hermesReceiptSecret: RECEIPT_SECRET,
+    providerConnectionPayload: payload,
+    hermesCommandFetch: async (url, init) => {
+      assert.equal(String(url), "https://openrouter.ai/api/v1/chat/completions");
+      assert.equal(init.headers.authorization, `Bearer ${apiKey}`);
+      return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(ownerPlan()) } }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    },
+  });
+  const next = await renderAppAdminResponse(new Request(`${ORIGIN}/api/admin/hermes?locale=en`), { config });
+  const nextBody = await next.json();
+  assert.equal(next.status, 200);
+  assert.equal(nextBody.command_availability.available, true);
+  assert.equal(nextBody.command_availability.provider_mode, "openrouter");
+  assert.equal(nextBody.command_form.enabled, true);
+  assert.doesNotMatch(JSON.stringify(nextBody), new RegExp(apiKey));
+
+  const standalone = await dispatchHttp(
+    createHttpApp({
+      reviewedAt: GENERATED_AT,
+      payloadAdminAuth: payloadAdminAuth(),
+      hermesEnv: { NODE_ENV: "test" },
+      hermesReceiptPayload: payload,
+      hermesReceiptSecret: RECEIPT_SECRET,
+      providerConnectionPayload: payload,
+    }),
+    { method: "GET", url: "/api/admin/hermes?locale=en", headers: payloadSessionHeaders() },
+  );
+  assert.equal(standalone.status, 200);
+  assert.equal(standalone.body.command_availability.provider_mode, "openrouter");
+  assert.equal(standalone.body.command_form.enabled, true);
+  assert.doesNotMatch(JSON.stringify(standalone.body), new RegExp(apiKey));
+
+  const form = {
+    idempotencyKey: "hermes-connected-openrouter-0001",
+    command: "Prepare a safe plan for today's listing review.",
+    locale: "en",
+  };
+  const command = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/hermes`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "sec-fetch-site": "same-origin" },
+      body: JSON.stringify(form),
+    }),
+    { config },
+  );
+  const commandBody = await command.json();
+  assert.equal(command.status, 201);
+  assert.equal(commandBody.receipt.status, "planned");
+  assert.equal(commandBody.receipt.model, "NousResearch/Hermes-4-14B");
+  assert.doesNotMatch(JSON.stringify(commandBody), new RegExp(apiKey));
 });
 
 test("Today can prefill the guarded Hermes command without executing it", async () => {
