@@ -38,6 +38,7 @@ import {
 import { GOOGLE_SCOPES, createProviderOAuthState } from "../lib/provider-connections.mjs";
 import { requiredAdminCapability } from "../lib/admin-auth.mjs";
 import { runOperatorConnectionAction } from "../lib/operator-connect-routes.mjs";
+import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 
 const SECRET = "operator-connect-secret-that-is-longer-than-thirty-two-characters";
 const ORIGIN = "https://ms-realty.example";
@@ -369,6 +370,10 @@ test("a configured owner page offers five one-click handoffs and no raw credenti
   assert.ok(html.includes('href="/api/admin/connections?provider=instagram&amp;action=start"'));
   assert.ok(html.includes('href="/api/admin/connections?provider=ai&amp;action=start"'));
   assert.equal((html.match(/data-whatsapp-connect="true"/g) || []).length, 1);
+  assert.match(html, /<button[^>]*disabled[^>]*data-whatsapp-connect="true"/);
+  assert.match(html, /data-whatsapp-result="true"/);
+  assert.match(ADMIN_APP_JS, /var loadSdk = function \(\) \{/);
+  assert.match(ADMIN_APP_JS, /if \(!window\.FB\) return loadSdk\(\);/);
   assert.equal(
     (html.match(/(?:href="\/api\/admin\/connections\?provider=(?:google|facebook|instagram|ai)&amp;action=start"|data-whatsapp-connect="true")/g) || []).length,
     5,

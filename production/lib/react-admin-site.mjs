@@ -3258,7 +3258,7 @@ function ThemeSwitch({ ui, variant }) {
           key: option.value,
           type: "button",
           "data-theme-option": option.value,
-          "aria-pressed": option.value === "system" ? "true" : "false",
+          "aria-pressed": "false",
           "aria-label": names[option.value],
           title: names[option.value],
         },
@@ -3547,13 +3547,12 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   });
 }
 
-function TodayBriefingPanel({ page, rows }) {
+function TodayBriefingPanel({ page, rows, total }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
   const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
   const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
-  const total = rows.length;
-  const count = copy.count.replace("{count}", String(total));
+  const count = copy.count.replace("{count}", String(rows.length));
   const prompt = first
     ? hermesCopy.todayPrompt
         .replace("{action}", first.action)
@@ -3566,7 +3565,7 @@ function TodayBriefingPanel({ page, rows }) {
       title: copy.title,
       "data-today-briefing": "true",
       "data-today-primary-action": first?.kind || "none",
-      "data-today-priority-count": String(Math.min(total, 5)),
+      "data-today-priority-count": String(rows.length),
       "data-today-priority-total": String(total),
     },
     h("p", { className: "adm-today-briefing__intro" }, copy.description),
@@ -3632,25 +3631,24 @@ function TodayBriefingPanel({ page, rows }) {
   );
 }
 
-function NextActionsPanel({ page, rows }) {
+function NextActionsPanel({ page, rows, total }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
   const remaining = rows.length ? rows.slice(1) : rows;
-  const visible = remaining.slice(0, 5);
   return h(
     Panel,
     {
       title: na.title,
       "data-next-actions": "true",
       "data-next-action-count": String(remaining.length),
-      "data-next-action-total": String(rows.length),
-      "data-next-action-visible": String(visible.length),
+      "data-next-action-total": String(total),
+      "data-next-action-visible": String(remaining.length),
     },
     h("p", { className: "adm-next-actions__intro" }, na.description),
-    visible.length
+    remaining.length
       ? h(
           "ol",
           { className: "adm-next-actions" },
-          ...visible.map((row) =>
+          ...remaining.map((row) =>
             h(
               "li",
               {
@@ -3883,7 +3881,8 @@ function TodayBody({ page }) {
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
-  const showNextActionsPanel = nextActions.length === 0 || nextActions.length > 1;
+  const visibleNextActions = nextActions.slice(0, 7);
+  const showNextActionsPanel = visibleNextActions.length === 0 || visibleNextActions.length > 1;
   const openLeadPipelineTasks =
     page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
   const openSellerTasks =
@@ -3920,8 +3919,8 @@ function TodayBody({ page }) {
         h(
           "div",
           { className: "adm-owner-flow__stack" },
-          h(TodayBriefingPanel, { page, rows: nextActions }),
-          showNextActionsPanel ? h(NextActionsPanel, { page, rows: nextActions }) : null,
+          h(TodayBriefingPanel, { page, rows: visibleNextActions, total: nextActions.length }),
+          showNextActionsPanel ? h(NextActionsPanel, { page, rows: visibleNextActions, total: nextActions.length }) : null,
         ),
         h(TodayReadinessRail, {
           page,

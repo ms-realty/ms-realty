@@ -48,6 +48,18 @@ test("mobile navigation drawer: solid top bar, full-height panel, styled header 
 test("owner operating stages keep primary work and supporting state in one vertical surface", () => {
   assert.match(adminAdapterCss, /\.adm-owner-stage\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.doesNotMatch(adminAdapterCss, /\.adm-owner-stage--(?:connections|hermes)\s*\{[^}]*grid-template-columns/);
+  assert.doesNotMatch(adminAdapterCss, /\.adm-workbench-(?:shell|rail|main)/);
+  assert.doesNotMatch(adminSettingsCss, /\.adm-workbench-(?:shell|rail|main)/);
+});
+
+test("server-rendered theme controls do not claim a browser-stored choice before hydration", async () => {
+  const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  const page = await dispatchHttp(app, { url: "/admin/today?locale=en", headers: auth });
+  assert.equal(page.status, 200);
+  for (const option of ["system", "light", "dark"]) {
+    const matches = page.body.match(new RegExp(`data-theme-option="${option}" aria-pressed="false"`, "g")) || [];
+    assert.equal(matches.length, 2, `${option} is neutral in desktop and mobile controls`);
+  }
 });
 
 test("admin skip link targets a programmatically focusable main landmark", async () => {
