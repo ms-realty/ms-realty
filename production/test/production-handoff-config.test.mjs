@@ -149,7 +149,7 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
   assert.match(worker, /if \(media\) return media;\n\s+if \(ownedKey\) return new Response\("Not found"/);
   assert.match(worker, /mediaCandidateKeys\(url\.hostname, url\.pathname\)/);
-  assert.match(worker, /import \{ PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, isPreviewHost, mediaCandidateKeys \} from "\.\/preview-host\.mjs"/);
+  assert.match(worker, /import \{ PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, canonicalLegacyHost, isPreviewHost, mediaCandidateKeys \} from "\.\/preview-host\.mjs"/);
   assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
   assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
