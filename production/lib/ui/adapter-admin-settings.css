@@ -142,7 +142,6 @@
 [data-workspace-onboarding="complete"] .adm-onboarding__progress progress { accent-color: var(--success-600); }
 
 /* ---- Settings screen ---- */
-.adm-workbench-shell--settings { align-items: start; }
 .adm-settings-panel { scroll-margin-top: calc(var(--adm-shell-top-offset, 64px) + var(--space-4)); }
 .adm-settings-disclosure > summary { cursor: pointer; list-style: none; }
 .adm-settings-disclosure > summary::-webkit-details-marker { display: none; }

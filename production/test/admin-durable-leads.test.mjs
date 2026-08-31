@@ -542,6 +542,14 @@ test("owner reports read durable funnel events and never fall back to the contai
   assert.equal(body.report.website_funnel.lead_tracking_gap, 1);
   assert.equal(body.report.website_funnel.lead_tracking_status, "mismatch");
 
+  const today = await adminGet("/admin/today?locale=en", routeConfig);
+  const todayHtml = await today.text();
+  assert.equal(today.status, 200);
+  assert.match(todayHtml, /data-today-primary-action="integrity"/);
+  assert.match(todayHtml, /Website submissions do not match CRM/);
+  assert.match(todayHtml, /Durable CRM leads without a submission event: 1\./);
+  assert.match(todayHtml, /href="\/admin\/reports#website-funnel"/);
+
   const unavailable = await adminGet("/api/admin/reports", {
     ...routeConfig,
     readEventsDurably: async () => {
@@ -550,4 +558,14 @@ test("owner reports read durable funnel events and never fall back to the contai
   });
   assert.equal(unavailable.status, 503);
   assert.equal((await unavailable.json()).kind, "event_store_unavailable");
+
+  const degradedToday = await adminGet("/api/admin/today", {
+    ...routeConfig,
+    readEventsDurably: async () => {
+      throw new Error("database unavailable");
+    },
+  });
+  const degradedTodayBody = await degradedToday.json();
+  assert.equal(degradedToday.status, 200);
+  assert.equal(degradedTodayBody.website_funnel.lead_tracking_status, "unavailable");
 });

@@ -486,7 +486,7 @@ test("OpenRouter owner-command planning uses the provisioned hosted endpoint", a
   assert.equal(result.model, "openrouter/test-model");
 });
 
-test("Hermes uses the encrypted owner OpenRouter connection only when hosted mode is selected", async () => {
+test("Hermes uses the encrypted owner OpenRouter connection when the managed runtime is not configured", async () => {
   const storedKey = "sk-or-v1-stored-openrouter-key-never-rendered";
   const payload = fakePayload([connectedAiProvider({ apiKey: storedKey })]);
   const timestamps = [STARTED_AT, COMPLETED_AT];
@@ -495,9 +495,7 @@ test("Hermes uses the encrypted owner OpenRouter connection only when hosted mod
     operator,
     payload,
     secret: SECRET,
-    env: {
-      HERMES_PROVIDER_MODE: "openrouter",
-    },
+    env: {},
     fetchImpl: async (url, init) => {
       providerCalls += 1;
       assert.equal(url, "https://openrouter.ai/api/v1/chat/completions");

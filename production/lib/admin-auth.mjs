@@ -194,6 +194,11 @@ export function requiredAdminCapability(method, pathname) {
   if (SECURITY_SELF_PATHS.has(pathname)) return "security:self";
   if (DATA_EXPORT_PATHS.has(pathname)) return "data:export";
   if (verb === "GET" && pathname === "/api/admin/security/audit-retention") return "activity:read";
+  // Every signed-in Payload operator may update their own non-privileged
+  // profile fields. Payload collection access still fences the record and the
+  // role/workspace fields; this capability only makes the self-service route
+  // reachable through the custom admin shell.
+  if (pathname === "/api/admin/profile") return "workspace:read";
   if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
   // Connecting the agency's own tools, disconnecting them, and minting the
   // assistant's delegated access all change what this workspace can reach, so

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -17,6 +18,7 @@ import {
   appendMediaUpload,
   applyMediaUploads,
   assertMediaUploads,
+  assertReplacementAsset,
   assertUploadEnquiry,
   assertUploadListing,
   createMediaUploadRecord,
@@ -29,6 +31,7 @@ import {
 } from "../lib/media-uploads.mjs";
 import { mediaAssetId } from "../lib/media-reviews.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
+import { MEDIA_INGEST_CONTEXT, mediaIngestCredential } from "../../workers/media-ingest-auth.mjs";
 import {
   avifWithExif,
   avifWithoutMetadata,
@@ -246,6 +249,30 @@ test("the r2 driver ingests through the Worker route and verifies the echoed siz
   assert.equal(fromEnv.host, "ms-realty.ms-realty-bg.workers.dev");
 });
 
+test("production can derive a media-only credential from the existing origin secret", async () => {
+  const originToken = "origin-token-that-is-at-least-thirty-two-characters";
+  const expected = createHmac("sha256", originToken).update(MEDIA_INGEST_CONTEXT).digest("hex");
+  assert.equal(await mediaIngestCredential(originToken), expected);
+  assert.equal(await mediaIngestCredential("short"), "");
+
+  let authorization = "";
+  const storage = createMediaUploadStorage(
+    { driver: "r2", endpoint: "https://example.test/__media/", originToken },
+    {
+      fetchImpl: async (_url, init) => {
+        authorization = init.headers.authorization;
+        return { ok: true, status: 200, json: async () => ({ size: init.body.length }) };
+      },
+    },
+  );
+  await storage.put({ key: "makler-realty.com/wp-content/uploads/2026/08/a.jpg", bytes: tinyJpeg() });
+  assert.equal(authorization, `Bearer ${expected}`);
+
+  const fromEnv = mediaUploadStorageConfigFromEnv({ MS_REALTY_ORIGIN_TOKEN: originToken });
+  assert.equal(fromEnv.originToken, originToken);
+  assert.equal(fromEnv.secret, "");
+});
+
 /* --------------------------------------------------------------- ledger */
 
 test("an uploaded asset is written unreviewed, is idempotent, and joins the listing media queue", async () => {
@@ -253,6 +280,13 @@ test("an uploaded asset is written unreviewed, is idempotent, and joins the list
   resetMediaUploads(file);
   const seed = loadCmsSeed();
   const record = assertUploadListing(seed, "MS-CRAWL-0001");
+  const replacementTarget = mediaAssetId(record.media.find((item) => item.is_public));
+  assert.equal(assertReplacementAsset(record, replacementTarget), replacementTarget);
+  assert.equal(assertReplacementAsset(record, ""), null);
+  assert.throws(
+    () => assertReplacementAsset(record, "media-00000000000000000000"),
+    (error) => error.status === 404 && error.code === "unknown_media_asset",
+  );
 
   const prepared = await prepareMediaUpload(
     { bytes: jpegWithGpsExif(), filename: "kitchen.jpg", contentType: "image/jpeg" },

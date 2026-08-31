@@ -148,7 +148,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /href="\/he\/search"/);
   assert.match(listingHtml, /data-listing-action="print"/);
   assert.match(listingHtml, /data-client-save-listing="MS-CRAWL-0001"/);
-  assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/makler-realty\.com\/wp-content\/uploads\//);
+  assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/media\/makler-realty\.com\/wp-content\/uploads\//);
   assert.match(listingHtml, /<meta name="robots" content="noindex,follow">/);
   assert.doesNotMatch(listingHtml, /hreflang=/);
   // The verified brand line (footer) is allowed everywhere; any OTHER tel:
@@ -212,7 +212,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski"/);
   assert.match(searchHtml, /data-search-card="true"/);
   assert.match(searchHtml, /data-card-thumbnail="true"/);
-  assert.match(searchHtml, /<img src="https:\/\/makler-realty\./);
+  assert.match(searchHtml, /<img src="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/media\/makler-realty\.(?:com|ru)\/wp-content\/uploads\//);
   assert.match(searchHtml, /<button(?=[^>]*data-view-mode="list")(?=[^>]*aria-pressed="true")[^>]*>/);
   assert.match(searchHtml, /<button[^>]*data-view-mode="map"[^>]*>/);
   assert.doesNotMatch(searchHtml, /verified inventory/);

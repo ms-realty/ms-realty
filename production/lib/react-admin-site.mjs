@@ -376,6 +376,9 @@ const ADMIN_UI_COPY = {
     mediaUploadSuccess: "Снимките са качени и чакат преглед.",
     mediaUploadFailed: "Снимките не бяха качени.",
     mediaUploadRejected: "Отказан файл",
+    replaceMedia: "Смени файла",
+    replaceMediaFile: "Избери нов файл",
+    mediaReplacementHint: "Текущият файл остава активен, докато човек не одобри замяната.",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourProvider: "Визуализатор на обиколката",
@@ -705,7 +708,7 @@ const ADMIN_UI_COPY = {
         clear: "Няма отворени приоритети",
         clearWhy: "Текущите опашки не показват причина за действие.",
         clearNext: "Провери отново по-късно.",
-        source: "Източник: запитвания, последващи действия, заявки от сайта и възможности.",
+        source: "Източник: запитвания, последващи действия, заявки от сайта, възможности и цялост на данните.",
       },
       hermesEntry: {
         title: "Попитай Hermes",
@@ -721,8 +724,12 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Нищо в този изглед.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност" },
-        actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността" },
+        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност", integrity: "Цялост на данните" },
+        actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността", inspectTracking: "Провери отчета" },
+        trackingTitle: "Запитванията от сайта не съвпадат с CRM",
+        trackingMissing: "CRM запитвания без събитие за изпращане: {count}.",
+        trackingOrphaned: "Отчетени изпращания, които липсват в постоянния CRM: {count}.",
+        trackingUnavailable: "Събитията от сайта не могат да бъдат проверени.",
         priorities: { critical: "Критично", urgent: "Спешно", normal: "Нормално" },
       },
     },
@@ -1059,6 +1066,9 @@ const ADMIN_UI_COPY = {
     mediaUploadSuccess: "Фотографии загружены и ждут проверки.",
     mediaUploadFailed: "Не удалось загрузить фотографии.",
     mediaUploadRejected: "Файл отклонён",
+    replaceMedia: "Заменить файл",
+    replaceMediaFile: "Выберите новый файл",
+    mediaReplacementHint: "Текущий файл останется активным, пока человек не одобрит замену.",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourProvider: "Просмотр тура",
@@ -1388,7 +1398,7 @@ const ADMIN_UI_COPY = {
         clear: "Открытых приоритетов нет",
         clearWhy: "Текущие очереди не показывают причины для действий.",
         clearNext: "Проверьте позже.",
-        source: "Источник: заявки, последующие действия, запросы с сайта и возможности.",
+        source: "Источник: заявки, последующие действия, запросы с сайта, возможности и целостность данных.",
       },
       hermesEntry: {
         title: "Спросить Hermes",
@@ -1404,8 +1414,12 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "В этом виде ничего нет.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность" },
-        actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность" },
+        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность", integrity: "Целостность данных" },
+        actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность", inspectTracking: "Проверить отчёт" },
+        trackingTitle: "Заявки с сайта не совпадают с CRM",
+        trackingMissing: "Заявки CRM без события отправки: {count}.",
+        trackingOrphaned: "Отмеченные отправки, отсутствующие в постоянной CRM: {count}.",
+        trackingUnavailable: "События сайта сейчас нельзя проверить.",
         priorities: { critical: "Критично", urgent: "Срочно", normal: "Обычно" },
       },
     },
@@ -1742,6 +1756,9 @@ const ADMIN_UI_COPY = {
     mediaUploadSuccess: "Photos uploaded and waiting for review.",
     mediaUploadFailed: "Could not upload the photos.",
     mediaUploadRejected: "File refused",
+    replaceMedia: "Replace file",
+    replaceMediaFile: "Choose replacement file",
+    mediaReplacementHint: "The current file stays live until a person approves the replacement.",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourProvider: "Tour viewer",
@@ -2071,7 +2088,7 @@ const ADMIN_UI_COPY = {
         clear: "No open priorities",
         clearWhy: "The current queues show no reason to act.",
         clearNext: "Check again later.",
-        source: "Source: enquiries, follow-ups, website requests, and opportunities.",
+        source: "Source: enquiries, follow-ups, website requests, opportunities, and data integrity.",
       },
       hermesEntry: {
         title: "Ask Hermes",
@@ -2087,8 +2104,12 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Nothing in this view.",
         due: "Due",
         overdue: "Overdue",
-        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity" },
-        actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity" },
+        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity", integrity: "Data integrity" },
+        actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity", inspectTracking: "Inspect report" },
+        trackingTitle: "Website submissions do not match CRM",
+        trackingMissing: "Durable CRM leads without a submission event: {count}.",
+        trackingOrphaned: "Tracked submissions absent from durable CRM: {count}.",
+        trackingUnavailable: "Website submission events cannot be verified.",
         priorities: { critical: "Critical", urgent: "Urgent", normal: "Normal" },
       },
     },
@@ -2647,6 +2668,11 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Всички работни пространства",
       scopedAccess: "Ограничен достъп до {count} работни пространства",
       scopeUnavailable: "Тази среда не е предоставила обхвата на работните пространства",
+      editName: "Име в работното пространство",
+      saveName: "Запази името",
+      saving: "Запазване…",
+      saved: "Профилът е обновен.",
+      saveFailed: "Профилът не беше обновен.",
       changePassword: "Смяна на парола",
       manageTeam: "Управление на екипа",
       manageConnections: "Връзки и интеграции",
@@ -2762,6 +2788,11 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Все рабочие пространства",
       scopedAccess: "Доступ к {count} рабочим пространствам",
       scopeUnavailable: "Эта среда не передала доступ к рабочим пространствам",
+      editName: "Имя в рабочем пространстве",
+      saveName: "Сохранить имя",
+      saving: "Сохранение…",
+      saved: "Профиль обновлён.",
+      saveFailed: "Профиль не обновлён.",
       changePassword: "Изменить пароль",
       manageTeam: "Управление командой",
       manageConnections: "Подключения и интеграции",
@@ -2877,6 +2908,11 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "All workspaces",
       scopedAccess: "Access to {count} workspaces",
       scopeUnavailable: "Workspace scope was not provided by this runtime",
+      editName: "Workspace name",
+      saveName: "Save name",
+      saving: "Saving…",
+      saved: "Profile updated.",
+      saveFailed: "Profile was not updated.",
       changePassword: "Change password",
       manageTeam: "Manage team",
       manageConnections: "Connections and integrations",
@@ -3010,7 +3046,7 @@ function MutationAvailabilityNote({ page, capability, pathname }) {
 
 function ownerIdentityName(page) {
   const profile = page.owner_profile || {};
-  return profile.name || profile.email || profile.id || page.workspace?.title || "MS Realty";
+  return profile.name || profile.email || page.workspace?.title || "MS Realty";
 }
 
 function ownerInitials(value) {
@@ -3222,7 +3258,7 @@ function ThemeSwitch({ ui, variant }) {
           key: option.value,
           type: "button",
           "data-theme-option": option.value,
-          "aria-pressed": option.value === "system" ? "true" : "false",
+          "aria-pressed": "false",
           "aria-label": names[option.value],
           title: names[option.value],
         },
@@ -3378,6 +3414,26 @@ const NEXT_ACTION_PRIORITY_RANK = { critical: 0, urgent: 1, normal: 2 };
 function todayNextActions(page, copy, ui, queue, inboxHref) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
   const rows = [];
+  const trackingStatus = page.website_funnel?.lead_tracking_status;
+  const trackingGap = Number(page.website_funnel?.lead_tracking_gap || 0);
+  if (trackingStatus === "mismatch" || trackingStatus === "unavailable") {
+    rows.push({
+      key: "integrity:website-leads",
+      kind: "integrity",
+      tags: "requests",
+      priority: "critical",
+      dueAt: null,
+      overdue: true,
+      title: na.trackingTitle,
+      context:
+        trackingStatus === "unavailable"
+          ? na.trackingUnavailable
+          : (trackingGap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(trackingGap))),
+      reference: "website-lead-tracking",
+      href: `${adminHref("/admin/reports", page)}#website-funnel`,
+      action: na.actions.inspectTracking,
+    });
+  }
   for (const lead of queue.pending) {
     const sla = queue.leadSlaById.get(lead.lead_id);
     const delivery = queue.deliveryByLeadId.get(lead.lead_id);
@@ -3491,13 +3547,12 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   });
 }
 
-function TodayBriefingPanel({ page, rows }) {
+function TodayBriefingPanel({ page, rows, total }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
   const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
   const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
-  const total = rows.length;
-  const count = copy.count.replace("{count}", String(total));
+  const count = copy.count.replace("{count}", String(rows.length));
   const prompt = first
     ? hermesCopy.todayPrompt
         .replace("{action}", first.action)
@@ -3510,7 +3565,7 @@ function TodayBriefingPanel({ page, rows }) {
       title: copy.title,
       "data-today-briefing": "true",
       "data-today-primary-action": first?.kind || "none",
-      "data-today-priority-count": String(Math.min(total, 5)),
+      "data-today-priority-count": String(rows.length),
       "data-today-priority-total": String(total),
     },
     h("p", { className: "adm-today-briefing__intro" }, copy.description),
@@ -3576,25 +3631,24 @@ function TodayBriefingPanel({ page, rows }) {
   );
 }
 
-function NextActionsPanel({ page, rows }) {
+function NextActionsPanel({ page, rows, total }) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
   const remaining = rows.length ? rows.slice(1) : rows;
-  const visible = remaining.slice(0, 5);
   return h(
     Panel,
     {
       title: na.title,
       "data-next-actions": "true",
       "data-next-action-count": String(remaining.length),
-      "data-next-action-total": String(rows.length),
-      "data-next-action-visible": String(visible.length),
+      "data-next-action-total": String(total),
+      "data-next-action-visible": String(remaining.length),
     },
     h("p", { className: "adm-next-actions__intro" }, na.description),
-    visible.length
+    remaining.length
       ? h(
           "ol",
           { className: "adm-next-actions" },
-          ...visible.map((row) =>
+          ...remaining.map((row) =>
             h(
               "li",
               {
@@ -3644,7 +3698,7 @@ function NextActionsPanel({ page, rows }) {
 function WorkspaceWelcomeBanner({ page }) {
   if (!page.welcome) return null;
   const copy = settingsCopy(page).welcome;
-  const operator = page.workspace?.operator_id || "";
+  const operator = String(page.owner_profile?.name || "").trim();
   return h(
     "aside",
     {
@@ -3827,7 +3881,8 @@ function TodayBody({ page }) {
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
-  const showNextActionsPanel = nextActions.length === 0 || nextActions.length > 1;
+  const visibleNextActions = nextActions.slice(0, 7);
+  const showNextActionsPanel = visibleNextActions.length === 0 || visibleNextActions.length > 1;
   const openLeadPipelineTasks =
     page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
   const openSellerTasks =
@@ -3864,8 +3919,8 @@ function TodayBody({ page }) {
         h(
           "div",
           { className: "adm-owner-flow__stack" },
-          h(TodayBriefingPanel, { page, rows: nextActions }),
-          showNextActionsPanel ? h(NextActionsPanel, { page, rows: nextActions }) : null,
+          h(TodayBriefingPanel, { page, rows: visibleNextActions, total: nextActions.length }),
+          showNextActionsPanel ? h(NextActionsPanel, { page, rows: visibleNextActions, total: nextActions.length }) : null,
         ),
         h(TodayReadinessRail, {
           page,
@@ -9145,12 +9200,12 @@ function ListingEditorBody({ page }) {
               { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
               reviewableMedia.length
                 ? reviewableMedia.map((item) => {
-                    const sourceUrl = item.asset_url || item.url || "";
+                    const sourceUrl = item.source_url || item.url || item.asset_url || "";
                     // The preview box is a small 16:10 card. Painting a 2560px
                     // photo into it downloads the whole photograph to draw a
                     // thumbnail, which is what the 640px rendition exists to
                     // stop. The full asset is still one click away below.
-                    const previewUrl = item.thumbnail_url || sourceUrl;
+                    const previewUrl = item.thumbnail_url || item.asset_url || sourceUrl;
                     const published = item.is_public === true;
                     const hasImagePreview = Boolean(sourceUrl && item.kind !== "video");
                     const previewState = hasImagePreview ? "loading" : sourceUrl ? "video" : "empty";
@@ -9197,6 +9252,47 @@ function ListingEditorBody({ page }) {
                       ),
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
+                        : null,
+                      canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
+                        ? h(
+                            "details",
+                            { className: "adm-media-review", "data-media-replacement": item.asset_id },
+                            h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
+                            h(
+                              "form",
+                              {
+                                method: "post",
+                                action: "/api/admin/media/uploads",
+                                enctype: "multipart/form-data",
+                                className: "adm-form adm-media-upload",
+                                "data-media-upload-form": "replacement",
+                                "data-media-upload-pending": ui.mediaUploadPending,
+                                "data-media-upload-success": ui.mediaUploadSuccess,
+                                "data-media-upload-failure": ui.mediaUploadFailed,
+                                "data-media-upload-rejected": ui.mediaUploadRejected,
+                              },
+                              h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+                              h("input", { type: "hidden", name: "replacesAssetId", defaultValue: item.asset_id }),
+                              h("input", { type: "hidden", name: "kind", defaultValue: item.kind === "floor_plan" ? "floor_plan" : "photo" }),
+                              h(
+                                "label",
+                                null,
+                                ui.replaceMediaFile,
+                                h("input", {
+                                  type: "file",
+                                  name: "photo",
+                                  required: true,
+                                  accept: "image/jpeg,image/png,image/webp,image/avif",
+                                  "data-media-upload-input": "true",
+                                }),
+                              ),
+                              h("p", { className: "adm-note" }, ui.mediaReplacementHint),
+                              h("progress", { max: "100", value: "0", hidden: true, "data-media-upload-progress": "true", "aria-label": ui.mediaUploadPending }),
+                              h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-media-upload-status": "true" }),
+                              h("ul", { className: "adm-media-upload__results", "data-media-upload-results": "true" }),
+                              h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", "data-media-upload-submit": "true" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
+                            ),
+                          )
                         : null,
                       canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/reviews")
                         ? h(
@@ -9245,7 +9341,9 @@ function ListingEditorBody({ page }) {
                                   ),
                                 ),
                                 h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
-                                h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.webp" })),
+                                item.kind === "video"
+                                  ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
+                                  : null,
                                 h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
                                 h(
                                   "label",
@@ -11222,6 +11320,7 @@ function OwnerProfileSection({ page }) {
   const copy = ownerConsoleCopy(page).profile;
   const scope = ownerWorkspaceScope(page, copy);
   const role = ownerRoleLabel(page, copy);
+  const profileNotice = page.profile_notice === "updated" ? copy.saved : page.profile_notice === "error" ? copy.saveFailed : "";
   const fields = [
     [copy.name, profile.name || ownerIdentityName(page)],
     [copy.email, profile.email],
@@ -11242,6 +11341,50 @@ function OwnerProfileSection({ page }) {
       { className: "adm-owner-profile__details" },
       ...fields.map(([term, value]) => h("div", { key: term }, h("dt", null, term), h("dd", null, h("bdi", null, value)))),
     ),
+    profile.editable
+      ? h(
+          "form",
+          {
+            method: "post",
+            action: adminHref("/api/admin/profile", page),
+            className: "adm-settings-form",
+            "data-admin-mutation-form": "owner-profile",
+            "data-admin-mutation-saving": copy.saving,
+            "data-admin-mutation-success": copy.saved,
+            "data-admin-mutation-failure": copy.saveFailed,
+          },
+          h(
+            "div",
+            { className: "adm-settings-grid" },
+            h(SettingsField, {
+              labelText: copy.editName,
+              control: h("input", {
+                name: "name",
+                defaultValue: profile.name || "",
+                autoComplete: "name",
+                maxLength: 120,
+                required: true,
+              }),
+            }),
+          ),
+          h(
+            "div",
+            { className: "adm-settings-actions" },
+            h(
+              "p",
+              {
+                className: "adm-settings-status",
+                role: "status",
+                "aria-live": "polite",
+                "data-admin-mutation-status": "true",
+                ...(profileNotice ? { "data-state": page.profile_notice === "updated" ? "success" : "error" } : {}),
+              },
+              profileNotice,
+            ),
+            h("button", { className: "mk-btn mk-btn--primary", type: "submit" }, copy.saveName),
+          ),
+        )
+      : null,
     h(
       "div",
       { className: "adm-owner-profile__actions" },
@@ -11278,8 +11421,7 @@ function connectionIcon(connection) {
 }
 
 function ConnectionAction({ connection }) {
-  if (connection.id === "whatsapp") {
-    if (!connection.can_manage) return null;
+  if (connection.id === "whatsapp" && connection.action_ready) {
     return h(
       "button",
       {
@@ -12185,6 +12327,164 @@ function HermesBody({ page }) {
   });
 }
 
+function TeamBody({ page }) {
+  const copy = page.team?.copy || {};
+  const roles = page.team?.roles || [];
+  const notice = page.team?.notice;
+  const noticeText = notice === "created" ? copy.created : notice === "updated" ? copy.updated : notice === "error" ? copy.error : "";
+  const roleOptions = (selected) =>
+    roles.map((role) =>
+      h("option", { key: role, value: role, selected: role === selected ? true : undefined }, copy.roleNames?.[role] || role),
+    );
+  const mutationActions = (id, buttonLabel) =>
+    h(
+      "div",
+      { className: "adm-settings-actions" },
+      h("p", { className: "adm-settings-status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h("button", { className: "mk-btn mk-btn--primary", type: "submit" }, buttonLabel),
+    );
+  const formAttrs = (id) => ({
+    method: "post",
+    className: "adm-settings-form",
+    "data-admin-mutation-form": id,
+    "data-admin-mutation-saving": copy.saving,
+    "data-admin-mutation-success": copy.saved,
+    "data-admin-mutation-failure": copy.saveFailed,
+  });
+  const operatorEditor = (operator) => {
+    const name = operator.name || operator.email;
+    const role = copy.roleNames?.[operator.role] || operator.role;
+    const scope = operator.full_workspace_access
+      ? copy.fullAccess
+      : operator.workspace_ids?.length
+        ? operator.workspace_ids.join(", ")
+        : copy.noWorkspace;
+    const summary = [name, role, scope, operator.is_current ? copy.current : null].filter(Boolean).join(" · ");
+    const ownProfile = operator.is_current;
+    return h(
+      WorkbenchDisclosure,
+      { key: operator.id, summary, "data-team-operator": operator.id, ...(ownProfile ? { "data-current-operator": "true" } : {}) },
+      h(
+        "form",
+        {
+          ...formAttrs(`team-operator-${operator.id}`),
+          action: adminHref(ownProfile ? "/api/admin/profile" : "/api/admin/team", page),
+        },
+        ownProfile ? null : h("input", { type: "hidden", name: "action", value: "update" }),
+        ownProfile ? null : h("input", { type: "hidden", name: "operator_id", value: operator.id }),
+        h(
+          "div",
+          { className: "adm-settings-grid" },
+          h(SettingsField, {
+            labelText: copy.name,
+            control: h("input", { name: "name", defaultValue: operator.name || "", autoComplete: "name", maxLength: 120, required: true }),
+          }),
+          h(SettingsField, {
+            labelText: copy.email,
+            control: h("input", { value: operator.email || "", readOnly: true, type: "email" }),
+          }),
+          ownProfile
+            ? null
+            : h(SettingsField, {
+                labelText: copy.role,
+                control: h("select", { name: "role", required: true }, ...roleOptions(operator.role)),
+              }),
+          ownProfile
+            ? null
+            : h(SettingsField, {
+                labelText: copy.workspaces,
+                hint: copy.workspacesHint,
+                wide: true,
+                control: h("input", { name: "workspace_ids", defaultValue: (operator.workspace_ids || []).join(", ") }),
+              }),
+          operator.password_change_required
+            ? h("p", { className: "adm-settings-note", role: "note" }, h(Icon, { name: "key", size: 15 }), h("span", null, copy.firstLogin))
+            : null,
+        ),
+        mutationActions(operator.id, copy.save),
+      ),
+    );
+  };
+  return adminShell(page, {
+    title: copy.title,
+    titleAsHeading: true,
+    mainAttrs: {
+      "data-kind": "admin-team",
+      "data-react-admin-ui": "team",
+      "data-admin-workbench": "workspace",
+      "data-admin-locale": page.workspace.locale,
+      "data-team-state": notice || "idle",
+    },
+    children: [
+      h(PageHeader, { title: copy.title, subtitle: copy.intro }),
+      noticeText
+        ? h(
+            "p",
+            {
+              className: `adm-settings-note${notice === "error" ? " adm-settings-note--blocked" : ""}`,
+              role: notice === "error" ? "alert" : "status",
+              "data-team-notice": notice,
+            },
+            h(Icon, { name: notice === "error" ? "triangle-alert" : "check", size: 15 }),
+            h("span", null, noticeText),
+          )
+        : null,
+      h(
+        "div",
+        { className: "adm-owner-flow adm-owner-flow__stack", "data-team-layout": "unified" },
+        h(
+          Panel,
+          { title: copy.newOperator, "data-team-create": "true" },
+          h(
+            "form",
+            { ...formAttrs("team-create"), action: adminHref("/api/admin/team", page) },
+            h("input", { type: "hidden", name: "action", value: "create" }),
+            h(
+              "div",
+              { className: "adm-settings-grid" },
+              h(SettingsField, {
+                labelText: copy.name,
+                control: h("input", { name: "name", autoComplete: "name", maxLength: 120, required: true }),
+              }),
+              h(SettingsField, {
+                labelText: copy.email,
+                control: h("input", { name: "email", type: "email", autoComplete: "off", required: true }),
+              }),
+              h(SettingsField, {
+                labelText: copy.password,
+                hint: copy.passwordHint,
+                control: h("input", { name: "password", type: "password", autoComplete: "new-password", minLength: 12, required: true }),
+              }),
+              h(SettingsField, {
+                labelText: copy.role,
+                control: h("select", { name: "role", required: true }, ...roleOptions("broker")),
+              }),
+              h(SettingsField, {
+                labelText: copy.workspaces,
+                hint: copy.workspacesHint,
+                wide: true,
+                control: h("input", { name: "workspace_ids" }),
+              }),
+            ),
+            mutationActions("create", copy.create),
+          ),
+        ),
+        h(
+          Panel,
+          {
+            title: copy.operators,
+            action: h(StatusPill, { tone: "ink", "data-team-count": page.operators?.length || 0 }, String(page.operators?.length || 0)),
+            "data-team-list": "true",
+          },
+          page.operators?.length
+            ? h("div", { className: "adm-owner-flow__stack" }, ...page.operators.map(operatorEditor))
+            : h("p", { className: "adm-empty", "data-team-empty": "true" }, copy.empty),
+        ),
+      ),
+    ],
+  });
+}
+
 function SettingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -12649,6 +12949,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_runtime_unavailable") return renderStaticElement(h(RuntimeUnavailableBody, { page }));
   if (page.kind === "admin_hermes") return renderStaticElement(h(HermesBody, { page }));
   if (page.kind === "admin_connections") return renderStaticElement(h(ConnectionsBody, { page }));
+  if (page.kind === "admin_team") return renderStaticElement(h(TeamBody, { page }));
   if (page.kind === "admin_workspace_settings") return renderStaticElement(h(SettingsBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));

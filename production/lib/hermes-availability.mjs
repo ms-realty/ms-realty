@@ -14,6 +14,7 @@ const REASONS = Object.freeze({
   provider_mode_unsupported: "Hermes reply drafts require the self hosted provider mode.",
   command_available: "Hermes owner-command planning is configured.",
   command_configured_provider: "A Hermes owner-command provider is configured for this environment.",
+  command_connected_provider: "The connected OpenRouter account can prepare owner-command plans.",
   command_provider_mode_unsupported: "This Hermes provider mode cannot prepare owner-command plans.",
   provider_mode_invalid: "HERMES_PROVIDER_MODE must be self_hosted or openrouter.",
   endpoint_invalid: "The configured Hermes endpoint is not a chat completions URL.",
@@ -67,7 +68,12 @@ export function hermesReplyAvailability({ env = process.env, provider = null, fe
 // OpenRouter mode, while customer/lead reply drafts remain self-hosted-only.
 // Keep this decision separate from reply availability so an injected command
 // provider cannot accidentally enable the reply composer (or vice versa).
-export function hermesOwnerCommandAvailability({ env = process.env, provider = null, fetchImpl = globalThis.fetch } = {}) {
+export function hermesOwnerCommandAvailability({
+  env = process.env,
+  provider = null,
+  connectedProviderMode = null,
+  fetchImpl = globalThis.fetch,
+} = {}) {
   if (typeof provider === "function") {
     return {
       available: true,
@@ -84,7 +90,19 @@ export function hermesOwnerCommandAvailability({ env = process.env, provider = n
     return unavailable("provider_mode_invalid");
   }
   const missing = missingInputs(config);
-  if (missing.length) return unavailable("not_configured", { missing, mode: config.mode });
+  if (missing.length) {
+    if (connectedProviderMode === "openrouter") {
+      if (typeof fetchImpl !== "function") return unavailable("fetch_unavailable", { mode: connectedProviderMode });
+      return {
+        available: true,
+        reason_key: "command_connected_provider",
+        reason: REASONS.command_connected_provider,
+        missing: [],
+        provider_mode: connectedProviderMode,
+      };
+    }
+    return unavailable("not_configured", { missing, mode: config.mode });
+  }
   if (!["self_hosted", "openrouter"].includes(config.mode)) {
     return unavailable("command_provider_mode_unsupported", { mode: config.mode });
   }

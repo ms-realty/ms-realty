@@ -29,6 +29,7 @@ import fs from "node:fs";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fromRoot } from "./paths.mjs";
+import { mediaIngestCredential } from "../../workers/media-ingest-auth.mjs";
 
 export const DEFAULT_MEDIA_UPLOAD_DIR = fromRoot("production", "data", "media-uploads");
 export const DEFAULT_MEDIA_UPLOAD_HOST = "ms-realty.ms-realty-bg.workers.dev";
@@ -162,10 +163,10 @@ function localDriver({ root }) {
 
 /* --------------------------------------------------------------------- r2 */
 
-function r2Driver({ endpoint, secret, fetchImpl }) {
-  if (!endpoint || !secret) {
+function r2Driver({ endpoint, secret, originToken, fetchImpl }) {
+  if (!endpoint || (!secret && !originToken)) {
     throw new MediaUploadStorageError(
-      "The r2 media upload driver requires MS_REALTY_MEDIA_UPLOAD_R2_ENDPOINT and MS_REALTY_MEDIA_INGEST_SECRET",
+      "The r2 media upload driver requires its endpoint and a media or origin credential",
       "bad_configuration",
     );
   }
@@ -178,9 +179,11 @@ function r2Driver({ endpoint, secret, fetchImpl }) {
     supports: () => true,
     async put({ key, bytes, contentType }) {
       const safeKey = assertSafeKey(key);
+      const credential = secret || (await mediaIngestCredential(originToken));
+      if (!credential) throw new MediaUploadStorageError("R2 media ingest credential is unavailable", "bad_configuration");
       const response = await call(`${base}${encodeURIComponent(safeKey)}`, {
         method: "PUT",
-        headers: { authorization: `Bearer ${secret}`, "content-type": contentType || "application/octet-stream" },
+        headers: { authorization: `Bearer ${credential}`, "content-type": contentType || "application/octet-stream" },
         body: bytes,
       });
       if (!response.ok) {
@@ -215,6 +218,7 @@ export function mediaUploadStorageConfigFromEnv(env = process.env) {
     host: String(env.MS_REALTY_MEDIA_UPLOAD_HOST || "").trim() || DEFAULT_MEDIA_UPLOAD_HOST,
     endpoint: String(env.MS_REALTY_MEDIA_UPLOAD_R2_ENDPOINT || "").trim(),
     secret: String(env.MS_REALTY_MEDIA_INGEST_SECRET || "").trim(),
+    originToken: String(env.MS_REALTY_ORIGIN_TOKEN || "").trim(),
   };
 }
 

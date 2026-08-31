@@ -31,7 +31,7 @@ test("human media review publishes a replacement floor plan without losing its s
       decision: "publish",
       kind: "floor_plan",
       alt: "Reviewed floor plan for the property",
-      replacementUrl: "https://cdn.example.test/listings/MS-CRAWL-0037/floor-plan.webp",
+      replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0037-floor-plan.webp",
       reviewer: "media_editor",
       reviewConfirmed: true,
     },
@@ -44,9 +44,9 @@ test("human media review publishes a replacement floor plan without losing its s
 
   assert.equal(review.is_public, true);
   assert.equal(review.review_status, "approved_by_human");
-  assert.equal(review.source_url, asset.asset_url);
-  assert.equal(reviewedAsset.source_url, asset.url);
-  assert.equal(reviewedAsset.asset_url, "https://cdn.example.test/listings/MS-CRAWL-0037/floor-plan.webp");
+  assert.equal(review.source_url, asset.source_url);
+  assert.equal(reviewedAsset.source_url, asset.source_url);
+  assert.equal(reviewedAsset.asset_url, "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0037-floor-plan.webp");
   assert.equal(reviewedAsset.media_reviewer, "media_editor");
   assert.equal(listing.media_workflow.review_gated_assets, 0);
   assert.equal(library.floor_plans.length, 1);
@@ -76,7 +76,7 @@ test("media review can keep an imported candidate private and retry safely", () 
   assert.equal(assertMediaReviews(readMediaReviews(file)), true);
 });
 
-test("media publication rejects missing human confirmation, captions, and unsafe URLs", () => {
+test("media publication rejects missing human confirmation, captions, and non-owned image URLs", () => {
   const { seed, assetId } = fixture();
   const base = {
     listingId: "MS-CRAWL-0037",
@@ -84,7 +84,7 @@ test("media publication rejects missing human confirmation, captions, and unsafe
     decision: "publish",
     kind: "floor_plan",
     reviewer: "media_editor",
-    replacementUrl: "https://cdn.example.test/listings/MS-CRAWL-0037/floor-plan.webp",
+    replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0037-floor-plan.webp",
   };
 
   assert.throws(() => createMediaReview(seed, { ...base, alt: "Reviewed floor plan" }), /explicit human confirmation/);
@@ -92,5 +92,9 @@ test("media publication rejects missing human confirmation, captions, and unsafe
   assert.throws(
     () => createMediaReview(seed, { ...base, alt: "Reviewed floor plan", replacementUrl: "http://cdn.example.test/plan.webp", reviewConfirmed: true }),
     /HTTPS asset URL/,
+  );
+  assert.throws(
+    () => createMediaReview(seed, { ...base, alt: "Reviewed floor plan", replacementUrl: "https://cdn.example.test/plan.webp", reviewConfirmed: true }),
+    /owned storage URL/,
   );
 });

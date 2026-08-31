@@ -1479,8 +1479,7 @@
   // Listing photo upload inside the media manager. Without JavaScript the same
   // form posts multipart and the server redirects back to this panel; here it
   // becomes inline progress with a per-file outcome list.
-  function initMediaUploadForm() {
-    var form = document.querySelector("[data-media-upload-form]");
+  function initMediaUploadForm(form) {
     if (!form || !window.FormData || !window.XMLHttpRequest) return;
     var input = form.querySelector("[data-media-upload-input]");
     var status = form.querySelector("[data-media-upload-status]");
@@ -1631,8 +1630,12 @@
     var appId = root.getAttribute("data-whatsapp-app-id");
     var configId = root.getAttribute("data-whatsapp-config-id");
     var version = root.getAttribute("data-whatsapp-version");
-    if (!button || !status || !appId || !configId || !version) return;
+    if (!button || !status) return;
     var copy = function (name, fallback) { return root.getAttribute("data-meta-" + name) || fallback; };
+    if (!appId || !configId || !version) {
+      status.textContent = copy("no-server", "WhatsApp setup is incomplete.");
+      return;
+    }
     var signup = null;
     var code = null;
     var fail = function (message) {
@@ -1673,13 +1676,18 @@
       button.disabled = false;
       status.textContent = copy("ready", "Ready to open Meta.");
     };
-    var script = document.createElement("script");
-    script.async = true;
-    script.src = "https://connect.facebook.net/en_US/sdk.js";
-    script.onerror = function () { fail(copy("sdk-failed", "The Meta SDK did not load.")); };
-    document.head.append(script);
+    var loadSdk = function () {
+      button.disabled = true;
+      status.textContent = copy("checking", "Loading Meta…");
+      var script = document.createElement("script");
+      script.async = true;
+      script.src = "https://connect.facebook.net/en_US/sdk.js";
+      script.onerror = function () { fail(copy("sdk-failed", "The Meta SDK did not load.")); };
+      document.head.append(script);
+    };
+    loadSdk();
     button.addEventListener("click", function () {
-      if (!window.FB) return fail(copy("sdk-not-ready", "Meta is not ready yet."));
+      if (!window.FB) return loadSdk();
       button.disabled = true;
       status.textContent = copy("opening", "Opening Meta…");
       window.FB.login(function (response) {
@@ -1810,7 +1818,10 @@
   initListingMediaPreviews();
   initRouteDecisionForms();
   initAdminMutationForms();
-  initMediaUploadForm();
+  var mediaUploadForms = document.querySelectorAll("[data-media-upload-form]");
+  for (var mediaUploadIndex = 0; mediaUploadIndex < mediaUploadForms.length; mediaUploadIndex += 1) {
+    initMediaUploadForm(mediaUploadForms[mediaUploadIndex]);
+  }
   initWorkspaceOnboarding();
   initWorkspaceSettingsForms();
   initLeadBulkForm();

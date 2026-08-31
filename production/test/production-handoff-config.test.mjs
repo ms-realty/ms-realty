@@ -85,6 +85,9 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(compose, /MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: \$\{MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:\?/);
   assert.match(compose, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: \/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
+  assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_DRIVER: r2/);
+  assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_HOST: ms-realty\.ms-realty-bg\.workers\.dev/);
+  assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_R2_ENDPOINT: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/__media\//);
   assert.match(dockerfile, /ARG MS_REALTY_BUILD_MARKER=unversioned[\s\S]*\.ms-realty-build-marker/);
   assert.match(cloudflareDockerfile, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH=\/app\/production\/data\/r2-media-coverage-report\.json/);
   assert.match(compose, /\/opt\/ms-realty\/shared\/media:\/srv\/media:ro/);
@@ -144,9 +147,9 @@ test("production search evidence uses one migrated Payload runtime", () => {
 test("workers.dev delegates dynamic traffic to the fixed origin and carries an exact edge marker", () => {
   assert.match(worker, /if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
   assert.match(worker, /requestForOrigin\(request, env\.MS_REALTY_ORIGIN_URL, env\.MS_REALTY_ORIGIN_TOKEN\)/);
-  assert.match(worker, /if \(media\) return media;\n\s+if \(env\.MS_REALTY_ORIGIN_URL\) return proxyDurableOrigin/);
+  assert.match(worker, /if \(media\) return media;\n\s+if \(ownedKey\) return new Response\("Not found"/);
   assert.match(worker, /mediaCandidateKeys\(url\.hostname, url\.pathname\)/);
-  assert.match(worker, /import \{ PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, isPreviewHost, mediaCandidateKeys \} from "\.\/preview-host\.mjs"/);
+  assert.match(worker, /import \{ PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, canonicalLegacyHost, isPreviewHost, mediaCandidateKeys \} from "\.\/preview-host\.mjs"/);
   assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
   assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
@@ -203,16 +206,17 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(ciWorkflow, /d\.origin_build_marker !== origin/);
 });
 
-test("every public CMS media asset preserves one of the two historical source hosts", () => {
+test("every public CMS media asset separates owned delivery from its historical source", () => {
   const seed = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-seed.json"), "utf8"));
-  const assets = new Set(
-    seed.records.flatMap((record) => (record.media || []).map((item) => item.asset_url).filter(Boolean)),
-  );
-  assert.ok(assets.size > 1_000);
+  const assets = seed.records.flatMap((record) => (record.media || []).filter((item) => item.asset_url));
+  assert.ok(assets.length > 1_000);
   for (const asset of assets) {
-    const url = new URL(asset);
-    assert.equal(url.protocol, "https:");
-    assert.ok(["makler-realty.com", "makler-realty.ru"].includes(url.hostname), asset);
-    assert.match(url.pathname, /^\/wp-content\/uploads\//);
+    const delivery = new URL(asset.asset_url);
+    const source = new URL(asset.source_url);
+    assert.equal(delivery.protocol, "https:");
+    assert.equal(delivery.hostname, "ms-realty.ms-realty-bg.workers.dev");
+    assert.match(delivery.pathname, /^\/media\/makler-realty\.(?:com|ru)\/wp-content\/uploads\//);
+    assert.ok(["makler-realty.com", "makler-realty.ru"].includes(source.hostname), asset.source_url);
+    assert.match(source.pathname, /^\/wp-content\/uploads\//);
   }
 });

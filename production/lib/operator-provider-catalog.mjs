@@ -429,12 +429,16 @@ export function operatorProviderCards({
     (Array.isArray(connections) ? connections : []).map((connection) => [String(connection.provider), connection]),
   );
   const hermes = config?.hermes || {};
+  const selfHostedHermesReady = hermes.mode === "self_hosted" && hermes.endpoint && hermes.has_api_key;
   return DEFINITIONS.map((definition) => {
     const connection = stored.get(definition.id) || null;
     const ready = availability[definition.id]?.ready === true;
     const storedStatus = trimmed(connection?.status);
     const connected = storedStatus === "connected";
-    const active = definition.id !== "ai" || hermes.mode === "openrouter";
+    const active =
+      definition.id !== "ai" ||
+      hermes.mode === "openrouter" ||
+      (hermes.mode === "self_hosted" && !selfHostedHermesReady);
     const supported = definition.supported !== false;
     const status =
       storedStatus === "connecting" || storedStatus === "unavailable"

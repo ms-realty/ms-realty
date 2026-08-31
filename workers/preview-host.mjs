@@ -27,6 +27,11 @@ export function isProductionPublicHost(hostname) {
   return normalizedHostname(hostname) === PRODUCTION_PUBLIC_HOST;
 }
 
+export function canonicalLegacyHost(hostname) {
+  const host = normalizedHostname(hostname);
+  return ["www.makler-realty.com", "www.makler-realty.ru"].includes(host) ? host.slice(4) : "";
+}
+
 export function isPreviewHost(hostname) {
   const host = normalizedHostname(hostname);
   return host.endsWith(".workers.dev") && !isProductionPublicHost(host);

@@ -6,6 +6,7 @@ import { loadLocaleRegistry, siteRootRedirectTarget } from "../lib/locales.mjs";
 import { renderAppSiteRoot } from "../lib/app-router-adapter.mjs";
 import {
   PREVIEW_NOINDEX,
+  canonicalLegacyHost,
   isPreviewHost,
   isProductionPublicHost,
   mediaCandidateKeys,
@@ -45,6 +46,13 @@ test("only isolated *.workers.dev hosts count as preview hosts", () => {
   assert.equal(isPreviewHost("evil-workers.dev"), false);
   assert.equal(isPreviewHost(""), false);
   assert.equal(isPreviewHost(undefined), false);
+});
+
+test("www legacy hosts canonicalize to the approved apex route contract", () => {
+  assert.equal(canonicalLegacyHost("WWW.MAKLER-REALTY.COM."), "makler-realty.com");
+  assert.equal(canonicalLegacyHost("www.makler-realty.ru"), "makler-realty.ru");
+  assert.equal(canonicalLegacyHost("mail.makler-realty.com"), "");
+  assert.match(workerSource, /return Response\.redirect\(url, 301\);/);
 });
 
 test("the Worker noindexes isolated drills and leaves the production origin indexable", () => {

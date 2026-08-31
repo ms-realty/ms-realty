@@ -658,7 +658,6 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
   color: var(--text-strong);
 }
 .crm-panel > .adm-kpis { border: 0; border-radius: 0; }
-.adm-workbench-rail .adm-kpis,
 .adm-editor-support .adm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 /* Text-valued stats (review states, tour status) read label over value and wrap. */
 .adm-kpis .crm-stat[data-stat="text"] {
@@ -701,7 +700,7 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
   min-width: 0;
 }
 .adm-owner-stage {
-  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.95fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 .adm-owner-flow--today [data-readiness-support="true"] {
@@ -709,12 +708,6 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
 }
 .adm-owner-flow--settings [data-settings-overview="true"] {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-.adm-owner-stage--connections {
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
-}
-.adm-owner-stage--hermes {
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
 }
 .adm-owner-flow--connections [data-connections-support="true"],
 .adm-owner-flow--hermes [data-hermes-support="true"],
@@ -725,21 +718,6 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
 .adm-owner-flow--hermes [data-hermes-support="true"] > .crm-panel,
 .adm-owner-flow--hermes [data-hermes-disclosures="true"] > details {
   height: 100%;
-}
-.adm-workbench-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(300px, 30vw, 336px);
-  gap: var(--space-4);
-  align-items: start;
-}
-.adm-workbench-main,
-.adm-workbench-rail { display: grid; gap: var(--space-4); min-width: 0; }
-.adm-workbench-rail {
-  inline-size: min(100%, clamp(300px, 30vw, 336px));
-  position: sticky;
-  top: calc(var(--adm-shell-top-offset, 64px) + var(--space-4));
-  align-self: start;
-  justify-self: end;
 }
 .adm-readiness-list {
   display: grid;
@@ -1883,8 +1861,6 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-contact-layout { grid-template-columns: 1fr; }
   .adm-contact-grid { grid-template-columns: 1fr; padding: var(--space-3); }
   .adm-contact-card > header { align-items: stretch; flex-direction: column; }
-  .adm-workbench-shell { grid-template-columns: minmax(0, 1fr); }
-  .adm-workbench-rail { position: static; }
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-2);
@@ -2501,11 +2477,6 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-managed-system-list { display: grid; margin: 0; padding: 0; list-style: none; }
 .adm-connection-row,
 .adm-managed-system-list > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-5); min-width: 0; padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border); }
-.crm-app main[data-react-admin-ui="connections"] .adm-workbench-shell,
-.crm-app main[data-react-admin-ui="hermes"] .adm-workbench-shell {
-  grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
-  align-items: stretch;
-}
 .crm-app main[data-react-admin-ui="connections"] .adm-owner-flow,
 .crm-app main[data-react-admin-ui="hermes"] .adm-owner-flow,
 .crm-app main[data-react-admin-ui="connections"] .adm-owner-stage,

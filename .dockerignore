@@ -96,4 +96,6 @@ production/data/audit-log.sqlite-shm
 workers/*
 !workers/index.js
 !workers/durable-case-authority.mjs
+!workers/media-ingest-auth.mjs
+!workers/preview-host.mjs
 wrangler.jsonc

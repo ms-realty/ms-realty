@@ -54,12 +54,13 @@ import {
   renderAdminLoginPage,
   renderAdminPasswordChangePage,
 } from "./admin-login.mjs";
-import { renderAdminTeamPage } from "./admin-team.mjs";
+import { renderAdminTeamPayload } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import {
   assignableBrokerProfiles,
   getPayloadAdminAuthService,
+  payloadAdminOwnerProfile,
   payloadAdminPasswordChangeFailureCode,
 } from "./payload-admin-auth.mjs";
 import {
@@ -4087,6 +4088,36 @@ export function createHttpApp({
         }
       }
     }
+    if (url.pathname === "/api/admin/profile") {
+      const service = await configuredPayloadAdminAuth().catch(() => null);
+      if (!payloadSession || !service) return adminForbidden("payload_session");
+      if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+      const formRequest = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(
+        "application/x-www-form-urlencoded",
+      );
+      try {
+        const operator = await service.updateProfile(payloadSession, parseBody(request));
+        if (formRequest) {
+          const target = new URL("/admin/settings", "http://ms-realty.local");
+          if (url.searchParams.get("locale")) target.searchParams.set("locale", url.searchParams.get("locale"));
+          target.searchParams.set("profile", "updated");
+          return adminResponse(303, "", "text/plain; charset=utf-8", {
+            location: `${target.pathname}${target.search}#owner-profile`,
+          });
+        }
+        return adminJson(200, { kind: "admin_profile", operator });
+      } catch (error) {
+        if (formRequest) {
+          const target = new URL("/admin/settings", "http://ms-realty.local");
+          if (url.searchParams.get("locale")) target.searchParams.set("locale", url.searchParams.get("locale"));
+          target.searchParams.set("profile", "error");
+          return adminResponse(303, "", "text/plain; charset=utf-8", {
+            location: `${target.pathname}${target.search}#owner-profile`,
+          });
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
       // Team management needs the Payload runtime. When it cannot start (no
       // database locally, or an outage), answer like a missing session instead
@@ -4095,15 +4126,23 @@ export function createHttpApp({
       if (!payloadSession || !service) return adminForbidden("payload_session");
       if (request.method === "GET") {
         const operators = await service.listOperators(payloadSession);
-        if (url.pathname === "/api/admin/team") return adminJson(200, { kind: "admin_team", operators });
+        const payload = renderAdminTeamPayload({
+          registry: activeRegistry,
+          requestedLocale: adminLocaleParam(url),
+          operators,
+          currentOperatorId: payloadSession.user.id,
+          notice: url.searchParams.get("created") === "1"
+            ? "created"
+            : url.searchParams.get("updated") === "1"
+              ? "updated"
+              : url.searchParams.get("error") === "1"
+                ? "error"
+                : null,
+        });
+        if (url.pathname === "/api/admin/team") return adminJson(200, payload);
         return adminResponse(
           200,
-          renderAdminTeamPage({
-            operators,
-            created: url.searchParams.get("created") === "1",
-            error: url.searchParams.get("error") === "1",
-            locale: url.searchParams.get("locale") || "bg",
-          }),
+          adminHtml({ ...payload, owner_profile: payloadAdminOwnerProfile(payloadSession) }),
           "text/html; charset=utf-8",
         );
       }
@@ -4112,11 +4151,17 @@ export function createHttpApp({
           "application/x-www-form-urlencoded",
         );
         try {
-          const operator = await service.createOperator(payloadSession, parseBody(request));
+          const input = parseBody(request);
+          const updating = String(input?.action || "") === "update";
+          const operator = updating
+            ? await service.updateOperator(payloadSession, input)
+            : await service.createOperator(payloadSession, input);
           if (formRequest) {
-            return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/team?created=1" });
+            return adminResponse(303, "", "text/plain; charset=utf-8", {
+              location: `/admin/team?${updating ? "updated" : "created"}=1`,
+            });
           }
-          return adminJson(201, { kind: "admin_team_operator", operator });
+          return adminJson(updating ? 200 : 201, { kind: "admin_team_operator", operator });
         } catch (error) {
           if (formRequest) {
             return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/team?error=1" });
@@ -4147,6 +4192,8 @@ export function createHttpApp({
           receiptPayload: hermesReceiptPayload || payloadListingRuntime,
           receiptSecret:
             hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+          providerConnectionPayload: providerConnectionPayload || payloadListingRuntime || null,
+          readConnections: readProviderConnections,
           commandResult,
           commandError,
           commandPrefill: url.searchParams.get("prompt") || "",
@@ -4211,8 +4258,8 @@ export function createHttpApp({
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const adminBrokerProfiles = await currentBrokerProfiles(payloadSession);
-      const settingsPage = (requestedLocale, settings, form = null, writable = workspaceSettingsStoreReady, onboarding = null) =>
-        withWorkspaceSettings(
+      const settingsPage = (requestedLocale, settings, form = null, writable = workspaceSettingsStoreReady, onboarding = null) => {
+        const page = withWorkspaceSettings(
           renderAdminWorkspaceSettingsPayload(activeRegistry, requestedLocale, {
             settings,
             operator: principal,
@@ -4231,6 +4278,10 @@ export function createHttpApp({
             ),
           }),
         );
+        const profiled = payloadSession?.user ? { ...page, owner_profile: payloadAdminOwnerProfile(payloadSession) } : page;
+        const profileNotice = url.searchParams.get("profile");
+        return profileNotice ? { ...profiled, profile_notice: profileNotice } : profiled;
+      };
       if (request.method === "GET") {
         if (!workspaceSettingsStoreReady && runtimeDataDurableOnly) {
           if (url.pathname === "/admin/settings" || wantsHtml(request, url)) {

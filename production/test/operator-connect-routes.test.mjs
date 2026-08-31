@@ -648,8 +648,8 @@ test("agent config GET is catalog-only while POST explicitly issues and audits",
   });
   assert.equal(catalogResponse.status, 200);
   assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
-  assert.equal(catalogResponse.body.summary.total, 119);
-  assert.equal(catalogResponse.body.operations.length, 119);
+  assert.equal(catalogResponse.body.summary.total, 120);
+  assert.equal(catalogResponse.body.operations.length, 120);
   assert.equal(
     catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
     OWNER_OPERATOR_BROWSER_OPERATIONS.length,
@@ -698,7 +698,7 @@ test("agent config GET is catalog-only while POST explicitly issues and audits",
   assert.equal(adapterCatalog.status, 200);
   const adapterCatalogBody = await adapterCatalog.json();
   assert.equal(adapterCatalogBody.kind, "owner_operator_catalog");
-  assert.equal(adapterCatalogBody.summary.total, 119);
+  assert.equal(adapterCatalogBody.summary.total, 120);
   assert.equal(readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued").length, 0);
   const adapterPost = await renderAppAdminResponse(
     new Request(`${ORIGIN}/api/admin/connections/agent-config`, { method: "POST", headers }),

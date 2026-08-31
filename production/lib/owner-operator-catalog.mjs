@@ -123,6 +123,7 @@ const ADMIN_ROUTE_METHODS = [
   ["GET", "/api/admin/payload-runtime"],
   ["GET", "/api/admin/pipeline"],
   ["GET", "/api/admin/preflight-reports"],
+  ["POST", "/api/admin/profile"],
   ["GET", "/api/admin/production-recovery-template"],
   ["POST", "/api/admin/production-recovery/import"],
   ["GET", "/api/admin/production-recovery"],
@@ -252,6 +253,7 @@ function executionBoundary(pathname) {
     /\/security\//.test(pathname) ||
     /\/data-exports/.test(pathname) ||
     /\/connections(?:\/|$)/.test(pathname) ||
+    pathname === "/api/admin/profile" ||
     pathname === "/api/admin/team" ||
     /\/media\/uploads(?:\/|$)/.test(pathname) ||
     /\/import$/.test(pathname)
@@ -264,6 +266,7 @@ function executionBoundary(pathname) {
 function browserUiPath(pathname) {
   if (/\/connections(?:\/|$)/.test(pathname)) return "/admin/connect";
   if (/\/security\/|\/data-exports/.test(pathname)) return "/admin/settings#settings-security";
+  if (pathname === "/api/admin/profile") return "/admin/settings#owner-profile";
   if (pathname === "/api/admin/team") return "/admin/team";
   if (/\/media\/uploads(?:\/|$)/.test(pathname)) return "/admin/listings/edit";
   if (/\/import$/.test(pathname)) return "/admin/migration/review";

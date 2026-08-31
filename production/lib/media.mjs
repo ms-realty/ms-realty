@@ -1,3 +1,8 @@
+import { PRODUCTION_PUBLIC_HOST, PRODUCTION_PUBLIC_ORIGIN } from "../../workers/preview-host.mjs";
+
+const LEGACY_MEDIA_HOSTS = new Set(["makler-realty.com", "makler-realty.ru"]);
+const OWNED_MEDIA_PREFIX = "/media/";
+
 function httpsUrl(value) {
   return typeof value === "string" && /^https:\/\//.test(value);
 }
@@ -6,8 +11,33 @@ function mediaUrl(item = {}) {
   return item.asset_url || item.url || item.image_url || item.source_url || "";
 }
 
+export function ownedMediaUrl(sourceUrl) {
+  try {
+    const source = new URL(sourceUrl);
+    if (source.hostname === PRODUCTION_PUBLIC_HOST) return source.href;
+    if (!LEGACY_MEDIA_HOSTS.has(source.hostname) || !source.pathname.startsWith("/wp-content/uploads/")) return source.href;
+    return `${PRODUCTION_PUBLIC_ORIGIN}${OWNED_MEDIA_PREFIX}${source.hostname}${source.pathname}`;
+  } catch {
+    return sourceUrl;
+  }
+}
+
+function sourceMediaUrl(ownedUrl) {
+  try {
+    const owned = new URL(ownedUrl);
+    if (owned.hostname !== PRODUCTION_PUBLIC_HOST || !owned.pathname.startsWith(OWNED_MEDIA_PREFIX)) return ownedUrl;
+    const relative = owned.pathname.slice(OWNED_MEDIA_PREFIX.length);
+    const slash = relative.indexOf("/");
+    const host = relative.slice(0, slash);
+    if (slash < 1 || !LEGACY_MEDIA_HOSTS.has(host)) return ownedUrl;
+    return `https://${host}${relative.slice(slash)}`;
+  } catch {
+    return ownedUrl;
+  }
+}
+
 function importedImageUrl(item = {}) {
-  const url = mediaUrl(item);
+  const url = sourceMediaUrl(mediaUrl(item));
   if (!httpsUrl(url)) return null;
 
   try {
@@ -58,8 +88,9 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
 
   return {
     url,
-    asset_url: assetUrl,
-    ...(recoveredOriginal ? { fallback_asset_url: importedUrl } : {}),
+    asset_url: assetUrl ? ownedMediaUrl(assetUrl) : null,
+    ...(assetUrl ? { source_url: assetUrl } : {}),
+    ...(recoveredOriginal ? { fallback_asset_url: ownedMediaUrl(importedUrl) } : {}),
     alt: row.alt || (publicImportedPhoto ? fallbackAlt : ""),
     width: recoveredOriginal ? null : width,
     height: recoveredOriginal ? null : height,
@@ -72,12 +103,12 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
 function publicAsset(item) {
   const fallbackUrl = item.fallback_asset_url || "";
   return {
-    url: item.asset_url || item.url,
+    url: ownedMediaUrl(item.asset_url || item.url),
     // A recovered WordPress original is suitable for the public gallery, but
     // its tiny crawl thumbnail is not. Keep that derivative on the CMS record
     // for provenance without letting an image error turn a full-width hero
     // into a visibly pixelated 72px fallback.
-    fallback_url: fallbackUrl && !isSmallDerivative(fallbackUrl) ? fallbackUrl : undefined,
+    fallback_url: fallbackUrl && !isSmallDerivative(fallbackUrl) ? ownedMediaUrl(fallbackUrl) : undefined,
     alt: item.alt || "Property photo",
     width: item.width,
     height: item.height,
@@ -192,7 +223,7 @@ export function selectPublicThumbnail(media = [], fallback = null) {
 
   // Do not render an unsafe legacy thumbnail. The design system has a stable
   // photo placeholder for listings awaiting a human media review.
-  if (fallback && !NON_PROPERTY_MEDIA.test(`${fallback.url || ""} ${fallback.alt || ""}`)) return fallback;
+  if (fallback && !NON_PROPERTY_MEDIA.test(`${fallback.url || ""} ${fallback.alt || ""}`)) return publicAsset(fallback);
   return null;
 }
 

@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
-import { renderAdminTeamPage } from "../lib/admin-team.mjs";
+import { renderAdminTeamPayload } from "../lib/admin-team.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { ADMIN_CSS_HASH, FONTS_URL } from "../lib/ui/design-assets.mjs";
 
 // Contracts from the admin workbench quality sweep: the mobile navigation
@@ -40,6 +42,23 @@ test("mobile navigation drawer: solid top bar, full-height panel, styled header 
     assert.match(touch, /\.adm-mobile-nav__panel-title\s*\{[^}]*color:\s*#fff/);
     assert.match(touch, /\.adm-mobile-nav__close\s*\{[^}]*width:\s*44px;\s*height:\s*44px/);
     assert.match(touch, /\.adm-mobile-nav__close:focus-visible\s*\{[^}]*box-shadow:\s*var\(--shadow-focus\)/);
+  }
+});
+
+test("owner operating stages keep primary work and supporting state in one vertical surface", () => {
+  assert.match(adminAdapterCss, /\.adm-owner-stage\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.doesNotMatch(adminAdapterCss, /\.adm-owner-stage--(?:connections|hermes)\s*\{[^}]*grid-template-columns/);
+  assert.doesNotMatch(adminAdapterCss, /\.adm-workbench-(?:shell|rail|main)/);
+  assert.doesNotMatch(adminSettingsCss, /\.adm-workbench-(?:shell|rail|main)/);
+});
+
+test("server-rendered theme controls do not claim a browser-stored choice before hydration", async () => {
+  const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  const page = await dispatchHttp(app, { url: "/admin/today?locale=en", headers: auth });
+  assert.equal(page.status, 200);
+  for (const option of ["system", "light", "dark"]) {
+    const matches = page.body.match(new RegExp(`data-theme-option="${option}" aria-pressed="false"`, "g")) || [];
+    assert.equal(matches.length, 2, `${option} is neutral in desktop and mobile controls`);
   }
 });
 
@@ -230,14 +249,15 @@ test("connect page uses the persistent workbench shell and responsive connection
   assert.doesNotMatch(html, /#1d4ed8/);
 });
 
-test("team page controls outrank the adapter's generic main field rules", () => {
-  const html = renderAdminTeamPage({ operators: [] });
-  assert.match(html, /\.team-page \.team__form input,\s*\.team-page \.team__form select \{/);
-  assert.match(html, /\.team-page \.team__form select \{[^}]*background-image: url/);
-  // The page now speaks one workbench language at a time instead of stacking
-  // "Bulgarian / English" into every string, so the empty state is Bulgarian
-  // by default and Russian and English come from ?locale=.
+test("team page uses the persistent owner shell and its shared form controls", () => {
+  const registry = loadLocaleRegistry();
+  const render = (locale) => renderReactAdminBody(renderAdminTeamPayload({ registry, requestedLocale: locale, operators: [] }));
+  const html = render("bg");
+  assert.match(html, /class="crm-app"/);
+  assert.match(html, /data-react-admin-ui="team"/);
+  assert.match(html, /class="adm-settings-form"/);
+  assert.doesNotMatch(html, /team-page|team__form/);
   assert.match(html, /Още няма оператори\./);
-  assert.match(renderAdminTeamPage({ operators: [], locale: "ru" }), /Операторов пока нет\./);
-  assert.match(renderAdminTeamPage({ operators: [], locale: "en" }), /No operators yet\./);
+  assert.match(render("ru"), /Операторов пока нет\./);
+  assert.match(render("en"), /No operators yet\./);
 });

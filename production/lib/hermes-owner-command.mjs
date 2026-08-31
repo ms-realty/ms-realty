@@ -385,8 +385,9 @@ function connectedOpenRouterConfig(credentials) {
 
 async function openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret }) {
   const fallback = hermesProviderConfigFromEnv(env);
+  const fallbackConfigured = Boolean(fallback.endpoint && fallback.has_api_key);
   const stored =
-    fallback.mode === "openrouter"
+    fallback.mode === "openrouter" || !fallbackConfigured
       ? connectedOpenRouterConfig(await readProviderCredentials("ai", { credentialSecret: secret, payload }))
       : null;
   const config = stored || { ...fallback, apiKey: String(env.HERMES_API_KEY || "") };
@@ -709,6 +710,15 @@ export async function runHermesOwnerCommand(
       : provider
         ? String(env.HERMES_PROVIDER_MODE || "").trim().toLowerCase() || "injected_provider"
         : fallbackProvider.mode;
+  if (
+    !provider &&
+    !(fallbackProvider.endpoint && fallbackProvider.has_api_key) &&
+    normalizedBusiness?.providers.some(
+      (entry) => ["ai", "openrouter"].includes(entry.id) && ["connected", "configured"].includes(entry.status),
+    )
+  ) {
+    providerMode = "openrouter";
+  }
   if (provider) {
     if (typeof provider !== "function") throw new HermesOwnerCommandError("hermes_unavailable", { status: 503 });
   }
@@ -759,6 +769,9 @@ export async function runHermesOwnerCommand(
       const resolved = await openAiCompatibleOwnerCommandProvider({ env, fetchImpl, payload, secret });
       model = resolved.model;
       providerMode = resolved.mode;
+      if (providerMode === "openrouter" && commandContainsSensitiveData(normalized.command)) {
+        throw new HermesOwnerCommandError("hermes_command_contains_sensitive_data", { status: 400 });
+      }
       callProvider = (request) => resolved.call(request, evidence);
     }
     plan = normalizedPlan(

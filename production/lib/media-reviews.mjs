@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { mediaWorkflow } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
+import { PRODUCTION_PUBLIC_HOST } from "../../workers/preview-host.mjs";
 
 export const DEFAULT_MEDIA_REVIEW_LEDGER_PATH = fromRoot("production", "data", "media-reviews.jsonl");
 
@@ -15,6 +16,10 @@ function assetUrl(item = {}) {
   return String(item.asset_url || item.url || "").trim();
 }
 
+function sourceAssetUrl(item = {}) {
+  return String(item.source_url || item.asset_url || item.url || "").trim();
+}
+
 function httpsUrl(value) {
   try {
     return new URL(value).protocol === "https:";
@@ -23,9 +28,22 @@ function httpsUrl(value) {
   }
 }
 
+function ownedImageUrl(value) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === PRODUCTION_PUBLIC_HOST &&
+      (url.pathname.startsWith("/media/") || url.pathname.startsWith("/wp-content/uploads/"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function mediaAssetId(item = {}) {
   if (/^media-[a-f0-9]{20}$/.test(String(item.asset_id || ""))) return item.asset_id;
-  const url = assetUrl(item);
+  const url = sourceAssetUrl(item);
   if (!url) throw new Error("Media asset requires a source URL");
   return `media-${crypto.createHash("sha256").update(url).digest("hex").slice(0, 20)}`;
 }
@@ -75,7 +93,9 @@ function validatedPublicUrl(value, kind) {
   const url = String(value || "").trim();
   if (!httpsUrl(url)) throw new Error("Published media requires an HTTPS asset URL");
   if (kind === "video" && !VIDEO_URL.test(url)) throw new Error("Published video requires a supported video URL");
-  if (kind !== "video" && !IMAGE_URL.test(url)) throw new Error("Published photo or floor plan requires an image URL");
+  if (kind !== "video" && (!IMAGE_URL.test(url) || !ownedImageUrl(url))) {
+    throw new Error("Published photo or floor plan requires an owned storage URL");
+  }
   return url;
 }
 
@@ -95,14 +115,15 @@ export function createMediaReview(seed, input, reviewedAt = new Date().toISOStri
   const kind = normalizedKind(input.kind, item.kind);
   const alt = normalizedText(input.alt || input.accessibilityCaption, "Media alt text");
   const replacementUrl = String(input.replacementUrl || input.replacement_url || "").trim();
-  const sourceUrl = assetUrl(item);
+  const sourceUrl = sourceAssetUrl(item);
+  const deliveryUrl = assetUrl(item);
   let publicUrl = null;
   if (decision === "publish") {
     if (!alt) throw new Error("Published media requires reviewed alt text or an accessibility caption");
     if (item.kind === "site_chrome" && !replacementUrl) {
       throw new Error("Site chrome cannot be published without a reviewed replacement asset");
     }
-    publicUrl = validatedPublicUrl(replacementUrl || sourceUrl, kind);
+    publicUrl = validatedPublicUrl(replacementUrl || deliveryUrl, kind);
   } else if (replacementUrl) {
     if (!httpsUrl(replacementUrl)) throw new Error("Replacement media requires an HTTPS asset URL");
     publicUrl = replacementUrl;
@@ -175,8 +196,29 @@ export function applyMediaReviews(seed, reviews = []) {
     records: seed.records.map((record) => {
       if (record.collection !== "listings") return record;
       let changed = false;
-      const media = (record.media || []).map((item) => {
+      const sourceMedia = record.media || [];
+      const approvedReplacements = new Map();
+      for (const item of sourceMedia) {
+        if (!item.replaces_asset_id) continue;
         const assetId = mediaAssetId(item);
+        const review = latestByAsset.get(`${record.id}:${assetId}`);
+        if (review?.is_public) approvedReplacements.set(item.replaces_asset_id, { assetId, review });
+      }
+      const media = sourceMedia.map((item) => {
+        const assetId = mediaAssetId(item);
+        const replacement = approvedReplacements.get(assetId);
+        if (replacement) {
+          changed = true;
+          return {
+            ...item,
+            asset_id: assetId,
+            is_public: false,
+            review_status: "replaced_by_human",
+            replacement_asset_id: replacement.assetId,
+            media_reviewer: replacement.review.reviewer,
+            media_reviewed_at: replacement.review.reviewed_at,
+          };
+        }
         const review = latestByAsset.get(`${record.id}:${assetId}`);
         if (!review) return { ...item, asset_id: assetId };
         changed = true;

@@ -1694,7 +1694,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             decision: "publish",
             kind: "floor_plan",
             alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
-            replacementUrl: "https://cdn.example.test/listings/MS-CRAWL-0001-floor-plan.webp",
+            replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0001-floor-plan.webp",
             reviewer: "media_editor",
             reviewConfirmed: "on",
           }),
@@ -2058,7 +2058,7 @@ test("Next admin listing-quality import persists complete launch review CSV", as
       );
       const readinessBody = await readiness.json();
 
-      assert.equal(imported.status, 201);
+      assert.equal(imported.status, 201, JSON.stringify(importedBody));
       assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
       assert.equal(importedBody.reviewPersisted, true);
       assert.equal(importedBody.reviewImport.ready, true);

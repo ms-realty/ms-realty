@@ -38,6 +38,7 @@ import {
 import { GOOGLE_SCOPES, createProviderOAuthState } from "../lib/provider-connections.mjs";
 import { requiredAdminCapability } from "../lib/admin-auth.mjs";
 import { runOperatorConnectionAction } from "../lib/operator-connect-routes.mjs";
+import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 
 const SECRET = "operator-connect-secret-that-is-longer-than-thirty-two-characters";
 const ORIGIN = "https://ms-realty.example";
@@ -224,6 +225,8 @@ test("a provider without an active authorization path stays unavailable without 
   assert.doesNotMatch(html, /Свързването е достъпно само във влязла сесия/);
   assert.doesNotMatch(html, /MS_REALTY_[A-Z0-9_]+/);
   assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
+  assert.doesNotMatch(html, /data-whatsapp-connect="true"/);
+  assert.match(html, /href="https:\/\/developers\.facebook\.com\/apps"/);
   assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
   assert.match(html, /data-managed-system="neon" data-status="managed"/);
   assert.equal((html.match(/<input\b/g) || []).length, 0);
@@ -285,6 +288,23 @@ test("stored provider rows keep truthful intermediate and unavailable status", (
   assert.equal(byId.google.status, "unavailable");
 });
 
+test("a stale WhatsApp row cannot bypass missing Embedded Signup configuration", () => {
+  const config = fullConfig({ metaConfigId: "" });
+  const html = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections: [{ provider: "whatsapp", status: "connecting", account_label: "MS Realty" }],
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(html, /data-provider="whatsapp" data-status="connecting"/);
+  assert.match(html, /data-whatsapp-embedded-signup="false"/);
+  assert.doesNotMatch(html, /data-whatsapp-connect="true"/);
+  assert.match(html, /Meta's protected Embedded Signup path is not ready/);
+  assert.match(html, /href="https:\/\/developers\.facebook\.com\/apps"/);
+});
+
 test("a stored OpenRouter authorization stays inactive while Hermes runs self-hosted", () => {
   const config = fullConfig({
     hermes: {
@@ -323,6 +343,36 @@ test("a stored OpenRouter authorization stays inactive while Hermes runs self-ho
   assert.match(html, /Hermes uses the configured self-hosted model runtime/);
 });
 
+test("a stored OpenRouter authorization activates Hermes when no self-hosted runtime is configured", () => {
+  const config = fullConfig({
+    hermes: {
+      mode: "self_hosted",
+      endpoint: "",
+      endpoint_redacted: null,
+      model: "NousResearch/Hermes-4-14B",
+      has_api_key: false,
+    },
+  });
+  const connections = [{
+    provider: "ai",
+    status: "connected",
+    account_label: "OpenRouter",
+    last_verified_at: "2026-08-24T12:00:00.000Z",
+    metadata: { model: "openrouter/auto" },
+  }];
+  const html = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections,
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(html, /data-provider="ai" data-status="connected"/);
+  assert.match(html, /data-managed-system="hermes" data-status="ready"/);
+  assert.match(html, /Hermes uses the OpenRouter-authorized key/);
+});
+
 test("a configured owner page offers five one-click handoffs and no raw credential form", () => {
   const config = fullConfig();
   const html = renderOperatorConnectPage({
@@ -337,6 +387,10 @@ test("a configured owner page offers five one-click handoffs and no raw credenti
   assert.ok(html.includes('href="/api/admin/connections?provider=instagram&amp;action=start"'));
   assert.ok(html.includes('href="/api/admin/connections?provider=ai&amp;action=start"'));
   assert.equal((html.match(/data-whatsapp-connect="true"/g) || []).length, 1);
+  assert.match(html, /<button[^>]*disabled[^>]*data-whatsapp-connect="true"/);
+  assert.match(html, /data-whatsapp-result="true"/);
+  assert.match(ADMIN_APP_JS, /var loadSdk = function \(\) \{/);
+  assert.match(ADMIN_APP_JS, /if \(!window\.FB\) return loadSdk\(\);/);
   assert.equal(
     (html.match(/(?:href="\/api\/admin\/connections\?provider=(?:google|facebook|instagram|ai)&amp;action=start"|data-whatsapp-connect="true")/g) || []).length,
     5,

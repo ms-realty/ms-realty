@@ -693,6 +693,29 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(populated.body, /data-workspace-onboarding="open"/);
     assert.match(populated.body, /class="crm-ph"/);
 
+    for (let index = 0; index < 3; index += 1) {
+      await dispatchHttp(app, {
+        method: "POST",
+        url: "/api/admin/leads",
+        headers: HEADERS,
+        body: {
+          id: `today-capped-action-${index}`,
+          source: "broker_whatsapp",
+          leadType: "buyer",
+          language: "en",
+          contact_preference: "whatsapp",
+          contact: { name: `Capped Action Buyer ${index}`, phone: `+35988000005${index}` },
+          requirements: { locations: ["Sandanski"], property_types: ["apartment"], budget_max_eur: 90000, timeline: "This year" },
+          message: "Please call me back.",
+          humanConfirmed: true,
+        },
+      });
+    }
+    const capped = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
+    assert.match(capped.body, /data-today-priority-count="7" data-today-priority-total="8"/);
+    assert.match(capped.body, /data-next-action-count="6" data-next-action-total="8" data-next-action-visible="6"/);
+    assert.equal((capped.body.match(/data-next-action="/g) || []).length, 6, "one briefing action plus six ranked rows");
+
     const json = await dispatchHttp(app, { url: "/api/admin/today", headers: HEADERS });
     assert.equal(json.status, 200);
     assert.equal(json.body.kind, "admin_today");

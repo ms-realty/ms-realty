@@ -25,7 +25,9 @@ export function planMediaMirror(seed, destination) {
   }
 
   const urls = new Set(
-    (seed.records || []).flatMap((record) => (record.media || []).map((item) => item.asset_url).filter(Boolean)),
+    (seed.records || []).flatMap((record) =>
+      (record.media || []).map((item) => item.source_url || item.asset_url).filter(Boolean),
+    ),
   );
   return [...urls].sort().map((assetUrl) => {
     const url = new URL(assetUrl);
