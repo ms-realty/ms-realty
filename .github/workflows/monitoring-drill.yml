@@ -17,6 +17,7 @@ on:
 permissions:
   actions: read
   contents: read
+  issues: write
 
 jobs:
   isolated-drill:
@@ -282,6 +283,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Write redacted machine evidence
+        id: machine-evidence
         if: always()
         env:
           ALERT_OUTCOME: ${{ steps.alert-probe.outcome }}
@@ -362,6 +364,109 @@ jobs:
           fs.writeFileSync("monitoring-drill-machine-evidence.json", `${JSON.stringify(evidence, null, 2)}\n`);
           NODE
 
+      - name: Create the durable GitHub alert receipt
+        id: alert-receipt
+        if: >-
+          always() &&
+          steps.machine-evidence.outcome == 'success' &&
+          steps.production.outcome == 'success' &&
+          steps.canary.outcome == 'success' &&
+          steps.alert-probe.outcome == 'failure' &&
+          steps.rollback.outcome == 'success'
+        uses: actions/github-script@v7
+        env:
+          CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
+          RUN_URL: ${{ steps.identity.outputs.run_url }}
+        with:
+          script: |
+            const fs = require("node:fs");
+            const runId = process.env.GITHUB_RUN_ID;
+            const runAttempt = process.env.GITHUB_RUN_ATTEMPT;
+            const correlationId = process.env.CORRELATION_ID;
+            const artifactName = `monitoring-drill-machine-evidence-${runId}-${runAttempt}`;
+            const { data: issue } = await github.rest.issues.create({
+              ...context.repo,
+              title: `Monitoring alert receipt for drill ${runId}/${runAttempt}`,
+              body: [
+                "Production monitoring drill alert receipt.",
+                "",
+                `- correlation_id: ${correlationId}`,
+                `- release_sha: ${process.env.RELEASE_SHA}`,
+                `- provider_run: ${process.env.RUN_URL}`,
+                `- machine_artifact: ${artifactName}`,
+                "- failure_surface: production_journey_probe (intentional isolated monitor fault)",
+                "- rollback: isolated Worker restored to the baseline version with the exact release marker",
+                "",
+                "This issue is the durable alert-delivery receipt for the typed workflow_dispatch monitoring drill.",
+              ].join("\n"),
+            });
+            const receipt = {
+              schema_version: 1,
+              status: "delivered",
+              provider: "github-issues",
+              receipt_id: issue.node_id,
+              correlation_id: correlationId,
+              provider_run_id: runId,
+              provider_run_attempt: runAttempt,
+              repository: process.env.GITHUB_REPOSITORY,
+              run_url: process.env.RUN_URL,
+              delivered_at: new Date(issue.created_at).toISOString(),
+            };
+            fs.writeFileSync("monitoring-alert-receipt.json", `${JSON.stringify(receipt, null, 2)}\n`);
+            core.setOutput("issue_url", issue.html_url);
+
+      - name: Build the current monitoring rollback report
+        id: monitoring-report
+        if: always() && steps.alert-receipt.outcome == 'success'
+        env:
+          MS_REALTY_ALERT_RECEIPT_EVIDENCE_PATH: monitoring-alert-receipt.json
+          MS_REALTY_MONITORING_DRILL_EVIDENCE_PATH: monitoring-drill-machine-evidence.json
+          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: ${{ runner.temp }}/monitoring-rollback-report.json
+        run: |
+          npm run monitoring:report
+          npm run monitoring:preflight
+
+      - name: Install current monitoring evidence on the durable origin
+        id: publish-monitoring-report
+        if: always() && steps.monitoring-report.outcome == 'success'
+        env:
+          MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
+          MS_REALTY_DEPLOY_KNOWN_HOSTS: ${{ secrets.MS_REALTY_DEPLOY_KNOWN_HOSTS }}
+          MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY }}
+          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH: ${{ runner.temp }}/monitoring-rollback-report.json
+        run: |
+          test -n "$MS_REALTY_DEPLOY_HOST"
+          test -n "$MS_REALTY_DEPLOY_KNOWN_HOSTS"
+          test -n "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY"
+          test -s "$MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH"
+          install -d -m 0700 "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
+          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
+          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          remote_report="/opt/ms-realty/incoming/monitoring-rollback-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          scp "${ssh_args[@]}" "$MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH" "root@$MS_REALTY_DEPLOY_HOST:$remote_report"
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "bash -s -- '$remote_report'" <<'REMOTE'
+          set -euo pipefail
+          report="$1"
+          container="$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')"
+          [[ "$container" =~ ^[0-9a-f]+$ ]]
+          docker cp "$report" "${container}:/runtime-evidence/.monitoring-rollback-report.json"
+          docker exec --user 0 "$container" sh -c 'chmod 0444 /runtime-evidence/.monitoring-rollback-report.json && mv -f /runtime-evidence/.monitoring-rollback-report.json /runtime-evidence/monitoring-rollback-report.json'
+          rm -f "$report"
+          REMOTE
+
+          health_url="https://ms-realty.ms-realty-bg.workers.dev/api/health"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 20 --header 'Cache-Control: no-cache' "$health_url" --output "$RUNNER_TEMP/refreshed-health.json" &&
+              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; const blockers=Array.isArray(d.blockers) ? d.blockers : []; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected || d.origin_build_marker !== expected || blockers.includes("monitoring_rollback")) process.exit(1)' "$RUNNER_TEMP/refreshed-health.json" "$RELEASE_SHA"; then
+              exit 0
+            fi
+            echo "Monitoring evidence refresh attempt $attempt/30 did not clear the blocker; retrying."
+            sleep 10
+          done
+          exit 1
+
       - name: Delete only the isolated drill Worker
         if: always() && steps.baseline.outputs.created == 'true'
         env:
@@ -378,6 +483,8 @@ jobs:
           name: monitoring-drill-machine-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             monitoring-drill-machine-evidence.json
+            monitoring-alert-receipt.json
+            ${{ runner.temp }}/monitoring-rollback-report.json
             ${{ runner.temp }}/production-journey.json
             ${{ runner.temp }}/canary-journey.json
             ${{ runner.temp }}/fault-probe-validation.json

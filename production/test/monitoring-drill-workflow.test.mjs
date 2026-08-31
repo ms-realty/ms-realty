@@ -70,3 +70,13 @@ test("monitoring drill records durable runtime, failure, and exact restoration e
   assert.match(workflow, /Delete only the isolated drill Worker\n\s+if: always\(\) && steps\.baseline\.outputs\.created == 'true'/);
   assert.match(workflow, /wrangler@4\.117\.0 delete "\$DRILL_WORKER" --force/);
 });
+
+test("monitoring drill closes the alert and runtime evidence loop", () => {
+  assert.match(workflow, /issues: write/);
+  assert.match(workflow, /steps\.alert-probe\.outcome == 'failure'/);
+  assert.match(workflow, /github\.rest\.issues\.create/);
+  assert.match(workflow, /npm run monitoring:report/);
+  assert.match(workflow, /npm run monitoring:preflight/);
+  assert.match(workflow, /docker cp "\$report" "\$\{container\}:\/runtime-evidence\/\.monitoring-rollback-report\.json"/);
+  assert.match(workflow, /blockers\.includes\("monitoring_rollback"\)/);
+});
