@@ -288,6 +288,23 @@ test("stored provider rows keep truthful intermediate and unavailable status", (
   assert.equal(byId.google.status, "unavailable");
 });
 
+test("a stale WhatsApp row cannot bypass missing Embedded Signup configuration", () => {
+  const config = fullConfig({ metaConfigId: "" });
+  const html = renderOperatorConnectPage({
+    baseUrl: ORIGIN,
+    operatorId: "connect_operator",
+    connections: [{ provider: "whatsapp", status: "connecting", account_label: "MS Realty" }],
+    availability: operatorProviderAvailability(config),
+    providerConfig: config,
+    locale: "en",
+  });
+  assert.match(html, /data-provider="whatsapp" data-status="connecting"/);
+  assert.match(html, /data-whatsapp-embedded-signup="false"/);
+  assert.doesNotMatch(html, /data-whatsapp-connect="true"/);
+  assert.match(html, /Meta's protected Embedded Signup path is not ready/);
+  assert.match(html, /href="https:\/\/developers\.facebook\.com\/apps"/);
+});
+
 test("a stored OpenRouter authorization stays inactive while Hermes runs self-hosted", () => {
   const config = fullConfig({
     hermes: {

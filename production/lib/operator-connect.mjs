@@ -241,6 +241,7 @@ function ownerConnectionView(card, copy, canManageConnections) {
     verified_label: storedConnected ? `${copy.verifiedAt}: ${verifiedAt(card.last_verified_at, copy)}` : "",
     action_label: storedConnected ? copy.reauthorize : copy[providerCopyKey(card.id, "Connect")],
     can_manage: ownerCanAct,
+    action_ready: ownerCanAct && card.ready === true,
     action_href:
       ownerCanAct && card.kind === "oauth" && ready
         ? `/api/admin/connections?provider=${card.id}&action=start`
@@ -256,6 +257,8 @@ function ownerConnectionView(card, copy, canManageConnections) {
           ? ""
           : card.id === "ai"
             ? copy.aiProviderUnavailable
+            : card.id === "whatsapp"
+              ? copy.whatsappUnavailable
             : copy.oauthUnavailable
       : "",
     recovery_message: card.owner_connectable
@@ -265,6 +268,8 @@ function ownerConnectionView(card, copy, canManageConnections) {
           ? ""
           : card.id === "ai"
             ? copy.aiProviderRecovery
+            : card.id === "whatsapp"
+              ? copy.whatsappRecovery
             : copy.oauthRecovery
       : "",
     helper_text: helperText,
@@ -394,7 +399,7 @@ export function buildOperatorConnectPayload({
     ],
     supporting_connections: supportingConnections,
     whatsapp_client: {
-      enabled: Boolean(canManageConnections && whatsapp && whatsapp.status !== "needs_setup"),
+      enabled: whatsapp?.action_ready === true,
       app_id: availability.whatsapp?.app_id || "",
       config_id: availability.whatsapp?.config_id || "",
       version: availability.whatsapp?.graph_version || "",
