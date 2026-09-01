@@ -55,6 +55,32 @@ test("MS_REALTY_TRUSTED_WRITE_ORIGINS allows a named extra host", () => {
   );
 });
 
+test("canonical legacy www aliases may post to the apex host", () => {
+  assert.equal(
+    crossOriginWriteRejection("POST", {
+      host: "makler-realty.com",
+      origin: "https://www.makler-realty.com",
+      "sec-fetch-site": "same-site",
+    }),
+    null,
+  );
+  assert.equal(
+    crossOriginWriteRejection("POST", {
+      host: "www.makler-realty.ru.",
+      origin: "https://makler-realty.ru",
+    }),
+    null,
+  );
+  assert.equal(
+    crossOriginWriteRejection("POST", {
+      host: "makler-realty.com",
+      origin: "https://blog.makler-realty.com",
+      "sec-fetch-site": "same-site",
+    }),
+    "cross_site_request",
+  );
+});
+
 test("Headers objects work, not just plain header maps", () => {
   const headers = new Headers({ host: "review.ms-realty.example", origin: "https://evil.example" });
   assert.equal(crossOriginWriteRejection("POST", headers), "cross_origin_request");
