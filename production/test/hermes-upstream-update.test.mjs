@@ -184,6 +184,10 @@ test("workflow fences official updater provenance, full CI dispatch, and compati
   assert.match(ci, /hermes_update:/);
   assert.match(ci, /expected_head_sha:/);
   assert.match(ci, /test "\$HERMES_EXPECTED_HEAD_SHA" = "\$GITHUB_SHA"/);
+  assert.match(ci, /git merge-base --is-ancestor origin\/main HEAD/);
+  assert.match(ci, /git diff --name-status --no-renames origin\/main\.\.\.HEAD/);
+  assert.match(ci, /test "\$\{#changed_entries\[@\]\}" -eq "\$\{#expected_paths\[@\]\}"/);
+  assert.match(ci, /test "\$status" = "M"/);
   assert.match(ci, /name: Hermes compatibility smoke/);
   assert.match(ci, /needs: check/);
   assert.match(ci, /npm run hermes:compatibility/);
@@ -200,6 +204,29 @@ test("workflow fences official updater provenance, full CI dispatch, and compati
   assert.match(autoMerge, /trustedUpdaterBot/);
   assert.match(autoMerge, /pull\.user\?\.login === "github-actions\[bot\]"/);
   assert.match(autoMerge, /!trustedUpdaterBot && !\["OWNER", "MEMBER", "COLLABORATOR"\]/);
+  assert.match(autoMerge, /compareCommitsWithBasehead/);
+  assert.match(autoMerge, /comparison\.status === "ahead"/);
+  assert.match(autoMerge, /changedFiles\.every\(\(\{ status, previous_filename: previousFilename \}\)/);
   assert.match(autoMerge, /pulls\.merge/);
   assert.match(autoMerge, /auto_merge_deploy/);
+
+  const expectedPaths = [
+    "SOURCE_OF_TRUTH.md",
+    "production/data/hermes-provider-provisioning-report.json",
+    "production/data/hermes-upstream-provenance.json",
+    "production/docker-compose.local-production.yml",
+    "production/lib/hermes-provider-provisioning.mjs",
+  ];
+  const ciPaths = [...ci.match(/expected_paths=\(\n([\s\S]*?)\n\s*\)/)[1].matchAll(/^\s+([^\s]+)$/gm)].map(([, file]) => file);
+  const autoMergePaths = [
+    ...autoMerge.match(/const allowedHermesUpdaterPaths = \[\n([\s\S]*?)\n\s*\];/)[1].matchAll(/"([^"]+)"/g),
+  ].map(([, file]) => file);
+  const acceptsExactDiff = (allowed, actual) =>
+    actual.length === allowed.length && [...actual].sort().every((file, index) => file === allowed[index]);
+  for (const allowed of [ciPaths, autoMergePaths]) {
+    assert.deepEqual(allowed, expectedPaths);
+    assert.equal(acceptsExactDiff(allowed, expectedPaths), true);
+    assert.equal(acceptsExactDiff(allowed, [...expectedPaths, ".github/workflows/ci.yml"]), false);
+    assert.equal(acceptsExactDiff(allowed, [...expectedPaths, "production/lib/http.mjs"]), false);
+  }
 });

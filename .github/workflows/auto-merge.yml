@@ -113,6 +113,34 @@ jobs:
               core.notice("Main advanced after CI; the pull-request branch was updated for a fresh run.");
               return;
             }
+            if (pull.head.ref === "automation/hermes-agent-updater") {
+              const allowedHermesUpdaterPaths = [
+                "SOURCE_OF_TRUTH.md",
+                "production/data/hermes-provider-provisioning-report.json",
+                "production/data/hermes-upstream-provenance.json",
+                "production/docker-compose.local-production.yml",
+                "production/lib/hermes-provider-provisioning.mjs",
+              ];
+              const { data: comparison } = await github.rest.repos.compareCommitsWithBasehead({
+                owner,
+                repo,
+                basehead: `${pull.base.sha}...${pull.head.sha}`,
+                per_page: 100,
+              });
+              const changedFiles = comparison.files ?? [];
+              const changedPaths = changedFiles.map(({ filename }) => filename).sort();
+              const hasExactHermesUpdaterDiff =
+                comparison.status === "ahead" &&
+                changedPaths.length === allowedHermesUpdaterPaths.length &&
+                allowedHermesUpdaterPaths.every((expected, index) => changedPaths[index] === expected) &&
+                changedFiles.every(({ status, previous_filename: previousFilename }) =>
+                  status === "modified" && previousFilename === undefined,
+                );
+              if (!hasExactHermesUpdaterDiff) {
+                core.setFailed("Hermes updater may merge only the five exact modified pin and provenance files.");
+                return;
+              }
+            }
 
             const { data: result } = await github.rest.pulls.merge({
               owner,
