@@ -42,8 +42,15 @@ function normalizedHost(value) {
     .toLowerCase();
 }
 
+function canonicalWriteHost(value) {
+  const host = normalizedHost(value).replace(/\.$/, "");
+  if (host === "www.makler-realty.com") return "makler-realty.com";
+  if (host === "www.makler-realty.ru") return "makler-realty.ru";
+  return host;
+}
+
 export function requestHost(headers) {
-  return normalizedHost(readHeader(headers, "x-forwarded-host") || readHeader(headers, "host"));
+  return canonicalWriteHost(readHeader(headers, "x-forwarded-host") || readHeader(headers, "host"));
 }
 
 // Extra hosts that may drive writes (e.g. an admin subdomain in front of the
@@ -56,7 +63,7 @@ export function trustedWriteHosts(env = process.env) {
         const trimmed = value.trim();
         if (!trimmed) return "";
         try {
-          return normalizedHost(new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`).host);
+          return canonicalWriteHost(new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`).host);
         } catch {
           return "";
         }
@@ -70,20 +77,19 @@ export function crossOriginWriteRejection(method, headers, { env = process.env }
   if (SAFE_METHODS.has(String(method || "GET").toUpperCase())) return null;
 
   const fetchSite = readHeader(headers, "sec-fetch-site").trim().toLowerCase();
-  if (fetchSite && !SAME_SITE_VALUES.has(fetchSite)) return "cross_site_request";
-
   const origin = readHeader(headers, "origin").trim();
   // Some browsers send `Origin: null` for sandboxed/opaque contexts.
   if (!origin || origin.toLowerCase() === "null") return fetchSite ? null : origin ? "opaque_origin" : null;
 
   let originHost;
   try {
-    originHost = normalizedHost(new URL(origin).host);
+    originHost = canonicalWriteHost(new URL(origin).host);
   } catch {
     return "invalid_origin";
   }
   const host = requestHost(headers);
   if (!host) return "unknown_host";
+  if (fetchSite && !SAME_SITE_VALUES.has(fetchSite) && originHost !== host) return "cross_site_request";
   if (originHost === host) return null;
   return trustedWriteHosts(env).has(originHost) ? null : "cross_origin_request";
 }
