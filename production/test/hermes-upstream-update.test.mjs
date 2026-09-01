@@ -187,6 +187,9 @@ test("workflow fences official updater provenance, full CI dispatch, and compati
   assert.match(autoMerge, /listJobsForWorkflowRun/);
   assert.match(autoMerge, /Hermes compatibility smoke/);
   assert.match(autoMerge, /workflowRun\.head_sha/);
+  assert.match(autoMerge, /trustedUpdaterBot/);
+  assert.match(autoMerge, /pull\.user\?\.login === "github-actions\[bot\]"/);
+  assert.match(autoMerge, /!trustedUpdaterBot && !\["OWNER", "MEMBER", "COLLABORATOR"\]/);
   assert.match(autoMerge, /pulls\.merge/);
   assert.match(autoMerge, /auto_merge_deploy/);
 });

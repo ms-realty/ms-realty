@@ -90,7 +90,11 @@ jobs:
                 return;
               }
             }
-            if (!["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {
+            const trustedUpdaterBot =
+              isHermesUpdaterRun &&
+              pull.head.ref === "automation/hermes-agent-updater" &&
+              pull.user?.login === "github-actions[bot]";
+            if (!trustedUpdaterBot && !["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {
               core.setFailed("The pull-request author is not a repository collaborator.");
               return;
             }
