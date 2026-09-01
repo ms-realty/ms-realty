@@ -3875,6 +3875,7 @@ export function createHttpApp({
               storage,
             })
           : null,
+        storageVisibility: durableMedia() ? "staged_private" : "public",
         editorPathFor: listingEditorPath,
       });
       if (uploaded.status === 303) return adminResponse(303, "", "text/plain; charset=utf-8", uploaded.headers);
@@ -6093,12 +6094,14 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
-        const review = createMediaReview(await currentMediaSeed(), input, reviewedAt);
+        const review = createMediaReview(await currentMediaSeed(), input, reviewedAt, { allowStaged: durableMedia() });
         const persisted = durableMedia()
           ? await persistMediaReviewDurably(review, {
               payload: payloadListingRuntime,
               env: payloadListingEnv,
               principal,
+              storage: mediaUploadStorage || createMediaUploadStorage(mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv()),
+              mediaUploadHost: mediaUploadStorageConfig?.host,
             })
           : appendMediaReview(review, { filePath: mediaReviewLedgerPath || undefined });
         if (!persisted.idempotent) {

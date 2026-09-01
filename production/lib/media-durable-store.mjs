@@ -11,6 +11,10 @@ import { createHash } from "node:crypto";
 import { mediaAssetId } from "./media-reviews.mjs";
 import { publicMediaUpload } from "./media-uploads.mjs";
 import { withPayloadTransaction } from "./listing-draft-service.mjs";
+import {
+  LISTING_PRIVATE_PREFIX,
+  mediaUploadPublicUrl,
+} from "./media-upload-storage.mjs";
 
 export const MEDIA_ASSET_COLLECTION = "media_assets";
 
@@ -20,6 +24,10 @@ const DURABLE_REVIEW_STATUSES = Object.freeze({
   publish: "approved_imported_photo",
   keep_private: "reviewed_private",
 });
+const INTERNAL_MEDIA_URL_PREFIX = "https://media.invalid/assets/";
+const STAGED_LISTING_MARKER = `/${LISTING_PRIVATE_PREFIX}/`;
+const PRIVATE_LISTING_KEY = /^([^/]+)\/wp-content\/private\/listings\/([^/]+)\/([^/]+)\/([^/]+)$/;
+const PUBLIC_LISTING_KEY = /^([^/]+)\/wp-content\/uploads\/(\d{4})\/(\d{2})\/listings\/([^/]+)\/([^/]+)\/([^/]+)$/;
 
 function clone(value) {
   if (value === undefined) return undefined;
@@ -39,6 +47,48 @@ function requiredText(value, label, max = 240) {
   const text = String(value ?? "").trim();
   if (!text || text.length > max) throw new Error(`${label} is required and must be ${max} characters or fewer`);
   return text;
+}
+
+function isStagedStorageKey(value) {
+  return String(value || "").includes(STAGED_LISTING_MARKER);
+}
+
+function internalMediaUrl(assetId) {
+  return `${INTERNAL_MEDIA_URL_PREFIX}${encodeURIComponent(String(assetId || "asset"))}`;
+}
+
+function scopedStorageParts(key) {
+  const value = String(key || "");
+  const privateMatch = value.match(PRIVATE_LISTING_KEY);
+  if (privateMatch) {
+    return { visibility: "staged_private", host: privateMatch[1], listingId: privateMatch[2], assetId: privateMatch[3], name: privateMatch[4] };
+  }
+  const publicMatch = value.match(PUBLIC_LISTING_KEY);
+  if (publicMatch) {
+    return {
+      visibility: "public",
+      host: publicMatch[1],
+      year: publicMatch[2],
+      month: publicMatch[3],
+      listingId: publicMatch[4],
+      assetId: publicMatch[5],
+      name: publicMatch[6],
+    };
+  }
+  return null;
+}
+
+function storageKeyForVisibility(key, visibility, at = new Date()) {
+  const parts = scopedStorageParts(key);
+  if (!parts) return null;
+  if (parts.visibility === visibility) return String(key);
+  if (visibility === "staged_private") {
+    return `${parts.host}/${LISTING_PRIVATE_PREFIX}/${parts.listingId}/${parts.assetId}/${parts.name}`;
+  }
+  const stamp = at instanceof Date && !Number.isNaN(at.valueOf()) ? at : new Date();
+  const year = String(stamp.getUTCFullYear());
+  const month = String(stamp.getUTCMonth() + 1).padStart(2, "0");
+  return `${parts.host}/wp-content/uploads/${year}/${month}/listings/${parts.listingId}/${parts.assetId}/${parts.name}`;
 }
 
 export class MediaDurableStoreUnavailableError extends Error {
@@ -207,16 +257,23 @@ function uploadData(record) {
     throw new Error("Only listing media can use the durable media authority");
   }
   if (!LISTING_ID.test(String(record.subject_id || ""))) throw new Error("Known listingId is required");
-  const assetUrl = requiredText(record.asset_url, "Listing media asset URL", 1000);
   const assetId = scopedAssetId(record);
+  const storageKey = requiredText(record.storage_key, "Media storage key", 512);
+  const staged = isStagedStorageKey(storageKey);
+  const assetUrl = String(record.asset_url || "").trim() || null;
+  if (staged && assetUrl) throw new Error("Staged listing media must not carry a public URL");
+  if (!staged && !assetUrl) throw new Error("Listing media asset URL is required for a non-staged upload");
   return {
     asset_id: assetId,
     upload_id: requiredText(record.id, "Media upload id", 200),
     subject_type: "listing",
     subject_id: String(record.subject_id),
-    source_url: assetUrl,
-    url: assetUrl,
-    asset_url: assetUrl,
+    // Payload keeps `url` required and unique for legacy imports. New staged
+    // uploads use a reserved non-public placeholder until review promotion;
+    // the safe projections below never expose it or the storage key.
+    source_url: staged ? null : assetUrl,
+    url: staged ? internalMediaUrl(assetId) : assetUrl,
+    asset_url: staged ? null : assetUrl,
     alt: "",
     width: record.width ?? null,
     height: record.height ?? null,
@@ -224,7 +281,7 @@ function uploadData(record) {
     is_public: false,
     review_status: DURABLE_REVIEW_STATUSES.pending,
     storage_driver: requiredText(record.storage_driver, "Media storage driver", 40),
-    storage_key: requiredText(record.storage_key, "Media storage key", 512),
+    storage_key: storageKey,
     rendition: storageRendition(record),
     content_hash: requiredText(record.content_hash, "Media content hash", 128),
     format: record.format || null,
@@ -339,6 +396,20 @@ function cleanupKeysForRecord(record) {
   return [record?.storage_key, record?.rendition?.storage_key].map((key) => String(key || "").trim()).filter(Boolean);
 }
 
+function listingScopedStorageKey(key) {
+  const value = String(key || "");
+  return isStagedStorageKey(value) || /\/wp-content\/uploads\/\d{4}\/\d{2}\/listings\/[^/]+\/[^/]+\//.test(value);
+}
+
+function safeCompensationKeys(record) {
+  return cleanupKeysForRecord(record).filter(listingScopedStorageKey);
+}
+
+function unreferencedKeys(incoming, committed) {
+  const retained = new Set(cleanupKeysForRecord(committed));
+  return cleanupKeysForRecord(incoming).filter((key) => !retained.has(key));
+}
+
 async function cleanupStoredObjects(storage, keys) {
   if (!keys.length) return "not_needed";
   if (!storage || typeof storage.delete !== "function") return "unsupported";
@@ -348,6 +419,12 @@ async function cleanupStoredObjects(storage, keys) {
   } catch {
     return "failed";
   }
+}
+
+async function cleanupSafeRecord(storage, record) {
+  const keys = safeCompensationKeys(record);
+  if (keys.length) return cleanupStoredObjects(storage, keys);
+  return cleanupKeysForRecord(record).length ? "unknown" : "not_needed";
 }
 
 function persistenceFailure(error, cleanup) {
@@ -456,7 +533,7 @@ export async function persistMediaUploadDurably(
   try {
     runtime = await runtimePayload(payload, env);
   } catch (error) {
-    const cleanup = await cleanupStoredObjects(storage, cleanupKeysForRecord(record));
+    const cleanup = await cleanupSafeRecord(storage, record);
     if (error instanceof MediaDurableStoreUnavailableError) throw persistenceFailure(error, cleanup);
     throw persistenceFailure(error, cleanup);
   }
@@ -474,6 +551,16 @@ export async function persistMediaUploadDurably(
         if ((!isUniqueViolation(error) && !isRetryableTransactionFailure(error)) || attempt === 3) throw error;
       }
     }
+    if (result.idempotent) {
+      // A retry may have optimized to the same asset id while writing a new
+      // object key. Delete only keys not referenced by the committed Payload
+      // document; content-hash legacy keys can be shared by other listings.
+      const retryKeys = unreferencedKeys(record, result.document).filter(listingScopedStorageKey);
+      const cleanup = await cleanupStoredObjects(storage, retryKeys);
+      if (cleanup !== "deleted" && cleanup !== "not_needed") {
+        throw persistenceFailure(new Error("Idempotent media retry left an unreferenced object"), cleanup);
+      }
+    }
     return {
       ...uploadRecordFromDocument(result.document, durableRecord),
       idempotent: result.idempotent,
@@ -481,7 +568,24 @@ export async function persistMediaUploadDurably(
     };
   } catch (error) {
     if (error instanceof MediaPersistenceError) throw error;
-    const cleanup = await cleanupStoredObjects(storage, cleanupKeysForRecord(record));
+    let cleanupKeys = safeCompensationKeys(record);
+    let ownershipChecked = false;
+    try {
+      const committed = await findMediaDocument(runtime, { assetId: data.asset_id, listingId: record.subject_id });
+      ownershipChecked = true;
+      cleanupKeys = committed ? unreferencedKeys(record, committed).filter(listingScopedStorageKey) : cleanupKeys;
+    } catch {
+      // Do not delete an object when the ownership check itself is unavailable.
+      // The caller receives an explicit reconciliation state instead.
+      cleanupKeys = [];
+    }
+    const cleanup = cleanupKeys.length
+      ? await cleanupStoredObjects(storage, cleanupKeys)
+      : ownershipChecked
+        ? "not_needed"
+        : cleanupKeysForRecord(record).length
+          ? "unknown"
+          : "not_needed";
     if (error.status === 404 || error.code === "unknown_listing") {
       const wrapped = persistenceFailure(error, cleanup);
       wrapped.status = 404;
@@ -499,9 +603,12 @@ export async function persistMediaUploadDurably(
 // still omitting storage keys and rendition internals.
 function durableMediaUploadProjection(document) {
   const row = uploadRecordFromDocument(document);
+  const staged = isStagedStorageKey(document.storage_key) && document.is_public !== true;
   return {
     ...publicMediaUpload(row),
-    source_url: document.source_url || document.asset_url || document.url || null,
+    source_url: staged ? null : document.source_url || document.asset_url || document.url || null,
+    asset_url: staged ? null : document.asset_url || null,
+    media_storage_state: staged ? "staged_private" : document.is_public === true ? "public" : "legacy_public_pending",
     is_public: document.is_public === true,
     review_status: row.review_status,
     replacement_asset_id: document.replacement_asset_id || null,
@@ -559,7 +666,86 @@ function reviewEvent(review, id) {
   };
 }
 
-function reviewData(review, existing, history, id) {
+function storageTransitionDescriptor(asset, listingId, targetVisibility) {
+  const sourceKey = String(asset?.storage_key || "");
+  const source = scopedStorageParts(sourceKey);
+  if (!source || source.visibility === targetVisibility) return null;
+  if (source.listingId !== String(listingId)) {
+    throw new MediaPersistenceError("Media storage key does not belong to the reviewed listing", {
+      storageCleanup: "not_needed",
+      orphanedStorage: false,
+    });
+  }
+  const at = new Date(asset.uploaded_at || Date.now());
+  const targetKey = storageKeyForVisibility(sourceKey, targetVisibility, at);
+  const objects = [{
+    sourceKey,
+    targetKey,
+    contentType: asset.content_type || "application/octet-stream",
+  }];
+  let rendition = null;
+  if (asset.rendition?.storage_key) {
+    const renditionKey = storageKeyForVisibility(asset.rendition.storage_key, targetVisibility, at);
+    if (!renditionKey) {
+      throw new MediaPersistenceError("Media rendition storage key is not listing-scoped", {
+        storageCleanup: "not_needed",
+        orphanedStorage: false,
+      });
+    }
+    rendition = { ...asset.rendition, storage_key: renditionKey };
+    objects.push({
+      sourceKey: asset.rendition.storage_key,
+      targetKey: renditionKey,
+      contentType: asset.rendition.content_type || "application/octet-stream",
+    });
+  }
+  return {
+    assetId: assetIdForDocument(asset),
+    targetVisibility,
+    targetKey,
+    targetUrl: targetVisibility === "public" ? mediaUploadPublicUrl(targetKey) : null,
+    rendition,
+    objects,
+  };
+}
+
+async function prepareStorageTransition(asset, listingId, targetVisibility, storage) {
+  const transition = storageTransitionDescriptor(asset, listingId, targetVisibility);
+  if (!transition) return null;
+  if (!storage || typeof storage.read !== "function" || typeof storage.put !== "function") {
+    throw new MediaPersistenceError("Media visibility changes require a storage driver that can read and write bytes", {
+      storageCleanup: "unsupported",
+      orphanedStorage: false,
+    });
+  }
+  try {
+    for (const object of transition.objects) {
+      const sourceBytes = Buffer.from(await storage.read(object.sourceKey));
+      let targetBytes = null;
+      try {
+        targetBytes = Buffer.from(await storage.read(object.targetKey));
+      } catch (error) {
+        if (error?.code !== "not_found") throw error;
+      }
+      if (targetBytes) {
+        if (!targetBytes.equals(sourceBytes)) {
+          throw new MediaPersistenceError("Media visibility destination already contains different bytes", {
+            storageCleanup: "not_needed",
+            orphanedStorage: false,
+          });
+        }
+        continue;
+      }
+      await storage.put({ key: object.targetKey, bytes: sourceBytes, contentType: object.contentType });
+    }
+    return transition;
+  } catch (error) {
+    error.mediaTransition = transition;
+    throw error;
+  }
+}
+
+function reviewData(review, existing, history, id, { transition = null } = {}) {
   const decision = String(review.decision || "").trim();
   const isPublic = decision === "publish";
   const payloadStatus = DURABLE_REVIEW_STATUSES[decision];
@@ -567,12 +753,23 @@ function reviewData(review, existing, history, id) {
   if (isPublic && !String(review.alt || "").trim()) {
     throw new Error("Published media requires reviewed alt text or an accessibility caption");
   }
-  const publicUrl = review.public_url || existing.asset_url || existing.url || null;
-  const event = reviewEvent(review, id);
+  const privateAfterReview = transition?.targetVisibility === "staged_private" || isStagedStorageKey(existing.storage_key);
+  const publicUrl = isPublic
+    ? review.public_url || transition?.targetUrl || existing.asset_url || (privateAfterReview ? null : existing.url) || null
+    : null;
+  if (isPublic && !publicUrl) throw new Error("Published staged media requires a promoted public asset");
+  const storageKey = transition?.targetKey || existing.storage_key;
+  const event = reviewEvent({
+    ...review,
+    source_url: isPublic ? publicUrl : null,
+    public_url: publicUrl,
+    is_public: isPublic,
+    review_status: review.review_status,
+  }, id);
   return {
-    source_url: existing.source_url || existing.asset_url || existing.url || null,
-    asset_url: publicUrl,
-    url: existing.url || publicUrl,
+    source_url: isPublic ? publicUrl : privateAfterReview ? null : existing.source_url || existing.asset_url || existing.url || null,
+    asset_url: isPublic ? publicUrl : null,
+    url: isPublic ? publicUrl : privateAfterReview ? internalMediaUrl(assetIdForDocument(existing)) : existing.url,
     alt: review.alt || "",
     kind: review.kind,
     is_public: isPublic,
@@ -582,6 +779,8 @@ function reviewData(review, existing, history, id) {
     review_decision: decision,
     human_confirmed: true,
     review_history: [...history, event],
+    storage_key: storageKey,
+    ...(transition?.rendition ? { rendition: transition.rendition } : {}),
   };
 }
 
@@ -594,102 +793,216 @@ function reviewOutput(review, id, idempotent) {
   };
 }
 
-async function reviewTransaction(runtime, review, principal) {
-  return withPayloadTransaction(
-    runtime,
-    { principal, accessMode: "read write", isolationLevel: "serializable" },
-    async (req) => {
-      const listing = await findListing(runtime, review.listing_id, req);
-      if (!listing) {
-        const error = new Error("Known listingId is required");
-        error.status = 404;
-        error.code = "listing_draft_not_found";
-        throw error;
-      }
-      const refs = new Set(relationIds(listing.media));
-      const asset = await findMediaDocument(runtime, { assetId: review.asset_id, listingId: review.listing_id, req });
-      if (!asset || !refs.has(relationId(asset.id))) {
-        const error = new Error("Known media assetId is required");
-        error.status = 404;
-        error.code = "unknown_media_asset";
-        throw error;
-      }
-
-      const history = Array.isArray(asset.review_history) ? asset.review_history : [];
-      const id = reviewIdFor(review);
-      const sameId = history.find((entry) => String(entry.id || "") === id);
-      if (sameId) {
-        if (!reviewIntent(sameId, review)) throw new MediaReviewConflictError();
-        return { review: reviewOutput(review, id, true), idempotent: true };
-      }
-      const retry = history.find((entry) => reviewIntent(entry, review));
-      if (retry) return { review: reviewOutput({ ...review, ...retry }, retry.id, true), idempotent: true };
-
-      const childData = reviewData(review, asset, history, id);
-      await runtime.update({
-        collection: MEDIA_ASSET_COLLECTION,
-        id: asset.id,
-        depth: 0,
-        draft: true,
-        overrideAccess: true,
-        req,
-        data: childData,
-        context: operatorContext(principal),
-      });
-
-      // A replacement becomes visible as one operation: the reviewed child is
-      // public, while its former sibling is retained for provenance but marked
-      // private. Keeping both documents makes reloads and audit queries
-      // deterministic without ever deleting the source asset.
-      if (review.is_public && asset.replaces_asset_id) {
-        const original = await findMediaDocument(runtime, {
-          assetId: asset.replaces_asset_id,
-          listingId: review.listing_id,
-          req,
-        });
-        if (!original || !refs.has(relationId(original.id))) {
-          const error = new Error("Replacement source media asset is unavailable");
-          error.status = 409;
-          error.code = "replacement_source_unavailable";
+async function reviewTransaction(runtime, review, principal, { storage } = {}) {
+  const transitions = [];
+  const prepareTransition = async (asset, visibility) => {
+    try {
+      const transition = await prepareStorageTransition(asset, review.listing_id, visibility, storage);
+      if (transition) transitions.push(transition);
+      return transition;
+    } catch (error) {
+      if (error.mediaTransition) transitions.push(error.mediaTransition);
+      throw error;
+    }
+  };
+  try {
+    return await withPayloadTransaction(
+      runtime,
+      { principal, accessMode: "read write", isolationLevel: "serializable" },
+      async (req) => {
+        const listing = await findListing(runtime, review.listing_id, req);
+        if (!listing) {
+          const error = new Error("Known listingId is required");
+          error.status = 404;
+          error.code = "listing_draft_not_found";
           throw error;
         }
-        const originalHistory = Array.isArray(original.review_history) ? original.review_history : [];
-        await runtime.update({
+        const refs = new Set(relationIds(listing.media));
+        const asset = await findMediaDocument(runtime, { assetId: review.asset_id, listingId: review.listing_id, req });
+        if (!asset || !refs.has(relationId(asset.id))) {
+          const error = new Error("Known media assetId is required");
+          error.status = 404;
+          error.code = "unknown_media_asset";
+          throw error;
+        }
+
+        const history = Array.isArray(asset.review_history) ? asset.review_history : [];
+        const id = reviewIdFor(review);
+        const sameId = history.find((entry) => String(entry.id || "") === id);
+        const retry = sameId || history.find((entry) => reviewIntent(entry, review));
+        if (retry) {
+          if (!reviewIntent(retry, review)) throw new MediaReviewConflictError();
+          if (String(history[history.length - 1]?.id || "") !== String(retry.id || "")) {
+            throw new MediaReviewConflictError("Media review was superseded by a later decision");
+          }
+          const replacementSource = review.decision === "publish" && asset.replaces_asset_id
+            ? await findMediaDocument(runtime, { assetId: asset.replaces_asset_id, listingId: review.listing_id, req })
+            : null;
+          return {
+            review: reviewOutput({ ...review, ...retry }, retry.id, true),
+            idempotent: true,
+            asset,
+            replacementSource,
+          };
+        }
+
+        if (review.decision === "publish" && isStagedStorageKey(asset.storage_key) && review.public_url) {
+          throw new Error("Staged listing media cannot publish from an external URL");
+        }
+        const childTransition = await prepareTransition(asset, review.decision === "publish" ? "public" : "staged_private");
+        let original = null;
+        let originalTransition = null;
+        if (review.decision === "publish" && asset.replaces_asset_id) {
+          original = await findMediaDocument(runtime, {
+            assetId: asset.replaces_asset_id,
+            listingId: review.listing_id,
+            req,
+          });
+          if (!original || !refs.has(relationId(original.id))) {
+            const error = new Error("Replacement source media asset is unavailable");
+            error.status = 409;
+            error.code = "replacement_source_unavailable";
+            throw error;
+          }
+          originalTransition = await prepareTransition(original, "staged_private");
+        }
+
+        const childData = reviewData(review, asset, history, id, { transition: childTransition });
+        const updatedAsset = await runtime.update({
           collection: MEDIA_ASSET_COLLECTION,
-          id: original.id,
+          id: asset.id,
           depth: 0,
           draft: true,
           overrideAccess: true,
           req,
-          data: {
-            is_public: false,
-            review_status: DURABLE_REVIEW_STATUSES.keep_private,
-            replacement_asset_id: review.asset_id,
-            reviewer: review.reviewer,
-            reviewed_at: review.reviewed_at,
-            review_decision: "keep_private",
-            human_confirmed: true,
-            review_history: [
-              ...originalHistory,
-              {
-                ...reviewEvent(review, id),
-                id: `${id}:replacement-source`,
-                asset_id: asset.replaces_asset_id,
-                replacement_asset_id: review.asset_id,
-              },
-            ],
-          },
+          data: childData,
           context: operatorContext(principal),
         });
-      }
-      return { review: reviewOutput(review, id, false), idempotent: false };
-    },
-  );
+
+        // A replacement becomes visible as one operation: the reviewed child is
+        // public, while its former sibling is retained for provenance but marked
+        // private. Keeping both documents makes reloads and audit queries
+        // deterministic without ever deleting the source asset.
+        let updatedOriginal = null;
+        if (original) {
+          const originalHistory = Array.isArray(original.review_history) ? original.review_history : [];
+          const privateAfterReview = originalTransition?.targetVisibility === "staged_private" || isStagedStorageKey(original.storage_key);
+          const originalEvent = reviewEvent({
+            ...review,
+            asset_id: asset.replaces_asset_id,
+            source_url: null,
+            replacement_url: childData.asset_url,
+            public_url: null,
+            decision: "keep_private",
+            is_public: false,
+            review_status: DURABLE_REVIEW_STATUSES.keep_private,
+          }, `${id}:replacement-source`);
+          updatedOriginal = await runtime.update({
+            collection: MEDIA_ASSET_COLLECTION,
+            id: original.id,
+            depth: 0,
+            draft: true,
+            overrideAccess: true,
+            req,
+            data: {
+              is_public: false,
+              asset_url: null,
+              source_url: privateAfterReview ? null : original.source_url || null,
+              url: privateAfterReview ? internalMediaUrl(assetIdForDocument(original)) : original.url,
+              storage_key: originalTransition?.targetKey || original.storage_key,
+              ...(originalTransition?.rendition ? { rendition: originalTransition.rendition } : {}),
+              review_status: DURABLE_REVIEW_STATUSES.keep_private,
+              replacement_asset_id: review.asset_id,
+              reviewer: review.reviewer,
+              reviewed_at: review.reviewed_at,
+              review_decision: "keep_private",
+              human_confirmed: true,
+              review_history: [
+                ...originalHistory,
+                {
+                  ...originalEvent,
+                  replacement_asset_id: review.asset_id,
+                },
+              ],
+            },
+            context: operatorContext(principal),
+          });
+        }
+        const output = {
+          ...review,
+          public_url: childData.asset_url || null,
+          source_url: childData.source_url || null,
+          is_public: childData.is_public === true,
+          review_status: review.review_status,
+        };
+        return {
+          review: reviewOutput(output, id, false),
+          idempotent: false,
+          asset: updatedAsset || { ...asset, ...childData },
+          replacementSource: updatedOriginal,
+        };
+      },
+    );
+  } catch (error) {
+    if (transitions.length) error.mediaTransitions = transitions;
+    throw error;
+  }
+}
+
+async function compensateReviewTransitions(runtime, review, transitions, storage) {
+  for (const transition of transitions || []) {
+    let committed;
+    try {
+      committed = await findMediaDocument(runtime, { assetId: transition.assetId, listingId: review.listing_id });
+    } catch (error) {
+      throw persistenceFailure(error, "unknown");
+    }
+    const retained = new Set(cleanupKeysForRecord(committed));
+    const keys = transition.objects
+      .map((object) => object.targetKey)
+      .filter(listingScopedStorageKey)
+      .filter((key) => !retained.has(key));
+    const cleanup = await cleanupStoredObjects(storage, keys);
+    if (cleanup !== "deleted" && cleanup !== "not_needed") {
+      throw persistenceFailure(new Error("Media visibility change could not be compensated"), cleanup);
+    }
+  }
+}
+
+function staleVisibilityKeys(document, visibility) {
+  if (!document) return [];
+  const current = scopedStorageParts(document.storage_key);
+  if (!current || current.visibility !== visibility) return [];
+  const staleVisibility = visibility === "public" ? "staged_private" : "public";
+  const at = new Date(document.uploaded_at || Date.now());
+  return [
+    storageKeyForVisibility(document.storage_key, staleVisibility, at),
+    document.rendition?.storage_key ? storageKeyForVisibility(document.rendition.storage_key, staleVisibility, at) : null,
+  ].filter(Boolean);
+}
+
+async function reconcileReviewStorage(storage, review, result) {
+  const retained = new Set([
+    ...cleanupKeysForRecord(result.asset),
+    ...cleanupKeysForRecord(result.replacementSource),
+  ]);
+  const visibility = review.decision === "publish" ? "public" : "staged_private";
+  const keys = [
+    ...staleVisibilityKeys(result.asset, visibility),
+    ...staleVisibilityKeys(result.replacementSource, "staged_private"),
+  ].filter(listingScopedStorageKey).filter((key) => !retained.has(key));
+  const cleanup = await cleanupStoredObjects(storage, [...new Set(keys)]);
+  if (cleanup !== "deleted" && cleanup !== "not_needed") {
+    throw new MediaPersistenceError("Media review committed, but superseded bytes require storage reconciliation", {
+      storageCleanup: cleanup,
+      orphanedStorage: true,
+    });
+  }
 }
 
 export async function persistMediaReviewDurably(
   review,
-  { payload = null, env = process.env, principal } = {},
+  { payload = null, env = process.env, principal, storage = null } = {},
 ) {
   const actor = assertPrincipal(principal);
   const boundReview = bindActor(review, actor, "reviewer");
@@ -699,11 +1012,16 @@ export async function persistMediaReviewDurably(
   const runtime = await runtimePayload(payload, env);
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      const result = await reviewTransaction(runtime, boundReview, actor);
+      const result = await reviewTransaction(runtime, boundReview, actor, { storage });
+      await reconcileReviewStorage(storage, boundReview, result);
       return result.review;
     } catch (error) {
+      if (error.mediaTransitions) {
+        await compensateReviewTransitions(runtime, boundReview, error.mediaTransitions, storage);
+      }
       if (error instanceof MediaReviewConflictError || error.status) throw error;
       if ((isUniqueViolation(error) || isRetryableTransactionFailure(error)) && attempt < 3) continue;
+      if (error instanceof MediaPersistenceError) throw error;
       throw new MediaDurableStoreUnavailableError("Durable Payload media review could not be committed", error);
     }
   }
@@ -786,6 +1104,7 @@ export async function readMediaUploadBytesDurably({ payload = null, env = proces
 
 export function durableMediaDocumentProjection(document = {}) {
   const assetId = assetIdForDocument(document);
+  const staged = isStagedStorageKey(document.storage_key);
   const payloadStatus = String(document.review_status || "").trim();
   const reviewDecision = String(document.review_decision || "").trim();
   const reviewStatus = document.replacement_asset_id
@@ -799,15 +1118,16 @@ export function durableMediaDocumentProjection(document = {}) {
     id: document.id,
     asset_id: assetId,
     upload_id: document.upload_id || null,
-    url: document.url,
-    source_url: document.source_url || document.url || null,
-    asset_url: document.asset_url ?? null,
+    url: staged && !document.is_public ? null : document.url,
+    source_url: staged && !document.is_public ? null : document.source_url || document.url || null,
+    asset_url: staged && !document.is_public ? null : document.asset_url ?? null,
     alt: document.alt || "",
     width: document.width ?? null,
     height: document.height ?? null,
     kind: document.kind,
     is_public: document.is_public === true,
     review_status: reviewStatus,
+    media_storage_state: staged && !document.is_public ? "staged_private" : document.is_public === true ? "public" : "legacy_public_pending",
     replaces_asset_id: document.replaces_asset_id || null,
     replacement_asset_id: document.replacement_asset_id || null,
     uploaded_at: document.uploaded_at || null,

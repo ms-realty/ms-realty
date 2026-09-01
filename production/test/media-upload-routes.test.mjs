@@ -283,6 +283,8 @@ test("durable-only admin media uploads persist to Payload, never touch the JSONL
     assert.equal(created.status, 201, JSON.stringify(created.body));
     assert.equal(created.body.kind, "media_upload_accepted");
     assert.equal(created.body.uploaded[0].review_status, "needs_media_review");
+    assert.equal(created.body.uploaded[0].asset_url, null);
+    assert.equal(created.body.uploaded[0].media_storage_state, "staged_private");
     assert.equal(readMediaUploads(context.mediaUploadLedgerPath).length, 0, "durable media must not fall back to JSONL");
 
     const createdRows = runtime.currentRows();
@@ -318,6 +320,7 @@ test("durable-only admin media uploads persist to Payload, never touch the JSONL
     });
     assert.equal(review.status, 201, JSON.stringify(review.body));
     assert.equal(review.body.is_public, true);
+    assert.match(review.body.public_url, /^https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/wp-content\/uploads\/\d{4}\/\d{2}\/listings\//);
 
     const reviewedRows = runtime.currentRows();
     const reviewedDoc = reviewedRows.media_assets.find((row) => row.upload_id === created.body.uploaded[0].id);
@@ -325,10 +328,11 @@ test("durable-only admin media uploads persist to Payload, never touch the JSONL
     assert.equal(reviewedDoc.human_confirmed, true);
     assert.equal(reviewedDoc.is_public, true);
     assert.equal(reviewedDoc.review_history.length, 1);
+    assert.equal(reviewedDoc.asset_url, review.body.public_url);
 
     const published = await dispatchHttp(context.app, { url: LISTING_PATH });
     assert.equal(published.status, 200);
-    const publishedAsset = published.body.body.media.gallery.find((item) => item.url === created.body.uploaded[0].asset_url);
+    const publishedAsset = published.body.body.media.gallery.find((item) => item.url === review.body.public_url);
     assert.ok(publishedAsset, "the reviewed durable upload must reach the public listing payload");
     assert.equal(publishedAsset.alt, "Kitchen photographed during the broker visit");
   } finally {

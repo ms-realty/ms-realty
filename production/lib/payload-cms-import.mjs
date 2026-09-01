@@ -647,6 +647,8 @@ function projectedTranslation(document, snapshot) {
 
 function projectedMedia(document) {
   const assetId = mediaAssetIdForDocument(document);
+  const staged = String(document.storage_key || "").includes("/wp-content/private/listings/");
+  const publicAsset = document.is_public === true && Boolean(document.asset_url);
   const reviewStatus = document.replacement_asset_id
     ? "replaced_by_human"
     : String(document.review_decision || "").trim() === "publish"
@@ -657,15 +659,16 @@ function projectedMedia(document) {
   return {
     id: document.id,
     asset_id: assetId,
-    url: document.url,
-    source_url: document.source_url || document.url || null,
-    asset_url: document.asset_url ?? null,
+    url: staged && !publicAsset ? null : document.url,
+    source_url: staged && !publicAsset ? null : document.source_url || document.url || null,
+    asset_url: staged && !publicAsset ? null : document.asset_url ?? null,
     alt: document.alt || "",
     width: document.width ?? null,
     height: document.height ?? null,
     kind: document.kind,
     is_public: document.is_public === true,
     review_status: reviewStatus,
+    media_storage_state: staged && !publicAsset ? "staged_private" : publicAsset ? "public" : "legacy_public_pending",
     replaces_asset_id: document.replaces_asset_id || null,
     replacement_asset_id: document.replacement_asset_id || null,
     upload_id: document.upload_id || null,

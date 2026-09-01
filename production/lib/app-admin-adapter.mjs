@@ -2718,12 +2718,14 @@ function persistEditorChange(result, config) {
 
 async function appendMediaReviewEntry(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
-  const review = createMediaReview(await currentMediaSeed(config), attributed, config.reviewedAt);
+  const review = createMediaReview(await currentMediaSeed(config), attributed, config.reviewedAt, { allowStaged: durableMedia(config) });
   const persisted = durableMedia(config)
     ? await persistMediaReviewDurably(review, {
         payload: config.payloadListingRuntime || null,
         env: config.payloadListingEnv || config.authEnv || process.env,
         principal: config.adminPrincipal,
+        storage: config.mediaUploadStorage || createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv()),
+        mediaUploadHost: config.mediaUploadStorageConfig?.host,
       })
     : appendMediaReview(review, { filePath: config.mediaReviewLedgerPath });
   if (!persisted.idempotent) {
@@ -5453,7 +5455,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     // B4 media upload
     if (url.pathname === ADMIN_MEDIA_UPLOAD_PATH || url.pathname.startsWith(`${ADMIN_MEDIA_UPLOAD_PATH}/`)) {
       const uploadLimits = config.mediaUploadLimits || mediaUploadLimitsFromEnv();
-      const uploadStorage = createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+      const uploadStorage = config.mediaUploadStorage || createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
       if (request.method === "GET" && url.pathname === ADMIN_MEDIA_UPLOAD_PATH) {
         const listed = durableMedia(config)
           ? await listMediaUploadsDurably({
@@ -5518,6 +5520,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               storage,
             })
           : null,
+        storageVisibility: durableMedia(config) ? "staged_private" : "public",
         editorPathFor: listingEditorPath,
       });
       if (uploaded.status === 303) {

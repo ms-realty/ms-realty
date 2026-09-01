@@ -68,9 +68,10 @@ function runtimeHarness(seed = focusedSeed(), hooks = {}) {
   return harness;
 }
 
-function storageHarness({ deleteSupported = true } = {}) {
+function storageHarness({ deleteSupported = true, failDeleteTimes = 0 } = {}) {
   const objects = new Map();
   const deleted = [];
+  let remainingDeleteFailures = failDeleteTimes;
   const storage = {
     driver: "local",
     async put({ key, bytes }) {
@@ -89,6 +90,10 @@ function storageHarness({ deleteSupported = true } = {}) {
   };
   if (deleteSupported) {
     storage.delete = async (key) => {
+      if (remainingDeleteFailures > 0) {
+        remainingDeleteFailures -= 1;
+        throw new Error("temporary storage delete failure");
+      }
       deleted.push(key);
       objects.delete(key);
       return { key, driver: "local", deleted: true };
@@ -97,13 +102,19 @@ function storageHarness({ deleteSupported = true } = {}) {
   return { storage, objects, deleted };
 }
 
-function uploadRecord(label, { replacesAssetId = null, subjectId = LISTING_ID } = {}) {
+function uploadRecord(label, { replacesAssetId = null, subjectId = LISTING_ID, visibility = "staged_private", withRendition = false } = {}) {
   const contentHash = crypto.createHash("sha256").update(label).digest("hex");
   const objectName = `ms-${contentHash.slice(0, 32)}.jpg`;
-  const storageKey = `${MEDIA_HOST}/wp-content/uploads/2026/09/${objectName}`;
+  const sourceAssetId = `media-${crypto.createHash("sha256").update(replacesAssetId ? `${contentHash}:${replacesAssetId}` : contentHash).digest("hex").slice(0, 20)}`;
+  const storageKey = visibility === "staged_private"
+    ? `${MEDIA_HOST}/wp-content/private/listings/${subjectId}/${sourceAssetId}/${objectName}`
+    : visibility === "scoped_public"
+      ? `${MEDIA_HOST}/wp-content/uploads/2026/09/listings/${subjectId}/${sourceAssetId}/${objectName}`
+      : `${MEDIA_HOST}/wp-content/uploads/2026/09/${objectName}`;
+  const renditionKey = storageKey.replace(/\.jpg$/, "-thumb.webp");
   return {
     id: `media-upload-${label}`,
-    asset_id: `media-${contentHash.slice(0, 20)}`,
+    asset_id: sourceAssetId,
     subject_type: "listing",
     subject_id: subjectId,
     kind: "photo",
@@ -125,9 +136,19 @@ function uploadRecord(label, { replacesAssetId = null, subjectId = LISTING_ID } 
     source: "admin_listing_editor",
     storage_driver: "local",
     storage_key: storageKey,
-    asset_url: `https://${storageKey}`,
+    asset_url: visibility === "staged_private" ? null : `https://${storageKey}`,
     content_hash: contentHash,
-    rendition: null,
+    rendition: withRendition
+      ? {
+          kind: "thumb",
+          storage_key: renditionKey,
+          content_type: "image/webp",
+          format: "webp",
+          bytes: 64,
+          width: 320,
+          height: 240,
+        }
+      : null,
     replaces_asset_id: replacesAssetId,
   };
 }
@@ -224,6 +245,7 @@ test("durable listing uploads commit Payload metadata, attach atomically, and re
   assert.equal(persisted.review_status, "review_required");
   assert.equal(persisted.is_public, false);
   assert.equal(persisted.storage_key, record.storage_key);
+  assert.equal(persisted.asset_url, null);
   assert.equal(
     harness.currentRows().listings.find((row) => row.id === LISTING_ID).media.some((id) => String(id) === String(persisted.id)),
     true,
@@ -234,6 +256,8 @@ test("durable listing uploads commit Payload metadata, attach atomically, and re
   assert.ok(exposed);
   assert.equal(exposed.is_public, false);
   assert.equal(exposed.review_status, "needs_media_review");
+  assert.equal(exposed.asset_url, null);
+  assert.equal(exposed.media_storage_state, "staged_private");
   assert.equal(Object.hasOwn(exposed, "storage_key"), false);
   assert.equal(Object.hasOwn(exposed, "rendition"), false);
 
@@ -254,12 +278,13 @@ test("durable listing uploads commit Payload metadata, attach atomically, and re
   assert.equal(Object.hasOwn(projectedAsset, "storage_key"), false);
 });
 
-test("durable media review requires a human caption, persists publication, and is idempotent", async () => {
+test("durable media review promotes private bytes and rendition, persists publication, and is idempotent", async () => {
   const seed = focusedSeed();
   const harness = runtimeHarness(seed);
   const { storage, objects } = storageHarness();
-  const record = uploadRecord("review-source");
+  const record = uploadRecord("review-source", { withRendition: true });
   objects.set(record.storage_key, Buffer.from("review-media-bytes"));
+  objects.set(record.rendition.storage_key, Buffer.from("review-thumb"));
   const upload = await persistMediaUploadDurably(record, { payload: harness.payload, principal: EDITOR, storage });
   const projected = await reload(seed, harness);
 
@@ -273,9 +298,14 @@ test("durable media review requires a human caption, persists publication, and i
   assert.throws(() => createMediaReview(projected, { ...base, alt: "Reviewed room" }), /explicit human confirmation/);
   assert.throws(() => createMediaReview(projected, { ...base, alt: "", reviewConfirmed: true }), /requires reviewed alt text/);
 
-  const review = createMediaReview(projected, { ...base, alt: "Reviewed room", reviewConfirmed: true }, "2026-09-01T10:05:00.000Z");
-  const saved = await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR });
-  const retry = await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR });
+  const review = createMediaReview(
+    projected,
+    { ...base, alt: "Reviewed room", reviewConfirmed: true },
+    "2026-09-01T10:05:00.000Z",
+    { allowStaged: true },
+  );
+  const saved = await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR, storage });
+  const retry = await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR, storage });
   const persisted = rawMedia(harness, upload.asset_id);
   assert.equal(saved.idempotent, false);
   assert.equal(retry.idempotent, true);
@@ -284,6 +314,11 @@ test("durable media review requires a human caption, persists publication, and i
   assert.equal(persisted.review_decision, "publish");
   assert.equal(persisted.human_confirmed, true);
   assert.equal(persisted.review_history.length, 1);
+  assert.match(persisted.storage_key, /\/wp-content\/uploads\/2026\/09\/listings\/MS-CRAWL-0001\//);
+  assert.equal(objects.has(record.storage_key), false);
+  assert.equal(objects.has(record.rendition.storage_key), false);
+  assert.deepEqual(objects.get(persisted.storage_key), Buffer.from("review-media-bytes"));
+  assert.deepEqual(objects.get(persisted.rendition.storage_key), Buffer.from("review-thumb"));
 
   const reloaded = await reload(seed, harness);
   const approved = listingFor(reloaded).media.find((row) => row.asset_id === upload.asset_id);
@@ -301,21 +336,38 @@ test("durable media review requires a human caption, persists publication, and i
 test("durable replacement keeps the source private and exposes the reviewed child", async () => {
   const seed = focusedSeed();
   const harness = runtimeHarness(seed);
-  const sourceStorage = storageHarness();
+  const mediaStorage = storageHarness();
   const source = uploadRecord("replacement-source");
-  sourceStorage.objects.set(source.storage_key, Buffer.from("source"));
+  mediaStorage.objects.set(source.storage_key, Buffer.from("source"));
   const sourceUpload = await persistMediaUploadDurably(source, {
     payload: harness.payload,
     principal: EDITOR,
-    storage: sourceStorage.storage,
+    storage: mediaStorage.storage,
   });
-  const childStorage = storageHarness();
+  const sourceProjected = await reload(seed, harness);
+  const sourceReview = createMediaReview(
+    sourceProjected,
+    {
+      listingId: LISTING_ID,
+      assetId: sourceUpload.asset_id,
+      decision: "publish",
+      kind: "photo",
+      alt: "Reviewed source room",
+      reviewer: EDITOR.id,
+      reviewConfirmed: true,
+    },
+    "2026-09-01T10:08:00.000Z",
+    { allowStaged: true },
+  );
+  await persistMediaReviewDurably(sourceReview, { payload: harness.payload, principal: EDITOR, storage: mediaStorage.storage });
+  const sourcePublicKey = rawMedia(harness, sourceUpload.asset_id).storage_key;
+
   const child = uploadRecord("replacement-child", { replacesAssetId: sourceUpload.asset_id });
-  childStorage.objects.set(child.storage_key, Buffer.from("replacement"));
+  mediaStorage.objects.set(child.storage_key, Buffer.from("replacement"));
   const childUpload = await persistMediaUploadDurably(child, {
     payload: harness.payload,
     principal: EDITOR,
-    storage: childStorage.storage,
+    storage: mediaStorage.storage,
   });
 
   const projected = await reload(seed, harness);
@@ -331,14 +383,18 @@ test("durable replacement keeps the source private and exposes the reviewed chil
       reviewConfirmed: true,
     },
     "2026-09-01T10:10:00.000Z",
+    { allowStaged: true },
   );
-  await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR });
+  await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR, storage: mediaStorage.storage });
 
   const sourceDocument = rawMedia(harness, sourceUpload.asset_id);
   const childDocument = rawMedia(harness, childUpload.asset_id);
   assert.equal(sourceDocument.is_public, false);
   assert.equal(sourceDocument.review_status, "reviewed_private");
   assert.equal(sourceDocument.replacement_asset_id, childUpload.asset_id);
+  assert.match(sourceDocument.storage_key, /\/wp-content\/private\/listings\/MS-CRAWL-0001\//);
+  assert.equal(mediaStorage.objects.has(sourcePublicKey), false);
+  assert.deepEqual(mediaStorage.objects.get(sourceDocument.storage_key), Buffer.from("source"));
   assert.equal(childDocument.is_public, true);
   assert.equal(childDocument.review_status, "approved_imported_photo");
 
@@ -352,6 +408,101 @@ test("durable replacement keeps the source private and exposes the reviewed chil
   assert.equal(childView.review_status, "approved_by_human");
   assert.equal(childView.is_public, true);
   assert.equal(listingFor(reloaded).media_workflow.review_gated_assets, 0);
+});
+
+test("keep-private review physically demotes listing-scoped public bytes", async () => {
+  const seed = focusedSeed();
+  const harness = runtimeHarness(seed);
+  const { storage, objects } = storageHarness();
+  const record = uploadRecord("demotion-source");
+  objects.set(record.storage_key, Buffer.from("demotion-bytes"));
+  const upload = await persistMediaUploadDurably(record, { payload: harness.payload, principal: EDITOR, storage });
+
+  const publish = createMediaReview(
+    await reload(seed, harness),
+    {
+      listingId: LISTING_ID,
+      assetId: upload.asset_id,
+      decision: "publish",
+      kind: "photo",
+      alt: "Reviewed room",
+      reviewer: EDITOR.id,
+      reviewConfirmed: true,
+    },
+    "2026-09-01T10:12:00.000Z",
+    { allowStaged: true },
+  );
+  await persistMediaReviewDurably(publish, { payload: harness.payload, principal: EDITOR, storage });
+  const publicKey = rawMedia(harness, upload.asset_id).storage_key;
+  assert.equal(objects.has(record.storage_key), false);
+  assert.equal(objects.has(publicKey), true);
+
+  const keepPrivate = createMediaReview(
+    await reload(seed, harness),
+    {
+      listingId: LISTING_ID,
+      assetId: upload.asset_id,
+      decision: "keep_private",
+      kind: "photo",
+      alt: "Internal room photo",
+      reviewer: EDITOR.id,
+      reviewConfirmed: true,
+    },
+    "2026-09-01T10:13:00.000Z",
+  );
+  await persistMediaReviewDurably(keepPrivate, { payload: harness.payload, principal: EDITOR, storage });
+
+  const privateDocument = rawMedia(harness, upload.asset_id);
+  assert.equal(privateDocument.is_public, false);
+  assert.equal(privateDocument.review_status, "reviewed_private");
+  assert.equal(privateDocument.storage_key, record.storage_key);
+  assert.equal(privateDocument.asset_url, null);
+  assert.equal(privateDocument.source_url, null);
+  assert.match(privateDocument.url, /^https:\/\/media\.invalid\/assets\//);
+  assert.equal(objects.has(publicKey), false);
+  assert.deepEqual(objects.get(record.storage_key), Buffer.from("demotion-bytes"));
+  const projection = (await reload(seed, harness)).records.find((row) => row.id === LISTING_ID).media
+    .find((row) => row.asset_id === upload.asset_id);
+  assert.equal(projection.url, null);
+  assert.equal(projection.asset_url, null);
+  assert.equal(projection.media_storage_state, "staged_private");
+});
+
+test("retry reconciles staged bytes after a committed publish cleanup failure", async () => {
+  const seed = focusedSeed();
+  const harness = runtimeHarness(seed);
+  const { storage, objects } = storageHarness({ failDeleteTimes: 1 });
+  const record = uploadRecord("cleanup-retry");
+  objects.set(record.storage_key, Buffer.from("retry-bytes"));
+  const upload = await persistMediaUploadDurably(record, { payload: harness.payload, principal: EDITOR, storage });
+  const review = createMediaReview(
+    await reload(seed, harness),
+    {
+      listingId: LISTING_ID,
+      assetId: upload.asset_id,
+      decision: "publish",
+      kind: "photo",
+      alt: "Retry room",
+      reviewer: EDITOR.id,
+      reviewConfirmed: true,
+    },
+    "2026-09-01T10:14:00.000Z",
+    { allowStaged: true },
+  );
+
+  await assert.rejects(
+    persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR, storage }),
+    (error) => error instanceof MediaPersistenceError && error.orphanedStorage === true,
+  );
+  const committed = rawMedia(harness, upload.asset_id);
+  assert.equal(committed.is_public, true);
+  assert.equal(objects.has(committed.storage_key), true);
+  assert.equal(objects.has(record.storage_key), true);
+
+  const retry = await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR, storage });
+  assert.equal(retry.idempotent, true);
+  assert.equal(objects.has(committed.storage_key), true);
+  assert.equal(objects.has(record.storage_key), false);
 });
 
 test("durable media mutations enforce operator roles and report orphan cleanup explicitly", async () => {
@@ -509,6 +660,7 @@ test("Node and Next admin adapters read the same durable media projection and ke
       adminPrincipal: EDITOR,
       payloadListingRuntime: harness.payload,
       payloadListingEnv: LIVE_ENV,
+      mediaUploadStorage: storage.storage,
       auditLogPath: path.join(adapterDirectory, "next-audit.jsonl"),
     };
     const next = await renderAppAdminResponse(

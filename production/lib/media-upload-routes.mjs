@@ -71,6 +71,7 @@ async function storeFiles(files, options) {
     auditKey,
     replacesAssetId = null,
     persistUpload = null,
+    storageVisibility = "public",
   } = options;
   const accepted = [];
   const rejected = [];
@@ -84,6 +85,7 @@ async function storeFiles(files, options) {
         imageSettings,
         replacesAssetId,
         uploadedAt,
+        storageVisibility,
       });
       const stored = await storage.put({ key: prepared.storageKey, bytes: prepared.bytes, contentType: prepared.mime });
       // The rendition is written after the photo it belongs to. If it fails,
@@ -197,6 +199,7 @@ export async function handleAdminMediaUpload({
   uploadedAt = new Date().toISOString(),
   recordAudit = null,
   persistUpload = null,
+  storageVisibility = "public",
   editorPathFor = (id) => `/admin/listings/edit?listingId=${encodeURIComponent(id)}`,
 }) {
   let listingId = "";
@@ -229,6 +232,7 @@ export async function handleAdminMediaUpload({
       auditKey: "listing_id",
       replacesAssetId,
       persistUpload,
+      storageVisibility,
     });
 
     if (acceptsHtml) {

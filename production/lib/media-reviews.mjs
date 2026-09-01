@@ -99,7 +99,7 @@ function validatedPublicUrl(value, kind) {
   return url;
 }
 
-export function createMediaReview(seed, input, reviewedAt = new Date().toISOString()) {
+export function createMediaReview(seed, input, reviewedAt = new Date().toISOString(), { allowStaged = false } = {}) {
   const listingId = String(input.listingId || input.listing_id || "").trim();
   const record = findListing(seed, listingId);
   if (!record) throw new Error("Known listingId is required");
@@ -115,6 +115,7 @@ export function createMediaReview(seed, input, reviewedAt = new Date().toISOStri
   const kind = normalizedKind(input.kind, item.kind);
   const alt = normalizedText(input.alt || input.accessibilityCaption, "Media alt text");
   const replacementUrl = String(input.replacementUrl || input.replacement_url || "").trim();
+  const staged = item.media_storage_state === "staged_private";
   const sourceUrl = sourceAssetUrl(item);
   const deliveryUrl = assetUrl(item);
   let publicUrl = null;
@@ -123,7 +124,13 @@ export function createMediaReview(seed, input, reviewedAt = new Date().toISOStri
     if (item.kind === "site_chrome" && !replacementUrl) {
       throw new Error("Site chrome cannot be published without a reviewed replacement asset");
     }
-    publicUrl = validatedPublicUrl(replacementUrl || deliveryUrl, kind);
+    if (staged && allowStaged && !replacementUrl) {
+      // The durable media authority promotes the private object and supplies
+      // the unique public URL only after the authenticated human decision.
+      publicUrl = null;
+    } else {
+      publicUrl = validatedPublicUrl(replacementUrl || deliveryUrl, kind);
+    }
   } else if (replacementUrl) {
     if (!httpsUrl(replacementUrl)) throw new Error("Replacement media requires an HTTPS asset URL");
     publicUrl = replacementUrl;
