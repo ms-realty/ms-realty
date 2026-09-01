@@ -18,6 +18,7 @@ import { createMediaReview } from "../lib/media-reviews.mjs";
 import { projectListingDraftSeed } from "../lib/listing-draft-service.mjs";
 import { handleAdminMediaUpload } from "../lib/media-upload-routes.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
+import { fromRoot } from "../lib/paths.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 import { photoJpegWithGpsExif } from "./image-upload.fixture.mjs";
@@ -146,6 +147,60 @@ async function reload(seed, harness) {
 function rawMedia(harness, assetId) {
   return harness.currentRows().media_assets.find((row) => row.asset_id === assetId);
 }
+
+test("durable media schema and migration retain identity, storage, lineage, and review audit fields", () => {
+  const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-collections.json"), "utf8"));
+  const media = manifest.collections.find((collection) => collection.slug === "media_assets");
+  const fields = new Map(media.fields.map((field) => [field.name, field]));
+  for (const field of [
+    "asset_id",
+    "upload_id",
+    "storage_driver",
+    "storage_key",
+    "rendition",
+    "content_hash",
+    "subject_id",
+    "uploaded_by",
+    "replaces_asset_id",
+    "replacement_asset_id",
+    "reviewer",
+    "reviewed_at",
+    "review_decision",
+    "human_confirmed",
+    "review_history",
+  ]) {
+    assert.ok(fields.has(field), `media_assets.${field} must be in the CMS contract`);
+  }
+  assert.equal(fields.get("asset_id").unique, true);
+  assert.equal(fields.get("upload_id").unique, true);
+  assert.equal(fields.get("storage_key").admin.hidden, true);
+  assert.equal(fields.get("review_history").admin.hidden, true);
+
+  const payload = JSON.parse(fs.readFileSync(fromRoot("production", "data", "payload-collections.json"), "utf8"));
+  const payloadMedia = payload.collections.find((collection) => collection.slug === "media_assets");
+  assert.equal(payloadMedia.fields.find((field) => field.name === "storage_key").admin.hidden, true);
+  assert.equal(payloadMedia.fields.find((field) => field.name === "review_history").admin.hidden, true);
+
+  const migration = fs.readFileSync(fromRoot("migrations", "20260901_120000_durable_media_lifecycle.ts"), "utf8");
+  for (const field of [
+    "asset_id",
+    "upload_id",
+    "storage_key",
+    "rendition",
+    "replaces_asset_id",
+    "replacement_asset_id",
+    "reviewer",
+    "reviewed_at",
+    "review_decision",
+    "human_confirmed",
+    "review_history",
+  ]) {
+    assert.match(migration, new RegExp(`ADD COLUMN IF NOT EXISTS "${field}"`));
+  }
+  assert.match(migration, /media_assets_asset_id_idx/);
+  assert.match(migration, /media_assets_upload_id_idx/);
+  assert.match(fs.readFileSync(fromRoot("migrations", "index.ts"), "utf8"), /20260901_120000_durable_media_lifecycle/);
+});
 
 test("durable listing uploads commit Payload metadata, attach atomically, and read back privately", async () => {
   const seed = focusedSeed();
