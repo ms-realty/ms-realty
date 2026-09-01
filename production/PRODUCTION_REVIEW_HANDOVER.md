@@ -1,8 +1,9 @@
 # Production review handover
 
 This deployment is the agency's durable decision workspace behind the private review host.
-The public production authority is the exact workers.dev origin
-`https://ms-realty.ms-realty-bg.workers.dev`; pending listing facts, translations,
+The sole indexable public authority is `https://makler-realty.com`. The noindex
+`https://ms-realty.ms-realty-bg.workers.dev` origin remains the operator/admin,
+OAuth, and deployment endpoint; pending listing facts, translations,
 customer messages, broker contacts, legacy URLs, and launch evidence remain behind
 their existing approval gates.
 
@@ -53,7 +54,8 @@ production-recovery panel in the admin workspace.
 
 ## Public production authority
 
-Use `https://ms-realty.ms-realty-bg.workers.dev` for the public site and direct `/admin`
-access. Isolated workers.dev drill hosts remain noindex. The historical
-`makler-realty.com` and `makler-realty.ru` URLs and media remain source/crawl compatibility
-data; no custom-domain or DNS cutover is required for deployment or readiness.
+Use `https://makler-realty.com` for indexable public pages and the workers.dev
+origin for direct `/admin`, OAuth callbacks, and deployment checks. All
+workers.dev public responses and admin/private surfaces remain noindex. The
+historical `.ru` URLs and both legacy media namespaces remain source/crawl
+compatibility data.

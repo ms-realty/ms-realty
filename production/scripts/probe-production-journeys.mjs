@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { isPreviewHost, isProductionPublicHost } from "../../workers/preview-host.mjs";
+import { isCanonicalPublicHost, isPreviewHost, isProductionPublicHost } from "../../workers/preview-host.mjs";
 
 // Synthetic probe of the deployed site's real operator-visible journeys.
 // /api/health only proves the process answers; a container can be "healthy"
@@ -23,6 +23,7 @@ if (expectedBuildMarker && !SHA_PATTERN.test(expectedBuildMarker)) {
 
 const TIMEOUT_MS = 25_000;
 const requestHostname = new URL(baseUrl).hostname;
+const canonicalPublicHost = isCanonicalPublicHost(requestHostname);
 const previewHost = isPreviewHost(requestHostname);
 const productionPublicHost = isProductionPublicHost(requestHostname);
 
@@ -60,7 +61,7 @@ const checks = [
   {
     id: "public_home",
     async run() {
-      const { status, text } = await fetchPath("/bg");
+      const { status, text } = await fetchPath(canonicalPublicHost ? "/" : "/bg");
       if (status !== 200) throw new Error(`home returned ${status}`);
       if (!text.includes("MS Realty")) throw new Error("home did not render the brand");
       // The verified agency line must stay reachable — it is the only working
@@ -86,13 +87,16 @@ const checks = [
   {
     id: "admin_login_reachable",
     async run() {
-      const { status, text } = await fetchPath("/admin/login");
+      const { status, headers, text } = await fetchPath("/admin/login");
       if (previewHost) {
         if (status !== 404) throw new Error(`preview edge exposed admin login with ${status}, expected 404`);
         return { note: "admin is intentionally hidden on the preview edge" };
       }
       if (status !== 200) throw new Error(`admin login returned ${status}`);
       if (!text.includes("<form")) throw new Error("admin login page has no form");
+      if ((canonicalPublicHost || productionPublicHost) && !String(headers.get("x-robots-tag") || "").includes("noindex")) {
+        throw new Error("admin login must remain noindex");
+      }
       return {};
     },
   },
@@ -117,14 +121,29 @@ const checks = [
     },
   },
   {
-    id: "preview_stays_noindex",
+    id: "indexing_contract",
     async run() {
-      const { headers } = await fetchPath("/bg");
+      const { headers, text } = await fetchPath("/bg");
       const robots = String(headers.get("x-robots-tag") || "");
       if (previewHost && !robots.includes("noindex")) {
         throw new Error("preview host must serve noindex — search equity protection");
       }
-      return { x_robots_tag: robots || null, production_public_host: productionPublicHost };
+      if (productionPublicHost && !robots.includes("noindex")) {
+        throw new Error("workers.dev operator host must remain noindex");
+      }
+      if (canonicalPublicHost) {
+        if (robots.includes("noindex")) throw new Error("canonical public host must remain indexable");
+        const head = text.match(/<head>[\s\S]*?<\/head>/)?.[0] || "";
+        if (!head.includes(`<link rel="canonical" href="${baseUrl}/bg">`)) {
+          throw new Error("public page does not publish the canonical domain");
+        }
+        if (head.includes(".workers.dev")) throw new Error("public metadata publishes a workers.dev origin");
+        const sitemap = await fetchPath("/sitemap.xml");
+        if (sitemap.status !== 200) throw new Error(`sitemap returned ${sitemap.status}`);
+        if (!sitemap.text.includes(`<loc>${baseUrl}/`)) throw new Error("sitemap does not publish the canonical domain");
+        if (sitemap.text.includes(".workers.dev/")) throw new Error("sitemap publishes a workers.dev origin");
+      }
+      return { canonical_public_host: canonicalPublicHost, x_robots_tag: robots || null };
     },
   },
   {

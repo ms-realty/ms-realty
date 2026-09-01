@@ -1,7 +1,7 @@
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor, labelsFor, localizedListingValue, uiCopyFor } from "./public-site.mjs";
-import { absolutePublicUrl, isAbsoluteHttpUrl } from "./public-origin.mjs";
+import { absolutePublicUrl, FALLBACK_PUBLIC_ORIGIN, isAbsoluteHttpUrl } from "./public-origin.mjs";
 import {
   ADMIN_CLIENT_HASH,
   ADMIN_CSS_HASH,
@@ -117,6 +117,18 @@ function twitterCard(social) {
     .map(([name, content]) => `<meta name="${escapeHtml(name)}" content="${escapeHtml(content)}">`);
 }
 
+function schemaForOrigin(schema, origin) {
+  if (!schema || !origin || origin === FALLBACK_PUBLIC_ORIGIN) return schema;
+  const canonical = { ...schema };
+  for (const field of ["@id", "url"]) {
+    const value = String(canonical[field] || "");
+    if (value.startsWith(FALLBACK_PUBLIC_ORIGIN)) {
+      canonical[field] = `${origin}${value.slice(FALLBACK_PUBLIC_ORIGIN.length)}`;
+    }
+  }
+  return canonical;
+}
+
 function meta(page, options = {}) {
   const social = socialMetadata(page, options.origin);
   const links = [
@@ -129,7 +141,7 @@ function meta(page, options = {}) {
     ),
   ];
   const schema = page.schema
-    ? `<script type="application/ld+json">${JSON.stringify(page.schema).replace(/</g, "\\u003c")}</script>`
+    ? `<script type="application/ld+json">${JSON.stringify(schemaForOrigin(page.schema, options.origin)).replace(/</g, "\\u003c")}</script>`
     : "";
   return [
     "<meta charset=\"utf-8\">",

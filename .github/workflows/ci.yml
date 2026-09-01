@@ -342,6 +342,12 @@ jobs:
           done
           exit 1
 
+      - name: Verify canonical production journeys
+        env:
+          MS_REALTY_EXPECTED_BUILD_MARKER: ${{ github.sha }}
+          MS_REALTY_PRODUCTION_URL: https://makler-realty.com
+        run: node production/scripts/probe-production-journeys.mjs
+
       - name: Roll back failed deployment
         if: failure() && needs.deploy_origin.outputs.previous_release != ''
         run: |

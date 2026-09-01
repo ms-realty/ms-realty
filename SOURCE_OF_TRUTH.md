@@ -1,8 +1,8 @@
 # MS Realty — Source of Truth
 
 **Single canonical document for the MS Realty rebuild** (historical `makler-realty.com` +
-`makler-realty.ru` sources; public production at
-`https://ms-realty.ms-realty-bg.workers.dev`).
+`makler-realty.ru` sources; indexable public production at
+`https://makler-realty.com`).
 Last updated: 2026-08-09.
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
@@ -22,9 +22,10 @@ the Greek border). The rebuild turns a 13-year-old WordPress/qTranslate-X site i
 operating system for buyers, sellers, and brokers, not a redesigned brochure site.
 
 The single hard constraint: **the historical domains' 13-year search equity is the asset.** The
-rebuild must preserve every indexed URL first, then add product on top. The exact workers.dev
-origin is the sole authoritative public production origin; legacy domains remain source, crawl,
-media, and redirect compatibility data rather than a cutover prerequisite.
+rebuild must preserve every indexed URL first, then add product on top. The `.com`
+origin is the sole indexable public authority; workers.dev remains the noindex
+operator/deployment origin, while `.ru` remains source, crawl, media, and redirect
+compatibility data pending a separate approved cutover.
 
 ---
 
@@ -415,8 +416,8 @@ homepage or search page.**
 4. Preserve `.ru` as Russian content unless an explicit consolidation decision is made.
 5. Preserve metadata (title, description, canonical, robots, OG, hreflang, structured data) and all
    media assets + image alt text that drive image SEO.
-6. Keep the exact workers.dev production origin indexable only after a crawl comparison proves URL,
-   metadata, and content parity; isolated drill hosts remain noindex.
+6. Keep `.com` indexable only after a crawl comparison proves URL, metadata, and
+   content parity; workers.dev and isolated drill hosts remain noindex.
 
 ### Inventory (authoritative URL universe)
 Union of: both domains' full sitemap trees (`.com/sitemap.html` + `.ru/sitemap_index.xml` and every
@@ -453,7 +454,7 @@ deployed decision artifact, so ledger changes do not clear the gate until export
 deployment have been updated.
 
 ### Production validation
-Crawl old `.com` + `.ru`; crawl the exact workers.dev production origin; diff URL counts by type; verify every old URL returns
+Crawl old `.com` + `.ru`; crawl the canonical `.com` production origin; diff URL counts by type; verify every old URL returns
 `200` / `301` / approved `410`; **zero redirect chains > 1 hop**; **zero accidental `noindex`** on
 indexable pages (isolated drill hosts must remain noindex); no canonical pointing to the wrong
 language/origin; no important page losing title, description, H1, body, or images; all forms and
@@ -604,7 +605,7 @@ contact a broker, save/share, and request viewings on mobile; sellers can reques
 broker pipeline; brokers can work leads, tasks, viewings, and property drafts inside the CRM; media
 supports photos, video, floor plans, and accessible 360 tours; accessibility QA passes before visual
 polish; AI and automation improve broker/editor speed without bypassing human review; and the launch
-crawl proves parity on the exact workers.dev production origin.
+crawl proves parity on the canonical `.com` production origin.
 
 ---
 

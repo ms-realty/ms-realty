@@ -110,6 +110,17 @@ test("the canonical host owns public metadata without trusting arbitrary Host va
   assert.match(head, /<meta property="og:url" content="https:\/\/makler-realty\.com\/bg">/);
   assert.doesNotMatch(head, /ms-realty\.ms-realty-bg\.workers\.dev/);
 
+  const listing = renderAppRouteResponse({
+    pathname: "/bg/imoti/MS-CRAWL-0001",
+    url: "http://app:3000/bg/imoti/MS-CRAWL-0001",
+    host: "makler-realty.com",
+    accept: "text/html",
+  });
+  const listingHtml = await listing.text();
+  const schema = JSON.parse(listingHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1] || "null");
+  assert.match(schema.url, /^https:\/\/makler-realty\.com\//);
+  assert.match(schema["@id"], /^https:\/\/makler-realty\.com\//);
+
   const worker = renderAppRouteResponse({
     pathname: "/bg",
     url: "http://app:3000/bg",
