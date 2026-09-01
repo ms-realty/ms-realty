@@ -163,6 +163,71 @@ test("document creation is idempotent and revisions remain append-only", async (
   assert.deepEqual((await readDocuments({ payload, principal: foreignBroker })).map((row) => row.document_id), []);
 });
 
+test("idempotency keys cannot replay revisions or signature requests onto another document", async () => {
+  const payload = new FakePayload();
+  await createDocument({ payload, principal: broker, input: documentInput() });
+  await createDocument({
+    payload,
+    principal: broker,
+    input: documentInput({ document_id: "doc-contract-2", idempotency_key: "document-write-2" }),
+  });
+  await createDocumentRevision({
+    payload,
+    principal: broker,
+    documentId: "doc-contract-1",
+    input: {
+      idempotency_key: "shared-revision-key",
+      storage_ref: "r2://private/doc-contract-1/r2.pdf",
+      mime_type: "application/pdf",
+      byte_size: 1300,
+      content_digest: "sha256:contract-r2",
+      change_reason: "First document revision",
+    },
+  });
+  await assert.rejects(
+    () =>
+      createDocumentRevision({
+        payload,
+        principal: broker,
+        documentId: "doc-contract-2",
+        input: {
+          idempotency_key: "shared-revision-key",
+          storage_ref: "r2://private/doc-contract-2/r2.pdf",
+          mime_type: "application/pdf",
+          byte_size: 1400,
+          content_digest: "sha256:other-r2",
+          change_reason: "Second document revision",
+        },
+      }),
+    (error) => error?.code === "revision_conflict" && error?.status === 409,
+  );
+
+  await createSignatureRequest({
+    payload,
+    principal: broker,
+    input: {
+      document_id: "doc-contract-1",
+      idempotency_key: "shared-signature-key",
+      signer_ref: "contact-1",
+      signer_role: "buyer",
+    },
+  });
+  await assert.rejects(
+    () =>
+      createSignatureRequest({
+        payload,
+        principal: broker,
+        input: {
+          document_id: "doc-contract-2",
+          idempotency_key: "shared-signature-key",
+          signer_ref: "contact-2",
+          signer_role: "seller",
+        },
+      }),
+    (error) => error?.code === "signature_request_conflict" && error?.status === 409,
+  );
+});
+
 test("signature requests stay provider-pending until a receipt-backed terminal update", async () => {
   const payload = new FakePayload();
   await createDocument({ payload, principal: admin, input: documentInput() });

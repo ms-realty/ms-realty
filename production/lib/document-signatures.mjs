@@ -709,7 +709,12 @@ export async function createDocumentRevision({ payload = null, principal, docume
     const existing = await findOne(runtime, DOCUMENT_REVISION_COLLECTION, workspaceWhere(document.workspace_id, {
       idempotency_key: { equals: idempotencyKey },
     }), req);
-    if (existing) return { document: documentRow(document), revision: revisionRow(existing), idempotent: true };
+    if (existing) {
+      if (String(existing.document_ref || "") !== String(document.document_id || "")) {
+        throw failure("idempotency_key already belongs to another document revision", 409, "revision_conflict");
+      }
+      return { document: documentRow(document), revision: revisionRow(existing), idempotent: true };
+    }
     const revision = inputRevision(input, document);
     const nextNumber = Number(document.current_revision_number) + 1;
     if (requestedRevision !== undefined && Number(requestedRevision) !== nextNumber) {
@@ -825,7 +830,12 @@ export async function createSignatureRequest({ payload = null, principal, input 
     const existing = await findOne(runtime, SIGNATURE_REQUEST_COLLECTION, workspaceWhere(normalized.workspace_id, {
       idempotency_key: { equals: normalized.idempotency_key },
     }), req);
-    if (existing) return { request: signatureRequestRow(existing), idempotent: true, provider_pending: existing.status === "provider_pending" };
+    if (existing) {
+      if (String(existing.document_ref || "") !== String(normalized.document_ref || "")) {
+        throw failure("idempotency_key already belongs to another signature request", 409, "signature_request_conflict");
+      }
+      return { request: signatureRequestRow(existing), idempotent: true, provider_pending: existing.status === "provider_pending" };
+    }
     const duplicate = await findOne(runtime, SIGNATURE_REQUEST_COLLECTION, byStableId("request_id", normalized.request_id), req);
     if (duplicate) throw failure("request_id already belongs to another signature request", 409, "signature_request_conflict");
     const created = await runtime.create({
