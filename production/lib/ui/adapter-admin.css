@@ -28,6 +28,15 @@
      3.5:1 against them, which is under the 4.5:1 a reader is owed, so muted
      text steps one rung darker here than it does on the public site. */
   --text-muted: var(--stone-600);
+  /* The same argument one rung further down, and it does not survive it.
+     stone-400 measures 2.40:1 on a panel, 2.18:1 on the canvas and 2.04:1 in a
+     well, and it carried real text in seventeen places -- week labels, hints,
+     references, "no data" lines, zero values in report bars. No value lighter
+     than muted clears 4.5:1 on a stone-100 well, so subtle stops being a colour
+     step in the workbench: weight and size carry that level of hierarchy
+     instead. Keeping it as an alias means the seventeen call sites are correct
+     without being rewritten. */
+  --text-subtle: var(--stone-600);
   /* Wells and inset panels (filter bars, list tools, report tracks). */
   --adm-well: var(--stone-100);
   --adm-panel: var(--ink-50);
@@ -75,6 +84,16 @@
 .crm-app .adm-form__group legend,
 .crm-app .crm-sb__group,
 .crm-app .adm-mobile-nav__group { letter-spacing: normal; text-transform: none; }
+/* A text field's border is the only thing that identifies it as a field, which
+   makes it "visual information required to identify a user interface component"
+   and puts it under WCAG 1.4.11's 3:1 floor. The workbench maps --border-strong
+   to ink-200, which measures 1.66:1 against the surface the field sits on.
+   ink-400 is the next step in the ramp that clears it: 4.30:1 in the light
+   theme, 4.04:1 in the dark one. Scoped to the controls so the token keeps its
+   lighter value for hover affordances and separators, which are not components. */
+.crm-app .mk-input__field,
+.crm-app .mk-select__field { border-color: var(--ink-400); }
+
 .crm-app .crm-sb__group {
   color: var(--adm-sidebar-group);
   font-size: var(--text-2xs);
@@ -2651,7 +2670,9 @@ html:has(main[data-react-admin-ui]) { color-scheme: light; }
     --text-strong: var(--stone-50);
     --text-body: var(--stone-200);
     --text-muted: var(--stone-400);
-    --text-subtle: var(--stone-500);
+    /* stone-500 measures 4.25:1 on the sunken surface, so the dark theme loses
+       the same step for the same reason as the light one. */
+    --text-subtle: var(--stone-400);
     --text-link: var(--stone-100);
     /* The brand swatch is near-white in this palette, so the label on a primary
        button has to invert with it or the button reads as a blank slab. */
