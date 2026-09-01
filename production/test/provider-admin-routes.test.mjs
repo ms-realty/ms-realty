@@ -10,7 +10,7 @@ const ORIGIN = "https://ms-realty.example";
 const SECRET = "provider-test-secret-that-is-longer-than-thirty-two-characters";
 
 function user() {
-  return { id: 1, collection: "admins", email: "owner@example.com", role: "admin", workspace_ids: ["sandanski"] };
+  return { id: 1, collection: "admins", email: "owner@example.com", role: "admin", workspace_ids: [] };
 }
 
 function config(overrides = {}) {

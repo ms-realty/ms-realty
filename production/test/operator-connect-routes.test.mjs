@@ -60,7 +60,7 @@ function auditFile(t) {
 }
 
 function adminUser() {
-  return { id: 1, collection: "admins", email: "owner@example.com", role: "admin", workspace_ids: ["sandanski"] };
+  return { id: 1, collection: "admins", email: "owner@example.com", role: "admin", workspace_ids: [] };
 }
 
 function payloadAdminAuth() {

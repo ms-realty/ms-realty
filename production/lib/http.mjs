@@ -79,6 +79,7 @@ import {
 } from "./operator-provider-catalog.mjs";
 import {
   OPERATOR_INTEGRATIONS_PATH,
+  isUnrestrictedOwnerAdmin,
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
@@ -4854,12 +4855,15 @@ export function createHttpApp({
 
     if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const configuredWorkspaceId =
+        workspaceSettingsWorkspaceId || providerConnection.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
       const canManageConnections = Boolean(
-        payloadSession && principal?.source === "payload_session" && principal.roles?.includes("admin"),
+        payloadSession && principal?.source === "payload_session" && isUnrestrictedOwnerAdmin(principal),
       );
       let agent = null;
       if (request.method === "POST") {
-        if (!canManageConnections) return adminForbidden("payload_admin_session");
+        if (!payloadSession || principal?.source !== "payload_session") return adminForbidden("payload_admin_session");
+        if (!isUnrestrictedOwnerAdmin(principal)) return adminForbidden("owner_admin_required");
         const input = parseBody(request);
         if (input.action !== "issue_agent_credential") return adminJson(400, { kind: "bad_request" });
         agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
@@ -4868,7 +4872,9 @@ export function createHttpApp({
       let connections = [];
       let storeError = !availability.store.ready;
       try {
-        if (availability.store.ready) connections = await readProviderConnections({ payload: providerConnectionPayload });
+        if (availability.store.ready) {
+          connections = await readProviderConnections({ payload: providerConnectionPayload, workspaceId: configuredWorkspaceId });
+        }
       } catch {
         storeError = true;
       }
@@ -5053,8 +5059,11 @@ export function createHttpApp({
             connections: await readProviderConnections({ payload: providerConnectionPayload, workspaceId: storeOptions.workspaceId }),
           });
         }
-        if (!payloadSession || principal?.source !== "payload_session" || !principal.roles?.includes("admin")) {
+        if (!payloadSession || principal?.source !== "payload_session") {
           return adminForbidden("payload_admin_session");
+        }
+        if (!isUnrestrictedOwnerAdmin(principal)) {
+          return adminForbidden("owner_admin_required");
         }
         // The assistant's configuration, for a caller that wants it as data
         // rather than as the copy block on the page.

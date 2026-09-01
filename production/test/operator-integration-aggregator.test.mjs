@@ -313,6 +313,20 @@ test("integration endpoint rejects unauthenticated and non-Payload admin access"
   assert.equal(scopedNext.status, 403);
   assert.equal((await scopedNext.json()).kind, "owner_admin_required");
 
+  const scopedStart = await dispatchHttp(scopedAdminApp, {
+    method: "GET",
+    url: "/api/admin/connections?provider=google&action=start",
+    headers: sessionHeaders(),
+  });
+  assert.equal(scopedStart.status, 403);
+  assert.equal(scopedStart.body.required_capability, "owner_admin_required");
+  const scopedNextStart = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/connections?provider=google&action=start`, { headers: sessionHeaders() }),
+    { config: adapterConfig(auditLogPath, payloadStore(), ["sandanski"]) },
+  );
+  assert.equal(scopedNextStart.status, 403);
+  assert.equal((await scopedNextStart.json()).required_capability, "owner_admin_required");
+
   const previous = {
     NODE_ENV: process.env.NODE_ENV,
     MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,

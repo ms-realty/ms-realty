@@ -79,6 +79,7 @@ import {
 import { operatorProviderAvailability, operatorProviderConfigFromEnv } from "./operator-provider-catalog.mjs";
 import {
   OPERATOR_INTEGRATIONS_PATH,
+  isUnrestrictedOwnerAdmin,
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
@@ -4593,17 +4594,20 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
+      const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
+      const configuredWorkspaceId =
+        config.workspaceSettingsWorkspaceId || providerConfig.workspaceId || (config.authEnv || process.env).MS_REALTY_WORKSPACE_ID || "";
       const canManageConnections = Boolean(
-        payloadSession && principal.source === "payload_session" && principal.roles?.includes("admin"),
+        payloadSession && principal.source === "payload_session" && isUnrestrictedOwnerAdmin(principal),
       );
       let agent = null;
       if (request.method === "POST") {
-        if (!canManageConnections) return adminForbidden("payload_admin_session");
+        if (!payloadSession || principal.source !== "payload_session") return adminForbidden("payload_admin_session");
+        if (!isUnrestrictedOwnerAdmin(principal)) return adminForbidden("owner_admin_required");
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
         if (input.action !== "issue_agent_credential") return jsonResponse(400, { kind: "bad_request" });
         agent = issueOperatorAgentToken({ principal, env: config.authEnv || process.env });
       }
-      const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
       let availability = operatorProviderAvailability(providerConfig);
       let connections = [];
       let storeError = !availability.store.ready;
@@ -4611,6 +4615,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         if (availability.store.ready) {
           connections = await (config.readProviderConnections || readProviderConnections)({
             payload: config.providerConnectionPayload || null,
+            workspaceId: configuredWorkspaceId,
           });
         }
       } catch {
@@ -4805,8 +4810,11 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           connections: await readConnections({ payload: storeOptions.payload, workspaceId: storeOptions.workspaceId }),
         });
       }
-      if (!payloadSession || principal.source !== "payload_session" || !principal.roles?.includes("admin")) {
+      if (!payloadSession || principal.source !== "payload_session") {
         return adminForbidden("payload_admin_session");
+      }
+      if (!isUnrestrictedOwnerAdmin(principal)) {
+        return adminForbidden("owner_admin_required");
       }
       if (url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH) {
         if (request.method === "GET" && url.searchParams.get("catalog") === "1") {
