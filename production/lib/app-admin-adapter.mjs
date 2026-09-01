@@ -78,6 +78,11 @@ import {
 } from "./provider-connections.mjs";
 import { operatorProviderAvailability, operatorProviderConfigFromEnv } from "./operator-provider-catalog.mjs";
 import {
+  OPERATOR_INTEGRATIONS_PATH,
+  readOperatorIntegrationContract,
+  resolveOperatorIntegrationWorkspace,
+} from "./operator-integration-aggregator.mjs";
+import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
   isOperatorOAuthProvider,
@@ -598,7 +603,10 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
     payloadAdminAuth: getPayloadAdminAuthService,
-    providerConnection: providerConnectionConfigFromEnv(env),
+    // Keep the provider configuration complete for both the legacy connection
+    // routes and the aggregated operator contract (GitHub/OpenRouter metadata
+    // lives in the operator catalogue extension).
+    providerConnection: operatorProviderConfigFromEnv(env),
   };
 }
 
@@ -4666,14 +4674,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (
       url.pathname === "/api/admin/connections" ||
+      url.pathname === OPERATOR_INTEGRATIONS_PATH ||
       url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH ||
       url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH
     ) {
       const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
       const availability = operatorProviderAvailability(providerConfig);
+      const configuredWorkspaceId =
+        config.workspaceSettingsWorkspaceId || providerConfig.workspaceId || (config.authEnv || process.env).MS_REALTY_WORKSPACE_ID || "";
       const storeOptions = {
         credentialSecret: providerConfig.credentialSecret,
         payload: config.providerConnectionPayload || null,
+        workspaceId: configuredWorkspaceId,
       };
       const readConnections = config.readProviderConnections || readProviderConnections;
       const connectionDeps = {
@@ -4701,11 +4713,96 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         const entry = operatorConnectionAudit(outcome, { actor: principal.id });
         if (entry) recordAudit(entry, config);
       };
+      if (url.pathname === OPERATOR_INTEGRATIONS_PATH) {
+        if (!payloadSession || principal.source !== "payload_session" || !principal.roles?.includes("admin")) {
+          return adminForbidden("payload_admin_session");
+        }
+        const requestedWorkspaceId = url.searchParams.get("workspace_id") || "";
+        let workspace;
+        try {
+          workspace = resolveOperatorIntegrationWorkspace(principal, {
+            workspaceId: requestedWorkspaceId,
+            configuredWorkspaceId,
+          });
+        } catch (error) {
+          return jsonResponse(error.status || 403, { kind: error.code || "workspace_scope_required", message: error.message });
+        }
+        const scopedStoreOptions = { ...storeOptions, workspaceId: workspace.workspace_id || "" };
+        const readContract = () =>
+          readOperatorIntegrationContract({
+            principal,
+            workspaceId: workspace.workspace_id || "",
+            configuredWorkspaceId: workspace.workspace_id || "",
+            providerConfig,
+            providerPayload: scopedStoreOptions.payload,
+            readConnections,
+            canManageConnections: true,
+          });
+        try {
+          if (request.method === "GET") {
+            const action = url.searchParams.get("action") || "status";
+            if (!["status", "refresh"].includes(action)) return jsonResponse(400, { kind: "unsupported_integration_action" });
+            const contract = await readContract();
+            recordAudit(
+              {
+                action: action === "refresh" ? "provider_connections_refreshed" : "provider_connections_status_read",
+                actor: principal.id,
+                objectType: "provider_connections",
+                objectId: contract.workspace_id || "all",
+                metadata: { provider_count: contract.providers.length },
+              },
+              config,
+            );
+            return jsonResponse(200, contract);
+          }
+          if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
+          const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+          if (input.action === "refresh") {
+            const contract = await readContract();
+            recordAudit(
+              {
+                action: "provider_connections_refreshed",
+                actor: principal.id,
+                objectType: "provider_connections",
+                objectId: contract.workspace_id || "all",
+                metadata: { provider_count: contract.providers.length },
+              },
+              config,
+            );
+            return jsonResponse(200, contract);
+          }
+          if (input.action !== "disconnect") return jsonResponse(400, { kind: "unsupported_integration_action" });
+          const beforeDisconnect = await readContract();
+          const existingProvider = beforeDisconnect.providers.find((provider) => provider.id === String(input.provider || "").trim().toLowerCase());
+          if (!existingProvider || !["connected", "inactive", "connecting", "unavailable"].includes(existingProvider.status)) {
+            return jsonResponse(404, { kind: "provider_connection_not_found" });
+          }
+          const outcome = await runOperatorConnectionAction({
+            intent: "disconnect",
+            provider: input.provider,
+            operatorId: principal.id,
+            config: providerConfig,
+            deps: { ...connectionDeps, storeOptions: scopedStoreOptions },
+          });
+          if (outcome.outcome === "rejected") {
+            recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error, config);
+            return jsonResponse(400, { kind: "provider_disconnect_rejected", message: "The connection was not removed" });
+          }
+          recordConnectionOutcome(outcome);
+          const contract = await readContract();
+          return jsonResponse(200, { ...contract, last_action: { action: "disconnect", provider: outcome.provider, revoked: outcome.revoked, deleted: outcome.deleted } });
+        } catch (error) {
+          if (error instanceof ProviderConnectionUnavailableError || error?.code === "provider_connection_unavailable") {
+            return jsonResponse(503, { kind: "provider_connection_unavailable", message: "Provider connection storage is unavailable" });
+          }
+          return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        }
+      }
       if (request.method === "GET" && url.pathname === "/api/admin/connections" && !url.searchParams.get("action")) {
         return jsonResponse(200, {
           kind: "provider_connections",
           availability,
-          connections: await readConnections({ payload: storeOptions.payload }),
+          connections: await readConnections({ payload: storeOptions.payload, workspaceId: storeOptions.workspaceId }),
         });
       }
       if (!payloadSession || principal.source !== "payload_session" || !principal.roles?.includes("admin")) {

@@ -230,7 +230,12 @@ export function requiredAdminCapability(method, pathname) {
   // below, which is where they already were.
   if (
     verb !== "GET" &&
-    ["/admin/connect", "/api/admin/connections", "/api/admin/connections/disconnect"].includes(pathname)
+    [
+      "/admin/connect",
+      "/api/admin/connections",
+      "/api/admin/connections/disconnect",
+      "/api/admin/integrations",
+    ].includes(pathname)
   ) {
     return "settings:manage";
   }

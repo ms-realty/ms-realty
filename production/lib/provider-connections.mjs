@@ -55,6 +55,11 @@ export const PROVIDER_CONNECTION_COLLECTION = {
       maxLength: 32,
     },
     { name: "connected_by", type: "text", required: true, maxLength: 160 },
+    // Provider credentials are workspace-owned even though the encrypted
+    // envelope itself remains server-only. Optional keeps existing rows
+    // readable during the migration; scoped callers fail closed for rows
+    // without an explicit workspace id.
+    { name: "workspace_id", type: "text", index: true, maxLength: 160 },
     { name: "account_label", type: "text", maxLength: 320 },
     { name: "external_account_id", type: "text", maxLength: 320 },
     { name: "scopes", type: "json" },
@@ -582,6 +587,7 @@ function safeConnection(document) {
     provider: providerName(document.provider),
     status: String(document.status || "unknown"),
     connected_by: String(document.connected_by || ""),
+    workspace_id: String(document.workspace_id || "").trim() || null,
     account_label: String(document.account_label || ""),
     external_account_id: String(document.external_account_id || ""),
     scopes: Array.isArray(document.scopes) ? document.scopes.map(String) : [],
@@ -600,7 +606,7 @@ function uniqueProviderConflict(error) {
   return entries.some((entry) => String(entry?.path || entry?.field || "").trim() === "provider");
 }
 
-async function findProvider(runtime, provider) {
+async function findProvider(runtime, provider, workspaceId = "") {
   const result = await runtime.find({
     collection: "provider_connections",
     depth: 0,
@@ -610,10 +616,11 @@ async function findProvider(runtime, provider) {
     where: { provider: { equals: providerName(provider) } },
   });
   if (!Array.isArray(result?.docs)) throw new Error("Payload provider connection query did not return documents");
-  return result.docs[0] || null;
+  const scope = String(workspaceId || "").trim();
+  return result.docs.find((document) => !scope || String(document.workspace_id || "").trim() === scope) || null;
 }
 
-export async function readProviderConnections({ payload = null } = {}) {
+export async function readProviderConnections({ payload = null, workspaceId = "" } = {}) {
   try {
     const runtime = await runtimePayload(payload);
     const result = await runtime.find({
@@ -624,17 +631,18 @@ export async function readProviderConnections({ payload = null } = {}) {
       sort: "provider",
     });
     if (!Array.isArray(result?.docs)) throw new Error("Payload provider connection query did not return documents");
-    return result.docs.map(safeConnection);
+    const scope = String(workspaceId || "").trim();
+    return result.docs.map(safeConnection).filter((connection) => !scope || connection.workspace_id === scope);
   } catch (error) {
     if (error instanceof ProviderConnectionUnavailableError) throw error;
     throw new ProviderConnectionUnavailableError("Provider connection read failed", error);
   }
 }
 
-export async function readProviderCredentials(provider, { credentialSecret, payload = null } = {}) {
+export async function readProviderCredentials(provider, { credentialSecret, payload = null, workspaceId = "" } = {}) {
   try {
     const runtime = await runtimePayload(payload);
-    const document = await findProvider(runtime, provider);
+    const document = await findProvider(runtime, provider, workspaceId);
     if (!document || document.status !== "connected") return null;
     const opened = openPrivateContactEnvelope(document.credential_envelope, {
       secret: secret(credentialSecret, "MS_REALTY_PROVIDER_TOKEN_KEY"),
@@ -652,7 +660,7 @@ export async function readProviderCredentials(provider, { credentialSecret, payl
 
 export async function saveProviderConnection(
   connection,
-  { connectedBy, credentialSecret, payload = null, verifiedAt = new Date().toISOString() } = {},
+  { connectedBy, workspaceId = "", credentialSecret, payload = null, verifiedAt = new Date().toISOString() } = {},
 ) {
   const provider = providerName(connection?.provider);
   if (!["connecting", "connected"].includes(connection?.status) || !connection?.credentials || typeof connection.credentials !== "object") {
@@ -676,6 +684,7 @@ export async function saveProviderConnection(
     provider,
     status: connection.status,
     connected_by: operator,
+    workspace_id: String(workspaceId || "").trim() || null,
     account_label: String(connection.accountLabel || ""),
     external_account_id: String(connection.externalAccountId || ""),
     scopes: Array.isArray(connection.scopes) ? [...new Set(connection.scopes.map(String))].sort() : [],
@@ -685,7 +694,8 @@ export async function saveProviderConnection(
   };
   try {
     const runtime = await runtimePayload(payload);
-    const existing = await findProvider(runtime, provider);
+    const scope = String(workspaceId || "").trim();
+    const existing = await findProvider(runtime, provider, scope);
     let document = existing
       ? await runtime.update({
           collection: "provider_connections",
@@ -705,7 +715,7 @@ export async function saveProviderConnection(
         });
       } catch (error) {
         if (!uniqueProviderConflict(error)) throw error;
-        const winner = await findProvider(runtime, provider);
+        const winner = await findProvider(runtime, provider, scope);
         if (!winner) throw error;
         document = await runtime.update({
           collection: "provider_connections",
@@ -727,11 +737,11 @@ export async function saveProviderConnection(
 // encrypted credential envelope stops existing at the same moment the operator
 // says to stop using it. Revoking the token at the provider is the caller's job
 // and happens first; this is the local half.
-export async function deleteProviderConnection(provider, { payload = null } = {}) {
+export async function deleteProviderConnection(provider, { payload = null, workspaceId = "" } = {}) {
   const name = providerName(provider);
   try {
     const runtime = await runtimePayload(payload);
-    const existing = await findProvider(runtime, name);
+    const existing = await findProvider(runtime, name, workspaceId);
     if (!existing) return { provider: name, deleted: false };
     if (typeof runtime.delete !== "function") throw new Error("Payload runtime cannot delete provider connections");
     await runtime.delete({ collection: "provider_connections", id: existing.id, depth: 0, overrideAccess: true });

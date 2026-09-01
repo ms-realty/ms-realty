@@ -53,6 +53,8 @@ const ADMIN_ACTIONS = new Set([
   "provider_connected",
   "provider_connection_failed",
   "provider_disconnected",
+  "provider_connections_status_read",
+  "provider_connections_refreshed",
   "provider_reply_sent",
   "provider_verified",
   "public_request_outcome_recorded",
