@@ -6,6 +6,7 @@ import {
   responseForPublicOrigin,
   responseWithEdgeBuildMarker,
 } from "../../workers/origin-proxy.mjs";
+import { crossOriginWriteRejection } from "../lib/request-guard.mjs";
 
 const PUBLIC_URL = "https://ms-realty.ms-realty-bg.workers.dev";
 const ORIGIN_URL = "https://ms-realty-review.157-230-109-185.sslip.io";
@@ -43,6 +44,23 @@ test("origin proxy forwards the trusted legacy hostname instead of a client spoo
     const proxied = requestForOrigin(request, ORIGIN_URL, ORIGIN_TOKEN);
     assert.equal(proxied.headers.get("x-forwarded-host"), host);
   }
+});
+
+test("origin proxy preserves the canonical admin origin through the app CSRF guard", () => {
+  const publicUrl = "https://makler-realty.com";
+  const proxied = requestForOrigin(
+    new Request(`${publicUrl}/admin/login`, {
+      method: "POST",
+      headers: { origin: publicUrl, "sec-fetch-site": "same-origin" },
+      body: new URLSearchParams({}),
+    }),
+    ORIGIN_URL,
+    ORIGIN_TOKEN,
+  );
+
+  assert.equal(proxied.headers.get("origin"), publicUrl);
+  assert.equal(proxied.headers.get("x-forwarded-host"), "makler-realty.com");
+  assert.equal(crossOriginWriteRejection(proxied.method, proxied.headers), null);
 });
 
 test("origin proxy rejects cross-site writes and unsafe origin configuration", () => {

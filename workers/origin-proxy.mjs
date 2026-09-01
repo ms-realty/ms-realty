@@ -75,7 +75,17 @@ export function requestForOrigin(request, originValue, originTokenValue) {
   headers.delete(ORIGIN_TOKEN_HEADER);
   headers.set("x-forwarded-host", publicUrl.host);
   headers.set(ORIGIN_TOKEN_HEADER, originToken);
-  if (headers.has("origin")) headers.set("origin", origin.origin);
+  // Admin CSRF checks compare Origin with the trusted forwarded public host.
+  // Keep that already-validated public Origin; public intake routes still
+  // compare against the internal request URL and therefore need translation.
+  if (
+    headers.has("origin") &&
+    publicUrl.pathname !== "/admin" &&
+    !publicUrl.pathname.startsWith("/admin/") &&
+    !publicUrl.pathname.startsWith("/api/admin/")
+  ) {
+    headers.set("origin", origin.origin);
+  }
 
   return new Request(new Request(upstreamUrl, request), { headers, redirect: "manual" });
 }
