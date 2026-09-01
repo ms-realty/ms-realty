@@ -1,9 +1,10 @@
-// The production public site is the exact workers.dev origin below. Isolated
+// The exact workers.dev host remains the operational/admin origin. Isolated
 // workers.dev drill hosts remain noindex, keyed on the hostname rather than an
-// env flag so a drill cannot accidentally become the public authority.
+// env flag so a drill cannot accidentally become a public authority.
 export const PREVIEW_NOINDEX = "noindex, nofollow, noarchive";
 export const PRODUCTION_PUBLIC_ORIGIN = "https://ms-realty.ms-realty-bg.workers.dev";
 export const PRODUCTION_PUBLIC_HOST = new URL(PRODUCTION_PUBLIC_ORIGIN).hostname;
+export const CANONICAL_PUBLIC_HOST = "makler-realty.com";
 
 function normalizedHostname(hostname) {
   return String(hostname || "").trim().toLowerCase().replace(/\.$/, "");
@@ -25,6 +26,10 @@ export function mediaCandidateKeys(hostname, pathname) {
 
 export function isProductionPublicHost(hostname) {
   return normalizedHostname(hostname) === PRODUCTION_PUBLIC_HOST;
+}
+
+export function isCanonicalPublicHost(hostname) {
+  return normalizedHostname(hostname) === CANONICAL_PUBLIC_HOST;
 }
 
 export function canonicalLegacyHost(hostname) {

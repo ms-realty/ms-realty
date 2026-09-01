@@ -3,14 +3,24 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "../lib/locales.mjs";
-import { renderAppRouteResponse, renderAppSiteRoot, renderAppSiteRootResponse } from "../lib/app-router-adapter.mjs";
 import {
+  renderAppRobotsResponse,
+  renderAppRouteResponse,
+  renderAppSitemapResponse,
+  renderAppSiteRoot,
+  renderAppSiteRootResponse,
+} from "../lib/app-router-adapter.mjs";
+import { CANONICAL_PUBLIC_ORIGIN, FALLBACK_PUBLIC_ORIGIN, publicOriginForHost } from "../lib/public-origin.mjs";
+import {
+  CANONICAL_PUBLIC_HOST,
   PREVIEW_NOINDEX,
   canonicalLegacyHost,
+  isCanonicalPublicHost,
   isPreviewHost,
   isProductionPublicHost,
   mediaCandidateKeys,
 } from "../../workers/preview-host.mjs";
+import { responseForCanonicalPublicIndex } from "../../workers/origin-proxy.mjs";
 
 const workerSource = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
 
@@ -68,9 +78,77 @@ test("the shared root response renders the same page as its retain_200 target", 
     accept: "text/html",
   });
   const target = renderAppRouteResponse({ pathname: "/bg", url: "http://app:3000/bg", accept: "text/html" });
+  const canonicalTarget = renderAppRouteResponse({
+    pathname: "/bg",
+    url: "http://app:3000/bg",
+    host: "makler-realty.com",
+    accept: "text/html",
+  });
   assert.equal(retained.status, 200);
   assert.equal(retained.headers.get("location"), null);
-  assert.equal(await retained.text(), await target.text());
+  assert.notEqual(await target.text(), await canonicalTarget.clone().text());
+  assert.equal(await retained.text(), await canonicalTarget.text());
+});
+
+test("the canonical host owns public metadata without trusting arbitrary Host values", async () => {
+  assert.equal(CANONICAL_PUBLIC_HOST, new URL(CANONICAL_PUBLIC_ORIGIN).hostname);
+  assert.equal(publicOriginForHost("makler-realty.com:443"), CANONICAL_PUBLIC_ORIGIN);
+  assert.equal(publicOriginForHost("WWW.MAKLER-REALTY.COM."), CANONICAL_PUBLIC_ORIGIN);
+  assert.equal(publicOriginForHost("makler-realty.com.evil.example"), FALLBACK_PUBLIC_ORIGIN);
+  assert.equal(publicOriginForHost("ms-realty.ms-realty-bg.workers.dev"), FALLBACK_PUBLIC_ORIGIN);
+  assert.equal(isCanonicalPublicHost("MAKLER-REALTY.COM."), true);
+
+  const canonical = renderAppRouteResponse({
+    pathname: "/bg",
+    url: "http://app:3000/bg",
+    host: "makler-realty.com",
+    accept: "text/html",
+  });
+  const html = await canonical.text();
+  const head = html.match(/<head>[\s\S]*?<\/head>/)?.[0] || "";
+  assert.match(head, /<link rel="canonical" href="https:\/\/makler-realty\.com\/bg">/);
+  assert.match(head, /<meta property="og:url" content="https:\/\/makler-realty\.com\/bg">/);
+  assert.doesNotMatch(head, /ms-realty\.ms-realty-bg\.workers\.dev/);
+
+  const worker = renderAppRouteResponse({
+    pathname: "/bg",
+    url: "http://app:3000/bg",
+    host: "ms-realty.ms-realty-bg.workers.dev",
+    accept: "text/html",
+  });
+  assert.match(await worker.text(), /<link rel="canonical" href="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/bg">/);
+});
+
+test("robots and sitemap use the request's allowlisted public authority", async () => {
+  const robots = await renderAppRobotsResponse({ host: "makler-realty.com" }).text();
+  assert.match(robots, /Sitemap: https:\/\/makler-realty\.com\/sitemap\.xml/);
+  assert.doesNotMatch(robots, /workers\.dev/);
+
+  const sitemap = await renderAppSitemapResponse({ host: "makler-realty.com" }).text();
+  assert.match(sitemap, /<loc>https:\/\/makler-realty\.com\/bg<\/loc>/);
+  assert.doesNotMatch(sitemap, /workers\.dev/);
+});
+
+test("the edge removes review noindex only from canonical public documents", async () => {
+  const response = () =>
+    new Response("<html></html>", {
+      headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": PREVIEW_NOINDEX },
+    });
+  assert.equal(
+    responseForCanonicalPublicIndex(response(), { hostname: "makler-realty.com", pathname: "/bg" }).headers.get("x-robots-tag"),
+    null,
+  );
+  assert.equal(
+    responseForCanonicalPublicIndex(response(), { hostname: "makler-realty.com", pathname: "/admin/login" }).headers.get("x-robots-tag"),
+    PREVIEW_NOINDEX,
+  );
+  assert.equal(
+    responseForCanonicalPublicIndex(response(), {
+      hostname: "ms-realty.ms-realty-bg.workers.dev",
+      pathname: "/bg",
+    }).headers.get("x-robots-tag"),
+    PREVIEW_NOINDEX,
+  );
 });
 
 test("only isolated *.workers.dev hosts count as preview hosts", () => {
@@ -94,11 +172,12 @@ test("www legacy hosts canonicalize to the approved apex route contract", () => 
   assert.match(workerSource, /return Response\.redirect\(url, 301\);/);
 });
 
-test("the Worker noindexes isolated drills and leaves the production origin indexable", () => {
+test("the Worker noindexes isolated drills and applies canonical public indexing at the edge", () => {
   assert.equal(PREVIEW_NOINDEX, "noindex, nofollow, noarchive");
   assert.match(workerSource, /const preview = isPreviewHost\(url\.hostname\);/);
   assert.match(workerSource, /if \(preview && url\.pathname === "\/robots\.txt"\) return previewRobotsResponse\(\);/);
-  assert.match(workerSource, /return preview \? withPreviewNoindex\(response\) : response;/);
+  assert.match(workerSource, /withPreviewNoindex\(response\)/);
+  assert.match(workerSource, /responseForCanonicalPublicIndex\(response, \{ hostname: url\.hostname, pathname: url\.pathname \}\)/);
   assert.match(workerSource, /"User-agent: \*\\nDisallow: \/\\n"/);
 });
 

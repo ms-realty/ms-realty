@@ -18,6 +18,7 @@ import { PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, canonicalLegacyHost, isPreview
 import {
   OriginProxyError,
   requestForOrigin,
+  responseForCanonicalPublicIndex,
   responseForPublicOrigin,
   responseWithEdgeBuildMarker,
 } from "./origin-proxy.mjs";
@@ -261,7 +262,9 @@ async function proxyDurableOrigin(request, env, url, preview) {
       env.MS_REALTY_EDGE_BUILD_MARKER,
       url.pathname,
     );
-    return preview ? withPreviewNoindex(versionedResponse) : versionedResponse;
+    return preview
+      ? withPreviewNoindex(versionedResponse)
+      : responseForCanonicalPublicIndex(versionedResponse, { hostname: url.hostname, pathname: url.pathname });
   } catch (error) {
     const status = error instanceof OriginProxyError ? error.status : 502;
     return new Response(JSON.stringify({ kind: status === 403 ? "cross_origin_write_blocked" : "origin_unavailable" }), {
@@ -306,7 +309,9 @@ async function serveFromContainer(request, env, url, preview) {
     forwardedRequest = new Request(request, { headers });
   }
   const response = await getContainer(env.MS_REALTY, "ms-realty-singleton").fetch(forwardedRequest);
-  return preview ? withPreviewNoindex(response) : response;
+  return preview
+    ? withPreviewNoindex(response)
+    : responseForCanonicalPublicIndex(response, { hostname: url.hostname, pathname: url.pathname });
 }
 
 export default {

@@ -28,6 +28,7 @@ import {
 } from "./public-search.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
+import { publicOriginForHost } from "./public-origin.mjs";
 
 const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
@@ -142,10 +143,10 @@ function htmlCacheControl(kind, status) {
   return status === 200 ? PUBLIC_CACHE : "no-store";
 }
 
-function renderedHtmlResponse(rendered, requestUrl) {
+function renderedHtmlResponse(rendered, requestUrl, origin) {
   const print = requestUrl.searchParams.get("print") === "1";
   const reactBody = print ? "" : renderReactPublicBody(rendered);
-  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print });
+  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print, origin });
   const status = rendered.status || 200;
 
   return {
@@ -169,7 +170,7 @@ function originUnavailableResponse({ pathname, url, config }) {
   const localeCode = String(pathname || "").split("/").filter(Boolean)[0] || registry.source_locale;
   const page = renderOriginUnavailablePage({ registry, localeCode, path: pathname });
   const requestUrl = url instanceof URL ? url : new URL(String(url || pathname), "http://localhost");
-  const out = renderedHtmlResponse(page, requestUrl);
+  const out = renderedHtmlResponse(page, requestUrl, config.publicOrigin);
   return new Response(out.html, { status: 503, headers: { ...out.headers, "cache-control": "no-store" } });
 }
 
@@ -209,7 +210,7 @@ function renderAppRouteWithContext({ pathname, url, config, registry, seed, tran
         currentRouteContract(config).catalog,
         { searchParams: requestUrl.searchParams },
       );
-  return renderedHtmlResponse(rendered, requestUrl);
+  return renderedHtmlResponse(rendered, requestUrl, config.publicOrigin);
 }
 
 export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
@@ -250,10 +251,11 @@ export async function renderAppSearchRoute({ pathname, url = pathname, config = 
     view: requestUrl.searchParams.get("view") || "list",
   });
 
-  return renderedHtmlResponse(result, requestUrl);
+  return renderedHtmlResponse(result, requestUrl, config.publicOrigin);
 }
 
 export function renderAppRouteResponse({ pathname, url = pathname, host = "", accept = "", config = appRouterConfigFromEnv() } = {}) {
+  config = { ...config, publicOrigin: publicOriginForHost(host) };
   const legacyDecision = legacyDecisionFor({ pathname, url, host, config });
   if (legacyDecision?.status === 301) {
     return new Response(null, {
@@ -308,6 +310,7 @@ async function renderDurableAppRouteResponse({ pathname, url, accept, config }) 
 }
 
 export async function renderAppSearchRouteResponse({ pathname, url = pathname, host = "", accept = "", config = appRouterConfigFromEnv() } = {}) {
+  config = { ...config, publicOrigin: publicOriginForHost(host) };
   const legacyDecision = legacyDecisionFor({ pathname, url, host, config });
   if (legacyDecision?.status === 301) {
     return new Response(null, {
@@ -319,7 +322,7 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
     return new Response("Gone", { status: 410, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE } });
   }
   if (legacyDecision?.status === 200) {
-    return renderAppRouteResponse({ pathname: legacyDecision.target_path, url, accept, config });
+    return renderAppRouteResponse({ pathname: legacyDecision.target_path, url, host, accept, config });
   }
 
   let result;
@@ -333,7 +336,7 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
       const localeCode = String(pathname || "").split("/").filter(Boolean)[0] || registry.source_locale;
       const page = renderSearchUnavailablePage({ registry, localeCode });
       const requestUrl = url instanceof URL ? url : new URL(String(url || pathname), "http://localhost");
-      const out = renderedHtmlResponse(page, requestUrl);
+      const out = renderedHtmlResponse(page, requestUrl, config.publicOrigin);
       return new Response(out.html, { status: out.status, headers: { ...out.headers, "cache-control": "no-store" } });
     }
     if (config.runtimeDataDurableOnly && htmlRequested(accept)) return originUnavailableResponse({ pathname, url, config });
@@ -351,13 +354,13 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 
-export function renderAppSitemap({ config = appRouterConfigFromEnv() } = {}) {
+export function renderAppSitemap({ config = appRouterConfigFromEnv(), origin } = {}) {
   const sitemap = buildRuntimeLocalizedSitemap(currentRegistry(config), currentPublicSeed(config), currentTranslationTasks(config));
   return {
     status: 200,
     headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },
     sitemap,
-    body: renderSitemapXml(sitemap),
+    body: renderSitemapXml(sitemap, { origin }),
   };
 }
 
@@ -370,11 +373,11 @@ export function renderAppSiteRoot({ config = appRouterConfigFromEnv() } = {}) {
   };
 }
 
-export function renderAppRobots() {
+export function renderAppRobots({ origin } = {}) {
   return {
     status: 200,
     headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE },
-    body: renderRobotsTxt(),
+    body: renderRobotsTxt({ origin }),
   };
 }
 
@@ -386,17 +389,18 @@ export function renderAppFavicon() {
   };
 }
 
-export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } = {}) {
-  if (config.runtimeDataDurableOnly) return renderDurableAppSitemapResponse(config);
-  const result = renderAppSitemap({ config });
+export function renderAppSitemapResponse({ host = "", config = appRouterConfigFromEnv() } = {}) {
+  const origin = publicOriginForHost(host);
+  if (config.runtimeDataDurableOnly) return renderDurableAppSitemapResponse(config, origin);
+  const result = renderAppSitemap({ config, origin });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
-async function renderDurableAppSitemapResponse(config) {
+async function renderDurableAppSitemapResponse(config, origin) {
   try {
     const context = await durablePublicContext(config);
     const sitemap = buildRuntimeLocalizedSitemap(context.registry, context.seed, context.translationTasks);
-    return new Response(renderSitemapXml(sitemap), {
+    return new Response(renderSitemapXml(sitemap, { origin }), {
       status: 200,
       headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },
     });
@@ -408,8 +412,8 @@ async function renderDurableAppSitemapResponse(config) {
   }
 }
 
-export function renderAppRobotsResponse() {
-  const result = renderAppRobots();
+export function renderAppRobotsResponse({ host = "" } = {}) {
+  const result = renderAppRobots({ origin: publicOriginForHost(host) });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
