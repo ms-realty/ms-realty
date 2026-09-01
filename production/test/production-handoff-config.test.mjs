@@ -158,10 +158,22 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.equal(wrangler.split("__MS_REALTY_BUILD_MARKER__").length - 1, 2);
 });
 
-test("production deploy leaves the obsolete public-origin secret inert during strict upload", () => {
+test("production deploy leaves the obsolete public-origin secret inert during the pre-deploy collision guard", () => {
   assert.doesNotMatch(ciWorkflow, /secret (?:list|delete) .*MS_REALTY_PUBLIC_ORIGIN/);
   assert.doesNotMatch(ciWorkflow, /secret put MS_REALTY_ORIGIN_TOKEN/);
-  assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy[\s\S]*--strict/);
+  const collisionGuard = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Validate Worker secret bindings"),
+    ciWorkflow.indexOf("- name: Deploy exact main commit"),
+  );
+  assert.match(collisionGuard, /secret list --name ms-realty --format json/);
+  assert.match(collisionGuard, /const allowedMigrationNames = new Set\(\[/);
+  assert.doesNotMatch(collisionGuard, /MS_REALTY_PUBLIC_ORIGIN/);
+  const deployCommand = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Deploy exact main commit"),
+    ciWorkflow.indexOf("- name: Verify deployed Worker"),
+  );
+  assert.match(deployCommand, /--keep-vars\b/);
+  assert.doesNotMatch(deployCommand, /--strict\b/);
 });
 
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
