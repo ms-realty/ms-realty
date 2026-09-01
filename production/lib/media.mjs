@@ -259,7 +259,13 @@ export function mediaWorkflow(media = []) {
     suppressed_public_assets: [...importedPublicAssets].filter((url) => !publicGalleryUrls.has(url)).length,
     floor_plan_candidates: media.filter((item) => item.kind === "floor_plan").length,
     video_candidates: media.filter((item) => item.kind === "video").length,
-    review_gated_assets: media.filter((item) => !item.is_public && item.review_status !== "reviewed_private").length,
+    // A replaced source remains in the durable graph for provenance, but its
+    // reviewed public child is the asset that now represents the listing. It
+    // must not keep the listing in a media-review gate after the replacement
+    // decision commits.
+    review_gated_assets: media.filter(
+      (item) => !item.is_public && !["reviewed_private", "replaced_by_human"].includes(item.review_status),
+    ).length,
   };
 }
 

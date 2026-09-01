@@ -70,6 +70,7 @@ async function storeFiles(files, options) {
     recordAudit,
     auditKey,
     replacesAssetId = null,
+    persistUpload = null,
   } = options;
   const accepted = [];
   const rejected = [];
@@ -99,10 +100,18 @@ async function storeFiles(files, options) {
           prepared.rendition = null;
         }
       }
-      const persisted = appendMediaUpload(
-        createMediaUploadRecord(prepared, { uploadedBy, source, storageDriver: stored.driver, uploadedAt }),
-        { filePath: ledgerPath || undefined },
-      );
+      const uploadRecord = createMediaUploadRecord(prepared, {
+        uploadedBy,
+        source,
+        storageDriver: stored.driver,
+        uploadedAt,
+      });
+      // Production durable-only mode supplies a Payload transaction callback.
+      // Keeping the legacy append as the default preserves the Node/Next
+      // parity and the existing non-durable behavior for local development.
+      const persisted = typeof persistUpload === "function"
+        ? await persistUpload(uploadRecord, { prepared, stored, storage })
+        : appendMediaUpload(uploadRecord, { filePath: ledgerPath || undefined });
       if (!persisted.idempotent && typeof recordAudit === "function") {
         recordAudit({
           action: "media_uploaded",
@@ -128,12 +137,31 @@ async function storeFiles(files, options) {
       }
       accepted.push({ index, persisted });
     } catch (error) {
+      if (typeof recordAudit === "function" && error?.code === "media_persistence_failed") {
+        recordAudit({
+          action: "media_persistence_failed",
+          actor: uploadedBy,
+          objectType: "media_asset",
+          objectId: null,
+          metadata: {
+            [auditKey]: String(subjectId || ""),
+            storage_cleanup: error.storageCleanup || "unknown",
+            orphaned_storage: error.orphanedStorage === true,
+          },
+        });
+      }
       rejected.push({
         index,
         filename: file.filename || null,
         kind: error.code || "bad_request",
         status: error.status || 400,
         message: error.message,
+        ...(error?.storageCleanup
+          ? {
+              storage_cleanup: error.storageCleanup,
+              orphaned_storage: error.orphanedStorage === true,
+            }
+          : {}),
       });
     }
   }
@@ -168,6 +196,7 @@ export async function handleAdminMediaUpload({
   uploadedBy = "admin",
   uploadedAt = new Date().toISOString(),
   recordAudit = null,
+  persistUpload = null,
   editorPathFor = (id) => `/admin/listings/edit?listingId=${encodeURIComponent(id)}`,
 }) {
   let listingId = "";
@@ -199,6 +228,7 @@ export async function handleAdminMediaUpload({
       recordAudit,
       auditKey: "listing_id",
       replacesAssetId,
+      persistUpload,
     });
 
     if (acceptsHtml) {

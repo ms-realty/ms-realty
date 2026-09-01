@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { assertCmsSeed } from "./cms-seed.mjs";
 import { assertLocaleRegistry, loadLocaleRegistry } from "./locales.mjs";
 import { mediaWorkflow } from "./media.mjs";
@@ -78,6 +79,13 @@ function countBy(rows, keyFn) {
 
 function relationKey(...values) {
   return values.map((value) => String(value || "")).join("\u0000");
+}
+
+function mediaAssetIdForDocument(document = {}) {
+  const explicit = String(document.asset_id || "").trim();
+  if (explicit) return explicit;
+  const source = String(document.source_url || document.asset_url || document.url || "").trim();
+  return source ? `media-${createHash("sha256").update(source).digest("hex").slice(0, 20)}` : "";
 }
 
 function retryCount(value) {
@@ -638,15 +646,37 @@ function projectedTranslation(document, snapshot) {
 }
 
 function projectedMedia(document) {
+  const assetId = mediaAssetIdForDocument(document);
+  const reviewStatus = document.replacement_asset_id
+    ? "replaced_by_human"
+    : String(document.review_decision || "").trim() === "publish"
+      ? "approved_by_human"
+      : String(document.review_decision || "").trim() === "keep_private"
+        ? "reviewed_private"
+        : document.review_status;
   return {
+    id: document.id,
+    asset_id: assetId,
     url: document.url,
+    source_url: document.source_url || document.url || null,
     asset_url: document.asset_url ?? null,
     alt: document.alt || "",
     width: document.width ?? null,
     height: document.height ?? null,
     kind: document.kind,
     is_public: document.is_public === true,
-    review_status: document.review_status,
+    review_status: reviewStatus,
+    replaces_asset_id: document.replaces_asset_id || null,
+    replacement_asset_id: document.replacement_asset_id || null,
+    upload_id: document.upload_id || null,
+    uploaded_at: document.uploaded_at || null,
+    uploaded_by: document.uploaded_by || null,
+    source: document.source || null,
+    media_reviewer: document.reviewer || null,
+    media_reviewed_at: document.reviewed_at || null,
+    thumbnail_url: document.rendition?.storage_key
+      ? `/api/admin/media/uploads/${assetId}?rendition=${encodeURIComponent(document.rendition.kind || "thumb")}`
+      : null,
   };
 }
 

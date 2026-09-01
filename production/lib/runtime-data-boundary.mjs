@@ -108,6 +108,7 @@ export function savedSearchWritesDisabledFromEnv(env = process.env) {
 export function productionRuntimeDataUnavailable({
   durableEvent = false,
   durableLeadOperations = false,
+  durableMedia = false,
   durableOnly = false,
   durableProviderDelivery = false,
   durableViewingTrip = false,
@@ -127,6 +128,7 @@ export function productionRuntimeDataUnavailable({
   if (path === "/api/events" && durableEvent) return false;
   if (path === "/api/viewing-trips" && durableViewingTrip) return false;
   if (path === "/api/admin/replies/delivery" && durableProviderDelivery) return false;
+  if (["/api/admin/media/uploads", "/api/admin/media/reviews"].includes(path) && durableMedia) return false;
   if (["/api/admin/viewings", "/api/admin/viewings/follow-up"].includes(path) && durableViewing) return false;
   if (durableLeadOperations && DURABLE_LEAD_OPERATION_PATHS.has(path)) return false;
   return FILE_BACKED_PUBLIC_MUTATIONS.has(path) || FILE_BACKED_ADMIN_MUTATIONS.has(path);

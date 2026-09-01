@@ -11,6 +11,7 @@ import { readMediaUploads } from "../lib/media-uploads.mjs";
 import { mediaAssetId } from "../lib/media-reviews.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { approvedPublicSeedFixtureOptions } from "./approved-public-seed.fixture.mjs";
+import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 import {
   avifWithExif,
   jpegWithGpsExif,
@@ -29,6 +30,12 @@ const SAME_ORIGIN = Object.freeze({
   origin: "http://localhost",
   "sec-fetch-site": "same-origin",
   accept: "application/json",
+});
+const DURABLE_ENV = Object.freeze({
+  NODE_ENV: "production",
+  MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
+  PAYLOAD_SECRET: "x".repeat(40),
+  DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
 });
 const ENQUIRY_ID = "lead-draft-11111111-2222-3333-4444-555555555555";
 const LISTING_ID = "MS-CRAWL-0001";
@@ -79,6 +86,24 @@ function adminUpload(files, fields = { listingId: LISTING_ID }) {
 
 async function post(app, url, { body, contentType }, headers) {
   return dispatchHttp(app, { method: "POST", url, headers: { ...headers, "content-type": contentType }, body });
+}
+
+function durablePayloadRuntime() {
+  const runtime = createPayloadDraftRuntime();
+  const create = runtime.payload.create.bind(runtime.payload);
+  runtime.payload.create = async (input) => {
+    if (input.collection === "media_assets" && !Object.hasOwn(input.data || {}, "id")) {
+      return create({
+        ...input,
+        data: {
+          id: runtime.currentRows().media_assets.length + 2000,
+          ...input.data,
+        },
+      });
+    }
+    return create(input);
+  };
+  return runtime;
 }
 
 /* ------------------------------------------------------ admin happy path */
@@ -235,6 +260,81 @@ test("an approved reupload replaces one public asset without a publication gap",
   const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}`, headers: ADMIN });
   assert.match(editor.body, new RegExp(`data-media-replacement="${replacement.asset_id}"`));
   assert.match(editor.body, /name="replacesAssetId"/);
+});
+
+test("durable-only admin media uploads persist to Payload, never touch the JSONL ledger, and publish through review", async () => {
+  const runtime = durablePayloadRuntime();
+  const context = workspace({
+    runtimeDataDurableOnly: true,
+    payloadListingRuntime: runtime.payload,
+    payloadListingEnv: DURABLE_ENV,
+  });
+  const previousCredentials = process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+  process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+    { id: "durable_media_owner", token: "durable-media-owner-token-0123456789abcdef", roles: ["admin"] },
+  ]);
+  const durableAdmin = {
+    authorization: "Bearer durable-media-owner-token-0123456789abcdef",
+    accept: "application/json",
+  };
+  try {
+    const photo = await photoJpegWithGpsExif({ width: 800, height: 600 });
+    const created = await post(context.app, "/api/admin/media/uploads", adminUpload([{ name: "kitchen.jpg", bytes: photo }]), durableAdmin);
+    assert.equal(created.status, 201, JSON.stringify(created.body));
+    assert.equal(created.body.kind, "media_upload_accepted");
+    assert.equal(created.body.uploaded[0].review_status, "needs_media_review");
+    assert.equal(readMediaUploads(context.mediaUploadLedgerPath).length, 0, "durable media must not fall back to JSONL");
+
+    const createdRows = runtime.currentRows();
+    const createdDoc = createdRows.media_assets.find((row) => row.upload_id === created.body.uploaded[0].id);
+    assert.ok(createdDoc, "the upload must exist in Payload media_assets");
+    assert.equal(createdDoc.subject_id, LISTING_ID);
+    assert.equal(createdDoc.is_public, false);
+    assert.equal(createdDoc.review_decision, null);
+    assert.ok(
+      createdRows.listings.find((row) => row.id === LISTING_ID).media.map((value) => String(value)).includes(String(createdDoc.id)),
+    );
+
+    const preview = await dispatchHttp(context.app, {
+      url: `/api/admin/media/uploads/${created.body.uploaded[0].asset_id}`,
+      headers: durableAdmin,
+    });
+    assert.equal(preview.status, 200);
+    assert.equal(preview.headers["cache-control"], "no-store");
+
+    const review = await dispatchHttp(context.app, {
+      method: "POST",
+      url: "/api/admin/media/reviews",
+      headers: durableAdmin,
+      body: {
+        listingId: LISTING_ID,
+        assetId: created.body.uploaded[0].asset_id,
+        decision: "publish",
+        kind: "photo",
+        alt: "Kitchen photographed during the broker visit",
+        reviewer: "durable_media_owner",
+        reviewConfirmed: true,
+      },
+    });
+    assert.equal(review.status, 201, JSON.stringify(review.body));
+    assert.equal(review.body.is_public, true);
+
+    const reviewedRows = runtime.currentRows();
+    const reviewedDoc = reviewedRows.media_assets.find((row) => row.upload_id === created.body.uploaded[0].id);
+    assert.equal(reviewedDoc.review_decision, "publish");
+    assert.equal(reviewedDoc.human_confirmed, true);
+    assert.equal(reviewedDoc.is_public, true);
+    assert.equal(reviewedDoc.review_history.length, 1);
+
+    const published = await dispatchHttp(context.app, { url: LISTING_PATH });
+    assert.equal(published.status, 200);
+    const publishedAsset = published.body.body.media.gallery.find((item) => item.url === created.body.uploaded[0].asset_url);
+    assert.ok(publishedAsset, "the reviewed durable upload must reach the public listing payload");
+    assert.equal(publishedAsset.alt, "Kitchen photographed during the broker visit");
+  } finally {
+    if (previousCredentials === undefined) delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+    else process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = previousCredentials;
+  }
 });
 
 /* ---------------------------------------------------------- admin refusals */

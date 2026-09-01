@@ -803,6 +803,54 @@
           "localized": false
         },
         {
+          "name": "asset_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "unique": true,
+          "index": true,
+          "maxLength": 160
+        },
+        {
+          "name": "upload_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "unique": true,
+          "index": true,
+          "maxLength": 200,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 32,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "subject_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 160,
+          "index": true,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "source_url",
+          "type": "url",
+          "required": false,
+          "localized": false
+        },
+        {
           "name": "alt",
           "type": "text",
           "required": false,
@@ -828,6 +876,7 @@
           "options": [
             "photo",
             "floor_plan",
+            "video",
             "site_chrome",
             "document",
             "unknown"
@@ -849,6 +898,230 @@
             "reviewed_private",
             "review_required"
           ]
+        },
+        {
+          "name": "storage_driver",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 40,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "storage_key",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 512,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "rendition",
+          "type": "json",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "content_hash",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 128,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "format",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 32,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "content_type",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 120,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "bytes",
+          "type": "number",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "submitted_bytes",
+          "type": "number",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "bytes_before",
+          "type": "number",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "bytes_after",
+          "type": "number",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "optimized",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "orientation_applied",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "resized",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "metadata_stripped",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "metadata_removed_bytes",
+          "type": "number",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "uploaded_at",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "uploaded_by",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 160,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 120,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "replaces_asset_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 160
+        },
+        {
+          "name": "replacement_asset_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 160
+        },
+        {
+          "name": "reviewer",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "maxLength": 160
+        },
+        {
+          "name": "reviewed_at",
+          "type": "date",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "review_decision",
+          "type": "select",
+          "required": false,
+          "localized": false,
+          "options": [
+            "publish",
+            "keep_private"
+          ]
+        },
+        {
+          "name": "human_confirmed",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
+        },
+        {
+          "name": "review_history",
+          "type": "json",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "hidden": true
+          }
         }
       ]
     },

@@ -255,6 +255,14 @@ import {
 import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, readMediaUploads } from "./media-uploads.mjs";
 import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
 import {
+  listMediaUploadsDurably,
+  mediaDurableRuntimeConfigured,
+  mediaDurableStoreConfigFromEnv,
+  persistMediaReviewDurably,
+  persistMediaUploadDurably,
+  readMediaUploadBytesDurably,
+} from "./media-durable-store.mjs";
+import {
   ADMIN_MEDIA_UPLOAD_PATH,
   acceptsHtmlResponse,
   handleAdminMediaUpload,
@@ -478,6 +486,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     durableListingAuditToFile: env.NODE_ENV !== "production",
     runtimeDataDurableOnly: durableOnly,
+    payloadListingEnv: env,
+    mediaDurableStore: mediaDurableStoreConfigFromEnv(env),
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
@@ -1055,6 +1065,25 @@ function currentSeed(config) {
     ),
     readMediaReviews(config.mediaReviewLedgerPath),
   );
+}
+
+function durableMedia(config) {
+  return mediaDurableRuntimeConfigured({
+    runtimeDataDurableOnly: config.runtimeDataDurableOnly,
+    payload: config.payloadListingRuntime || null,
+    config: config.mediaDurableStore || null,
+    env: config.payloadListingEnv || config.authEnv || process.env,
+  });
+}
+
+async function currentMediaSeed(config) {
+  const seed = currentSeed(config);
+  if (!config.runtimeDataDurableOnly) return seed;
+  return projectListingDraftSeed(seed, {
+    env: config.payloadListingEnv || config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+    requirePayload: true,
+  });
 }
 
 // Durable lead operations are active only when the operator asked for them AND
@@ -2687,10 +2716,16 @@ function persistEditorChange(result, config) {
   return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
 }
 
-function appendMediaReviewEntry(input, config) {
+async function appendMediaReviewEntry(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
-  const review = createMediaReview(currentSeed(config), attributed, config.reviewedAt);
-  const persisted = appendMediaReview(review, { filePath: config.mediaReviewLedgerPath });
+  const review = createMediaReview(await currentMediaSeed(config), attributed, config.reviewedAt);
+  const persisted = durableMedia(config)
+    ? await persistMediaReviewDurably(review, {
+        payload: config.payloadListingRuntime || null,
+        env: config.payloadListingEnv || config.authEnv || process.env,
+        principal: config.adminPrincipal,
+      })
+    : appendMediaReview(review, { filePath: config.mediaReviewLedgerPath });
   if (!persisted.idempotent) {
     recordAudit(
       {
@@ -4254,6 +4289,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (productionRuntimeDataUnavailable({
       durableLeadOperations: config.leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
       durableProviderDelivery: Boolean(parsedDeliveryBody?.provider && !parsedDeliveryBody?.action),
+      durableMedia: durableMedia(config),
       durableOnly: config.runtimeDataDurableOnly,
       durableViewing: config.viewingDurableStore?.viewingDurableStoreEnabled === true,
       method: request.method,
@@ -5419,12 +5455,20 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       const uploadLimits = config.mediaUploadLimits || mediaUploadLimitsFromEnv();
       const uploadStorage = createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
       if (request.method === "GET" && url.pathname === ADMIN_MEDIA_UPLOAD_PATH) {
-        const listed = listMediaUploads({
-          ledgerPath: config.mediaUploadLedgerPath,
-          listing: url.searchParams.get("listing") || "",
-          enquiry: url.searchParams.get("enquiry") || "",
-          limits: uploadLimits,
-        });
+        const listed = durableMedia(config)
+          ? await listMediaUploadsDurably({
+              payload: config.payloadListingRuntime || null,
+              env: config.payloadListingEnv || config.authEnv || process.env,
+              listing: url.searchParams.get("listing") || "",
+              enquiry: url.searchParams.get("enquiry") || "",
+              limits: uploadLimits,
+            })
+          : listMediaUploads({
+              ledgerPath: config.mediaUploadLedgerPath,
+              listing: url.searchParams.get("listing") || "",
+              enquiry: url.searchParams.get("enquiry") || "",
+              limits: uploadLimits,
+            });
         return jsonResponse(listed.status, listed.body);
       }
       if (request.method === "GET") {
@@ -5434,12 +5478,20 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         } catch {
           return jsonResponse(400, { kind: "bad_request", message: "Malformed upload id" });
         }
-        const preview = await readMediaUploadBytes({
-          ledgerPath: config.mediaUploadLedgerPath,
-          assetId,
-          rendition: url.searchParams.get("rendition") || "",
-          storage: uploadStorage,
-        });
+        const preview = durableMedia(config)
+          ? await readMediaUploadBytesDurably({
+              payload: config.payloadListingRuntime || null,
+              env: config.payloadListingEnv || config.authEnv || process.env,
+              assetId,
+              rendition: url.searchParams.get("rendition") || "",
+              storage: uploadStorage,
+            })
+          : await readMediaUploadBytes({
+              ledgerPath: config.mediaUploadLedgerPath,
+              assetId,
+              rendition: url.searchParams.get("rendition") || "",
+              storage: uploadStorage,
+            });
         if (preview.status !== 200) return jsonResponse(preview.status, preview.body);
         return new Response(preview.body, {
           status: 200,
@@ -5451,13 +5503,21 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         bytes: Buffer.from(await request.arrayBuffer()),
         contentType: request.headers.get("content-type") || "",
         acceptsHtml: acceptsHtmlResponse(request.headers.get("accept")),
-        seed: currentSeed(config),
+        seed: await currentMediaSeed(config),
         limits: uploadLimits,
         storage: uploadStorage,
         ledgerPath: config.mediaUploadLedgerPath,
         uploadedBy: config.adminPrincipal?.id || "admin",
         uploadedAt: auditRecordedAt(config),
         recordAudit: (entry) => recordAudit(entry, config),
+        persistUpload: durableMedia(config)
+          ? (record, { storage }) => persistMediaUploadDurably(record, {
+              payload: config.payloadListingRuntime || null,
+              env: config.payloadListingEnv || config.authEnv || process.env,
+              principal: config.adminPrincipal,
+              storage,
+            })
+          : null,
         editorPathFor: listingEditorPath,
       });
       if (uploaded.status === 303) {
@@ -5466,7 +5526,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(uploaded.status, uploaded.body);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
-      const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const result = await appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {

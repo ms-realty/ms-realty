@@ -13,10 +13,17 @@ import { renderAppApiResponse, appApiConfigFromEnv } from "../lib/app-api-adapte
 import { optimizeImageUpload } from "../lib/image-optimizer.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 import { jpegWithGpsExif, multipartBody, textFileNamedJpg, tinyJpeg } from "./image-upload.fixture.mjs";
 
 const ENQUIRY_ID = "lead-draft-99999999-8888-7777-6666-555555555555";
 const LISTING_ID = "MS-CRAWL-0001";
+const DURABLE_ENV = Object.freeze({
+  NODE_ENV: "production",
+  MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
+  PAYLOAD_SECRET: "x".repeat(40),
+  DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
+});
 
 function scratch() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-app-upload-"));
@@ -39,6 +46,24 @@ function uploadRequest(url, { body, contentType }, headers = {}) {
     body,
     duplex: "half",
   });
+}
+
+function durablePayloadRuntime() {
+  const runtime = createPayloadDraftRuntime();
+  const create = runtime.payload.create.bind(runtime.payload);
+  runtime.payload.create = async (input) => {
+    if (input.collection === "media_assets" && !Object.hasOwn(input.data || {}, "id")) {
+      return create({
+        ...input,
+        data: {
+          id: runtime.currentRows().media_assets.length + 2000,
+          ...input.data,
+        },
+      });
+    }
+    return create(input);
+  };
+  return runtime;
 }
 
 test("the App Router handoff exposes both upload routes", () => {
@@ -111,6 +136,50 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
   assert.equal(preview.status, 200);
   assert.equal(preview.headers.get("cache-control"), "no-store");
   assert.deepEqual(Buffer.from(await preview.arrayBuffer()), expected.bytes);
+});
+
+test("the admin adapter uses the durable media authority without falling back to the upload ledger", async () => {
+  const context = scratch();
+  const runtime = durablePayloadRuntime();
+  const config = {
+    ...appAdminConfigFromEnv(DURABLE_ENV),
+    adminPrincipal: { id: "operations_lead", source: "credential_registry", can_mutate: true, roles: ["admin"] },
+    runtimeDataDurableOnly: true,
+    payloadListingRuntime: runtime.payload,
+    payloadListingEnv: DURABLE_ENV,
+    mediaUploadLedgerPath: context.uploadLedger,
+    mediaUploadStorageConfig: { driver: "local", root: context.uploadRoot, host: "ms-realty.ms-realty-bg.workers.dev" },
+    auditLogPath: context.auditLog,
+  };
+
+  const accepted = await renderAppAdminResponse(
+    uploadRequest(
+      "http://localhost/api/admin/media/uploads",
+      multipartBody([
+        { name: "listingId", value: LISTING_ID },
+        { name: "photo", filename: "kitchen.jpg", contentType: "image/jpeg", value: jpegWithGpsExif() },
+      ]),
+    ),
+    { config },
+  );
+  assert.equal(accepted.status, 201);
+  const payload = await accepted.json();
+  assert.equal(payload.uploaded[0].review_status, "needs_media_review");
+  assert.equal(readMediaUploads(context.uploadLedger).length, 0);
+
+  const rows = runtime.currentRows();
+  const stored = rows.media_assets.find((row) => row.upload_id === payload.uploaded[0].id);
+  assert.ok(stored, "the upload must be persisted through Payload");
+  assert.equal(stored.subject_id, LISTING_ID);
+  assert.equal(stored.is_public, false);
+
+  const listed = await renderAppAdminResponse(
+    new Request(`http://localhost/api/admin/media/uploads?listing=${LISTING_ID}`, { headers: { accept: "application/json" } }),
+    { config },
+  );
+  assert.equal(listed.status, 200);
+  const listingPayload = await listed.json();
+  assert.equal(listingPayload.uploads.some((row) => row.asset_id === payload.uploaded[0].asset_id), true);
 });
 
 test("the public adapter keeps a seller photo private and bound to the enquiry", async () => {

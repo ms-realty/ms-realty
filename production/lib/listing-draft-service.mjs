@@ -104,7 +104,7 @@ function assertCompletePayloadSnapshot(seed, snapshot) {
   }
 }
 
-function payloadUser(principal) {
+export function payloadUser(principal) {
   const id = requiredText(principal?.id, "Authenticated operator id", 64);
   const roles = Array.isArray(principal?.roles) ? principal.roles.map((role) => String(role || "").trim()).filter(Boolean) : [];
   const role = roles.includes("admin")
@@ -119,7 +119,7 @@ function payloadUser(principal) {
   return { id, role, roles, source: principal?.source || "admin" };
 }
 
-async function withPayloadTransaction(payload, { principal, accessMode, isolationLevel }, work) {
+export async function withPayloadTransaction(payload, { principal, accessMode, isolationLevel }, work) {
   const transactionID = await payload.db.beginTransaction({ accessMode, isolationLevel });
   if (!transactionID) throw unavailableError("Payload draft store did not open a transaction");
   const req = { payload, transactionID, user: payloadUser(principal) };
