@@ -57,6 +57,9 @@ function principalWorkspaceIds(principal) {
 }
 
 export function isUnrestrictedOwnerAdmin(principal) {
+  if (principal?.workspace_ids !== undefined && principal.workspace_ids !== null && !Array.isArray(principal.workspace_ids)) {
+    return false;
+  }
   return Array.isArray(principal?.roles) && principal.roles.includes("admin") && principalWorkspaceIds(principal).length === 0;
 }
 

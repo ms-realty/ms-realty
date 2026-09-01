@@ -227,6 +227,10 @@ test("integration workspace resolution is owner-only and fails closed without co
     (error) => error.code === "owner_admin_required" && error.status === 403,
   );
   assert.throws(
+    () => resolveOperatorIntegrationWorkspace({ ...ownerPrincipal(), workspace_ids: "sandanski" }, { configuredWorkspaceId: "sandanski" }),
+    (error) => error.code === "owner_admin_required" && error.status === 403,
+  );
+  assert.throws(
     () => resolveOperatorIntegrationWorkspace(ownerPrincipal(), { workspaceId: "foreign", configuredWorkspaceId: "sandanski" }),
     (error) => error.code === "workspace_forbidden" && error.status === 403,
   );
