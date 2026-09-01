@@ -198,10 +198,20 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(ciWorkflow, /r2-media-coverage-\$\{\{ github\.sha \}\}/);
   assert.match(ciWorkflow, /Restore exact R2 report from the origin release/);
   assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
-  assert.match(ciWorkflow, /Capture active origin release/);
+  assert.match(ciWorkflow, /previous_marker: \$\{\{ steps\.previous_origin\.outputs\.marker \}\}/);
+  assert.match(ciWorkflow, /previous_ready: \$\{\{ steps\.previous_origin\.outputs\.ready \}\}/);
+  assert.match(ciWorkflow, /previous_blockers: \$\{\{ steps\.previous_origin\.outputs\.blockers \}\}/);
+  assert.match(ciWorkflow, /Capture active origin release and readiness/);
+  assert.ok(
+    ciWorkflow.indexOf("Capture active origin release and readiness") <
+      ciWorkflow.indexOf("Upload and activate exact origin release"),
+  );
   assert.match(ciWorkflow, /ready_url="\$\{health_url%\/api\/health\}\/api\/ready"/);
-  assert.match(ciWorkflow, /echo "ready=\$ready" >> "\$GITHUB_OUTPUT"/);
-  assert.match(ciWorkflow, /echo "blockers=\$blockers" >> "\$GITHUB_OUTPUT"/);
+  assert.match(ciWorkflow, /echo "ready=\$ready"/);
+  assert.match(ciWorkflow, /echo "blockers=\$blockers"/);
+  assert.match(ciWorkflow, /expected_ready="\$\{\{ needs\.deploy_origin\.outputs\.previous_ready \}\}"/);
+  assert.match(ciWorkflow, /expected_blockers="\$\{\{ needs\.deploy_origin\.outputs\.previous_blockers \}\}"/);
+  assert.doesNotMatch(ciWorkflow, /expected_ready="\$\{\{ steps\.previous\.outputs\.ready \}\}"/);
   assert.match(ciWorkflow, /expected_ready_status=503/);
   assert.match(ciWorkflow, /ready_status="\$\(curl[\s\S]*--write-out '%\{http_code\}' "\$ready_url"\)"/);
   assert.match(ciWorkflow, /d\.launch_ready !== true/);

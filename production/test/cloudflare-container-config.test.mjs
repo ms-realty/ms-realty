@@ -268,7 +268,9 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
   assert.match(deployJob, /timeout-minutes: 45/);
   assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
-  assert.match(ciWorkflow, /Capture active origin release/);
+  assert.match(ciWorkflow, /previous_ready: \$\{\{ steps\.previous_origin\.outputs\.ready \}\}/);
+  assert.match(ciWorkflow, /previous_blockers: \$\{\{ steps\.previous_origin\.outputs\.blockers \}\}/);
+  assert.match(ciWorkflow, /Capture active origin release and readiness/);
   assert.match(deployJob, /secret list --name ms-realty --format json/);
   assert.match(deployJob, /name === "MS_REALTY_ORIGIN_TOKEN"/);
   assert.doesNotMatch(deployJob, /secret put MS_REALTY_ORIGIN_TOKEN/);
@@ -278,11 +280,18 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(ciWorkflow, /--build-arg "MS_REALTY_BUILD_MARKER=\$GITHUB_SHA"/);
   assert.match(ciWorkflow, /d\.build_marker !== expected/);
   assert.match(ciWorkflow, /d\.origin_build_marker !== expected/);
+  const preActivationCapture = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Capture active origin release and readiness"),
+    ciWorkflow.indexOf("- name: Capture exact-release R2 media coverage"),
+  );
+  assert.match(preActivationCapture, /steps\.workers_dev\.outputs\.url/);
+  assert.match(preActivationCapture, /d\.launch_ready === true/);
+  assert.match(preActivationCapture, /d\.blockers/);
   const captureBlock = ciWorkflow.slice(
-    ciWorkflow.indexOf("- name: Capture active Worker version and image marker"),
+    ciWorkflow.indexOf("- name: Capture active Worker version"),
     ciWorkflow.indexOf("- name: Set exact Container image marker"),
   );
-  assert.doesNotMatch(captureBlock, /origin_build_marker/, "the old Worker is captured after the new origin activates");
+  assert.doesNotMatch(captureBlock, /curl|launch_ready|blockers/, "post-activation capture must not sample mixed readiness");
   const verificationBlock = ciWorkflow.slice(
     ciWorkflow.indexOf("- name: Verify deployed Worker"),
     ciWorkflow.indexOf("- name: Roll back failed deployment"),
@@ -294,6 +303,8 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(verificationBlock, /d\.blockers\.length !== 0/);
   const rollbackBlock = ciWorkflow.slice(ciWorkflow.indexOf("- name: Roll back failed deployment"));
   assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_release/);
+  assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_ready/);
+  assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_blockers/);
   assert.match(rollbackBlock, /if \[ "\$version" != "\$previous_version" \]/);
   assert.match(rollbackBlock, /mv -Tf .*link.*\/opt\/ms-realty\/current/);
   assert.match(rollbackBlock, /d\.origin_build_marker !== origin/);
