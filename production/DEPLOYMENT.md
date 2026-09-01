@@ -1,10 +1,11 @@
 # MS Realty production runbook
 
-The sole public authority is `https://ms-realty.ms-realty-bg.workers.dev`.
-Public pages, `/admin`, APIs, media, robots, sitemaps, OAuth callbacks, MCP, and
-production probes use that origin. The `makler-realty.com` and
-`makler-realty.ru` names remain only as historical crawl records and R2 object
-namespaces so imported URLs and media keep resolving.
+The sole indexable public authority is `https://makler-realty.com`. Public
+pages, robots, sitemaps, and canonical journey probes use that origin. The
+noindex `https://ms-realty.ms-realty-bg.workers.dev` endpoint remains the
+operator/admin, OAuth, MCP, media-upload, health, and deployment origin. The
+`.ru` domain remains a historical source and R2 namespace pending a separate
+approved cutover.
 
 ## Runtime topology
 
@@ -25,8 +26,8 @@ GitHub pull request
        -> restore the previous origin release and Worker version on failure
 ```
 
-`wrangler.jsonc` pins the Worker name, account, durable-origin ingress, public
-workers.dev origin, R2 binding, and build-marker placeholders. The durable
+`wrangler.jsonc` pins the Worker name, account, durable-origin ingress,
+operational workers.dev origin, R2 binding, and build-marker placeholders. The durable
 origin accepts Worker traffic only with `X-MS-Realty-Origin-Token`; it is not a
 second public authority.
 
@@ -61,7 +62,7 @@ node production/scripts/validate-foundation.mjs
 
 The deployed release materializes private provider reports and the exact-SHA
 R2 report. Production is proven only from the exact repository-dispatch run and
-the public workers.dev responses for that same SHA:
+the operational workers.dev and canonical `.com` responses for that same SHA:
 
 1. `GET /api/health` must return HTTP 200 with `status: "ok"`;
    `build_marker` and `origin_build_marker` must both equal the exact
@@ -69,22 +70,26 @@ the public workers.dev responses for that same SHA:
 2. `GET /api/ready` must return HTTP 200 with `status: "ready"` and
    `blockers: []`. Its response is `no-store` and reflects the materialized
    runtime evidence, not a cached repository snapshot.
-3. `GET /admin/login` must return HTTP 200 through the same workers.dev origin.
+3. `GET /admin/login` must return HTTP 200 and remain noindex through the
+   workers.dev operator origin.
 4. The GitHub run for `auto_merge_deploy` must show `npm check`,
    `Deploy durable origin`, and `Deploy production` as successful for that SHA.
-5. The exact-release R2 report must be embedded in both release artifacts and
+5. The canonical `.com` journey probe must pass with root HTTP 200, indexable
+   public metadata, and a `.com` sitemap.
+6. The exact-release R2 report must be embedded in both release artifacts and
    have `missing_count=0` with a matching `release_sha`.
 
 Useful read-only checks:
 
 ```bash
 release_sha='<40-character main SHA>'
-base='https://ms-realty.ms-realty-bg.workers.dev'
+operator='https://ms-realty.ms-realty-bg.workers.dev'
+public='https://makler-realty.com'
 
-curl --fail --silent --show-error "$base/api/health"
-curl --fail --silent --show-error "$base/api/ready"
-curl --fail --silent --show-error --output /dev/null "$base/admin/login"
-MS_REALTY_PRODUCTION_URL="$base" \
+curl --fail --silent --show-error "$operator/api/health"
+curl --fail --silent --show-error "$operator/api/ready"
+curl --fail --silent --show-error --output /dev/null "$operator/admin/login"
+MS_REALTY_PRODUCTION_URL="$public" \
   MS_REALTY_EXPECTED_BUILD_MARKER="$release_sha" \
   node production/scripts/probe-production-journeys.mjs
 ```
@@ -150,7 +155,7 @@ UI and direct identity collection routes stay edge-hidden. Admin sessions,
 role/workspace checks, step-up controls, provider OAuth state, and connection
 tokens are enforced server-side.
 
-Provider callbacks and webhooks must use the workers.dev origin. A connection
+Provider callbacks and webhooks must use the workers.dev operator origin. A connection
 is operational only after the admin connection status, provider callback, and
 one read or draft operation succeed without exposing credentials. Hermes stays
 inside its draft-only policy: it may prepare work, but it cannot publish pages,
@@ -174,4 +179,4 @@ writes.
 Code, CI, origin, Worker, provider, and browser evidence are separate layers.
 A change is deployed only when the exact SHA is merged, both deployment jobs
 pass, edge and origin markers match, readiness has no blockers, and the affected
-workers.dev journey succeeds.
+workers.dev operator checks and canonical `.com` journey succeed.

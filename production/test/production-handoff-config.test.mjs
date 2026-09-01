@@ -27,15 +27,16 @@ test("generic validation preserves live launch authority artifacts", () => {
   assert.match(packageJson.scripts["launch:inputs"], /build-launch-input-checklist\.mjs/);
 });
 
-test("deployment guide names the workers.dev authority and separates baseline from runtime proof", () => {
-  assert.match(deploymentGuide, /sole public authority is `https:\/\/ms-realty\.ms-realty-bg\.workers\.dev`/);
+test("deployment guide separates the canonical authority from the workers.dev operator origin", () => {
+  assert.match(deploymentGuide, /sole indexable public authority is `https:\/\/makler-realty\.com`/);
+  assert.match(deploymentGuide, /noindex `https:\/\/ms-realty\.ms-realty-bg\.workers\.dev` endpoint remains the[\s\S]*operator\/admin/);
   assert.match(deploymentGuide, /Committed baseline/);
   assert.match(deploymentGuide, /Runtime materialized evidence/);
   assert.match(deploymentGuide, /`build_marker` and `origin_build_marker` must both equal the exact[\s\S]*40-character release SHA/);
   assert.match(deploymentGuide, /`GET \/api\/ready` must return HTTP 200 with `status: "ready"` and[\s\S]*`blockers: \[\]`/);
   assert.doesNotMatch(
     deploymentGuide,
-    /Audited state \(2026-08-09\)|Phase 1 .*repair Worker secrets|MS_REALTY_ADMIN_CREDENTIALS_JSON|Payload admin unreachable|Known gaps & accepted risks|Fast-follow code changes|Definition of "shipped today"|custom-domain|\bDNS\b/,
+    /Audited state \(2026-08-09\)|Phase 1 .*repair Worker secrets|MS_REALTY_ADMIN_CREDENTIALS_JSON|Payload admin unreachable|Known gaps & accepted risks|Fast-follow code changes|Definition of "shipped today"/,
   );
 });
 
@@ -175,6 +176,7 @@ test("production deploy leaves the obsolete public-origin secret inert during th
   );
   assert.match(deployCommand, /--keep-vars\b/);
   assert.doesNotMatch(deployCommand, /--strict\b/);
+  assert.match(ciWorkflow, /Verify canonical production journeys[\s\S]*MS_REALTY_EXPECTED_BUILD_MARKER: \$\{\{ github\.sha \}\}[\s\S]*MS_REALTY_PRODUCTION_URL: https:\/\/makler-realty\.com[\s\S]*node production\/scripts\/probe-production-journeys\.mjs/);
 });
 
 test("origin deployment is immutable, backup-first, and rolls back the active release", () => {
