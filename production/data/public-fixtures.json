@@ -905,7 +905,8 @@
           },
           "applicable_filter_fields": [
             "bedrooms_min"
-          ]
+          ],
+          "widen_ranges": []
         }
       },
       "seller": {
@@ -4680,7 +4681,8 @@
         },
         "applicable_filter_fields": [
           "bedrooms_min"
-        ]
+        ],
+        "widen_ranges": []
       },
       "fallback": {
         "enabled": true,

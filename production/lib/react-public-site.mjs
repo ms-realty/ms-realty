@@ -2389,6 +2389,25 @@ function SearchBody({ page }) {
   const reviewedPropertyFamilies = [...new Set(filterOptions.property_families || filterOptions.property_types || [])].filter(Boolean).slice(0, 6);
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
+  // A reversed or non-numeric range reaches this page with the offending values
+  // already stripped from the query, so the results are honest. The boxes keep
+  // what was typed and say so, because a buyer who has just written two numbers
+  // needs to correct one of them, not start the search again.
+  const filterNotice = page.search.filter_notice || null;
+  const noticeFields = new Set(filterNotice?.fields || []);
+  const noticeId = "sr-filter-notice";
+  const filterFieldLabel = (name) =>
+    ({
+      price: `${labels.price} (EUR)`,
+      area: labels.area,
+      land_area: labels.factLabels?.land_area_sqm,
+      bedrooms: labels.factLabels?.bedrooms,
+      premises: labels.factLabels?.premises,
+      hotel_rooms: labels.factLabels?.hotel_rooms,
+      floor: labels.factLabels?.floor,
+      storeys: labels.factLabels?.storeys,
+    })[String(name).replace(/_(min|max)$/u, "")] || null;
+  const noticeLabels = [...new Set((filterNotice?.fields || []).map(filterFieldLabel).filter(Boolean))];
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
   const contact = chrome.contact || {};
@@ -2432,6 +2451,18 @@ function SearchBody({ page }) {
         h(Icon, { name: "chevron-down", size: 16, className: "sr-select__chevron" }),
       ),
     );
+  const numberInput = (idPrefix, name, { step = "1", inputMode = "numeric" } = {}) =>
+    h("input", {
+      id: `${idPrefix}-${name}`,
+      name,
+      type: "number",
+      min: "0",
+      step,
+      inputMode,
+      defaultValue: filters[name] || (noticeFields.has(name) ? filterNotice.values?.[name] || "" : ""),
+      "aria-invalid": noticeFields.has(name) ? "true" : undefined,
+      "aria-describedby": noticeFields.has(name) ? noticeId : undefined,
+    });
   const rangePair = (idPrefix, legend, minName, maxName, { step = "1", inputMode = "numeric", className = "" } = {}) =>
     h(
       "fieldset",
@@ -2440,18 +2471,8 @@ function SearchBody({ page }) {
       h(
         "div",
         { className: "sr-fg__pair" },
-        h(
-          "label",
-          { htmlFor: `${idPrefix}-${minName}` },
-          h("span", null, labels.min),
-          h("input", { id: `${idPrefix}-${minName}`, name: minName, type: "number", min: "0", step, inputMode, defaultValue: filters[minName] || "" }),
-        ),
-        h(
-          "label",
-          { htmlFor: `${idPrefix}-${maxName}` },
-          h("span", null, labels.max),
-          h("input", { id: `${idPrefix}-${maxName}`, name: maxName, type: "number", min: "0", step, inputMode, defaultValue: filters[maxName] || "" }),
-        ),
+        h("label", { htmlFor: `${idPrefix}-${minName}` }, h("span", null, labels.min), numberInput(idPrefix, minName, { step, inputMode })),
+        h("label", { htmlFor: `${idPrefix}-${maxName}` }, h("span", null, labels.max), numberInput(idPrefix, maxName, { step, inputMode })),
       ),
     );
   const geographyField = (idPrefix) => {
@@ -2978,6 +2999,19 @@ function SearchBody({ page }) {
               : null
             : toolbarForm(),
         ),
+        noticeLabels.length
+          ? h(
+              "p",
+              {
+                id: noticeId,
+                className: "sr-notice",
+                role: "alert",
+                "data-search-filter-notice": filterNotice.reason,
+              },
+              h(Icon, { name: "triangle-alert", size: 18 }),
+              h("span", null, `${noticeLabels.join(" · ")}: ${filterNotice.reason === "range" ? labels.filterRangeInvalid : labels.filterValueInvalid}`),
+            )
+          : null,
         savedView
           ? null
           : h(
@@ -3021,6 +3055,28 @@ function SearchBody({ page }) {
               h("span", { className: "sr-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "search", size: 28 })),
               h("h2", null, labels.searchResults),
               h("p", null, `${page.search.total_matches} ${labels.matches}`),
+              (controls.widen_ranges || []).length
+                ? h(
+                    "div",
+                    { className: "sr-empty__widen", "data-search-widen": "true" },
+                    h("p", null, labels.widenHint),
+                    h(
+                      "ul",
+                      null,
+                      ...controls.widen_ranges.map((suggestion) =>
+                        h(
+                          "li",
+                          { key: suggestion.fields[0] },
+                          h(
+                            "a",
+                            { href: searchHref(page, null, 1, Object.fromEntries(suggestion.fields.map((field) => [field, ""]))) },
+                            `${filterFieldLabel(suggestion.fields[0]) || labels.search}: ${suggestion.matches} ${labels.matches}`,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
               h(
                 "div",
                 { className: "sr-empty__actions" },

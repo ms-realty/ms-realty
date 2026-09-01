@@ -26,6 +26,29 @@ const NUMERIC_FIELDS = Object.freeze([
 
 const ARRAY_FIELDS = Object.freeze(["property_families", "property_subtypes", "parking_kinds", "construction_statuses", "location_ids"]);
 
+// A visitor who types 200000 into "min" and 100000 into "max" has made an
+// ordinary mistake, not a bad request: the page that carries the mistake has to
+// be able to say which pair of boxes disagrees. The plain Error the intent used
+// to throw carried that only in prose, so every caller had to parse English to
+// find out. This carries the intent field names instead.
+export class SearchFilterError extends Error {
+  constructor(message, fields) {
+    super(message);
+    this.name = "SearchFilterError";
+    this.code = "invalid_search_filter";
+    this.status = 400;
+    this.fields = Object.freeze([...fields]);
+  }
+}
+
+// The public query string calls the primary area "area"; the intent calls it
+// "primary_area". Everything else shares a name.
+const INTENT_FIELD_QUERY_KEYS = Object.freeze({ primary_area_min: "area_min", primary_area_max: "area_max" });
+
+export function searchFilterQueryKeys(fields = []) {
+  return fields.map((field) => INTENT_FIELD_QUERY_KEYS[field] || field);
+}
+
 function values(value) {
   if (Array.isArray(value)) return value;
   return String(value ?? "")
@@ -37,7 +60,7 @@ function values(value) {
 function optionalNumber(value, field) {
   if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
-  if (!Number.isFinite(number) || number < 0) throw new Error(`${field} must be a non-negative number`);
+  if (!Number.isFinite(number) || number < 0) throw new SearchFilterError(`${field} must be a non-negative number`, [field]);
   return number;
 }
 
@@ -61,7 +84,7 @@ function mapBounds(input) {
 
 function assertRange(intent, min, max) {
   if (intent[min] !== null && intent[max] !== null && intent[min] > intent[max]) {
-    throw new Error(`${min} cannot exceed ${max}`);
+    throw new SearchFilterError(`${min} cannot exceed ${max}`, [min, max]);
   }
 }
 

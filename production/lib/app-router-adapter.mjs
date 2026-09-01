@@ -6,6 +6,7 @@ import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
+import { searchFilterQueryKeys } from "./search-intent.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
@@ -224,7 +225,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
   });
 }
 
-export async function renderAppSearchRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+export async function renderAppSearchRoute({ pathname, url = pathname, config = appRouterConfigFromEnv(), filterNotice = null } = {}) {
   if (!pathname) throw new Error("App route pathname is required");
 
   const context = config.runtimeDataDurableOnly
@@ -251,7 +252,11 @@ export async function renderAppSearchRoute({ pathname, url = pathname, config = 
     view: requestUrl.searchParams.get("view") || "list",
   });
 
-  return renderedHtmlResponse(result, requestUrl, config.publicOrigin);
+  return renderedHtmlResponse(
+    filterNotice ? { ...result, search: { ...result.search, filter_notice: filterNotice } } : result,
+    requestUrl,
+    config.publicOrigin,
+  );
 }
 
 export function renderAppRouteResponse({ pathname, url = pathname, host = "", accept = "", config = appRouterConfigFromEnv() } = {}) {
@@ -329,6 +334,28 @@ export async function renderAppSearchRouteResponse({ pathname, url = pathname, h
   try {
     result = await renderAppSearchRoute({ pathname, url, config });
   } catch (error) {
+    // A reversed or non-numeric range is the visitor's typing, not a broken
+    // request. Answering it with a JSON error body left a buyer staring at
+    // {"kind":"bad_request"} with no way back to their search, so the page is
+    // rendered again without the values that cannot be honoured, carrying a
+    // notice that names them and keeps what was typed in the boxes.
+    const invalidKeys = searchFilterQueryKeys(error?.fields || []);
+    if (invalidKeys.length && htmlRequested(accept)) {
+      const retryUrl = new URL(url, "http://localhost");
+      const typed = Object.fromEntries(invalidKeys.map((key) => [key, retryUrl.searchParams.get(key) ?? ""]));
+      for (const key of invalidKeys) retryUrl.searchParams.delete(key);
+      try {
+        result = await renderAppSearchRoute({
+          pathname,
+          url: retryUrl,
+          config,
+          filterNotice: { reason: error.fields.length > 1 ? "range" : "value", fields: invalidKeys, values: typed },
+        });
+        return new Response(result.html, { status: result.status, headers: { ...result.headers, "cache-control": "no-store" } });
+      } catch {
+        // Fall through to the generic answer below.
+      }
+    }
     if (error instanceof PublicSearchUnavailableError) {
       // A person on the search page gets a branded fallback with working
       // contact channels; the /api/search JSON contract is handled elsewhere.
