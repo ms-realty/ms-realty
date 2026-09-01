@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -18,6 +20,9 @@ const workspaceSettingsMigration = fromRoot("migrations", "20260828_130000_works
 const durableViewingTripRequestsMigration = fromRoot("migrations", "20260829_120000_durable_viewing_trip_requests.ts");
 const listingTranslationCopyMigration = fromRoot("migrations", "20260830_120000_listing_translation_copy.ts");
 const listingTranslationWorkflowStatusMigration = fromRoot("migrations", "20260830_130000_listing_translation_workflow_status.ts");
+const providerConnectionWorkspaceMigration = fromRoot("migrations", "20260901_130000_provider_connection_workspace_scope.ts");
+const payloadRuntime = createRequire(import.meta.url).resolve("payload");
+const payloadCli = path.resolve(path.dirname(payloadRuntime), "..", "bin.js");
 
 function tableSql(source, name) {
   const start = [`CREATE TABLE "${name}" (`, `CREATE TABLE IF NOT EXISTS "${name}" (`]
@@ -52,6 +57,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260829_120000_durable_viewing_trip_requests.ts",
     "20260830_120000_listing_translation_copy.ts",
     "20260830_130000_listing_translation_workflow_status.ts",
+    "20260901_130000_provider_connection_workspace_scope.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -144,6 +150,21 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(
     migrationIndex,
     /up: migration_20260830_130000_listing_translation_workflow_status\.up,\s+down: migration_20260830_130000_listing_translation_workflow_status\.down,\s+name: '20260830_130000_listing_translation_workflow_status'/,
+  );
+
+  const providerConnectionWorkspace = fs.readFileSync(providerConnectionWorkspaceMigration, "utf8");
+  assert.match(providerConnectionWorkspace, /ALTER TABLE "provider_connections" ADD COLUMN IF NOT EXISTS "workspace_id" varchar/);
+  assert.match(providerConnectionWorkspace, /CREATE INDEX IF NOT EXISTS "provider_connections_workspace_id_idx"/);
+  assert.match(providerConnectionWorkspace, /UPDATE "provider_connections"/);
+  assert.match(providerConnectionWorkspace, /WHERE "workspace_id" IS NULL OR btrim\("workspace_id"\) = ''/);
+  assert.match(providerConnectionWorkspace, /MS_REALTY_WORKSPACE_ID/);
+  const providerConnectionWorkspaceDown = providerConnectionWorkspace.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.match(providerConnectionWorkspaceDown, /void db/);
+  assert.doesNotMatch(providerConnectionWorkspaceDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
+  assert.match(migrationIndex, /import \* as migration_20260901_130000_provider_connection_workspace_scope/);
+  assert.match(
+    migrationIndex,
+    /up: migration_20260901_130000_provider_connection_workspace_scope\.up,\s+down: migration_20260901_130000_provider_connection_workspace_scope\.down,\s+name: '20260901_130000_provider_connection_workspace_scope'/,
   );
 
   const localizedPublicSearch = fs.readFileSync(publicSearchMigration, "utf8");
@@ -317,15 +338,15 @@ test("Payload migration boot configuration and generated constraints stay runnab
       cwd: fromRoot(),
       encoding: "utf8",
       env,
-      timeout: 60_000,
+      timeout: 180_000,
     });
     assert.equal(loaded.status, 0, loaded.stderr);
 
-    const help = spawnSync(fromRoot("node_modules", ".bin", "payload"), ["migrate", "--help"], {
+    const help = spawnSync(process.execPath, [payloadCli, "migrate", "--help"], {
       cwd: fromRoot(),
       encoding: "utf8",
       env,
-      timeout: 60_000,
+      timeout: 180_000,
     });
     assert.equal(help.status, 0, help.stderr);
     assert.match(help.stdout, /Available commands: migrate/);

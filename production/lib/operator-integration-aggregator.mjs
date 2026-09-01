@@ -1,4 +1,3 @@
-import { canAdminAccessWorkspace } from "./admin-auth.mjs";
 import { ProviderConnectionUnavailableError, readProviderConnections } from "./provider-connections.mjs";
 import {
   OPERATOR_PROVIDER_COVERAGE,
@@ -57,9 +56,13 @@ function principalWorkspaceIds(principal) {
   ];
 }
 
-// Admins with an explicit allowlist still need to choose one workspace when
-// they have more than one. Full admins may see all workspaces only when no
-// workspace id is configured; non-admins never receive an unscoped result.
+export function isUnrestrictedOwnerAdmin(principal) {
+  return Array.isArray(principal?.roles) && principal.roles.includes("admin") && principalWorkspaceIds(principal).length === 0;
+}
+
+// Provider connections are a single configured owner workspace until the
+// provider store has a per-workspace uniqueness model. An assigned/scoped
+// admin must not receive an apparently actionable integration contract.
 export function resolveOperatorIntegrationWorkspace(
   principal,
   { workspaceId = "", configuredWorkspaceId = "" } = {},
@@ -67,20 +70,31 @@ export function resolveOperatorIntegrationWorkspace(
   if (!principal) throw workspaceFailure("workspace_scope_required", "An authenticated operator is required");
   const requested = normalizedWorkspaceId(workspaceId, "workspace_id");
   const configured = normalizedWorkspaceId(configuredWorkspaceId, "configured workspace id");
-  const allowed = principalWorkspaceIds(principal);
-  const fullAdmin = principal.roles?.includes("admin") === true && allowed.length === 0;
-  const selected = requested || configured;
-  const selectedIsAllowed = fullAdmin || (allowed.length > 0 ? allowed.includes(selected) : canAdminAccessWorkspace(principal, selected));
-  if (selected && !selectedIsAllowed) {
+  if (!isUnrestrictedOwnerAdmin(principal)) {
+    throw workspaceFailure("owner_admin_required", "Integrations require an unrestricted owner admin");
+  }
+  if (!configured) {
+    throw workspaceFailure("workspace_scope_unavailable", "A configured workspace is required for integrations", 503);
+  }
+  if (requested && requested !== configured) {
     throw workspaceFailure("workspace_forbidden", "The selected workspace is not available to this operator");
   }
-  if (selected) return { workspace_id: selected, scope: "workspace" };
-  if (allowed.length === 1) return { workspace_id: allowed[0], scope: "workspace" };
-  if (allowed.length > 1) {
-    throw workspaceFailure("workspace_scope_required", "Choose one workspace for this integration request", 400);
+  return { workspace_id: configured, scope: "workspace" };
+}
+
+const OMIT_METADATA = Symbol("omit_metadata");
+const URL_METADATA_KEYS = new Set(["endpoint", "uri"]);
+
+function sanitizeUrlMetadata(value) {
+  if (typeof value !== "string") return OMIT_METADATA;
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    return OMIT_METADATA;
   }
-  if (fullAdmin) return { workspace_id: null, scope: "all" };
-  throw workspaceFailure("workspace_scope_required", "This operator has no workspace access");
+  if (!url.origin || !["http:", "https:"].includes(url.protocol)) return OMIT_METADATA;
+  return `${url.origin}${url.pathname === "/" ? "" : url.pathname}`.slice(0, 320);
 }
 
 function redactMetadata(value, depth = 0) {
@@ -90,7 +104,11 @@ function redactMetadata(value, depth = 0) {
   return Object.fromEntries(
     Object.entries(value)
       .filter(([key]) => SAFE_METADATA_KEYS.has(String(key)))
-      .map(([key, nested]) => [key, redactMetadata(nested, depth + 1)]),
+      .map(([key, nested]) => [
+        key,
+        URL_METADATA_KEYS.has(String(key)) ? sanitizeUrlMetadata(nested) : redactMetadata(nested, depth + 1),
+      ])
+      .filter(([, nested]) => nested !== OMIT_METADATA),
   );
 }
 
@@ -197,7 +215,12 @@ export function buildOperatorIntegrationContract({
   canManageConnections = false,
   actionBasePath = "/api/admin/connections",
 } = {}) {
-  const scope = workspace || { workspace_id: normalizedWorkspaceId(workspaceId, "workspace_id") || null, scope: workspaceId ? "workspace" : "all" };
+  const scope = workspace || (() => {
+    const id = normalizedWorkspaceId(workspaceId, "workspace_id");
+    if (!id) throw workspaceFailure("workspace_scope_required", "A workspace is required for integrations");
+    return { workspace_id: id, scope: "workspace" };
+  })();
+  const ownerCanManage = canManageConnections === true && isUnrestrictedOwnerAdmin(principal);
   const safeConnections = (Array.isArray(connections) ? connections : []).map(safeConnection);
   const stored = new Map(safeConnections.map((connection) => [connection.provider, connection]));
   const config = providerConfig || operatorProviderConfigFromEnv();
@@ -206,7 +229,7 @@ export function buildOperatorIntegrationContract({
   const providers = OPERATOR_PROVIDER_COVERAGE.map((coverage) => {
     const card = cardsById.get(coverage.provider);
     return providerRow(coverage, card, stored.get(coverage.provider), {
-      canManageConnections: canManageConnections === true,
+      canManageConnections: ownerCanManage,
       actionBasePath,
       workspace_id: scope.workspace_id,
     });
@@ -254,9 +277,7 @@ export async function readOperatorIntegrationContract({
     throw new ProviderConnectionUnavailableError("Provider connection storage is unavailable");
   }
   const rawConnections = await readConnections({ payload: providerPayload, workspaceId: workspace.workspace_id || "" });
-  const connections = (Array.isArray(rawConnections) ? rawConnections : []).filter(
-    (connection) => !workspace.workspace_id || text(connection?.workspace_id) === workspace.workspace_id,
-  );
+  const connections = Array.isArray(rawConnections) ? rawConnections : [];
   return buildOperatorIntegrationContract({
     principal,
     workspace,

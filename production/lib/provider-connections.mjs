@@ -607,32 +607,39 @@ function uniqueProviderConflict(error) {
 }
 
 async function findProvider(runtime, provider, workspaceId = "") {
+  const scope = String(workspaceId || "").trim();
+  const providerWhere = { provider: { equals: providerName(provider) } };
   const result = await runtime.find({
     collection: "provider_connections",
     depth: 0,
     limit: 1,
     overrideAccess: true,
     pagination: false,
-    where: { provider: { equals: providerName(provider) } },
+    where: scope
+      ? {
+          and: [providerWhere, { workspace_id: { equals: scope } }],
+        }
+      : providerWhere,
   });
   if (!Array.isArray(result?.docs)) throw new Error("Payload provider connection query did not return documents");
-  const scope = String(workspaceId || "").trim();
-  return result.docs.find((document) => !scope || String(document.workspace_id || "").trim() === scope) || null;
+  return result.docs[0] || null;
 }
 
 export async function readProviderConnections({ payload = null, workspaceId = "" } = {}) {
   try {
     const runtime = await runtimePayload(payload);
-    const result = await runtime.find({
+    const options = {
       collection: "provider_connections",
       depth: 0,
       overrideAccess: true,
       pagination: false,
       sort: "provider",
-    });
-    if (!Array.isArray(result?.docs)) throw new Error("Payload provider connection query did not return documents");
+    };
     const scope = String(workspaceId || "").trim();
-    return result.docs.map(safeConnection).filter((connection) => !scope || connection.workspace_id === scope);
+    if (scope) options.where = { workspace_id: { equals: scope } };
+    const result = await runtime.find(options);
+    if (!Array.isArray(result?.docs)) throw new Error("Payload provider connection query did not return documents");
+    return result.docs.map(safeConnection);
   } catch (error) {
     if (error instanceof ProviderConnectionUnavailableError) throw error;
     throw new ProviderConnectionUnavailableError("Provider connection read failed", error);

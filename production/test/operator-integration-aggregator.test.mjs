@@ -12,6 +12,7 @@ import {
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "../lib/operator-integration-aggregator.mjs";
+import { saveProviderConnection } from "../lib/provider-connections.mjs";
 
 const ORIGIN = "https://ms-realty.example";
 const SECRET = "integration-aggregator-secret-that-is-longer-than-thirty-two-characters";
@@ -45,7 +46,7 @@ const PROVIDER_CONFIG = {
   },
 };
 
-function ownerPrincipal(workspaceIds = ["sandanski"]) {
+function ownerPrincipal(workspaceIds = []) {
   return {
     id: "payload-owner",
     source: "payload_session",
@@ -55,28 +56,38 @@ function ownerPrincipal(workspaceIds = ["sandanski"]) {
   };
 }
 
-function payloadAuth() {
+function payloadAuth(workspaceIds = []) {
   return {
     async resolve(token) {
-      return token === SESSION ? { principal: ownerPrincipal(), user: { id: 1 } } : null;
+      return token === SESSION ? { principal: ownerPrincipal(workspaceIds), user: { id: 1 } } : null;
     },
   };
 }
 
-function payloadStore() {
+function whereEquals(where, key) {
+  if (where?.[key]?.equals !== undefined) return where[key].equals;
+  for (const clause of where?.and || []) {
+    const match = whereEquals(clause, key);
+    if (match !== undefined) return match;
+  }
+  return undefined;
+}
+
+function payloadStore({ legacyGoogle = false } = {}) {
   const rows = [
     {
       id: "provider-google",
       provider: "google",
       status: "connected",
       connected_by: "payload-owner",
-      workspace_id: "sandanski",
+      ...(legacyGoogle ? {} : { workspace_id: "sandanski" }),
       account_label: "owner@example.com",
       external_account_id: "google-account-1",
       scopes: ["openid"],
       metadata: {
         email: "owner@example.com",
-        endpoint: "https://safe.example",
+        endpoint: "https://user:password@safe.example/v1?access_token=metadata-secret#metadata-secret",
+        uri: "https://safe.example/bot?token=metadata-secret#metadata-secret",
         api_key: "must-not-escape",
         access_token: "must-not-escape",
         credential_envelope: "must-not-escape",
@@ -103,11 +114,21 @@ function payloadStore() {
       metadata: { email: "other@example.com" },
     },
   ];
+  const queries = [];
   return {
     rows,
+    queries,
     async find(options) {
-      const provider = options.where?.provider?.equals;
-      return { docs: provider ? rows.filter((row) => row.provider === provider) : [...rows] };
+      queries.push(options);
+      const provider = whereEquals(options.where, "provider");
+      const workspace = whereEquals(options.where, "workspace_id");
+      return {
+        docs: rows.filter(
+          (row) =>
+            (provider === undefined || row.provider === provider) &&
+            (workspace === undefined || String(row.workspace_id || "") === workspace),
+        ),
+      };
     },
     async create({ data }) {
       const row = { id: `provider-${data.provider}`, ...data };
@@ -139,11 +160,11 @@ function sessionHeaders() {
   return { cookie: `ms_admin=${SESSION}`, host: "ms-realty.example" };
 }
 
-function adapterConfig(auditLogPath, payload) {
+function adapterConfig(auditLogPath, payload, workspaceIds = []) {
   return {
     ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }),
     auditLogPath,
-    payloadAdminAuth: payloadAuth(),
+    payloadAdminAuth: payloadAuth(workspaceIds),
     providerConnection: PROVIDER_CONFIG,
     providerConnectionPayload: payload,
     workspaceSettingsWorkspaceId: "sandanski",
@@ -151,11 +172,13 @@ function adapterConfig(auditLogPath, payload) {
 }
 
 test("integration contract is truthful, workspace-scoped, and redacts provider secrets", async () => {
+  const payload = payloadStore();
   const contract = await readOperatorIntegrationContract({
     principal: ownerPrincipal(),
     workspaceId: "sandanski",
+    configuredWorkspaceId: "sandanski",
     providerConfig: PROVIDER_CONFIG,
-    providerPayload: payloadStore(),
+    providerPayload: payload,
     canManageConnections: true,
   });
   const google = contract.providers.find((provider) => provider.id === "google");
@@ -189,21 +212,27 @@ test("integration contract is truthful, workspace-scoped, and redacts provider s
     assert.equal(serialized.includes(secret), false, secret);
   }
   assert.equal(google.metadata.email, "owner@example.com");
-  assert.equal(google.metadata.endpoint, "https://safe.example");
+  assert.equal(google.metadata.endpoint, "https://safe.example/v1");
+  assert.equal(google.metadata.uri, "https://safe.example/bot");
+  assert.equal(payload.queries.some((query) => query.where?.workspace_id?.equals === "sandanski"), true);
 });
 
-test("integration workspace resolution fails closed for ambiguous or foreign workspaces", () => {
+test("integration workspace resolution is owner-only and fails closed without configured scope", () => {
   assert.deepEqual(
-    resolveOperatorIntegrationWorkspace(ownerPrincipal(["sandanski"])),
+    resolveOperatorIntegrationWorkspace(ownerPrincipal(), { configuredWorkspaceId: "sandanski" }),
     { workspace_id: "sandanski", scope: "workspace" },
   );
   assert.throws(
-    () => resolveOperatorIntegrationWorkspace(ownerPrincipal(["sandanski"]), { workspaceId: "foreign" }),
+    () => resolveOperatorIntegrationWorkspace(ownerPrincipal(["sandanski"]), { configuredWorkspaceId: "sandanski" }),
+    (error) => error.code === "owner_admin_required" && error.status === 403,
+  );
+  assert.throws(
+    () => resolveOperatorIntegrationWorkspace(ownerPrincipal(), { workspaceId: "foreign", configuredWorkspaceId: "sandanski" }),
     (error) => error.code === "workspace_forbidden" && error.status === 403,
   );
   assert.throws(
-    () => resolveOperatorIntegrationWorkspace(ownerPrincipal(["sandanski", "sofia"])),
-    (error) => error.code === "workspace_scope_required" && error.status === 400,
+    () => resolveOperatorIntegrationWorkspace(ownerPrincipal()),
+    (error) => error.code === "workspace_scope_unavailable" && error.status === 503,
   );
 });
 
@@ -258,6 +287,27 @@ test("integration endpoint rejects unauthenticated and non-Payload admin access"
   });
   const unauthenticated = await dispatchHttp(app, { method: "GET", url: "/api/admin/integrations", headers: {} });
   assert.equal(unauthenticated.status, 401);
+
+  const scopedAdminApp = createHttpApp({
+    auditLogPath,
+    payloadAdminAuth: payloadAuth(["sandanski"]),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: payloadStore(),
+    workspaceSettingsWorkspaceId: "sandanski",
+  });
+  const scopedAdmin = await dispatchHttp(scopedAdminApp, {
+    method: "GET",
+    url: "/api/admin/integrations?workspace_id=sandanski",
+    headers: sessionHeaders(),
+  });
+  assert.equal(scopedAdmin.status, 403);
+  assert.equal(scopedAdmin.body.kind, "owner_admin_required");
+  const scopedNext = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/integrations?workspace_id=sandanski`, { headers: sessionHeaders() }),
+    { config: adapterConfig(auditLogPath, payloadStore(), ["sandanski"]) },
+  );
+  assert.equal(scopedNext.status, 403);
+  assert.equal((await scopedNext.json()).kind, "owner_admin_required");
 
   const previous = {
     NODE_ENV: process.env.NODE_ENV,
@@ -315,6 +365,67 @@ test("aggregated disconnect is workspace-scoped, provider-revoking, and audited"
   assert.equal(foreign.status, 404);
   assert.equal(foreign.body.kind, "provider_connection_not_found");
   assert.equal(payload.rows.some((row) => row.workspace_id === "other-workspace"), true);
+});
+
+test("migrated legacy provider rows remain readable, updateable, and disconnectable", async (t) => {
+  const payload = payloadStore({ legacyGoogle: true });
+  for (const row of payload.rows) {
+    if (!String(row.workspace_id || "").trim()) row.workspace_id = "sandanski";
+  }
+  const contract = await readOperatorIntegrationContract({
+    principal: ownerPrincipal(),
+    configuredWorkspaceId: "sandanski",
+    providerConfig: PROVIDER_CONFIG,
+    providerPayload: payload,
+    canManageConnections: true,
+  });
+  assert.deepEqual(contract.connections.map((connection) => connection.provider), ["google"]);
+  assert.equal(payload.queries.some((query) => query.where?.workspace_id?.equals === "sandanski"), true);
+
+  const saved = await saveProviderConnection(
+    {
+      provider: "google",
+      status: "connected",
+      accountLabel: "upgraded-owner@example.com",
+      externalAccountId: "google-account-upgraded",
+      scopes: ["openid"],
+      metadata: { email: "upgraded-owner@example.com" },
+      credentials: { refresh_token: "upgraded-refresh-token" },
+    },
+    {
+      connectedBy: "payload-owner",
+      workspaceId: "sandanski",
+      credentialSecret: SECRET,
+      payload,
+    },
+  );
+  assert.equal(saved.account_label, "upgraded-owner@example.com");
+  assert.equal(payload.rows.find((row) => row.provider === "google").workspace_id, "sandanski");
+  assert.equal(
+    payload.queries.some(
+      (query) => query.where?.and?.some((clause) => clause.workspace_id?.equals === "sandanski"),
+    ),
+    true,
+  );
+
+  const auditLogPath = auditPath(t, "legacy-disconnect");
+  const app = createHttpApp({
+    auditLogPath,
+    payloadAdminAuth: payloadAuth(),
+    providerConnection: PROVIDER_CONFIG,
+    providerConnectionPayload: payload,
+    providerFetch: async () => new Response("{}", { status: 200 }),
+    workspaceSettingsWorkspaceId: "sandanski",
+  });
+  const response = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/integrations",
+    headers: { ...sessionHeaders(), "content-type": "application/json", origin: ORIGIN, "sec-fetch-site": "same-origin" },
+    body: { action: "disconnect", provider: "google" },
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.last_action.deleted, true);
+  assert.equal(payload.rows.some((row) => row.provider === "google"), false);
 });
 
 test("provider capability without OAuth remains setup-only and cannot expose a fake action", () => {

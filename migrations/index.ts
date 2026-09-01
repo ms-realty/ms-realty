@@ -28,6 +28,7 @@ import * as migration_20260830_120000_listing_translation_copy from './20260830_
 import * as migration_20260830_130000_listing_translation_workflow_status from './20260830_130000_listing_translation_workflow_status';
 import * as migration_20260901_120000_durable_media_lifecycle from './20260901_120000_durable_media_lifecycle';
 import * as migration_20260901_130000_document_signatures from './20260901_130000_document_signatures';
+import * as migration_20260901_130000_provider_connection_workspace_scope from './20260901_130000_provider_connection_workspace_scope';
 
 export const migrations = [
   {
@@ -179,5 +180,10 @@ export const migrations = [
     up: migration_20260901_130000_document_signatures.up,
     down: migration_20260901_130000_document_signatures.down,
     name: '20260901_130000_document_signatures',
+  },
+  {
+    up: migration_20260901_130000_provider_connection_workspace_scope.up,
+    down: migration_20260901_130000_provider_connection_workspace_scope.down,
+    name: '20260901_130000_provider_connection_workspace_scope',
   },
 ];
