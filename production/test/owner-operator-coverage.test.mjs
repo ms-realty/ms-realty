@@ -38,7 +38,7 @@ const key = (row) => `${row.method} ${row.pathname}`;
 test("owner/operator catalog covers every admin route method exactly once", () => {
   assert.equal(assertOwnerOperatorCatalog(), true);
   const discovered = discoverAdminRoutes();
-  assert.equal(discovered.length, 130);
+  assert.equal(discovered.length, 148);
   assert.equal(new Set(discovered.map((row) => key(row))).size, discovered.length);
   assert.equal(ADMIN_ROUTE_COVERAGE.length, discovered.length);
   assert.deepEqual(
@@ -65,6 +65,15 @@ test("owner/operator catalog covers every admin route method exactly once", () =
     adminCatalog.operations.find((row) => row.operation === "admin_post_listings_status").confirmation,
     ownerOperatorConfirmation("admin_post_listings_status"),
   );
+  const automationRuns = adminCatalog.operations.find((row) => row.operation === "admin_get_automations_runs");
+  assert.equal(automationRuns.family, "operations");
+  assert.equal(automationRuns.capability, "operations:read");
+  assert.equal(automationRuns.sensitive, true);
+  const completeTask = adminCatalog.operations.find((row) => row.operation === "admin_post_tasks_by_taskId_complete");
+  assert.equal(completeTask.family, "operations");
+  assert.equal(completeTask.capability, "operations:write");
+  assert.equal(completeTask.sensitive, true);
+  assert.deepEqual(completeTask.confirmation, ownerOperatorConfirmation(completeTask.operation));
 });
 
 test("owner/operator operations include each Hermes tool exactly once", () => {
@@ -84,13 +93,13 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   assert.equal(artifact.proof_kind, "source_and_executable_contract");
   assert.deepEqual(Object.keys(artifact.executable_proof), ["admin_pages", "admin_routes", "hermes_tools", "provider_matrix"]);
   assert.deepEqual(artifact.summary, {
-    admin_route_files: 111,
-    admin_methods: 130,
+    admin_route_files: 121,
+    admin_methods: 148,
     admin_pages: ADMIN_PAGE_SURFACES.length,
     nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,
-    authorized_workflows: 152,
-    structurally_covered_workflows: 152,
+    authorized_workflows: 170,
+    structurally_covered_workflows: 170,
     structural_coverage_percent: 100,
     providers: 10,
     enabled_integrations: 5,

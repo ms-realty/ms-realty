@@ -55,6 +55,15 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/accounts"],
   ["GET", "/api/admin/activity"],
   ["GET", "/api/admin/approved-content"],
+  ["GET", "/api/admin/automations"],
+  ["POST", "/api/admin/automations"],
+  ["GET", "/api/admin/automations/{ruleId}"],
+  ["POST", "/api/admin/automations/{ruleId}"],
+  ["PUT", "/api/admin/automations/{ruleId}"],
+  ["PATCH", "/api/admin/automations/{ruleId}"],
+  ["POST", "/api/admin/automations/{ruleId}/run"],
+  ["GET", "/api/admin/automations/runs"],
+  ["GET", "/api/admin/automations/runs/{runId}"],
   ["GET", "/api/admin/availability"],
   ["POST", "/api/admin/availability"],
   ["POST", "/api/admin/broker-contacts"],
@@ -90,6 +99,8 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/hermes"],
   ["GET", "/api/admin/integrations"],
   ["POST", "/api/admin/integrations"],
+  ["GET", "/api/admin/hermes/runs"],
+  ["GET", "/api/admin/hermes/runs/{runId}"],
   ["GET", "/api/admin/launch-input-checklist"],
   ["POST", "/api/admin/launch-readiness/export"],
   ["GET", "/api/admin/launch-readiness"],
@@ -167,6 +178,13 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/settings"],
   ["GET", "/api/admin/team"],
   ["POST", "/api/admin/team"],
+  ["GET", "/api/admin/tasks"],
+  ["POST", "/api/admin/tasks"],
+  ["GET", "/api/admin/tasks/{taskId}"],
+  ["POST", "/api/admin/tasks/{taskId}"],
+  ["PUT", "/api/admin/tasks/{taskId}"],
+  ["PATCH", "/api/admin/tasks/{taskId}"],
+  ["POST", "/api/admin/tasks/{taskId}/complete"],
   ["GET", "/api/admin/today"],
   ["POST", "/api/admin/tours/approve"],
   ["POST", "/api/admin/translations/approve"],
@@ -231,7 +249,7 @@ function operationFamily(pathname) {
     return "content";
   }
   if (
-    /\/accounts?|\/availability|\/broker-contacts|\/consents|\/deals\/|\/documents|\/lead|\/leads|\/pipeline|\/public-requests|\/replies|\/requests|\/saved-search|\/viewings|\/views/.test(
+    /\/accounts?|\/automations|\/availability|\/broker-contacts|\/consents|\/deals\/|\/documents|\/lead|\/leads|\/pipeline|\/public-requests|\/replies|\/requests|\/saved-search|\/tasks|\/viewings|\/views/.test(
       pathname,
     )
   ) {
@@ -241,7 +259,7 @@ function operationFamily(pathname) {
 }
 
 function isSensitivePath(pathname) {
-  return /\/accounts?|\/broker-contacts|\/connections\/agent-config|\/consents|\/contacts|\/data-exports|\/documents|\/hermes|\/leads?|\/replies|\/security\/|\/team/.test(
+  return /\/accounts?|\/automations|\/broker-contacts|\/connections\/agent-config|\/consents|\/contacts|\/data-exports|\/documents|\/hermes|\/leads?|\/replies|\/security\/|\/tasks|\/team/.test(
     pathname,
   );
 }
