@@ -8,24 +8,51 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: read
 
 jobs:
   merge:
     name: Merge tested pull request
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'pull_request' ||
+      (github.event.workflow_run.event == 'workflow_dispatch' &&
+      github.event.workflow_run.head_branch == 'automation/hermes-agent-updater'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/github-script@v7
         with:
           script: |
-            const reference = context.payload.workflow_run.pull_requests[0];
+            const { owner, repo } = context.repo;
+            const workflowRun = context.payload.workflow_run;
+            const isHermesUpdaterRun =
+              workflowRun.event === "workflow_dispatch" &&
+              workflowRun.head_branch === "automation/hermes-agent-updater";
+            let reference = workflowRun.pull_requests?.[0];
+            if (!reference && isHermesUpdaterRun) {
+              const { data: candidates } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: "open",
+                base: "main",
+                head: owner + ":automation/hermes-agent-updater",
+                per_page: 10,
+              });
+              if (candidates.length !== 1) {
+                core.notice(
+                  "The Hermes updater CI run must have exactly one open same-repository PR; found " +
+                    candidates.length + ".",
+                );
+                return;
+              }
+              reference = candidates[0];
+            }
             if (!reference) {
               core.notice("The completed CI run is not attached to a pull request.");
               return;
             }
 
-            const { owner, repo } = context.repo;
             const { data: pull } = await github.rest.pulls.get({
               owner,
               repo,
@@ -40,15 +67,39 @@ jobs:
               core.setFailed("Only same-repository pull requests targeting main can be merged automatically.");
               return;
             }
-            if (pull.head.sha !== context.payload.workflow_run.head_sha) {
+            if (pull.head.sha !== workflowRun.head_sha) {
               core.setFailed("The pull-request head changed after this CI run.");
               return;
+            }
+            if (pull.head.ref === "automation/hermes-agent-updater") {
+              const marker = "<!-- ms-realty:hermes-upstream-update -->";
+              if (!pull.body?.includes(marker)) {
+                core.setFailed("The Hermes updater pull request is missing its provenance marker.");
+                return;
+              }
+              const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+                owner,
+                repo,
+                run_id: workflowRun.id,
+                filter: "latest",
+                per_page: 100,
+              });
+              const smoke = jobs.jobs.find((job) => job.name === "Hermes compatibility smoke");
+              if (smoke?.conclusion !== "success") {
+                core.notice("Hermes updater PR remains open until its compatibility smoke passes.");
+                return;
+              }
             }
             if (!["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {
               core.setFailed("The pull-request author is not a repository collaborator.");
               return;
             }
-            if (pull.base.sha !== reference.base.sha) {
+            let expectedBaseSha = reference.base?.sha;
+            if (isHermesUpdaterRun) {
+              const { data: main } = await github.rest.repos.getBranch({ owner, repo, branch: "main" });
+              expectedBaseSha = main.commit.sha;
+            }
+            if (expectedBaseSha && pull.base.sha !== expectedBaseSha) {
               await github.rest.pulls.updateBranch({
                 owner,
                 repo,
