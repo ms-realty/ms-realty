@@ -14,6 +14,7 @@ const searchSyncCli = fs.readFileSync(fromRoot("production", "scripts", "run-sea
 const searchQueryCli = fs.readFileSync(fromRoot("production", "scripts", "run-search-engine-query.mjs"), "utf8");
 const liveServiceEvidenceCli = fs.readFileSync(fromRoot("production", "scripts", "run-live-service-evidence.mjs"), "utf8");
 const worker = fs.readFileSync(fromRoot("workers", "index.js"), "utf8");
+const mediaIngestBoundary = fs.readFileSync(fromRoot("workers", "media-ingest-boundary.mjs"), "utf8");
 const previewHost = fs.readFileSync(fromRoot("workers", "preview-host.mjs"), "utf8");
 const wrangler = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
 const deploymentGuide = fs.readFileSync(fromRoot("production", "DEPLOYMENT.md"), "utf8");
@@ -152,7 +153,7 @@ test("workers.dev delegates dynamic traffic to the fixed origin and carries an e
   assert.match(worker, /mediaCandidateKeys\(url\.hostname, url\.pathname\)/);
   assert.match(worker, /import \{ PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, canonicalLegacyHost, isPreviewHost, mediaCandidateKeys \} from "\.\/preview-host\.mjs"/);
   assert.ok(previewHost.includes("`${PRODUCTION_PUBLIC_HOST}${pathname}`"));
-  assert.ok(worker.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
+  assert.ok(mediaIngestBoundary.includes("`${PRODUCTION_PUBLIC_HOST}/wp-content/`"));
   assert.match(wrangler, /"MS_REALTY_ORIGIN_URL": "https:\/\/ms-realty-review\.157-230-109-185\.sslip\.io"/);
   assert.match(wrangler, /"MS_REALTY_WORKER_PUBLIC_ORIGIN": "https:\/\/ms-realty\.ms-realty-bg\.workers\.dev"/);
   assert.doesNotMatch(wrangler, /"MS_REALTY_PUBLIC_ORIGIN"\s*:/);
