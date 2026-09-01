@@ -12,7 +12,6 @@ import {
   allowsPublicLeadMutation,
   isPublicAdminPath,
   isPayloadPrivatePath,
-  secretMatches,
 } from "./durable-case-authority.mjs";
 import { PREVIEW_NOINDEX, PRODUCTION_PUBLIC_HOST, canonicalLegacyHost, isPreviewHost, mediaCandidateKeys } from "./preview-host.mjs";
 import {
@@ -23,7 +22,7 @@ import {
   responseWithEdgeBuildMarker,
 } from "./origin-proxy.mjs";
 import { edgeCacheHit, edgeCacheKey, requestMayUseEdgeCache, storeInEdgeCache } from "./edge-cache.mjs";
-import { mediaIngestCredential } from "./media-ingest-auth.mjs";
+import { INGEST_PREFIX, ingestMedia } from "./media-ingest-boundary.mjs";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -154,68 +153,7 @@ function ownedMediaKey(pathname) {
   return `${host}${mediaPath}`;
 }
 
-// Bulk media ingest. The obvious route — `wrangler r2 object put` — goes
-// through Cloudflare's management API, which is rate limited per account and
-// reports "Upload complete" on a throttled write; pushing 1714 objects that
-// way silently dropped most of them. Writing through this binding is the same
-// code path the site reads from, so a 200 here means the object is really
-// there. The endpoint does not exist unless an explicit media secret or the
-// origin credential needed to derive a media-only credential is set.
-const INGEST_PREFIX = "/__media/";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-// R2 keys are arbitrary UTF-8, and 13 years of WordPress uploads include
-// Cyrillic filenames ("схема.jpg") that carry their own search equity. An
-// ASCII allowlist silently dropped them, so the guard now rejects only what is
-// genuinely dangerous: control characters and the parent-directory token.
-// eslint-disable-next-line no-control-regex -- matching control characters is the whole point
-const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
-const isSafeKey = (key) => key.length > 0 && key.length <= 1024 && !CONTROL_CHARS.test(key) && !key.includes("..");
-
-// Uploads may only land under the production or legacy-host media trees. Even with the
-// secret, the endpoint cannot plant objects at arbitrary keys — a leaked
-// credential defaces images, it does not gain a free file host.
-const INGEST_KEY_PREFIXES = [
-  `${PRODUCTION_PUBLIC_HOST}/wp-content/`,
-  "makler-realty.com/wp-content/",
-  "makler-realty.ru/wp-content/",
-];
-// Largest mirrored file is 9.8MB; the cap bounds Worker memory, not R2.
-const MAX_INGEST_BYTES = 32 * 1024 * 1024;
-
-async function ingestMedia(request, env, url) {
-  const expected = env.MEDIA_INGEST_SECRET || (await mediaIngestCredential(env.MS_REALTY_ORIGIN_TOKEN));
-  if (!expected) return new Response("Not found", { status: 404 });
-  if (request.method !== "PUT") return new Response("Method not allowed", { status: 405 });
-
-  const presented = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (!presented || !(await secretMatches(presented, expected))) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const declared = Number(request.headers.get("content-length") || 0);
-  if (declared > MAX_INGEST_BYTES) return new Response("Too large", { status: 413 });
-
-  let key;
-  try {
-    key = decodeURIComponent(url.pathname.slice(INGEST_PREFIX.length));
-  } catch {
-    return new Response("Bad key", { status: 400 });
-  }
-  if (!isSafeKey(key) || !INGEST_KEY_PREFIXES.some((prefix) => key.startsWith(prefix))) {
-    return new Response("Bad key", { status: 400 });
-  }
-
-  const body = await request.arrayBuffer();
-  if (!body.byteLength) return new Response("Empty body", { status: 400 });
-  if (body.byteLength > MAX_INGEST_BYTES) return new Response("Too large", { status: 413 });
-  await env.MEDIA.put(key, body, {
-    httpMetadata: { contentType: request.headers.get("content-type") ?? "application/octet-stream" },
-  });
-  // Echo the stored length so the uploader can verify rather than trust.
-  return new Response(JSON.stringify({ key, size: body.byteLength }), {
-    headers: { "content-type": "application/json" },
-  });
-}
 
 function previewRobotsResponse() {
   return new Response("User-agent: *\nDisallow: /\n", {

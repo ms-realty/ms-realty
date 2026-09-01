@@ -185,6 +185,20 @@ test("the stored filename is a content hash and cannot be steered by the caller"
   assert.equal(key, `ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/ms-${"a".repeat(32)}.jpg`);
   assert.equal(mediaUploadPublicUrl(key), `https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/ms-${"a".repeat(32)}.jpg`);
 
+  const stagedKey = mediaUploadKey({
+    scope: "listing",
+    subjectId: "MS-CRAWL-0001",
+    assetId: "media-0123456789abcdef0123",
+    hash,
+    ext: "jpg",
+    visibility: "staged_private",
+  });
+  assert.equal(
+    stagedKey,
+    `ms-realty.ms-realty-bg.workers.dev/wp-content/private/listings/MS-CRAWL-0001/media-0123456789abcdef0123/ms-${"a".repeat(32)}.jpg`,
+  );
+  assert.equal(mediaUploadPublicUrl(stagedKey), null);
+
   // A seller's photo lives outside the prefix the Worker serves, so it has no
   // public URL at all.
   const privateKey = mediaUploadKey({ scope: "enquiry", subjectId: "lead-draft-1", hash, ext: "jpg" });
@@ -217,7 +231,9 @@ test("the r2 driver ingests through the Worker route and verifies the echoed siz
     { driver: "r2", endpoint: "https://example.test/__media", secret: "ingest-secret" },
     {
       fetchImpl: async (url, init) => {
-        calls.push({ url, method: init.method, auth: init.headers.authorization, bytes: init.body.length });
+        calls.push({ url, method: init.method, auth: init.headers.authorization, bytes: init.body?.length || 0 });
+        if (init.method === "GET") return { ok: true, status: 200, arrayBuffer: async () => tinyJpeg() };
+        if (init.method === "DELETE") return { ok: true, status: 200 };
         return { ok: true, status: 200, json: async () => ({ key: "k", size: init.body.length }) };
       },
     },
@@ -234,6 +250,11 @@ test("the r2 driver ingests through the Worker route and verifies the echoed siz
     calls[0].url,
     "https://example.test/__media/makler-realty.com%2Fwp-content%2Fuploads%2F2026%2F08%2Fms-abc.jpg",
   );
+  assert.deepEqual(await storage.read("makler-realty.com/wp-content/uploads/2026/08/ms-abc.jpg"), tinyJpeg());
+  await storage.delete("makler-realty.com/wp-content/uploads/2026/08/ms-abc.jpg");
+  assert.deepEqual(calls.map((call) => call.method), ["PUT", "GET", "DELETE"]);
+  assert.equal(calls[1].auth, "Bearer ingest-secret");
+  assert.equal(calls[2].auth, "Bearer ingest-secret");
 
   const lying = createMediaUploadStorage(
     { driver: "r2", endpoint: "https://example.test/__media/", secret: "ingest-secret" },
