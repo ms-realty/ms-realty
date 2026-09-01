@@ -264,6 +264,27 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(ciWorkflow, /MS_REALTY_DEPLOY_KNOWN_HOSTS: \$\{\{ secrets\.MS_REALTY_DEPLOY_KNOWN_HOSTS \}\}/);
   const deployJob = ciWorkflow.slice(ciWorkflow.indexOf("\n  deploy:"));
   assert.doesNotMatch(deployJob, /secrets\.DATABASE_URL|secrets\.PAYLOAD_SECRET|payload:migrate/);
+  const collisionGuard = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Validate Worker secret bindings"),
+    ciWorkflow.indexOf("- name: Deploy exact main commit"),
+  );
+  assert.match(collisionGuard, /secret list --name ms-realty --format json/);
+  assert.match(collisionGuard, /wrangler\.jsonc/);
+  const allowlist = collisionGuard.match(/const allowedMigrationNames = new Set\(\[\n([\s\S]*?)\n\s*\]\);/);
+  assert.ok(allowlist, "Worker secret collision allowlist must be explicit");
+  assert.deepEqual(
+    [...allowlist[1].matchAll(/"([^"]+)"/g)].map(([, name]) => name),
+    ["MS_REALTY_LEAD_DURABLE_STORE_ENABLED", "MS_REALTY_WORKSPACE_ID"],
+  );
+  assert.match(collisionGuard, /const collisions = rows[\s\S]*?checkedInVars\.has\(name\)/);
+  assert.match(collisionGuard, /const unexpectedCollisions = collisions[\s\S]*?allowedMigrationNames\.has\(name\)/);
+  assert.match(collisionGuard, /if \(collisions\.length > 2 \|\| unexpectedCollisions\.length > 0\) \{\s+throw new Error/);
+  const deployCommand = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Deploy exact main commit"),
+    ciWorkflow.indexOf("- name: Verify deployed Worker"),
+  );
+  assert.doesNotMatch(deployCommand, /--strict\b/);
+  assert.match(deployCommand, /--keep-vars\b/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
   assert.match(deployJob, /timeout-minutes: 45/);
