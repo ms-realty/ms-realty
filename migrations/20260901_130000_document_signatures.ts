@@ -240,4 +240,3 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   void db;
 }
-

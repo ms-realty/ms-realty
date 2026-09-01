@@ -46,6 +46,8 @@ test("individual admin credentials are authoritative and bind a stable operator"
     "cases:read",
     "cases:write",
     "content:read",
+    "documents:read",
+    "documents:write",
     "operations:read",
     "operations:write",
     // Every role manages its own second factor and its own session list.

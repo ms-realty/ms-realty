@@ -116,6 +116,17 @@ import {
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
+import {
+  DocumentStoreUnavailableError,
+  createDocument,
+  createDocumentRevision,
+  createSignatureRequest,
+  readDocument,
+  readDocumentRevisions,
+  readDocuments,
+  readSignatureRequests,
+  updateSignatureRequestStatus,
+} from "./document-signatures.mjs";
 import { appendAccountContactLink, appendAccountCreation, deriveAccounts, readAccountLedger } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
 import { loadMigrationRecords } from "./content.mjs";
@@ -5132,6 +5143,155 @@ export function createHttpApp({
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
+    }
+
+    // Durable document metadata and signature state live in Payload/Postgres.
+    // Keep this API separate from the older checklist ledger at
+    // /api/admin/documents, whose GET and /outcome POST remain unchanged.
+    if (
+      url.pathname === "/api/admin/documents/records" ||
+      (request.method === "POST" && url.pathname === "/api/admin/documents") ||
+      url.pathname === "/api/admin/signature-requests" ||
+      (url.pathname !== "/api/admin/documents/outcome" &&
+        /^\/api\/admin\/documents\/[^/]+(?:\/revisions)?$/.test(url.pathname)) ||
+      /^\/api\/admin\/signature-requests\/[^/]+\/status$/.test(url.pathname)
+    ) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const recordedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
+      const jsonDocumentError = (error) => {
+        if (error instanceof DocumentStoreUnavailableError || error?.code === "document_store_unavailable") {
+          return adminJson(503, {
+            kind: "document_store_unavailable",
+            message: "Document storage is temporarily unavailable",
+          });
+        }
+        return adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error?.message || "Invalid document request" });
+      };
+      try {
+        const servicePayload = payloadListingRuntime || null;
+        if (request.method === "GET" && url.pathname === "/api/admin/documents/records") {
+          return adminJson(200, {
+            kind: "admin_documents",
+            documents: await readDocuments({
+              payload: servicePayload,
+              principal,
+              workspaceId: url.searchParams.get("workspace_id") || url.searchParams.get("workspaceId") || null,
+            }),
+          });
+        }
+        if (request.method === "POST" && url.pathname === "/api/admin/documents") {
+          const result = await createDocument({ payload: servicePayload, principal, input: parseBody(request), recordedAt });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "document_created",
+              actor: principal.id,
+              objectType: "document",
+              objectId: result.document.document_id,
+              metadata: {
+                workspace_id: result.document.workspace_id,
+                document_type: result.document.document_type,
+                revision_number: result.revision?.revision_number || 1,
+              },
+            }, recordedAt);
+          }
+          return adminJson(result.idempotent ? 200 : 201, { kind: "document", ...result });
+        }
+        const documentMatch = url.pathname.match(/^\/api\/admin\/documents\/([^/]+)$/);
+        if (request.method === "GET" && documentMatch) {
+          return adminJson(200, {
+            kind: "document",
+            document: await readDocument({ payload: servicePayload, principal, documentId: decodeURIComponent(documentMatch[1]) }),
+          });
+        }
+        const revisionsMatch = url.pathname.match(/^\/api\/admin\/documents\/([^/]+)\/revisions$/);
+        if (revisionsMatch) {
+          const documentId = decodeURIComponent(revisionsMatch[1]);
+          if (request.method === "GET") {
+            return adminJson(200, {
+              kind: "document_revisions",
+              document_id: documentId,
+              revisions: await readDocumentRevisions({ payload: servicePayload, principal, documentId }),
+            });
+          }
+          if (request.method === "POST") {
+            const result = await createDocumentRevision({
+              payload: servicePayload,
+              principal,
+              documentId,
+              input: parseBody(request),
+              recordedAt,
+            });
+            if (!result.idempotent) {
+              recordAudit({
+                action: "document_revision_created",
+                actor: principal.id,
+                objectType: "document_revision",
+                objectId: result.revision.revision_id,
+                metadata: {
+                  workspace_id: result.document.workspace_id,
+                  document_id: result.document.document_id,
+                  revision_number: result.revision.revision_number,
+                },
+              }, recordedAt);
+            }
+            return adminJson(result.idempotent ? 200 : 201, { kind: "document_revision", ...result });
+          }
+        }
+        if (request.method === "GET" && url.pathname === "/api/admin/signature-requests") {
+          return adminJson(200, {
+            kind: "signature_requests",
+            requests: await readSignatureRequests({
+              payload: servicePayload,
+              principal,
+              documentId: url.searchParams.get("document_id") || url.searchParams.get("documentId") || null,
+            }),
+          });
+        }
+        if (request.method === "POST" && url.pathname === "/api/admin/signature-requests") {
+          const result = await createSignatureRequest({ payload: servicePayload, principal, input: parseBody(request), recordedAt });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "signature_request_created",
+              actor: principal.id,
+              objectType: "signature_request",
+              objectId: result.request.request_id,
+              metadata: {
+                workspace_id: result.request.workspace_id,
+                document_id: result.request.document_id,
+                revision_number: result.request.revision_number,
+                status: result.request.status,
+              },
+            }, recordedAt);
+          }
+          return adminJson(result.idempotent ? 200 : 201, { kind: "signature_request", ...result });
+        }
+        const statusMatch = url.pathname.match(/^\/api\/admin\/signature-requests\/([^/]+)\/status$/);
+        if (request.method === "POST" && statusMatch) {
+          const result = await updateSignatureRequestStatus({
+            payload: servicePayload,
+            principal,
+            requestId: decodeURIComponent(statusMatch[1]),
+            input: parseBody(request),
+            recordedAt,
+          });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "signature_status_updated",
+              actor: principal.id,
+              objectType: "signature_request",
+              objectId: result.request.request_id,
+              metadata: {
+                workspace_id: result.request.workspace_id,
+                status: result.request.status,
+              },
+            }, recordedAt);
+          }
+          return adminJson(result.idempotent ? 200 : 201, { kind: "signature_request_status", ...result });
+        }
+        return adminJson(405, { kind: "method_not_allowed" });
+      } catch (error) {
+        return jsonDocumentError(error);
+      }
     }
 
     if (request.method === "GET" && ["/api/admin/documents", "/admin/documents"].includes(url.pathname)) {

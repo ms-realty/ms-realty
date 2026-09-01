@@ -122,6 +122,17 @@ import {
   readDocumentChecklistOutcomes,
 } from "./document-checklists.mjs";
 import {
+  DocumentStoreUnavailableError,
+  createDocument,
+  createDocumentRevision,
+  createSignatureRequest,
+  readDocument,
+  readDocumentRevisions,
+  readDocuments,
+  readSignatureRequests,
+  updateSignatureRequestStatus,
+} from "./document-signatures.mjs";
+import {
   DEFAULT_ACCOUNT_LEDGER_PATH,
   appendAccountContactLink,
   appendAccountCreation,
@@ -4865,6 +4876,164 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, await contactsPayload(registry, url, config));
+
+    // Durable document metadata and signature state live in Payload/Postgres.
+    // The legacy checklist ledger remains on /api/admin/documents GET and
+    // /api/admin/documents/outcome POST; this block handles the durable API.
+    if (
+      url.pathname === "/api/admin/documents/records" ||
+      (request.method === "POST" && url.pathname === "/api/admin/documents") ||
+      url.pathname === "/api/admin/signature-requests" ||
+      (url.pathname !== "/api/admin/documents/outcome" &&
+        /^\/api\/admin\/documents\/[^/]+(?:\/revisions)?$/.test(url.pathname)) ||
+      /^\/api\/admin\/signature-requests\/[^/]+\/status$/.test(url.pathname)
+    ) {
+      const servicePayload = config.payloadListingRuntime || null;
+      const recordedAt = config.reviewedAt || config.editedAt || config.receivedAt || new Date().toISOString();
+      try {
+        if (request.method === "GET" && url.pathname === "/api/admin/documents/records") {
+          return jsonResponse(200, {
+            kind: "admin_documents",
+            documents: await readDocuments({
+              payload: servicePayload,
+              principal: config.adminPrincipal,
+              workspaceId: url.searchParams.get("workspace_id") || url.searchParams.get("workspaceId") || null,
+            }),
+          });
+        }
+        if (request.method === "POST" && url.pathname === "/api/admin/documents") {
+          const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+          const result = await createDocument({
+            payload: servicePayload,
+            principal: config.adminPrincipal,
+            input,
+            recordedAt,
+          });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "document_created",
+              actor: config.adminPrincipal?.id,
+              objectType: "document",
+              objectId: result.document.document_id,
+              metadata: {
+                workspace_id: result.document.workspace_id,
+                document_type: result.document.document_type,
+                revision_number: result.revision?.revision_number || 1,
+              },
+            }, config, recordedAt);
+          }
+          return jsonResponse(result.idempotent ? 200 : 201, { kind: "document", ...result });
+        }
+        const documentMatch = url.pathname.match(/^\/api\/admin\/documents\/([^/]+)$/);
+        if (request.method === "GET" && documentMatch) {
+          return jsonResponse(200, {
+            kind: "document",
+            document: await readDocument({
+              payload: servicePayload,
+              principal: config.adminPrincipal,
+              documentId: decodeURIComponent(documentMatch[1]),
+            }),
+          });
+        }
+        const revisionsMatch = url.pathname.match(/^\/api\/admin\/documents\/([^/]+)\/revisions$/);
+        if (revisionsMatch) {
+          const documentId = decodeURIComponent(revisionsMatch[1]);
+          if (request.method === "GET") {
+            return jsonResponse(200, {
+              kind: "document_revisions",
+              document_id: documentId,
+              revisions: await readDocumentRevisions({ payload: servicePayload, principal: config.adminPrincipal, documentId }),
+            });
+          }
+          if (request.method === "POST") {
+            const result = await createDocumentRevision({
+              payload: servicePayload,
+              principal: config.adminPrincipal,
+              documentId,
+              input: parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+              recordedAt,
+            });
+            if (!result.idempotent) {
+              recordAudit({
+                action: "document_revision_created",
+                actor: config.adminPrincipal?.id,
+                objectType: "document_revision",
+                objectId: result.revision.revision_id,
+                metadata: {
+                  workspace_id: result.document.workspace_id,
+                  document_id: result.document.document_id,
+                  revision_number: result.revision.revision_number,
+                },
+              }, config, recordedAt);
+            }
+            return jsonResponse(result.idempotent ? 200 : 201, { kind: "document_revision", ...result });
+          }
+        }
+        if (request.method === "GET" && url.pathname === "/api/admin/signature-requests") {
+          return jsonResponse(200, {
+            kind: "signature_requests",
+            requests: await readSignatureRequests({
+              payload: servicePayload,
+              principal: config.adminPrincipal,
+              documentId: url.searchParams.get("document_id") || url.searchParams.get("documentId") || null,
+            }),
+          });
+        }
+        if (request.method === "POST" && url.pathname === "/api/admin/signature-requests") {
+          const result = await createSignatureRequest({
+            payload: servicePayload,
+            principal: config.adminPrincipal,
+            input: parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+            recordedAt,
+          });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "signature_request_created",
+              actor: config.adminPrincipal?.id,
+              objectType: "signature_request",
+              objectId: result.request.request_id,
+              metadata: {
+                workspace_id: result.request.workspace_id,
+                document_id: result.request.document_id,
+                revision_number: result.request.revision_number,
+                status: result.request.status,
+              },
+            }, config, recordedAt);
+          }
+          return jsonResponse(result.idempotent ? 200 : 201, { kind: "signature_request", ...result });
+        }
+        const statusMatch = url.pathname.match(/^\/api\/admin\/signature-requests\/([^/]+)\/status$/);
+        if (request.method === "POST" && statusMatch) {
+          const result = await updateSignatureRequestStatus({
+            payload: servicePayload,
+            principal: config.adminPrincipal,
+            requestId: decodeURIComponent(statusMatch[1]),
+            input: parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+            recordedAt,
+          });
+          if (!result.idempotent) {
+            recordAudit({
+              action: "signature_status_updated",
+              actor: config.adminPrincipal?.id,
+              objectType: "signature_request",
+              objectId: result.request.request_id,
+              metadata: { workspace_id: result.request.workspace_id, status: result.request.status },
+            }, config, recordedAt);
+          }
+          return jsonResponse(result.idempotent ? 200 : 201, { kind: "signature_request_status", ...result });
+        }
+        return jsonResponse(405, { kind: "method_not_allowed" });
+      } catch (error) {
+        if (error instanceof DocumentStoreUnavailableError || error?.code === "document_store_unavailable") {
+          return jsonResponse(503, {
+            kind: "document_store_unavailable",
+            message: "Document storage is temporarily unavailable",
+          });
+        }
+        return adminBadRequest(error);
+      }
+    }
+
     if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(await documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, await documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/consents") return htmlResponse(consentPayload(registry, url, config));
