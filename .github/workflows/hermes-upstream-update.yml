@@ -40,19 +40,22 @@ jobs:
           git fetch --no-tags origin main
           if git fetch --no-tags origin "${HERMES_UPDATE_BRANCH}"; then
             lease="$(git rev-parse "refs/remotes/origin/${HERMES_UPDATE_BRANCH}")"
-            remote_head="$lease"
             remote_exists=true
-            git switch --create "${HERMES_UPDATE_BRANCH}" --force "origin/${HERMES_UPDATE_BRANCH}"
-            git merge --no-edit origin/main
+            while IFS= read -r changed_path; do
+              case "$changed_path" in
+                production/docker-compose.local-production.yml|production/lib/hermes-provider-provisioning.mjs|SOURCE_OF_TRUTH.md|production/data/hermes-upstream-provenance.json|production/data/hermes-provider-provisioning-report.json) ;;
+                *) echo "Updater branch contains a disallowed path: $changed_path" >&2; exit 1 ;;
+              esac
+            done < <(git diff --name-only origin/main..."origin/${HERMES_UPDATE_BRANCH}")
           else
             lease="$(printf '%040d' 0)"
-            remote_head="$lease"
             remote_exists=false
-            git switch --create "${HERMES_UPDATE_BRANCH}" --force origin/main
           fi
+          # The updater always executes trusted code from the protected base.
+          # The remote updater branch is data-only and is never checked out.
+          git switch --create "${HERMES_UPDATE_BRANCH}" --force origin/main
           {
             echo "lease=$lease"
-            echo "remote_head=$remote_head"
             echo "remote_exists=$remote_exists"
           } >> "$GITHUB_OUTPUT"
 
@@ -60,7 +63,6 @@ jobs:
         id: update
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          HERMES_REMOTE_HEAD: ${{ steps.branch.outputs.remote_head }}
           HERMES_REMOTE_EXISTS: ${{ steps.branch.outputs.remote_exists }}
         shell: bash
         run: |
@@ -76,19 +78,21 @@ jobs:
             production/data/hermes-upstream-provenance.json
             production/data/hermes-provider-provisioning-report.json
           )
+          if [ "$HERMES_REMOTE_EXISTS" = "true" ] &&
+            git merge-base --is-ancestor origin/main "origin/${HERMES_UPDATE_BRANCH}" &&
+            git diff --quiet "origin/${HERMES_UPDATE_BRANCH}" -- "${tracked_paths[@]}"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ -n "$(git status --porcelain -- "${tracked_paths[@]}")" ]; then
             git add -- "${tracked_paths[@]}"
             git diff --cached --check
             git commit -m "chore: update Hermes Agent upstream pin"
-          elif [ "$HERMES_REMOTE_EXISTS" != "true" ]; then
+          else
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           head_sha="$(git rev-parse HEAD)"
-          if [ "$head_sha" = "$HERMES_REMOTE_HEAD" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           {
             echo "changed=true"
             echo "head_sha=$head_sha"

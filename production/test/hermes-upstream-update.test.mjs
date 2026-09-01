@@ -167,6 +167,16 @@ test("workflow fences official updater provenance, full CI dispatch, and compati
   assert.match(updater, /git push --force-with-lease/);
   assert.match(updater, /remote_exists=true/);
   assert.match(updater, /remote_exists=false/);
+  assert.match(updater, /Updater branch contains a disallowed path/);
+  assert.match(updater, /git diff --name-only origin\/main\.\.\."origin\/\$\{HERMES_UPDATE_BRANCH\}"/);
+  assert.match(updater, /git switch --create "\$\{HERMES_UPDATE_BRANCH\}" --force origin\/main/);
+  assert.doesNotMatch(updater, /git switch --create "\$\{HERMES_UPDATE_BRANCH\}" --force "origin\/\$\{HERMES_UPDATE_BRANCH\}"/);
+  assert.ok(
+    updater.indexOf('git switch --create "${HERMES_UPDATE_BRANCH}" --force origin/main') <
+      updater.indexOf("npm run hermes:upstream:update"),
+  );
+  assert.match(updater, /git merge-base --is-ancestor origin\/main "origin\/\$\{HERMES_UPDATE_BRANCH\}"/);
+  assert.match(updater, /git diff --quiet "origin\/\$\{HERMES_UPDATE_BRANCH\}" -- "\$\{tracked_paths\[@\]\}"/);
   assert.match(updater, /ms-realty:hermes-upstream-update/);
   assert.doesNotMatch(updater, /nousresearch\/hermes-agent:latest/);
 
