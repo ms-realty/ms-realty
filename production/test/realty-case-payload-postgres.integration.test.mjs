@@ -947,7 +947,10 @@ function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
       assert.equal(created.idempotent, false);
       assert.equal(created.task.task_id, taskInput.task_id);
       await payload.destroy();
-      payload = await getPayload({ config: await payloadConfig });
+      // Payload caches the default instance globally even after destroy(). A
+      // distinct key gives this assertion a genuinely fresh connection while
+      // keeping the create/reload check inside one isolated child process.
+      payload = await getPayload({ config: await payloadConfig, key: "operations-reload" });
       const reloaded = await readTask({ payload, workspaceId, taskId: taskInput.task_id });
       assert.equal(reloaded.title, taskInput.title);
       await assert.rejects(
