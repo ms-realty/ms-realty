@@ -254,7 +254,8 @@ test("Cloudflare Container allows only configured durable lead-authority writes"
 
 test("main deploys automatically with coordinated Worker and origin rollback", () => {
   assert.match(ciWorkflow, /repository_dispatch:\n\s+types: \[auto_merge_deploy\]/);
-  assert.doesNotMatch(ciWorkflow, /workflow_dispatch:/);
+  assert.match(ciWorkflow, /workflow_dispatch:\n\s+inputs:\n\s+hermes_update:/);
+  assert.match(ciWorkflow, /test "\$HERMES_EXPECTED_HEAD_SHA" = "\$GITHUB_SHA"/);
   assert.match(ciWorkflow, /github\.event_name == 'repository_dispatch'/);
   assert.match(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
   assert.match(ciWorkflow, /github\.event\.client_payload\.merge_sha == github\.sha/);
@@ -400,8 +401,9 @@ test("validation fixtures cannot become Container lead workflow state", () => {
 test("successful exact-head CI runs merge without a review gate", () => {
   assert.match(autoMergeWorkflow, /workflow_run:/);
   assert.match(autoMergeWorkflow, /pull\.head\.repo\?\.full_name !== `\$\{owner\}\/\$\{repo\}`/);
-  assert.match(autoMergeWorkflow, /pull\.head\.sha !== context\.payload\.workflow_run\.head_sha/);
-  assert.match(autoMergeWorkflow, /pull\.base\.sha !== reference\.base\.sha/);
+  assert.match(autoMergeWorkflow, /pull\.head\.sha !== workflowRun\.head_sha/);
+  assert.match(autoMergeWorkflow, /let expectedBaseSha = reference\.base\?\.sha/);
+  assert.match(autoMergeWorkflow, /pull\.base\.sha !== expectedBaseSha/);
   assert.match(autoMergeWorkflow, /github\.rest\.pulls\.updateBranch/);
   assert.match(autoMergeWorkflow, /merge_method: "squash"/);
   assert.doesNotMatch(autoMergeWorkflow, /actions: write/);
