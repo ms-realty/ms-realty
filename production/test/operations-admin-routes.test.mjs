@@ -85,6 +85,18 @@ function appRequest(pathname, { method = "GET", body, config } = {}) {
   );
 }
 
+test("nested automation and Hermes history routes resolve the shared Next adapter", async () => {
+  for (const route of [
+    "../../app/api/admin/automations/runs/route.js",
+    "../../app/api/admin/automations/runs/[runId]/route.js",
+    "../../app/api/admin/hermes/runs/route.js",
+    "../../app/api/admin/hermes/runs/[runId]/route.js",
+  ]) {
+    const module = await import(route);
+    assert.equal(typeof module.GET, "function", route);
+  }
+});
+
 test("Node and Next operations API paths share task and Hermes read behavior", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-operations-parity-"));
   const hermesAuditPath = path.join(directory, "hermes-audit.jsonl");
