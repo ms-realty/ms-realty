@@ -11,6 +11,16 @@ const store = createLedgerStore({
 
 const ADMIN_ACTIONS = new Set([
   "account_created",
+  "task_created",
+  "task_updated",
+  "task_completed",
+  "automation_rule_created",
+  "automation_rule_updated",
+  "automation_rule_enabled",
+  "automation_rule_disabled",
+  "automation_run_requested",
+  "automation_run_completed",
+  "automation_run_failed",
   "admin_session_revoked",
   "admin_sign_in_failed",
   "admin_signed_in",

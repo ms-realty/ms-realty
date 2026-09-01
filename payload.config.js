@@ -19,6 +19,12 @@ import { VIEWING_TRIP_REQUEST_COLLECTION } from "./production/lib/viewing-trip-r
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { DOCUMENT_COLLECTIONS } from "./production/lib/document-signatures.mjs";
 import { WORKSPACE_SETTINGS_COLLECTION } from "./production/lib/workspace-settings.mjs";
+import {
+  AUTOMATION_RULE_COLLECTION,
+  AUTOMATION_RUN_COLLECTION,
+  AUTOMATION_RUN_FAILURE_COLLECTION,
+  TASK_COLLECTION,
+} from "./production/lib/operations-durable-store.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
 import {
@@ -348,6 +354,19 @@ const viewingTripRequestCollectionWithAccess = {
   access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
 };
 
+// Operations are application-owned workflow state. Operators read them via
+// the workspace-scoped admin API; direct Payload writes stay disabled so the
+// task/audit/idempotency rules cannot be bypassed from the CMS panel.
+const operationsCollectionsWithAccess = [
+  TASK_COLLECTION,
+  AUTOMATION_RULE_COLLECTION,
+  AUTOMATION_RUN_COLLECTION,
+  AUTOMATION_RUN_FAILURE_COLLECTION,
+].map((collection) => ({
+  ...collection,
+  access: { ...serverOwnedCollectionAccess, read: caseCollectionAccess.read },
+}));
+
 // Request-time lead side effects share the lead transaction. They remain
 // append-only, server-owned event records; brokers can inspect their
 // privacy-safe payloads but cannot forge or rewrite them.
@@ -412,6 +431,7 @@ export default buildConfig({
     VIEWING_COLLECTION,
     viewingTripRequestCollectionWithAccess,
     LEAD_OPERATION_COLLECTION,
+    ...operationsCollectionsWithAccess,
     ...durableLeadSideEffectCollections,
   ],
 });
