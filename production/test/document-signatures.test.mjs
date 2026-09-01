@@ -234,6 +234,13 @@ test("document references reject content and API capabilities do not replace che
   assert.equal(createAuditLogEntry({ action: "document_created", actor: "operator", objectType: "document", objectId: "doc-1" }).action, "document_created");
 });
 
+test("document mutations reject inline content instead of silently dropping it", async () => {
+  await assert.rejects(
+    () => createDocument({ payload: new FakePayload(), principal: broker, input: { ...documentInput(), content: "raw bytes" } }),
+    (error) => error?.code === "invalid_document" && error?.status === 400,
+  );
+});
+
 test("migration registers durable document tables and immutable guards", () => {
   const migration = fs.readFileSync(new URL("../../migrations/20260901_130000_document_signatures.ts", import.meta.url), "utf8");
   const index = fs.readFileSync(new URL("../../migrations/index.ts", import.meta.url), "utf8");

@@ -522,6 +522,7 @@ function inputRevision(input, fallback = {}) {
 }
 
 function documentInput(input, principal, recordedAt) {
+  assertReferences(input, "document request");
   const workspaceId = assertWorkspace(principal, input?.workspace_id || input?.workspaceId);
   const actor = assertActor(principal);
   const idempotencyKey = requiredText(input?.idempotency_key || input?.idempotencyKey, "idempotency_key");
@@ -696,6 +697,7 @@ export async function readDocumentRevisions({ payload = null, principal, documen
 
 export async function createDocumentRevision({ payload = null, principal, documentId, input = {}, recordedAt = null } = {}) {
   const runtime = await runtimePayload(payload);
+  assertReferences(input, "revision request");
   const actor = assertActor(principal);
   const idempotencyKey = requiredText(input?.idempotency_key || input?.idempotencyKey, "idempotency_key");
   const requestedRevisionValue = input?.revision_number ?? input?.revisionNumber;
@@ -810,6 +812,7 @@ export async function readSignatureRequests({ payload = null, principal, documen
 
 export async function createSignatureRequest({ payload = null, principal, input = {}, recordedAt = null } = {}) {
   const runtime = await runtimePayload(payload);
+  assertReferences(input, "signature request");
   const document = await findDocument(runtime, input?.document_id || input?.documentId, principal);
   if (!document) throw failure("Document was not found", 404, "document_not_found");
   const revisionValue = input?.revision_number ?? input?.revisionNumber;
