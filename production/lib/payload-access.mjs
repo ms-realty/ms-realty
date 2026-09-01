@@ -166,6 +166,30 @@ export const caseCollectionAccess = {
   delete: isAdmin,
 };
 
+// Document metadata and signature requests are private case/workspace data.
+// The custom service owns writes so a caller cannot bypass revision ordering
+// or the signature state machine through Payload's generic REST surface.
+export const documentCollectionAccess = {
+  create: () => false,
+  read: workspaceScopedAccess({ allowRoles: ["admin", "broker"] }),
+  update: () => false,
+  delete: () => false,
+};
+
+export const documentRevisionCollectionAccess = {
+  create: () => false,
+  read: workspaceScopedAccess({ allowRoles: ["admin", "broker"] }),
+  update: () => false,
+  delete: () => false,
+};
+
+export const signatureRequestCollectionAccess = {
+  create: () => false,
+  read: workspaceScopedAccess({ allowRoles: ["admin", "broker"] }),
+  update: () => false,
+  delete: () => false,
+};
+
 // Which generated content collections are translation-shaped (translators may
 // write) vs plain content (editors only).
 const TRANSLATION_SLUGS = new Set(["listing_translations"]);

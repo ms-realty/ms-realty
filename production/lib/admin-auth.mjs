@@ -12,7 +12,18 @@ export const ADMIN_ROLES = ["admin", "broker", "editor", "translator", "agent"];
 // workspace export is a bulk personal-data release, not an operations read.
 const ROLE_CAPABILITIES = {
   admin: ["*"],
-  broker: ["workspace:read", "operations:read", "operations:write", "cases:read", "cases:write", "content:read", "activity:read", "security:self"],
+  broker: [
+    "workspace:read",
+    "operations:read",
+    "operations:write",
+    "documents:read",
+    "documents:write",
+    "cases:read",
+    "cases:write",
+    "content:read",
+    "activity:read",
+    "security:self",
+  ],
   editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read", "security:self"],
   translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read", "security:self"],
   agent: ["workspace:read", "cases:read", "cases:write", "activity:read", "security:self"],
@@ -109,6 +120,19 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/public-requests/outcome",
   "/api/admin/saved-search-alerts/run-due",
   "/api/admin/deals/close",
+]);
+
+// Document metadata, immutable revisions, and signature-request state are a
+// separate capability from the older checklist ledger at /documents. The
+// checklist GET/POST outcome routes retain their operations capability; the
+// durable records below are served by the Payload-backed document service.
+const DOCUMENT_READ_PATHS = new Set([
+  "/api/admin/documents/records",
+  "/api/admin/signature-requests",
+]);
+const DOCUMENT_WRITE_PATHS = new Set([
+  "/api/admin/documents",
+  "/api/admin/signature-requests",
 ]);
 
 const CONTENT_WRITE_PATHS = new Set([
@@ -211,6 +235,15 @@ export function requiredAdminCapability(method, pathname) {
     return "settings:manage";
   }
   if (pathname === "/api/admin/connections/agent-config") return "settings:manage";
+  if (verb === "GET" && DOCUMENT_READ_PATHS.has(pathname)) return "documents:read";
+  if (verb === "POST" && DOCUMENT_WRITE_PATHS.has(pathname)) return "documents:write";
+  if (pathname !== "/api/admin/documents/outcome" && /^\/api\/admin\/documents\/[^/]+$/.test(pathname)) {
+    return verb === "GET" ? "documents:read" : "documents:write";
+  }
+  if (/^\/api\/admin\/documents\/[^/]+\/revisions$/.test(pathname)) return verb === "GET" ? "documents:read" : "documents:write";
+  if (/^\/api\/admin\/signature-requests\/[^/]+\/status$/.test(pathname)) {
+    return verb === "GET" ? "documents:read" : "documents:write";
+  }
   // Every operator may read the workspace settings screen; only an admin saves.
   if (["/admin/settings", "/api/admin/settings"].includes(pathname)) {
     return verb === "GET" ? "workspace:read" : "settings:manage";

@@ -27,6 +27,7 @@ import * as migration_20260829_170000_social_marketing_publications from './2026
 import * as migration_20260830_120000_listing_translation_copy from './20260830_120000_listing_translation_copy';
 import * as migration_20260830_130000_listing_translation_workflow_status from './20260830_130000_listing_translation_workflow_status';
 import * as migration_20260901_120000_durable_media_lifecycle from './20260901_120000_durable_media_lifecycle';
+import * as migration_20260901_130000_document_signatures from './20260901_130000_document_signatures';
 
 export const migrations = [
   {
@@ -173,5 +174,10 @@ export const migrations = [
     up: migration_20260901_120000_durable_media_lifecycle.up,
     down: migration_20260901_120000_durable_media_lifecycle.down,
     name: '20260901_120000_durable_media_lifecycle',
+  },
+  {
+    up: migration_20260901_130000_document_signatures.up,
+    down: migration_20260901_130000_document_signatures.down,
+    name: '20260901_130000_document_signatures',
   },
 ];
