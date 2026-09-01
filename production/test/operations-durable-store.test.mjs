@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { createPrivateContactEnvelope } from "../lib/private-contact-vault.mjs";
 import {
   automationConfirmation,
   completeTask,
@@ -36,7 +37,7 @@ function matches(value, where) {
 }
 
 function fakePayload() {
-  const rows = { tasks: [], automation_rules: [], automation_runs: [], automation_run_failures: [] };
+  const rows = { tasks: [], automation_rules: [], automation_runs: [], automation_run_failures: [], hermes_owner_receipts: [] };
   let nextId = 1;
   let snapshot = null;
   let transaction = 0;
@@ -122,9 +123,30 @@ test("tasks are durable, workspace-scoped, revision-guarded, and idempotent", as
       title: "Review the lead queue",
       source_type: "lead",
       source_id: "lead-1",
+      assignee_id: "broker-1",
+      due_at: "2026-09-03T09:00:00.000Z",
+      priority: "high",
     },
   });
   assert.equal(retry.idempotent, true);
+  await assert.rejects(
+    createTask({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      input: {
+        task_id: "task-lead-1",
+        idempotency_key: "task-intent-1",
+        title: "Review the lead queue",
+        source_type: "lead",
+        source_id: "lead-1",
+        assignee_id: "broker-1",
+        due_at: "2026-09-04T09:00:00.000Z",
+        priority: "urgent",
+      },
+    }),
+    /idempotency key conflicts/,
+  );
   await assert.rejects(
     createTask({
       payload,
@@ -157,6 +179,24 @@ test("automation rules require owner confirmation and run only approved types", 
     input: { rule_id: "rule-alerts", idempotency_key: "rule-intent-1", name: "Saved-search digest", rule_type: "saved_search_alerts", schedule: "manual" },
   });
   assert.equal(disabled.rule.enabled, false);
+  await assert.rejects(
+    createAutomationRule({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      principal,
+      input: {
+        rule_id: "rule-alerts",
+        idempotency_key: "rule-intent-1",
+        name: "Saved-search digest",
+        rule_type: "saved_search_alerts",
+        schedule: "manual",
+        enabled: true,
+        confirmation: automationConfirmation("enable", "rule-alerts"),
+      },
+    }),
+    /idempotency key conflicts/,
+  );
   await assert.rejects(
     updateAutomationRule({ payload, workspaceId, actor: principal.id, principal, ruleId: "rule-alerts", input: { enabled: true } }),
     /Owner confirmation must exactly equal/,
@@ -347,6 +387,89 @@ test("automation failures are durable and Hermes history remains read-only and r
   assert.equal(history[0].source, "hermes-audit");
   assert.equal(Object.hasOwn(history[0], "prompt"), false);
   assert.equal((await readHermesRun({ auditPath, runId: "translation-task-1" })).task_id, "translation-task-1");
+});
+
+test("Hermes history merges sources by recorded_at descending before applying limit", async () => {
+  const payload = fakePayload();
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-hermes-runs-mixed-"));
+  const auditPath = path.join(directory, "hermes-audit.jsonl");
+  const receiptSecret = "x".repeat(32);
+  payload.rows.hermes_owner_receipts.push({
+    id: 1,
+    idempotency_key: "owner-command-older",
+    operator_id: principal.id,
+    status: "planned",
+    command_digest: "sha256:owner-command-older",
+    model: "hermes-test",
+    evidence_refs: ["authenticated_owner_scope"],
+    started_at: "2026-09-03T11:59:00.000Z",
+    completed_at: "2026-09-03T11:59:30.000Z",
+    failure_code: null,
+    receipt_envelope: createPrivateContactEnvelope(
+      {
+        subjectType: "hermes_owner_command",
+        subjectId: "owner-command-older",
+        payload: {
+          command: "Review today's work",
+          evidence: [{ id: "authenticated_owner_scope" }],
+          plan: { summary: "Review today's work", steps: [{ title: "Open today", why: "Check current work", destination: "today", admin_path: "/admin/today", mode: "review", evidence: ["authenticated_owner_scope"], requires_human_approval: true, can_execute: false }], questions: [] },
+          locale: "en",
+          context_digest: "sha256:none",
+        },
+      },
+      { secret: receiptSecret, secretName: "MS_REALTY_PROVIDER_TOKEN_KEY", storedAt: "2026-09-03T11:59:30.000Z" },
+    ),
+  });
+  fs.writeFileSync(
+    auditPath,
+    [
+      {
+        recorded_at: "2026-09-03T12:00:00.000Z",
+        task_id: "translation-newest",
+        object_type: "listing",
+        object_id: "listing-1",
+        source_locale: "bg",
+        target_locale: "en",
+        status: "hermes_drafted",
+        provider_mode: "self_hosted",
+        source_hash: "a".repeat(64),
+        draft_hash: "b".repeat(64),
+        has_output: true,
+        public_indexable: false,
+        human_approved: false,
+        can_publish: false,
+        can_mark_indexable: false,
+      },
+      {
+        recorded_at: "2026-09-03T11:58:00.000Z",
+        task_id: "translation-oldest",
+        object_type: "listing",
+        object_id: "listing-2",
+        source_locale: "bg",
+        target_locale: "ru",
+        status: "hermes_drafted",
+        provider_mode: "self_hosted",
+        source_hash: "c".repeat(64),
+        draft_hash: "d".repeat(64),
+        has_output: true,
+        public_indexable: false,
+        human_approved: false,
+        can_publish: false,
+        can_mark_indexable: false,
+      },
+    ]
+      .map((row) => JSON.stringify(row))
+      .join("\n") + "\n",
+  );
+
+  const history = await readHermesRunHistory({ auditPath, payload, operatorId: principal.id, receiptSecret, limit: 2 });
+  assert.deepEqual(
+    history.map((row) => [row.run_id, row.source]),
+    [
+      ["translation-newest", "hermes-audit"],
+      ["owner-command-older", "hermes-owner-receipt"],
+    ],
+  );
 });
 
 test("operations schema and Payload collections retain deterministic durable boundaries", async () => {

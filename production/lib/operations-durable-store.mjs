@@ -444,6 +444,22 @@ function safeSummary(value, depth = 0) {
   return output;
 }
 
+function comparableFieldValue(field, value) {
+  if (value === undefined || value === null || value === "") return null;
+  if (field === "due_at" || field === "last_run_at" || field === "last_failure_at") {
+    return isoDate(value, field);
+  }
+  return value;
+}
+
+function sameFields(document, expected, fields) {
+  return fields.every((field) => comparableFieldValue(field, document?.[field]) === comparableFieldValue(field, expected?.[field]));
+}
+
+function compareRecordedAtDesc(left, right) {
+  return Date.parse(String(right?.recorded_at || "")) - Date.parse(String(left?.recorded_at || ""));
+}
+
 function immutableTaskData(input, scope, actor) {
   assertKnownKeys(input, new Set(["task_id", "title", "description", "source_type", "source_id", "source_label", "assignee_id", "due_at", "status", "priority", "idempotency_key"]), "Task");
   assertNoPrivateFields(input, "Task");
@@ -653,7 +669,22 @@ export async function createTask({ input, workspaceId, actor, payload = null, au
     const result = await withTransaction(runtime, async (req) => {
       const existing = await findOne(runtime, TASK_COLLECTION_SLUG, scopeWhere(scope, { idempotency_key: { equals: data.idempotency_key } }), req);
       if (existing) {
-        const same = existing.task_id === data.task_id && existing.title === data.title && existing.source_type === data.source_type && (existing.source_id || null) === (data.source_id || null);
+        const same = sameFields(existing, data, [
+          "task_id",
+          "workspace_id",
+          "title",
+          "description",
+          "source_type",
+          "source_id",
+          "source_label",
+          "assignee_id",
+          "due_at",
+          "status",
+          "priority",
+          "created_by",
+          "idempotency_key",
+          "revision",
+        ]);
         if (!same) throw new OperationsConflictError("Task idempotency key conflicts with an existing task");
         return { document: existing, idempotent: true };
       }
@@ -774,7 +805,21 @@ export async function createAutomationRule({ input, workspaceId, actor, principa
     const result = await withTransaction(runtime, async (req) => {
       const existing = await findOne(runtime, AUTOMATION_RULE_COLLECTION_SLUG, scopeWhere(scope, { idempotency_key: { equals: data.idempotency_key } }), req);
       if (existing) {
-        const same = existing.rule_id === data.rule_id && existing.rule_type === data.rule_type && existing.name === data.name;
+        const same = sameFields(existing, data, [
+          "rule_id",
+          "workspace_id",
+          "name",
+          "rule_type",
+          "schedule",
+          "description",
+          "enabled",
+          "created_by",
+          "updated_by",
+          "last_run_at",
+          "last_failure_at",
+          "idempotency_key",
+          "revision",
+        ]);
         if (!same) throw new OperationsConflictError("Automation rule idempotency key conflicts with an existing rule");
         return { document: existing, idempotent: true };
       }
@@ -983,13 +1028,13 @@ function safeHermesAuditRow(row) {
 }
 
 export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", receiptSecret = "", limit = 100 } = {}) {
+  const cappedLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
   let rows;
   try {
     rows = readHermesAuditLedger(auditPath).map(safeHermesAuditRow);
   } catch (error) {
     throw new OperationsStoreUnavailableError("Hermes audit history is unavailable", error);
   }
-  const capped = rows.slice(-Math.min(Math.max(Number(limit) || 100, 1), 500)).reverse();
   // Owner command receipts are already redacted by hermes-owner-command.mjs.
   // They are optional here: translation workers may be file-backed while the
   // owner command store is Payload-backed, and an absent secret must not make a
@@ -997,7 +1042,7 @@ export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LE
   let ownerReceipts = [];
   if (payload && operatorId && String(receiptSecret || "").length >= 32) {
     try {
-      ownerReceipts = (await readHermesOwnerReceipts({ payload, operatorId, secret: receiptSecret, limit })).map((receipt) => ({
+      ownerReceipts = (await readHermesOwnerReceipts({ payload, operatorId, secret: receiptSecret, limit: cappedLimit })).map((receipt) => ({
         run_id: id(receipt.idempotency_key, "run_id"),
         task_id: id(receipt.idempotency_key, "task_id"),
         object_type: "hermes_owner_command",
@@ -1026,7 +1071,7 @@ export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LE
       ownerReceipts = [];
     }
   }
-  return [...ownerReceipts, ...capped].slice(0, Math.min(Math.max(Number(limit) || 100, 1), 500));
+  return [...ownerReceipts, ...rows].sort(compareRecordedAtDesc).slice(0, cappedLimit);
 }
 
 export async function readHermesRun({ runId, auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", receiptSecret = "" } = {}) {
