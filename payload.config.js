@@ -17,6 +17,7 @@ import { PROVIDER_WEBHOOK_EVENT_COLLECTION } from "./production/lib/provider-web
 import { VIEWING_COLLECTION } from "./production/lib/viewing-durable-store.mjs";
 import { VIEWING_TRIP_REQUEST_COLLECTION } from "./production/lib/viewing-trip-requests.mjs";
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
+import { DOCUMENT_COLLECTIONS } from "./production/lib/document-signatures.mjs";
 import { WORKSPACE_SETTINGS_COLLECTION } from "./production/lib/workspace-settings.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
@@ -398,6 +399,7 @@ export default buildConfig({
     admins,
     locales,
     ...collections,
+    ...DOCUMENT_COLLECTIONS,
     ...caseCollectionsWithAccess,
     ...leadCollectionsWithAccess,
     funnelEventCollectionWithAccess,
