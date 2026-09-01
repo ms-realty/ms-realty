@@ -16,7 +16,9 @@
 //     write whose echoed size does not match the bytes we sent.
 //
 // Key space, and why it is split:
-//   <host>/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>   public
+//   <host>/wp-content/uploads/<YYYY>/<MM>/ms-<hash>.<ext>   legacy public
+//   <host>/wp-content/uploads/<YYYY>/<MM>/listings/<listing>/<asset>/ms-<hash>.<ext> public after review
+//   <host>/wp-content/private/listings/<listing>/<asset>/ms-<hash>.<ext> staged/private
 //   <host>/wp-content/private/enquiries/<id>/ms-<hash>.<ext> private
 // The Worker only serves `/wp-content/uploads/*` from R2 (workers/index.js,
 // MEDIA_PREFIX), so a key under `wp-content/private/` is storable through the
@@ -36,9 +38,12 @@ export const DEFAULT_MEDIA_UPLOAD_HOST = "ms-realty.ms-realty-bg.workers.dev";
 export const MEDIA_UPLOAD_SCOPES = Object.freeze(["listing", "enquiry"]);
 
 const PUBLIC_PREFIX = "wp-content/uploads";
+export const LISTING_PRIVATE_PREFIX = "wp-content/private/listings";
 const PRIVATE_PREFIX = "wp-content/private/enquiries";
 const HOST = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
 const SUBJECT_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+const ASSET_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
+const STORAGE_VISIBILITIES = new Set(["public", "staged_private"]);
 
 export class MediaUploadStorageError extends Error {
   constructor(message, code = "media_storage_unavailable") {
@@ -55,13 +60,36 @@ export function mediaUploadContentHash(bytes) {
 // The stored name is derived from the bytes, never from anything the caller
 // typed. Two uploads of the same photo collapse onto one object, and a
 // filename can neither escape the directory nor choose the extension.
-export function mediaUploadKey({ scope, subjectId, hash, ext, host = DEFAULT_MEDIA_UPLOAD_HOST, at = new Date() }) {
+export function mediaUploadKey({
+  scope,
+  subjectId,
+  hash,
+  ext,
+  host = DEFAULT_MEDIA_UPLOAD_HOST,
+  at = new Date(),
+  visibility = "public",
+  assetId = null,
+}) {
   if (!MEDIA_UPLOAD_SCOPES.includes(scope)) throw new MediaUploadStorageError("Upload scope must be listing or enquiry", "bad_request");
   if (!HOST.test(String(host))) throw new MediaUploadStorageError("Media upload host must be a hostname", "bad_request");
   if (!/^[a-f0-9]{64}$/.test(String(hash))) throw new MediaUploadStorageError("Upload key requires a sha256 content hash", "bad_request");
   if (!/^[a-z0-9]{3,4}$/.test(String(ext))) throw new MediaUploadStorageError("Upload key requires a sniffed extension", "bad_request");
+  if (!STORAGE_VISIBILITIES.has(visibility)) throw new MediaUploadStorageError("Upload visibility is unsupported", "bad_request");
   const name = `ms-${String(hash).slice(0, 32)}.${ext}`;
   if (scope === "listing") {
+    const id = String(subjectId || "");
+    if (visibility === "staged_private" || assetId !== null && assetId !== undefined) {
+      if (!SUBJECT_ID.test(id)) throw new MediaUploadStorageError("Listing upload requires a known listing id", "bad_request");
+      const stableAssetId = String(assetId || "");
+      if (!ASSET_ID.test(stableAssetId)) throw new MediaUploadStorageError("Listing upload requires a stable asset id", "bad_request");
+      if (visibility === "staged_private") {
+        return `${host}/${LISTING_PRIVATE_PREFIX}/${id}/${stableAssetId}/${name}`;
+      }
+      const stamp = at instanceof Date && !Number.isNaN(at.valueOf()) ? at : new Date();
+      const year = String(stamp.getUTCFullYear());
+      const month = String(stamp.getUTCMonth() + 1).padStart(2, "0");
+      return `${host}/${PUBLIC_PREFIX}/${year}/${month}/listings/${id}/${stableAssetId}/${name}`;
+    }
     const stamp = at instanceof Date && !Number.isNaN(at.valueOf()) ? at : new Date();
     const year = String(stamp.getUTCFullYear());
     const month = String(stamp.getUTCMonth() + 1).padStart(2, "0");
@@ -180,18 +208,28 @@ function r2Driver({ endpoint, secret, originToken, fetchImpl }) {
   }
   const base = endpoint.endsWith("/") ? endpoint : `${endpoint}/`;
   const call = fetchImpl || globalThis.fetch;
+  const credentialForRequest = async () => {
+    const credential = secret || (await mediaIngestCredential(originToken));
+    if (!credential) throw new MediaUploadStorageError("R2 media ingest credential is unavailable", "bad_configuration");
+    return credential;
+  };
+  const request = async (key, method, init = {}) => {
+    const safeKey = assertSafeKey(key);
+    const credential = await credentialForRequest();
+    return { safeKey, response: await call(`${base}${encodeURIComponent(safeKey)}`, {
+      ...init,
+      method,
+      headers: { authorization: `Bearer ${credential}`, ...(init.headers || {}) },
+    }) };
+  };
   return {
     driver: "r2",
     root: base,
     describe: () => ({ driver: "r2", endpoint: base, bucket: "ms-realty-media" }),
     supports: () => true,
     async put({ key, bytes, contentType }) {
-      const safeKey = assertSafeKey(key);
-      const credential = secret || (await mediaIngestCredential(originToken));
-      if (!credential) throw new MediaUploadStorageError("R2 media ingest credential is unavailable", "bad_configuration");
-      const response = await call(`${base}${encodeURIComponent(safeKey)}`, {
-        method: "PUT",
-        headers: { authorization: `Bearer ${credential}`, "content-type": contentType || "application/octet-stream" },
+      const { safeKey, response } = await request(key, "PUT", {
+        headers: { "content-type": contentType || "application/octet-stream" },
         body: bytes,
       });
       if (!response.ok) {
@@ -204,14 +242,23 @@ function r2Driver({ endpoint, secret, originToken, fetchImpl }) {
       }
       return { key: safeKey, driver: "r2", bytes: bytes.length, stored: true };
     },
-    async read() {
-      // The ingest route is write-only and the edge serves only the public
-      // prefix, so an unreviewed object cannot be read back through it. Say so
-      // instead of pretending the byte preview works.
-      throw new MediaUploadStorageError(
-        "The r2 driver cannot read uploaded bytes back; review the object in the R2 dashboard or configure the local driver",
-        "not_implemented",
-      );
+    async read(key) {
+      const { response } = await request(key, "GET", { headers: { accept: "application/octet-stream" } });
+      if (!response.ok) {
+        if (response.status === 404) throw new MediaUploadStorageError("Stored upload is missing", "not_found");
+        throw new MediaUploadStorageError(`R2 media read refused the request (${response.status})`);
+      }
+      if (typeof response.arrayBuffer !== "function") {
+        throw new MediaUploadStorageError("R2 media read returned no byte body");
+      }
+      return Buffer.from(await response.arrayBuffer());
+    },
+    async delete(key) {
+      const { safeKey, response } = await request(key, "DELETE");
+      if (!response.ok && response.status !== 404) {
+        throw new MediaUploadStorageError(`R2 media delete refused the request (${response.status})`);
+      }
+      return { key: safeKey, driver: "r2", deleted: true };
     },
   };
 }

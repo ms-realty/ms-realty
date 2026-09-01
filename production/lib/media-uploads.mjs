@@ -163,6 +163,7 @@ export async function prepareMediaUpload(
     host,
     replacesAssetId = null,
     uploadedAt = new Date().toISOString(),
+    storageVisibility = "public",
   },
 ) {
   if (!MEDIA_UPLOAD_SCOPES.includes(scope)) throw new MediaUploadError("Upload scope must be listing or enquiry");
@@ -189,6 +190,7 @@ export async function prepareMediaUpload(
   // The hash is taken over the bytes we actually store, so an upload that
   // optimises to the same result as an earlier one is still the same asset.
   const contentHash = mediaUploadContentHash(optimized.bytes);
+  const assetId = `media-${createHash("sha256").update(replacesAssetId ? `${contentHash}:${replacesAssetId}` : contentHash).digest("hex").slice(0, 20)}`;
   let storageKey;
   let renditionKey = null;
   try {
@@ -199,6 +201,8 @@ export async function prepareMediaUpload(
       ext: optimized.ext,
       ...(host ? { host } : {}),
       at: new Date(uploadedAt),
+      visibility: storageVisibility,
+      ...(scope === "listing" && storageVisibility !== "public" ? { assetId } : {}),
     });
     if (optimized.rendition) {
       renditionKey = mediaUploadRenditionKey(storageKey, {
@@ -217,8 +221,8 @@ export async function prepareMediaUpload(
     bytes: optimized.bytes,
     contentHash,
     storageKey,
-    assetUrl: scope === "listing" ? mediaUploadPublicUrl(storageKey) : null,
-    assetId: `media-${createHash("sha256").update(replacesAssetId ? `${contentHash}:${replacesAssetId}` : contentHash).digest("hex").slice(0, 20)}`,
+    assetUrl: scope === "listing" && storageVisibility === "public" ? mediaUploadPublicUrl(storageKey) : null,
+    assetId,
     replacesAssetId,
     format: optimized.format,
     mime: optimized.mime,
@@ -337,13 +341,17 @@ export function applyMediaUploads(seed, uploads = []) {
       const added = rows
         .filter((row) => !existing.has(row.asset_id))
         .map((row) => ({
-          url: row.asset_url || `storage:${row.storage_key}`,
-          asset_url: row.asset_url,
+          // Storage keys are an implementation detail. The reviewer uses the
+          // scoped preview route instead of receiving a raw object path.
+          url: row.asset_url || null,
+          asset_url: row.asset_url || null,
           asset_id: row.asset_id,
           alt: row.alt || "",
           width: row.width ?? null,
           height: row.height ?? null,
           thumbnail_url: row.rendition?.storage_key ? mediaUploadPublicUrl(row.rendition.storage_key) : null,
+          preview_path: `/api/admin/media/uploads/${row.asset_id}`,
+          media_storage_state: row.asset_url ? "legacy_public_pending" : "staged_private",
           kind: row.kind,
           is_public: false,
           review_status: "needs_media_review",
@@ -351,7 +359,6 @@ export function applyMediaUploads(seed, uploads = []) {
           uploaded_at: row.uploaded_at,
           uploaded_by: row.uploaded_by,
           storage_driver: row.storage_driver,
-          storage_key: row.storage_key,
           origin: "operator_upload",
           ...(row.replaces_asset_id ? { replaces_asset_id: row.replaces_asset_id } : {}),
         }));
@@ -469,6 +476,7 @@ export function publicMediaUpload(row) {
     storage_driver: row.storage_driver,
     replaces_asset_id: row.replaces_asset_id || null,
     asset_url: row.asset_url || null,
+    media_storage_state: row.asset_url ? (row.is_public ? "public" : "legacy_public_pending") : "staged_private",
     is_public: false,
     review_status: row.review_status,
     preview_path: `/api/admin/media/uploads/${row.asset_id}`,
