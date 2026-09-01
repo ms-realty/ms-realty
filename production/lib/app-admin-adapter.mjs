@@ -408,7 +408,25 @@ import {
   appendTranslationTask,
   latestTranslationTasks,
   readTranslationLedger,
+  DEFAULT_HERMES_AUDIT_LEDGER_PATH,
 } from "./translation-ledger.mjs";
+import {
+  createTask,
+  readTasks,
+  readTask,
+  updateTask,
+  completeTask,
+  createAutomationRule,
+  readAutomationRules,
+  readAutomationRule,
+  updateAutomationRule,
+  runAutomationRule,
+  readAutomationRuns,
+  readAutomationRun,
+  readHermesRunHistory,
+  readHermesRun,
+  operationsDurableStoreConfigFromEnv,
+} from "./operations-durable-store.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, createViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import {
   ViewingConflictError,
@@ -522,6 +540,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
     workspaceSettingsPath: env.MS_REALTY_WORKSPACE_SETTINGS_PATH || null,
     workspaceSettingsWorkspaceId: env.MS_REALTY_WORKSPACE_ID || "",
+    workspaceId: env.MS_REALTY_WORKSPACE_ID || "",
+    operationsDurableStore: operationsDurableStoreConfigFromEnv(env),
+    hermesAuditPath: env.MS_REALTY_HERMES_AUDIT_PATH || DEFAULT_HERMES_AUDIT_LEDGER_PATH,
     workspaceSettingsPayloadRuntimeConfigured: Boolean(String(env.PAYLOAD_SECRET || "").trim() && String(env.DATABASE_URL || "").trim()),
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
@@ -4423,6 +4444,155 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         }
       }
       return jsonResponse(405, { kind: "method_not_allowed" });
+    }
+
+    // Operations backend: Tasks, approved automation rules/runs, and the
+    // read-only Hermes run history. All writes go through the Payload-backed
+    // store; the adapter supplies the authenticated workspace and the one
+    // existing run-due function for each allowlisted rule type.
+    const taskPath = url.pathname.match(/^\/api\/admin\/tasks(?:\/([^/]+))?(?:\/(complete))?$/);
+    const automationBase = url.pathname.match(/^\/api\/admin\/(automations|automation-rules)(?:\/([^/]+))?(?:\/(run))?$/);
+    const automationRunsPath = url.pathname.match(/^\/api\/admin\/(automations|automation-rules)\/runs(?:\/([^/]+))?$/);
+    const hermesRunsPath = url.pathname.match(/^\/api\/admin\/hermes\/runs(?:\/([^/]+))?$/);
+    if (taskPath || automationBase || automationRunsPath || hermesRunsPath) {
+      const scope = String(
+        config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId || "",
+      ).trim();
+      if (!scope) {
+        return jsonResponse(503, {
+          kind: "operations_workspace_unavailable",
+          message: "A workspace scope is required for operations data.",
+        });
+      }
+      if (!canAdminAccessWorkspace(principal, scope)) return adminForbidden("workspace:access");
+      const payload = config.operationsPayload || config.payloadListingRuntime || null;
+      const recordedAt = auditRecordedAt(config);
+      const actor = principal?.id || "";
+      const audit = (entry, at = recordedAt) => recordAudit({ ...entry, actor: entry.actor || actor }, config, at);
+      const body = async () => parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+      const stableId = (value, label) => {
+        try {
+          return decodeURIComponent(String(value || ""));
+        } catch {
+          const error = new Error(`${label} is malformed`);
+          error.status = 400;
+          error.code = "bad_request";
+          throw error;
+        }
+      };
+      const failure = (error) => adminBadRequest(error);
+
+      if (taskPath) {
+        const taskId = taskPath[1] ? stableId(taskPath[1], "task_id") : null;
+        try {
+          if (request.method === "GET" && !taskId) {
+            const tasks = await readTasks({
+              workspaceId: scope,
+              payload,
+              filters: {
+                status: url.searchParams.get("status") || "",
+                assignee_id: url.searchParams.get("assignee_id") || "",
+                source_type: url.searchParams.get("source_type") || "",
+              },
+              limit: url.searchParams.get("limit") || 100,
+            });
+            return jsonResponse(200, { kind: "admin_tasks", workspace_id: scope, tasks });
+          }
+          if (request.method === "GET" && taskId) {
+            return jsonResponse(200, { kind: "admin_task", task: await readTask({ taskId, workspaceId: scope, payload }) });
+          }
+          if (request.method === "POST" && taskPath[2] === "complete" && taskId) {
+            const result = await completeTask({ taskId, input: await body(), workspaceId: scope, actor, payload, audit, recordedAt });
+            return jsonResponse(result.idempotent ? 200 : 200, { kind: "admin_task", ...result });
+          }
+          if (request.method === "POST" && !taskId) {
+            const result = await createTask({ input: await body(), workspaceId: scope, actor, payload, audit, recordedAt });
+            return jsonResponse(result.idempotent ? 200 : 201, { kind: "admin_task", ...result });
+          }
+          if ((request.method === "PATCH" || request.method === "PUT" || request.method === "POST") && taskId) {
+            const result = await updateTask({ taskId, input: await body(), workspaceId: scope, actor, payload, audit, recordedAt });
+            return jsonResponse(200, { kind: "admin_task", ...result });
+          }
+          return jsonResponse(405, { kind: "method_not_allowed" });
+        } catch (error) {
+          return failure(error);
+        }
+      }
+
+      if (hermesRunsPath) {
+        if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
+        try {
+          const options = {
+            auditPath: config.hermesAuditPath,
+            payload: config.hermesReceiptPayload || payload,
+            operatorId: actor,
+            receiptSecret: config.hermesReceiptSecret || config.hermesEnv?.MS_REALTY_PROVIDER_TOKEN_KEY || authEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+            limit: url.searchParams.get("limit") || 100,
+          };
+          if (hermesRunsPath[1]) {
+            return jsonResponse(200, { kind: "admin_hermes_run", run: await readHermesRun({ ...options, runId: stableId(hermesRunsPath[1], "run_id") }) });
+          }
+          return jsonResponse(200, { kind: "admin_hermes_runs", runs: await readHermesRunHistory(options) });
+        } catch (error) {
+          return failure(error);
+        }
+      }
+
+      if (automationRunsPath) {
+        if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
+        try {
+          if (automationRunsPath[2]) {
+            return jsonResponse(200, { kind: "admin_automation_run", ...await readAutomationRun({ runId: stableId(automationRunsPath[2], "run_id"), workspaceId: scope, payload }) });
+          }
+          return jsonResponse(200, {
+            kind: "admin_automation_runs",
+            workspace_id: scope,
+            runs: await readAutomationRuns({ workspaceId: scope, payload, limit: url.searchParams.get("limit") || 100 }),
+          });
+        } catch (error) {
+          return failure(error);
+        }
+      }
+
+      if (automationBase) {
+        const ruleId = automationBase[2] ? stableId(automationBase[2], "rule_id") : null;
+        try {
+          if (request.method === "GET" && !ruleId) {
+            return jsonResponse(200, { kind: "admin_automations", workspace_id: scope, rules: await readAutomationRules({ workspaceId: scope, payload, limit: url.searchParams.get("limit") || 100 }) });
+          }
+          if (request.method === "GET" && ruleId) {
+            return jsonResponse(200, { kind: "admin_automation", rule: await readAutomationRule({ ruleId, workspaceId: scope, payload }) });
+          }
+          if (request.method === "POST" && automationBase[3] === "run" && ruleId) {
+            const result = await runAutomationRule({
+              ruleId,
+              input: await body(),
+              workspaceId: scope,
+              actor,
+              principal,
+              payload,
+              recordedAt,
+              audit,
+              runner: (rule) =>
+                rule.rule_type === "saved_search_alerts"
+                  ? runDueSavedSearchAlerts(config)
+                  : runDueListingPublications(config),
+            });
+            return jsonResponse(result.idempotent ? 200 : result.failure ? 502 : 201, { kind: "admin_automation_run", ...result });
+          }
+          if (request.method === "POST" && !ruleId) {
+            const result = await createAutomationRule({ input: await body(), workspaceId: scope, actor, principal, payload, audit, recordedAt });
+            return jsonResponse(result.idempotent ? 200 : 201, { kind: "admin_automation", ...result });
+          }
+          if ((request.method === "PATCH" || request.method === "PUT" || request.method === "POST") && ruleId) {
+            const result = await updateAutomationRule({ ruleId, input: await body(), workspaceId: scope, actor, principal, payload, audit, recordedAt });
+            return jsonResponse(200, { kind: "admin_automation", ...result });
+          }
+          return jsonResponse(405, { kind: "method_not_allowed" });
+        } catch (error) {
+          return failure(error);
+        }
+      }
     }
     if (["/admin/settings", "/api/admin/settings"].includes(url.pathname)) {
       const registry = loadLocaleRegistry(config.localeRegistryPath);

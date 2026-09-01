@@ -21,6 +21,7 @@ const durableViewingTripRequestsMigration = fromRoot("migrations", "20260829_120
 const listingTranslationCopyMigration = fromRoot("migrations", "20260830_120000_listing_translation_copy.ts");
 const listingTranslationWorkflowStatusMigration = fromRoot("migrations", "20260830_130000_listing_translation_workflow_status.ts");
 const providerConnectionWorkspaceMigration = fromRoot("migrations", "20260901_130000_provider_connection_workspace_scope.ts");
+const operationsWorkspaceMigration = fromRoot("migrations", "20260901_140000_operations_workspace.ts");
 const payloadRuntime = createRequire(import.meta.url).resolve("payload");
 const payloadCli = path.resolve(path.dirname(payloadRuntime), "..", "bin.js");
 
@@ -58,6 +59,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260830_120000_listing_translation_copy.ts",
     "20260830_130000_listing_translation_workflow_status.ts",
     "20260901_130000_provider_connection_workspace_scope.ts",
+    "20260901_140000_operations_workspace.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -145,6 +147,55 @@ test("Payload migration boot configuration and generated constraints stay runnab
   const listingTranslationWorkflowStatusDown = listingTranslationWorkflowStatus.match(/export async function down[\s\S]*$/)?.[0] || "";
   assert.match(listingTranslationWorkflowStatusDown, /void db/);
   assert.doesNotMatch(listingTranslationWorkflowStatusDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TYPE\b/);
+
+  const operationsWorkspace = fs.readFileSync(operationsWorkspaceMigration, "utf8");
+  for (const [table, columns] of Object.entries({
+    tasks: [
+      '"task_id" varchar NOT NULL',
+      '"workspace_id" varchar NOT NULL',
+      '"source_type" varchar NOT NULL',
+      '"status" varchar NOT NULL',
+      '"priority" varchar NOT NULL',
+      '"idempotency_key" varchar NOT NULL',
+      '"revision" integer DEFAULT 1 NOT NULL',
+    ],
+    automation_rules: [
+      '"rule_id" varchar NOT NULL',
+      '"workspace_id" varchar NOT NULL',
+      '"rule_type" varchar NOT NULL',
+      '"enabled" boolean DEFAULT false NOT NULL',
+      '"idempotency_key" varchar NOT NULL',
+    ],
+    automation_runs: [
+      '"run_id" varchar NOT NULL',
+      '"workspace_id" varchar NOT NULL',
+      '"rule_id" varchar NOT NULL',
+      '"status" varchar NOT NULL',
+      '"started_at" timestamp(3) with time zone NOT NULL',
+      '"result_summary" jsonb',
+    ],
+    automation_run_failures: [
+      '"failure_id" varchar NOT NULL',
+      '"workspace_id" varchar NOT NULL',
+      '"run_id" varchar NOT NULL',
+      '"failure_code" varchar NOT NULL',
+      '"message" varchar NOT NULL',
+    ],
+  })) {
+    const definition = tableSql(operationsWorkspace, table);
+    for (const column of columns) assert.ok(definition.includes(column), `${table}.${column} must be required`);
+  }
+  for (const index of [
+    'tasks_workspace_idempotency_key_idx',
+    'automation_rules_workspace_idempotency_key_idx',
+    'automation_runs_workspace_idempotency_key_idx',
+    'automation_run_failures_workspace_run_id_idx',
+  ]) {
+    assert.match(operationsWorkspace, new RegExp(index));
+  }
+  const operationsWorkspaceDown = operationsWorkspace.match(/export async function down[\s\S]*$/)?.[0] || "";
+  assert.match(operationsWorkspaceDown, /void db/);
+  assert.doesNotMatch(operationsWorkspaceDown, /\bDROP\b|\bDELETE\b|\bTRUNCATE\b|\bALTER TABLE\b/);
   const migrationIndex = fs.readFileSync(fromRoot("migrations", "index.ts"), "utf8");
   assert.match(migrationIndex, /import \* as migration_20260830_130000_listing_translation_workflow_status/);
   assert.match(

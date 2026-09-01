@@ -84,6 +84,12 @@ const OPERATIONS_READ_PATHS = new Set([
   "/api/admin/viewings.ics",
   // B1: an operator reads their own saved views for the inbox and pipeline.
   "/api/admin/views",
+  "/api/admin/tasks",
+  "/api/admin/automations",
+  "/api/admin/automations/runs",
+  "/api/admin/automation-rules",
+  "/api/admin/automation-rules/runs",
+  "/api/admin/hermes/runs",
 ]);
 
 const CONTENT_READ_PATHS = new Set([
@@ -120,6 +126,9 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/public-requests/outcome",
   "/api/admin/saved-search-alerts/run-due",
   "/api/admin/deals/close",
+  "/api/admin/tasks",
+  "/api/admin/automations",
+  "/api/admin/automation-rules",
 ]);
 
 // Document metadata, immutable revisions, and signature-request state are a
@@ -254,6 +263,16 @@ export function requiredAdminCapability(method, pathname) {
     return verb === "GET" ? "workspace:read" : "settings:manage";
   }
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
+  const operationsReadRoute =
+    /^\/api\/admin\/(?:tasks(?:\/[^/]+)?|automations(?:\/runs(?:\/[^/]+)?|\/[^/]+)?|automation-rules(?:\/runs(?:\/[^/]+)?|\/[^/]+)?|hermes\/runs(?:\/[^/]+)?)$/.test(
+      pathname,
+    );
+  const operationsWriteRoute =
+    /^\/api\/admin\/(?:tasks(?:\/[^/]+(?:\/complete)?)?|automations(?:\/[^/]+(?:\/run)?)?|automation-rules(?:\/[^/]+(?:\/run)?)?)$/.test(
+      pathname,
+    );
+  if (operationsReadRoute && verb === "GET") return "operations:read";
+  if (operationsWriteRoute && verb !== "GET") return "operations:write";
   if (
     verb === "GET" &&
     ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents", "/api/admin/cases/conditions"].includes(pathname)
