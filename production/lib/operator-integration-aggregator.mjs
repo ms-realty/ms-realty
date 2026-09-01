@@ -98,7 +98,12 @@ function sanitizeUrlMetadata(value) {
 }
 
 function redactMetadata(value, depth = 0) {
-  if (depth > 2 || value === null || value === undefined) return value ?? null;
+  if (depth > 2) {
+    if (value === null || value === undefined) return null;
+    if (typeof value === "string") return value.slice(0, 320);
+    return typeof value === "object" ? null : value;
+  }
+  if (value === null || value === undefined) return value ?? null;
   if (Array.isArray(value)) return value.slice(0, 32).map((entry) => redactMetadata(entry, depth + 1));
   if (typeof value !== "object") return typeof value === "string" ? value.slice(0, 320) : value;
   return Object.fromEntries(
