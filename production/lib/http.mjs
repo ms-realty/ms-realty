@@ -247,6 +247,13 @@ import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft 
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
+  listMediaUploadsDurably,
+  mediaDurableRuntimeConfigured,
+  persistMediaReviewDurably,
+  persistMediaUploadDurably,
+  readMediaUploadBytesDurably,
+} from "./media-durable-store.mjs";
+import {
   appendListingPublicationSchedule,
   buildListingPublicationScheduleQueue,
   cancelListingPublicationSchedule,
@@ -1104,6 +1111,7 @@ export function createHttpApp({
   localeRegistryPath = null,
   payloadListingRuntime = null,
   payloadListingEnv = process.env,
+  mediaDurableStore = null,
   receivedAt,
   requestedAt,
   editedAt,
@@ -1207,6 +1215,22 @@ export function createHttpApp({
       ),
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
+  const durableMedia = () =>
+    mediaDurableRuntimeConfigured({
+      runtimeDataDurableOnly,
+      payload: payloadListingRuntime || null,
+      config: mediaDurableStore || null,
+      env: payloadListingEnv || process.env,
+    });
+  const currentMediaSeed = async () => {
+    const source = currentSeed();
+    if (!runtimeDataDurableOnly) return source;
+    return projectListingDraftSeed(source, {
+      payload: payloadListingRuntime,
+      env: payloadListingEnv,
+      requirePayload: true,
+    });
+  };
   const currentPublicSeed = () => {
     if (runtimeDataDurableOnly) throw Object.assign(new Error("Payload public listing authority is required"), { status: 503 });
     return publicSeedFor(currentSeed());
@@ -2594,6 +2618,7 @@ export function createHttpApp({
     if (!runtimeDataAdminRequest && productionRuntimeDataUnavailable({
       durableLeadOperations: leadOperationsDurableStore?.leadOperationsDurableStoreEnabled === true,
       durableViewingTrip: viewingDurableStore?.viewingDurableStoreEnabled === true,
+      durableMedia: durableMedia(),
       durableOnly: runtimeDataDurableOnly,
       method: request.method,
       pathname: url.pathname,
@@ -2875,6 +2900,7 @@ export function createHttpApp({
     if (productionRuntimeDataUnavailable({
       durableLeadOperations,
       durableProviderDelivery,
+      durableMedia: durableMedia(),
       durableOnly: runtimeDataDurableOnly,
       durableViewingTrip: viewingDurableStore?.viewingDurableStoreEnabled === true,
       durableViewing: viewingDurableStore?.viewingDurableStoreEnabled === true,
@@ -3775,13 +3801,25 @@ export function createHttpApp({
         mediaUploadStorage || createMediaUploadStorage(mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
 
       if (request.method === "GET" && url.pathname === ADMIN_MEDIA_UPLOAD_PATH) {
-        const listed = listMediaUploads({
-          ledgerPath: mediaUploadLedgerPath,
-          listing: url.searchParams.get("listing") || "",
-          enquiry: url.searchParams.get("enquiry") || "",
-          limits: uploadLimits,
-        });
-        return adminJson(listed.status, listed.body);
+        try {
+          const listed = durableMedia()
+            ? await listMediaUploadsDurably({
+                payload: payloadListingRuntime,
+                env: payloadListingEnv,
+                listing: url.searchParams.get("listing") || "",
+                enquiry: url.searchParams.get("enquiry") || "",
+                limits: uploadLimits,
+              })
+            : listMediaUploads({
+                ledgerPath: mediaUploadLedgerPath,
+                listing: url.searchParams.get("listing") || "",
+                enquiry: url.searchParams.get("enquiry") || "",
+                limits: uploadLimits,
+              });
+          return adminJson(listed.status, listed.body);
+        } catch (error) {
+          return adminJson(error.status || 503, { kind: error.code || "media_durable_store_unavailable", message: error.message });
+        }
       }
 
       if (request.method === "GET") {
@@ -3793,14 +3831,26 @@ export function createHttpApp({
         } catch {
           return adminJson(400, { kind: "bad_request", message: "Malformed upload id" });
         }
-        const preview = await readMediaUploadBytes({
-          ledgerPath: mediaUploadLedgerPath,
-          assetId,
-          rendition: url.searchParams.get("rendition") || "",
-          storage: uploadStorage(),
-        });
-        if (preview.status !== 200) return adminJson(preview.status, preview.body);
-        return { status: 200, headers: { ...SECURITY_HEADERS, ...PRIVATE_HEADERS, ...preview.headers }, body: preview.body };
+        try {
+          const preview = durableMedia()
+            ? await readMediaUploadBytesDurably({
+                payload: payloadListingRuntime,
+                env: payloadListingEnv,
+                assetId,
+                rendition: url.searchParams.get("rendition") || "",
+                storage: uploadStorage(),
+              })
+            : await readMediaUploadBytes({
+                ledgerPath: mediaUploadLedgerPath,
+                assetId,
+                rendition: url.searchParams.get("rendition") || "",
+                storage: uploadStorage(),
+              });
+          if (preview.status !== 200) return adminJson(preview.status, preview.body);
+          return { status: 200, headers: { ...SECURITY_HEADERS, ...PRIVATE_HEADERS, ...preview.headers }, body: preview.body };
+        } catch (error) {
+          return adminJson(error.status || 503, { kind: error.code || "media_durable_store_unavailable", message: error.message });
+        }
       }
 
       if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
@@ -3810,13 +3860,21 @@ export function createHttpApp({
         // A browser form post (no JavaScript) asks for HTML and gets a redirect
         // back to the editor; the enhanced fetch asks for JSON and gets JSON.
         acceptsHtml: acceptsHtmlResponse(readHeader(request.headers, "accept")),
-        seed: currentSeed(),
+        seed: await currentMediaSeed(),
         limits: uploadLimits,
         storage: uploadStorage(),
         ledgerPath: mediaUploadLedgerPath,
         uploadedBy: principal?.id || "admin",
         uploadedAt: reviewedAt || editedAt || receivedAt || new Date().toISOString(),
         recordAudit: (entry) => writeAudit(withAuthenticatedAuditActor(entry, principal)),
+        persistUpload: durableMedia()
+          ? (record, { storage }) => persistMediaUploadDurably(record, {
+              payload: payloadListingRuntime,
+              env: payloadListingEnv,
+              principal,
+              storage,
+            })
+          : null,
         editorPathFor: listingEditorPath,
       });
       if (uploaded.status === 303) return adminResponse(303, "", "text/plain; charset=utf-8", uploaded.headers);
@@ -6035,8 +6093,14 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
-        const review = createMediaReview(currentSeed(), input, reviewedAt);
-        const persisted = appendMediaReview(review, { filePath: mediaReviewLedgerPath || undefined });
+        const review = createMediaReview(await currentMediaSeed(), input, reviewedAt);
+        const persisted = durableMedia()
+          ? await persistMediaReviewDurably(review, {
+              payload: payloadListingRuntime,
+              env: payloadListingEnv,
+              principal,
+            })
+          : appendMediaReview(review, { filePath: mediaReviewLedgerPath || undefined });
         if (!persisted.idempotent) {
           recordAudit({
             action: "media_reviewed",

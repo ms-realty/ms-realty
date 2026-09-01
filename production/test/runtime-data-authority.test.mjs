@@ -533,11 +533,11 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   );
   const editorHtml = await editor.text();
   assert.equal(editor.status, 200);
-  assert.match(editorHtml, /data-action-unavailable="runtime"/);
   assert.match(editorHtml, /data-unavailable-data="[^"]*listingEdits[^"]*"/);
   assert.match(editorHtml, /data-unavailable-data="[^"]*tourApprovals[^"]*"/);
+  assert.match(editorHtml, /action="\/api\/admin\/media\/uploads"/);
+  assert.match(editorHtml, /action="\/api\/admin\/media\/reviews"/);
   assert.match(editorHtml, /Data connection required/);
-  assert.match(editorHtml, /Your owner permissions are active/);
   assert.doesNotMatch(editorHtml, /data-read-only-role="true"/);
 
   const translations = await renderAppAdminResponse(
@@ -583,8 +583,23 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(blockedAlertRun.status, 503);
   assert.equal((await blockedAlertRun.json()).kind, "runtime_data_unavailable");
 
+  assert.equal(
+    productionRuntimeDataUnavailable({
+      durableOnly: true,
+      durableMedia: true,
+      method: "POST",
+      pathname: "/api/admin/media/reviews",
+    }),
+    false,
+  );
+  const mediaReviewWithoutBody = await renderAppAdminResponse(
+    new Request("https://live.test/api/admin/media/reviews", { method: "POST" }),
+    { config },
+  );
+  assert.equal(mediaReviewWithoutBody.status, 400);
+  assert.equal((await mediaReviewWithoutBody.json()).kind, "bad_request");
+
   for (const pathname of [
-    "/api/admin/media/reviews",
     "/api/admin/tours/approve",
     "/api/admin/translations/publish",
     "/api/admin/listings/publication-schedules",
@@ -635,6 +650,8 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(standaloneEditor.status, 200);
   assert.match(standaloneEditor.body, /data-unavailable-data="[^"]*listingEdits[^"]*"/);
   assert.match(standaloneEditor.body, /data-unavailable-data="[^"]*tourApprovals[^"]*"/);
+  assert.match(standaloneEditor.body, /action="\/api\/admin\/media\/uploads"/);
+  assert.match(standaloneEditor.body, /action="\/api\/admin\/media\/reviews"/);
   assert.match(standaloneEditor.body, /Data connection required/);
 
   const standaloneTranslations = await dispatchHttp(standalone, {

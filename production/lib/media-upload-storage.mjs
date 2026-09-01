@@ -158,6 +158,14 @@ function localDriver({ root }) {
         throw error;
       }
     },
+    async delete(key) {
+      try {
+        await rm(resolve(key), { force: true });
+        return { key, driver: "local", deleted: true };
+      } catch (error) {
+        throw new MediaUploadStorageError(`Could not remove the orphaned upload: ${error.message}`);
+      }
+    },
   };
 }
 
