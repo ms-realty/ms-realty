@@ -413,7 +413,11 @@ export function renderAppRobotsResponse() {
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
-export function renderAppSiteRootResponse({ config = appRouterConfigFromEnv() } = {}) {
+export function renderAppSiteRootResponse({ url = "/", host = "", accept = "", config = appRouterConfigFromEnv() } = {}) {
+  const legacyDecision = legacyDecisionFor({ pathname: "/", url, host, config });
+  if (legacyDecision?.status === 200 && legacyDecision.target_path === siteRootRedirectTarget(currentRegistry(config))) {
+    return renderAppRouteResponse({ pathname: "/", url, host, accept, config });
+  }
   const result = renderAppSiteRoot({ config });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }

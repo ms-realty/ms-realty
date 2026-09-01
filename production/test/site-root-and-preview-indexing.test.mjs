@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "../lib/locales.mjs";
-import { renderAppSiteRoot } from "../lib/app-router-adapter.mjs";
+import { renderAppRouteResponse, renderAppSiteRoot, renderAppSiteRootResponse } from "../lib/app-router-adapter.mjs";
 import {
   PREVIEW_NOINDEX,
   canonicalLegacyHost,
@@ -32,6 +32,45 @@ test("both runtimes serve the root redirect", () => {
   assert.ok(fs.existsSync(fromRoot("app", "route.js")), "Next needs app/route.js for /");
   const httpSource = fs.readFileSync(fromRoot("production", "lib", "http.mjs"), "utf8");
   assert.match(httpSource, /url\.pathname === "\/"\) \{\n\s+const location = siteRootRedirectTarget/);
+});
+
+test("the Next root serves the approved apex retain_200 content without changing other hosts", async () => {
+  const route = await import("../../app/route.js");
+  const request = (url, host) =>
+    new Request(url, {
+      headers: { accept: "text/html", "x-forwarded-host": host },
+    });
+
+  for (const url of ["https://makler-realty.com", "https://makler-realty.com/"]) {
+    const response = await route.GET(request(url, "makler-realty.com"));
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("location"), null);
+    assert.match(await response.text(), /<html[^>]*lang="bg"/);
+  }
+
+  const worker = await route.GET(request("https://ms-realty.ms-realty-bg.workers.dev/", "ms-realty.ms-realty-bg.workers.dev"));
+  assert.equal(worker.status, 308);
+  assert.equal(worker.headers.get("location"), "/bg");
+
+  const www = await route.GET(request("https://www.makler-realty.com/", "www.makler-realty.com"));
+  assert.equal(www.status, 308);
+  assert.equal(www.headers.get("location"), "/bg");
+
+  const legacyRu = await route.GET(request("https://makler-realty.ru/", "makler-realty.ru"));
+  assert.equal(legacyRu.status, 308);
+  assert.equal(legacyRu.headers.get("location"), "/bg");
+});
+
+test("the shared root response renders the same page as its retain_200 target", async () => {
+  const retained = renderAppSiteRootResponse({
+    url: "http://app:3000/",
+    host: "makler-realty.com:443",
+    accept: "text/html",
+  });
+  const target = renderAppRouteResponse({ pathname: "/bg", url: "http://app:3000/bg", accept: "text/html" });
+  assert.equal(retained.status, 200);
+  assert.equal(retained.headers.get("location"), null);
+  assert.equal(await retained.text(), await target.text());
 });
 
 test("only isolated *.workers.dev hosts count as preview hosts", () => {
