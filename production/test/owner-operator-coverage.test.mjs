@@ -38,7 +38,7 @@ const key = (row) => `${row.method} ${row.pathname}`;
 test("owner/operator catalog covers every admin route method exactly once", () => {
   assert.equal(assertOwnerOperatorCatalog(), true);
   const discovered = discoverAdminRoutes();
-  assert.equal(discovered.length, 128);
+  assert.equal(discovered.length, 130);
   assert.equal(new Set(discovered.map((row) => key(row))).size, discovered.length);
   assert.equal(ADMIN_ROUTE_COVERAGE.length, discovered.length);
   assert.deepEqual(
@@ -84,13 +84,13 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   assert.equal(artifact.proof_kind, "source_and_executable_contract");
   assert.deepEqual(Object.keys(artifact.executable_proof), ["admin_pages", "admin_routes", "hermes_tools", "provider_matrix"]);
   assert.deepEqual(artifact.summary, {
-    admin_route_files: 110,
-    admin_methods: 128,
+    admin_route_files: 111,
+    admin_methods: 130,
     admin_pages: ADMIN_PAGE_SURFACES.length,
     nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,
-    authorized_workflows: 150,
-    structurally_covered_workflows: 150,
+    authorized_workflows: 152,
+    structurally_covered_workflows: 152,
     structural_coverage_percent: 100,
     providers: 10,
     enabled_integrations: 5,
