@@ -152,6 +152,49 @@ test("compatibility smoke plan is immutable, read-only, no-network, and safety-c
   assert.throws(() => buildHermesCompatibilityPlan(`${HERMES_UPSTREAM_DOCKER_REPOSITORY}:${RELEASE_TAG}`), /digest/);
 });
 
+test("Hermes updater fences every dirty path before staging and commits as the Actions bot", () => {
+  const updater = fs.readFileSync(fromRoot(".github", "workflows", "hermes-upstream-update.yml"), "utf8");
+  const updateStepStart = updater.indexOf("name: Resolve official release, digest, and synchronized pins");
+  const updateStepEnd = updater.indexOf("name: Push updater branch with a lease");
+  const updateStep = updater.slice(updateStepStart, updateStepEnd);
+  const generatorsEnd = updateStep.indexOf("npm run hermes:provisioning");
+  const dirtyFence = updateStep.indexOf("git ls-files --others --exclude-standard");
+  const firstStage = updateStep.indexOf("git add --");
+  const firstEarlyExit = updateStep.indexOf("exit 0");
+  const commit = updateStep.indexOf('git commit -m "chore: update Hermes Agent upstream pin"');
+
+  assert.ok(generatorsEnd >= 0);
+  assert.match(updateStep, /git diff --name-only --no-renames/);
+  assert.match(updateStep, /git diff --cached --name-only --no-renames/);
+  assert.match(updateStep, /git ls-files --others --exclude-standard/);
+  assert.match(updateStep, /Updater generated a disallowed path/);
+  assert.ok(dirtyFence > generatorsEnd);
+  assert.ok(dirtyFence < firstStage);
+  assert.ok(dirtyFence < firstEarlyExit);
+  assert.ok(updateStep.indexOf("git diff --check") > dirtyFence);
+  assert.match(updateStep, /git config user\.name "github-actions\[bot\]"/);
+  assert.match(updateStep, /git config user\.email "41898282\+github-actions\[bot\]@users\.noreply\.github\.com"/);
+  assert.ok(updateStep.indexOf('git config user.name "github-actions[bot]"') < commit);
+  assert.ok(updateStep.indexOf('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"') < commit);
+  assert.doesNotMatch(updateStep.slice(0, dirtyFence), /git add --/);
+});
+
+test("auto-merge fences the reserved Hermes branch to dispatches from github-actions[bot]", () => {
+  const autoMerge = fs.readFileSync(fromRoot(".github", "workflows", "auto-merge.yml"), "utf8");
+  const reservedBranchGuard = autoMerge.indexOf(
+    'pull.head.ref === "automation/hermes-agent-updater" &&\n              (!isHermesUpdaterRun || pull.user?.login !== "github-actions[bot]")',
+  );
+  const merge = autoMerge.indexOf("github.rest.pulls.merge");
+
+  assert.ok(reservedBranchGuard >= 0);
+  assert.match(autoMerge, /workflowRun\.event === "workflow_dispatch"/);
+  assert.match(autoMerge, /!isHermesUpdaterRun \|\| pull\.user\?\.login !== "github-actions\[bot\]"/);
+  assert.ok(reservedBranchGuard < merge);
+  assert.doesNotMatch(autoMerge.slice(reservedBranchGuard, merge), /github\.rest\.pulls\.merge/);
+  assert.match(autoMerge, /github\.event\.workflow_run\.event == 'pull_request'/);
+  assert.match(autoMerge, /!trustedUpdaterBot && !\["OWNER", "MEMBER", "COLLABORATOR"\]/);
+});
+
 test("workflow fences official updater provenance, full CI dispatch, and compatibility-gated auto-merge", () => {
   const updater = fs.readFileSync(fromRoot(".github", "workflows", "hermes-upstream-update.yml"), "utf8");
   const ci = fs.readFileSync(fromRoot(".github", "workflows", "ci.yml"), "utf8");

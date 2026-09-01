@@ -71,6 +71,15 @@ jobs:
               core.setFailed("The pull-request head changed after this CI run.");
               return;
             }
+            if (
+              pull.head.ref === "automation/hermes-agent-updater" &&
+              (!isHermesUpdaterRun || pull.user?.login !== "github-actions[bot]")
+            ) {
+              core.setFailed(
+                "The Hermes updater pull request may merge only from its explicit workflow dispatch and github-actions[bot].",
+              );
+              return;
+            }
             if (pull.head.ref === "automation/hermes-agent-updater") {
               const marker = "<!-- ms-realty:hermes-upstream-update -->";
               if (!pull.body?.includes(marker)) {
