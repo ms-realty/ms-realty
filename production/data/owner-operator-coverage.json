@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 110,
-    "admin_methods": 128,
+    "admin_route_files": 111,
+    "admin_methods": 130,
     "admin_pages": 19,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 150,
-    "structurally_covered_workflows": 150,
+    "authorized_workflows": 152,
+    "structurally_covered_workflows": 152,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -546,6 +546,24 @@
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/hermes/route.js",
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_integrations",
+      "method": "GET",
+      "pathname": "/api/admin/integrations",
+      "family": "administration",
+      "tool": "ms_realty_admin_read",
+      "capability": "administration:read",
+      "read_only": true,
+      "sensitive": false,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "browser_session",
+      "ui_path": "/admin/connect",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/integrations/route.js",
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_launch_input_checklist",
@@ -1802,6 +1820,35 @@
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/hermes/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_integrations",
+      "method": "POST",
+      "pathname": "/api/admin/integrations",
+      "family": "administration",
+      "tool": "ms_realty_admin_write",
+      "capability": "settings:manage",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "browser_session",
+      "ui_path": "/admin/connect",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/integrations/route.js",
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_launch_readiness_export",

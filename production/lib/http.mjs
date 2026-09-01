@@ -78,6 +78,12 @@ import {
   operatorProviderConfigFromEnv,
 } from "./operator-provider-catalog.mjs";
 import {
+  OPERATOR_INTEGRATIONS_PATH,
+  isUnrestrictedOwnerAdmin,
+  readOperatorIntegrationContract,
+  resolveOperatorIntegrationWorkspace,
+} from "./operator-integration-aggregator.mjs";
+import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
   isOperatorOAuthProvider,
@@ -4849,12 +4855,15 @@ export function createHttpApp({
 
     if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const configuredWorkspaceId =
+        workspaceSettingsWorkspaceId || providerConnection.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
       const canManageConnections = Boolean(
-        payloadSession && principal?.source === "payload_session" && principal.roles?.includes("admin"),
+        payloadSession && principal?.source === "payload_session" && isUnrestrictedOwnerAdmin(principal),
       );
       let agent = null;
       if (request.method === "POST") {
-        if (!canManageConnections) return adminForbidden("payload_admin_session");
+        if (!payloadSession || principal?.source !== "payload_session") return adminForbidden("payload_admin_session");
+        if (!isUnrestrictedOwnerAdmin(principal)) return adminForbidden("owner_admin_required");
         const input = parseBody(request);
         if (input.action !== "issue_agent_credential") return adminJson(400, { kind: "bad_request" });
         agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
@@ -4863,7 +4872,9 @@ export function createHttpApp({
       let connections = [];
       let storeError = !availability.store.ready;
       try {
-        if (availability.store.ready) connections = await readProviderConnections({ payload: providerConnectionPayload });
+        if (availability.store.ready) {
+          connections = await readProviderConnections({ payload: providerConnectionPayload, workspaceId: configuredWorkspaceId });
+        }
       } catch {
         storeError = true;
       }
@@ -4927,13 +4938,17 @@ export function createHttpApp({
 
     if (
       url.pathname === "/api/admin/connections" ||
+      url.pathname === OPERATOR_INTEGRATIONS_PATH ||
       url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH ||
       url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH
     ) {
       const availability = operatorProviderAvailability(providerConnection);
+      const configuredWorkspaceId =
+        workspaceSettingsWorkspaceId || providerConnection.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
       const storeOptions = {
         credentialSecret: providerConnection.credentialSecret,
         payload: providerConnectionPayload,
+        workspaceId: configuredWorkspaceId,
       };
       const connectionDeps = {
         fetchImpl: providerFetch,
@@ -4949,16 +4964,106 @@ export function createHttpApp({
         const entry = operatorConnectionAudit(outcome, { actor: principal.id });
         if (entry) recordAudit(entry);
       };
+      if (url.pathname === OPERATOR_INTEGRATIONS_PATH) {
+        if (!payloadSession || principal?.source !== "payload_session" || !principal.roles?.includes("admin")) {
+          return adminForbidden("payload_admin_session");
+        }
+        const requestedWorkspaceId = url.searchParams.get("workspace_id") || "";
+        let workspace;
+        try {
+          workspace = resolveOperatorIntegrationWorkspace(principal, {
+            workspaceId: requestedWorkspaceId,
+            configuredWorkspaceId,
+          });
+        } catch (error) {
+          return adminJson(error.status || 403, { kind: error.code || "workspace_scope_required", message: error.message });
+        }
+        const scopedStoreOptions = { ...storeOptions, workspaceId: workspace.workspace_id || "" };
+        const readContract = () =>
+          readOperatorIntegrationContract({
+            principal,
+            workspaceId: workspace.workspace_id || "",
+            configuredWorkspaceId: workspace.workspace_id || "",
+            providerConfig: providerConnection,
+            providerPayload: scopedStoreOptions.payload,
+            readConnections: readProviderConnections,
+            canManageConnections: true,
+          });
+        try {
+          if (request.method === "GET") {
+            const action = url.searchParams.get("action") || "status";
+            if (!["status", "refresh"].includes(action)) return adminJson(400, { kind: "unsupported_integration_action" });
+            const contract = await readContract();
+            recordAudit({
+              action: action === "refresh" ? "provider_connections_refreshed" : "provider_connections_status_read",
+              actor: principal.id,
+              objectType: "provider_connections",
+              objectId: contract.workspace_id || "all",
+              metadata: { provider_count: contract.providers.length },
+            });
+            return adminJson(200, contract);
+          }
+          if (request.method !== "POST") return adminJson(405, { kind: "method_not_allowed" });
+          const input = parseBody(request);
+          if (input.action === "refresh") {
+            const contract = await readContract();
+            recordAudit({
+              action: "provider_connections_refreshed",
+              actor: principal.id,
+              objectType: "provider_connections",
+              objectId: contract.workspace_id || "all",
+              metadata: { provider_count: contract.providers.length },
+            });
+            return adminJson(200, contract);
+          }
+          if (input.action !== "disconnect") return adminJson(400, { kind: "unsupported_integration_action" });
+          const beforeDisconnect = await readContract();
+          const existingProvider = beforeDisconnect.providers.find((provider) => provider.id === String(input.provider || "").trim().toLowerCase());
+          if (!existingProvider || !["connected", "inactive", "connecting", "unavailable"].includes(existingProvider.status)) {
+            return adminJson(404, { kind: "provider_connection_not_found" });
+          }
+          const outcome = await runOperatorConnectionAction({
+            intent: "disconnect",
+            provider: input.provider,
+            operatorId: principal.id,
+            config: providerConnection,
+            deps: { ...connectionDeps, storeOptions: scopedStoreOptions },
+          });
+          if (outcome.outcome === "rejected") {
+            recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error);
+            return adminJson(400, { kind: "provider_disconnect_rejected", message: "The connection was not removed" });
+          }
+          recordConnectionOutcome(outcome);
+          const contract = await readContract();
+          return adminJson(200, {
+            ...contract,
+            last_action: {
+              action: "disconnect",
+              provider: outcome.provider,
+              revoked: outcome.revoked,
+              deleted: outcome.deleted,
+            },
+          });
+        } catch (error) {
+          if (error instanceof ProviderConnectionUnavailableError || error?.code === "provider_connection_unavailable") {
+            return adminJson(503, { kind: "provider_connection_unavailable", message: "Provider connection storage is unavailable" });
+          }
+          return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        }
+      }
       try {
         if (request.method === "GET" && url.pathname === "/api/admin/connections" && !url.searchParams.get("action")) {
           return adminJson(200, {
             kind: "provider_connections",
             availability,
-            connections: await readProviderConnections({ payload: providerConnectionPayload }),
+            connections: await readProviderConnections({ payload: providerConnectionPayload, workspaceId: storeOptions.workspaceId }),
           });
         }
-        if (!payloadSession || principal?.source !== "payload_session" || !principal.roles?.includes("admin")) {
+        if (!payloadSession || principal?.source !== "payload_session") {
           return adminForbidden("payload_admin_session");
+        }
+        if (!isUnrestrictedOwnerAdmin(principal)) {
+          return adminForbidden("owner_admin_required");
         }
         // The assistant's configuration, for a caller that wants it as data
         // rather than as the copy block on the page.

@@ -88,6 +88,8 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/documents"],
   ["GET", "/api/admin/hermes"],
   ["POST", "/api/admin/hermes"],
+  ["GET", "/api/admin/integrations"],
+  ["POST", "/api/admin/integrations"],
   ["GET", "/api/admin/launch-input-checklist"],
   ["POST", "/api/admin/launch-readiness/export"],
   ["GET", "/api/admin/launch-readiness"],
@@ -260,7 +262,7 @@ function executionBoundary(pathname) {
   if (
     /\/security\//.test(pathname) ||
     /\/data-exports/.test(pathname) ||
-    /\/connections(?:\/|$)/.test(pathname) ||
+    /\/(?:connections|integrations)(?:\/|$)/.test(pathname) ||
     pathname === "/api/admin/profile" ||
     pathname === "/api/admin/team" ||
     /\/media\/uploads(?:\/|$)/.test(pathname) ||
@@ -272,7 +274,7 @@ function executionBoundary(pathname) {
 }
 
 function browserUiPath(pathname) {
-  if (/\/connections(?:\/|$)/.test(pathname)) return "/admin/connect";
+  if (/(?:\/connections|\/integrations)(?:\/|$)/.test(pathname)) return "/admin/connect";
   if (/\/security\/|\/data-exports/.test(pathname)) return "/admin/settings#settings-security";
   if (pathname === "/api/admin/profile") return "/admin/settings#owner-profile";
   if (pathname === "/api/admin/team") return "/admin/team";
