@@ -132,7 +132,13 @@ async function runtimePayload(payload, env = process.env) {
 }
 
 function assertPrincipal(principal) {
-  const id = requiredText(principal?.id, "Authenticated operator id", 64);
+  const id = String(principal?.id || "").trim();
+  if (!id || id.length > 64) {
+    const error = new Error("Media mutations require a named authenticated operator");
+    error.status = 403;
+    error.code = "forbidden";
+    throw error;
+  }
   const roles = Array.isArray(principal?.roles) ? principal.roles.map((role) => String(role || "").trim()) : [];
   if (!roles.includes("admin") && !roles.includes("editor")) {
     const error = new Error("Media mutations require an authenticated admin or editor");
@@ -140,11 +146,28 @@ function assertPrincipal(principal) {
     error.code = "forbidden";
     throw error;
   }
-  return { id, roles };
+  return { id, roles, source: principal?.source || "admin" };
+}
+
+function bindActor(input, actor, field) {
+  const submitted = String(input?.[field] || "").trim();
+  if (submitted && submitted !== actor.id) {
+    const error = new Error(`Submitted ${field} must match the authenticated operator`);
+    error.status = 403;
+    error.code = "forbidden";
+    throw error;
+  }
+  return { ...(input || {}), [field]: actor.id };
 }
 
 function isUniqueViolation(error) {
   return [error?.code, error?.cause?.code, error?.data?.code, error?.data?.cause?.code].includes("23505");
+}
+
+function isRetryableTransactionFailure(error) {
+  return [error?.code, error?.cause?.code, error?.data?.code, error?.data?.cause?.code].some((code) =>
+    ["40001", "40P01"].includes(String(code || "")),
+  ) || /could not serialize|serialization failure|deadlock detected/i.test(String(error?.message || error));
 }
 
 function assetIdForDocument(document = {}) {
@@ -349,6 +372,19 @@ async function writeUploadTransaction(runtime, record, data, principal) {
         error.code = "unknown_listing";
         throw error;
       }
+      if (record.replaces_asset_id) {
+        const original = await findMediaDocument(runtime, {
+          assetId: record.replaces_asset_id,
+          listingId: record.subject_id,
+          req,
+        });
+        if (!original || !relationIds(listing.media).includes(relationId(original.id))) {
+          const error = new Error("Known replacement assetId is required");
+          error.status = 404;
+          error.code = "unknown_media_asset";
+          throw error;
+        }
+      }
       const existing = await findMediaDocument(runtime, { assetId: data.asset_id, listingId: record.subject_id, req });
       if (existing) {
         await attachMediaToListing(runtime, listing, existing, req, principal);
@@ -413,8 +449,9 @@ export async function persistMediaUploadDurably(
   { payload = null, env = process.env, principal, storage = null } = {},
 ) {
   const actor = assertPrincipal(principal);
-  const data = uploadData(record);
-  const durableRecord = { ...record, asset_id: data.asset_id };
+  const boundRecord = bindActor(record, actor, "uploaded_by");
+  const data = uploadData(boundRecord);
+  const durableRecord = { ...boundRecord, asset_id: data.asset_id };
   let runtime;
   try {
     runtime = await runtimePayload(payload, env);
@@ -426,13 +463,16 @@ export async function persistMediaUploadDurably(
 
   try {
     let result;
-    try {
-      result = await writeUploadTransaction(runtime, durableRecord, data, actor);
-    } catch (error) {
-      // A retry racing a unique asset_id insert must replay the committed row,
-      // never delete its object or surface a duplicate to the operator.
-      if (!isUniqueViolation(error)) throw error;
-      result = await writeUploadTransaction(runtime, durableRecord, data, actor);
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        result = await writeUploadTransaction(runtime, durableRecord, data, actor);
+        break;
+      } catch (error) {
+        // A retry racing a unique asset_id insert or serializable transaction
+        // must replay the committed row, never delete its object or surface a
+        // duplicate to the operator.
+        if ((!isUniqueViolation(error) && !isRetryableTransactionFailure(error)) || attempt === 3) throw error;
+      }
     }
     return {
       ...uploadRecordFromDocument(result.document, durableRecord),
@@ -627,7 +667,7 @@ async function reviewTransaction(runtime, review, principal) {
             replacement_asset_id: review.asset_id,
             reviewer: review.reviewer,
             reviewed_at: review.reviewed_at,
-            review_decision: "publish",
+            review_decision: "keep_private",
             human_confirmed: true,
             review_history: [
               ...originalHistory,
@@ -652,21 +692,20 @@ export async function persistMediaReviewDurably(
   { payload = null, env = process.env, principal } = {},
 ) {
   const actor = assertPrincipal(principal);
-  if (review?.human_confirmed !== true) {
+  const boundReview = bindActor(review, actor, "reviewer");
+  if (boundReview?.human_confirmed !== true) {
     throw new Error("Media review requires explicit human confirmation");
   }
-  let runtime = await runtimePayload(payload, env);
-  try {
-    const result = await reviewTransaction(runtime, review, actor);
-    return result.review;
-  } catch (error) {
-    if (error instanceof MediaReviewConflictError) throw error;
-    if (isUniqueViolation(error)) {
-      const retry = await reviewTransaction(runtime, review, actor);
-      return retry.review;
+  const runtime = await runtimePayload(payload, env);
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const result = await reviewTransaction(runtime, boundReview, actor);
+      return result.review;
+    } catch (error) {
+      if (error instanceof MediaReviewConflictError || error.status) throw error;
+      if ((isUniqueViolation(error) || isRetryableTransactionFailure(error)) && attempt < 3) continue;
+      throw new MediaDurableStoreUnavailableError("Durable Payload media review could not be committed", error);
     }
-    if (error.status) throw error;
-    throw new MediaDurableStoreUnavailableError("Durable Payload media review could not be committed", error);
   }
 }
 
