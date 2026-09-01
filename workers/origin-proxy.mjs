@@ -1,3 +1,5 @@
+import { isCanonicalPublicHost } from "./preview-host.mjs";
+
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const SAME_SITE_VALUES = new Set(["same-origin", "none"]);
 export const ORIGIN_TOKEN_HEADER = "x-ms-realty-origin-token";
@@ -92,6 +94,22 @@ export function responseForPublicOrigin(response, { originValue, publicUrl }) {
       headers.set("location", target.href);
     }
   }
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
+export function responseForCanonicalPublicIndex(response, { hostname, pathname }) {
+  const path = String(pathname || "");
+  const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+  const publicDocument =
+    contentType.startsWith("text/html") ||
+    path === "/robots.txt" ||
+    path === "/sitemap.xml";
+  if (!isCanonicalPublicHost(hostname) || path === "/admin" || path.startsWith("/admin/") || !publicDocument) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  headers.delete("x-robots-tag");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 

@@ -74,13 +74,13 @@ function openGraphLocale(code) {
 
 // One source for everything a share card reads, so Open Graph and the Twitter
 // card can never drift apart.
-function socialMetadata(page) {
+function socialMetadata(page, origin) {
   const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
   return {
     title: page.metadata?.og_title || page.metadata?.title || "MS Realty",
     description: page.metadata?.og_description || page.metadata?.description || "",
-    url: absolutePublicUrl(page.canonical || page.path || "/"),
-    image: image ? absolutePublicUrl(image) : null,
+    url: absolutePublicUrl(page.canonical || page.path || "/", { origin }),
+    image: image ? absolutePublicUrl(image, { origin }) : null,
   };
 }
 
@@ -118,12 +118,14 @@ function twitterCard(social) {
 }
 
 function meta(page, options = {}) {
-  const social = socialMetadata(page);
+  const social = socialMetadata(page, options.origin);
   const links = [
     `<link rel="canonical" href="${escapeHtml(social.url)}">`,
     ...(page.hreflang || []).map(
       (link) =>
-        `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(absolutePublicUrl(link.href))}">`,
+        `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(
+          absolutePublicUrl(link.href, { origin: options.origin }),
+        )}">`,
     ),
   ];
   const schema = page.schema

@@ -1,7 +1,18 @@
-// Canonical URLs, hreflang, og:url and JSON-LD identifiers all use this one
-// production public origin. Isolated workers.dev drill hosts are handled at the
-// edge and remain noindex; they are never another canonical authority.
+// The operational Worker remains the safe fallback for direct/internal
+// rendering. Requests for the allowlisted public domain select the canonical
+// authority below without changing admin/OAuth origin configuration.
 export const FALLBACK_PUBLIC_ORIGIN = "https://ms-realty.ms-realty-bg.workers.dev";
+export const CANONICAL_PUBLIC_ORIGIN = "https://makler-realty.com";
+
+function forwardedHostname(value) {
+  const host = String(value || "").split(",")[0].trim();
+  if (!host) return "";
+  try {
+    return new URL(`https://${host}`).hostname.toLowerCase().replace(/\.$/, "");
+  } catch {
+    return "";
+  }
+}
 
 export function publicOrigin(env = process.env) {
   const configured = String(env?.MS_REALTY_PUBLIC_ORIGIN || "").trim();
@@ -13,6 +24,16 @@ export function publicOrigin(env = process.env) {
     // still has one true public domain to fall back on.
     return FALLBACK_PUBLIC_ORIGIN;
   }
+}
+
+// Only the two known .com hosts may select the canonical authority. Falling
+// back for every other Host value prevents an untrusted forwarded Host header
+// from poisoning canonical, hreflang, Open Graph, robots, or sitemap URLs.
+export function publicOriginForHost(host, env = process.env) {
+  const hostname = forwardedHostname(host);
+  return ["makler-realty.com", "www.makler-realty.com"].includes(hostname)
+    ? CANONICAL_PUBLIC_ORIGIN
+    : publicOrigin(env);
 }
 
 export function isAbsoluteHttpUrl(value) {
