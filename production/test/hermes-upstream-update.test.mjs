@@ -165,6 +165,8 @@ test("workflow fences official updater provenance, full CI dispatch, and compati
   assert.match(updater, /expected_head_sha: process\.env\.HERMES_HEAD_SHA/);
   assert.match(updater, /pull_request_number: String\(pull\.number\)/);
   assert.match(updater, /git push --force-with-lease/);
+  assert.match(updater, /remote_exists=true/);
+  assert.match(updater, /remote_exists=false/);
   assert.match(updater, /ms-realty:hermes-upstream-update/);
   assert.doesNotMatch(updater, /nousresearch\/hermes-agent:latest/);
 
