@@ -2656,7 +2656,6 @@ const OWNER_CONSOLE_COPY = {
   bg: {
     groups: { today: "Днес", crm: "Работа", cms: "Имоти и съдържание", hermes: "Hermes", workspace: "Система" },
     routes: { today: "Днес", leads: "Запитвания", listings: "Имоти", translations: "Преводи", hermes: "Hermes", integrations: "Интеграции", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
-    navMore: "Още в {group}",
     profile: {
       title: "Профил на собственика",
       open: "Отвори профила и настройките",
@@ -2776,7 +2775,6 @@ const OWNER_CONSOLE_COPY = {
   ru: {
     groups: { today: "Сегодня", crm: "Работа", cms: "Объекты и контент", hermes: "Hermes", workspace: "Система" },
     routes: { today: "Сегодня", leads: "Заявки", listings: "Объекты", translations: "Переводы", hermes: "Hermes", integrations: "Интеграции", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
-    navMore: "Ещё в группе {group}",
     profile: {
       title: "Профиль владельца",
       open: "Открыть профиль и настройки",
@@ -2896,7 +2894,6 @@ const OWNER_CONSOLE_COPY = {
   en: {
     groups: { today: "Today", crm: "Work", cms: "Properties & Content", hermes: "Hermes", workspace: "System" },
     routes: { today: "Today", leads: "Leads", listings: "Listings", translations: "Translations", hermes: "Hermes", integrations: "Integrations", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
-    navMore: "More in {group}",
     profile: {
       title: "Owner profile",
       open: "Open profile and settings",
@@ -3160,44 +3157,19 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
   );
 }
 
+// The rail is flat. Every destination the operator can reach is one link at
+// one depth, because the previous shape hid ten of nineteen routes behind three
+// "More in ..." disclosures -- Pipeline, Viewings, Contacts, Requests and
+// Reports were all two clicks and a guess away from a screen that exists to
+// lead with the next action. Grouping still carries the meaning; the disclosure
+// only carried the hiding.
 function navigationDestination(destination, page, { mobile = false } = {}) {
-  const moreLabel = ownerConsoleCopy(page).navMore.replace("{group}", destination.label);
-  const nested = destination.children?.length
-    ? mobile
-      ? h(
-          "details",
-          {
-            className: "adm-mobile-nav__more",
-            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
-            "data-admin-nav-drilldown": destination.id,
-          },
-          h("summary", { className: "adm-mobile-nav__more-summary" }, moreLabel),
-          h(
-            "div",
-            { className: "adm-mobile-nav__nested" },
-            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
-          ),
-        )
-      : h(
-          "details",
-          {
-            className: "crm-sb__more",
-            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
-            "data-admin-nav-drilldown": destination.id,
-          },
-          h("summary", { className: "crm-sb__more-summary" }, moreLabel),
-          h(
-            "div",
-            { className: "crm-sb__nested" },
-            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
-          ),
-        )
-    : null;
   return h(
     "div",
     { key: `${mobile ? "mobile-" : ""}destination-${destination.id}`, className: mobile ? "adm-mobile-nav__destination" : "crm-sb__destination" },
     navigationLink(destination.route, page, { mobile, primary: true, key: `${mobile ? "mobile-" : ""}primary-${destination.id}` }),
-    nested,
+    ...(destination.children || []).map((item) =>
+      navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
   );
 }
 

@@ -635,10 +635,17 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     for (const destination of ["Today", "Leads", "Listings", "Translations", "Hermes", "Integrations", "Settings"]) {
       assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
-    for (const drilldown of ["leads", "translations", "settings"]) {
-      assert.match(empty.body, new RegExp(`data-admin-nav-drilldown="${drilldown}"`), drilldown);
-    }
-    // Legacy destinations remain reachable through grouped disclosures.
+    // The rail is flat: no disclosure hides a destination behind a second click.
+    assert.doesNotMatch(empty.body, /data-admin-nav-drilldown=/, "no grouped disclosures remain");
+    const rail = empty.body.slice(empty.body.indexOf('class="crm-sb__nav"'), empty.body.indexOf('class="crm-sb__me"'));
+    assert.equal((rail.match(/<details/g) || []).length, 0, "the desktop rail carries no disclosure");
+    assert.equal(
+      [...rail.matchAll(/data-admin-nav-route="/g)].length,
+      19,
+      "all nineteen destinations are links at one depth",
+    );
+    // Every destination is reachable directly, including the ten that used to
+    // sit behind "More in ...".
     for (const route of ["contacts", "consents", "documents", "cases", "pipeline", "requests", "viewings", "reports", "approved-content", "migration/review", "team", "activity"]) {
       assert.match(empty.body, new RegExp(`href="/admin/${route}"`), route);
     }
