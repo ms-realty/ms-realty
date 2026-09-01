@@ -23,7 +23,7 @@ const RULE_TYPE_ALIASES = new Map([
 export const TASK_SOURCE_TYPES = Object.freeze(["lead", "viewing", "case", "listing", "manual"]);
 export const TASK_STATUSES = Object.freeze(["open", "in_progress", "completed", "cancelled"]);
 export const TASK_PRIORITIES = Object.freeze(["low", "normal", "high", "urgent"]);
-export const AUTOMATION_SCHEDULES = Object.freeze(["manual", "hourly", "daily", "weekly"]);
+export const AUTOMATION_SCHEDULES = Object.freeze(["manual"]);
 export const AUTOMATION_RUN_STATUSES = Object.freeze(["queued", "running", "succeeded", "failed"]);
 
 const TASK_COLLECTION_SLUG = "tasks";
@@ -220,8 +220,8 @@ function isoDate(value, label, { required = false } = {}) {
   return parsed.toISOString();
 }
 
-function id(value, label) {
-  return text(value, label, 160);
+function id(value, label, max = 160) {
+  return text(value, label, max);
 }
 
 function assertNoPrivateFields(value, label = "input") {
@@ -429,7 +429,10 @@ function safeFailure(document) {
 function safeSummary(value, depth = 0) {
   if (depth > 2) return null;
   if (value === null || typeof value === "boolean" || typeof value === "number") return value;
-  if (typeof value === "string") return value.length > 160 ? value.slice(0, 160) : value;
+  if (typeof value === "string") {
+    if (URL_VALUE.test(value) || EMAIL_VALUE.test(value) || PHONE_VALUE.test(value)) return null;
+    return value.length > 160 ? value.slice(0, 160) : value;
+  }
   if (Array.isArray(value)) return value.slice(0, 20).map((entry) => safeSummary(entry, depth + 1));
   if (!record(value)) return null;
   const output = {};
@@ -842,7 +845,9 @@ async function readRunByKey(runtime, scope, key, req = undefined) {
   return findOne(runtime, AUTOMATION_RUN_COLLECTION_SLUG, scopeWhere(scope, { idempotency_key: { equals: key } }), req);
 }
 
-async function updateRuleAfterRun({ runtime, scope, rule, status, completedAt, req }) {
+async function updateRuleAfterRun({ runtime, scope, ruleId, status, completedAt, req }) {
+  const rule = await findOne(runtime, AUTOMATION_RULE_COLLECTION_SLUG, scopeWhere(scope, { rule_id: { equals: ruleId } }), req);
+  if (!rule) throw new OperationsNotFoundError("Automation rule was not found after execution");
   const data = {
     last_run_at: completedAt,
     last_failure_at: status === "failed" ? completedAt : rule.last_failure_at || null,
@@ -913,7 +918,10 @@ export async function runAutomationRule({ ruleId, input = {}, workspaceId, actor
         req,
       });
       if (failure) await runtime.create({ collection: AUTOMATION_RUN_FAILURE_COLLECTION_SLUG, data: failure, depth: 0, overrideAccess: true, req });
-      await updateRuleAfterRun({ runtime, scope, rule: started.rule, status, completedAt, req });
+      // The owner may edit a rule while the approved runner is in flight. Read
+      // the current workspace-scoped row before incrementing its revision so
+      // that the completion marker cannot regress a concurrent edit.
+      await updateRuleAfterRun({ runtime, scope, ruleId: started.document.rule_id, status, completedAt, req });
       return document;
     });
     auditEvent(audit, {

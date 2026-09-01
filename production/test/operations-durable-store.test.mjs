@@ -9,6 +9,7 @@ import {
   createAutomationRule,
   createTask,
   readAutomationRun,
+  readAutomationRule,
   readAutomationRuns,
   readAutomationRules,
   readHermesRun,
@@ -153,7 +154,7 @@ test("automation rules require owner confirmation and run only approved types", 
     actor: principal.id,
     principal,
     audit: (entry) => audit.push(entry),
-    input: { rule_id: "rule-alerts", idempotency_key: "rule-intent-1", name: "Saved-search digest", rule_type: "saved_search_alerts", schedule: "hourly" },
+    input: { rule_id: "rule-alerts", idempotency_key: "rule-intent-1", name: "Saved-search digest", rule_type: "saved_search_alerts", schedule: "manual" },
   });
   assert.equal(disabled.rule.enabled, false);
   await assert.rejects(
@@ -183,12 +184,23 @@ test("automation rules require owner confirmation and run only approved types", 
     runner: async (rule) => {
       runnerCalls += 1;
       assert.equal(rule.rule_type, "saved_search_alerts");
-      return { queued: 2, delivered: 0, url: "https://should-not-persist" };
+      return {
+        queued: 2,
+        delivered: 0,
+        detail: "alice@example.com",
+        phone: "+359 888 123 456",
+        link: "https://should-not-persist",
+      };
     },
   });
   assert.equal(run.run.status, "succeeded");
   assert.equal(run.run.result_summary.queued, 2);
   assert.equal(run.run.result_summary.url, undefined);
+  const persistedSummary = payload.rows.automation_runs.find((row) => row.run_id === "run-alerts-1").result_summary;
+  for (const secret of ["alice@example.com", "+359 888 123 456", "https://should-not-persist"]) {
+    assert.equal(JSON.stringify(persistedSummary).includes(secret), false);
+    assert.equal(JSON.stringify(run.run.result_summary).includes(secret), false);
+  }
   assert.equal(runnerCalls, 1);
   const retry = await runAutomationRule({
     payload,
@@ -227,10 +239,71 @@ test("automation rules require owner confirmation and run only approved types", 
   );
 });
 
+test("automation completion preserves a concurrent rule edit and increments its current revision", async () => {
+  const payload = fakePayload();
+  const created = await createAutomationRule({
+    payload,
+    workspaceId,
+    actor: principal.id,
+    principal,
+    input: { rule_id: "rule-concurrent", name: "Original name", rule_type: "saved_search_alerts", schedule: "manual" },
+  });
+  const enabled = await updateAutomationRule({
+    payload,
+    workspaceId,
+    actor: principal.id,
+    principal,
+    ruleId: created.rule.rule_id,
+    input: { enabled: true, confirmation: automationConfirmation("enable", created.rule.rule_id) },
+  });
+  let releaseRunner;
+  let signalRunnerStarted;
+  const runnerStarted = new Promise((resolve) => {
+    signalRunnerStarted = resolve;
+  });
+  const runnerRelease = new Promise((resolve) => {
+    releaseRunner = resolve;
+  });
+  const runPromise = runAutomationRule({
+    payload,
+    workspaceId,
+    actor: principal.id,
+    principal,
+    ruleId: created.rule.rule_id,
+    input: { run_id: "run-concurrent", confirmation: automationConfirmation("run", created.rule.rule_id) },
+    runner: async () => {
+      signalRunnerStarted();
+      await runnerRelease;
+      return { queued: 1 };
+    },
+  });
+  await runnerStarted;
+  const edited = await updateAutomationRule({
+    payload,
+    workspaceId,
+    actor: principal.id,
+    principal,
+    ruleId: created.rule.rule_id,
+    input: { expected_revision: enabled.rule.revision, name: "Concurrent owner edit" },
+  });
+  assert.equal(edited.rule.revision, enabled.rule.revision + 1);
+  releaseRunner();
+  const run = await runPromise;
+  assert.equal(run.run.status, "succeeded");
+  const finalRule = await readAutomationRule({ payload, workspaceId, ruleId: created.rule.rule_id });
+  assert.equal(finalRule.name, "Concurrent owner edit");
+  assert.equal(finalRule.revision, edited.rule.revision + 1);
+  assert.ok(finalRule.last_run_at);
+});
+
 test("automation failures are durable and Hermes history remains read-only and redacted", async () => {
   const payload = fakePayload();
   const audit = [];
-  await createAutomationRule({ payload, workspaceId, actor: principal.id, principal, input: { rule_id: "rule-publish", name: "Listing schedules", rule_type: "listing_publication_schedules", schedule: "daily" } });
+  await assert.rejects(
+    createAutomationRule({ payload, workspaceId, actor: principal.id, principal, input: { rule_id: "rule-scheduled", name: "Scheduled listing runs", rule_type: "listing_publication_schedules", schedule: "daily" } }),
+    /schedule must be one of manual/,
+  );
+  await createAutomationRule({ payload, workspaceId, actor: principal.id, principal, input: { rule_id: "rule-publish", name: "Listing runs", rule_type: "listing_publication_schedules", schedule: "manual" } });
   await updateAutomationRule({ payload, workspaceId, actor: principal.id, principal, ruleId: "rule-publish", input: { enabled: true, confirmation: automationConfirmation("enable", "rule-publish") } });
   const failed = await runAutomationRule({
     payload,

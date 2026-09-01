@@ -973,7 +973,7 @@ function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
           idempotency_key: "operations-rule-payload-it-key",
           name: "Approved listing schedule",
           rule_type: "listing_publication_schedules",
-          schedule: "daily",
+          schedule: "manual",
         },
       });
       assert.equal(rule.rule.enabled, false);
