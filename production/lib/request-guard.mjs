@@ -1,3 +1,5 @@
+import { CANONICAL_PUBLIC_ORIGIN, FALLBACK_PUBLIC_ORIGIN } from "./public-origin.mjs";
+
 // Cross-origin write protection shared by both runtimes (bare Node server and
 // the Next App Router adapters).
 //
@@ -15,10 +17,10 @@
 // mandatory: the Worker does not parse or trust the signed session and cannot
 // replace same-origin, role, workspace, and Payload access validation.
 //
-// Rule: for state-changing methods, if the request carries browser-set origin
-// evidence (Sec-Fetch-Site or Origin), it must say same-origin. Requests with
-// neither header are non-browser clients (curl, server-to-server), which
-// cannot be CSRF'd, so they pass.
+// Rule: for state-changing methods, browser-set origin evidence must identify
+// either the request host or an explicitly trusted application origin.
+// Requests with neither header are non-browser clients (curl,
+// server-to-server), which cannot be CSRF'd, so they pass.
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const SAME_SITE_VALUES = new Set(["same-origin", "none"]);
@@ -48,6 +50,10 @@ function canonicalWriteHost(value) {
   if (host === "www.makler-realty.ru") return "makler-realty.ru";
   return host;
 }
+
+const OWNED_ADMIN_LOGIN_HOSTS = new Set(
+  [CANONICAL_PUBLIC_ORIGIN, FALLBACK_PUBLIC_ORIGIN].map((origin) => canonicalWriteHost(new URL(origin).host)),
+);
 
 export function requestHost(headers) {
   return canonicalWriteHost(readHeader(headers, "x-forwarded-host") || readHeader(headers, "host"));
@@ -88,10 +94,41 @@ export function crossOriginWriteRejection(method, headers, { env = process.env }
     return "invalid_origin";
   }
   const host = requestHost(headers);
-  if (!host) return "unknown_host";
-  if (fetchSite && !SAME_SITE_VALUES.has(fetchSite) && originHost !== host) return "cross_site_request";
+  if (!host) return fetchSite && !SAME_SITE_VALUES.has(fetchSite) ? "cross_site_request" : "unknown_host";
   if (originHost === host) return null;
-  return trustedWriteHosts(env).has(originHost) ? null : "cross_origin_request";
+  if (trustedWriteHosts(env).has(originHost)) return null;
+  if (fetchSite && !SAME_SITE_VALUES.has(fetchSite)) return "cross_site_request";
+  return "cross_origin_request";
+}
+
+// The canonical domain may currently hand a signed-out owner to the durable
+// workers.dev login route (and vice versa). Keep that cutover exception scoped
+// to the first credential POST: a session cookie or Authorization header means
+// the request must obey the normal cross-origin write policy.
+export function adminLoginWriteRejection(
+  method,
+  headers,
+  { pathname = "", hasAdminCredential = false, env = process.env } = {},
+) {
+  const rejection = crossOriginWriteRejection(method, headers, { env });
+  if (
+    !rejection ||
+    String(method || "GET").toUpperCase() !== "POST" ||
+    pathname !== "/admin/login" ||
+    hasAdminCredential
+  ) {
+    return rejection;
+  }
+
+  const origin = readHeader(headers, "origin").trim();
+  let originHost;
+  try {
+    originHost = canonicalWriteHost(new URL(origin).host);
+  } catch {
+    return rejection;
+  }
+  const host = requestHost(headers);
+  return OWNED_ADMIN_LOGIN_HOSTS.has(originHost) && OWNED_ADMIN_LOGIN_HOSTS.has(host) ? null : rejection;
 }
 
 // Public lead intake is intentionally browser-only once the durable store is

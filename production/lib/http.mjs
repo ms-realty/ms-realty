@@ -18,7 +18,7 @@ import {
   signInGuardConfigFromEnv,
 } from "./admin-sign-in-guard.mjs";
 import {
-  crossOriginWriteRejection,
+  adminLoginWriteRejection,
   readHeader,
   requestHost,
   sameOriginWriteRejection,
@@ -2626,9 +2626,15 @@ export function createHttpApp({
       const sameOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl });
       if (sameOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: sameOrigin });
     }
+    let auth = request.headers?.authorization || request.headers?.Authorization || "";
+    const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
     // Runs after /mcp, which keeps its own MS_REALTY_MCP_ALLOWED_ORIGINS allowlist
-    // because connector clients are legitimately cross-origin.
-    const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+    // because connector clients are legitimately cross-origin. Only the first
+    // signed-out login POST gets the fixed canonical↔workers.dev cutover exception.
+    const crossOrigin = adminLoginWriteRejection(request.method, request.headers, {
+      pathname: url.pathname,
+      hasAdminCredential: Boolean(auth || sessionToken),
+    });
     if (crossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
     const runtimeDataAdminRequest =
       url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
@@ -2642,8 +2648,6 @@ export function createHttpApp({
     })) {
       return adminJson(503, runtimeDataUnavailablePayload(url.pathname));
     }
-   let auth = request.headers?.authorization || request.headers?.Authorization || "";
-    const sessionToken = auth ? "" : adminTokenFromCookie(request.headers?.cookie || request.headers?.Cookie || "");
 
     // B6 workspace security and data: server-side session revocation. A revoked
     // cookie is refused here, before the token ever reaches Payload, so "sign

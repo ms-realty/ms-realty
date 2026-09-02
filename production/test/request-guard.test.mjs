@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { crossOriginWriteRejection } from "../lib/request-guard.mjs";
+import { adminLoginWriteRejection, crossOriginWriteRejection } from "../lib/request-guard.mjs";
 
 const HOST = { host: "review.ms-realty.example" };
 
@@ -53,6 +53,40 @@ test("MS_REALTY_TRUSTED_WRITE_ORIGINS allows a named extra host", () => {
     crossOriginWriteRejection("POST", headers, { env: { MS_REALTY_TRUSTED_WRITE_ORIGINS: "admin.ms-realty.example" } }),
     null,
   );
+});
+
+test("only an initial login may cross between the canonical and production workers.dev hosts", () => {
+  for (const headers of [
+    {
+      host: "makler-realty.com",
+      origin: "https://ms-realty.ms-realty-bg.workers.dev",
+      "sec-fetch-site": "cross-site",
+    },
+    {
+      host: "ms-realty.ms-realty-bg.workers.dev",
+      origin: "https://makler-realty.com",
+      "sec-fetch-site": "cross-site",
+    },
+  ]) {
+    assert.equal(crossOriginWriteRejection("POST", headers), "cross_site_request");
+    assert.equal(adminLoginWriteRejection("POST", headers, { pathname: "/admin/login" }), null);
+    assert.equal(
+      adminLoginWriteRejection("POST", headers, { pathname: "/admin/login", hasAdminCredential: true }),
+      "cross_site_request",
+    );
+    assert.equal(adminLoginWriteRejection("POST", headers, { pathname: "/api/admin/team" }), "cross_site_request");
+  }
+});
+
+test("MS_REALTY_PUBLIC_ORIGIN alone never grants cross-origin write trust", () => {
+  const headers = {
+    host: "makler-realty.com",
+    origin: "https://admin.example.test",
+    "sec-fetch-site": "cross-site",
+  };
+  const env = { MS_REALTY_PUBLIC_ORIGIN: "https://admin.example.test" };
+  assert.equal(crossOriginWriteRejection("POST", headers, { env }), "cross_site_request");
+  assert.equal(adminLoginWriteRejection("POST", headers, { pathname: "/admin/login", env }), "cross_site_request");
 });
 
 test("canonical legacy www aliases may post to the apex host", () => {
