@@ -456,8 +456,8 @@
                 </div>
               </div>
               <div class="ph-actions">
-                <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Snooze</span></button>
-                <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Assign</span></button>
+                <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Snooze…</span></button>
+                <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Reassign…</span></button>
                 <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>History</span></button>
               </div>
             </div>
@@ -469,6 +469,31 @@
               <div class="fact"><dt>Assigned broker</dt><dd class="subtle">Not set</dd></div>
               <div class="fact"><dt>Matching inventory</dt><dd>5 properties</dd></div>
             </dl>
+
+            <div class="sect">
+              <h3>Reassign this enquiry
+                <span style="font-weight:500; font-size:12px; color:var(--text-muted)">
+                  Both fields are required — the server refuses a reassignment without them.
+                </span>
+              </h3>
+              <div style="display:grid; gap:10px; max-width:520px">
+                <div class="field"><label for="ra-broker">To</label>
+                  <span class="in" id="ra-broker">Mariya Ruseva <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
+                <div class="field"><label for="ra-reason">Why <em>required</em></label>
+                  <span class="in in--area" id="ra-reason">Hebrew enquiry; Mariya answers in Hebrew and
+                    the previous broker is on leave until the 12th.</span></div>
+                <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+                  <span class="box" data-on="1"></span>
+                  <span>I am reassigning this enquiry and my name goes on it.</span>
+                </div>
+                <div style="display:flex; gap:8px">
+                  <button class="btn btn--sm btn--primary" type="button">Reassign</button>
+                  <button class="btn btn--sm" type="button">Cancel</button>
+                </div>
+                <span class="hint">Snoozing asks for the same two things plus the moment it comes back,
+                  at most 90 days out. The reply clock defers by that whole window rather than restarting.</span>
+              </div>
+            </div>
 
             <div class="sect">
               <h3>Reply

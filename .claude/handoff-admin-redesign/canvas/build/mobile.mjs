@@ -177,7 +177,7 @@ const CASE = `<div class="ph-app">
       </div>
       <div class="ph-row"><span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Met</span>
         <span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Waived</span>
-        <span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Extend</span></div>
+        <span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Blocked…</span></div>
     </div>
   </div>
 ${tabs("cases")}

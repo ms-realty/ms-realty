@@ -123,7 +123,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1004,
+      "h": 1275,
       "page": "page-2"
     },
     {
@@ -139,7 +139,7 @@
       "file": "Viewings.dc.html",
       "title": "Viewings",
       "x": 0,
-      "y": 1240,
+      "y": 1445,
       "w": 1440,
       "h": 1004,
       "page": "page-2"
@@ -148,7 +148,7 @@
       "file": "Tasks.dc.html",
       "title": "Tasks",
       "x": 1560,
-      "y": 1240,
+      "y": 1445,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -157,7 +157,7 @@
       "file": "Requests.dc.html",
       "title": "Requests from the website",
       "x": 3120,
-      "y": 1240,
+      "y": 1445,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -166,7 +166,7 @@
       "file": "Contacts.dc.html",
       "title": "Contacts",
       "x": 0,
-      "y": 2414,
+      "y": 2619,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -175,7 +175,7 @@
       "file": "Consent.dc.html",
       "title": "Consent",
       "x": 1560,
-      "y": 2414,
+      "y": 2619,
       "w": 1440,
       "h": 924,
       "page": "page-2"

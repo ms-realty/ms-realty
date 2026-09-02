@@ -109,8 +109,8 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
                 </div>
               </div>
               <div class="ph-actions">
-                <button class="btn btn--sm" type="button">${icon("clock", 14)}<span>Snooze</span></button>
-                <button class="btn btn--sm" type="button">${icon("users", 14)}<span>Assign</span></button>
+                <button class="btn btn--sm" type="button">${icon("clock", 14)}<span>Snooze…</span></button>
+                <button class="btn btn--sm" type="button">${icon("users", 14)}<span>Reassign…</span></button>
                 <button class="btn btn--sm" type="button">${icon("list", 14)}<span>History</span></button>
               </div>
             </div>
@@ -122,6 +122,31 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
               <div class="fact"><dt>Assigned broker</dt><dd class="subtle">Not set</dd></div>
               <div class="fact"><dt>Matching inventory</dt><dd>5 properties</dd></div>
             </dl>
+
+            <div class="sect">
+              <h3>Reassign this enquiry
+                <span style="font-weight:500; font-size:12px; color:var(--text-muted)">
+                  Both fields are required — the server refuses a reassignment without them.
+                </span>
+              </h3>
+              <div style="display:grid; gap:10px; max-width:520px">
+                <div class="field"><label for="ra-broker">To</label>
+                  <span class="in" id="ra-broker">Mariya Ruseva ${icon("down", 13)}</span></div>
+                <div class="field"><label for="ra-reason">Why <em>required</em></label>
+                  <span class="in in--area" id="ra-reason">Hebrew enquiry; Mariya answers in Hebrew and
+                    the previous broker is on leave until the 12th.</span></div>
+                <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+                  <span class="box" data-on="1"></span>
+                  <span>I am reassigning this enquiry and my name goes on it.</span>
+                </div>
+                <div style="display:flex; gap:8px">
+                  <button class="btn btn--sm btn--primary" type="button">Reassign</button>
+                  <button class="btn btn--sm" type="button">Cancel</button>
+                </div>
+                <span class="hint">Snoozing asks for the same two things plus the moment it comes back,
+                  at most 90 days out. The reply clock defers by that whole window rather than restarting.</span>
+              </div>
+            </div>
 
             <div class="sect">
               <h3>Reply

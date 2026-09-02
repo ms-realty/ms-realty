@@ -126,8 +126,11 @@ ${prov({ logo: "OR", bg: "var(--stone-100)", fg: "var(--stone-600)", name: "Open
               ${icon("alert", 16)}
               <span><code>MS_REALTY_META_WEBHOOK_VERIFY_TOKEN</code><p>Lets Meta deliver inbound messages back to the workspace.</p></span>
             </div>
-            <div style="padding:12px 16px; border-top:1px solid var(--border)">
-              <button class="btn btn--sm btn--primary" type="button">${icon("gear", 14)}<span>Enter these values</span></button>
+            <div style="padding:12px 16px; border-top:1px solid var(--border); display:grid; gap:8px">
+              <button class="btn btn--sm" type="button">${icon("copy", 14)}<span>Copy the key names</span></button>
+              <span class="hint">This workspace never takes a credential through a form. Every provider row
+                declares owner_secret_fields false, and the coverage build refuses a row that does not — these
+                four are set in the deployment environment and the workspace only reports whether they arrived.</span>
             </div>
           </section>
 

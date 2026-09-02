@@ -154,8 +154,8 @@ ${[
               <p class="sub"><span class="mono">MS-CRAWL-0032</span> · Bulgarian → German · drafted by Hermes 31 Aug 09:05</p></div>
             <div style="display:flex; gap:8px">
               <button class="btn btn--sm" type="button">Edit the German</button>
-              <button class="btn btn--sm" type="button">Reject</button>
-              <button class="btn btn--sm btn--primary" type="button">Approve and index</button>
+              <button class="btn btn--sm btn--primary" type="button">Approve</button>
+              <button class="btn btn--sm" type="button">Publish</button>
             </div>
           </div>
           <div class="diff">
@@ -183,8 +183,10 @@ ${[
               </div>
             </div>
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">Approving puts your name on this text,
-            makes it indexable in German, and adds it to the next sitemap build.</span></div>
+          <div class="savebar"><span style="font-size:12px" class="muted">Approving puts your name on this text.
+            Publishing is the separate act that makes it indexable in German and adds it to the next sitemap
+            build — a translator may approve, and only an editor may publish, so the two are two buttons.
+            There is no reject: a draft that is wrong is edited or left, and the ledger records no rejection.</span></div>
         </section>
       </div>`;
 fs.writeFileSync(W("Translations.dc.html"), page({ active: "translations", body: TR_BODY, extraCss: TR_CSS, height: 900 }));

@@ -275,30 +275,30 @@ const CONS_BODY = `      <div class="ph">
         <section class="panel">
           <div class="toolbar"><span class="find">${icon("search", 14)}Person or email</span>
             <button class="btn btn--sm" type="button">Any purpose ${icon("down", 13)}</button>
-            <button class="btn btn--sm" type="button">Expiring soon ${icon("down", 13)}</button></div>
+            <button class="btn btn--sm" type="button">Any state ${icon("down", 13)}</button></div>
           <table>
-            <thead><tr><th>Person</th><th>Purpose</th><th>Given</th><th>Source</th><th>Expires</th><th>State</th><th></th></tr></thead>
+            <thead><tr><th>Person</th><th>Purpose</th><th>Given</th><th>Source</th><th>Legal basis</th><th>State</th><th></th></tr></thead>
             <tbody>
               <tr><td><b>Nikolay Stoyanov</b></td><td>Marketing email</td><td class="muted">14 Mar 2026</td>
-                <td class="mono">/bg/kontakt</td><td><span style="color:var(--warning-700); font-weight:600">14 Sep 2026</span></td>
-                <td><span class="pill pill--warn"><i></i>Expires in 13 days</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Ask to renew</button></td></tr>
+                <td class="mono">/bg/kontakt</td><td class="muted">consent</td>
+                <td><span class="pill pill--ok"><i></i>Current</span></td>
+                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
               <tr><td><b>Dmitri Volkov</b></td><td>Marketing email</td><td class="muted">2 Jun 2026</td>
-                <td class="mono">/ru/kontakt</td><td class="muted">—</td>
+                <td class="mono">/ru/kontakt</td><td class="muted">consent</td>
                 <td><span class="pill pill--sand"><i></i>Withdrawn 27 Aug</span></td>
                 <td style="text-align:right"><span class="muted" style="font-size:12px">No further contact</span></td></tr>
               <tr><td><b>Anna Weber</b></td><td>Viewing and transaction contact</td><td class="muted">11 Jul 2026</td>
-                <td class="mono">/de/imoti/villa-katuntsi</td><td class="muted">11 Jul 2028</td>
+                <td class="mono">/de/imoti/villa-katuntsi</td><td class="muted">legitimate_interest</td>
                 <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw</button></td></tr>
+                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
               <tr><td><b>Sofia Marinova</b></td><td>Saved-search alerts</td><td class="muted">3 Aug 2026</td>
-                <td class="mono">/el/tarsene</td><td class="muted">3 Aug 2027</td>
+                <td class="mono">/el/tarsene</td><td class="muted">consent</td>
                 <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw</button></td></tr>
+                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
               <tr><td><b>Maria Petrova</b></td><td>Enquiry reply</td><td class="muted">4 Jul 2026</td>
-                <td class="mono">WhatsApp opt-in</td><td class="muted">4 Jul 2027</td>
+                <td class="mono">WhatsApp opt-in</td><td class="muted">consent</td>
                 <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw</button></td></tr>
+                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
             </tbody>
           </table>
         </section>
@@ -313,12 +313,19 @@ const CONS_BODY = `      <div class="ph">
             </div>
           </section>
           <section class="panel">
-            <div class="panel-hd"><h2>Expiring in 60 days</h2><span class="sub">3</span></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; justify-content:space-between"><span>Nikolay Stoyanov</span><span style="color:var(--warning-700); font-weight:600">14 Sep</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Petar Kolev</span><span class="muted">2 Oct</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Ivan Georgiev</span><span class="muted">19 Oct</span></div>
-              <button class="btn btn--sm" type="button" style="margin-top:5px">${icon("send", 13)}<span>Draft renewal requests</span></button>
+            <div class="panel-hd"><h2>Withdrawing a consent</h2></div>
+            <div class="sect" style="display:grid; gap:10px; font-size:12.5px">
+              <div class="field"><label for="wd-reason">Why <em>required</em></label>
+                <span class="in" id="wd-reason">The person asked us to ${icon("down", 13)}</span></div>
+              <span class="hint">One of three: the person asked us to, a broker recorded their request,
+                or a data correction. The server takes no other reason.</span>
+              <div style="display:flex; align-items:flex-start; gap:9px">
+                <span class="box" data-on="1"></span>
+                <span>I am recording this withdrawal and my name goes on it.</span>
+              </div>
+              <button class="btn btn--sm btn--danger" type="button">Withdraw this consent</button>
+              <span class="hint">Withdrawal supersedes rather than edits, and cannot be undone from
+                here — a new consent has to come from the person.</span>
             </div>
           </section>
         </div>
