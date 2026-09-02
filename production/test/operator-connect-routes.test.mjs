@@ -14,7 +14,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { renderMcpResponse, mcpConfigFromEnv } from "../lib/mcp-server.mjs";
 import { OWNER_CONNECTABLE_PROVIDERS, OPERATOR_PROVIDERS } from "../lib/operator-provider-catalog.mjs";
 import { OPERATOR_AGENT_SECRET_ENV, mintOperatorAgentToken } from "../lib/operator-agent-access.mjs";
-import { OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
+import { ADMIN_ROUTE_COVERAGE, OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
 import { payloadAdminPrincipal } from "../lib/payload-admin-auth.mjs";
 import { readProviderCredentials, saveProviderConnection } from "../lib/provider-connections.mjs";
 
@@ -648,8 +648,17 @@ test("agent config GET is catalog-only while POST explicitly issues and audits",
   });
   assert.equal(catalogResponse.status, 200);
   assert.equal(catalogResponse.body.kind, "owner_operator_catalog");
-  assert.equal(catalogResponse.body.summary.total, 130);
-  assert.equal(catalogResponse.body.operations.length, 130);
+  // The catalog response has to be the catalog: every operation, named, with
+  // none quietly dropped. A pasted total said nothing about which ones came
+  // back, and had to be edited by whoever added the next admin route.
+  // This operator is a full admin, so the catalog they get back is every admin
+  // route, named. A pasted total said nothing about which ones came back, and
+  // had to be edited by whoever added the next admin route.
+  assert.equal(catalogResponse.body.summary.total, ADMIN_ROUTE_COVERAGE.length);
+  assert.deepEqual(
+    catalogResponse.body.operations.map((row) => row.operation).sort(),
+    ADMIN_ROUTE_COVERAGE.map((row) => row.operation).sort(),
+  );
   assert.equal(
     catalogResponse.body.operations.filter((row) => row.execution === "browser_session").length,
     OWNER_OPERATOR_BROWSER_OPERATIONS.length,
@@ -698,7 +707,13 @@ test("agent config GET is catalog-only while POST explicitly issues and audits",
   assert.equal(adapterCatalog.status, 200);
   const adapterCatalogBody = await adapterCatalog.json();
   assert.equal(adapterCatalogBody.kind, "owner_operator_catalog");
-  assert.equal(adapterCatalogBody.summary.total, 130);
+  // Both servers answer with the same catalog, so both are checked against the
+  // same source rather than against a number typed twice.
+  assert.equal(adapterCatalogBody.summary.total, ADMIN_ROUTE_COVERAGE.length);
+  assert.deepEqual(
+    adapterCatalogBody.operations.map((row) => row.operation).sort(),
+    ADMIN_ROUTE_COVERAGE.map((row) => row.operation).sort(),
+  );
   assert.equal(readAuditLog(adapterAudit).filter((row) => row.action === "operator_agent_token_issued").length, 0);
   const adapterPost = await renderAppAdminResponse(
     new Request(`${ORIGIN}/api/admin/connections/agent-config`, { method: "POST", headers }),

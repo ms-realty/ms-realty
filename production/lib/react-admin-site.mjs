@@ -221,6 +221,12 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    assistDraft: "Чернова",
+    assistPending: "Hermes пише чернова…",
+    assistFailed: "Hermes не успя да напише чернова.",
+    assistUnavailable: "Hermes не е настроен в тази среда. Напишете текста сами.",
+    assistDrafted: "Чернова от Hermes по {source}. Нищо не се публикува, докато вие не я одобрите.",
+    assistSourceListingFacts: "одобрените факти на обявата",
     localeRolloutLead: "{live} от {total} езика са публикувани. Езикът се отваря чак когато човек одобри превода.",
     localeLanguages: "Езици",
     localeLanguage: "Език",
@@ -940,6 +946,12 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    assistDraft: "Черновик",
+    assistPending: "Hermes пишет черновик…",
+    assistFailed: "Hermes не смог написать черновик.",
+    assistUnavailable: "Hermes не настроен в этой среде. Напишите текст сами.",
+    assistDrafted: "Черновик Hermes по {source}. Ничего не публикуется, пока вы не одобрите.",
+    assistSourceListingFacts: "одобренным фактам объекта",
     localeRolloutLead: "{live} из {total} языков опубликованы. Язык открывается только после того, как человек одобрил перевод.",
     localeLanguages: "Языки",
     localeLanguage: "Язык",
@@ -1659,6 +1671,12 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    assistDraft: "Draft",
+    assistPending: "Hermes is drafting…",
+    assistFailed: "Hermes could not draft this.",
+    assistUnavailable: "Hermes is not configured in this environment. Write the text yourself.",
+    assistDrafted: "Hermes draft from {source}. Nothing is published until you approve it.",
+    assistSourceListingFacts: "the listing\u2019s approved facts",
     localeRolloutLead: "{live} of {total} languages are live. A language opens only once a human has approved the translation.",
     localeLanguages: "Languages",
     localeLanguage: "Language",
@@ -8998,8 +9016,8 @@ function editorSelect(field, value, disabled, options) {
   );
 }
 
-function editorInputFor(ui, field, value, disabled = false) {
-  const shared = { name: field, defaultValue: value, disabled, "data-editor-field": field };
+function editorInputFor(ui, field, value, disabled = false, id = undefined) {
+  const shared = { name: field, defaultValue: value, disabled, "data-editor-field": field, ...(id ? { id } : {}) };
   if (["description", "seo_description", "seo_og_description"].includes(field)) return h("textarea", { ...shared, rows: field === "description" ? 6 : 3 });
   if (["price_eur", "area_sqm", "land_area_sqm"].includes(field)) return h("input", { ...shared, type: "number", min: "0", step: "any", inputMode: "decimal" });
   if (["bedrooms", "floor", "total_floors"].includes(field)) return h("input", { ...shared, type: "number", min: "0", step: "1", inputMode: "numeric" });
@@ -9033,14 +9051,82 @@ function editorInputFor(ui, field, value, disabled = false) {
   return h("input", shared);
 }
 
-function editorField(copy, ui, field, value, disabled = false) {
-  return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
+// The editable values Hermes can draft, and the Hermes copy field each one
+// maps to. The affordance is identical wherever it appears; what differs is the
+// source it draws from, which the drafted bar names.
+const LISTING_ASSIST_FIELDS = Object.freeze({
+  description: "description",
+  seo_title: "seo_title",
+  seo_description: "meta_description",
+});
+
+function editorField(copy, ui, field, value, disabled = false, assist = null) {
+  if (!assist) return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
+  return assistedEditorField(copy, ui, field, value, disabled, assist);
 }
 
-function editorFieldWithReview(copy, ui, field, value, disabled = false, factReview = null) {
+// One draft, one approval boundary, one shape. The button never writes anything
+// public: it fills the box the broker is already looking at and says where the
+// words came from, and the value is saved by the same form as any other edit.
+function assistedEditorField(copy, ui, field, value, disabled, assist, extra = []) {
+  const inputId = `editor-${field}`;
+  const barId = `${inputId}-drafted`;
+  return h(
+    "div",
+    // Named differently from the button's data-hermes-assist-field on purpose:
+    // the button carries the Hermes copy field, this carries the editor field,
+    // and one closest() lookup has to be able to tell them apart.
+    { key: field, className: "adm-field adm-field--assisted", "data-hermes-assist-for": field },
+    h(
+      "div",
+      { className: "adm-lblrow" },
+      h("label", { htmlFor: inputId }, fieldText(ui, field)),
+      h(
+        "button",
+        {
+          type: "button",
+          className: "adm-assist",
+          disabled: disabled || !assist.available || undefined,
+          title: assist.available ? undefined : assist.unavailableReason || undefined,
+          "data-hermes-assist": "true",
+          "data-hermes-assist-endpoint": assist.endpoint,
+          "data-hermes-assist-field": LISTING_ASSIST_FIELDS[field],
+          "data-hermes-assist-listing": assist.listingId,
+          "data-hermes-assist-locale": assist.locale,
+          "data-hermes-assist-target": inputId,
+          "data-hermes-assist-bar": barId,
+          "data-hermes-assist-pending": ui.assistPending,
+          "data-hermes-assist-failure": ui.assistFailed,
+          "data-hermes-assist-unavailable": ui.assistUnavailable,
+        },
+        h(Icon, { name: "sparkles", size: 14 }),
+        h("span", null, ui.assistDraft),
+      ),
+    ),
+    editorInputFor(ui, field, value, disabled, inputId),
+    h(
+      "p",
+      { id: barId, className: "adm-drafted-bar", role: "status", "data-hermes-drafted-bar": field, hidden: true },
+      h(Icon, { name: "sparkles", size: 14 }),
+      h("span", null, fillTemplate(ui.assistDrafted, { source: assist.source })),
+    ),
+    ...extra,
+  );
+}
+
+function editorFieldWithReview(copy, ui, field, value, disabled = false, factReview = null, assist = null) {
   const reviewRows = (factReview?.rows || []).filter((row) => row.editor_field === field);
-  if (!reviewRows.length) return editorField(copy, ui, field, value, disabled);
+  if (!reviewRows.length) return editorField(copy, ui, field, value, disabled, assist);
   const reviewCopy = factReview.copy || {};
+  const confirmations = reviewRows.map((row) =>
+    h(
+      "span",
+      { key: `${field}-${row.row}`, className: "adm-fact-review-confirm" },
+      h("input", { type: "checkbox", name: "confirmedFacts", value: field, disabled, "data-fact-review-confirm": row.row }),
+      ` ${reviewCopy.confirm || "I confirm this value"}`,
+    ),
+  );
+  if (assist) return assistedEditorField(copy, ui, field, value, disabled, assist, confirmations);
   return h(
     "label",
     { key: field },
@@ -9063,17 +9149,19 @@ function editorFieldWithReview(copy, ui, field, value, disabled = false, factRev
   );
 }
 
-function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, factReview = null) {
+function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, factReview = null, assist = null) {
   if (!fields.length) return null;
   return h(
     "fieldset",
     { className: "adm-form__group" },
     h("legend", null, title),
-    ...fields.map((field) => editorFieldWithReview(copy, ui, field, facts[field] ?? "", disabled, factReview)),
+    ...fields.map((field) =>
+      editorFieldWithReview(copy, ui, field, facts[field] ?? "", disabled, factReview, assist && LISTING_ASSIST_FIELDS[field] ? assist : null),
+    ),
   );
 }
 
-function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null } = {}) {
+function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null, assist = null } = {}) {
   if (!fields.length) return null;
   return h(
     "details",
@@ -9084,7 +9172,7 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
       h("span", null, title),
       h("small", null, `${fields.length}`),
     ),
-    editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview),
+    editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview, assist),
   );
 }
 
@@ -9139,6 +9227,16 @@ function ListingEditorBody({ page }) {
   const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
+  // One descriptor, so the button is the same control on every field it
+  // appears on and every field names the same source and the same boundary.
+  const hermesAssist = {
+    endpoint: "/api/admin/listings/copy/draft",
+    listingId: page.listing.id,
+    locale: page.listing.source_locale || page.workspace.locale,
+    source: ui.assistSourceListingFacts,
+    available: pageCan(page, "content:write") && page.hermes_available !== false,
+    unavailableReason: page.hermes_unavailable_reason || null,
+  };
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
   const workflowFields = page.editableFields.filter((field) => ["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field));
@@ -9257,14 +9355,14 @@ function ListingEditorBody({ page }) {
               page.factReview?.rows?.length
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }),
               editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
               h(
                 "section",
                 { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo" }),
+                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
               ),
               canEditContent
                 ? [

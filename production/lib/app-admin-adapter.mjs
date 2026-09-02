@@ -312,6 +312,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
+import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
@@ -5706,6 +5707,16 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/copy/draft") {
+      return jsonResponse(
+        201,
+        await createHermesListingCopyDraft(currentSeed(config), parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), {
+          auditLogPath: config.auditLogPath,
+          provider: config.hermesListingCopyProvider || undefined,
+          recordedAt: config.reviewedAt || config.editedAt,
+        }),
+      );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       try {

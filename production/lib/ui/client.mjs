@@ -3570,6 +3570,74 @@ ${THEME_SWITCH_JS}
         });
     });
   }
+  // One behaviour for every field-level Hermes draft. The button knows its
+  // endpoint, the box it fills and the bar that names the source; nothing here
+  // is listing-specific, so the next assisted field needs no new code.
+  function initHermesAssist() {
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-hermes-assist]") : null;
+      if (!button || button.disabled) return;
+      event.preventDefault();
+      var target = document.getElementById(button.getAttribute("data-hermes-assist-target") || "");
+      var bar = document.getElementById(button.getAttribute("data-hermes-assist-bar") || "");
+      if (!target) return;
+      var host = button.closest("[data-hermes-assist-for]");
+      var original = button.innerHTML;
+      var pending = button.getAttribute("data-hermes-assist-pending") || "Drafting…";
+      var failure = button.getAttribute("data-hermes-assist-failure") || "Could not draft this.";
+      var unavailable = button.getAttribute("data-hermes-assist-unavailable") || failure;
+      button.disabled = true;
+      button.setAttribute("data-busy", "true");
+      button.textContent = pending;
+      fetch(button.getAttribute("data-hermes-assist-endpoint"), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          listingId: button.getAttribute("data-hermes-assist-listing"),
+          field: button.getAttribute("data-hermes-assist-field"),
+          locale: button.getAttribute("data-hermes-assist-locale"),
+          sourceText: target.value || "",
+        }),
+      })
+        .then(function (response) {
+          return response.json().then(function (payload) {
+            if (!response.ok) throw new Error(payload && payload.message ? payload.message : failure);
+            return payload;
+          });
+        })
+        .then(function (draft) {
+          // A draft that claims it may publish is not a draft. Refuse it rather
+          // than putting it in front of a broker as if it were reviewed.
+          if (!draft.text || draft.can_publish === true || draft.human_approval_required !== true) {
+            throw new Error("invalid Hermes draft response");
+          }
+          target.value = draft.text;
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+          if (host) host.setAttribute("data-hermes-drafted", "true");
+          // On the field itself as well, so the styling rule can sit beside the
+          // bare-field rule it has to outrank rather than fight it from a
+          // component selector that always loses.
+          target.setAttribute("data-hermes-drafted", "true");
+          if (bar) bar.hidden = false;
+          button.innerHTML = original;
+        })
+        .catch(function (error) {
+          var missing = /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY|not configured/i.test(String((error && error.message) || ""));
+          button.innerHTML = original;
+          if (host) host.setAttribute("data-hermes-error", missing ? unavailable : (error && error.message) || failure);
+          if (bar) {
+            bar.hidden = false;
+            bar.setAttribute("data-hermes-drafted-state", "error");
+            bar.textContent = missing ? unavailable : (error && error.message) || failure;
+          }
+        })
+        .then(function () {
+          button.removeAttribute("data-busy");
+          button.disabled = false;
+        });
+    });
+  }
   function initReplyForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -4780,6 +4848,7 @@ ${THEME_SWITCH_JS}
   initTranslationWorkflowForms();
   initReplyDeliveryForms();
   initReplyForms();
+  initHermesAssist();
   initCommunicationTemplates();
   initAdminListFilters();
   initPipelineBoard();

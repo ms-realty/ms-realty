@@ -76,6 +76,13 @@ main select[aria-invalid="true"]:not(.mk-select__field),
 main textarea[aria-invalid="true"]:not(.mk-textarea__field) {
   border-color: var(--danger-500);
 }
+/* A value a person has not written themselves is marked while they read it, in
+   the same place and with the same weight as the invalid state above. */
+main input[data-hermes-drafted="true"]:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(.mk-input__field):not(.mk-searchbar__input),
+main select[data-hermes-drafted="true"]:not(.mk-select__field),
+main textarea[data-hermes-drafted="true"]:not(.mk-textarea__field) {
+  border-color: var(--brick-500);
+}
 main input:focus-visible:not([type="checkbox"]):not([type="radio"]):not(.mk-input__field):not(.mk-searchbar__input),
 main select:focus-visible:not(.mk-select__field),
 main textarea:focus-visible:not(.mk-textarea__field) {

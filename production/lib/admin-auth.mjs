@@ -282,6 +282,7 @@ export function requiredAdminCapability(method, pathname) {
     return "translations:write";
   }
   if (verb !== "GET" && pathname === "/api/admin/translations/publish") return "translations:publish";
+  if (pathname === "/api/admin/listings/copy/draft" && verb === "POST") return "content:write";
   if (pathname === "/admin/locales" && verb === "GET") return "content:read";
   if (pathname === "/api/admin/locales" && verb === "GET") return "content:read";
   if (pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/")) {

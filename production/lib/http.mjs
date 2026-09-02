@@ -220,6 +220,7 @@ import {
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
+import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
@@ -1151,6 +1152,7 @@ export function createHttpApp({
   leadSlaGeneratedAt,
   leadSnoozeAt,
   hermesReplyProvider = null,
+  hermesListingCopyProvider = null,
   hermesOwnerCommandProvider = null,
   hermesEnv = process.env,
   hermesAgentFetch = fetch,
@@ -7360,6 +7362,21 @@ export function createHttpApp({
         const draft = await createHermesReplyDraft(currentLeads(), parseJsonBody(request), {
           auditLogPath: auditLogPath || undefined,
           provider: hermesReplyProvider || undefined,
+          recordedAt: reviewedAt || editedAt || receivedAt,
+        });
+        return adminJson(201, draft);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/copy/draft") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!canAdminAccess(principal, "content:write")) return adminForbidden("content:write");
+      try {
+        const draft = await createHermesListingCopyDraft(currentSeed(), parseJsonBody(request), {
+          auditLogPath: auditLogPath || undefined,
+          provider: hermesListingCopyProvider || undefined,
           recordedAt: reviewedAt || editedAt || receivedAt,
         });
         return adminJson(201, draft);

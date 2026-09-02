@@ -38,7 +38,10 @@ const key = (row) => `${row.method} ${row.pathname}`;
 test("owner/operator catalog covers every admin route method exactly once", () => {
   assert.equal(assertOwnerOperatorCatalog(), true);
   const discovered = discoverAdminRoutes();
-  assert.equal(discovered.length, 130);
+  // No route count here on purpose. What matters is that discovery and the
+  // static catalog describe the same set, each route exactly once; the three
+  // assertions below say that, and cannot pass vacuously because the catalog
+  // they are compared against is a literal list in the source.
   assert.equal(new Set(discovered.map((row) => key(row))).size, discovered.length);
   assert.equal(ADMIN_ROUTE_COVERAGE.length, discovered.length);
   assert.deepEqual(
@@ -88,9 +91,18 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   // that is counted in one registry and missing from another; a literal only
   // catches that someone changed the number.
   const authorizedWorkflows = artifact.summary.admin_pages + artifact.summary.admin_methods + artifact.summary.hermes_tools;
+  // The builder already refuses to run when a route file on disk is missing
+  // from the catalog, or the catalog names one that is not on disk. What the
+  // test adds is that the artifact carries exactly the catalogued routes;
+  // counting files and methods by hand only detected that someone had edited
+  // the number, and had to be edited again by the next person who added a route.
+  assert.deepEqual(
+    artifact.admin_routes.map((row) => `${row.method} ${row.pathname}`).sort(),
+    ADMIN_ROUTE_COVERAGE.map((row) => `${row.method} ${row.pathname}`).sort(),
+  );
   assert.deepEqual(artifact.summary, {
-    admin_route_files: 111,
-    admin_methods: 130,
+    admin_route_files: new Set(artifact.admin_routes.map((row) => row.source_file)).size,
+    admin_methods: ADMIN_ROUTE_COVERAGE.length,
     admin_pages: ADMIN_PAGE_SURFACES.length,
     nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,

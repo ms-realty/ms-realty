@@ -1087,6 +1087,54 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   font-weight: var(--fw-semibold);
 }
 .adm-filterbar__notice svg { flex: none; }
+
+/* Inline Hermes assist. Every editable value Hermes can draft carries the same
+   control in its label row, and the same bar underneath naming the source and
+   the approval boundary. The canvas draws the border at --brick-300, which
+   measures 2.21:1 against --brick-50 and fails 1.4.11's 3:1 floor for a control
+   boundary; --brick-500 measures 3.82:1 and is used instead. */
+.adm-field--assisted { display: grid; gap: var(--space-1); min-width: 0; }
+.adm-lblrow { display: flex; align-items: center; gap: var(--space-2); }
+.adm-lblrow > label { flex: 1 1 auto; min-width: 0; color: var(--adm-label); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-assist {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-1);
+  /* The shared rule gives every button 44px, which is the right floor for a
+     primary control and too heavy for a chip sitting in a label row. The box
+     stays 24px and the ::after below restores the 44px target, so the control
+     reads as secondary without becoming hard to hit. */
+  min-height: 24px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--brick-500);
+  border-radius: var(--radius-full);
+  background: var(--brick-50);
+  color: var(--brick-700);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.adm-assist::after { content: ""; position: absolute; inset: 50% 0 auto; height: 44px; transform: translateY(-50%); }
+.adm-assist:disabled { border-color: var(--border-strong); background: var(--surface); color: var(--text-muted); cursor: not-allowed; }
+.adm-assist:disabled::after { content: none; }
+.adm-assist[data-busy] { border-color: var(--border-strong); background: var(--surface); color: var(--text-muted); }
+.adm-drafted-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--brick-500);
+  border-radius: var(--radius-sm);
+  background: var(--brick-50);
+  color: var(--brick-700);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+}
+.adm-drafted-bar svg { flex: none; }
 .adm-filterbar input,
 .adm-filterbar select { width: 100%; min-width: 0; height: 40px; min-height: 40px; padding-block: 0; font-size: var(--text-sm); }
 .adm-filterbar .mk-btn { flex: none; }

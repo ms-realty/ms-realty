@@ -118,6 +118,7 @@ const ADMIN_ROUTE_METHODS = [
   ["GET", "/api/admin/live-service-report-template"],
   ["POST", "/api/admin/live-service-reports/import"],
   ["GET", "/api/admin/live-services"],
+  ["POST", "/api/admin/listings/copy/draft"],
   ["GET", "/api/admin/locales"],
   ["POST", "/api/admin/locales"],
   ["POST", "/api/admin/media/reviews"],
