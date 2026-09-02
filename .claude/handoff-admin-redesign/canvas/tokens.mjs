@@ -1,7 +1,36 @@
 // MS Realty operator design system — resolved tokens.
 // Ramps come from makler-realty-design-system/project/tokens/*.css.
-// Three values are NEW steps, added because the inherited ones fail a WCAG 2.2 AA
-// threshold in this workspace's densities. Each is noted with the measured ratio.
+//
+// What actually changed against the inherited ramps, which the Foundations sheet
+// used to summarise as "three roles are new steps":
+//   one NEW value      --warning-700 #8A5F18, because 600 on warning-50 is 4.21:1
+//   one role RE-POINTED --border-control to --stone-500, an existing step
+//   one role WITHDRAWN  --text-ghost is stone-400 at 2.40:1, non-text only
+//   one alpha RAISED    --sb-label .38 -> .54, because .38 composited to 3.59:1
+//
+// The scales below are exported because the Foundations sheet documents them and
+// lint.mjs checks the sheet against them. A claim about the system that is not
+// rendered from the system is a claim that drifts.
+
+// Layout spacing: gutters, gaps, and panel and row padding.
+export const SPACING_STEPS = Object.freeze([4, 8, 12, 16, 20, 24, 32]);
+
+// The four measurements the sheet publishes as canonical. Every one is a step.
+export const CANONICAL_SPACING = Object.freeze({
+  rowPadding: [8, 12],
+  panelPadding: [12, 16],
+  pageGutter: 24,
+  columnGap: 20,
+});
+
+// Icons are drawn on a 24px grid and used at two densities: beside a word, and
+// as the single figure in an empty state. The bands describe what the canvas
+// actually does — 509 calls, none outside these two ranges — rather than an
+// aspiration three quarters of the drawings miss.
+export const ICON_BANDS = Object.freeze({
+  inline: [11, 22],
+  illustration: [26, 30],
+});
 
 export const TOKENS = `
     :root {
@@ -37,8 +66,8 @@ export const TOKENS = `
       --text-ghost:var(--stone-400);      /* NON-TEXT ONLY — 2.40:1. Dashed edges, disabled glyphs. */
       --brand:var(--ink-800); --accent:var(--brick-600);
       --sb-bg:var(--ink-900); --sb-edge:var(--ink-950);
-      --sb-text:rgba(255,255,255,.74);    /* 9.2:1 composited */
-      --sb-label:rgba(255,255,255,.54);   /* 5.14:1 composited — .38 was 3.48:1 */
+      --sb-text:rgba(255,255,255,.74);    /* 10.07:1 composited on --sb-bg */
+      --sb-label:rgba(255,255,255,.54);   /* 5.93:1 composited on --sb-bg — .38 was 3.59:1 */
 
       --font-sans:'Commissioner',system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
       --font-display:'Source Serif 4','Iowan Old Style',Georgia,'Times New Roman',serif;

@@ -41,8 +41,8 @@
       --text-ghost:var(--stone-400);      /* NON-TEXT ONLY — 2.40:1. Dashed edges, disabled glyphs. */
       --brand:var(--ink-800); --accent:var(--brick-600);
       --sb-bg:var(--ink-900); --sb-edge:var(--ink-950);
-      --sb-text:rgba(255,255,255,.74);    /* 9.2:1 composited */
-      --sb-label:rgba(255,255,255,.54);   /* 5.14:1 composited — .38 was 3.48:1 */
+      --sb-text:rgba(255,255,255,.74);    /* 10.07:1 composited on --sb-bg */
+      --sb-label:rgba(255,255,255,.54);   /* 5.93:1 composited on --sb-bg — .38 was 3.59:1 */
 
       --font-sans:'Commissioner',system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
       --font-display:'Source Serif 4','Iowan Old Style',Georgia,'Times New Roman',serif;
@@ -107,7 +107,7 @@
     .top-health--ok { background:var(--success-50); color:var(--success-600); }
     .top-av { display:grid; place-items:center; width:34px; height:34px; border-radius:var(--r-full); border:0;
       background:var(--ink-800); color:#fff; font:600 11.5px var(--font-sans); cursor:pointer; }
-    .scroll { flex:1 1 auto; padding:22px 26px 28px; min-width:0; }
+    .scroll { flex:1 1 auto; padding:20px 24px 24px; min-width:0; }
 
     /* ---------- section sub-nav ---------- */
     .subnav { display:flex; gap:2px; padding:3px; margin-bottom:16px; border-radius:var(--r-md);
@@ -147,7 +147,7 @@
     .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
       box-shadow:var(--e-2); overflow:hidden; }
     .panel-hd { display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:13px 16px; border-bottom:1px solid var(--border); }
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .panel-hd h2 { font-size:14.5px; font-weight:600; letter-spacing:-.005em; }
     .panel-hd .sub { font-size:12px; color:var(--text-muted); font-weight:400; }
     .sect { padding:16px 20px; border-bottom:1px solid var(--border); }
@@ -179,9 +179,9 @@
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
       color:var(--text-muted); font-size:12.5px; }
     table { width:100%; border-collapse:separate; border-spacing:0; }
-    th { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); background:var(--stone-50);
+    th { text-align:left; padding:8px 12px; border-bottom:1px solid var(--border); background:var(--stone-50);
       font-size:11px; font-weight:600; letter-spacing:.02em; color:var(--text-muted); white-space:nowrap; }
-    td { padding:9px 12px; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:middle; }
+    td { padding:8px 12px; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:middle; }
     tbody tr:hover td { background:var(--stone-50); }
     tbody tr:last-child td { border-bottom:0; }
     .t2 { display:grid; gap:1px; min-width:0; }
@@ -310,6 +310,7 @@
     .chipbox { display:inline-flex; align-items:center; gap:7px; }
     .dot { width:15px; height:15px; border-radius:var(--r-xs); border:1px solid rgba(0,0,0,.12); flex:0 0 auto; }
     .ok { color:var(--success-600); font-weight:600; }
+    .bad { color:var(--danger-600); font-weight:600; }
     .type-row { display:grid; grid-template-columns:118px minmax(0,1fr); gap:16px; align-items:baseline;
       padding:9px 0; border-bottom:1px solid var(--border); }
     .type-row:last-child { border-bottom:0; }
@@ -351,12 +352,14 @@
   <div>
     <h1>Foundations</h1>
     <p>The resolved values every screen in this workspace is built from. Ramps come from the MS Realty
-      design system; three roles are new steps, added where an inherited value misses a WCAG 2.2 AA
-      threshold at the densities this tool runs at.</p>
+      design system. Four roles were corrected where an inherited value misses a WCAG 2.2 AA threshold at
+      the densities this tool runs at: one new value (--warning-700), one role re-pointed to an existing
+      step (--border-control to stone-500), one withdrawn from text altogether (--text-ghost, 2.40:1), and
+      one composited alpha raised (--sb-label, .38 was 3.59:1).</p>
   </div>
   <div style="display:grid; gap:6px; justify-items:end">
     <span class="pill pill--ok"><i></i>WCAG 2.2 AA verified</span>
-    <span class="mono">21 text pairs measured · 3 corrected</span>
+    <span class="mono">13 pairs measured · 4 corrected</span>
   </div>
 </div>
 
@@ -397,7 +400,7 @@
           <td>Headings, table primaries</td>
           <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
           <td><b>16.35:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--text-body</span></td>
@@ -405,7 +408,7 @@
           <td>Paragraphs, cell values</td>
           <td><span class="chipbox"><span class="dot" style="background:#FAF7F1"></span><span class="mono">#FAF7F1</span></span></td>
           <td><b>11.79:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--text-muted</span></td>
@@ -413,7 +416,7 @@
           <td>Labels, meta, placeholders</td>
           <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
           <td><b>5.75:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--text-muted</span></td>
@@ -421,7 +424,7 @@
           <td>Same, on a sunken toolbar</td>
           <td><span class="chipbox"><span class="dot" style="background:#F2ECE1"></span><span class="mono">#F2ECE1</span></span></td>
           <td><b>4.89:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--border-control</span></td>
@@ -429,7 +432,7 @@
           <td>Input and button edges (1.4.11)</td>
           <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
           <td><b>3.73:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 3</td>
         </tr>
         <tr>
           <td><span class="mono">--brand</span></td>
@@ -437,15 +440,31 @@
           <td>Primary button fill</td>
           <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
           <td><b>15.91:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--accent</span></td>
           <td><span class="chipbox"><span class="dot" style="background:#C42D2D"></span><span class="mono">#C42D2D</span></span></td>
-          <td>One CTA, counts, the active rail bar</td>
+          <td>One CTA, and counts</td>
           <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
           <td><b>5.58:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
+        </tr>
+        <tr>
+          <td><span class="mono">--brick-500</span></td>
+          <td><span class="chipbox"><span class="dot" style="background:#DB3E3E"></span><span class="mono">#DB3E3E</span></span></td>
+          <td>The active rail marker</td>
+          <td><span class="chipbox"><span class="dot" style="background:#181818"></span><span class="mono">#181818</span></span></td>
+          <td><b>4.03:1</b></td>
+          <td class="ok">pass · needs 3</td>
+        </tr>
+        <tr>
+          <td><span class="mono">--sb-label</span></td>
+          <td><span class="chipbox"><span class="dot" style="background:rgba(255,255,255,.54)"></span><span class="mono">rgba(255,255,255,.54)</span></span></td>
+          <td>Rail group labels, composited</td>
+          <td><span class="chipbox"><span class="dot" style="background:#181818"></span><span class="mono">#181818</span></span></td>
+          <td><b>5.93:1</b></td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--warning-700</span></td>
@@ -453,7 +472,7 @@
           <td>Warning text and pills</td>
           <td><span class="chipbox"><span class="dot" style="background:#FBF1DD"></span><span class="mono">#FBF1DD</span></span></td>
           <td><b>5.02:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--danger-600</span></td>
@@ -461,7 +480,7 @@
           <td>Overdue, destructive</td>
           <td><span class="chipbox"><span class="dot" style="background:#F9E7EA"></span><span class="mono">#F9E7EA</span></span></td>
           <td><b>6.43:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--success-600</span></td>
@@ -469,7 +488,7 @@
           <td>Live, approved, won</td>
           <td><span class="chipbox"><span class="dot" style="background:#E7F3EC"></span><span class="mono">#E7F3EC</span></span></td>
           <td><b>6.25:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
         <tr>
           <td><span class="mono">--sea-700</span></td>
@@ -477,16 +496,19 @@
           <td>Neutral informational state</td>
           <td><span class="chipbox"><span class="dot" style="background:#ECF3F2"></span><span class="mono">#ECF3F2</span></span></td>
           <td><b>10.83:1</b></td>
-          <td class="ok">pass</td>
+          <td class="ok">pass · needs 4.5</td>
         </tr>
       </tbody>
     </table>
   </div>
-  <p class="note-b">Three corrections, each forced by a number rather than taste: warning text moved from
-    600 to a new 700 step (600 measured 4.21:1 on its own tint); control edges moved off the hairline grey
-    to stone-500, because an input's border is the only thing identifying it (1.4.11 needs 3:1); and the
-    palest text role was withdrawn from text altogether at 2.40:1 — an empty value now says
-    <b>Not set</b> in muted type instead of being greyed out, which also clears 1.4.1.</p>
+  <p class="note-b">Every ratio above is computed from the two colours beside it when this sheet is built,
+    and the verdict against the floor its role actually has to clear — 4.5:1 for text, 3:1 for the boundary
+    of a control. Four corrections, each forced by a number rather than taste: warning text moved from 600
+    to a new 700 step (600 measured 4.21:1 on its own tint); control edges moved off the hairline grey to
+    stone-500, because an input's border is the only thing identifying it; the palest text role was
+    withdrawn from text altogether at 2.40:1 — an empty value now says <b>Not set</b> in muted type instead
+    of being greyed out, which also clears 1.4.1; and the rail's group labels went from .38 alpha to .54,
+    because .38 composites to 3.59:1 on the rail.</p>
 </div>
 
 <div class="grp">
@@ -548,10 +570,11 @@
           <div style="width:38px; height:64px"></div>
         </div>
         <div style="display:flex; gap:10px; margin-top:2px">
-          <span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">11</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">11.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">12</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">12.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">13</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">13.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">14.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">19</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">26</span>
+          <span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">11.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">12</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">12.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">13</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">13.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">14.5</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">19</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">26</span><span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">32</span>
         </div>
-        <p class="note-b">Nine sizes, no tenth. Line height is 1.45 for running text, 1.25 for headings,
-          1 for anything inside a pill or a chip.</p>
+        <p class="note-b">9 sizes, and the chart above is the specimen list beside it —
+          both are rendered from the same array, so they cannot come to disagree. Line height is 1.45 for
+          running text, 1.25 for headings, 1 for anything inside a pill or a chip.</p>
       </div>
       <div class="panel" style="padding:16px; margin-top:16px">
         <b style="font-size:12.5px">Prices and references keep their own faces</b>
@@ -571,15 +594,17 @@
   <h2>Spacing, radius, elevation</h2>
   <div class="cols" style="grid-template-columns:1.1fr .9fr">
     <div class="panel" style="padding:16px">
-      <b style="font-size:12.5px">Spacing — a 4px unit, seven steps</b>
+      <b style="font-size:12.5px">Spacing — a 4px unit, 7 steps</b>
       <div class="scale" style="margin-top:12px">
         <div style="width:4px; height:4px; background:var(--sea-100)"></div><div style="width:8px; height:8px; background:var(--sea-100)"></div><div style="width:12px; height:12px; background:var(--sea-100)"></div><div style="width:16px; height:16px; background:var(--sea-100)"></div><div style="width:20px; height:20px; background:var(--sea-100)"></div><div style="width:24px; height:24px; background:var(--sea-100)"></div><div style="width:32px; height:32px; background:var(--sea-100)"></div>
       </div>
       <div style="display:flex; gap:10px; margin-top:4px">
         <span style="width:4px; font:500 10px var(--font-mono); color:var(--text-muted)">4</span><span style="width:8px; font:500 10px var(--font-mono); color:var(--text-muted)">8</span><span style="width:12px; font:500 10px var(--font-mono); color:var(--text-muted)">12</span><span style="width:16px; font:500 10px var(--font-mono); color:var(--text-muted)">16</span><span style="width:20px; font:500 10px var(--font-mono); color:var(--text-muted)">20</span><span style="width:24px; font:500 10px var(--font-mono); color:var(--text-muted)">24</span><span style="width:32px; font:500 10px var(--font-mono); color:var(--text-muted)">32</span>
       </div>
-      <p class="note-b">Row padding 9/12. Panel padding 13/16. Page gutter 26. Column gap 20.
-        A value outside the seven is a defect, not a decision.</p>
+      <p class="note-b">Row padding 8/12. Panel padding
+        12/16. Page gutter 24.
+        Column gap 20. Every measurement this sheet publishes is a step, and
+        the linter refuses one that is not. Optical nudges below 4px are not spacing and are not on it.</p>
       <b style="font-size:12.5px; display:block; margin-top:18px">Radius — five, and one rule each</b>
       <div class="rad" style="margin-top:10px">
         <div style="border-radius:4px">4 chip</div>
@@ -688,9 +713,11 @@
     <span title="map"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></span>
     <span title="webhook"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0-3.4 3.95"/><path d="m9 20 3.5-6"/><path d="M15 20a4 4 0 1 0-1.5-7.7"/><path d="M6 14a4 4 0 0 0 3 6h6"/></svg></span>
   </div>
-  <p class="note-b">One stroke family: 24px grid, 1.6 stroke, round caps, drawn at 16–20px and checked at
-    16. Icons never carry a state on their own — every one of them sits beside a word, because there is no
-    drawing for undo, sync scope, or approval.</p>
+  <p class="note-b">One stroke family: 24px grid, 1.6 stroke, round caps. Two densities:
+    11–22px beside a word, 26–30px as the
+    single figure in an empty state, and the linter refuses a drawing outside them. Icons never carry a
+    state on their own — every one of them sits beside a word, because there is no drawing for undo, sync
+    scope, or approval.</p>
 </div>
 
 <div class="grp" style="margin-bottom:0">

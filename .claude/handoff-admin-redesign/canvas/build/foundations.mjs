@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { sheet, icon } from "../shell.mjs";
 import { ICON } from "../icons.mjs";
+import { CANONICAL_SPACING, ICON_BANDS, SPACING_STEPS } from "../tokens.mjs";
 
 const CSS = `
     .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:26px; }
@@ -19,6 +20,7 @@ const CSS = `
     .chipbox { display:inline-flex; align-items:center; gap:7px; }
     .dot { width:15px; height:15px; border-radius:var(--r-xs); border:1px solid rgba(0,0,0,.12); flex:0 0 auto; }
     .ok { color:var(--success-600); font-weight:600; }
+    .bad { color:var(--danger-600); font-weight:600; }
     .type-row { display:grid; grid-template-columns:118px minmax(0,1fr); gap:16px; align-items:baseline;
       padding:9px 0; border-bottom:1px solid var(--border); }
     .type-row:last-child { border-bottom:0; }
@@ -70,18 +72,54 @@ function ramp(name, cols) {
   return `<div class="ramp"><b>${name}</b>${cells}</div>`;
 }
 
+
+// 1.4.3 wants 4.5:1 for body text; 1.4.11 wants 3:1 for the boundary of a
+// control. Which applies is a property of the role, so each row declares it.
+const AA_FLOOR = { text: 4.5, nonText: 3 };
+
+function channel(value) {
+  const c = value / 255;
+  return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+
+function luminance([r, g, b]) {
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function rgb(value, background) {
+  const alpha = value.match(/rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)/);
+  if (alpha) {
+    const [, r, g, b, a] = alpha.map(Number);
+    // A translucent role is only as legible as what shows through it.
+    return [r, g, b].map((c, i) => Math.round(c * a + background[i] * (1 - a)));
+  }
+  const hex = value.replace("#", "");
+  return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+}
+
+function contrast(value, against) {
+  const back = rgb(against, [255, 255, 255]);
+  const front = rgb(value, back);
+  const [hi, lo] = [luminance(front), luminance(back)].sort((a, b) => b - a);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
 const ROLES = [
-  ["--text-strong", "#241F18", "Headings, table primaries", "#FFFFFF", "16.35"],
-  ["--text-body", "#3A3227", "Paragraphs, cell values", "#FAF7F1", "11.79"],
-  ["--text-muted", "#73644A", "Labels, meta, placeholders", "#FFFFFF", "5.75"],
-  ["--text-muted", "#73644A", "Same, on a sunken toolbar", "#F2ECE1", "4.89"],
-  ["--border-control", "#948263", "Input and button edges (1.4.11)", "#FFFFFF", "3.73"],
-  ["--brand", "#222222", "Primary button fill", "#FFFFFF", "15.91"],
-  ["--accent", "#C42D2D", "One CTA, counts, the active rail bar", "#FFFFFF", "5.58"],
-  ["--warning-700", "#8A5F18", "Warning text and pills", "#FBF1DD", "5.02"],
-  ["--danger-600", "#9E2334", "Overdue, destructive", "#F9E7EA", "6.43"],
-  ["--success-600", "#256345", "Live, approved, won", "#E7F3EC", "6.25"],
-  ["--sea-700", "#183B39", "Neutral informational state", "#ECF3F2", "10.83"],
+  ["--text-strong", "#241F18", "Headings, table primaries", "#FFFFFF", "text"],
+  ["--text-body", "#3A3227", "Paragraphs, cell values", "#FAF7F1", "text"],
+  ["--text-muted", "#73644A", "Labels, meta, placeholders", "#FFFFFF", "text"],
+  ["--text-muted", "#73644A", "Same, on a sunken toolbar", "#F2ECE1", "text"],
+  ["--border-control", "#948263", "Input and button edges (1.4.11)", "#FFFFFF", "nonText"],
+  ["--brand", "#222222", "Primary button fill", "#FFFFFF", "text"],
+  ["--accent", "#C42D2D", "One CTA, and counts", "#FFFFFF", "text"],
+  // The rail marker is a different colour on a different ground, and was being
+  // reported at the accent's ratio. Measured: #DB3E3E on #181818.
+  ["--brick-500", "#DB3E3E", "The active rail marker", "#181818", "nonText"],
+  ["--sb-label", "rgba(255,255,255,.54)", "Rail group labels, composited", "#181818", "text"],
+  ["--warning-700", "#8A5F18", "Warning text and pills", "#FBF1DD", "text"],
+  ["--danger-600", "#9E2334", "Overdue, destructive", "#F9E7EA", "text"],
+  ["--success-600", "#256345", "Live, approved, won", "#E7F3EC", "text"],
+  ["--sea-700", "#183B39", "Neutral informational state", "#ECF3F2", "text"],
 ];
 
 const TYPE = [
@@ -97,16 +135,23 @@ const TYPE = [
   ["Mono / 11.5", "font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted)", "References, ids, env keys", "MS-CRAWL-0001 · HERMES_API_KEY"],
 ];
 
+// The bar chart and the specimen panel used to name different sets of nine. One
+// array now feeds both, so the sheet cannot contradict itself about its own type
+// scale again.
+const TYPE_SIZES = [...new Set(TYPE.map(([, css]) => Number(css.match(/font-size:([\d.]+)px/)[1])))].sort((a, b) => a - b);
+
 const BODY = `<div class="doc-hd">
   <div>
     <h1>Foundations</h1>
     <p>The resolved values every screen in this workspace is built from. Ramps come from the MS Realty
-      design system; three roles are new steps, added where an inherited value misses a WCAG 2.2 AA
-      threshold at the densities this tool runs at.</p>
+      design system. Four roles were corrected where an inherited value misses a WCAG 2.2 AA threshold at
+      the densities this tool runs at: one new value (--warning-700), one role re-pointed to an existing
+      step (--border-control to stone-500), one withdrawn from text altogether (--text-ghost, 2.40:1), and
+      one composited alpha raised (--sb-label, .38 was 3.59:1).</p>
   </div>
   <div style="display:grid; gap:6px; justify-items:end">
     <span class="pill pill--ok"><i></i>WCAG 2.2 AA verified</span>
-    <span class="mono">21 text pairs measured · 3 corrected</span>
+    <span class="mono">${ROLES.length} pairs measured · 4 corrected</span>
   </div>
 </div>
 
@@ -137,22 +182,29 @@ const BODY = `<div class="doc-hd">
     <table class="roles">
       <thead><tr><th>Token</th><th>Value</th><th>Used for</th><th>Against</th><th>Ratio</th><th>AA</th></tr></thead>
       <tbody>
-${ROLES.map(([t, v, u, a, r]) => `        <tr>
+${ROLES.map(([t, v, u, a, kind]) => {
+  const measured = contrast(v, a);
+  const passes = measured >= AA_FLOOR[kind];
+  return `        <tr>
           <td><span class="mono">${t}</span></td>
           <td><span class="chipbox"><span class="dot" style="background:${v}"></span><span class="mono">${v}</span></span></td>
           <td>${u}</td>
           <td><span class="chipbox"><span class="dot" style="background:${a}"></span><span class="mono">${a}</span></span></td>
-          <td><b>${r}:1</b></td>
-          <td class="ok">pass</td>
-        </tr>`).join("\n")}
+          <td><b>${measured.toFixed(2)}:1</b></td>
+          <td class="${passes ? "ok" : "bad"}">${passes ? "pass" : "fail"} · needs ${AA_FLOOR[kind]}</td>
+        </tr>`;
+}).join("\n")}
       </tbody>
     </table>
   </div>
-  <p class="note-b">Three corrections, each forced by a number rather than taste: warning text moved from
-    600 to a new 700 step (600 measured 4.21:1 on its own tint); control edges moved off the hairline grey
-    to stone-500, because an input's border is the only thing identifying it (1.4.11 needs 3:1); and the
-    palest text role was withdrawn from text altogether at 2.40:1 — an empty value now says
-    <b>Not set</b> in muted type instead of being greyed out, which also clears 1.4.1.</p>
+  <p class="note-b">Every ratio above is computed from the two colours beside it when this sheet is built,
+    and the verdict against the floor its role actually has to clear — 4.5:1 for text, 3:1 for the boundary
+    of a control. Four corrections, each forced by a number rather than taste: warning text moved from 600
+    to a new 700 step (600 measured 4.21:1 on its own tint); control edges moved off the hairline grey to
+    stone-500, because an input's border is the only thing identifying it; the palest text role was
+    withdrawn from text altogether at 2.40:1 — an empty value now says <b>Not set</b> in muted type instead
+    of being greyed out, which also clears 1.4.1; and the rail's group labels went from .38 alpha to .54,
+    because .38 composites to 3.59:1 on the rail.</p>
 </div>
 
 <div class="grp">
@@ -178,10 +230,11 @@ ${TYPE.map(([n, s, note, sample]) => `      <div class="type-row">
           <div style="width:38px; height:64px"></div>
         </div>
         <div style="display:flex; gap:10px; margin-top:2px">
-          ${["11","11.5","12","12.5","13","13.5","14.5","19","26"].map((s) => `<span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">${s}</span>`).join("")}
+          ${TYPE_SIZES.map((s) => `<span style="width:38px; font:500 10px var(--font-mono); color:var(--text-muted); text-align:center">${s}</span>`).join("")}
         </div>
-        <p class="note-b">Nine sizes, no tenth. Line height is 1.45 for running text, 1.25 for headings,
-          1 for anything inside a pill or a chip.</p>
+        <p class="note-b">${TYPE_SIZES.length} sizes, and the chart above is the specimen list beside it —
+          both are rendered from the same array, so they cannot come to disagree. Line height is 1.45 for
+          running text, 1.25 for headings, 1 for anything inside a pill or a chip.</p>
       </div>
       <div class="panel" style="padding:16px; margin-top:16px">
         <b style="font-size:12.5px">Prices and references keep their own faces</b>
@@ -201,15 +254,17 @@ ${TYPE.map(([n, s, note, sample]) => `      <div class="type-row">
   <h2>Spacing, radius, elevation</h2>
   <div class="cols" style="grid-template-columns:1.1fr .9fr">
     <div class="panel" style="padding:16px">
-      <b style="font-size:12.5px">Spacing — a 4px unit, seven steps</b>
+      <b style="font-size:12.5px">Spacing — a 4px unit, ${SPACING_STEPS.length} steps</b>
       <div class="scale" style="margin-top:12px">
-        ${[4,8,12,16,20,24,32].map((v) => `<div style="width:${v}px; height:${v}px; background:var(--sea-100)"></div>`).join("")}
+        ${SPACING_STEPS.map((v) => `<div style="width:${v}px; height:${v}px; background:var(--sea-100)"></div>`).join("")}
       </div>
       <div style="display:flex; gap:10px; margin-top:4px">
-        ${[4,8,12,16,20,24,32].map((v) => `<span style="width:${v}px; font:500 10px var(--font-mono); color:var(--text-muted)">${v}</span>`).join("")}
+        ${SPACING_STEPS.map((v) => `<span style="width:${v}px; font:500 10px var(--font-mono); color:var(--text-muted)">${v}</span>`).join("")}
       </div>
-      <p class="note-b">Row padding 9/12. Panel padding 13/16. Page gutter 26. Column gap 20.
-        A value outside the seven is a defect, not a decision.</p>
+      <p class="note-b">Row padding ${CANONICAL_SPACING.rowPadding.join("/")}. Panel padding
+        ${CANONICAL_SPACING.panelPadding.join("/")}. Page gutter ${CANONICAL_SPACING.pageGutter}.
+        Column gap ${CANONICAL_SPACING.columnGap}. Every measurement this sheet publishes is a step, and
+        the linter refuses one that is not. Optical nudges below 4px are not spacing and are not on it.</p>
       <b style="font-size:12.5px; display:block; margin-top:18px">Radius — five, and one rule each</b>
       <div class="rad" style="margin-top:10px">
         <div style="border-radius:4px">4 chip</div>
@@ -263,9 +318,11 @@ ${TYPE.map(([n, s, note, sample]) => `      <div class="type-row">
   <div class="icons">
 ${Object.keys(ICON).slice(0, 56).map((k) => `    <span title="${k}">${icon(k, 19)}</span>`).join("\n")}
   </div>
-  <p class="note-b">One stroke family: 24px grid, 1.6 stroke, round caps, drawn at 16–20px and checked at
-    16. Icons never carry a state on their own — every one of them sits beside a word, because there is no
-    drawing for undo, sync scope, or approval.</p>
+  <p class="note-b">One stroke family: 24px grid, 1.6 stroke, round caps. Two densities:
+    ${ICON_BANDS.inline.join("\u2013")}px beside a word, ${ICON_BANDS.illustration.join("\u2013")}px as the
+    single figure in an empty state, and the linter refuses a drawing outside them. Icons never carry a
+    state on their own — every one of them sits beside a word, because there is no drawing for undo, sync
+    scope, or approval.</p>
 </div>
 
 <div class="grp" style="margin-bottom:0">

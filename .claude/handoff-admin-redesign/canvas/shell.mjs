@@ -130,7 +130,7 @@ export const BASE = `${TOKENS}
     .top-health--ok { background:var(--success-50); color:var(--success-600); }
     .top-av { display:grid; place-items:center; width:34px; height:34px; border-radius:var(--r-full); border:0;
       background:var(--ink-800); color:#fff; font:600 11.5px var(--font-sans); cursor:pointer; }
-    .scroll { flex:1 1 auto; padding:22px 26px 28px; min-width:0; }
+    .scroll { flex:1 1 auto; padding:20px 24px 24px; min-width:0; }
 
     /* ---------- section sub-nav ---------- */
     .subnav { display:flex; gap:2px; padding:3px; margin-bottom:16px; border-radius:var(--r-md);
@@ -170,7 +170,7 @@ export const BASE = `${TOKENS}
     .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
       box-shadow:var(--e-2); overflow:hidden; }
     .panel-hd { display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:13px 16px; border-bottom:1px solid var(--border); }
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .panel-hd h2 { font-size:14.5px; font-weight:600; letter-spacing:-.005em; }
     .panel-hd .sub { font-size:12px; color:var(--text-muted); font-weight:400; }
     .sect { padding:16px 20px; border-bottom:1px solid var(--border); }
@@ -202,9 +202,9 @@ export const BASE = `${TOKENS}
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
       color:var(--text-muted); font-size:12.5px; }
     table { width:100%; border-collapse:separate; border-spacing:0; }
-    th { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); background:var(--stone-50);
+    th { text-align:left; padding:8px 12px; border-bottom:1px solid var(--border); background:var(--stone-50);
       font-size:11px; font-weight:600; letter-spacing:.02em; color:var(--text-muted); white-space:nowrap; }
-    td { padding:9px 12px; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:middle; }
+    td { padding:8px 12px; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:middle; }
     tbody tr:hover td { background:var(--stone-50); }
     tbody tr:last-child td { border-bottom:0; }
     .t2 { display:grid; gap:1px; min-width:0; }
