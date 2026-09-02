@@ -24,11 +24,11 @@
   "summary": {
     "admin_route_files": 111,
     "admin_methods": 130,
-    "admin_pages": 19,
+    "admin_pages": 20,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 152,
-    "structurally_covered_workflows": 152,
+    "authorized_workflows": 153,
+    "structurally_covered_workflows": 153,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -159,6 +159,15 @@
       "path": "/admin/approved-content",
       "icon": "check-circle-2",
       "kind": "admin_approved_content_review",
+      "capability": "content:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "locale_rollout",
+      "group": "cms",
+      "path": "/admin/locales",
+      "icon": "globe",
+      "kind": "admin_locale_rollout",
       "capability": "content:read",
       "declared_entrypoint": "signed_in_admin_ui"
     },

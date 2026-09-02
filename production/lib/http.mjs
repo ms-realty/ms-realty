@@ -219,6 +219,7 @@ import {
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
@@ -5622,6 +5623,19 @@ export function createHttpApp({
       } catch (error) {
         return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
       }
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/locales") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = renderAdminLocaleRolloutPayload(activeRegistry, adminLocaleParam(url), {
+        seed: currentSeed(),
+        translationTasks: latestTranslationTasks(currentTranslationTasks()),
+        languageRequests: readLanguageRequests(languageRequestPath || undefined),
+        generatedAt: reviewedAt || new Date().toISOString(),
+        operatorId: principal || null,
+        focus: url.searchParams.get("focus") || url.searchParams.get("language") || "",
+      });
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {

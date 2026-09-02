@@ -221,6 +221,29 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    localeRolloutLead: "{live} от {total} езика са публикувани. Езикът се отваря чак когато човек одобри превода.",
+    localeLanguages: "Езици",
+    localeLanguage: "Език",
+    localeState: "Състояние",
+    localeListings: "Обяви",
+    localePages: "Ръководства",
+    localeFallback: "Резервен език",
+    localeReviewer: "Проверява",
+    localeSourceOfRecord: "Език източник",
+    localeGuidesDrafted: "{count} чакат одобрение",
+    localeStates: { source: "Език източник", live: "Публикуван", enabled_not_indexed: "Публичен, но неиндексиран", requested: "Заявен", off: "Изключен" },
+    localeAddTitle: "Добавяне на език",
+    localeAddCommitment: "Новият език започва изключен. За да бъде индексирана дори една страница на него, човек трябва да одобри превода на всичките {listings} обяви и {pages} ръководства и да ги поддържа актуални.",
+    localeAlreadyRequested: "{language} е заявен {count} пъти от посетители на сайта.",
+    localeCode: "Код",
+    localeNativeName: "Име на самия език",
+    localeDirection: "Посока на писане",
+    localeAddAction: "Добави език",
+    localeAdded: "Езикът е добавен изключен.",
+    localeAddFailed: "Езикът не беше добавен.",
+    localeRemoveTitle: "Премахване на език",
+    localeRemoveConsequence: "Тези езици вече имат индексирани адреси: {locales}. Премахването на език не е редакция на регистъра — всеки негов адрес се нуждае от собствено решение 301 или 410, иначе се губи търсещият трафик, който миграцията пази.",
+    localeRemoveRoute: "Решенията за адресите се вземат в",
     priceRange: "Цена (EUR)",
     areaRange: "Площ (m²)",
     rangeMin: "Мин.",
@@ -917,6 +940,29 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    localeRolloutLead: "{live} из {total} языков опубликованы. Язык открывается только после того, как человек одобрил перевод.",
+    localeLanguages: "Языки",
+    localeLanguage: "Язык",
+    localeState: "Состояние",
+    localeListings: "Объекты",
+    localePages: "Руководства",
+    localeFallback: "Запасной язык",
+    localeReviewer: "Проверяет",
+    localeSourceOfRecord: "Язык-источник",
+    localeGuidesDrafted: "{count} ждут одобрения",
+    localeStates: { source: "Язык-источник", live: "Опубликован", enabled_not_indexed: "Публичный, но не индексируется", requested: "Запрошен", off: "Выключен" },
+    localeAddTitle: "Добавить язык",
+    localeAddCommitment: "Новый язык начинается выключенным. Чтобы на нём проиндексировалась хотя бы одна страница, человек должен одобрить перевод всех {listings} объектов и {pages} руководств и поддерживать их актуальными.",
+    localeAlreadyRequested: "{language} запрошен посетителями сайта {count} раз.",
+    localeCode: "Код",
+    localeNativeName: "Название на самом языке",
+    localeDirection: "Направление письма",
+    localeAddAction: "Добавить язык",
+    localeAdded: "Язык добавлен выключенным.",
+    localeAddFailed: "Язык не добавлен.",
+    localeRemoveTitle: "Удаление языка",
+    localeRemoveConsequence: "У этих языков уже проиндексированы адреса: {locales}. Удаление языка — не правка реестра: каждому его адресу нужно собственное решение 301 или 410, иначе теряется поисковый трафик, который бережёт миграция.",
+    localeRemoveRoute: "Решения по адресам принимаются в",
     priceRange: "Цена (EUR)",
     areaRange: "Площадь (m²)",
     rangeMin: "Мин.",
@@ -1613,6 +1659,29 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    localeRolloutLead: "{live} of {total} languages are live. A language opens only once a human has approved the translation.",
+    localeLanguages: "Languages",
+    localeLanguage: "Language",
+    localeState: "State",
+    localeListings: "Listings",
+    localePages: "Guides",
+    localeFallback: "Falls back to",
+    localeReviewer: "Reviewer",
+    localeSourceOfRecord: "Source of record",
+    localeGuidesDrafted: "{count} awaiting approval",
+    localeStates: { source: "Source of record", live: "Live", enabled_not_indexed: "Public, not indexed", requested: "Requested", off: "Off" },
+    localeAddTitle: "Add a language",
+    localeAddCommitment: "A new language starts off. Before one page in it may be indexed, a human has to approve a translation of all {listings} listings and {pages} guides, and keep them current.",
+    localeAlreadyRequested: "{language} has been requested {count} times by website visitors.",
+    localeCode: "Code",
+    localeNativeName: "Name in that language",
+    localeDirection: "Writing direction",
+    localeAddAction: "Add language",
+    localeAdded: "Language added, switched off.",
+    localeAddFailed: "Could not add the language.",
+    localeRemoveTitle: "Removing a language",
+    localeRemoveConsequence: "These languages already have indexed URLs: {locales}. Removing one is not a registry edit — every URL it owns needs its own 301 or 410 decision, or the search equity the migration protects is lost.",
+    localeRemoveRoute: "URL decisions are made in",
     priceRange: "Price (EUR)",
     areaRange: "Area (m²)",
     rangeMin: "Min",
@@ -8490,6 +8559,159 @@ function ListingManagerBody({ page }) {
   });
 }
 
+// Adding a language is a commitment, not a switch, and removing one is a
+// per-URL decision rather than a registry edit. Both are stated on the screen
+// because neither endpoint enforces them: POST /api/admin/locales will happily
+// create a locale, and nothing at all removes one.
+function LocaleRolloutBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "localeRollout", "Website languages");
+  const canManage = pageCan(page, "settings:manage");
+  const tone = { source: "ink", live: "sea", enabled_not_indexed: "sun", requested: "sun", off: "stone" };
+  const stateLabel = (state) => ui.localeStates?.[state] || valueText(ui, state);
+  const columns = [
+    ui.localeLanguage || "Language",
+    ui.localeState || "State",
+    ui.localeListings || "Listings",
+    ui.localePages || "Guides",
+    ui.localeFallback || "Falls back to",
+    ui.localeReviewer || "Reviewer",
+  ];
+  const coverage = (done, total) => `${done} / ${total}`;
+  const focusRow = page.locales.find((row) => row.code === page.focus) || null;
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-locale-rollout",
+      "data-react-admin-ui": "locale-rollout",
+      "data-admin-workbench": "cms",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: fillTemplate(ui.localeRolloutLead, { live: page.summary.live, total: page.summary.total }) },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) },
+          h(Icon, { name: "languages", size: 16 }),
+          h("span", null, label(copy, "translationQueue", "Translation review")),
+        ),
+      ),
+      h(
+        Panel,
+        { title: `${ui.localeLanguages || "Languages"} · ${page.summary.total}`, "data-locale-rollout": "true" },
+        h(
+          "div",
+          { className: "adm-scroll-x" },
+          h(
+            "table",
+            { className: "crm-tbl" },
+            h("thead", null, h("tr", null, ...columns.map((column) => h("th", { key: column, scope: "col" }, column)))),
+            h(
+              "tbody",
+              null,
+              ...page.locales.map((row) =>
+                h(
+                  "tr",
+                  { key: row.code, "data-locale-row": row.code, "data-locale-state": row.state },
+                  h(
+                    "th",
+                    { scope: "row" },
+                    h("bdi", null, row.native_name),
+                    h("span", { className: "crm-lang" }, row.code.toUpperCase()),
+                    row.direction === "rtl" ? h("span", { className: "crm-lang" }, "RTL") : null,
+                  ),
+                  h("td", null, h(StatusPill, { tone: tone[row.state] || "ink" }, stateLabel(row.state))),
+                  // The count is the way into the work behind it: a figure a
+                  // broker cannot open is a figure they cannot act on.
+                  h(
+                    "td",
+                    null,
+                    row.is_source
+                      ? h("span", { "data-locale-listings": row.code }, coverage(row.listings.done, row.listings.total))
+                      : h("a", { href: adminHref(row.translation_path, page), "data-locale-listings": row.code }, coverage(row.listings.done, row.listings.total)),
+                  ),
+                  h("td", { "data-locale-pages": row.code }, row.pages.drafted
+                    ? `${coverage(row.pages.done, row.pages.total)} · ${fillTemplate(ui.localeGuidesDrafted, { count: row.pages.drafted })}`
+                    : coverage(row.pages.done, row.pages.total)),
+                  h("td", null, row.fallback_locale ? row.fallback_locale.toUpperCase() : "—"),
+                  h("td", null, row.reviewer_role),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      h(
+        Panel,
+        { title: ui.localeAddTitle || "Add a language", "data-locale-add": "true" },
+        h("p", { className: "adm-planned-note" }, fillTemplate(ui.localeAddCommitment, { listings: page.commitments.add.listings, pages: page.commitments.add.pages })),
+        focusRow && focusRow.state === "requested"
+          ? h(
+              "p",
+              { className: "adm-planned-note", "data-locale-requested": focusRow.code },
+              fillTemplate(ui.localeAlreadyRequested, { language: focusRow.native_name, count: focusRow.requested_count }),
+            )
+          : null,
+        canManage
+          ? h(
+              "form",
+              {
+                method: "post",
+                action: "/api/admin/locales",
+                className: "adm-filterbar",
+                "data-locale-form": "true",
+                "data-admin-mutation-form": "locale",
+                "data-success-message": ui.localeAdded,
+                "data-failure-message": ui.localeAddFailed,
+              },
+              h("input", { type: "hidden", name: "reviewer", value: currentOperatorId(page, "locale_editor") }),
+              // A new language starts closed. It opens only once a human has
+              // approved a translation of every published listing, which is
+              // the translation queue's job, not this form's.
+              h("input", { type: "hidden", name: "public_enabled", value: "false" }),
+              h("input", { type: "hidden", name: "indexable", value: "false" }),
+              h("label", null, ui.localeCode || "Code", h("input", { name: "code", required: true, defaultValue: focusRow && focusRow.state === "requested" ? focusRow.code : "", placeholder: "fr" })),
+              h("label", null, ui.localeNativeName || "Name in that language", h("input", { name: "native_name", required: true, defaultValue: focusRow && focusRow.state === "requested" ? focusRow.native_name : "" })),
+              h(
+                "label",
+                null,
+                ui.localeFallback || "Falls back to",
+                h("select", { name: "fallback_locale" }, ...page.locales.filter((row) => row.indexable).map((row) => h("option", { key: row.code, value: row.code }, row.code.toUpperCase()))),
+              ),
+              h(
+                "label",
+                null,
+                ui.localeDirection || "Direction",
+                h("select", { name: "direction" }, h("option", { value: "ltr" }, "LTR"), h("option", { value: "rtl" }, "RTL")),
+              ),
+              h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "plus", size: 16 }), ui.localeAddAction || "Add language"),
+            )
+          : h("p", { className: "adm-planned-note" }, ui.readOnlyAccess),
+      ),
+      h(
+        Panel,
+        { title: ui.localeRemoveTitle || "Removing a language", "data-locale-remove": "true" },
+        h(
+          "p",
+          { className: "adm-planned-note", "data-locale-remove-consequence": "true" },
+          fillTemplate(ui.localeRemoveConsequence, { locales: page.commitments.remove.indexed_locales.map((code) => code.toUpperCase()).join(", ") }),
+        ),
+        h(
+          "p",
+          { className: "adm-planned-note" },
+          ui.localeRemoveRoute,
+          " ",
+          h("a", { href: adminHref("/admin/migration/review", page) }, label(copy, "migrationReview", "Migration review")),
+        ),
+      ),
+    ],
+  });
+}
+
 function TranslationQueueBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -12978,6 +13200,19 @@ function SettingsBody({ page }) {
                 checked: publicSite.flag("saved_search_alerts_enabled"),
                 disabled,
               }),
+              // The website's languages are not a workspace setting: adding one
+              // commits the agency to translating every published listing, so
+              // it is decided on its own screen. Settings points at it.
+              h(
+                "p",
+                { key: "languages", className: "adm-planned-note", "data-settings-locale-link": "true" },
+                h(
+                  "a",
+                  { href: adminHref("/admin/locales", page) },
+                  h(Icon, { name: "globe", size: 15 }),
+                  h("span", null, label(copy, "localeRollout", "Website languages")),
+                ),
+              ),
             ],
           }),
           page.workspace_security?.two_factor ? h(SettingsSecuritySection, { page, icon: "shield-check" }) : null,
@@ -13016,6 +13251,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_operations_reports") return renderStaticElement(h(OperationsReportsBody, { page }));
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
+  if (page.kind === "admin_locale_rollout") return renderStaticElement(h(LocaleRolloutBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));

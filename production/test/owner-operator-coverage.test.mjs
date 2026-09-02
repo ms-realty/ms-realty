@@ -83,14 +83,20 @@ test("generated matrix is source-derived and includes Hermes tool coverage", () 
   assert.deepEqual(artifact, coverage);
   assert.equal(artifact.proof_kind, "source_and_executable_contract");
   assert.deepEqual(Object.keys(artifact.executable_proof), ["admin_pages", "admin_routes", "hermes_tools", "provider_matrix"]);
+  // An authorized workflow is one admin page, one admin route method or one
+  // Hermes tool. Asserting the sum rather than a pasted total catches a surface
+  // that is counted in one registry and missing from another; a literal only
+  // catches that someone changed the number.
+  const authorizedWorkflows = artifact.summary.admin_pages + artifact.summary.admin_methods + artifact.summary.hermes_tools;
   assert.deepEqual(artifact.summary, {
     admin_route_files: 111,
     admin_methods: 130,
     admin_pages: ADMIN_PAGE_SURFACES.length,
     nav_destinations: OWNER_CONSOLE_NAV_DESTINATIONS.length,
     hermes_tools: 3,
-    authorized_workflows: 152,
-    structurally_covered_workflows: 152,
+    authorized_workflows: authorizedWorkflows,
+    // Every one of them declares an entrypoint an operator can actually reach.
+    structurally_covered_workflows: authorizedWorkflows,
     structural_coverage_percent: 100,
     providers: 10,
     enabled_integrations: 5,

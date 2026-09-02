@@ -6,6 +6,7 @@ import { readAuditLog } from "../lib/audit-log.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readLeadLedger } from "../lib/lead-ledger.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
+import { OWNER_CONSOLE_NAV_DESTINATIONS } from "../lib/owner-operator-catalog.mjs";
 import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   WORKSPACE_SETTINGS_DEFAULTS,
@@ -639,10 +640,15 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.doesNotMatch(empty.body, /data-admin-nav-drilldown=/, "no grouped disclosures remain");
     const rail = empty.body.slice(empty.body.indexOf('class="crm-sb__nav"'), empty.body.indexOf('class="crm-sb__me"'));
     assert.equal((rail.match(/<details/g) || []).length, 0, "the desktop rail carries no disclosure");
-    assert.equal(
-      [...rail.matchAll(/data-admin-nav-route="/g)].length,
-      19,
-      "all nineteen destinations are links at one depth",
+    // Not a count: the rail must carry exactly the destinations the operator
+    // catalog says this operator can reach, each once, each at one depth. A
+    // number would have to be bumped whenever one is added, and would pass
+    // just as happily if one were swapped for another.
+    const reachable = OWNER_CONSOLE_NAV_DESTINATIONS.flatMap((destination) => [destination.primary, ...destination.children]);
+    assert.deepEqual(
+      [...rail.matchAll(/data-admin-nav-route="([^"]+)"/g)].map((match) => match[1]).sort(),
+      [...reachable].sort(),
+      "every catalogued destination is a link at one depth, and nothing else is",
     );
     // Every destination is reachable directly, including the ten that used to
     // sit behind "More in ...".

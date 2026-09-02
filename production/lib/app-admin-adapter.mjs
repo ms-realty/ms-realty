@@ -311,6 +311,7 @@ import {
 } from "./listing-quality.mjs";
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
+import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
@@ -2635,6 +2636,21 @@ function migrationReviewPayload(registry, url, config) {
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: decisions,
   };
+}
+
+async function localeRolloutPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    payload: config.payloadListingRuntime || null,
+    env: config.authEnv || process.env,
+    requirePayload: config.runtimeDataDurableOnly,
+  });
+  return renderAdminLocaleRolloutPayload(registry, url.searchParams.get("locale") || "en", {
+    seed,
+    translationTasks: config.runtimeDataDurableOnly ? [] : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    operatorId: config.adminPrincipal || null,
+    focus: url.searchParams.get("language") || "",
+  });
 }
 
 function localePayload(registry, url) {
@@ -5255,6 +5271,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
       return jsonResponse(200, migrationReviewPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/locales") {
+      return htmlResponse(await localeRolloutPayload(registry, url, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       return jsonResponse(200, localePayload(registry, url));
