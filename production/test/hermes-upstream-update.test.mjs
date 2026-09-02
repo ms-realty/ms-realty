@@ -154,6 +154,11 @@ test("compatibility smoke plan is immutable, read-only, no-network, and safety-c
   assert.ok(configCommand.includes("- web"));
   assert.ok(plan.start.includes("API_SERVER_ENABLED=true"));
   assert.ok(plan.start.includes("API_SERVER_KEY=ms-realty-compatibility-smoke-only"));
+  const startCommand = plan.start.join(" ");
+  assert.match(startCommand, /--tmpfs \/run:rw,nosuid,size=16m/);
+  assert.doesNotMatch(startCommand, /\/run:rw,noexec/);
+  assert.match(startCommand, /--tmpfs \/opt\/data:rw,noexec,nosuid,size=64m/);
+  assert.match(startCommand, /--tmpfs \/tmp:rw,noexec,nosuid,size=64m/);
   assert.throws(() => buildHermesCompatibilityPlan(`${HERMES_UPSTREAM_DOCKER_REPOSITORY}:${RELEASE_TAG}`), /digest/);
 });
 
