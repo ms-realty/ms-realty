@@ -194,6 +194,7 @@ jobs:
       previous_marker: ${{ steps.previous_origin.outputs.marker }}
       previous_ready: ${{ steps.previous_origin.outputs.ready }}
       previous_blockers: ${{ steps.previous_origin.outputs.blockers }}
+      previous_monitoring_valid: ${{ steps.previous_monitoring.outputs.valid }}
       workers_dev_url: ${{ steps.workers_dev.outputs.url }}
     env:
       MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
@@ -260,6 +261,45 @@ jobs:
             echo "blockers=$blockers"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Capture validated monitoring evidence for rollback
+        id: previous_monitoring
+        run: |
+          blockers="${{ steps.previous_origin.outputs.blockers }}"
+          if [[ ",$blockers," == *",monitoring_rollback,"* ]]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            echo "Prior release already has monitoring_rollback; no passing report will be preserved."
+            exit 0
+          fi
+          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          local_report="$RUNNER_TEMP/previous-monitoring-rollback-report.json"
+          remote_report="/opt/ms-realty/incoming/previous-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          # Runner values are intentionally expanded before SSH.
+          # shellcheck disable=SC2029
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 /opt/ms-realty/incoming; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker exec --user 1001:1001 \"\$container\" node production/scripts/validate-monitoring-rollback-report.mjs >/dev/null; docker cp \"\${container}:/runtime-evidence/monitoring-rollback-report.json\" '$remote_report'; chmod 0600 '$remote_report'"
+          # The validated temporary path is runner-controlled.
+          # shellcheck disable=SC2029
+          if ! scp "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST:$remote_report" "$local_report"; then
+            # The validated temporary path is runner-controlled.
+            # shellcheck disable=SC2029
+            ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'" || true
+            exit 1
+          fi
+          # The validated temporary path is runner-controlled.
+          # shellcheck disable=SC2029
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'"
+          chmod 0600 "$local_report"
+          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+
+      - name: Preserve validated monitoring evidence for rollback
+        if: steps.previous_monitoring.outputs.valid == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-monitoring-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/previous-monitoring-rollback-report.json
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Capture exact-release R2 media coverage
         run: |
           node production/scripts/repair-missing-r2-media.mjs \
@@ -305,7 +345,7 @@ jobs:
       github.event.client_payload.merge_sha == github.sha))
     needs: [check, deploy_origin]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -339,6 +379,13 @@ jobs:
         with:
           name: r2-media-coverage-${{ github.sha }}
           path: production/data
+
+      - name: Restore validated monitoring evidence for rollback
+        if: needs.deploy_origin.outputs.previous_monitoring_valid == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: rollback-monitoring-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/rollback-evidence
 
       - name: Verify exact R2 report for the Worker image
         run: >-
@@ -418,14 +465,17 @@ jobs:
         run: |
           health_url="${{ needs.deploy_origin.outputs.workers_dev_url }}"
           ready_url="${health_url%/api/health}/api/ready"
-          for attempt in $(seq 1 100); do
+          verification_deadline=$((SECONDS + 900))
+          attempt=0
+          while [ "$SECONDS" -lt "$verification_deadline" ]; do
+            attempt=$((attempt + 1))
             if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/health.json" &&
               node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected || d.origin_build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/health.json" "$GITHUB_SHA" &&
               curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$ready_url" --output "$RUNNER_TEMP/ready.json" &&
               node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ready" || d.launch_ready !== true || !Array.isArray(d.blockers) || d.blockers.length !== 0) process.exit(1)' "$RUNNER_TEMP/ready.json"; then
               exit 0
             fi
-            echo "Expected exact markers $GITHUB_SHA and ready status; attempt $attempt/100 did not match."
+            echo "Expected exact markers $GITHUB_SHA and ready status; attempt $attempt did not match."
             sleep 10
           done
           exit 1
@@ -441,6 +491,12 @@ jobs:
         run: |
           previous_version="${{ steps.previous.outputs.version }}"
           previous_origin="${{ needs.deploy_origin.outputs.previous_release }}"
+          expected_marker="${{ needs.deploy_origin.outputs.previous_marker }}"
+          expected_ready="${{ needs.deploy_origin.outputs.previous_ready }}"
+          expected_blockers="${{ needs.deploy_origin.outputs.previous_blockers }}"
+          previous_monitoring_valid="${{ needs.deploy_origin.outputs.previous_monitoring_valid }}"
+          [[ "$expected_ready" =~ ^(true|false)$ ]]
+          [[ "$previous_monitoring_valid" =~ ^(true|false)$ ]]
           install -d -m 0700 "$RUNNER_TEMP/ssh"
           printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
           printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
@@ -457,14 +513,33 @@ jobs:
           fi
           [[ "$previous_origin" =~ ^[0-9a-f]{40}$ ]]
           ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          # Validated release and run identifiers expand on the runner.
+          # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; release='$previous_origin'; target='/opt/ms-realty/releases/$previous_origin'; test -f \"\$target/.ms-realty-release-sha\"; test \"\$(cat \"\$target/.ms-realty-release-sha\")\" = \"\$release\"; link='/opt/ms-realty/.current-rollback-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}'; ln -s \"\$target\" \"\$link\"; mv -Tf \"\$link\" /opt/ms-realty/current; cd \"\$target\"; MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml MS_REALTY_BUILD_MARKER=\"\$release\" npm run docker:up; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\""
+          if [ "$previous_monitoring_valid" = "true" ]; then
+            local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
+            remote_report="/opt/ms-realty/incoming/rollback-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+            test -s "$local_report"
+            MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight
+            # The validated temporary path is runner-controlled.
+            # shellcheck disable=SC2029
+            scp "${ssh_args[@]}" "$local_report" "root@$MS_REALTY_DEPLOY_HOST:$remote_report"
+            # Validated release and temporary paths expand on the runner.
+            # shellcheck disable=SC2029
+            if ! ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; report='$remote_report'; trap 'rm -f \"\$report\"' EXIT; target='/opt/ms-realty/releases/$previous_origin'; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\"; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker cp \"\$report\" \"\${container}:/runtime-evidence/.monitoring-rollback-report.json\"; docker exec --user 0 \"\$container\" sh -c 'chmod 0444 /runtime-evidence/.monitoring-rollback-report.json && mv -f /runtime-evidence/.monitoring-rollback-report.json /runtime-evidence/monitoring-rollback-report.json'; docker exec --user 1001:1001 \"\$container\" sh -c 'node production/scripts/validate-monitoring-rollback-report.mjs && node production/scripts/build-launch-readiness.mjs'"; then
+              # The validated temporary path is runner-controlled.
+              # shellcheck disable=SC2029
+              ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'" || true
+              exit 1
+            fi
+          fi
           health_url="${{ needs.deploy_origin.outputs.workers_dev_url }}"
           if [ -z "$health_url" ]; then health_url="https://ms-realty.ms-realty-bg.workers.dev/api/health"; fi
           ready_url="${health_url%/api/health}/api/ready"
-          expected_marker="${{ needs.deploy_origin.outputs.previous_marker }}"
-          expected_ready="${{ needs.deploy_origin.outputs.previous_ready }}"
-          expected_blockers="${{ needs.deploy_origin.outputs.previous_blockers }}"
-          for attempt in $(seq 1 100); do
+          rollback_deadline=$((SECONDS + 900))
+          attempt=0
+          while [ "$SECONDS" -lt "$rollback_deadline" ]; do
+            attempt=$((attempt + 1))
             if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/rollback-health.json"; then
               health_matches=false
               if [ -n "$expected_marker" ]; then
@@ -476,7 +551,9 @@ jobs:
               fi
               expected_ready_status=503
               if [ "$expected_ready" = "true" ]; then expected_ready_status=200; fi
-              ready_status="$(curl --silent --show-error --max-time 20 --header "Cache-Control: no-cache" --output "$RUNNER_TEMP/rollback-ready.json" --write-out '%{http_code}' "$ready_url")"
+              if ! ready_status="$(curl --silent --show-error --max-time 20 --header "Cache-Control: no-cache" --output "$RUNNER_TEMP/rollback-ready.json" --write-out '%{http_code}' "$ready_url")"; then
+                ready_status=000
+              fi
               if [ "$health_matches" = true ] && [ "$ready_status" = "$expected_ready_status" ] &&
                 node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const ready=process.argv[2] === "true"; const blockers=process.argv[3] ? process.argv[3].split(",") : []; const actual=Array.isArray(d.blockers) ? [...d.blockers].sort() : []; if (d.service !== "ms-realty" || d.launch_ready !== ready || d.status !== (ready ? "ready" : "blocked") || JSON.stringify(actual) !== JSON.stringify(blockers)) process.exit(1)' "$RUNNER_TEMP/rollback-ready.json" "$expected_ready" "$expected_blockers"; then
                 if [ -z "$expected_marker" ]; then
@@ -485,7 +562,11 @@ jobs:
                 exit 0
               fi
             fi
-            echo "Rollback verification attempt $attempt/100 did not match the prior edge/origin markers and readiness."
+            echo "rollback_expected edge=${expected_marker:-legacy} origin=$previous_origin ready=$expected_ready blockers=${expected_blockers:-none}"
+            # JavaScript expands its own template literal.
+            # shellcheck disable=SC2016
+            node -e 'const fs=require("node:fs"); const read=(p)=>{try{return JSON.parse(fs.readFileSync(p,"utf8"))}catch{return {}}}; const marker=(v)=>typeof v==="string"&&(/^[0-9a-f]{40}$/i.test(v)||v==="unversioned")?v:"invalid"; const h=read(process.argv[1]),r=read(process.argv[2]); const blockers=Array.isArray(r.blockers)&&r.blockers.every((v)=>typeof v==="string"&&/^[a-z0-9_:-]+$/.test(v))?[...r.blockers].sort().join(",")||"none":"invalid"; const ready=r.launch_ready===true?"true":r.launch_ready===false?"false":"invalid"; console.log(`rollback_state edge=${marker(h.build_marker)} origin=${marker(h.origin_build_marker)} ready=${ready} blockers=${blockers}`)' "$RUNNER_TEMP/rollback-health.json" "$RUNNER_TEMP/rollback-ready.json"
+            echo "Rollback verification attempt $attempt did not match the prior edge/origin markers and readiness."
             sleep 10
           done
           exit 1

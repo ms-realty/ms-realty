@@ -288,10 +288,11 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(deployCommand, /--keep-vars\b/);
   assert.match(ciWorkflow, /wrangler@4\.117\.0 deploy/);
   assert.match(deployJob, /needs: \[check, deploy_origin\]/);
-  assert.match(deployJob, /timeout-minutes: 45/);
+  assert.match(deployJob, /timeout-minutes: 60/);
   assert.match(ciWorkflow, /previous_release: \$\{\{ steps\.previous_origin\.outputs\.release \}\}/);
   assert.match(ciWorkflow, /previous_ready: \$\{\{ steps\.previous_origin\.outputs\.ready \}\}/);
   assert.match(ciWorkflow, /previous_blockers: \$\{\{ steps\.previous_origin\.outputs\.blockers \}\}/);
+  assert.match(ciWorkflow, /previous_monitoring_valid: \$\{\{ steps\.previous_monitoring\.outputs\.valid \}\}/);
   assert.match(ciWorkflow, /Capture active origin release and readiness/);
   assert.match(deployJob, /secret list --name ms-realty --format json/);
   assert.match(deployJob, /name === "MS_REALTY_ORIGIN_TOKEN"/);
@@ -309,6 +310,25 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(preActivationCapture, /steps\.workers_dev\.outputs\.url/);
   assert.match(preActivationCapture, /d\.launch_ready === true/);
   assert.match(preActivationCapture, /d\.blockers/);
+  const monitoringCapture = ciWorkflow.slice(
+    ciWorkflow.indexOf("- name: Capture validated monitoring evidence for rollback"),
+    ciWorkflow.indexOf("- name: Capture exact-release R2 media coverage"),
+  );
+  assert.match(monitoringCapture, /id: previous_monitoring/);
+  assert.match(monitoringCapture, /monitoring_rollback/);
+  assert.match(monitoringCapture, /docker exec --user 1001:1001 .*validate-monitoring-rollback-report\.mjs/);
+  assert.match(monitoringCapture, /docker cp .*\/runtime-evidence\/monitoring-rollback-report\.json/);
+  assert.match(monitoringCapture, /MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH=.*npm run monitoring:preflight/);
+  assert.match(monitoringCapture, /echo "valid=true"/);
+  assert.match(monitoringCapture, /actions\/upload-artifact@v4/);
+  assert.match(monitoringCapture, /retention-days: 1/);
+  assert.ok(
+    ciWorkflow.indexOf("Capture validated monitoring evidence for rollback") <
+      ciWorkflow.indexOf("Upload and activate exact origin release"),
+    "rollback evidence must be captured before origin activation",
+  );
+  assert.match(deployJob, /Restore validated monitoring evidence for rollback/);
+  assert.match(deployJob, /needs\.deploy_origin\.outputs\.previous_monitoring_valid == 'true'/);
   const captureBlock = ciWorkflow.slice(
     ciWorkflow.indexOf("- name: Capture active Worker version"),
     ciWorkflow.indexOf("- name: Set exact Container image marker"),
@@ -318,7 +338,9 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
     ciWorkflow.indexOf("- name: Verify deployed Worker"),
     ciWorkflow.indexOf("- name: Roll back failed deployment"),
   );
-  assert.match(verificationBlock, /for attempt in \$\(seq 1 100\); do/);
+  assert.match(verificationBlock, /verification_deadline=\$\(\(SECONDS \+ 900\)\)/);
+  assert.match(verificationBlock, /while \[ "\$SECONDS" -lt "\$verification_deadline" \]; do/);
+  assert.doesNotMatch(verificationBlock, /seq 1 100/);
   assert.match(verificationBlock, /d\.origin_build_marker !== expected/);
   assert.match(verificationBlock, /\/api\/ready/);
   assert.match(verificationBlock, /d\.launch_ready !== true/);
@@ -327,10 +349,22 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_release/);
   assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_ready/);
   assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_blockers/);
+  assert.match(rollbackBlock, /needs\.deploy_origin\.outputs\.previous_monitoring_valid/);
   assert.match(rollbackBlock, /if \[ "\$version" != "\$previous_version" \]/);
   assert.match(rollbackBlock, /mv -Tf .*link.*\/opt\/ms-realty\/current/);
+  assert.match(rollbackBlock, /docker cp .*\/runtime-evidence\/\.monitoring-rollback-report\.json/);
+  assert.match(rollbackBlock, /validate-monitoring-rollback-report\.mjs && node production\/scripts\/build-launch-readiness\.mjs/);
+  assert.ok(
+    rollbackBlock.indexOf("build-launch-readiness.mjs") < rollbackBlock.indexOf("rollback_deadline="),
+    "rollback must reinstall monitoring evidence and rebuild readiness before verification",
+  );
+  assert.match(rollbackBlock, /rollback_deadline=\$\(\(SECONDS \+ 900\)\)/);
+  assert.match(rollbackBlock, /while \[ "\$SECONDS" -lt "\$rollback_deadline" \]; do/);
+  assert.match(rollbackBlock, /rollback_state edge=/);
+  assert.doesNotMatch(rollbackBlock, /seq 1 100/);
   assert.match(rollbackBlock, /d\.origin_build_marker !== origin/);
   assert.match(rollbackBlock, /rollback-ready\.json/);
+  assert.match(rollbackBlock, /if ! ready_status="\$\(curl[\s\S]*"\$ready_url"\)"; then\s+ready_status=000/);
   assert.match(rollbackBlock, /d\.launch_ready !== ready/);
   assert.match(rollbackBlock, /JSON\.stringify\(actual\) !== JSON\.stringify\(blockers\)/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
