@@ -4558,6 +4558,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             payload: config.hermesReceiptPayload || payload,
             operatorId: actor,
             workspaceId: scope,
+            legacyWorkspaceId: configuredScope,
             receiptSecret: config.hermesReceiptSecret || config.hermesEnv?.MS_REALTY_PROVIDER_TOKEN_KEY || authEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
             limit: url.searchParams.get("limit") || 100,
           };

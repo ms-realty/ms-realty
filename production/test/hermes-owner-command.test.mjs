@@ -14,7 +14,7 @@ const STARTED_AT = "2026-08-28T12:00:00.000Z";
 const COMPLETED_AT = "2026-08-28T12:00:01.000Z";
 const operator = { id: "payload-owner", roles: ["admin"], workspace_ids: [] };
 
-function fakePayload(seed = []) {
+function fakePayload(seed = [], { receiptUniqueByWorkspace = false } = {}) {
   const docs = seed.map((doc, index) => ({ id: index + 1, ...doc }));
   return {
     docs,
@@ -34,7 +34,15 @@ function fakePayload(seed = []) {
     },
     async create({ data }) {
       assert.equal(data.status, "requested", "the durable fence exists before the model runs");
-      if (docs.some((doc) => doc.idempotency_key === data.idempotency_key)) throw new Error("duplicate");
+      if (
+        docs.some(
+          (doc) =>
+            doc.idempotency_key === data.idempotency_key &&
+            (!receiptUniqueByWorkspace || doc.workspace_id === data.workspace_id),
+        )
+      ) {
+        throw Object.assign(new Error("duplicate key value violates unique constraint"), { code: "23505" });
+      }
       const doc = { id: docs.length + 1, ...data };
       docs.push(doc);
       return doc;
@@ -319,6 +327,41 @@ test("Hermes owner receipts are workspace-scoped and new commands persist their 
     now: () => STARTED_AT,
   });
   assert.equal(createdPayload.docs[0].workspace_id, workspaceB);
+});
+
+test("Hermes receipt idempotency is scoped by workspace and global collisions are explicit", async () => {
+  const workspaceA = "workspace-hermes-collision-a";
+  const workspaceB = "workspace-hermes-collision-b";
+  const input = command({ idempotencyKey: "hermes-owner-cross-workspace-key" });
+  const run = (payload, workspaceId) =>
+    runHermesOwnerCommand(input, {
+      operator,
+      workspaceId,
+      payload,
+      secret: SECRET,
+      provider: async () => safePlan(),
+      now: () => COMPLETED_AT,
+    });
+
+  const legacyGlobalPayload = fakePayload();
+  await run(legacyGlobalPayload, workspaceA);
+  await assert.rejects(
+    run(legacyGlobalPayload, workspaceB),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "idempotency_conflict" && error.status === 409,
+  );
+
+  const workspaceScopedPayload = fakePayload([], { receiptUniqueByWorkspace: true });
+  const first = await run(workspaceScopedPayload, workspaceA);
+  const second = await run(workspaceScopedPayload, workspaceB);
+  assert.equal(first.status, "planned");
+  assert.equal(second.status, "planned");
+  assert.deepEqual(
+    workspaceScopedPayload.docs.map((doc) => [doc.idempotency_key, doc.workspace_id]),
+    [
+      [input.idempotencyKey, workspaceA],
+      [input.idempotencyKey, workspaceB],
+    ],
+  );
 });
 
 test("failed receipts are terminal and return their stored failure", async () => {

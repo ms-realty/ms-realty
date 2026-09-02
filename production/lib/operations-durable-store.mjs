@@ -1029,10 +1029,11 @@ export async function readAutomationRun({ runId, workspaceId, payload = null } =
   return { run: safeRun(document), failures: failures.map(safeFailure) };
 }
 
-function safeHermesAuditRow(row, workspaceId = null) {
+function safeHermesAuditRow(row, workspaceId = null, { legacyWorkspaceId = null } = {}) {
   if (!record(row)) throw new Error("Hermes audit row is not an object");
   const rowWorkspaceId = row.workspace_id ? id(row.workspace_id, "workspace_id") : null;
-  if (workspaceId && rowWorkspaceId !== workspaceId) return null;
+  const effectiveWorkspaceId = rowWorkspaceId || (workspaceId && legacyWorkspaceId === workspaceId ? workspaceId : null);
+  if (workspaceId && effectiveWorkspaceId !== workspaceId) return null;
   const output = {
     run_id: id(row.run_id || row.task_id, "run_id"),
     task_id: id(row.task_id, "task_id"),
@@ -1052,16 +1053,27 @@ function safeHermesAuditRow(row, workspaceId = null) {
     recorded_at: nowIso(row.recorded_at),
     source: "hermes-audit",
   };
-  if (rowWorkspaceId) output.workspace_id = rowWorkspaceId;
+  if (effectiveWorkspaceId) output.workspace_id = effectiveWorkspaceId;
   return output;
 }
 
-export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", workspaceId = "", receiptSecret = "", limit = 100 } = {}) {
+export async function readHermesRunHistory({
+  auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH,
+  payload = null,
+  operatorId = "",
+  workspaceId = "",
+  legacyWorkspaceId = process.env.MS_REALTY_WORKSPACE_ID || "",
+  receiptSecret = "",
+  limit = 100,
+} = {}) {
   const cappedLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
   const scope = workspaceId ? id(workspaceId, "workspace_id") : null;
+  const legacyScope = legacyWorkspaceId ? id(legacyWorkspaceId, "legacy_workspace_id") : null;
   let rows;
   try {
-    rows = readHermesAuditLedger(auditPath).map((row) => safeHermesAuditRow(row, scope)).filter(Boolean);
+    rows = readHermesAuditLedger(auditPath)
+      .map((row) => safeHermesAuditRow(row, scope, { legacyWorkspaceId: legacyScope }))
+      .filter(Boolean);
   } catch (error) {
     throw new OperationsStoreUnavailableError("Hermes audit history is unavailable", error);
   }
@@ -1101,9 +1113,17 @@ export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LE
   return [...ownerReceipts, ...rows].sort(compareRecordedAtDesc).slice(0, cappedLimit);
 }
 
-export async function readHermesRun({ runId, auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", workspaceId = "", receiptSecret = "" } = {}) {
+export async function readHermesRun({
+  runId,
+  auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH,
+  payload = null,
+  operatorId = "",
+  workspaceId = "",
+  legacyWorkspaceId = process.env.MS_REALTY_WORKSPACE_ID || "",
+  receiptSecret = "",
+} = {}) {
   const stableId = id(runId, "run_id");
-  const rows = await readHermesRunHistory({ auditPath, payload, operatorId, workspaceId, receiptSecret, limit: 500 });
+  const rows = await readHermesRunHistory({ auditPath, payload, operatorId, workspaceId, legacyWorkspaceId, receiptSecret, limit: 500 });
   const found = rows.find((row) => row.run_id === stableId || row.task_id === stableId);
   if (!found) throw new OperationsNotFoundError("Hermes run was not found");
   return found;

@@ -107,24 +107,48 @@ test("nested automation and Hermes history routes resolve the shared Next adapte
 test("Node and Next operations API paths share task and Hermes read behavior", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-operations-parity-"));
   const hermesAuditPath = path.join(directory, "hermes-audit.jsonl");
-  fs.writeFileSync(hermesAuditPath, `${JSON.stringify({
-    recorded_at: "2026-09-03T09:00:00.000Z",
-    task_id: "hermes-task-parity",
-    object_type: "listing",
-    object_id: "listing-parity",
-    source_locale: "bg",
-    target_locale: "en",
-    status: "hermes_drafted",
-    provider_mode: "self_hosted",
-    workspace_id: WORKSPACE,
-    source_hash: "a".repeat(64),
-    draft_hash: "b".repeat(64),
-    has_output: true,
-    public_indexable: false,
-    human_approved: false,
-    can_publish: false,
-    can_mark_indexable: false,
-  })}\n`);
+  fs.writeFileSync(
+    hermesAuditPath,
+    [
+      {
+        recorded_at: "2026-09-03T09:00:00.000Z",
+        task_id: "hermes-task-parity",
+        object_type: "listing",
+        object_id: "listing-parity",
+        source_locale: "bg",
+        target_locale: "en",
+        status: "hermes_drafted",
+        provider_mode: "self_hosted",
+        workspace_id: WORKSPACE,
+        source_hash: "a".repeat(64),
+        draft_hash: "b".repeat(64),
+        has_output: true,
+        public_indexable: false,
+        human_approved: false,
+        can_publish: false,
+        can_mark_indexable: false,
+      },
+      {
+        recorded_at: "2026-09-03T08:59:00.000Z",
+        task_id: "legacy-hermes-task-parity",
+        object_type: "listing",
+        object_id: "listing-legacy-parity",
+        source_locale: "bg",
+        target_locale: "en",
+        status: "hermes_drafted",
+        provider_mode: "self_hosted",
+        source_hash: "c".repeat(64),
+        draft_hash: "d".repeat(64),
+        has_output: true,
+        public_indexable: false,
+        human_approved: false,
+        can_publish: false,
+        can_mark_indexable: false,
+      },
+    ]
+      .map(JSON.stringify)
+      .join("\n") + "\n",
+  );
   const appPayload = fakePayload();
   const httpPayload = fakePayload();
   const app = appConfig(appPayload, path.join(directory, "next-audit.jsonl"), hermesAuditPath);
@@ -175,6 +199,7 @@ test("Node and Next operations API paths share task and Hermes read behavior", a
     assert.deepEqual(await nextHermes.json(), nodeHermes.body);
     assert.equal(nodeHermes.body.runs[0].can_publish, false);
     assert.equal(Object.hasOwn(nodeHermes.body.runs[0], "prompt"), false);
+    assert.equal(nodeHermes.body.runs.some((run) => run.run_id === "legacy-hermes-task-parity" && run.workspace_id === WORKSPACE), true);
 
     const nextAlias = await appRequest("/api/admin/automation-rules", { config: app });
     const nodeAlias = await dispatchHttp(standalone, { url: "/api/admin/automation-rules", headers: { authorization: "Bearer operations-parity-token", accept: "application/json" } });

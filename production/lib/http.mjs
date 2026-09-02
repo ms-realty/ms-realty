@@ -4416,6 +4416,7 @@ export function createHttpApp({
             payload: hermesReceiptPayload || payload,
             operatorId: actor,
             workspaceId: scope,
+            legacyWorkspaceId: configuredScope,
             receiptSecret: hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
             limit: url.searchParams.get("limit") || 100,
           };

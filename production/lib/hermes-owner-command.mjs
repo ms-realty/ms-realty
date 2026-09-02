@@ -18,7 +18,7 @@ export const HERMES_OWNER_RECEIPT_COLLECTION = {
     defaultColumns: ["operator_id", "status", "model", "started_at", "completed_at"],
   },
   fields: [
-    { name: "idempotency_key", type: "text", required: true, unique: true, index: true, maxLength: 128 },
+    { name: "idempotency_key", type: "text", required: true, maxLength: 128 },
     { name: "operator_id", type: "text", required: true, index: true, maxLength: 160 },
     { name: "workspace_id", type: "text", index: true, maxLength: 160 },
     { name: "status", type: "text", required: true, index: true, maxLength: 24 },
@@ -30,6 +30,9 @@ export const HERMES_OWNER_RECEIPT_COLLECTION = {
     { name: "failure_code", type: "text", maxLength: 64 },
     { name: "receipt_envelope", type: "json", required: true, admin: { hidden: true } },
   ],
+  // Replay lookup is workspace + key; operator ownership is checked before a
+  // stored plan is returned, so the database fence follows that same scope.
+  indexes: [{ fields: ["workspace_id", "idempotency_key"], unique: true }],
 };
 
 export const HERMES_OWNER_DESTINATIONS = Object.freeze([
@@ -460,6 +463,12 @@ async function findReceipt(runtime, idempotencyKey, { workspaceId = null } = {})
   return result.docs[0] || null;
 }
 
+function isUniqueViolation(cause) {
+  const code = String(cause?.code || "");
+  const message = String(cause?.message || "");
+  return code === "23505" || /duplicate|unique constraint|unique index/i.test(message);
+}
+
 function receiptEnvelope(idempotencyKey, command, evidence, plan, { secret, storedAt, locale, contextDigest } = {}) {
   return createPrivateContactEnvelope(
     {
@@ -771,6 +780,9 @@ export async function runHermesOwnerCommand(
       if (raced) return existingReceipt(runtime, raced, receiptIdentity, secret, operatorId, { now, workspaceId: workspace });
     } catch {
       // The fixed store error below is the only response exposed to the owner.
+    }
+    if (isUniqueViolation(cause)) {
+      throw new HermesOwnerCommandError("idempotency_conflict", { status: 409, cause });
     }
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }

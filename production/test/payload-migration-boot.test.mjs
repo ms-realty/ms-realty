@@ -22,6 +22,8 @@ const listingTranslationCopyMigration = fromRoot("migrations", "20260830_120000_
 const listingTranslationWorkflowStatusMigration = fromRoot("migrations", "20260830_130000_listing_translation_workflow_status.ts");
 const providerConnectionWorkspaceMigration = fromRoot("migrations", "20260901_130000_provider_connection_workspace_scope.ts");
 const operationsWorkspaceMigration = fromRoot("migrations", "20260901_140000_operations_workspace.ts");
+const hermesOwnerReceiptsMigration = fromRoot("migrations", "20260828_120000_hermes_owner_receipts.ts");
+const hermesOwnerReceiptWorkspaceMigration = fromRoot("migrations", "20260902_120000_hermes_owner_receipt_workspace_idempotency.ts");
 const payloadRuntime = createRequire(import.meta.url).resolve("payload");
 const payloadCli = path.resolve(path.dirname(payloadRuntime), "..", "bin.js");
 
@@ -58,8 +60,10 @@ test("Payload migration boot configuration and generated constraints stay runnab
     "20260829_120000_durable_viewing_trip_requests.ts",
     "20260830_120000_listing_translation_copy.ts",
     "20260830_130000_listing_translation_workflow_status.ts",
+    "20260828_120000_hermes_owner_receipts.ts",
     "20260901_130000_provider_connection_workspace_scope.ts",
     "20260901_140000_operations_workspace.ts",
+    "20260902_120000_hermes_owner_receipt_workspace_idempotency.ts",
   ]) {
     assert.match(
       fs.readFileSync(fromRoot("migrations", migration), "utf8"),
@@ -216,6 +220,27 @@ test("Payload migration boot configuration and generated constraints stay runnab
   assert.match(
     migrationIndex,
     /up: migration_20260901_130000_provider_connection_workspace_scope\.up,\s+down: migration_20260901_130000_provider_connection_workspace_scope\.down,\s+name: '20260901_130000_provider_connection_workspace_scope'/,
+  );
+
+  const hermesOwnerReceipts = fs.readFileSync(hermesOwnerReceiptsMigration, "utf8");
+  const hermesOwnerReceiptsTable = tableSql(hermesOwnerReceipts, "hermes_owner_receipts");
+  assert.ok(hermesOwnerReceiptsTable.includes('"workspace_id" varchar'), "Hermes receipts keep legacy workspace rows nullable");
+  assert.match(hermesOwnerReceipts, /CREATE UNIQUE INDEX IF NOT EXISTS "hermes_owner_receipts_workspace_id_idempotency_key_idx"/);
+  assert.match(hermesOwnerReceipts, /ON "hermes_owner_receipts" USING btree \("workspace_id", "idempotency_key"\)/);
+  assert.match(hermesOwnerReceipts, /DROP INDEX IF EXISTS "hermes_owner_receipts_idempotency_key_idx"/);
+  assert.doesNotMatch(hermesOwnerReceipts, /CREATE UNIQUE INDEX IF NOT EXISTS "hermes_owner_receipts_idempotency_key_idx"/);
+
+  const hermesOwnerReceiptWorkspace = fs.readFileSync(hermesOwnerReceiptWorkspaceMigration, "utf8");
+  assert.match(hermesOwnerReceiptWorkspace, /ALTER TABLE "hermes_owner_receipts" ADD COLUMN IF NOT EXISTS "workspace_id" varchar/);
+  assert.match(hermesOwnerReceiptWorkspace, /MS_REALTY_WORKSPACE_ID/);
+  assert.match(hermesOwnerReceiptWorkspace, /UPDATE "hermes_owner_receipts"/);
+  assert.match(hermesOwnerReceiptWorkspace, /WHERE "workspace_id" IS NULL OR btrim\("workspace_id"\) = ''/);
+  assert.match(hermesOwnerReceiptWorkspace, /CREATE UNIQUE INDEX IF NOT EXISTS "hermes_owner_receipts_workspace_id_idempotency_key_idx"/);
+  assert.match(hermesOwnerReceiptWorkspace, /DROP INDEX IF EXISTS "hermes_owner_receipts_idempotency_key_idx"/);
+  assert.match(migrationIndex, /import \* as migration_20260902_120000_hermes_owner_receipt_workspace_idempotency/);
+  assert.match(
+    migrationIndex,
+    /up: migration_20260902_120000_hermes_owner_receipt_workspace_idempotency\.up,\s+down: migration_20260902_120000_hermes_owner_receipt_workspace_idempotency\.down,\s+name: '20260902_120000_hermes_owner_receipt_workspace_idempotency'/,
   );
 
   const localizedPublicSearch = fs.readFileSync(publicSearchMigration, "utf8");

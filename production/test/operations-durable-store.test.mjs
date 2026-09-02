@@ -438,7 +438,7 @@ test("automation failures are durable and Hermes history remains read-only and r
   assert.equal((await readHermesRun({ auditPath, workspaceId, runId: "translation-task-1" })).task_id, "translation-task-1");
 });
 
-test("Hermes history excludes legacy and other-workspace audit rows when scoped", async () => {
+test("Hermes history adopts legacy audit rows only for the configured workspace", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-hermes-runs-scope-"));
   const auditPath = path.join(directory, "hermes-audit.jsonl");
   const row = (taskId, workspace) => ({
@@ -460,8 +460,15 @@ test("Hermes history excludes legacy and other-workspace audit rows when scoped"
     ...(workspace ? { workspace_id: workspace } : {}),
   });
   fs.writeFileSync(auditPath, [row("legacy-hermes", null), row("workspace-a-hermes", "workspace-a"), row("workspace-b-hermes", "workspace-b")].map(JSON.stringify).join("\n") + "\n");
-  const scoped = await readHermesRunHistory({ auditPath, workspaceId: "workspace-a" });
-  assert.deepEqual(scoped.map((entry) => entry.run_id), ["workspace-a-hermes"]);
+  const scoped = await readHermesRunHistory({ auditPath, workspaceId: "workspace-a", legacyWorkspaceId: "workspace-a" });
+  assert.deepEqual(scoped.map((entry) => entry.run_id), ["legacy-hermes", "workspace-a-hermes"]);
+  assert.deepEqual(scoped.map((entry) => entry.workspace_id), ["workspace-a", "workspace-a"]);
+
+  const wrongConfiguredScope = await readHermesRunHistory({ auditPath, workspaceId: "workspace-a", legacyWorkspaceId: "workspace-b" });
+  assert.deepEqual(wrongConfiguredScope.map((entry) => entry.run_id), ["workspace-a-hermes"]);
+
+  const otherWorkspace = await readHermesRunHistory({ auditPath, workspaceId: "workspace-b", legacyWorkspaceId: "workspace-a" });
+  assert.deepEqual(otherWorkspace.map((entry) => entry.run_id), ["workspace-b-hermes"]);
 });
 
 test("configured Hermes receipt-store failures surface as a safe 503", async () => {
