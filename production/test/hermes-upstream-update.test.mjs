@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -20,7 +21,11 @@ import {
   selectLatestStableHermesRelease,
   synchronizeHermesImagePins,
 } from "../lib/hermes-upstream-update.mjs";
-import { buildHermesCompatibilityPlan } from "../lib/hermes-agent-compatibility.mjs";
+import {
+  HERMES_COMPATIBILITY_CONFIG_MOUNT,
+  HERMES_COMPATIBILITY_REQUIRED_CONFIG_MARKERS,
+  buildHermesCompatibilityPlan,
+} from "../lib/hermes-agent-compatibility.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const RELEASE_TAG = "v2026.8.31";
@@ -150,6 +155,33 @@ test("compatibility smoke plan is immutable, read-only, no-network, and safety-c
   assert.ok(plan.start.includes("API_SERVER_ENABLED=true"));
   assert.ok(plan.start.includes("API_SERVER_KEY=ms-realty-compatibility-smoke-only"));
   assert.throws(() => buildHermesCompatibilityPlan(`${HERMES_UPSTREAM_DOCKER_REPOSITORY}:${RELEASE_TAG}`), /digest/);
+});
+
+test("Hermes compatibility config check exits successfully only with every safety marker", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-hermes-config-check-"));
+  const configPath = path.join(directory, "config.yaml");
+  const snippet = buildHermesCompatibilityPlan(IMAGE, { configPath }).config.at(-1);
+  const runCheck = (contents) => {
+    fs.writeFileSync(configPath, contents);
+    return spawnSync("python3", ["-c", snippet.replaceAll(HERMES_COMPATIBILITY_CONFIG_MOUNT, configPath)], {
+      encoding: "utf8",
+    });
+  };
+
+  try {
+    const valid = runCheck(HERMES_COMPATIBILITY_REQUIRED_CONFIG_MARKERS.join("\n"));
+    assert.equal(valid.error, undefined);
+    assert.equal(valid.status, 0, valid.stderr);
+    assert.match(valid.stdout, /config: pass/);
+
+    const missingMarker = HERMES_COMPATIBILITY_REQUIRED_CONFIG_MARKERS.at(-1);
+    const invalid = runCheck(HERMES_COMPATIBILITY_REQUIRED_CONFIG_MARKERS.slice(0, -1).join("\n"));
+    assert.equal(invalid.error, undefined);
+    assert.notEqual(invalid.status, 0);
+    assert.match(invalid.stderr, new RegExp(`missing Hermes safety config: .*${missingMarker}`));
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("Hermes compatibility retries only the immutable pull three times", () => {

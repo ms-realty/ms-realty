@@ -40,7 +40,7 @@ export function buildHermesCompatibilityPlan(image, { configPath = "production/h
   const parsed = parseHermesImageReference(image, { requireDigest: true });
   const configCheck = [
     "-c",
-    `from pathlib import Path; text=Path(${JSON.stringify(HERMES_COMPATIBILITY_CONFIG_MOUNT)}).read_text(encoding="utf-8"); required=${JSON.stringify(HERMES_COMPATIBILITY_REQUIRED_CONFIG_MARKERS)}; missing=[marker for marker in required if marker not in text]; raise SystemExit("missing Hermes safety config: " + ", ".join(missing)) if missing else print("config: pass")`,
+    `from pathlib import Path; import sys; text=Path(${JSON.stringify(HERMES_COMPATIBILITY_CONFIG_MOUNT)}).read_text(encoding="utf-8"); required=${JSON.stringify(HERMES_COMPATIBILITY_REQUIRED_CONFIG_MARKERS)}; missing=[marker for marker in required if marker not in text]; sys.exit("missing Hermes safety config: " + ", ".join(missing)) if missing else print("config: pass")`,
   ];
   return {
     image: parsed.image,
