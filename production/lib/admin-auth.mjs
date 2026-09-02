@@ -283,6 +283,9 @@ export function requiredAdminCapability(method, pathname) {
   }
   if (verb !== "GET" && pathname === "/api/admin/translations/publish") return "translations:publish";
   if (pathname === "/api/admin/listings/copy/draft" && verb === "POST") return "content:write";
+  // A broker holds documents:read but not administration:read, and the
+  // fallthrough below would hand this HTML path the latter.
+  if (pathname === "/admin/documents/records" && verb === "GET") return "documents:read";
   if (pathname === "/admin/media" && verb === "GET") return "content:read";
   if (pathname === "/admin/locales" && verb === "GET") return "content:read";
   if (pathname === "/api/admin/locales" && verb === "GET") return "content:read";

@@ -27,6 +27,7 @@ export const ADMIN_PAGE_SURFACES = Object.freeze([
   { id: "listing_manager", group: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
   { id: "translation_queue", group: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
   { id: "approved_content", group: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
+  { id: "document_records", group: "crm", path: "/admin/documents/records", icon: "file-text", kind: "admin_document_records", capability: "documents:read" },
   { id: "media_library", group: "cms", path: "/admin/media", icon: "camera", kind: "admin_media_library", capability: "content:read" },
   { id: "locale_rollout", group: "cms", path: "/admin/locales", icon: "globe", kind: "admin_locale_rollout", capability: "content:read" },
   { id: "migration_review", group: "cms", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
@@ -37,7 +38,7 @@ export const ADMIN_PAGE_SURFACES = Object.freeze([
 ]);
 export const OWNER_CONSOLE_NAV_DESTINATIONS = Object.freeze([
   { id: "today", group: "today", primary: "today", children: [] },
-  { id: "leads", group: "crm", primary: "lead_inbox", children: ["contacts", "consents", "documents", "realty_cases", "lead_pipeline", "requests", "viewings", "reports"] },
+  { id: "leads", group: "crm", primary: "lead_inbox", children: ["contacts", "consents", "documents", "document_records", "realty_cases", "lead_pipeline", "requests", "viewings", "reports"] },
   { id: "listings", group: "cms", primary: "listing_manager", children: ["media_library"] },
   { id: "translations", group: "cms", primary: "translation_queue", children: ["approved_content", "locale_rollout", "migration_review"] },
   { id: "hermes", group: "hermes", primary: "hermes", children: [] },

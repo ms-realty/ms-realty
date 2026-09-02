@@ -313,6 +313,7 @@ import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
 import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
+import { renderAdminDocumentRecordsPayload } from "./document-records.mjs";
 import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -2638,6 +2639,39 @@ function migrationReviewPayload(registry, url, config) {
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: decisions,
   };
+}
+
+async function documentRecordsPayload(registry, url, config) {
+  // Same shape as the node origin: an absent store is a state, not a 503.
+  const principal = config.adminPrincipal;
+  const payload = config.payloadListingRuntime || null;
+  let documents = [];
+  let signatureRequests = [];
+  let unavailable = null;
+  try {
+    documents = await readDocuments({ payload, principal });
+    signatureRequests = await readSignatureRequests({ payload, principal });
+  } catch (error) {
+    if (error instanceof DocumentStoreUnavailableError || error?.code === "document_store_unavailable") {
+      unavailable = { code: "document_store_unavailable", message: error.message };
+    } else if (error?.status === 403) {
+      unavailable = { code: "workspace_access_denied", message: error.message };
+    } else {
+      throw error;
+    }
+  }
+  return renderAdminDocumentRecordsPayload(registry, url.searchParams.get("locale") || "en", {
+    documents,
+    signatureRequests,
+    unavailable,
+    query: url.searchParams.get("q") || "",
+    status: url.searchParams.get("status") || "",
+    documentType: url.searchParams.get("documentType") || "",
+    caseId: url.searchParams.get("caseId") || "",
+    awaiting: url.searchParams.get("awaiting") || false,
+    operatorId: config.adminPrincipal || null,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
 }
 
 async function mediaLibraryPayload(registry, url, config) {
@@ -5291,6 +5325,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
       return jsonResponse(200, migrationReviewPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/documents/records") {
+      return htmlResponse(await documentRecordsPayload(registry, url, config));
     }
     if (request.method === "GET" && url.pathname === "/admin/media") {
       return htmlResponse(await mediaLibraryPayload(registry, url, config));

@@ -24,11 +24,11 @@
   "summary": {
     "admin_route_files": 112,
     "admin_methods": 131,
-    "admin_pages": 21,
+    "admin_pages": 22,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 155,
-    "structurally_covered_workflows": 155,
+    "authorized_workflows": 156,
+    "structurally_covered_workflows": 156,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -160,6 +160,15 @@
       "icon": "check-circle-2",
       "kind": "admin_approved_content_review",
       "capability": "content:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "document_records",
+      "group": "crm",
+      "path": "/admin/documents/records",
+      "icon": "file-text",
+      "kind": "admin_document_records",
+      "capability": "documents:read",
       "declared_entrypoint": "signed_in_admin_ui"
     },
     {

@@ -15,6 +15,15 @@ function label(copy, key, fallback) {
   return copy[key] || fallback;
 }
 
+// Destinations whose name lives in the workspace copy rather than in the owner
+// console's module list.
+const RAIL_LABEL_KEYS = Object.freeze({
+  migration_review: { key: "migrationReview", fallback: "Migration review" },
+  locale_rollout: { key: "localeRollout", fallback: "Website languages" },
+  media_library: { key: "mediaLibrary", fallback: "Media" },
+  document_records: { key: "documentRecords", fallback: "Document records" },
+});
+
 function pageCan(page, capability) {
   const capabilities = page.workspace?.operator_capabilities;
   if (!Array.isArray(capabilities)) return true;
@@ -221,6 +230,20 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    documentTitle: "Документ",
+    documentType: "Вид",
+    documentVersion: "Версия",
+    documentVersionValue: "в. {n}",
+    documentSigners: "Подписи",
+    documentSigner: "Подписващ",
+    documentSignersWaiting: "{count} чакат",
+    documentNoOpenSigners: "Няма чакащи",
+    documentAwaitingSignature: "Чакат подпис",
+    documentSignatureQueue: "Заявки за подпис",
+    documentSearchHint: "Заглавие, номер или дело",
+    documentRecordsEmpty: "Няма документи по този филтър.",
+    documentNoSignatures: "Няма заявки за подпис.",
+    documentStoreUnavailable: "Хранилището на документите не е достъпно в тази среда.",
     mediaAsset: "Файл",
     mediaIssue: "Чака за",
     mediaSearchHint: "Обява, локация или alt текст",
@@ -959,6 +982,20 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    documentTitle: "Документ",
+    documentType: "Вид",
+    documentVersion: "Версия",
+    documentVersionValue: "в. {n}",
+    documentSigners: "Подписи",
+    documentSigner: "Подписант",
+    documentSignersWaiting: "{count} ждут",
+    documentNoOpenSigners: "Никто не ждёт",
+    documentAwaitingSignature: "Ждут подписи",
+    documentSignatureQueue: "Заявки на подпись",
+    documentSearchHint: "Название, номер или дело",
+    documentRecordsEmpty: "По этому фильтру документов нет.",
+    documentNoSignatures: "Заявок на подпись нет.",
+    documentStoreUnavailable: "Хранилище документов недоступно в этой среде.",
     mediaAsset: "Файл",
     mediaIssue: "Ждёт",
     mediaSearchHint: "Объект, локация или alt-текст",
@@ -1697,6 +1734,20 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    documentTitle: "Document",
+    documentType: "Kind",
+    documentVersion: "Version",
+    documentVersionValue: "v{n}",
+    documentSigners: "Signatures",
+    documentSigner: "Signer",
+    documentSignersWaiting: "{count} waiting",
+    documentNoOpenSigners: "None waiting",
+    documentAwaitingSignature: "Awaiting signature",
+    documentSignatureQueue: "Signature requests",
+    documentSearchHint: "Title, reference or case",
+    documentRecordsEmpty: "No documents match this filter.",
+    documentNoSignatures: "No signature requests.",
+    documentStoreUnavailable: "The document store is not available in this environment.",
     mediaAsset: "Asset",
     mediaIssue: "Waiting for",
     mediaSearchHint: "Listing, location or alt text",
@@ -3236,11 +3287,14 @@ function adminNavigationGroups(page) {
     if (owner.routes[item.id]) return owner.routes[item.id];
     if (item.id === "realty_cases") return caseCopy(page).title;
     if (item.id === "approved_content") return workbenchCopy(page).approvedContent.title;
-    if (item.id === "migration_review") return label(copy, "migrationReview", "Migration review");
-    // Without this the rail printed the destination's id, "locale_rollout", at
-    // a broker. screenLabel only knows the ids the owner console enumerates.
-    if (item.id === "locale_rollout") return label(copy, "localeRollout", "Website languages");
-    if (item.id === "media_library") return label(copy, "mediaLibrary", "Media");
+    // screenLabel only knows the ids the owner console module list enumerates,
+    // and returns the id itself for anything else — so the rail printed
+    // "locale_rollout", then "media_library", then "document_records" at a
+    // broker, in all three languages, once each time a destination was added.
+    // One table, so the next destination fails obviously here rather than
+    // quietly there.
+    const copyKey = RAIL_LABEL_KEYS[item.id];
+    if (copyKey) return label(copy, copyKey.key, copyKey.fallback);
     return screenLabel(item.group, item.id, item.id);
   };
   const routeBadge = (item) => {
@@ -8646,6 +8700,174 @@ function ListingManagerBody({ page }) {
 // figure a broker cannot open is a figure they cannot act on, and the four the
 // queue groups by are the four listing-quality actually computes. Nothing here
 // detects a face, a plate or a watermark, because nothing in the codebase does.
+// The durable document authority shipped nine routes and no screen. This is
+// the screen: every document, the version it is on, and who still has to sign
+// it. Counts are links into the rows behind them, and the store being absent is
+// a state the page renders rather than an error it throws.
+function DocumentRecordsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "documentRecords", "Documents");
+  const filters = page.filters || {};
+  const summary = page.summary;
+  const href = (params) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) if (value) search.set(key, String(value));
+    const query = search.toString();
+    return adminHref(query ? `/admin/documents/records?${query}` : "/admin/documents/records", page);
+  };
+  const tabs = [
+    { value: "", label: label(copy, "all", "All"), count: summary.total, href: href({}), selected: !filters.status && !filters.awaiting },
+    {
+      value: "awaiting",
+      label: ui.documentAwaitingSignature,
+      count: summary.awaiting_signature,
+      href: href({ awaiting: "1" }),
+      selected: Boolean(filters.awaiting),
+    },
+    { value: "active", label: statusText(ui, "active"), count: summary.active, href: href({ status: "active" }), selected: filters.status === "active" },
+    { value: "void", label: statusText(ui, "void"), count: summary.void, href: href({ status: "void" }), selected: filters.status === "void" },
+  ];
+  const columns = [
+    ui.documentTitle,
+    ui.documentType,
+    label(copy, "qualityStatus", "Status"),
+    ui.documentVersion,
+    ui.documentSigners,
+    label(copy, "realtyCases", "Case"),
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-document-records",
+      "data-react-admin-ui": "document-records",
+      "data-admin-workbench": "crm",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/documents", page) },
+          h(Icon, { name: "list-checks", size: 16 }),
+          h("span", null, label(copy, "documents", "Documents and process")),
+        ),
+      ),
+      h(DataAvailabilityNotice, { page }),
+      h(PageToolbar, null, h(CmsFilterLinks, { scope: "documents", label: label(copy, "qualityStatus", "Status"), options: tabs })),
+      h(
+        "form",
+        { method: "get", action: "/admin/documents/records", className: "adm-filterbar", role: "search", "data-document-filters": "true" },
+        filterLocaleInput(page),
+        h("label", null, label(copy, "searchListings", "Search"), h("input", { type: "search", name: "q", defaultValue: filters.q || "", placeholder: ui.documentSearchHint })),
+        h(
+          "label",
+          null,
+          ui.documentType,
+          h(
+            "select",
+            { name: "documentType" },
+            h("option", { value: "" }, label(copy, "all", "All")),
+            ...(page.filterOptions.documentTypes || []).map((value) =>
+              h("option", { key: value, value, selected: filters.documentType === value ? true : undefined }, valueText(ui, value)),
+            ),
+          ),
+        ),
+        h("label", null, label(copy, "realtyCases", "Case"), h("input", { name: "caseId", defaultValue: filters.caseId || "" })),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: href({}) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      h(
+        Panel,
+        { title: `${label(copy, "results", "Results")} · ${page.documents.length}`, "data-document-records": "true" },
+        page.documents.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl", "data-document-table": "true" },
+                h("thead", null, h("tr", null, ...columns.map((column) => h("th", { key: column, scope: "col" }, column)))),
+                h(
+                  "tbody",
+                  null,
+                  ...page.documents.map((row) =>
+                    h(
+                      "tr",
+                      { key: row.document_id, "data-document-row": row.document_id, "data-document-status": row.status },
+                      h(
+                        "th",
+                        { scope: "row" },
+                        h("div", { className: "adm-lead-identity" }, h("bdi", null, row.title || row.document_id), h("code", { className: "crm-mono" }, row.document_id)),
+                      ),
+                      h("td", null, valueText(ui, row.document_type)),
+                      h("td", null, h(StatusPill, { tone: row.status === "active" ? "sea" : "stone" }, statusText(ui, row.status))),
+                      // The version is the product's whole claim to an
+                      // auditable file, so it is a figure and not a checkmark.
+                      h("td", { "data-document-revision": String(row.current_revision_number) }, fillTemplate(ui.documentVersionValue, { n: row.current_revision_number })),
+                      h(
+                        "td",
+                        null,
+                        row.open_signature_requests
+                          ? h(StatusPill, { tone: "sun", "data-document-open-signatures": String(row.open_signature_requests) }, fillTemplate(ui.documentSignersWaiting, { count: row.open_signature_requests }))
+                          : h("span", { className: "crm-tbl__muted" }, ui.documentNoOpenSigners),
+                      ),
+                      h("td", null, row.case_id ? h("code", { className: "crm-mono" }, row.case_id) : h("span", { className: "crm-tbl__muted" }, ui.notSet)),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "file-text", "data-document-records-empty": "true" },
+              page.dataAvailability ? ui.documentStoreUnavailable : ui.documentRecordsEmpty,
+            ),
+      ),
+      h(
+        Panel,
+        { title: ui.documentSignatureQueue, "data-signature-queue": "true" },
+        page.signatureRequests.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl", "data-signature-table": "true" },
+                h(
+                  "thead",
+                  null,
+                  h("tr", null, ...[ui.documentTitle, ui.documentSigner, label(copy, "qualityStatus", "Status"), ui.documentVersion].map((column) => h("th", { key: column, scope: "col" }, column))),
+                ),
+                h(
+                  "tbody",
+                  null,
+                  ...page.signatureRequests.map((request) =>
+                    h(
+                      "tr",
+                      { key: request.request_id, "data-signature-row": request.request_id, "data-signature-status": request.status },
+                      h("th", { scope: "row" }, h("code", { className: "crm-mono" }, request.document_id)),
+                      h("td", null, h("bdi", null, request.signer_role || request.signer_ref)),
+                      h("td", null, h(StatusPill, { tone: request.status === "signed" ? "sea" : request.status === "provider_pending" ? "sun" : "stone" }, statusText(ui, request.status))),
+                      h("td", null, fillTemplate(ui.documentVersionValue, { n: request.revision_number })),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "file-check", "data-signature-queue-empty": "true" },
+              page.dataAvailability ? ui.documentStoreUnavailable : ui.documentNoSignatures,
+            ),
+      ),
+    ],
+  });
+}
+
 function MediaLibraryBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -13646,6 +13868,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
   if (page.kind === "admin_locale_rollout") return renderStaticElement(h(LocaleRolloutBody, { page }));
   if (page.kind === "admin_media_library") return renderStaticElement(h(MediaLibraryBody, { page }));
+  if (page.kind === "admin_document_records") return renderStaticElement(h(DocumentRecordsBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));

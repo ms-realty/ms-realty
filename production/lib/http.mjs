@@ -221,6 +221,7 @@ import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./
 import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
 import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
+import { renderAdminDocumentRecordsPayload } from "./document-records.mjs";
 import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
@@ -5626,6 +5627,42 @@ export function createHttpApp({
       } catch (error) {
         return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
       }
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/documents/records") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      // The store is Payload on Postgres and is genuinely absent in local
+      // development. That is a state the screen renders, not an error: a broker
+      // who opens this page without a database should see the page and the
+      // reason, not a 503 body.
+      let documents = [];
+      let signatureRequests = [];
+      let unavailable = null;
+      try {
+        documents = await readDocuments({ payload: payloadListingRuntime || null, principal });
+        signatureRequests = await readSignatureRequests({ payload: payloadListingRuntime || null, principal });
+      } catch (error) {
+        if (error instanceof DocumentStoreUnavailableError || error?.code === "document_store_unavailable") {
+          unavailable = { code: "document_store_unavailable", message: error.message };
+        } else if (error?.status === 403) {
+          return adminForbidden(error.code || "documents:read");
+        } else {
+          throw error;
+        }
+      }
+      const payload = renderAdminDocumentRecordsPayload(activeRegistry, adminLocaleParam(url), {
+        documents,
+        signatureRequests,
+        unavailable,
+        query: url.searchParams.get("q") || "",
+        status: url.searchParams.get("status") || "",
+        documentType: url.searchParams.get("documentType") || "",
+        caseId: url.searchParams.get("caseId") || "",
+        awaiting: url.searchParams.get("awaiting") || false,
+        operatorId: principal || null,
+        generatedAt: reviewedAt || new Date().toISOString(),
+      });
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
 
     if (request.method === "GET" && url.pathname === "/admin/media") {
