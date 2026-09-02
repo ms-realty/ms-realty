@@ -3444,7 +3444,8 @@
           },
           "applicable_filter_fields": [
             "bedrooms_min"
-          ]
+          ],
+          "widen_ranges": []
         }
       },
       "seller": {
@@ -7315,7 +7316,8 @@
         },
         "applicable_filter_fields": [
           "bedrooms_min"
-        ]
+        ],
+        "widen_ranges": []
       },
       "fallback": {
         "enabled": true,
@@ -10058,7 +10060,8 @@
         },
         "applicable_filter_fields": [
           "bedrooms_min"
-        ]
+        ],
+        "widen_ranges": []
       },
       "fallback": {
         "enabled": true,
@@ -10761,9 +10764,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-fb731b4c-c6d3-4bac-9c95-8ecc499b64b1",
+    "id": "inbox-lead-draft-9323e0dd-316b-48f8-98bd-a0a00e7664f9",
     "lead": {
-      "id": "lead-draft-fb731b4c-c6d3-4bac-9c95-8ecc499b64b1",
+      "id": "lead-draft-9323e0dd-316b-48f8-98bd-a0a00e7664f9",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10864,9 +10867,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-5967ea66-20e0-4583-9dc6-88ad599a2f97",
+    "id": "inbox-lead-draft-a42d00f1-f8cf-40d4-8470-134160295947",
     "lead": {
-      "id": "lead-draft-5967ea66-20e0-4583-9dc6-88ad599a2f97",
+      "id": "lead-draft-a42d00f1-f8cf-40d4-8470-134160295947",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10970,9 +10973,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-f871911a-4e04-49a4-9db0-ecc53d6934cc",
+    "id": "inbox-lead-draft-3c31bd4a-7a97-4b2c-b0af-687b6233185e",
     "lead": {
-      "id": "lead-draft-f871911a-4e04-49a4-9db0-ecc53d6934cc",
+      "id": "lead-draft-3c31bd4a-7a97-4b2c-b0af-687b6233185e",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",
