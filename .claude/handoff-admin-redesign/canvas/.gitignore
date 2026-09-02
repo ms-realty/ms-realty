@@ -1,0 +1,3 @@
+# preview.mjs unwraps every artboard into a plain page for a browser. It is a
+# render of what is already committed beside it, so it is not committed.
+preview/

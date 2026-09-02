@@ -1,0 +1,550 @@
+{
+  "artboards": [
+    {
+      "file": "PublicHome.dc.html",
+      "title": "Home",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 3050,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicSearch.dc.html",
+      "title": "Search with map",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2302,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicListing.dc.html",
+      "title": "Property page",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 3234,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicLocation.dc.html",
+      "title": "Location — Sandanski",
+      "x": 0,
+      "y": 3404,
+      "w": 1440,
+      "h": 2374,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicSeller.dc.html",
+      "title": "Sell with us",
+      "x": 1560,
+      "y": 3404,
+      "w": 1440,
+      "h": 2164,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicContact.dc.html",
+      "title": "Contact",
+      "x": 3120,
+      "y": 3404,
+      "w": 1440,
+      "h": 2004,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicMobileSearch.dc.html",
+      "title": "Phone — search",
+      "x": 0,
+      "y": 5948,
+      "w": 390,
+      "h": 1141,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicMobileListing.dc.html",
+      "title": "Phone — property",
+      "x": 510,
+      "y": 5948,
+      "w": 390,
+      "h": 941,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicMobileHebrew.dc.html",
+      "title": "Phone — Hebrew, right to left",
+      "x": 1020,
+      "y": 5948,
+      "w": 390,
+      "h": 919,
+      "page": "page-0"
+    },
+    {
+      "file": "Foundations.dc.html",
+      "title": "Foundations — tokens, type, layout",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 2978,
+      "page": "page-1"
+    },
+    {
+      "file": "Components.dc.html",
+      "title": "Components and every state",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2081,
+      "page": "page-1"
+    },
+    {
+      "file": "Interaction.dc.html",
+      "title": "Interaction rules",
+      "x": 3120,
+      "y": 0,
+      "w": 1560,
+      "h": 2088,
+      "page": "page-1"
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "Today",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1081,
+      "page": "page-2"
+    },
+    {
+      "file": "LeadInbox.dc.html",
+      "title": "Lead inbox",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1004,
+      "page": "page-2"
+    },
+    {
+      "file": "Pipeline.dc.html",
+      "title": "Pipeline",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 924,
+      "page": "page-2"
+    },
+    {
+      "file": "Viewings.dc.html",
+      "title": "Viewings",
+      "x": 0,
+      "y": 1251,
+      "w": 1440,
+      "h": 1004,
+      "page": "page-2"
+    },
+    {
+      "file": "Tasks.dc.html",
+      "title": "Tasks",
+      "x": 1560,
+      "y": 1251,
+      "w": 1440,
+      "h": 924,
+      "page": "page-2"
+    },
+    {
+      "file": "Requests.dc.html",
+      "title": "Requests from the website",
+      "x": 3120,
+      "y": 1251,
+      "w": 1440,
+      "h": 924,
+      "page": "page-2"
+    },
+    {
+      "file": "Contacts.dc.html",
+      "title": "Contacts",
+      "x": 0,
+      "y": 2425,
+      "w": 1440,
+      "h": 924,
+      "page": "page-2"
+    },
+    {
+      "file": "Consent.dc.html",
+      "title": "Consent",
+      "x": 1560,
+      "y": 2425,
+      "w": 1440,
+      "h": 924,
+      "page": "page-2"
+    },
+    {
+      "file": "Cases.dc.html",
+      "title": "Transaction cases",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 984,
+      "page": "page-3"
+    },
+    {
+      "file": "CaseDetail.dc.html",
+      "title": "Case detail — BG step list",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1432,
+      "page": "page-3"
+    },
+    {
+      "file": "Documents.dc.html",
+      "title": "Documents",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1326,
+      "page": "page-3"
+    },
+    {
+      "file": "DocumentEditor.dc.html",
+      "title": "Document composer and signature",
+      "x": 0,
+      "y": 1602,
+      "w": 1440,
+      "h": 1188,
+      "page": "page-3"
+    },
+    {
+      "file": "Listings.dc.html",
+      "title": "Listings",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 964,
+      "page": "page-4"
+    },
+    {
+      "file": "ListingEditor.dc.html",
+      "title": "Listing editor",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1029,
+      "page": "page-4"
+    },
+    {
+      "file": "Translations.dc.html",
+      "title": "Translation approval",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 924,
+      "page": "page-4"
+    },
+    {
+      "file": "SitePages.dc.html",
+      "title": "Website — pages",
+      "x": 0,
+      "y": 1199,
+      "w": 1440,
+      "h": 1045,
+      "page": "page-4"
+    },
+    {
+      "file": "PageEditor.dc.html",
+      "title": "Page editor — blocks",
+      "x": 1560,
+      "y": 1199,
+      "w": 1440,
+      "h": 1164,
+      "page": "page-4"
+    },
+    {
+      "file": "Media.dc.html",
+      "title": "Media library",
+      "x": 3120,
+      "y": 1199,
+      "w": 1440,
+      "h": 1264,
+      "page": "page-4"
+    },
+    {
+      "file": "MediaEditor.dc.html",
+      "title": "Photo editor",
+      "x": 0,
+      "y": 2633,
+      "w": 1440,
+      "h": 1395,
+      "page": "page-4"
+    },
+    {
+      "file": "MediaStates.dc.html",
+      "title": "Upload and edit — every state",
+      "x": 1560,
+      "y": 2633,
+      "w": 1560,
+      "h": 1971,
+      "page": "page-4"
+    },
+    {
+      "file": "SeoRedirects.dc.html",
+      "title": "SEO and legacy redirects",
+      "x": 3240,
+      "y": 2633,
+      "w": 1440,
+      "h": 984,
+      "page": "page-4"
+    },
+    {
+      "file": "Hermes.dc.html",
+      "title": "Hermes console",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1603,
+      "page": "page-5"
+    },
+    {
+      "file": "HermesRun.dc.html",
+      "title": "Hermes run — what it did",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1144,
+      "page": "page-5"
+    },
+    {
+      "file": "Integrations.dc.html",
+      "title": "Connected services",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1344,
+      "page": "page-5"
+    },
+    {
+      "file": "IntegrationCatalogue.dc.html",
+      "title": "Integration catalogue",
+      "x": 0,
+      "y": 1773,
+      "w": 1440,
+      "h": 1104,
+      "page": "page-5"
+    },
+    {
+      "file": "Automations.dc.html",
+      "title": "Automations and webhooks",
+      "x": 1560,
+      "y": 1773,
+      "w": 1440,
+      "h": 1293,
+      "page": "page-5"
+    },
+    {
+      "file": "Settings.dc.html",
+      "title": "Settings",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1104,
+      "page": "page-6"
+    },
+    {
+      "file": "Team.dc.html",
+      "title": "Team and roles",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 970,
+      "page": "page-6"
+    },
+    {
+      "file": "Reports.dc.html",
+      "title": "Insight",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1044,
+      "page": "page-6"
+    },
+    {
+      "file": "Activity.dc.html",
+      "title": "Activity log",
+      "x": 0,
+      "y": 1274,
+      "w": 1440,
+      "h": 924,
+      "page": "page-6"
+    },
+    {
+      "file": "LaunchReadiness.dc.html",
+      "title": "Launch readiness",
+      "x": 1560,
+      "y": 1274,
+      "w": 1440,
+      "h": 1175,
+      "page": "page-6"
+    },
+    {
+      "file": "SignIn.dc.html",
+      "title": "Sign in",
+      "x": 3120,
+      "y": 1274,
+      "w": 1440,
+      "h": 924,
+      "page": "page-6"
+    },
+    {
+      "file": "FlowLead.dc.html",
+      "title": "Flow — enquiry to keys",
+      "x": 0,
+      "y": 0,
+      "w": 1560,
+      "h": 1204,
+      "page": "page-7"
+    },
+    {
+      "file": "FlowPublish.dc.html",
+      "title": "Flow — legacy URL to published listing",
+      "x": 1680,
+      "y": 0,
+      "w": 1560,
+      "h": 1264,
+      "page": "page-7"
+    },
+    {
+      "file": "Coverage.dc.html",
+      "title": "Design against the backend",
+      "x": 3360,
+      "y": 0,
+      "w": 1560,
+      "h": 2242,
+      "page": "page-7"
+    },
+    {
+      "file": "Mobile.dc.html",
+      "title": "Phone — Today",
+      "x": 0,
+      "y": 2412,
+      "w": 390,
+      "h": 868,
+      "page": "page-7"
+    },
+    {
+      "file": "MobileLead.dc.html",
+      "title": "Phone — lead and reply",
+      "x": 510,
+      "y": 2412,
+      "w": 390,
+      "h": 888,
+      "page": "page-7"
+    },
+    {
+      "file": "MobileCase.dc.html",
+      "title": "Phone — case",
+      "x": 1020,
+      "y": 2412,
+      "w": 390,
+      "h": 933,
+      "page": "page-7"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-public",
+      "page": "page-0",
+      "x": 0,
+      "y": -250,
+      "w": 900,
+      "text": "The public site — what the 13 years of indexed URLs actually resolve to.\n\nSearch is the hero, not a brochure. Every property page shows where each fact came from and which ones nobody has confirmed, because the agency's promise is that a price and an area are checked against a document rather than retyped.\n\nSeven languages, Bulgarian as the source. Hebrew is a full right-to-left build: the shell mirrors, but references, prices and areas stay left to right inside the mirrored line."
+    },
+    {
+      "id": "note-system",
+      "page": "page-1",
+      "x": 0,
+      "y": -250,
+      "w": 900,
+      "text": "MS Realty operator workspace — the whole system.\n\nBuilt on the agency's own design system: Commissioner, Source Serif 4 and IBM Plex Mono, an Ink-900 rail over a Stone-50 canvas, a 244px rail, a 64px topbar, 8 and 14px radii, and the Brick red held back for one call to action.\n\nThree token values are new. Each was forced by a measured WCAG 2.2 AA failure, not by taste — the numbers are on the Foundations board."
+    },
+    {
+      "id": "note-work",
+      "page": "page-2",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "The rail is flat: seventeen destinations, no accordions. The three \"More in ...\" disclosures that hid ten routes are gone, and sections with real depth open a sub-nav inside the page instead.\n\nKPI tiles are gone too. Counts became filters, so every number on a screen is something you can click."
+    },
+    {
+      "id": "note-deals",
+      "page": "page-3",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "The richest model in the repository was also the least visible: six case types across eight phases, Bulgarian and Greek step lists, evidence attributed to a notary, registry, bank, lawyer or client, and a manual or autonomous execution mode per case.\n\nDocuments are designed ahead of the code. Today the backend records checklist outcomes only — there is no document to create, version, send or sign."
+    },
+    {
+      "id": "note-cms",
+      "page": "page-4",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "The catalogue already round-trips through the CMS. The website does not: home, search, seller, contact and location copy is rendered from code, so the owner cannot edit five of the seven public page types.\n\nThe Website boards design the collections that have to exist for that."
+    },
+    {
+      "id": "note-ai",
+      "page": "page-5",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "Hermes drafts and checks. Five actions are refused to it in code — publish, send a message, mark a translation indexable, change a price, change a redirect — and the interface never offers them.\n\nThe run board shows a real guardrail firing: a Greek draft called Sandanski a coastal town, and the sentence was dropped rather than softened."
+    },
+    {
+      "id": "note-flows",
+      "page": "page-7",
+      "x": 0,
+      "y": -250,
+      "w": 900,
+      "text": "The last board checks every screen against the repository: 118 admin routes, 8 CMS collections, 7 public page types. Twenty surfaces are already backed, four are partial, and four need backend that does not exist yet — named, sized and separated from the rest."
+    }
+  ],
+  "pages": [
+    {
+      "id": "page-0",
+      "name": "Public site"
+    },
+    {
+      "id": "page-1",
+      "name": "Foundations"
+    },
+    {
+      "id": "page-2",
+      "name": "Daily work"
+    },
+    {
+      "id": "page-3",
+      "name": "Deals and documents"
+    },
+    {
+      "id": "page-4",
+      "name": "Catalogue and website"
+    },
+    {
+      "id": "page-5",
+      "name": "AI and integrations"
+    },
+    {
+      "id": "page-6",
+      "name": "System"
+    },
+    {
+      "id": "page-7",
+      "name": "Flows, phone, coverage"
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-2"
+  }
+}
