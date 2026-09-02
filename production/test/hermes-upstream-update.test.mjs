@@ -152,6 +152,28 @@ test("compatibility smoke plan is immutable, read-only, no-network, and safety-c
   assert.throws(() => buildHermesCompatibilityPlan(`${HERMES_UPSTREAM_DOCKER_REPOSITORY}:${RELEASE_TAG}`), /digest/);
 });
 
+test("Hermes compatibility retries only the immutable pull three times", () => {
+  const smoke = fs.readFileSync(fromRoot("production", "scripts", "hermes-agent-compatibility-smoke.mjs"), "utf8");
+  const pullRetryStart = smoke.indexOf("for (let attempt = 1; attempt <= 3; attempt += 1) {");
+  const versionRun = smoke.indexOf("run(plan.version);");
+  const pullRetry = smoke.slice(pullRetryStart, versionRun);
+
+  assert.ok(pullRetryStart >= 0);
+  assert.ok(versionRun > pullRetryStart);
+  assert.equal((smoke.match(/run\(plan\.pull\)/g) || []).length, 1);
+  assert.match(pullRetry, /run\(plan\.pull\);\s+break;/);
+  assert.match(pullRetry, /if \(attempt === 3\) throw error;/);
+  assert.match(pullRetry, /await new Promise\(\(resolve\) => setTimeout\(resolve, 1000\)\)/);
+  assert.doesNotMatch(pullRetry, /plan\.(version|help|config|start|health|stop)/);
+  assert.ok(pullRetry.indexOf("run(plan.pull)") < pullRetry.indexOf("setTimeout"));
+  assert.ok(versionRun > pullRetry.indexOf("setTimeout"));
+  for (const command of ["version", "help", "config", "start"]) {
+    assert.ok(smoke.indexOf(`run(plan.${command}`) >= versionRun);
+  }
+  assert.ok(smoke.indexOf("let healthy = false;") > versionRun);
+  assert.ok(smoke.indexOf("} finally {") > versionRun);
+});
+
 test("Hermes updater fences every dirty path before staging and commits as the Actions bot", () => {
   const updater = fs.readFileSync(fromRoot(".github", "workflows", "hermes-upstream-update.yml"), "utf8");
   const updateStepStart = updater.indexOf("name: Resolve official release, digest, and synchronized pins");

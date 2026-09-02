@@ -17,7 +17,15 @@ function run(args, { capture = false } = {}) {
 }
 
 try {
-  run(plan.pull);
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      run(plan.pull);
+      break;
+    } catch (error) {
+      if (attempt === 3) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
   run(plan.version);
   run(plan.help);
   run(plan.config);
