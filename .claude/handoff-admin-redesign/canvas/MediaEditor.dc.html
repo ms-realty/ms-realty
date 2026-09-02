@@ -515,11 +515,29 @@
 
           <div class="isect" style="border-bottom:0">
             <b>Review</b>
-            <div class="note note--warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>A face is visible. Publish it only with the person's permission, or redact it first.</span></div>
-            <div style="display:flex; gap:7px">
-              <button class="btn btn--sm btn--primary" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Approve for the public site</span></button>
+            <div class="note note--warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Reviewer's note: a face is visible. Publish
+              it only with the person's permission, or redact it first.</span></div>
+            <div style="display:grid; gap:10px; margin-top:9px">
+              <div class="field"><label for="media-decision">Decision</label>
+                <span class="in" id="media-decision">Publish on the public site <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div class="field"><label for="media-kind">Kind</label>
+                <span class="in" id="media-kind">Photo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div class="field"><label for="media-alt">Alt text <em>required to publish</em></label>
+                <span class="in in--area" id="media-alt">South-facing terrace of a two-bedroom apartment,
+                  looking towards the Pirin ridge.</span></div>
+              <div class="field"><label for="media-reviewer">Reviewer <em>required</em></label>
+                <span class="in" id="media-reviewer">mariya.ivanova</span></div>
+              <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+                <span class="box" data-on="1"></span>
+                <span>I have looked at this image and I am accountable for publishing it.</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:7px; margin-top:10px">
+              <button class="btn btn--sm btn--primary" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Save this review</span></button>
               <button class="btn btn--sm" type="button">Hold</button>
             </div>
+            <span class="hint">The server refuses a review without a named person and that confirmation,
+              and refuses to publish without alt text. A one-click Approve cannot exist here.</span>
           </div>
         </div>
       </div>

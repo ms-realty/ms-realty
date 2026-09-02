@@ -79,6 +79,9 @@ ${[
               <div style="display:flex; gap:9px">${icon("check", 15)}<span>At least six photos, all reviewed.</span></div>
               <div style="display:flex; gap:9px">${icon("check", 15)}<span>Bulgarian description approved by a person.</span></div>
               <div style="display:flex; gap:9px; color:var(--warning-700)">${icon("alert", 15)}<span>Three facts unconfirmed — allowed, they stay off the page.</span></div>
+              <div style="display:flex; gap:9px; color:var(--warning-700)">${icon("alert", 15)}<span>Publishing
+                this listing also publishes its four photos that are still waiting for a review. They go out
+                as approved_imported_photo without anyone opening them.</span></div>
             </div>
           </section>
           <section class="panel">

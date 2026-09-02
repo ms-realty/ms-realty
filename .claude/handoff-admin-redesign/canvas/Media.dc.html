@@ -399,7 +399,7 @@
           </div>
           <div class="bulk">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>3 selected</span>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Approve</span></button>
+            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Review 3 together…</span></button>
             <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Hold</span></button>
             <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft alt text</span></button>
             <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg><span>Attach to a listing</span></button>
@@ -472,7 +472,7 @@
                   <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
                 </span>
               </div>
-              <div class="mt"><b>sandanski-apt-02.jpg</b><span>MS-CRAWL-0001 · a face is visible</span></div>
+              <div class="mt"><b>sandanski-apt-02.jpg</b><span>MS-CRAWL-0001 · note: a face is visible</span></div>
             </div>
             <div class="tile">
               <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
@@ -496,7 +496,7 @@
                   <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
                 </span>
               </div>
-              <div class="mt"><b>plot-levunovo-01.jpg</b><span>MS-CRAWL-0129 · a document is in frame</span></div>
+              <div class="mt"><b>plot-levunovo-01.jpg</b><span>MS-CRAWL-0129 · note: a document is in frame</span></div>
             </div>
             <div class="tile">
               <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
@@ -568,12 +568,14 @@
           <section class="panel">
             <div class="panel-hd"><h2>Review queue</h2><span class="sub">46</span></div>
             <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div class="kvline"><span>A face is visible</span><b>9</b></div>
-              <div class="kvline"><span>A document or plate is in frame</span><b>4</b></div>
-              <div class="kvline"><span>Watermarked by the old site</span><b>11</b></div>
-              <div class="kvline"><span>Below the minimum size</span><b>7</b></div>
-              <div class="kvline"><span>Not attached to anything</span><b>15</b></div>
+              <div class="kvline"><span>Awaiting a human review</span><b>46</b></div>
+              <div class="kvline"><span>Without alt text</span><b>312</b></div>
+              <div class="kvline"><span>Gallery too thin to publish</span><b>18</b></div>
+              <div class="kvline"><span>Tour awaiting review</span><b>3</b></div>
               <button class="btn btn--sm btn--primary" type="button" style="margin-top:5px">Start reviewing</button>
+              <span class="hint">These four are what listing-quality computes: media_review_pending,
+                missing_alt_text, thin_public_gallery, tour_review_pending. Nothing here detects a face,
+                a number plate or a watermark — a person does, and records it as a note.</span>
             </div>
           </section>
           <section class="panel">

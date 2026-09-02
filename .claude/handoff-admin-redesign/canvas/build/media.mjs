@@ -48,9 +48,9 @@ const TILES = [
   ["villa-katuntsi-02.jpg", "MS-CRAWL-0114 · 2400×1600 · 388 KB", "", "", true],
   ["villa-katuntsi-pool.jpg", "MS-CRAWL-0114 · no alt text", "Needs alt", "warn", "", ""],
   ["sandanski-apt-01.jpg", "MS-CRAWL-0001 · 1800×1200 · 301 KB", "", "", "", ""],
-  ["sandanski-apt-02.jpg", "MS-CRAWL-0001 · a face is visible", "Needs review", "warn", "blur", ""],
+  ["sandanski-apt-02.jpg", "MS-CRAWL-0001 · note: a face is visible", "Needs review", "warn", "blur", ""],
   ["studio-baths-01.jpg", "MS-CRAWL-0087 · 1600×1067 · 244 KB", "", "", "", ""],
-  ["plot-levunovo-01.jpg", "MS-CRAWL-0129 · a document is in frame", "Held", "danger", "blur", ""],
+  ["plot-levunovo-01.jpg", "MS-CRAWL-0129 · note: a document is in frame", "Held", "danger", "blur", ""],
   ["melnik-house-01.jpg", "MS-CRAWL-0032 · 2000×1333 · 356 KB", "", "", "", ""],
   ["tour-villa-katuntsi.jpg", "360° tour · equirectangular", "Tour", "sea", "", ""],
   ["office-sandanski.jpg", "Contact page · 1600×900", "", "", "", ""],
@@ -81,7 +81,7 @@ const MED_BODY = `      <div class="ph">
           </div>
           <div class="bulk">
             ${icon("check", 15)}<span>3 selected</span>
-            <button class="btn btn--sm" type="button">${icon("check", 12)}<span>Approve</span></button>
+            <button class="btn btn--sm" type="button">${icon("check", 12)}<span>Review 3 together…</span></button>
             <button class="btn btn--sm" type="button">${icon("alert", 12)}<span>Hold</span></button>
             <button class="btn btn--sm" type="button">${icon("sparkles", 12)}<span>Draft alt text</span></button>
             <button class="btn btn--sm" type="button">${icon("building", 12)}<span>Attach to a listing</span></button>
@@ -118,12 +118,14 @@ ${TILES.map(([n, m, flag, tone, hover]) => `            <div class="tile">
           <section class="panel">
             <div class="panel-hd"><h2>Review queue</h2><span class="sub">46</span></div>
             <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div class="kvline"><span>A face is visible</span><b>9</b></div>
-              <div class="kvline"><span>A document or plate is in frame</span><b>4</b></div>
-              <div class="kvline"><span>Watermarked by the old site</span><b>11</b></div>
-              <div class="kvline"><span>Below the minimum size</span><b>7</b></div>
-              <div class="kvline"><span>Not attached to anything</span><b>15</b></div>
+              <div class="kvline"><span>Awaiting a human review</span><b>46</b></div>
+              <div class="kvline"><span>Without alt text</span><b>312</b></div>
+              <div class="kvline"><span>Gallery too thin to publish</span><b>18</b></div>
+              <div class="kvline"><span>Tour awaiting review</span><b>3</b></div>
               <button class="btn btn--sm btn--primary" type="button" style="margin-top:5px">Start reviewing</button>
+              <span class="hint">These four are what listing-quality computes: media_review_pending,
+                missing_alt_text, thin_public_gallery, tour_review_pending. Nothing here detects a face,
+                a number plate or a watermark — a person does, and records it as a note.</span>
             </div>
           </section>
           <section class="panel">
@@ -324,11 +326,29 @@ const ED_BODY = `      <div class="crumbs">
 
           <div class="isect" style="border-bottom:0">
             <b>Review</b>
-            <div class="note note--warn">${icon("alert", 14)}<span>A face is visible. Publish it only with the person's permission, or redact it first.</span></div>
-            <div style="display:flex; gap:7px">
-              <button class="btn btn--sm btn--primary" type="button">${icon("check", 12)}<span>Approve for the public site</span></button>
+            <div class="note note--warn">${icon("alert", 14)}<span>Reviewer's note: a face is visible. Publish
+              it only with the person's permission, or redact it first.</span></div>
+            <div style="display:grid; gap:10px; margin-top:9px">
+              <div class="field"><label for="media-decision">Decision</label>
+                <span class="in" id="media-decision">Publish on the public site ${icon("down", 13)}</span></div>
+              <div class="field"><label for="media-kind">Kind</label>
+                <span class="in" id="media-kind">Photo ${icon("down", 13)}</span></div>
+              <div class="field"><label for="media-alt">Alt text <em>required to publish</em></label>
+                <span class="in in--area" id="media-alt">South-facing terrace of a two-bedroom apartment,
+                  looking towards the Pirin ridge.</span></div>
+              <div class="field"><label for="media-reviewer">Reviewer <em>required</em></label>
+                <span class="in" id="media-reviewer">mariya.ivanova</span></div>
+              <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+                <span class="box" data-on="1"></span>
+                <span>I have looked at this image and I am accountable for publishing it.</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:7px; margin-top:10px">
+              <button class="btn btn--sm btn--primary" type="button">${icon("check", 12)}<span>Save this review</span></button>
               <button class="btn btn--sm" type="button">Hold</button>
             </div>
+            <span class="hint">The server refuses a review without a named person and that confirmation,
+              and refuses to publish without alt text. A one-click Approve cannot exist here.</span>
           </div>
         </div>
       </div>

@@ -24,14 +24,14 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 3234,
+      "h": 3235,
       "page": "page-0"
     },
     {
       "file": "PublicLocation.dc.html",
       "title": "Location — Sandanski",
       "x": 0,
-      "y": 3404,
+      "y": 3405,
       "w": 1440,
       "h": 2374,
       "page": "page-0"
@@ -40,7 +40,7 @@
       "file": "PublicSeller.dc.html",
       "title": "Sell with us",
       "x": 1560,
-      "y": 3404,
+      "y": 3405,
       "w": 1440,
       "h": 2164,
       "page": "page-0"
@@ -49,7 +49,7 @@
       "file": "PublicContact.dc.html",
       "title": "Contact",
       "x": 3120,
-      "y": 3404,
+      "y": 3405,
       "w": 1440,
       "h": 2004,
       "page": "page-0"
@@ -58,7 +58,7 @@
       "file": "PublicMobileSearch.dc.html",
       "title": "Phone — search",
       "x": 0,
-      "y": 5948,
+      "y": 5949,
       "w": 390,
       "h": 1141,
       "page": "page-0"
@@ -67,7 +67,7 @@
       "file": "PublicMobileListing.dc.html",
       "title": "Phone — property",
       "x": 510,
-      "y": 5948,
+      "y": 5949,
       "w": 390,
       "h": 941,
       "page": "page-0"
@@ -76,9 +76,9 @@
       "file": "PublicMobileHebrew.dc.html",
       "title": "Phone — Hebrew, right to left",
       "x": 1020,
-      "y": 5948,
+      "y": 5949,
       "w": 390,
-      "h": 919,
+      "h": 920,
       "page": "page-0"
     },
     {
@@ -87,7 +87,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 2978,
+      "h": 3140,
       "page": "page-1"
     },
     {
@@ -96,7 +96,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 2081,
+      "h": 2082,
       "page": "page-1"
     },
     {
@@ -114,7 +114,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 1081,
+      "h": 1070,
       "page": "page-2"
     },
     {
@@ -139,7 +139,7 @@
       "file": "Viewings.dc.html",
       "title": "Viewings",
       "x": 0,
-      "y": 1251,
+      "y": 1240,
       "w": 1440,
       "h": 1004,
       "page": "page-2"
@@ -148,7 +148,7 @@
       "file": "Tasks.dc.html",
       "title": "Tasks",
       "x": 1560,
-      "y": 1251,
+      "y": 1240,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -157,7 +157,7 @@
       "file": "Requests.dc.html",
       "title": "Requests from the website",
       "x": 3120,
-      "y": 1251,
+      "y": 1240,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -166,7 +166,7 @@
       "file": "Contacts.dc.html",
       "title": "Contacts",
       "x": 0,
-      "y": 2425,
+      "y": 2414,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -175,7 +175,7 @@
       "file": "Consent.dc.html",
       "title": "Consent",
       "x": 1560,
-      "y": 2425,
+      "y": 2414,
       "w": 1440,
       "h": 924,
       "page": "page-2"
@@ -195,7 +195,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1432,
+      "h": 1424,
       "page": "page-3"
     },
     {
@@ -204,16 +204,16 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 1326,
+      "h": 1319,
       "page": "page-3"
     },
     {
       "file": "DocumentEditor.dc.html",
       "title": "Document composer and signature",
       "x": 0,
-      "y": 1602,
+      "y": 1594,
       "w": 1440,
-      "h": 1188,
+      "h": 1177,
       "page": "page-3"
     },
     {
@@ -231,7 +231,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1029,
+      "h": 1098,
       "page": "page-4"
     },
     {
@@ -247,16 +247,16 @@
       "file": "SitePages.dc.html",
       "title": "Website — pages",
       "x": 0,
-      "y": 1199,
+      "y": 1268,
       "w": 1440,
-      "h": 1045,
+      "h": 1039,
       "page": "page-4"
     },
     {
       "file": "PageEditor.dc.html",
       "title": "Page editor — blocks",
       "x": 1560,
-      "y": 1199,
+      "y": 1268,
       "w": 1440,
       "h": 1164,
       "page": "page-4"
@@ -265,7 +265,7 @@
       "file": "Media.dc.html",
       "title": "Media library",
       "x": 3120,
-      "y": 1199,
+      "y": 1268,
       "w": 1440,
       "h": 1264,
       "page": "page-4"
@@ -274,25 +274,25 @@
       "file": "MediaEditor.dc.html",
       "title": "Photo editor",
       "x": 0,
-      "y": 2633,
+      "y": 2702,
       "w": 1440,
-      "h": 1395,
+      "h": 1830,
       "page": "page-4"
     },
     {
       "file": "MediaStates.dc.html",
       "title": "Upload and edit — every state",
       "x": 1560,
-      "y": 2633,
+      "y": 2702,
       "w": 1560,
-      "h": 1971,
+      "h": 1972,
       "page": "page-4"
     },
     {
       "file": "SeoRedirects.dc.html",
       "title": "SEO and legacy redirects",
       "x": 3240,
-      "y": 2633,
+      "y": 2702,
       "w": 1440,
       "h": 984,
       "page": "page-4"
@@ -303,7 +303,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 1603,
+      "h": 1591,
       "page": "page-5"
     },
     {
@@ -328,7 +328,7 @@
       "file": "IntegrationCatalogue.dc.html",
       "title": "Integration catalogue",
       "x": 0,
-      "y": 1773,
+      "y": 1761,
       "w": 1440,
       "h": 1104,
       "page": "page-5"
@@ -337,9 +337,9 @@
       "file": "Automations.dc.html",
       "title": "Automations and webhooks",
       "x": 1560,
-      "y": 1773,
+      "y": 1761,
       "w": 1440,
-      "h": 1293,
+      "h": 1285,
       "page": "page-5"
     },
     {
@@ -357,7 +357,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 970,
+      "h": 958,
       "page": "page-6"
     },
     {
@@ -384,7 +384,7 @@
       "x": 1560,
       "y": 1274,
       "w": 1440,
-      "h": 1175,
+      "h": 1167,
       "page": "page-6"
     },
     {
@@ -420,14 +420,14 @@
       "x": 3360,
       "y": 0,
       "w": 1560,
-      "h": 2242,
+      "h": 2238,
       "page": "page-7"
     },
     {
       "file": "Mobile.dc.html",
       "title": "Phone — Today",
       "x": 0,
-      "y": 2412,
+      "y": 2408,
       "w": 390,
       "h": 868,
       "page": "page-7"
@@ -436,18 +436,18 @@
       "file": "MobileLead.dc.html",
       "title": "Phone — lead and reply",
       "x": 510,
-      "y": 2412,
+      "y": 2408,
       "w": 390,
-      "h": 888,
+      "h": 889,
       "page": "page-7"
     },
     {
       "file": "MobileCase.dc.html",
       "title": "Phone — case",
       "x": 1020,
-      "y": 2412,
+      "y": 2408,
       "w": 390,
-      "h": 933,
+      "h": 934,
       "page": "page-7"
     }
   ],
