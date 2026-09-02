@@ -229,6 +229,7 @@ const ADMIN_UI_COPY = {
     assistUnavailable: "Hermes не е настроен в тази среда. Напишете текста сами.",
     assistDrafted: "Чернова от Hermes по {source}. Нищо не се публикува, докато вие не я одобрите.",
     assistSourceListingFacts: "одобрените факти на обявата",
+    assistSourceLead: "запитването и фактите на обявата",
     localeRolloutLead: "{live} от {total} езика са публикувани. Езикът се отваря чак когато човек одобри превода.",
     localeLanguages: "Езици",
     localeLanguage: "Език",
@@ -956,6 +957,7 @@ const ADMIN_UI_COPY = {
     assistUnavailable: "Hermes не настроен в этой среде. Напишите текст сами.",
     assistDrafted: "Черновик Hermes по {source}. Ничего не публикуется, пока вы не одобрите.",
     assistSourceListingFacts: "одобренным фактам объекта",
+    assistSourceLead: "запросу и фактам объекта",
     localeRolloutLead: "{live} из {total} языков опубликованы. Язык открывается только после того, как человек одобрил перевод.",
     localeLanguages: "Языки",
     localeLanguage: "Язык",
@@ -1683,6 +1685,7 @@ const ADMIN_UI_COPY = {
     assistUnavailable: "Hermes is not configured in this environment. Write the text yourself.",
     assistDrafted: "Hermes draft from {source}. Nothing is published until you approve it.",
     assistSourceListingFacts: "the listing\u2019s approved facts",
+    assistSourceLead: "the enquiry and the listing\u2019s facts",
     localeRolloutLead: "{live} of {total} languages are live. A language opens only once a human has approved the translation.",
     localeLanguages: "Languages",
     localeLanguage: "Language",
@@ -3204,6 +3207,9 @@ function adminNavigationGroups(page) {
     if (item.id === "realty_cases") return caseCopy(page).title;
     if (item.id === "approved_content") return workbenchCopy(page).approvedContent.title;
     if (item.id === "migration_review") return label(copy, "migrationReview", "Migration review");
+    // Without this the rail printed the destination's id, "locale_rollout", at
+    // a broker. screenLabel only knows the ids the owner console enumerates.
+    if (item.id === "locale_rollout") return label(copy, "localeRollout", "Website languages");
     return screenLabel(item.group, item.id, item.id);
   };
   const routeBadge = (item) => {
@@ -7225,45 +7231,47 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       h(
         "div",
         { className: "adm-reply-cell__row" },
+        // The same control the listing editor carries, on the value a broker
+        // rewrites most: it fills the reply the approval form already holds,
+        // opens that form so the draft is read before it is queued, and says
+        // where the words came from.
         h(
-          "form",
+          "div",
           {
-            method: "post",
-            action: "/api/admin/replies/draft",
-            className: "adm-draft-form",
-            "data-hermes-draft-request": "true",
-            "data-hermes-draft-endpoint": "/api/admin/replies/draft",
-            "data-original-language": lead.original_language,
-            "data-reply-draft-pending": label(copy, "replyDraftPending", "Preparing broker-only draft…"),
-            "data-reply-draft-success": label(copy, "replyDraftReady", "Draft ready for broker review."),
-            "data-reply-draft-failure": label(copy, "replyDraftFailed", "Could not prepare a broker draft."),
-            "data-reply-draft-unavailable": label(
-              copy,
-              "replyDraftUnavailable",
-              "Hermes is not configured in this environment. Use an approved template or write the reply manually.",
-            ),
+            className: "adm-field adm-field--assisted adm-draft-form",
+            "data-hermes-assist-for": `reply-${lead.lead_id}`,
             hidden: page.leadSourceDurable || undefined,
           },
-          h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
-          h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
           h(
-            "button",
-            {
-              type: "submit",
-              className: "mk-btn mk-btn--secondary mk-btn--sm",
-              // Derived from configuration, so the button is honest on first
-              // paint instead of learning it after a failed request.
-              disabled: hermesAvailable ? undefined : true,
-              "aria-describedby": hermesAvailable ? undefined : `hermes-note-${lead.lead_id}`,
-              title: hermesAvailable ? undefined : hermesReason,
-            },
-            h(Icon, { name: "sparkles", size: 16 }),
+            "div",
+            { className: "adm-lblrow" },
             h("span", null, label(copy, "draftWithHermes", "Draft with Hermes")),
+            hermesAssistButton(ui, {
+              assist: {
+                endpoint: "/api/admin/replies/draft",
+                listingId: null,
+                locale: lead.original_language,
+                source: ui.assistSourceLead,
+                available: hermesAvailable,
+                unavailableReason: hermesAvailable ? null : hermesReason,
+              },
+              hermesField: "reply",
+              targetId: `reply-draft-${lead.lead_id}`,
+              barId: `reply-draft-${lead.lead_id}-drafted`,
+              payload: { leadId: lead.lead_id, language: lead.original_language },
+              reveal: `reply-approval-${lead.lead_id}`,
+              describedBy: hermesAvailable ? undefined : `hermes-note-${lead.lead_id}`,
+            }),
           ),
+          hermesDraftedBar(ui, {
+            assist: { source: ui.assistSourceLead },
+            barId: `reply-draft-${lead.lead_id}-drafted`,
+            field: `reply-${lead.lead_id}`,
+          }),
         ),
         h(
           "details",
-          { className: "adm-reply", hidden: page.leadSourceDurable || undefined },
+          { id: `reply-approval-${lead.lead_id}`, className: "adm-reply", hidden: page.leadSourceDurable || undefined },
           h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "send", size: 16 }), h("span", null, label(copy, "queueReply", "Queue reply"))),
           h(
             "form",
@@ -7288,7 +7296,12 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
               h("input", { type: "checkbox", name: "showOriginal" }),
               ` ${label(copy, "showOriginal", "Show original")}`,
             ),
-            h("label", null, label(copy, "hermesDraftText", "Hermes draft text"), h("textarea", { name: "hermesDraftText" })),
+            h(
+              "label",
+              { htmlFor: `reply-draft-${lead.lead_id}` },
+              label(copy, "hermesDraftText", "Hermes draft text"),
+              h("textarea", { id: `reply-draft-${lead.lead_id}`, name: "hermesDraftText" }),
+            ),
             h(
               "label",
               null,
@@ -9085,6 +9098,44 @@ function editorField(copy, ui, field, value, disabled = false, assist = null) {
 // One draft, one approval boundary, one shape. The button never writes anything
 // public: it fills the box the broker is already looking at and says where the
 // words came from, and the value is saved by the same form as any other edit.
+// The button and the bar, so any editable value can carry the same control
+// rather than each screen growing its own.
+function hermesAssistButton(ui, { assist, hermesField, targetId, barId, disabled = false, payload = null, reveal = null, describedBy = null }) {
+  return h(
+    "button",
+    {
+      type: "button",
+      className: "adm-assist",
+      disabled: disabled || !assist.available || undefined,
+      title: assist.available ? undefined : assist.unavailableReason || undefined,
+      "aria-describedby": describedBy || undefined,
+      ...(payload ? { "data-hermes-assist-payload": JSON.stringify(payload) } : {}),
+      ...(reveal ? { "data-hermes-assist-reveal": reveal } : {}),
+      "data-hermes-assist": "true",
+      "data-hermes-assist-endpoint": assist.endpoint,
+      "data-hermes-assist-field": hermesField,
+      "data-hermes-assist-listing": assist.listingId,
+      "data-hermes-assist-locale": assist.locale,
+      "data-hermes-assist-target": targetId,
+      "data-hermes-assist-bar": barId,
+      "data-hermes-assist-pending": ui.assistPending,
+      "data-hermes-assist-failure": ui.assistFailed,
+      "data-hermes-assist-unavailable": ui.assistUnavailable,
+    },
+    h(Icon, { name: "sparkles", size: 14 }),
+    h("span", null, ui.assistDraft),
+  );
+}
+
+function hermesDraftedBar(ui, { assist, barId, field }) {
+  return h(
+    "p",
+    { id: barId, className: "adm-drafted-bar", role: "status", "data-hermes-drafted-bar": field, hidden: true },
+    h(Icon, { name: "sparkles", size: 14 }),
+    h("span", null, fillTemplate(ui.assistDrafted, { source: assist.source })),
+  );
+}
+
 function assistedEditorField(copy, ui, field, value, disabled, assist, extra = []) {
   const inputId = `editor-${field}`;
   const barId = `${inputId}-drafted`;
@@ -9098,35 +9149,10 @@ function assistedEditorField(copy, ui, field, value, disabled, assist, extra = [
       "div",
       { className: "adm-lblrow" },
       h("label", { htmlFor: inputId }, fieldText(ui, field)),
-      h(
-        "button",
-        {
-          type: "button",
-          className: "adm-assist",
-          disabled: disabled || !assist.available || undefined,
-          title: assist.available ? undefined : assist.unavailableReason || undefined,
-          "data-hermes-assist": "true",
-          "data-hermes-assist-endpoint": assist.endpoint,
-          "data-hermes-assist-field": LISTING_ASSIST_FIELDS[field],
-          "data-hermes-assist-listing": assist.listingId,
-          "data-hermes-assist-locale": assist.locale,
-          "data-hermes-assist-target": inputId,
-          "data-hermes-assist-bar": barId,
-          "data-hermes-assist-pending": ui.assistPending,
-          "data-hermes-assist-failure": ui.assistFailed,
-          "data-hermes-assist-unavailable": ui.assistUnavailable,
-        },
-        h(Icon, { name: "sparkles", size: 14 }),
-        h("span", null, ui.assistDraft),
-      ),
+      hermesAssistButton(ui, { assist, hermesField: LISTING_ASSIST_FIELDS[field], targetId: inputId, barId, disabled }),
     ),
     editorInputFor(ui, field, value, disabled, inputId),
-    h(
-      "p",
-      { id: barId, className: "adm-drafted-bar", role: "status", "data-hermes-drafted-bar": field, hidden: true },
-      h(Icon, { name: "sparkles", size: 14 }),
-      h("span", null, fillTemplate(ui.assistDrafted, { source: assist.source })),
-    ),
+    hermesDraftedBar(ui, { assist, barId, field }),
     ...extra,
   );
 }
@@ -9731,7 +9757,26 @@ function ListingEditorBody({ page }) {
                                     ),
                                   ),
                                 ),
-                                h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
+                                // Alt text is the value that blocks publication when it is
+                                // empty, and the one a broker is least likely to write. Same
+                                // control, same boundary, drawn from the same approved facts.
+                                h(
+                                  "div",
+                                  { className: "adm-field adm-field--assisted", "data-hermes-assist-for": `alt-${item.asset_id}` },
+                                  h(
+                                    "div",
+                                    { className: "adm-lblrow" },
+                                    h("label", { htmlFor: `media-alt-${item.asset_id}` }, ui.mediaAlt),
+                                    hermesAssistButton(ui, {
+                                      assist: hermesAssist,
+                                      hermesField: "alt_text",
+                                      targetId: `media-alt-${item.asset_id}`,
+                                      barId: `media-alt-${item.asset_id}-drafted`,
+                                    }),
+                                  ),
+                                  h("textarea", { id: `media-alt-${item.asset_id}`, name: "alt", rows: 2, defaultValue: item.alt || "" }),
+                                  hermesDraftedBar(ui, { assist: hermesAssist, barId: `media-alt-${item.asset_id}-drafted`, field: `alt-${item.asset_id}` }),
+                                ),
                                 item.kind === "video"
                                   ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
                                   : null,

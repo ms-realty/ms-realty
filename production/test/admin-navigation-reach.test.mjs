@@ -78,6 +78,24 @@ test("every admin surface renders the whole rail, at one depth", async () => {
   }
 });
 
+test("no destination is labelled with its own id", async () => {
+  // A destination the copy dictionary does not know falls through to
+  // screenLabel, which returns the id. That is how "locale_rollout" reached
+  // the rail in three languages.
+  const server = app();
+  for (const locale of ["en", "bg", "ru"]) {
+    const res = await dispatchHttp(server, { url: `/admin/today?locale=${locale}`, headers: AUTH });
+    assert.equal(res.status, 200);
+    const rail = railOf(res.body);
+    const labelled = [...rail.matchAll(/data-admin-nav-route="([^"]+)"[\s\S]*?<span>([^<]*)<\/span>/g)];
+    assert.ok(labelled.length >= 15, `${locale} rail renders its destinations`);
+    for (const [, id, text] of labelled) {
+      assert.notEqual(text, id, `${locale}: ${id} shows its id instead of a name`);
+      assert.doesNotMatch(text, /^[a-z][a-z0-9_]*$/, `${locale}: ${id} shows "${text}", which reads like an identifier`);
+    }
+  }
+});
+
 test("the rail marks exactly one destination as current on each surface", async () => {
   const server = app();
   for (const surface of ADMIN_PAGE_SURFACES.filter((s) => !NEEDS_PAYLOAD_RUNTIME.has(s.path))) {

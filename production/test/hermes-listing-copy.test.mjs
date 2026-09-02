@@ -111,10 +111,20 @@ test("the same control appears on every field it can draft", async () => {
   assert.equal(page.status, 200);
 
   const buttons = [...page.body.matchAll(/<button[^>]*data-hermes-assist="true"[^>]*>/g)].map((match) => match[0]);
-  assert.equal(buttons.length, 3, "description, SEO title and meta description");
-
   const fields = buttons.map((button) => button.match(/data-hermes-assist-field="([^"]+)"/)[1]);
-  assert.deepEqual(fields.sort(), ["description", "meta_description", "seo_title"]);
+
+  // Not a count: the editor draws one control per assisted value, and the
+  // number of media assets on a listing is not this contract's business. What
+  // is: the three listing-copy values are all offered, and nothing is offered
+  // that the endpoint would refuse.
+  for (const field of ["description", "seo_title", "meta_description"]) {
+    assert.ok(fields.includes(field), `${field} offers a draft`);
+  }
+  assert.deepEqual(
+    [...new Set(fields)].sort(),
+    ["alt_text", "description", "meta_description", "seo_title"],
+    "every control names a field the copy endpoint accepts",
+  );
 
   // Identical affordance: one endpoint, one listing, one locale, the same
   // status strings. What differs is the field and the box it fills.
@@ -138,16 +148,68 @@ test("the same control appears on every field it can draft", async () => {
 
   // Every assisted field carries a bar that names the source and the boundary,
   // hidden until a draft actually arrives.
-  assert.equal((page.body.match(/data-hermes-drafted-bar="/g) || []).length, 3);
+  // One bar per control, so no assisted value can fill a box without saying
+  // where the words came from.
+  assert.equal(
+    (page.body.match(/data-hermes-drafted-bar="/g) || []).length,
+    (page.body.match(/data-hermes-assist="true"/g) || []).length,
+  );
   assert.match(page.body, /Nothing is published until you approve it/);
 });
 
 test("the browser refuses a draft response that claims it may publish", () => {
   assert.match(ADMIN_APP_JS, /data-hermes-assist/);
-  assert.match(ADMIN_APP_JS, /draft\.can_publish === true \|\| draft\.human_approval_required !== true/);
+  assert.match(ADMIN_APP_JS, /draft\.can_publish === true \|\| draft\.can_send_without_approval === true/);
   // And a field that carries a machine-written value is marked, so the styling
   // rule can sit beside the bare-field rule rather than lose to it.
   assert.match(ADMIN_APP_JS, /setAttribute\("data-hermes-drafted", "true"\)/);
   const css = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-admin.css"), "utf8");
   assert.match(css, /textarea\[data-hermes-drafted="true"\]/);
+});
+
+// The point of item 3 is that the affordance does not vary. These check the
+// two values outside the listing editor that now carry the same control.
+test("the media alt text a publication is blocked on carries the same control", async () => {
+  const { app } = harness({ provider: async () => ({ text: "unused" }) });
+  const page = await dispatchHttp(app, { url: `/admin/listings/edit?listingId=${LISTING}&locale=en`, headers: { authorization: AUTH.authorization } });
+  assert.equal(page.status, 200);
+
+  const alt = [...page.body.matchAll(/<button[^>]*data-hermes-assist="true"[^>]*data-hermes-assist-field="alt_text"[^>]*>/g)];
+  assert.ok(alt.length >= 1, "every reviewable asset offers a draft for its alt text");
+  for (const [button] of alt) {
+    assert.match(button, /data-hermes-assist-endpoint="\/api\/admin\/listings\/copy\/draft"/);
+    assert.match(button, /data-hermes-assist-pending="/);
+  }
+  // It fills the box the reviewer is looking at, and that box is labelled.
+  assert.match(page.body, /<label for="media-alt-[^"]+">/);
+  assert.match(page.body, /<textarea id="media-alt-[^"]+" name="alt"/);
+});
+
+test("the lead reply uses the shared control, not a form of its own", async () => {
+  const { app } = harness({ provider: async () => ({ text: "unused" }) });
+  const page = await dispatchHttp(app, { url: "/admin/leads?locale=en", headers: { authorization: AUTH.authorization } });
+  assert.equal(page.status, 200);
+
+  const buttons = [...page.body.matchAll(/<button[^>]*data-hermes-assist="true"[^>]*data-hermes-assist-field="reply"[^>]*>/g)].map((m) => m[0]);
+  assert.ok(buttons.length >= 1);
+  for (const button of buttons) {
+    assert.match(button, /data-hermes-assist-endpoint="\/api\/admin\/replies\/draft"/);
+    // A reply needs a different body than listing copy; the button carries it
+    // rather than the behaviour growing a second branch.
+    assert.match(button, /data-hermes-assist-payload="[^"]*leadId/);
+    // The draft lands in a disclosure, so the control opens it: filling a box
+    // nobody can see is the same as not filling it.
+    assert.match(button, /data-hermes-assist-reveal="reply-approval-/);
+  }
+
+  // The bespoke draft form the composer used to carry is gone from this screen.
+  assert.doesNotMatch(page.body, /data-hermes-draft-request/);
+  assert.match(page.body, /<textarea id="reply-draft-[^"]+" name="hermesDraftText"/);
+});
+
+test("the browser refuses a reply draft that says it can be sent without approval", () => {
+  // Listing copy says human_approval_required, a reply says
+  // broker_approval_required, and neither may claim it can go out.
+  assert.match(ADMIN_APP_JS, /draft\.human_approval_required === true \|\| draft\.broker_approval_required === true/);
+  assert.match(ADMIN_APP_JS, /draft\.can_publish === true \|\| draft\.can_send_without_approval === true/);
 });

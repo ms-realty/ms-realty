@@ -1235,8 +1235,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes("Эскалации менеджеру"), true);
   assert.equal(smoke.adminHtml.body.includes('data-sla-status="manager_escalation_required"'), true);
   assert.equal(smoke.adminHtml.body.includes("Срок эскалации"), true);
-  assert.equal(smoke.adminHtml.body.includes('action="/api/admin/replies/draft"'), true);
-  assert.equal(smoke.adminHtml.body.includes('data-hermes-draft-request="true"'), true);
+  // The composer's draft is the same control every other assisted value
+  // carries, so it is checked by what it does rather than by the bespoke form
+  // it used to be: the endpoint it calls, the lead it names, and the box it
+  // fills. A pinned form name only ever proved the markup had not moved.
+  assert.equal(smoke.adminHtml.body.includes('data-hermes-assist-endpoint="/api/admin/replies/draft"'), true);
+  assert.equal(smoke.adminHtml.body.includes('data-hermes-assist-field="reply"'), true);
+  assert.equal(/data-hermes-assist-payload="[^"]*leadId/.test(smoke.adminHtml.body), true);
   assert.equal(smoke.adminHtml.body.includes('data-reply-delivery-form="true"'), true);
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraftText"'), true);
   assert.equal(smoke.adminHtml.body.includes('data-communication-thread='), true);

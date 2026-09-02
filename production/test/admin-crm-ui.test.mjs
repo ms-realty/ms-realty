@@ -68,7 +68,9 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   }
   // The reply composer, assignment control and thread stay inside the detail.
   assert.match(page.body, /class="adm-lead-detail__section adm-reply-cell"/);
-  assert.match(page.body, /data-hermes-draft-request="true"/);
+  // The draft is the shared assist control, named by what it calls and fills.
+  assert.match(page.body, /data-hermes-assist-endpoint="\/api\/admin\/replies\/draft"/);
+  assert.match(page.body, /data-hermes-assist-field="reply"/);
   assert.match(page.body, /data-reply-approval-required="true"/);
   assert.match(page.body, /data-lead-assignment-control=/);
 });

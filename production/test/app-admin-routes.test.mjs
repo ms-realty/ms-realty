@@ -455,9 +455,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-original-language="he"/);
       assert.match(inboxHtml, /data-private-contact="true"/);
       assert.match(inboxHtml, /https:\/\/wa\.me\/359880000001/);
-      assert.match(inboxHtml, /action="\/api\/admin\/replies\/draft"/);
-      assert.match(inboxHtml, /data-hermes-draft-request="true"/);
-      assert.match(inboxHtml, /data-reply-draft-unavailable="Hermes не настроен в этой среде\./);
+      // The draft is a control that calls the endpoint, not a form posting to
+      // it, so the endpoint is asserted where the control names it.
+      assert.match(inboxHtml, /data-hermes-assist-endpoint="\/api\/admin\/replies\/draft"/);
+      assert.match(inboxHtml, /data-hermes-assist-field="reply"/);
+      // The unavailable message reaches the operator in the admin locale they
+      // asked for, which is what the old attribute was standing for.
+      assert.match(inboxHtml, /data-hermes-assist-unavailable="Hermes не настроен в этой среде\./);
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
       assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
       assert.match(inboxHtml, /name="hermesDraftText"/);

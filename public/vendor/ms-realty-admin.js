@@ -646,12 +646,20 @@
         method: "POST",
         headers: { "content-type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({
-          listingId: button.getAttribute("data-hermes-assist-listing"),
-          field: button.getAttribute("data-hermes-assist-field"),
-          locale: button.getAttribute("data-hermes-assist-locale"),
-          sourceText: target.value || "",
-        }),
+        // Every assisted value posts what its own endpoint needs. The button
+        // carries that as one payload attribute, so a second kind of draft is
+        // a markup change rather than a second copy of this behaviour.
+        body: JSON.stringify(
+          Object.assign(
+            {
+              listingId: button.getAttribute("data-hermes-assist-listing"),
+              field: button.getAttribute("data-hermes-assist-field"),
+              locale: button.getAttribute("data-hermes-assist-locale"),
+              sourceText: target.value || "",
+            },
+            JSON.parse(button.getAttribute("data-hermes-assist-payload") || "{}"),
+          ),
+        ),
       })
         .then(function (response) {
           return response.json().then(function (payload) {
@@ -660,9 +668,12 @@
           });
         })
         .then(function (draft) {
-          // A draft that claims it may publish is not a draft. Refuse it rather
-          // than putting it in front of a broker as if it were reviewed.
-          if (!draft.text || draft.can_publish === true || draft.human_approval_required !== true) {
+          // A draft that claims it may act on its own is not a draft. Refuse it
+          // rather than putting it in front of a broker as if it were reviewed.
+          // Listing copy says human_approval_required; a reply says
+          // broker_approval_required. Neither may claim it can go out.
+          var approvalRequired = draft.human_approval_required === true || draft.broker_approval_required === true;
+          if (!draft.text || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
             throw new Error("invalid Hermes draft response");
           }
           target.value = draft.text;
@@ -673,6 +684,11 @@
           // component selector that always loses.
           target.setAttribute("data-hermes-drafted", "true");
           if (bar) bar.hidden = false;
+          // Some values are edited inside a disclosure. Filling one the reader
+          // cannot see is the same as not filling it.
+          var reveal = button.getAttribute("data-hermes-assist-reveal");
+          var panel = reveal ? document.getElementById(reveal) : target.closest("details");
+          if (panel && panel.tagName === "DETAILS") panel.open = true;
           button.innerHTML = original;
         })
         .catch(function (error) {
