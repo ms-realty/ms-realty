@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "kind": "hermes_upstream_provenance",
+  "generated_at": "2026-09-01T13:05:28.987Z",
+  "upstream": {
+    "repository": "NousResearch/hermes-agent",
+    "release": {
+      "id": 379999964,
+      "tag": "v2026.8.31",
+      "name": "Hermes Agent v0.21.0 (v2026.8.31)",
+      "published_at": "2026-08-31T19:29:49Z",
+      "url": "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.31"
+    },
+    "commit": {
+      "sha": "29112bef099274229cadff79cdff7bf7b99c4b77",
+      "url": "https://github.com/NousResearch/hermes-agent/commit/29112bef099274229cadff79cdff7bf7b99c4b77"
+    },
+    "docker": {
+      "repository": "nousresearch/hermes-agent",
+      "registry": "registry-1.docker.io",
+      "tag": "v2026.8.31",
+      "digest": "sha256:64923faeae267792bf9bf87fe3b4c4869e35004e360c7df01730ad801b74d524",
+      "manifest_url": "https://registry-1.docker.io/v2/nousresearch/hermes-agent/manifests/v2026.8.31",
+      "media_type": "application/vnd.oci.image.index.v1+json"
+    }
+  },
+  "managed_image": "nousresearch/hermes-agent:v2026.8.31@sha256:64923faeae267792bf9bf87fe3b4c4869e35004e360c7df01730ad801b74d524",
+  "pins": {
+    "files": [
+      "production/docker-compose.local-production.yml",
+      "production/lib/hermes-provider-provisioning.mjs",
+      "SOURCE_OF_TRUTH.md"
+    ],
+    "image": "nousresearch/hermes-agent:v2026.8.31@sha256:64923faeae267792bf9bf87fe3b4c4869e35004e360c7df01730ad801b74d524"
+  },
+  "safety": {
+    "draft_only": true,
+    "human_approval_required": true,
+    "managed_tool_access": "none",
+    "persistent_memory": false,
+    "production_deployment_requires_exact_main_sha": true
+  }
+}

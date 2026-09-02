@@ -4,6 +4,24 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      hermes_update:
+        description: "Run the fenced Hermes upstream compatibility gate"
+        required: false
+        default: "false"
+      pull_request_number:
+        description: "Hermes updater pull request number"
+        required: false
+        default: ""
+      expected_head_sha:
+        description: "Exact updater commit to validate"
+        required: false
+        default: ""
+      release_tag:
+        description: "Stable Hermes release tag to validate"
+        required: false
+        default: ""
   repository_dispatch:
     types: [auto_merge_deploy]
 
@@ -24,6 +42,42 @@ jobs:
       CI: "true"
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate Hermes updater dispatch fence
+        if: github.event_name == 'workflow_dispatch' && inputs.hermes_update == 'true'
+        env:
+          HERMES_UPDATE_BRANCH: automation/hermes-agent-updater
+          HERMES_EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
+          HERMES_PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
+          HERMES_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/$HERMES_UPDATE_BRANCH"
+          test "$HERMES_EXPECTED_HEAD_SHA" = "$GITHUB_SHA"
+          node -e 'if (!/^[0-9a-f]{40}$/i.test(process.argv[1])) process.exit(1)' "$HERMES_EXPECTED_HEAD_SHA"
+          node -e 'if (!/^[1-9][0-9]*$/.test(process.argv[1])) process.exit(1)' "$HERMES_PULL_REQUEST_NUMBER"
+          node -e 'if (!/^v20[0-9]{2}\.(?:[1-9]|1[0-2])\.(?:[1-9]|[12][0-9]|3[01])(?:\.[0-9]+)?$/.test(process.argv[1])) process.exit(1)' "$HERMES_RELEASE_TAG"
+          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+            git fetch --no-tags --unshallow origin "+refs/heads/main:refs/remotes/origin/main"
+          else
+            git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+          fi
+          git merge-base --is-ancestor origin/main HEAD
+          expected_paths=(
+            SOURCE_OF_TRUTH.md
+            production/data/hermes-provider-provisioning-report.json
+            production/data/hermes-upstream-provenance.json
+            production/docker-compose.local-production.yml
+            production/lib/hermes-provider-provisioning.mjs
+          )
+          mapfile -t changed_entries < <(git diff --name-status --no-renames origin/main...HEAD)
+          test "${#changed_entries[@]}" -eq "${#expected_paths[@]}"
+          for index in "${!expected_paths[@]}"; do
+            IFS=$'\t' read -r status changed_path extra <<< "${changed_entries[$index]}"
+            test "$status" = "M"
+            test "$changed_path" = "${expected_paths[$index]}"
+            test -z "${extra:-}"
+          done
 
       - uses: actions/setup-node@v4
         with:
@@ -89,6 +143,40 @@ jobs:
       - name: Stop deployable container
         if: always() && steps.container_smoke.outputs.container_id != ''
         run: docker rm --force "${{ steps.container_smoke.outputs.container_id }}"
+
+  hermes_compatibility:
+    name: Hermes compatibility smoke
+    if: >-
+      (github.event_name == 'workflow_dispatch' &&
+      inputs.hermes_update == 'true' &&
+      github.ref == 'refs/heads/automation/hermes-agent-updater') ||
+      (github.event_name == 'pull_request' &&
+      github.head_ref == 'automation/hermes-agent-updater')
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify exact workflow-dispatch head
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          HERMES_EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
+          HERMES_PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
+          HERMES_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/automation/hermes-agent-updater"
+          test "$HERMES_EXPECTED_HEAD_SHA" = "$GITHUB_SHA"
+          test "$HERMES_PULL_REQUEST_NUMBER" != ""
+          test "$HERMES_RELEASE_TAG" != ""
+
+      - name: Run exact Hermes image compatibility smoke
+        run: npm run hermes:compatibility
 
   deploy_origin:
     name: Deploy durable origin

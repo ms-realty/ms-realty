@@ -334,7 +334,7 @@ cannot grant the Agent write access to public, CRM, or messaging state.
 Nous also ships **`hermes-agent`** (`github.com/NousResearch/hermes-agent`, MIT): an autonomous agent
 with persistent memory, reusable **skills** (agentskills.io standard), a multi-channel gateway
 (Telegram/Discord/Slack/WhatsApp/Signal/CLI), and sandboxed local/Docker/SSH/browser execution. The
-local production compose profile runs `nousresearch/hermes-agent:v2026.7.7.2` as an authenticated,
+local production compose profile runs `nousresearch/hermes-agent:v2026.8.31@sha256:64923faeae267792bf9bf87fe3b4c4869e35004e360c7df01730ad801b74d524` as an authenticated,
 private service. A runtime probe requires `/health` and bearer-authenticated `/v1/capabilities` before
 the deployment accepts Agent evidence.
 
