@@ -269,6 +269,171 @@ test("Next admin adapter: Payload login, cookie auth, and logout behave identica
     assert.ok(service.calls.some(([name, token]) => name === "logout" && token === PAYLOAD_SESSION));
 });
 
+test("standalone and Next login accept the owned fallback origin but reject arbitrary cross-origin POSTs", async () => {
+  const service = payloadSessionService();
+  const config = {
+    ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+    payloadAdminAuth: service,
+    adminSessionLedgerPath: `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-adapter-login-cross-origin-`)}/admin-sessions.jsonl`,
+    nowSeconds: () => NOW_SECONDS,
+  };
+  const app = createHttpApp(config);
+  const body = "email=peycheff.com%40gmail.com&password=correct-password";
+
+  const standaloneLogin = await dispatchHttp(app, {
+    method: "POST",
+    url: "/admin/login",
+    headers: {
+      host: "makler-realty.com",
+      origin: "https://ms-realty.ms-realty-bg.workers.dev",
+      "sec-fetch-site": "cross-site",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+  assert.equal(standaloneLogin.status, 303);
+  assert.equal(standaloneLogin.headers.location, "/admin");
+
+  const adapterLogin = await renderAppAdminResponse(
+    new Request("https://makler-realty.com/admin/login", {
+      method: "POST",
+      headers: {
+        origin: "https://ms-realty.ms-realty-bg.workers.dev",
+        "sec-fetch-site": "cross-site",
+        "content-type": "application/x-www-form-urlencoded",
+        "x-forwarded-host": "makler-realty.com",
+      },
+      body,
+    }),
+    { config },
+  );
+  assert.equal(adapterLogin.status, 303);
+  assert.equal(adapterLogin.headers.get("location"), "/admin");
+
+  const blockedStandaloneLogin = await dispatchHttp(app, {
+    method: "POST",
+    url: "/admin/login",
+    headers: {
+      host: "makler-realty.com",
+      origin: "https://mail.google.com",
+      "sec-fetch-site": "cross-site",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+  assert.equal(blockedStandaloneLogin.status, 403);
+  assert.deepEqual(blockedStandaloneLogin.body, {
+    kind: "cross_origin_write_blocked",
+    reason: "cross_site_request",
+  });
+
+  const blockedAdapterLogin = await renderAppAdminResponse(
+    new Request("https://makler-realty.com/admin/login", {
+      method: "POST",
+      headers: {
+        origin: "https://mail.google.com",
+        "sec-fetch-site": "cross-site",
+        "content-type": "application/x-www-form-urlencoded",
+        "x-forwarded-host": "makler-realty.com",
+      },
+      body,
+    }),
+    { config },
+  );
+  assert.equal(blockedAdapterLogin.status, 403);
+  assert.deepEqual(await blockedAdapterLogin.json(), {
+    kind: "cross_origin_write_blocked",
+    reason: "cross_site_request",
+  });
+
+  const cookie = adapterLogin.headers.get("set-cookie").split(";")[0];
+  const blockedStandaloneTeam = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/team",
+    headers: {
+      cookie,
+      host: "makler-realty.com",
+      origin: "https://ms-realty.ms-realty-bg.workers.dev",
+      "sec-fetch-site": "cross-site",
+      "content-type": "application/json",
+    },
+    body: "{}",
+  });
+  assert.equal(blockedStandaloneTeam.status, 403);
+  assert.deepEqual(blockedStandaloneTeam.body, {
+    kind: "cross_origin_write_blocked",
+    reason: "cross_site_request",
+  });
+
+  const blockedAdapterTeam = await renderAppAdminResponse(
+    new Request("https://makler-realty.com/api/admin/team", {
+      method: "POST",
+      headers: {
+        cookie,
+        origin: "https://ms-realty.ms-realty-bg.workers.dev",
+        "sec-fetch-site": "cross-site",
+        "content-type": "application/json",
+        "x-forwarded-host": "makler-realty.com",
+      },
+      body: "{}",
+    }),
+    { config },
+  );
+  assert.equal(blockedAdapterTeam.status, 403);
+  assert.deepEqual(await blockedAdapterTeam.json(), {
+    kind: "cross_origin_write_blocked",
+    reason: "cross_site_request",
+  });
+
+  const blockedStandaloneChange = await dispatchHttp(app, {
+    method: "POST",
+    url: "/admin/login",
+    headers: {
+      cookie,
+      host: "makler-realty.com",
+      origin: "https://ms-realty.ms-realty-bg.workers.dev",
+      "sec-fetch-site": "cross-site",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      action: "change-password",
+      current_password: "correct-password",
+      password: "replacement-password",
+      password_confirmation: "replacement-password",
+    }).toString(),
+  });
+  assert.equal(blockedStandaloneChange.status, 403);
+  assert.deepEqual(blockedStandaloneChange.body, {
+    kind: "cross_origin_write_blocked",
+    reason: "cross_site_request",
+  });
+
+  const blockedChange = await renderAppAdminResponse(
+    new Request("https://makler-realty.com/admin/login", {
+      method: "POST",
+      headers: {
+        cookie,
+        origin: "https://ms-realty.ms-realty-bg.workers.dev",
+        "sec-fetch-site": "cross-site",
+        "content-type": "application/x-www-form-urlencoded",
+        "x-forwarded-host": "makler-realty.com",
+      },
+      body: new URLSearchParams({
+        action: "change-password",
+        current_password: "correct-password",
+        password: "replacement-password",
+        password_confirmation: "replacement-password",
+      }),
+    }),
+    { config },
+  );
+  assert.equal(blockedChange.status, 403);
+  assert.deepEqual(await blockedChange.json(), {
+    kind: "cross_origin_write_blocked",
+    reason: "cross_site_request",
+  });
+});
+
 test("contact page tells the truth about the lead form and always offers channels", () => {
   const enabled = renderContactPage({ registry, localeCode: "bg", leadWritesDisabled: false });
   assert.ok(enabled.body.callback, "form renders when writes are available");
