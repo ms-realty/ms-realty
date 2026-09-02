@@ -312,6 +312,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
+import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
 import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -2637,6 +2638,24 @@ function migrationReviewPayload(registry, url, config) {
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: decisions,
   };
+}
+
+async function mediaLibraryPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    payload: config.payloadListingRuntime || null,
+    env: config.authEnv || process.env,
+    requirePayload: config.runtimeDataDurableOnly,
+  });
+  return renderAdminMediaLibraryPayload(registry, url.searchParams.get("locale") || "en", {
+    seed,
+    query: url.searchParams.get("q") || "",
+    issue: url.searchParams.get("issue") || "",
+    listing: url.searchParams.get("listing") || "",
+    kind: url.searchParams.get("kind") || "",
+    page: url.searchParams.get("page") || 1,
+    operatorId: config.adminPrincipal || null,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
 }
 
 async function localeRolloutPayload(registry, url, config) {
@@ -5272,6 +5291,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
       return jsonResponse(200, migrationReviewPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/media") {
+      return htmlResponse(await mediaLibraryPayload(registry, url, config));
     }
     if (request.method === "GET" && url.pathname === "/admin/locales") {
       return htmlResponse(await localeRolloutPayload(registry, url, config));

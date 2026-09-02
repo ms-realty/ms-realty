@@ -221,6 +221,16 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    mediaAsset: "Файл",
+    mediaIssue: "Чака за",
+    mediaSearchHint: "Обява, локация или alt текст",
+    mediaLibraryLead: "{assets} файла в {listings} обяви. Снимка стига до сайта само след като човек е погледнал какво е на нея.",
+    mediaLibraryEmpty: "Няма файлове по този филтър.",
+    mediaNoSource: "Няма източник",
+    mediaUnreviewable: "{count} файла нямат адрес на източника и не могат да бъдат прегледани.",
+    mediaWhatCounts: "Какво брои опашката",
+    mediaTaxonomyNote: "Четирите състояния идват от listing-quality: чака преглед, без alt текст, твърде малка публична галерия, обиколка за преглед. Нищо тук не разпознава лице, номер или воден знак — това го намира човек и го записва като бележка.",
+    mediaIssues: { media_review_pending: "Чака преглед", missing_alt_text: "Без alt текст", thin_public_gallery: "Малка галерия", tour_review_pending: "Обиколка за преглед" },
     hermesUnavailableBroker: "Hermes не е свързан за това работно пространство. Използвайте одобрен шаблон или напишете отговора сами; собственикът може да го свърже.",
     hermesUnavailableOwner: "Hermes не е настроен в тази среда.",
     assistDraft: "Чернова",
@@ -949,6 +959,16 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    mediaAsset: "Файл",
+    mediaIssue: "Ждёт",
+    mediaSearchHint: "Объект, локация или alt-текст",
+    mediaLibraryLead: "{assets} файлов в {listings} объектах. Фото попадает на сайт только после того, как человек посмотрел, что на нём.",
+    mediaLibraryEmpty: "По этому фильтру файлов нет.",
+    mediaNoSource: "Нет источника",
+    mediaUnreviewable: "У {count} файлов нет адреса источника — их нельзя проверить.",
+    mediaWhatCounts: "Что считает очередь",
+    mediaTaxonomyNote: "Четыре состояния приходят из listing-quality: ждёт проверки, без alt-текста, слишком маленькая публичная галерея, тур на проверку. Ничто здесь не распознаёт лицо, номер или водяной знак — это находит человек и записывает заметкой.",
+    mediaIssues: { media_review_pending: "Ждёт проверки", missing_alt_text: "Без alt-текста", thin_public_gallery: "Маленькая галерея", tour_review_pending: "Тур на проверку" },
     hermesUnavailableBroker: "Hermes не подключён для этого рабочего пространства. Используйте одобренный шаблон или напишите ответ сами; подключить может владелец.",
     hermesUnavailableOwner: "Hermes не настроен в этой среде.",
     assistDraft: "Черновик",
@@ -1677,6 +1697,16 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    mediaAsset: "Asset",
+    mediaIssue: "Waiting for",
+    mediaSearchHint: "Listing, location or alt text",
+    mediaLibraryLead: "{assets} files across {listings} listings. A photo reaches the public site only after a person has looked at what is in it.",
+    mediaLibraryEmpty: "No files match this filter.",
+    mediaNoSource: "No source",
+    mediaUnreviewable: "{count} files carry no source URL and cannot be reviewed.",
+    mediaWhatCounts: "What the queue counts",
+    mediaTaxonomyNote: "The four states come from listing-quality: awaiting review, missing alt text, a public gallery too thin to publish, and a tour awaiting review. Nothing here detects a face, a number plate or a watermark — a person finds those and records them as a note.",
+    mediaIssues: { media_review_pending: "Awaiting review", missing_alt_text: "No alt text", thin_public_gallery: "Thin gallery", tour_review_pending: "Tour awaiting review" },
     hermesUnavailableBroker: "Hermes is not connected for this workspace. Use an approved template or write the reply yourself; the workspace owner can connect it.",
     hermesUnavailableOwner: "Hermes is not configured in this environment.",
     assistDraft: "Draft",
@@ -3210,6 +3240,7 @@ function adminNavigationGroups(page) {
     // Without this the rail printed the destination's id, "locale_rollout", at
     // a broker. screenLabel only knows the ids the owner console enumerates.
     if (item.id === "locale_rollout") return label(copy, "localeRollout", "Website languages");
+    if (item.id === "media_library") return label(copy, "mediaLibrary", "Media");
     return screenLabel(item.group, item.id, item.id);
   };
   const routeBadge = (item) => {
@@ -8611,6 +8642,186 @@ function ListingManagerBody({ page }) {
 // per-URL decision rather than a registry edit. Both are stated on the screen
 // because neither endpoint enforces them: POST /api/admin/locales will happily
 // create a locale, and nothing at all removes one.
+// Every media asset in the catalogue, in one place. The counts are links: a
+// figure a broker cannot open is a figure they cannot act on, and the four the
+// queue groups by are the four listing-quality actually computes. Nothing here
+// detects a face, a plate or a watermark, because nothing in the codebase does.
+function MediaLibraryBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "mediaLibrary", "Media");
+  const filters = page.filters || {};
+  const summary = page.summary;
+  const issueHref = (issue) => adminHref(issue ? `/admin/media?issue=${encodeURIComponent(issue)}` : "/admin/media", page);
+  const issueRow = (issue, count) => ({
+    value: issue,
+    label: ui.mediaIssues?.[issue] || valueText(ui, issue),
+    count,
+    href: issueHref(issue),
+    selected: filters.issue === issue,
+  });
+  const issueOptions = [
+    { value: "", label: label(copy, "all", "All"), count: summary.total, href: issueHref(""), selected: !filters.issue },
+    issueRow("media_review_pending", summary.media_review_pending),
+    issueRow("missing_alt_text", summary.missing_alt_text),
+    issueRow("thin_public_gallery", summary.thin_public_gallery),
+  ];
+  const columns = [
+    ui.mediaAsset || "Asset",
+    ui.listing,
+    ui.mediaKind,
+    ui.mediaAlt,
+    label(copy, "qualityStatus", "Status"),
+    label(copy, "reviewMedia", "Review"),
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-media-library",
+      "data-react-admin-ui": "media-library",
+      "data-admin-workbench": "cms",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: fillTemplate(ui.mediaLibraryLead, { assets: summary.total, listings: summary.listings }) },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) },
+          h(Icon, { name: "building-2", size: 16 }),
+          h("span", null, label(copy, "listingManager", "Listings")),
+        ),
+      ),
+      h(PageToolbar, null, h(CmsFilterLinks, { scope: "media", label: ui.mediaIssue || "Waiting for", options: issueOptions })),
+      h(
+        "form",
+        { method: "get", action: "/admin/media", className: "adm-filterbar", role: "search", "data-media-filters": "true" },
+        filterLocaleInput(page),
+        h("input", { type: "hidden", name: "issue", value: filters.issue || "" }),
+        h(
+          "label",
+          null,
+          label(copy, "searchListings", "Search"),
+          h("input", { type: "search", name: "q", defaultValue: filters.q || "", placeholder: ui.mediaSearchHint }),
+        ),
+        h(
+          "label",
+          null,
+          ui.mediaKind,
+          h(
+            "select",
+            { name: "kind" },
+            h("option", { value: "" }, label(copy, "all", "All")),
+            ...(page.filterOptions.kinds || []).map((kind) =>
+              h("option", { key: kind, value: kind, selected: filters.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
+            ),
+          ),
+        ),
+        h("label", null, ui.listing, h("input", { name: "listing", defaultValue: filters.listing || "", placeholder: "MS-CRAWL-0001" })),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/media", page) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      summary.unreviewable
+        ? h(
+            "p",
+            { className: "adm-planned-note", "data-media-unreviewable": String(summary.unreviewable) },
+            h(Icon, { name: "triangle-alert", size: 15 }),
+            h("span", null, fillTemplate(ui.mediaUnreviewable, { count: summary.unreviewable })),
+          )
+        : null,
+      h(
+        Panel,
+        { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-media-library": "true" },
+        page.assets.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl", "data-media-table": "true" },
+                h("thead", null, h("tr", null, ...columns.map((column) => h("th", { key: column, scope: "col" }, column)))),
+                h(
+                  "tbody",
+                  null,
+                  ...page.assets.map((asset) =>
+                    h(
+                      "tr",
+                      { key: `${asset.listing_id}-${asset.asset_id || asset.url}`, "data-media-row": asset.asset_id || "", "data-media-public": String(asset.is_public) },
+                      h(
+                        "th",
+                        { scope: "row" },
+                        h(
+                          "div",
+                          { className: "adm-lead-identity" },
+                          h("bdi", null, asset.listing_title),
+                          h("small", { className: "adm-lead-context" }, [asset.location, `${asset.width || "?"}×${asset.height || "?"}`].filter(Boolean).join(" · ")),
+                        ),
+                      ),
+                      h("td", null, h("code", { className: "crm-mono" }, asset.listing_id)),
+                      h("td", null, fieldText(ui, `media_kind_${asset.kind}`)),
+                      h(
+                        "td",
+                        null,
+                        asset.has_alt
+                          ? h("bdi", null, asset.alt.length > 60 ? `${asset.alt.slice(0, 60)}…` : asset.alt)
+                          : h(StatusPill, { tone: "sun", "data-media-missing-alt": "true" }, ui.mediaIssues?.missing_alt_text || "No alt text"),
+                      ),
+                      h(
+                        "td",
+                        null,
+                        h(StatusPill, { tone: asset.is_public ? "sea" : asset.needs_review ? "sun" : "ink" }, statusText(ui, asset.review_status)),
+                      ),
+                      h(
+                        "td",
+                        null,
+                        asset.reviewable
+                          ? h("a", { href: adminHref(asset.editor_path, page), "data-media-review-link": asset.asset_id }, label(copy, "reviewMedia", "Review"))
+                          : h("span", { className: "crm-tbl__muted" }, ui.mediaNoSource),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "camera", "data-media-empty": "true" },
+              ui.mediaLibraryEmpty,
+              h("a", { className: "adm-empty__action", href: adminHref("/admin/media", page) }, label(copy, "resetFilters", "Reset filters")),
+            ),
+        page.pagination.totalPages > 1
+          ? h(
+              "nav",
+              { className: "adm-pagination", "aria-label": label(copy, "results", "Results"), "data-media-pagination": "true" },
+              page.pagination.page > 1
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: mediaPageHref(page, page.pagination.page - 1) }, label(copy, "previous", "Previous"))
+                : h("span"),
+              h("span", { className: "adm-pagination__status" }, `${page.pagination.page} / ${page.pagination.totalPages}`),
+              page.pagination.page < page.pagination.totalPages
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: mediaPageHref(page, page.pagination.page + 1) }, label(copy, "next", "Next"))
+                : h("span"),
+            )
+          : null,
+      ),
+      h(
+        Panel,
+        { title: ui.mediaWhatCounts || "What the queue counts", "data-media-taxonomy": "true" },
+        h("p", { className: "adm-planned-note" }, ui.mediaTaxonomyNote),
+      ),
+    ],
+  });
+}
+
+function mediaPageHref(page, target) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(page.filters || {})) if (value) params.set(key, String(value));
+  if (target > 1) params.set("page", String(target));
+  const query = params.toString();
+  return adminHref(query ? `/admin/media?${query}` : "/admin/media", page);
+}
+
 function LocaleRolloutBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -13434,6 +13645,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
   if (page.kind === "admin_locale_rollout") return renderStaticElement(h(LocaleRolloutBody, { page }));
+  if (page.kind === "admin_media_library") return renderStaticElement(h(MediaLibraryBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));

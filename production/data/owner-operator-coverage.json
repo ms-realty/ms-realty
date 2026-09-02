@@ -24,11 +24,11 @@
   "summary": {
     "admin_route_files": 112,
     "admin_methods": 131,
-    "admin_pages": 20,
+    "admin_pages": 21,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 154,
-    "structurally_covered_workflows": 154,
+    "authorized_workflows": 155,
+    "structurally_covered_workflows": 155,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -159,6 +159,15 @@
       "path": "/admin/approved-content",
       "icon": "check-circle-2",
       "kind": "admin_approved_content_review",
+      "capability": "content:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "media_library",
+      "group": "cms",
+      "path": "/admin/media",
+      "icon": "camera",
+      "kind": "admin_media_library",
       "capability": "content:read",
       "declared_entrypoint": "signed_in_admin_ui"
     },

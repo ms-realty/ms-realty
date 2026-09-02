@@ -220,6 +220,7 @@ import {
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
+import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
 import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
@@ -5625,6 +5626,21 @@ export function createHttpApp({
       } catch (error) {
         return viewingStoreErrorResponse(error) || adminJson(400, { kind: "bad_request", message: error.message });
       }
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/media") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = renderAdminMediaLibraryPayload(activeRegistry, adminLocaleParam(url), {
+        seed: currentSeed(),
+        query: url.searchParams.get("q") || "",
+        issue: url.searchParams.get("issue") || "",
+        listing: url.searchParams.get("listing") || "",
+        kind: url.searchParams.get("kind") || "",
+        page: url.searchParams.get("page") || 1,
+        operatorId: principal || null,
+        generatedAt: reviewedAt || new Date().toISOString(),
+      });
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
 
     if (request.method === "GET" && url.pathname === "/admin/locales") {
