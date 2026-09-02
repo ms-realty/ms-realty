@@ -221,6 +221,8 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    hermesUnavailableBroker: "Hermes не е свързан за това работно пространство. Използвайте одобрен шаблон или напишете отговора сами; собственикът може да го свърже.",
+    hermesUnavailableOwner: "Hermes не е настроен в тази среда.",
     assistDraft: "Чернова",
     assistPending: "Hermes пише чернова…",
     assistFailed: "Hermes не успя да напише чернова.",
@@ -946,6 +948,8 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    hermesUnavailableBroker: "Hermes не подключён для этого рабочего пространства. Используйте одобренный шаблон или напишите ответ сами; подключить может владелец.",
+    hermesUnavailableOwner: "Hermes не настроен в этой среде.",
     assistDraft: "Черновик",
     assistPending: "Hermes пишет черновик…",
     assistFailed: "Hermes не смог написать черновик.",
@@ -1671,6 +1675,8 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    hermesUnavailableBroker: "Hermes is not connected for this workspace. Use an approved template or write the reply yourself; the workspace owner can connect it.",
+    hermesUnavailableOwner: "Hermes is not configured in this environment.",
     assistDraft: "Draft",
     assistPending: "Hermes is drafting…",
     assistFailed: "Hermes could not draft this.",
@@ -2774,6 +2780,7 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Всички работни пространства",
       scopedAccess: "Ограничен достъп до {count} работни пространства",
       scopeUnavailable: "Тази среда не е предоставила обхвата на работните пространства",
+      scopeUnknown: "Не е записан",
       editName: "Име в работното пространство",
       saveName: "Запази името",
       saving: "Запазване…",
@@ -2893,6 +2900,7 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Все рабочие пространства",
       scopedAccess: "Доступ к {count} рабочим пространствам",
       scopeUnavailable: "Эта среда не передала доступ к рабочим пространствам",
+      scopeUnknown: "Не записан",
       editName: "Имя в рабочем пространстве",
       saveName: "Сохранить имя",
       saving: "Сохранение…",
@@ -3012,6 +3020,7 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "All workspaces",
       scopedAccess: "Access to {count} workspaces",
       scopeUnavailable: "Workspace scope was not provided by this runtime",
+      scopeUnknown: "Not recorded",
       editName: "Workspace name",
       saveName: "Save name",
       saving: "Saving…",
@@ -7106,9 +7115,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   // Hermes availability comes from configuration on the payload, never from a
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
-  const hermesReason =
-    page.hermes?.reason ||
-    label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.");
+  // hermes-availability builds a reason that names the missing environment
+  // variables. That is the right sentence for whoever can set them, and the
+  // wrong one for a broker with a lead open: HERMES_API_KEY is not something
+  // they can do anything about. The env detail goes to the operator who can
+  // act on it; everyone else is told who to ask.
+  const hermesReason = pageCan(page, "settings:manage")
+    ? page.hermes?.reason || ui.hermesUnavailableOwner
+    : ui.hermesUnavailableBroker;
   return h(
     "article",
     {
@@ -7305,7 +7319,10 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
           ...(hermesAvailable ? {} : { "data-hermes-reason": page.hermes?.reason_key || "not_configured" }),
         },
         h(Icon, { name: "info", size: 15 }),
-        h("span", null, hermesAvailable ? label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.") : hermesReason),
+        h("span", null, hermesReason),
+        pageCan(page, "settings:manage")
+          ? h("a", { href: adminHref("/admin/connect", page) }, label(copy, "connections", "Integrations"))
+          : null,
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
     ),
@@ -11674,14 +11691,26 @@ function operatorIdForPage(page) {
   return String(page?.workspace?.operator_id || "").trim();
 }
 
-function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
+// "Workspace scope was not provided by this runtime" was being printed as the
+// value of a field labelled Access, in a workspace where the reader is a
+// broker. A field's value says what is true of the person; why the workspace
+// cannot say it is a note about the workspace, and belongs beside the field
+// rather than inside it.
+function ownerWorkspaceAccess(page, copy = ownerConsoleCopy(page).profile) {
   const profile = page.owner_profile || {};
   const roles = operatorRolesForPage(page);
   const hasWorkspaceScope = Array.isArray(profile.workspace_ids);
   const workspaceIds = hasWorkspaceScope ? profile.workspace_ids : [];
-  if (profile.full_workspace_access || (roles.includes("admin") && hasWorkspaceScope && workspaceIds.length === 0)) return copy.fullAccess;
-  if (roles.includes("admin") && !hasWorkspaceScope && operatorIdForPage(page)) return copy.fullAccess;
-  return hasWorkspaceScope ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length }) : copy.scopeUnavailable;
+  if (profile.full_workspace_access || (roles.includes("admin") && hasWorkspaceScope && workspaceIds.length === 0)) {
+    return { value: copy.fullAccess, known: true };
+  }
+  if (roles.includes("admin") && !hasWorkspaceScope && operatorIdForPage(page)) return { value: copy.fullAccess, known: true };
+  if (hasWorkspaceScope) return { value: fillTemplate(copy.scopedAccess, { count: workspaceIds.length }), known: true };
+  return { value: copy.scopeUnknown, known: false, reason: copy.scopeUnavailable };
+}
+
+function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
+  return ownerWorkspaceAccess(page, copy).value;
 }
 
 function ownerRoleLabel(page, copy = ownerConsoleCopy(page).profile) {
@@ -11692,7 +11721,8 @@ function ownerRoleLabel(page, copy = ownerConsoleCopy(page).profile) {
 function OwnerProfileSection({ page }) {
   const profile = page.owner_profile || {};
   const copy = ownerConsoleCopy(page).profile;
-  const scope = ownerWorkspaceScope(page, copy);
+  const access = ownerWorkspaceAccess(page, copy);
+  const scope = access.value;
   const role = ownerRoleLabel(page, copy);
   const profileNotice = page.profile_notice === "updated" ? copy.saved : page.profile_notice === "error" ? copy.saveFailed : "";
   const fields = [
@@ -11708,13 +11738,21 @@ function OwnerProfileSection({ page }) {
     h(
       "div",
       { className: "crm-panel__hd adm-owner-profile__heading" },
-      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, scope].filter(Boolean).join(" · "))),
+      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, access.known ? scope : null].filter(Boolean).join(" · "))),
     ),
     h(
       "dl",
       { className: "adm-owner-profile__details" },
       ...fields.map(([term, value]) => h("div", { key: term }, h("dt", null, term), h("dd", null, h("bdi", null, value)))),
     ),
+    access.known
+      ? null
+      : h(
+          "p",
+          { className: "adm-planned-note", "data-owner-scope-unknown": "true" },
+          h(Icon, { name: "info", size: 15 }),
+          h("span", null, access.reason),
+        ),
     profile.editable
       ? h(
           "form",
@@ -12864,7 +12902,8 @@ function SettingsBody({ page }) {
   const ui = workbenchCopy(page);
   const settings = settingsCopy(page);
   const owner = ownerConsoleCopy(page);
-  const ownerScope = ownerWorkspaceScope(page, owner.profile);
+  const ownerAccess = ownerWorkspaceAccess(page, owner.profile);
+  const ownerScope = ownerAccess.value;
   const options = page.settingsOptions || { admin_locales: ["bg", "ru", "en"], timezones: [], date_formats: [], broker_groups: [] };
   const brokers = page.brokerProfiles || [];
   const title = settings.title;
