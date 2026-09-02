@@ -845,6 +845,7 @@ function exerciseHermesOwnerCommand(env) {
       };
       const options = {
         operator: { id: "payload-owner-it", roles: ["admin"], workspace_ids: [] },
+        workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
         payload,
         secret: process.env.MS_REALTY_PROVIDER_TOKEN_KEY,
         provider: async () => {
@@ -885,6 +886,7 @@ function exerciseHermesOwnerCommand(env) {
       });
       assert.equal(stored.docs.length, 1);
       assert.equal(stored.docs[0].operator_id, "payload-owner-it");
+      assert.equal(stored.docs[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
       assert.equal(JSON.stringify(stored.docs[0]).includes(input.command), false);
       const opened = openPrivateContactEnvelope(stored.docs[0].receipt_envelope, {
         secret: process.env.MS_REALTY_PROVIDER_TOKEN_KEY,
@@ -960,7 +962,7 @@ function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
           actor: principal.id,
           input: { ...taskInput, task_id: "operations-task-payload-conflict", title: "Different source work" },
         }),
-        (error) => error.code === "conflict" && error.status === 409,
+        (error) => error.code === "idempotency_conflict" && error.status === 409,
       );
 
       const rule = await createAutomationRule({
@@ -991,7 +993,11 @@ function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
         actor: principal.id,
         principal,
         ruleId: rule.rule.rule_id,
-        input: { run_id: "operations-run-payload-it", confirmation: automationConfirmation("run", rule.rule.rule_id) },
+        input: {
+          run_id: "operations-run-payload-it",
+          idempotency_key: "operations-run-payload-it-key",
+          confirmation: automationConfirmation("run", rule.rule.rule_id),
+        },
         runner: async () => ({ queued: 1, url: "https://must-not-persist.example" }),
       });
       assert.equal(run.run.status, "succeeded");
@@ -1003,6 +1009,7 @@ function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
 
       fs.writeFileSync(hermesAuditPath, JSON.stringify({
         recorded_at: "2026-09-01T11:00:00.000Z",
+        workspace_id: workspaceId,
         task_id: "operations-hermes-payload-it",
         object_type: "listing",
         object_id: "MS-CRAWL-0001",
@@ -1019,7 +1026,7 @@ function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
         can_mark_indexable: false,
         prompt: "never return this",
       }) + "\\n");
-      const history = await readHermesRunHistory({ auditPath: hermesAuditPath });
+      const history = await readHermesRunHistory({ auditPath: hermesAuditPath, workspaceId });
       assert.equal(history[0].run_id, "operations-hermes-payload-it");
       assert.equal(history[0].can_publish, false);
       assert.equal(Object.hasOwn(history[0], "prompt"), false);

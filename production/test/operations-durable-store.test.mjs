@@ -61,6 +61,9 @@ function fakePayload() {
     },
     async find({ collection, where, sort, limit, req }) {
       calls.find.push({ collection, where, sort, limit, transactionID: req?.transactionID || null });
+      if (collection === "hermes_owner_receipts" && payload.failHermesReceiptRead) {
+        throw new Error("configured Hermes receipt store failed");
+      }
       let found = rows[collection].filter((row) => matches(row, where)).map(clone);
       const sortField = String(sort || "").replace(/^-/, "");
       const direction = String(sort || "").startsWith("-") ? -1 : 1;
@@ -145,7 +148,7 @@ test("tasks are durable, workspace-scoped, revision-guarded, and idempotent", as
         priority: "urgent",
       },
     }),
-    /idempotency key conflicts/,
+    (error) => error?.code === "idempotency_conflict" && error.status === 409 && /idempotency key conflicts/.test(error.message),
   );
   await assert.rejects(
     createTask({
@@ -154,7 +157,7 @@ test("tasks are durable, workspace-scoped, revision-guarded, and idempotent", as
       actor: principal.id,
       input: { task_id: "task-other", idempotency_key: "task-intent-1", title: "Conflicting task", source_type: "manual" },
     }),
-    /idempotency key conflicts/,
+    (error) => error?.code === "idempotency_conflict" && error.status === 409 && /idempotency key conflicts/.test(error.message),
   );
   const updated = await updateTask({ payload, workspaceId, actor: principal.id, audit: auditWriter, taskId: "task-lead-1", input: { expected_revision: 1, status: "in_progress" } });
   assert.equal(updated.task.status, "in_progress");
@@ -163,8 +166,29 @@ test("tasks are durable, workspace-scoped, revision-guarded, and idempotent", as
   assert.equal(completed.task.status, "completed");
   assert.equal(completed.task.completed_by, principal.id);
   assert.equal(audit.at(-1).action, "task_completed");
+  const lost200Retry = await completeTask({
+    payload,
+    workspaceId,
+    actor: principal.id,
+    audit: auditWriter,
+    taskId: "task-lead-1",
+    recordedAt: "2026-09-03T10:01:00.000Z",
+    input: { expected_revision: 2, completion_note: "Reviewed" },
+  });
+  assert.equal(lost200Retry.idempotent, true);
+  assert.equal(lost200Retry.task.revision, completed.task.revision);
   assert.equal((await readTasks({ payload, workspaceId })).length, 1);
   await assert.rejects(readTask({ payload, workspaceId: "another-workspace", taskId: "task-lead-1" }), /not found/);
+
+  await assert.rejects(
+    createTask({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      input: { task_id: "task-lead-1", idempotency_key: "task-intent-new", title: "A different task", source_type: "manual" },
+    }),
+    (error) => error?.code === "task_id_conflict" && error.status === 409,
+  );
 });
 
 test("automation rules require owner confirmation and run only approved types", async () => {
@@ -185,6 +209,16 @@ test("automation rules require owner confirmation and run only approved types", 
       workspaceId,
       actor: principal.id,
       principal,
+      input: { rule_id: "rule-alerts", idempotency_key: "rule-intent-new", name: "Saved-search digest", rule_type: "saved_search_alerts", schedule: "manual" },
+    }),
+    (error) => error?.code === "rule_id_conflict" && error.status === 409,
+  );
+  await assert.rejects(
+    createAutomationRule({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      principal,
       input: {
         rule_id: "rule-alerts",
         idempotency_key: "rule-intent-1",
@@ -195,7 +229,7 @@ test("automation rules require owner confirmation and run only approved types", 
         confirmation: automationConfirmation("enable", "rule-alerts"),
       },
     }),
-    /idempotency key conflicts/,
+    (error) => error?.code === "idempotency_conflict" && error.status === 409 && /idempotency key conflicts/.test(error.message),
   );
   await assert.rejects(
     updateAutomationRule({ payload, workspaceId, actor: principal.id, principal, ruleId: "rule-alerts", input: { enabled: true } }),
@@ -211,6 +245,20 @@ test("automation rules require owner confirmation and run only approved types", 
     input: { enabled: true, confirmation: automationConfirmation("enable", "rule-alerts") },
   });
   assert.equal(enabled.rule.enabled, true);
+  await assert.rejects(
+    runAutomationRule({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      principal,
+      ruleId: "rule-alerts",
+      input: { confirmation: automationConfirmation("run", "rule-alerts") },
+      runner: async () => {
+        throw new Error("the runner must not be reached without a client idempotency key");
+      },
+    }),
+    (error) => error?.code === "bad_request" && /idempotency_key is required/.test(error.message),
+  );
   let runnerCalls = 0;
   const run = await runAutomationRule({
     payload,
@@ -266,7 +314,7 @@ test("automation rules require owner confirmation and run only approved types", 
       input: { run_id: "run-other", idempotency_key: "run-intent-1", confirmation: automationConfirmation("run", "rule-alerts") },
       runner: async () => ({ queued: 99 }),
     }),
-    /idempotency key conflicts/,
+    (error) => error?.code === "idempotency_conflict" && error.status === 409 && /idempotency key conflicts/.test(error.message),
   );
   const listed = await readAutomationRuns({ payload, workspaceId });
   assert.equal(listed.length, 1);
@@ -310,7 +358,7 @@ test("automation completion preserves a concurrent rule edit and increments its 
     actor: principal.id,
     principal,
     ruleId: created.rule.rule_id,
-    input: { run_id: "run-concurrent", confirmation: automationConfirmation("run", created.rule.rule_id) },
+    input: { run_id: "run-concurrent", idempotency_key: "run-concurrent-key", confirmation: automationConfirmation("run", created.rule.rule_id) },
     runner: async () => {
       signalRunnerStarted();
       await runnerRelease;
@@ -352,7 +400,7 @@ test("automation failures are durable and Hermes history remains read-only and r
     principal,
     ruleId: "rule-publish",
     audit: (entry) => audit.push(entry),
-    input: { run_id: "run-publish-1", confirmation: automationConfirmation("run", "rule-publish") },
+    input: { run_id: "run-publish-1", idempotency_key: "run-publish-key", confirmation: automationConfirmation("run", "rule-publish") },
     runner: async () => {
       throw Object.assign(new Error("listing schedule unavailable"), { code: "schedule_unavailable" });
     },
@@ -371,6 +419,7 @@ test("automation failures are durable and Hermes history remains read-only and r
     object_id: "listing-1",
     source_locale: "bg",
     target_locale: "en",
+    workspace_id: workspaceId,
     status: "hermes_drafted",
     provider_mode: "self_hosted",
     source_hash: "a".repeat(64),
@@ -381,12 +430,110 @@ test("automation failures are durable and Hermes history remains read-only and r
     can_publish: false,
     can_mark_indexable: false,
   })}\n`);
-  const history = await readHermesRunHistory({ auditPath });
+  const history = await readHermesRunHistory({ auditPath, workspaceId });
   assert.equal(history[0].run_id, "translation-task-1");
   assert.equal(history[0].can_publish, false);
   assert.equal(history[0].source, "hermes-audit");
   assert.equal(Object.hasOwn(history[0], "prompt"), false);
-  assert.equal((await readHermesRun({ auditPath, runId: "translation-task-1" })).task_id, "translation-task-1");
+  assert.equal((await readHermesRun({ auditPath, workspaceId, runId: "translation-task-1" })).task_id, "translation-task-1");
+});
+
+test("Hermes history excludes legacy and other-workspace audit rows when scoped", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-hermes-runs-scope-"));
+  const auditPath = path.join(directory, "hermes-audit.jsonl");
+  const row = (taskId, workspace) => ({
+    recorded_at: "2026-09-03T12:00:00.000Z",
+    task_id: taskId,
+    object_type: "listing",
+    object_id: `listing-${taskId}`,
+    source_locale: "bg",
+    target_locale: "en",
+    status: "hermes_drafted",
+    provider_mode: "self_hosted",
+    source_hash: "a".repeat(64),
+    draft_hash: "b".repeat(64),
+    has_output: true,
+    public_indexable: false,
+    human_approved: false,
+    can_publish: false,
+    can_mark_indexable: false,
+    ...(workspace ? { workspace_id: workspace } : {}),
+  });
+  fs.writeFileSync(auditPath, [row("legacy-hermes", null), row("workspace-a-hermes", "workspace-a"), row("workspace-b-hermes", "workspace-b")].map(JSON.stringify).join("\n") + "\n");
+  const scoped = await readHermesRunHistory({ auditPath, workspaceId: "workspace-a" });
+  assert.deepEqual(scoped.map((entry) => entry.run_id), ["workspace-a-hermes"]);
+});
+
+test("configured Hermes receipt-store failures surface as a safe 503", async () => {
+  const payload = fakePayload();
+  payload.failHermesReceiptRead = true;
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-hermes-runs-receipt-failure-"));
+  const auditPath = path.join(directory, "hermes-audit.jsonl");
+  fs.writeFileSync(auditPath, "");
+  await assert.rejects(
+    readHermesRunHistory({
+      auditPath,
+      payload,
+      operatorId: principal.id,
+      receiptSecret: "x".repeat(32),
+      workspaceId,
+    }),
+    (error) => error?.status === 503 && error.code === "hermes_receipt_unavailable",
+  );
+});
+
+test("automation retries never rerun a side effect after a crash between create and finalize", async () => {
+  const payload = fakePayload();
+  await createAutomationRule({
+    payload,
+    workspaceId,
+    actor: principal.id,
+    principal,
+    input: { rule_id: "rule-crash", name: "Crash fence", rule_type: "saved_search_alerts", schedule: "manual", enabled: true, confirmation: automationConfirmation("enable", "rule-crash") },
+  });
+  let runnerCalls = 0;
+  const originalUpdate = payload.update;
+  let failFinalize = true;
+  payload.update = async (args) => {
+    if (failFinalize && args.collection === "automation_runs" && args.data?.status === "succeeded") {
+      failFinalize = false;
+      throw new Error("simulated crash between create and finalize");
+    }
+    return originalUpdate(args);
+  };
+  const input = { run_id: "run-crash", idempotency_key: "run-crash-key", confirmation: automationConfirmation("run", "rule-crash") };
+  await assert.rejects(
+    runAutomationRule({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      principal,
+      ruleId: "rule-crash",
+      input,
+      runner: async () => {
+        runnerCalls += 1;
+        return { queued: 1 };
+      },
+    }),
+    (error) => error?.code === "operations_store_unavailable" && error.status === 503,
+  );
+  assert.equal(payload.rows.automation_runs[0].status, "running");
+  await assert.rejects(
+    runAutomationRule({
+      payload,
+      workspaceId,
+      actor: principal.id,
+      principal,
+      ruleId: "rule-crash",
+      input,
+      runner: async () => {
+        runnerCalls += 1;
+        return { queued: 99 };
+      },
+    }),
+    (error) => error?.code === "automation_run_in_progress" && error.status === 409 && /in progress|indeterminate/i.test(error.message),
+  );
+  assert.equal(runnerCalls, 1);
 });
 
 test("Hermes history merges sources by recorded_at descending before applying limit", async () => {
@@ -398,6 +545,7 @@ test("Hermes history merges sources by recorded_at descending before applying li
     id: 1,
     idempotency_key: "owner-command-older",
     operator_id: principal.id,
+    workspace_id: workspaceId,
     status: "planned",
     command_digest: "sha256:owner-command-older",
     model: "hermes-test",
@@ -425,6 +573,7 @@ test("Hermes history merges sources by recorded_at descending before applying li
     [
       {
         recorded_at: "2026-09-03T12:00:00.000Z",
+        workspace_id: workspaceId,
         task_id: "translation-newest",
         object_type: "listing",
         object_id: "listing-1",
@@ -442,6 +591,7 @@ test("Hermes history merges sources by recorded_at descending before applying li
       },
       {
         recorded_at: "2026-09-03T11:58:00.000Z",
+        workspace_id: workspaceId,
         task_id: "translation-oldest",
         object_type: "listing",
         object_id: "listing-2",
@@ -462,7 +612,7 @@ test("Hermes history merges sources by recorded_at descending before applying li
       .join("\n") + "\n",
   );
 
-  const history = await readHermesRunHistory({ auditPath, payload, operatorId: principal.id, receiptSecret, limit: 2 });
+  const history = await readHermesRunHistory({ auditPath, payload, operatorId: principal.id, receiptSecret, workspaceId, limit: 2 });
   assert.deepEqual(
     history.map((row) => [row.run_id, row.source]),
     [

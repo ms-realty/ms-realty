@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { automationConfirmation } from "../lib/operations-durable-store.mjs";
 
 const WORKSPACE = "workspace-parity";
 const OPERATOR = { id: "operations-owner", source: "credential_registry", can_mutate: true, roles: ["admin"], workspace_ids: [WORKSPACE] };
@@ -20,7 +21,7 @@ function matches(value, where) {
 }
 
 function fakePayload() {
-  const rows = { tasks: [], automation_rules: [], automation_runs: [], automation_run_failures: [] };
+  const rows = { tasks: [], automation_rules: [], automation_runs: [], automation_run_failures: [], hermes_owner_receipts: [] };
   let nextId = 1;
   let snapshot = null;
   let transaction = 0;
@@ -62,7 +63,13 @@ function fakePayload() {
 
 function appConfig(payload, auditLogPath, hermesAuditPath) {
   return {
-    ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_WORKSPACE_ID: WORKSPACE }),
+    ...appAdminConfigFromEnv({
+      NODE_ENV: "test",
+      MS_REALTY_WORKSPACE_ID: WORKSPACE,
+      MS_REALTY_OPERATIONS_DURABLE_STORE_ENABLED: "true",
+      PAYLOAD_SECRET: "operations-parity-payload-secret",
+      DATABASE_URL: "postgres://operations-parity",
+    }),
     workspaceId: WORKSPACE,
     workspaceSettingsWorkspaceId: WORKSPACE,
     operationsPayload: payload,
@@ -109,6 +116,7 @@ test("Node and Next operations API paths share task and Hermes read behavior", a
     target_locale: "en",
     status: "hermes_drafted",
     provider_mode: "self_hosted",
+    workspace_id: WORKSPACE,
     source_hash: "a".repeat(64),
     draft_hash: "b".repeat(64),
     has_output: true,
@@ -133,6 +141,12 @@ test("Node and Next operations API paths share task and Hermes read behavior", a
   try {
     const standalone = createHttpApp({
       workspaceId: WORKSPACE,
+      operationsDurableStore: {
+        operationsDurableStoreEnabled: true,
+        payloadSecret: "operations-parity-payload-secret",
+        databaseUrl: "postgres://operations-parity",
+        workspaceId: WORKSPACE,
+      },
       operationsPayload: httpPayload,
       payloadListingRuntime: httpPayload,
       auditLogPath: path.join(directory, "http-audit.jsonl"),
@@ -161,6 +175,98 @@ test("Node and Next operations API paths share task and Hermes read behavior", a
     assert.deepEqual(await nextHermes.json(), nodeHermes.body);
     assert.equal(nodeHermes.body.runs[0].can_publish, false);
     assert.equal(Object.hasOwn(nodeHermes.body.runs[0], "prompt"), false);
+
+    const nextAlias = await appRequest("/api/admin/automation-rules", { config: app });
+    const nodeAlias = await dispatchHttp(standalone, { url: "/api/admin/automation-rules", headers: { authorization: "Bearer operations-parity-token", accept: "application/json" } });
+    assert.notEqual(nextAlias.status, 200);
+    assert.notEqual(nodeAlias.status, 200);
+
+    const broker = { ...OPERATOR, id: "operations-broker", roles: ["broker"] };
+    const brokerConfig = { ...app, adminPrincipal: broker };
+    const nextCrossWorkspace = await appRequest("/api/admin/hermes/runs?workspace_id=another-workspace", { config: brokerConfig });
+    assert.equal(nextCrossWorkspace.status, 403);
+    const brokerToken = "operations-broker-credential-token";
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: broker.id, token: brokerToken, roles: broker.roles, workspace_ids: [WORKSPACE] },
+    ]);
+    const nodeCrossWorkspace = await dispatchHttp(standalone, {
+      url: "/api/admin/hermes/runs?workspace_id=another-workspace",
+      headers: { authorization: `Bearer ${brokerToken}`, accept: "application/json" },
+    });
+    assert.equal(nodeCrossWorkspace.status, 403);
+
+    const ruleInput = {
+      rule_id: "route-retry-rule",
+      idempotency_key: "route-retry-rule-key",
+      name: "Route retry rule",
+      rule_type: "saved_search_alerts",
+      schedule: "manual",
+    };
+    const nextRule = await appRequest("/api/admin/automations", { method: "POST", body: ruleInput, config: app });
+    assert.equal(nextRule.status, 201);
+    const nextEnabled = await appRequest("/api/admin/automations/route-retry-rule", {
+      method: "PATCH",
+      body: { enabled: true, confirmation: automationConfirmation("enable", ruleInput.rule_id) },
+      config: app,
+    });
+    assert.equal(nextEnabled.status, 200);
+    const missingRunKey = await appRequest("/api/admin/automations/route-retry-rule/run", {
+      method: "POST",
+      body: { confirmation: automationConfirmation("run", ruleInput.rule_id) },
+      config: app,
+    });
+    assert.equal(missingRunKey.status, 400);
+    const runInput = { idempotency_key: "route-retry-run-key", confirmation: automationConfirmation("run", ruleInput.rule_id) };
+    const firstRun = await appRequest("/api/admin/automations/route-retry-rule/run", { method: "POST", body: runInput, config: app });
+    assert.ok([201, 502].includes(firstRun.status));
+    const retriedRun = await appRequest("/api/admin/automations/route-retry-rule/run", { method: "POST", body: runInput, config: app });
+    assert.equal(retriedRun.status, 200);
+    assert.equal((await retriedRun.json()).idempotent, true);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("both adapters refuse durable operations when the feature flag is disabled", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-operations-disabled-"));
+  const disabledStore = {
+    operationsDurableStoreEnabled: false,
+    payloadSecret: "operations-parity-payload-secret",
+    databaseUrl: "postgres://operations-parity",
+    workspaceId: WORKSPACE,
+  };
+  const app = appConfig(fakePayload(), path.join(directory, "next-audit.jsonl"), path.join(directory, "hermes-audit.jsonl"));
+  const disabledApp = { ...app, operationsDurableStore: disabledStore };
+  const next = await appRequest("/api/admin/tasks", { config: disabledApp });
+  assert.equal(next.status, 503);
+  assert.equal((await next.json()).kind, "operations_store_unavailable");
+
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  process.env.NODE_ENV = "test";
+  process.env.MS_REALTY_ADMIN_TOKEN = "operations-disabled-token";
+  process.env.MS_REALTY_ADMIN_ACTOR = OPERATOR.id;
+  delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+  try {
+    const standalone = createHttpApp({
+      workspaceId: WORKSPACE,
+      operationsDurableStore: disabledStore,
+      operationsPayload: fakePayload(),
+      hermesAuditPath: path.join(directory, "hermes-audit.jsonl"),
+    });
+    const node = await dispatchHttp(standalone, {
+      url: "/api/admin/tasks",
+      headers: { authorization: "Bearer operations-disabled-token", accept: "application/json" },
+    });
+    assert.equal(node.status, 503);
+    assert.equal(node.body.kind, "operations_store_unavailable");
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

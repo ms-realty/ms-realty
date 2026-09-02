@@ -51,12 +51,13 @@ test("translation ledger writes redacted Hermes audit rows for persisted AI task
         can_mark_indexable: false,
       },
     },
-    { filePath: file, recordedAt: "2026-07-05T00:00:00Z" },
+    { filePath: file, recordedAt: "2026-07-05T00:00:00Z", workspaceId: "workspace-hermes-ledger" },
   );
 
   const rows = readHermesAuditLedger(auditFile);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].task_id, "translation-listing-MS-1-he");
+  assert.equal(rows[0].workspace_id, "workspace-hermes-ledger");
   assert.equal(rows[0].has_output, false);
   assert.equal(rows[0].can_publish, false);
   assert.equal(JSON.stringify(rows).includes("raw source text"), false);

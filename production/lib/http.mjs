@@ -274,6 +274,7 @@ import {
   readHermesRunHistory,
   readHermesRun,
   operationsDurableStoreConfigFromEnv,
+  isOperationsDurableStoreEnabled,
 } from "./operations-durable-store.mjs";
 import {
   appendListingEdit,
@@ -4280,11 +4281,13 @@ export function createHttpApp({
     // shares the same store contract as the Next adapter and only supplies the
     // two existing run-due implementations.
     const taskPath = url.pathname.match(/^\/api\/admin\/tasks(?:\/([^/]+))?(?:\/(complete))?$/);
-    const automationBase = url.pathname.match(/^\/api\/admin\/(automations|automation-rules)(?:\/([^/]+))?(?:\/(run))?$/);
-    const automationRunsPath = url.pathname.match(/^\/api\/admin\/(automations|automation-rules)\/runs(?:\/([^/]+))?$/);
+    const automationBase = url.pathname.match(/^\/api\/admin\/automations(?:\/([^/]+))?(?:\/(run))?$/);
+    const automationRunsPath = url.pathname.match(/^\/api\/admin\/automations\/runs(?:\/([^/]+))?$/);
     const hermesRunsPath = url.pathname.match(/^\/api\/admin\/hermes\/runs(?:\/([^/]+))?$/);
     if (taskPath || automationBase || automationRunsPath || hermesRunsPath) {
-      const scope = String(workspaceId || operationsDurableStore?.workspaceId || "").trim();
+      const configuredScope = String(workspaceId || operationsDurableStore?.workspaceId || "").trim();
+      const requestedScope = String(url.searchParams.get("workspace_id") || "").trim();
+      const scope = requestedScope || configuredScope;
       if (!scope) {
         return adminJson(503, {
           kind: "operations_workspace_unavailable",
@@ -4292,6 +4295,12 @@ export function createHttpApp({
         });
       }
       if (!canAdminAccessWorkspace(principal, scope)) return adminForbidden("workspace:access");
+      if (!isOperationsDurableStoreEnabled(operationsDurableStore)) {
+        return adminJson(503, {
+          kind: "operations_store_unavailable",
+          message: "Durable operations are unavailable on this runtime.",
+        });
+      }
       const payload = operationsPayload || payloadListingRuntime || null;
       const recordedAt = reviewedAt || editedAt || bookedAt || receivedAt || new Date().toISOString();
       const actor = principal?.id || "";
@@ -4406,6 +4415,7 @@ export function createHttpApp({
             auditPath: hermesAuditPath,
             payload: hermesReceiptPayload || payload,
             operatorId: actor,
+            workspaceId: scope,
             receiptSecret: hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
             limit: url.searchParams.get("limit") || 100,
           };
@@ -4418,8 +4428,8 @@ export function createHttpApp({
       if (automationRunsPath) {
         if (request.method !== "GET") return adminJson(405, { kind: "method_not_allowed" });
         try {
-          if (automationRunsPath[2]) {
-            return adminJson(200, { kind: "admin_automation_run", ...(await readAutomationRun({ runId: stableId(automationRunsPath[2], "run_id"), workspaceId: scope, payload })) });
+          if (automationRunsPath[1]) {
+            return adminJson(200, { kind: "admin_automation_run", ...(await readAutomationRun({ runId: stableId(automationRunsPath[1], "run_id"), workspaceId: scope, payload })) });
           }
           return adminJson(200, { kind: "admin_automation_runs", workspace_id: scope, runs: await readAutomationRuns({ workspaceId: scope, payload, limit: url.searchParams.get("limit") || 100 }) });
         } catch (error) {
@@ -4427,11 +4437,11 @@ export function createHttpApp({
         }
       }
       if (automationBase) {
-        const ruleId = automationBase[2] ? stableId(automationBase[2], "rule_id") : null;
+        const ruleId = automationBase[1] ? stableId(automationBase[1], "rule_id") : null;
         try {
           if (request.method === "GET" && !ruleId) return adminJson(200, { kind: "admin_automations", workspace_id: scope, rules: await readAutomationRules({ workspaceId: scope, payload, limit: url.searchParams.get("limit") || 100 }) });
           if (request.method === "GET" && ruleId) return adminJson(200, { kind: "admin_automation", rule: await readAutomationRule({ ruleId, workspaceId: scope, payload }) });
-          if (request.method === "POST" && automationBase[3] === "run" && ruleId) {
+          if (request.method === "POST" && automationBase[2] === "run" && ruleId) {
             const result = await runAutomationRule({
               ruleId,
               input: parseBody(request),
@@ -4479,6 +4489,13 @@ export function createHttpApp({
           receiptPayload: hermesReceiptPayload || payloadListingRuntime,
           receiptSecret:
             hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+          workspaceId: String(
+            url.searchParams.get("workspace_id") ||
+              workspaceId ||
+              operationsDurableStore?.workspaceId ||
+              hermesEnv.MS_REALTY_WORKSPACE_ID ||
+              "",
+          ).trim(),
           providerConnectionPayload: providerConnectionPayload || payloadListingRuntime || null,
           readConnections: readProviderConnections,
           commandResult,
@@ -4500,6 +4517,13 @@ export function createHttpApp({
             operator: principal,
             payload: hermesReceiptPayload || payloadListingRuntime,
             secret: hermesReceiptSecret || providerConnection?.credentialSecret || hermesEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+            workspaceId: String(
+              url.searchParams.get("workspace_id") ||
+                workspaceId ||
+                operationsDurableStore?.workspaceId ||
+                hermesEnv.MS_REALTY_WORKSPACE_ID ||
+                "",
+            ).trim(),
             env: hermesEnv,
             fetchImpl: hermesCommandFetch || hermesAgentFetch,
             provider: hermesOwnerCommandProvider,
@@ -6382,7 +6406,10 @@ export function createHttpApp({
             );
             const persistedStaleTranslations = result.staleTranslations
               .filter((translation) => translation.id)
-              .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
+              .map((translation) => appendTranslationTask(translation, {
+                filePath: translationLedgerPath || undefined,
+                workspaceId: workspaceId || operationsDurableStore?.workspaceId,
+              }));
             return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
           });
         let reviewPath = null;
@@ -6464,7 +6491,10 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
-        const task = appendTranslationTask(createTranslationReviewTask(activeRegistry, input), { filePath: translationLedgerPath || undefined });
+        const task = appendTranslationTask(createTranslationReviewTask(activeRegistry, input), {
+          filePath: translationLedgerPath || undefined,
+          workspaceId: workspaceId || operationsDurableStore?.workspaceId,
+        });
         recordAudit({
           action: "translation_drafted",
           actor: input.reviewer || "translation_editor",
@@ -6487,6 +6517,7 @@ export function createHttpApp({
         if (!task) throw new Error("Known translation task is required");
         const approved = appendTranslationTask(approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt), {
           filePath: translationLedgerPath || undefined,
+          workspaceId: workspaceId || operationsDurableStore?.workspaceId,
         });
         recordAudit({
           action: "translation_approved",
@@ -6514,7 +6545,10 @@ export function createHttpApp({
           principal?.id || task.reviewer,
           reviewedAt || new Date().toISOString(),
         );
-        const persisted = appendTranslationTask(published, { filePath: translationLedgerPath || undefined });
+        const persisted = appendTranslationTask(published, {
+          filePath: translationLedgerPath || undefined,
+          workspaceId: workspaceId || operationsDurableStore?.workspaceId,
+        });
         recordAudit({
           action: "translation_published",
           actor: persisted.reviewer,

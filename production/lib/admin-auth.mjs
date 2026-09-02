@@ -87,8 +87,6 @@ const OPERATIONS_READ_PATHS = new Set([
   "/api/admin/tasks",
   "/api/admin/automations",
   "/api/admin/automations/runs",
-  "/api/admin/automation-rules",
-  "/api/admin/automation-rules/runs",
   "/api/admin/hermes/runs",
 ]);
 
@@ -128,7 +126,6 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/deals/close",
   "/api/admin/tasks",
   "/api/admin/automations",
-  "/api/admin/automation-rules",
 ]);
 
 // Document metadata, immutable revisions, and signature-request state are a
@@ -264,11 +261,11 @@ export function requiredAdminCapability(method, pathname) {
   }
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
   const operationsReadRoute =
-    /^\/api\/admin\/(?:tasks(?:\/[^/]+)?|automations(?:\/runs(?:\/[^/]+)?|\/[^/]+)?|automation-rules(?:\/runs(?:\/[^/]+)?|\/[^/]+)?|hermes\/runs(?:\/[^/]+)?)$/.test(
+    /^\/api\/admin\/(?:tasks(?:\/[^/]+)?|automations(?:\/runs(?:\/[^/]+)?|\/[^/]+)?|hermes\/runs(?:\/[^/]+)?)$/.test(
       pathname,
     );
   const operationsWriteRoute =
-    /^\/api\/admin\/(?:tasks(?:\/[^/]+(?:\/complete)?)?|automations(?:\/[^/]+(?:\/run)?)?|automation-rules(?:\/[^/]+(?:\/run)?)?)$/.test(
+    /^\/api\/admin\/(?:tasks(?:\/[^/]+(?:\/complete)?)?|automations(?:\/[^/]+(?:\/run)?)?)$/.test(
       pathname,
     );
   if (operationsReadRoute && verb === "GET") return "operations:read";

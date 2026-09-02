@@ -426,6 +426,7 @@ import {
   readHermesRunHistory,
   readHermesRun,
   operationsDurableStoreConfigFromEnv,
+  isOperationsDurableStoreEnabled,
 } from "./operations-durable-store.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, createViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import {
@@ -2273,6 +2274,14 @@ async function translationQueuePayload(registry, url, config) {
 
 async function hermesConsolePayload(registry, url, config, { commandResult = null, commandError = null } = {}) {
   const env = config.authEnv || process.env;
+  const workspaceId = String(
+    url.searchParams.get("workspace_id") ||
+      config.workspaceId ||
+      config.workspaceSettingsWorkspaceId ||
+      config.operationsDurableStore?.workspaceId ||
+      env.MS_REALTY_WORKSPACE_ID ||
+      "",
+  ).trim();
   return buildAdminHermesPayload({
     registry,
     requestedLocale: adminLocaleParam(url, config),
@@ -2289,6 +2298,7 @@ async function hermesConsolePayload(registry, url, config, { commandResult = nul
     probeTimeoutMs: config.hermesAgentProbeTimeoutMs || 5_000,
     receiptPayload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
     receiptSecret: config.hermesReceiptSecret || env.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+    workspaceId,
     providerConnectionPayload: config.providerConnectionPayload || config.payloadListingRuntime || null,
     readConnections: config.readProviderConnections || readProviderConnections,
     commandResult,
@@ -2737,7 +2747,10 @@ function persistEditorChange(result, config) {
     ? []
     : result.staleTranslations
         .filter((translation) => translation.id)
-        .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
+        .map((translation) => appendTranslationTask(translation, {
+          filePath: config.translationLedgerPath,
+          workspaceId: config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId,
+        }));
   if (!edit.idempotent) {
     recordAudit(
       {
@@ -3741,7 +3754,10 @@ function appendTourApprovalRow(input, config) {
 
 function appendTranslationDraft(registry, input, config) {
   const attributedInput = bindAuthenticatedOperator(translationDraftInput(input), config.adminPrincipal, ["reviewer"]);
-  const task = appendTranslationTask(createTranslationReviewTask(registry, attributedInput), { filePath: config.translationLedgerPath });
+  const task = appendTranslationTask(createTranslationReviewTask(registry, attributedInput), {
+    filePath: config.translationLedgerPath,
+    workspaceId: config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId,
+  });
   recordAudit(
     {
       action: "translation_drafted",
@@ -3762,6 +3778,7 @@ function appendApprovedTranslation(registry, input, config) {
   if (!task) throw new Error("Known translation task is required");
   const approved = appendTranslationTask(approveTranslationTask(registry, task, input.reviewer, input.approvedAt || config.reviewedAt), {
     filePath: config.translationLedgerPath,
+    workspaceId: config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId,
   });
   recordAudit(
     {
@@ -3787,7 +3804,10 @@ function appendPublishedTranslation(registry, input, config) {
       config.adminPrincipal?.id || task.reviewer,
       config.reviewedAt || new Date().toISOString(),
     ),
-    { filePath: config.translationLedgerPath },
+    {
+      filePath: config.translationLedgerPath,
+      workspaceId: config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId,
+    },
   );
   recordAudit(
     {
@@ -4093,7 +4113,10 @@ async function importListingQualityRows(inputCsv, config, source = "listing_qual
       );
       const persistedStaleTranslations = result.staleTranslations
         .filter((translation) => translation.id)
-        .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
+        .map((translation) => appendTranslationTask(translation, {
+          filePath: config.translationLedgerPath,
+          workspaceId: config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId,
+        }));
       return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
     });
   let reviewPath = null;
@@ -4451,13 +4474,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     // store; the adapter supplies the authenticated workspace and the one
     // existing run-due function for each allowlisted rule type.
     const taskPath = url.pathname.match(/^\/api\/admin\/tasks(?:\/([^/]+))?(?:\/(complete))?$/);
-    const automationBase = url.pathname.match(/^\/api\/admin\/(automations|automation-rules)(?:\/([^/]+))?(?:\/(run))?$/);
-    const automationRunsPath = url.pathname.match(/^\/api\/admin\/(automations|automation-rules)\/runs(?:\/([^/]+))?$/);
+    const automationBase = url.pathname.match(/^\/api\/admin\/automations(?:\/([^/]+))?(?:\/(run))?$/);
+    const automationRunsPath = url.pathname.match(/^\/api\/admin\/automations\/runs(?:\/([^/]+))?$/);
     const hermesRunsPath = url.pathname.match(/^\/api\/admin\/hermes\/runs(?:\/([^/]+))?$/);
     if (taskPath || automationBase || automationRunsPath || hermesRunsPath) {
-      const scope = String(
+      const configuredScope = String(
         config.workspaceId || config.workspaceSettingsWorkspaceId || config.operationsDurableStore?.workspaceId || "",
       ).trim();
+      const requestedScope = String(url.searchParams.get("workspace_id") || "").trim();
+      const scope = requestedScope || configuredScope;
       if (!scope) {
         return jsonResponse(503, {
           kind: "operations_workspace_unavailable",
@@ -4465,6 +4490,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         });
       }
       if (!canAdminAccessWorkspace(principal, scope)) return adminForbidden("workspace:access");
+      if (!isOperationsDurableStoreEnabled(config.operationsDurableStore)) {
+        return jsonResponse(503, {
+          kind: "operations_store_unavailable",
+          message: "Durable operations are unavailable on this runtime.",
+        });
+      }
       const payload = config.operationsPayload || config.payloadListingRuntime || null;
       const recordedAt = auditRecordedAt(config);
       const actor = principal?.id || "";
@@ -4526,6 +4557,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             auditPath: config.hermesAuditPath,
             payload: config.hermesReceiptPayload || payload,
             operatorId: actor,
+            workspaceId: scope,
             receiptSecret: config.hermesReceiptSecret || config.hermesEnv?.MS_REALTY_PROVIDER_TOKEN_KEY || authEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
             limit: url.searchParams.get("limit") || 100,
           };
@@ -4541,8 +4573,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       if (automationRunsPath) {
         if (request.method !== "GET") return jsonResponse(405, { kind: "method_not_allowed" });
         try {
-          if (automationRunsPath[2]) {
-            return jsonResponse(200, { kind: "admin_automation_run", ...await readAutomationRun({ runId: stableId(automationRunsPath[2], "run_id"), workspaceId: scope, payload }) });
+          if (automationRunsPath[1]) {
+            return jsonResponse(200, { kind: "admin_automation_run", ...await readAutomationRun({ runId: stableId(automationRunsPath[1], "run_id"), workspaceId: scope, payload }) });
           }
           return jsonResponse(200, {
             kind: "admin_automation_runs",
@@ -4555,7 +4587,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       }
 
       if (automationBase) {
-        const ruleId = automationBase[2] ? stableId(automationBase[2], "rule_id") : null;
+        const ruleId = automationBase[1] ? stableId(automationBase[1], "rule_id") : null;
         try {
           if (request.method === "GET" && !ruleId) {
             return jsonResponse(200, { kind: "admin_automations", workspace_id: scope, rules: await readAutomationRules({ workspaceId: scope, payload, limit: url.searchParams.get("limit") || 100 }) });
@@ -4563,7 +4595,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           if (request.method === "GET" && ruleId) {
             return jsonResponse(200, { kind: "admin_automation", rule: await readAutomationRule({ ruleId, workspaceId: scope, payload }) });
           }
-          if (request.method === "POST" && automationBase[3] === "run" && ruleId) {
+          if (request.method === "POST" && automationBase[2] === "run" && ruleId) {
             const result = await runAutomationRule({
               ruleId,
               input: await body(),
@@ -4723,6 +4755,14 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               operator: principal,
               payload: config.hermesReceiptPayload || config.payloadListingRuntime || null,
               secret: config.hermesReceiptSecret || authEnv.MS_REALTY_PROVIDER_TOKEN_KEY || "",
+              workspaceId: String(
+                url.searchParams.get("workspace_id") ||
+                  config.workspaceId ||
+                  config.workspaceSettingsWorkspaceId ||
+                  config.operationsDurableStore?.workspaceId ||
+                  authEnv.MS_REALTY_WORKSPACE_ID ||
+                  "",
+              ).trim(),
               env: authEnv,
               fetchImpl: config.hermesCommandFetch || config.hermesAgentFetch || globalThis.fetch,
               provider: config.hermesOwnerCommandProvider || null,

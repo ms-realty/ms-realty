@@ -150,10 +150,10 @@ export class OperationsNotFoundError extends Error {
 }
 
 export class OperationsConflictError extends Error {
-  constructor(message = "Operations record conflicts with the requested change") {
+  constructor(message = "Operations record conflicts with the requested change", { code = "conflict" } = {}) {
     super(message);
     this.name = "OperationsConflictError";
-    this.code = "conflict";
+    this.code = code;
     this.status = 409;
   }
 }
@@ -545,10 +545,6 @@ function ruleChangedData(input, current, actor) {
   return output;
 }
 
-function operationKey(scope, kind, value) {
-  return `${scope}:${kind}:${value}`;
-}
-
 function runData({ rule, scope, actor, input, startedAt }) {
   assertKnownKeys(input, new Set(["idempotency_key", "run_id", "confirmation"]), "Automation run");
   assertNoPrivateFields(input, "Automation run");
@@ -561,7 +557,7 @@ function runData({ rule, scope, actor, input, startedAt }) {
     trigger: "manual",
     status: "running",
     requested_by: id(actor, "requested_by"),
-    idempotency_key: text(input.idempotency_key || operationKey(scope, "automation-run", runId), "idempotency_key", 240),
+    idempotency_key: text(input.idempotency_key, "idempotency_key", 240),
     started_at: nowIso(startedAt),
     completed_at: null,
     failure_code: null,
@@ -589,13 +585,17 @@ function auditEvent(audit, input) {
   return audit(input);
 }
 
-function conflictFromDuplicate(error) {
+function conflictFromDuplicate(error, { stableCode = null, stableMessage = "" } = {}) {
   const textValue = String(error?.message || "");
-  return /unique|duplicate|23505/i.test(textValue) ? new OperationsConflictError("The operations idempotency key is already in use") : error;
+  if (!/unique|duplicate|23505/i.test(textValue)) return error;
+  if (stableCode && /(task[_ ]?id|rule[_ ]?id|workspace_.*(?:task|rule))/i.test(textValue)) {
+    return new OperationsConflictError(stableMessage, { code: stableCode });
+  }
+  return new OperationsConflictError("The operations idempotency key is already in use", { code: "idempotency_conflict" });
 }
 
-function durableFailure(message, error) {
-  const conflict = conflictFromDuplicate(error);
+function durableFailure(message, error, conflictOptions = {}) {
+  const conflict = conflictFromDuplicate(error, conflictOptions);
   if (conflict !== error) return conflict;
   if (error?.name === "OperationsInputError" || error?.code === "bad_request") return error;
   return new OperationsStoreUnavailableError(message, error);
@@ -685,8 +685,14 @@ export async function createTask({ input, workspaceId, actor, payload = null, au
           "idempotency_key",
           "revision",
         ]);
-        if (!same) throw new OperationsConflictError("Task idempotency key conflicts with an existing task");
+        if (!same) {
+          throw new OperationsConflictError("Task idempotency key conflicts with an existing task", { code: "idempotency_conflict" });
+        }
         return { document: existing, idempotent: true };
+      }
+      const stable = await findOne(runtime, TASK_COLLECTION_SLUG, scopeWhere(scope, { task_id: { equals: data.task_id } }), req);
+      if (stable) {
+        throw new OperationsConflictError("Task task_id conflicts with an existing task in this workspace", { code: "task_id_conflict" });
       }
       const document = await runtime.create({ collection: TASK_COLLECTION_SLUG, data, depth: 0, overrideAccess: true, req });
       return { document, idempotent: false };
@@ -704,7 +710,10 @@ export async function createTask({ input, workspaceId, actor, payload = null, au
     return { task: safeTask(result.document), idempotent: result.idempotent };
   } catch (error) {
     if (error instanceof OperationsStoreUnavailableError || error instanceof OperationsConflictError) throw error;
-    throw durableFailure("Durable tasks create failed", error);
+    throw durableFailure("Durable tasks create failed", error, {
+      stableCode: "task_id_conflict",
+      stableMessage: "Task task_id conflicts with an existing task in this workspace",
+    });
   }
 }
 
@@ -748,10 +757,10 @@ export async function completeTask({ taskId, input = {}, workspaceId, actor, pay
       const current = await findOne(runtime, TASK_COLLECTION_SLUG, scopeWhere(scope, { task_id: { equals: stableId } }), req);
       if (!current) throw new OperationsNotFoundError("Task was not found");
       const expectedRevision = optionalRevision(input.expected_revision, "expected_revision");
+      if (current.status === "completed") return { document: current, idempotent: true };
       if (expectedRevision !== null && expectedRevision !== Number(current.revision || 1)) {
         throw new OperationsConflictError("Task revision no longer matches completion");
       }
-      if (current.status === "completed") return { document: current, idempotent: true };
       if (current.status === "cancelled") throw new OperationsConflictError("A cancelled task cannot be completed");
       const document = await runtime.update({
         collection: TASK_COLLECTION_SLUG,
@@ -820,8 +829,14 @@ export async function createAutomationRule({ input, workspaceId, actor, principa
           "idempotency_key",
           "revision",
         ]);
-        if (!same) throw new OperationsConflictError("Automation rule idempotency key conflicts with an existing rule");
+        if (!same) {
+          throw new OperationsConflictError("Automation rule idempotency key conflicts with an existing rule", { code: "idempotency_conflict" });
+        }
         return { document: existing, idempotent: true };
+      }
+      const stable = await findOne(runtime, AUTOMATION_RULE_COLLECTION_SLUG, scopeWhere(scope, { rule_id: { equals: data.rule_id } }), req);
+      if (stable) {
+        throw new OperationsConflictError("Automation rule rule_id conflicts with an existing rule in this workspace", { code: "rule_id_conflict" });
       }
       const document = await runtime.create({ collection: AUTOMATION_RULE_COLLECTION_SLUG, data, depth: 0, overrideAccess: true, req });
       return { document, idempotent: false };
@@ -842,7 +857,10 @@ export async function createAutomationRule({ input, workspaceId, actor, principa
     return { rule: safeRule(result.document), idempotent: result.idempotent };
   } catch (error) {
     if (error instanceof OperationsStoreUnavailableError || error instanceof OperationsConflictError || error instanceof OperationsConfirmationError) throw error;
-    throw durableFailure("Durable automation rule create failed", error);
+    throw durableFailure("Durable automation rule create failed", error, {
+      stableCode: "rule_id_conflict",
+      stableMessage: "Automation rule rule_id conflicts with an existing rule in this workspace",
+    });
   }
 }
 
@@ -917,8 +935,16 @@ export async function runAutomationRule({ ruleId, input = {}, workspaceId, actor
       const data = runData({ rule: ruleDocument, scope, actor, input: runInput, startedAt });
       const existing = await readRunByKey(runtime, scope, data.idempotency_key, req);
       if (existing) {
-        const same = existing.run_id === data.run_id && existing.rule_id === data.rule_id;
-        if (!same) throw new OperationsConflictError("Automation run idempotency key conflicts with an existing run");
+        const same = existing.rule_id === data.rule_id && (!runInput.run_id || existing.run_id === data.run_id);
+        if (!same) {
+          throw new OperationsConflictError("Automation run idempotency key conflicts with an existing run", { code: "idempotency_conflict" });
+        }
+        if (!new Set(["succeeded", "failed"]).has(String(existing.status || "").toLowerCase())) {
+          throw new OperationsConflictError(
+            "Automation run is already in progress or indeterminate; retry status before running it again",
+            { code: "automation_run_in_progress" },
+          );
+        }
         return { document: existing, rule: ruleDocument, idempotent: true };
       }
       const document = await runtime.create({ collection: AUTOMATION_RUN_COLLECTION_SLUG, data, depth: 0, overrideAccess: true, req });
@@ -1003,8 +1029,10 @@ export async function readAutomationRun({ runId, workspaceId, payload = null } =
   return { run: safeRun(document), failures: failures.map(safeFailure) };
 }
 
-function safeHermesAuditRow(row) {
+function safeHermesAuditRow(row, workspaceId = null) {
   if (!record(row)) throw new Error("Hermes audit row is not an object");
+  const rowWorkspaceId = row.workspace_id ? id(row.workspace_id, "workspace_id") : null;
+  if (workspaceId && rowWorkspaceId !== workspaceId) return null;
   const output = {
     run_id: id(row.run_id || row.task_id, "run_id"),
     task_id: id(row.task_id, "task_id"),
@@ -1024,14 +1052,16 @@ function safeHermesAuditRow(row) {
     recorded_at: nowIso(row.recorded_at),
     source: "hermes-audit",
   };
+  if (rowWorkspaceId) output.workspace_id = rowWorkspaceId;
   return output;
 }
 
-export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", receiptSecret = "", limit = 100 } = {}) {
+export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", workspaceId = "", receiptSecret = "", limit = 100 } = {}) {
   const cappedLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
+  const scope = workspaceId ? id(workspaceId, "workspace_id") : null;
   let rows;
   try {
-    rows = readHermesAuditLedger(auditPath).map(safeHermesAuditRow);
+    rows = readHermesAuditLedger(auditPath).map((row) => safeHermesAuditRow(row, scope)).filter(Boolean);
   } catch (error) {
     throw new OperationsStoreUnavailableError("Hermes audit history is unavailable", error);
   }
@@ -1041,8 +1071,7 @@ export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LE
   // safe translation history unreadable.
   let ownerReceipts = [];
   if (payload && operatorId && String(receiptSecret || "").length >= 32) {
-    try {
-      ownerReceipts = (await readHermesOwnerReceipts({ payload, operatorId, secret: receiptSecret, limit: cappedLimit })).map((receipt) => ({
+    ownerReceipts = (await readHermesOwnerReceipts({ payload, operatorId, workspaceId: scope, secret: receiptSecret, limit: cappedLimit })).map((receipt) => ({
         run_id: id(receipt.idempotency_key, "run_id"),
         task_id: id(receipt.idempotency_key, "task_id"),
         object_type: "hermes_owner_command",
@@ -1066,17 +1095,15 @@ export async function readHermesRunHistory({ auditPath = DEFAULT_HERMES_AUDIT_LE
         source: "hermes-owner-receipt",
         can_publish: false,
         can_mark_indexable: false,
+        ...(receipt.workspace_id ? { workspace_id: id(receipt.workspace_id, "workspace_id") } : {}),
       }));
-    } catch {
-      ownerReceipts = [];
-    }
   }
   return [...ownerReceipts, ...rows].sort(compareRecordedAtDesc).slice(0, cappedLimit);
 }
 
-export async function readHermesRun({ runId, auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", receiptSecret = "" } = {}) {
+export async function readHermesRun({ runId, auditPath = DEFAULT_HERMES_AUDIT_LEDGER_PATH, payload = null, operatorId = "", workspaceId = "", receiptSecret = "" } = {}) {
   const stableId = id(runId, "run_id");
-  const rows = await readHermesRunHistory({ auditPath, payload, operatorId, receiptSecret, limit: 500 });
+  const rows = await readHermesRunHistory({ auditPath, payload, operatorId, workspaceId, receiptSecret, limit: 500 });
   const found = rows.find((row) => row.run_id === stableId || row.task_id === stableId);
   if (!found) throw new OperationsNotFoundError("Hermes run was not found");
   return found;
