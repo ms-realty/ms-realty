@@ -787,16 +787,38 @@ main[data-react-admin-ui="translation-queue"] .crm-tbl th,
 main[data-react-admin-ui="translation-queue"] .crm-tbl td,
 main[data-react-admin-ui="consents"] .crm-tbl th,
 main[data-react-admin-ui="consents"] .crm-tbl td { overflow-wrap: break-word; vertical-align: top; }
+/* A fixed column and a pill that refuses to wrap is text painted over the next
+   column: "Valuation requested · Open" is 172px of ink in a 100px cell, and it
+   was landing on top of the Due at column beside it. Inside these tables a pill
+   wraps and grows its row; the cell clips as a backstop so no future content
+   can reach its neighbour either. */
+table[data-viewing-follow-up-table] td,
+table[data-seller-pipeline-table] td,
+main[data-react-admin-ui="translation-queue"] .crm-tbl td,
+main[data-react-admin-ui="consents"] .crm-tbl td { overflow: hidden; }
+/* Except the column that opens a form. Clipping a control is not an
+   improvement on overlapping one, and this cell is the only one whose content
+   is meant to grow. */
+table[data-viewing-follow-up-table] td[data-viewing-column="action"],
+table[data-seller-pipeline-table] td[data-seller-pipeline-column="action"] { overflow: visible; }
+table[data-viewing-follow-up-table] .crm-pill,
+table[data-seller-pipeline-table] .crm-pill,
+main[data-react-admin-ui="translation-queue"] .crm-tbl .crm-pill,
+main[data-react-admin-ui="consents"] .crm-tbl .crm-pill {
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: start;
+}
 table[data-viewing-follow-up-table] th:nth-child(1),
-table[data-seller-pipeline-table] th:nth-child(1) { width: 30%; }
+table[data-seller-pipeline-table] th:nth-child(1) { width: 24%; }
 table[data-viewing-follow-up-table] th:nth-child(2),
-table[data-seller-pipeline-table] th:nth-child(2) { width: 12%; }
+table[data-seller-pipeline-table] th:nth-child(2) { width: 10%; }
 table[data-viewing-follow-up-table] th:nth-child(3),
-table[data-seller-pipeline-table] th:nth-child(3) { width: 18%; }
+table[data-seller-pipeline-table] th:nth-child(3) { width: 20%; }
 table[data-viewing-follow-up-table] th:nth-child(4),
-table[data-seller-pipeline-table] th:nth-child(4) { width: 16%; }
+table[data-seller-pipeline-table] th:nth-child(4) { width: 12%; }
 table[data-viewing-follow-up-table] th:nth-child(5),
-table[data-seller-pipeline-table] th:nth-child(5) { width: 24%; }
+table[data-seller-pipeline-table] th:nth-child(5) { width: 34%; }
 main[data-react-admin-ui="translation-queue"] .crm-tbl th:nth-child(1) { width: 36%; }
 main[data-react-admin-ui="translation-queue"] .crm-tbl th:nth-child(2) { width: 11%; }
 main[data-react-admin-ui="translation-queue"] .crm-tbl th:nth-child(3) { width: 15%; }
