@@ -221,6 +221,12 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    priceRange: "Цена (EUR)",
+    areaRange: "Площ (m²)",
+    rangeMin: "Мин.",
+    rangeMax: "Макс.",
+    rangeReversed: "Минимумът е по-голям от максимума, затова редовете по-долу пренебрегват този филтър.",
+    rangeNotNumeric: "Приемаме само число, затова редовете по-долу пренебрегват тази стойност.",
     publicPhoto: "Публична снимка",
     publicPhotos: "Публични снимки",
     selectListings: "Избери обяви",
@@ -911,6 +917,12 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    priceRange: "Цена (EUR)",
+    areaRange: "Площадь (m²)",
+    rangeMin: "Мин.",
+    rangeMax: "Макс.",
+    rangeReversed: "Минимум больше максимума, поэтому строки ниже игнорируют этот фильтр.",
+    rangeNotNumeric: "Здесь принимается только число, поэтому строки ниже игнорируют это значение.",
     publicPhoto: "Публичное фото",
     publicPhotos: "Публичные фото",
     selectListings: "Выбрать объекты",
@@ -1601,6 +1613,12 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    priceRange: "Price (EUR)",
+    areaRange: "Area (m²)",
+    rangeMin: "Min",
+    rangeMax: "Max",
+    rangeReversed: "The minimum is above the maximum, so the rows below ignore that filter.",
+    rangeNotNumeric: "Only a number works here, so the rows below ignore that value.",
     publicPhoto: "Public photo",
     publicPhotos: "Public photos",
     selectListings: "Select listings",
@@ -8057,12 +8075,58 @@ function ListingManagerBody({ page }) {
     const search = remaining.map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join("&");
     return adminHref(`/admin/listings${search ? `?${search}` : ""}`, page);
   };
+  // A typed bound that could not be honoured keeps its box filled and is named
+  // here, so the broker corrects the figure rather than wondering why the row
+  // count did not move.
+  const filterErrors = page.filterErrors || [];
+  const rangeFields = page.filterOptions.rangeFields || [];
+  const invalidFields = new Set(
+    filterErrors.flatMap((error) => (error.reason === "range" ? [`${error.field}Min`, `${error.field}Max`] : [error.field])),
+  );
+  const rangeNoticeId = "adm-listing-range-notice";
+  const rangeLabel = (field) => (field === "price" ? ui.priceRange : ui.areaRange);
+  const boundChip = (name, field, bound) =>
+    page.filters[name] && !invalidFields.has(name)
+      ? { name, text: `${rangeLabel(field)} ${bound}: ${page.filters[name]}` }
+      : null;
   const activeFilters = [
     page.filters.q ? { name: "q", text: `${label(copy, "searchListings", "Search listings")}: ${page.filters.q}` } : null,
     page.filters.status ? { name: "status", text: `${label(copy, "qualityStatus", "Status")}: ${statusText(ui, page.filters.status)}` } : null,
     page.filters.propertyFamily ? { name: "propertyFamily", text: `${ui.propertyFamily}: ${statusText(ui, page.filters.propertyFamily)}` } : null,
     page.filters.sourceLocale ? { name: "sourceLocale", text: `${label(copy, "language", "Language")}: ${String(page.filters.sourceLocale).toUpperCase()}` } : null,
+    boundChip("priceMin", "price", ui.rangeMin),
+    boundChip("priceMax", "price", ui.rangeMax),
+    boundChip("areaMin", "area", ui.rangeMin),
+    boundChip("areaMax", "area", ui.rangeMax),
   ].filter(Boolean);
+  const rangeField = (field, { step = "1", inputMode = "numeric" } = {}) =>
+    h(
+      "fieldset",
+      { className: "adm-filterbar__range" },
+      h("legend", null, rangeLabel(field)),
+      h(
+        "div",
+        { className: "adm-filterbar__pair" },
+        ...["Min", "Max"].map((bound) => {
+          const name = `${field}${bound}`;
+          return h(
+            "label",
+            { key: name },
+            h("span", null, bound === "Min" ? ui.rangeMin : ui.rangeMax),
+            h("input", {
+              name,
+              type: "number",
+              min: "0",
+              step,
+              inputMode,
+              defaultValue: page.filters[name] || "",
+              "aria-invalid": invalidFields.has(name) ? "true" : undefined,
+              "aria-describedby": invalidFields.has(name) ? rangeNoticeId : undefined,
+            }),
+          );
+        }),
+      ),
+    );
   const title = label(copy, "listingManager", "Listings");
   const hasFilters = activeFilters.length > 0;
   const statusOptions = page.filterOptions.statuses || [];
@@ -8248,6 +8312,22 @@ function ListingManagerBody({ page }) {
           label(copy, "language", "Language"),
           h("select", { name: "sourceLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.sourceLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.sourceLocale === value }, value.toUpperCase()))),
         ),
+        rangeFields.includes("price") ? rangeField("price") : null,
+        rangeFields.includes("area") ? rangeField("area", { step: "any", inputMode: "decimal" }) : null,
+        filterErrors.length
+          ? h(
+              "p",
+              { id: rangeNoticeId, className: "adm-filterbar__notice", role: "alert", "data-listing-filter-error": filterErrors[0].reason },
+              h(Icon, { name: "triangle-alert", size: 16 }),
+              h(
+                "span",
+                null,
+                `${[...new Set(filterErrors.map((error) => rangeLabel(error.field.replace(/(Min|Max)$/u, ""))))].join(" · ")}: ${
+                  filterErrors.some((error) => error.reason === "range") ? ui.rangeReversed : ui.rangeNotNumeric
+                }`,
+              ),
+            )
+          : null,
         h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),

@@ -407,6 +407,7 @@ import { seedForPostgresSearchHits } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
+import { searchFilterQueryKeys } from "./search-intent.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 // Package B2: approved content.
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -2055,6 +2056,10 @@ export function createHttpApp({
       status: url.searchParams.get("status") || "",
       sourceLocale: url.searchParams.get("sourceLocale") || "",
       propertyFamily: url.searchParams.get("propertyFamily") || "",
+      priceMin: url.searchParams.get("priceMin") || "",
+      priceMax: url.searchParams.get("priceMax") || "",
+      areaMin: url.searchParams.get("areaMin") || "",
+      areaMax: url.searchParams.get("areaMax") || "",
       page: url.searchParams.get("page") || 1,
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
@@ -4810,15 +4815,31 @@ export function createHttpApp({
       );
       if (searchLocale) {
         let searchRequest;
-        try {
-          // A page URL carries whatever the referrer appended to it; only
-          // /api/search above holds its callers to the exact field list.
-          searchRequest = normalizeSearchRequest(searchParamsFromUrl(url.searchParams), {
+        // A reversed or non-numeric range is the visitor's typing, not a broken
+        // request; answering the PAGE with JSON strands them with no way back
+        // to their search. The offending values are dropped and named instead.
+        let filterNotice = null;
+        const searchUrl = new URL(url.toString());
+        const normalizeFor = (params) =>
+          normalizeSearchRequest(searchParamsFromUrl(params), {
             defaultLocale: searchLocale.code,
             naturalLanguageEnabled: naturalLanguageSearchEnabled,
           });
+        try {
+          // A page URL carries whatever the referrer appended to it; only
+          // /api/search above holds its callers to the exact field list.
+          searchRequest = normalizeFor(searchUrl.searchParams);
         } catch (error) {
-          return json(400, { kind: "bad_request", message: error.message });
+          const invalidKeys = searchFilterQueryKeys(error?.fields || []);
+          if (!invalidKeys.length) return json(400, { kind: "bad_request", message: error.message });
+          const typed = Object.fromEntries(invalidKeys.map((key) => [key, searchUrl.searchParams.get(key) ?? ""]));
+          for (const key of invalidKeys) searchUrl.searchParams.delete(key);
+          try {
+            searchRequest = normalizeFor(searchUrl.searchParams);
+          } catch {
+            return json(400, { kind: "bad_request", message: error.message });
+          }
+          filterNotice = { reason: error.fields.length > 1 ? "range" : "value", fields: invalidKeys, values: typed };
         }
         const { intent, query, filters, sort, page } = searchRequest;
         const savedView = url.searchParams.get("saved") === "1";
@@ -4834,7 +4855,11 @@ export function createHttpApp({
           return publicResponse(request, url, renderSearchUnavailablePage({ registry: activeRegistry, localeCode: searchLocale.code }));
         }
         recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
-        return publicResponse(request, url, outcome.result);
+        return publicResponse(
+          request,
+          url,
+          filterNotice ? { ...outcome.result, search: { ...outcome.result.search, filter_notice: filterNotice } } : outcome.result,
+        );
       }
     }
 

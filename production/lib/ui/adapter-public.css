@@ -1043,7 +1043,6 @@ main form label.sr-toolbar__sort { display: flex; align-items: center; gap: var(
   font-size: var(--text-sm);
   font-weight: var(--fw-semibold);
 }
-.sr-form [aria-invalid="true"] { border-color: var(--danger-500); }
 
 .sr-active { margin: 0 0 var(--space-4); }
 .sr-active:empty { display: none; }

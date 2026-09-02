@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { appRouterConfigFromEnv, renderAppSearchRouteResponse } from "../lib/app-router-adapter.mjs";
+import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const config = () => appRouterConfigFromEnv({ NODE_ENV: "test", ...approvedPublicSeedFixtureEnv() });
@@ -81,4 +86,34 @@ test("an empty result names the range to widen and the count it promises is real
   assert.ok(promised > 0);
   const widened = await search(new URL(suggestion[1], "https://example.test").search);
   assert.match(widened.body, new RegExp(`<p class="sr-results__count"[^>]*>${promised} съвпадения</p>`));
+});
+
+// The Next route and the node origin each normalize the query on their own, so
+// the rule has to hold in both. A visitor cannot tell which one served them.
+test("the node origin recovers from a reversed range the same way", async () => {
+  const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-search-states-"));
+  const copy = (name) => {
+    const target = path.join(dataDir, name);
+    fs.copyFileSync(path.join(ROOT, "production/data", name), target);
+    return target;
+  };
+  const app = createHttpApp({
+    leadLedgerPath: copy("lead-ledger.jsonl"),
+    eventLedgerPath: copy("events.jsonl"),
+    leadContactVaultPath: path.join(dataDir, "lead-contacts.jsonl"),
+    leadContactKey: "test-only-search-filter-states-key-32c",
+  });
+
+  const page = await dispatchHttp(app, { url: "/bg/tarsene?price_min=200000&price_max=100000", headers: { accept: "text/html" } });
+  assert.equal(page.status, 200);
+  assert.match(page.body, /data-search-filter-notice="range"/);
+  assert.match(page.body, /id="sr-price_min"[^>]*value="200000"/);
+
+  // The JSON contract of /api/search is untouched by the page's recovery.
+  const api = await dispatchHttp(app, { url: "/api/search?locale=bg&price_min=200000&price_max=100000" });
+  assert.equal(api.status, 400);
+  // dispatchHttp hands JSON routes their parsed body already.
+  const apiBody = typeof api.body === "string" ? JSON.parse(api.body) : api.body;
+  assert.equal(apiBody.message, "price_min cannot exceed price_max");
 });

@@ -68,6 +68,14 @@ main textarea:not(.mk-textarea__field) {
   font-size: var(--text-base);
   transition: var(--transition-color), box-shadow var(--dur-fast) var(--ease-standard);
 }
+/* A field that reports itself invalid has to look invalid. The bare-field rule
+   above outranks any component-level override, so the error state is declared
+   here beside it rather than five times over in the surfaces that need it. */
+main input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(.mk-input__field):not(.mk-searchbar__input),
+main select[aria-invalid="true"]:not(.mk-select__field),
+main textarea[aria-invalid="true"]:not(.mk-textarea__field) {
+  border-color: var(--danger-500);
+}
 main input:focus-visible:not([type="checkbox"]):not([type="radio"]):not(.mk-input__field):not(.mk-searchbar__input),
 main select:focus-visible:not(.mk-select__field),
 main textarea:focus-visible:not(.mk-textarea__field) {
