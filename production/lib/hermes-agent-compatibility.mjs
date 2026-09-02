@@ -63,7 +63,7 @@ export function buildHermesCompatibilityPlan(image, { configPath = "production/h
       "--detach",
       ...READ_ONLY_RUNTIME_ARGS,
       "--tmpfs",
-      "/run:rw,nosuid,size=16m",
+      "/run:rw,exec,nosuid,size=16m",
       "--tmpfs",
       "/opt/data:rw,noexec,nosuid,size=64m",
       "--mount",
