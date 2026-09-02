@@ -5,14 +5,19 @@ import {
   HERMES_OWNER_RECEIPT_COLLECTION,
   HermesOwnerCommandError,
   readHermesOwnerReceipts,
-  runHermesOwnerCommand,
+  runHermesOwnerCommand as runHermesOwnerCommandWithoutWorkspace,
 } from "../lib/hermes-owner-command.mjs";
 import { createPrivateContactEnvelope, openPrivateContactEnvelope } from "../lib/private-contact-vault.mjs";
 
 const SECRET = "hermes-owner-command-test-secret-longer-than-thirty-two-characters";
 const STARTED_AT = "2026-08-28T12:00:00.000Z";
 const COMPLETED_AT = "2026-08-28T12:00:01.000Z";
+const TEST_WORKSPACE = "workspace-hermes-test";
 const operator = { id: "payload-owner", roles: ["admin"], workspace_ids: [] };
+
+function runHermesOwnerCommand(input, options = {}) {
+  return runHermesOwnerCommandWithoutWorkspace(input, { workspaceId: TEST_WORKSPACE, ...options });
+}
 
 function fakePayload(seed = [], { receiptUniqueByWorkspace = false } = {}) {
   const docs = seed.map((doc, index) => ({ id: index + 1, ...doc }));
@@ -137,6 +142,7 @@ function storedReceipt(
   return {
     idempotency_key: input.idempotencyKey,
     operator_id: operator.id,
+    workspace_id: TEST_WORKSPACE,
     status,
     command_digest: `sha256:${cryptoDigest(JSON.stringify({ command: input.command, locale: input.locale || "en", contextDigest }))}`,
     model: "injected",
@@ -362,6 +368,35 @@ test("Hermes receipt idempotency is scoped by workspace and global collisions ar
       [input.idempotencyKey, workspaceB],
     ],
   );
+});
+
+test("Hermes owner commands refuse concurrent unscoped writes before fencing or provider work", async () => {
+  const payload = fakePayload();
+  let providerCalls = 0;
+  const options = {
+    operator,
+    payload,
+    secret: SECRET,
+    provider: async () => {
+      providerCalls += 1;
+      return safePlan();
+    },
+    now: () => COMPLETED_AT,
+  };
+  const outcomes = await Promise.allSettled([
+    runHermesOwnerCommandWithoutWorkspace(command({ idempotencyKey: "hermes-unscoped-race" }), options),
+    runHermesOwnerCommandWithoutWorkspace(command({ idempotencyKey: "hermes-unscoped-race" }), options),
+  ]);
+
+  assert.deepEqual(
+    outcomes.map((outcome) => [outcome.status, outcome.reason?.code, outcome.reason?.status]),
+    [
+      ["rejected", "hermes_workspace_required", 503],
+      ["rejected", "hermes_workspace_required", 503],
+    ],
+  );
+  assert.equal(providerCalls, 0);
+  assert.equal(payload.docs.length, 0);
 });
 
 test("failed receipts are terminal and return their stored failure", async () => {

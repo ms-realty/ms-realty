@@ -10,6 +10,7 @@ const ORIGIN = "https://ms-realty.ms-realty-bg.workers.dev";
 const GENERATED_AT = "2026-08-27T16:30:00.000Z";
 const RECEIPT_SECRET = "admin-hermes-receipt-test-secret-longer-than-thirty-two-characters";
 const PAYLOAD_SESSION_TOKEN = "hermes-console-payload-session";
+const TEST_WORKSPACE = "workspace-hermes-console";
 const principal = {
   id: "payload-owner",
   source: "payload_session",
@@ -34,9 +35,11 @@ const DURABLE_VIEWING_STORE = {
 
 function appConfig(overrides = {}) {
   return {
-    ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+    ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_WORKSPACE_ID: TEST_WORKSPACE }),
     adminPrincipal: principal,
     authEnv: { NODE_ENV: "test" },
+    workspaceId: TEST_WORKSPACE,
+    workspaceSettingsWorkspaceId: TEST_WORKSPACE,
     reviewedAt: GENERATED_AT,
     ...overrides,
   };
@@ -90,6 +93,10 @@ function fakeHermesReceiptPayload(seed = []) {
       if (where?.provider?.equals) rows = rows.filter((doc) => doc.provider === where.provider.equals);
       if (where?.idempotency_key?.equals) rows = rows.filter((doc) => doc.idempotency_key === where.idempotency_key.equals);
       if (where?.operator_id?.equals) rows = rows.filter((doc) => doc.operator_id === where.operator_id.equals);
+      for (const clause of where?.and || []) {
+        if (clause?.operator_id?.equals) rows = rows.filter((doc) => doc.operator_id === clause.operator_id.equals);
+        if (clause?.workspace_id?.equals) rows = rows.filter((doc) => doc.workspace_id === clause.workspace_id.equals);
+      }
       return { docs: rows.slice(0, limit) };
     },
     async create({ data }) {
@@ -239,6 +246,7 @@ test("Hermes console proves authenticated runtime capabilities without exposing 
 
   const standalone = await dispatchHttp(
     createHttpApp({
+      workspaceId: TEST_WORKSPACE,
       reviewedAt: GENERATED_AT,
       hermesEnv,
       hermesAgentFetch: healthyHermesFetch([]),
@@ -283,6 +291,7 @@ test("a connected OpenRouter account enables owner planning without an environme
 
   const standalone = await dispatchHttp(
     createHttpApp({
+      workspaceId: TEST_WORKSPACE,
       reviewedAt: GENERATED_AT,
       payloadAdminAuth: payloadAdminAuth(),
       hermesEnv: { NODE_ENV: "test" },
@@ -392,6 +401,7 @@ test("Hermes owner command renders the same guarded durable plan in Next and sta
   const standalonePayload = fakeHermesReceiptPayload();
   const standalone = await dispatchHttp(
     createHttpApp({
+      workspaceId: TEST_WORKSPACE,
       reviewedAt: GENERATED_AT,
       hermesOwnerCommandProvider: async () => ownerPlan(),
       hermesReceiptPayload: standalonePayload,
@@ -474,6 +484,7 @@ test("Hermes owner command routes pass authoritative business context and provid
 
   const standalone = await dispatchHttp(
     createHttpApp({
+      workspaceId: TEST_WORKSPACE,
       reviewedAt: GENERATED_AT,
       runtimeDataDurableOnly: true,
       payloadListingRuntime: PAYLOAD_RUNTIME,
@@ -558,6 +569,7 @@ test("Hermes owner command fails closed when provider connections are configured
 
   const standalone = await dispatchHttp(
     createHttpApp({
+      workspaceId: TEST_WORKSPACE,
       reviewedAt: GENERATED_AT,
       runtimeDataDurableOnly: true,
       payloadListingRuntime: PAYLOAD_RUNTIME,
@@ -586,4 +598,64 @@ test("Hermes owner command fails closed when provider connections are configured
   );
   assert.equal(standalone.status, 503);
   assert.equal(standalone.body.kind, "provider_connection_unavailable");
+});
+
+test("both Hermes command adapters fail closed without a workspace scope", async () => {
+  let nextProviderCalls = 0;
+  let standaloneProviderCalls = 0;
+  const input = {
+    idempotencyKey: "hermes-unscoped-adapter-0001",
+    command: "Prepare a safe plan for today's enquiries.",
+    locale: "en",
+  };
+  const next = await renderAppAdminResponse(
+    new Request(`${ORIGIN}/api/admin/hermes`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "sec-fetch-site": "same-origin" },
+      body: JSON.stringify(input),
+    }),
+    {
+      config: appConfig({
+        workspaceId: "",
+        workspaceSettingsWorkspaceId: "",
+        operationsDurableStore: { operationsDurableStoreEnabled: false, workspaceId: "" },
+        authEnv: { NODE_ENV: "test" },
+        payloadListingEnv: { NODE_ENV: "test" },
+        hermesOwnerCommandProvider: async () => {
+          nextProviderCalls += 1;
+          return ownerPlan();
+        },
+        hermesReceiptPayload: fakeHermesReceiptPayload(),
+        hermesReceiptSecret: RECEIPT_SECRET,
+      }),
+    },
+  );
+  const nextBody = await next.json();
+  assert.equal(next.status, 503);
+  assert.equal(nextBody.kind, "hermes_workspace_required");
+
+  const standalone = await dispatchHttp(
+    createHttpApp({
+      workspaceId: "",
+      workspaceSettingsWorkspaceId: "",
+      reviewedAt: GENERATED_AT,
+      hermesEnv: { NODE_ENV: "test" },
+      hermesOwnerCommandProvider: async () => {
+        standaloneProviderCalls += 1;
+        return ownerPlan();
+      },
+      hermesReceiptPayload: fakeHermesReceiptPayload(),
+      hermesReceiptSecret: RECEIPT_SECRET,
+    }),
+    {
+      method: "POST",
+      url: "/api/admin/hermes",
+      headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/json" },
+      body: input,
+    },
+  );
+  assert.equal(standalone.status, 503);
+  assert.equal(standalone.body.kind, "hermes_workspace_required");
+  assert.equal(nextProviderCalls, 0);
+  assert.equal(standaloneProviderCalls, 0);
 });

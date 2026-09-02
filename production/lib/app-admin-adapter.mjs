@@ -2279,6 +2279,7 @@ async function hermesConsolePayload(registry, url, config, { commandResult = nul
       config.workspaceId ||
       config.workspaceSettingsWorkspaceId ||
       config.operationsDurableStore?.workspaceId ||
+      config.payloadListingEnv?.MS_REALTY_WORKSPACE_ID ||
       env.MS_REALTY_WORKSPACE_ID ||
       "",
   ).trim();
@@ -4761,6 +4762,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
                   config.workspaceId ||
                   config.workspaceSettingsWorkspaceId ||
                   config.operationsDurableStore?.workspaceId ||
+                  config.payloadListingEnv?.MS_REALTY_WORKSPACE_ID ||
                   authEnv.MS_REALTY_WORKSPACE_ID ||
                   "",
               ).trim(),

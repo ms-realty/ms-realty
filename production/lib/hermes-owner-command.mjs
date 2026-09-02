@@ -64,6 +64,7 @@ const PROVIDER_NETWORK_ERROR_CODES = new Set(["ECONNABORTED", "ECONNREFUSED", "E
 
 const FAILURE_MESSAGES = Object.freeze({
   bad_request: "Tell Hermes what you want to prepare.",
+  hermes_workspace_required: "Hermes owner commands require a configured workspace before planning can continue.",
   hermes_receipt_unavailable: "Hermes cannot run until its durable receipt store is available.",
   hermes_context_unavailable: "Hermes cannot plan until authoritative business context is available.",
   hermes_command_contains_sensitive_data: "Hosted Hermes planning accepts only privacy-safe owner commands.",
@@ -82,6 +83,7 @@ const FAILURE_MESSAGES = Object.freeze({
 
 const FAILURE_STATUS = Object.freeze({
   bad_request: 400,
+  hermes_workspace_required: 503,
   hermes_receipt_unavailable: 503,
   hermes_context_unavailable: 503,
   hermes_command_contains_sensitive_data: 400,
@@ -707,6 +709,7 @@ export async function runHermesOwnerCommand(
     throw new HermesOwnerCommandError("bad_request");
   }
   if (String(secret || "").length < 32) throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  if (!workspace) throw new HermesOwnerCommandError("hermes_workspace_required", { status: 503 });
   const startedAt = isoTimestamp(typeof now === "function" ? now() : now);
   const normalizedBusiness = normalizeBusinessContext(businessContext, { required: requireBusinessContext });
   const contextDigest = normalizedBusiness ? businessContextDigest(normalizedBusiness) : "sha256:none";

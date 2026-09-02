@@ -4493,6 +4493,7 @@ export function createHttpApp({
           workspaceId: String(
             url.searchParams.get("workspace_id") ||
               workspaceId ||
+              workspaceSettingsWorkspaceId ||
               operationsDurableStore?.workspaceId ||
               hermesEnv.MS_REALTY_WORKSPACE_ID ||
               "",
@@ -4521,6 +4522,7 @@ export function createHttpApp({
             workspaceId: String(
               url.searchParams.get("workspace_id") ||
                 workspaceId ||
+                workspaceSettingsWorkspaceId ||
                 operationsDurableStore?.workspaceId ||
                 hermesEnv.MS_REALTY_WORKSPACE_ID ||
                 "",
