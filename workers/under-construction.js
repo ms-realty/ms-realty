@@ -94,7 +94,7 @@ const LOCALES = [
 ];
 
 /** Best supported locale for an Accept-Language header, DEFAULT_LOCALE otherwise. */
-export function pickLocale(acceptLanguage) {
+export function pickLocale(acceptLanguage, fallback = DEFAULT_LOCALE) {
   const supported = new Set(LOCALES.map((locale) => locale.code));
   const ranked = String(acceptLanguage || "")
     .split(",")
@@ -108,7 +108,7 @@ export function pickLocale(acceptLanguage) {
     })
     .filter((entry) => supported.has(entry.code) && Number.isFinite(entry.q) && entry.q > 0)
     .sort((a, b) => b.q - a.q);
-  return ranked.length > 0 ? ranked[0].code : DEFAULT_LOCALE;
+  return ranked.length > 0 ? ranked[0].code : fallback;
 }
 
 export function renderPage(activeCode) {
@@ -268,6 +268,11 @@ export function isServicePath(pathname) {
   return SERVICE_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
+/** makler-realty.ru is the Russian edition; every other host defaults to the source locale. */
+export function defaultLocaleForHost(hostname) {
+  return String(hostname || "").toLowerCase().endsWith(".ru") ? "ru" : DEFAULT_LOCALE;
+}
+
 /** The locale a public URL already names, so a deep link keeps its language. */
 export function localeFromPath(pathname) {
   const first = String(pathname || "").split("/")[1]?.toLowerCase();
@@ -278,7 +283,9 @@ export default {
   fetch(request, env) {
     const { pathname } = new URL(request.url);
     if (env?.APP && isServicePath(pathname)) return env.APP.fetch(request);
-    const locale = localeFromPath(pathname) || pickLocale(request.headers.get("accept-language"));
+    const locale =
+      localeFromPath(pathname) ||
+      pickLocale(request.headers.get("accept-language"), defaultLocaleForHost(new URL(request.url).hostname));
     return new Response(renderPage(locale), {
       status: STATUS,
       headers: {

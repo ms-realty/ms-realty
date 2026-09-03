@@ -1,13 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import worker, { isServicePath, localeFromPath, pickLocale, renderPage } from "../../workers/under-construction.js";
+import worker, { defaultLocaleForHost, isServicePath, localeFromPath, pickLocale, renderPage } from "../../workers/under-construction.js";
 
 test("accept-language negotiation falls back to the source locale", () => {
   assert.equal(pickLocale("de-DE,de;q=0.9,en;q=0.8"), "de");
   assert.equal(pickLocale("en;q=0.3, he;q=0.9"), "he");
   assert.equal(pickLocale("fr-FR,fr;q=0.9"), "bg");
   assert.equal(pickLocale(null), "bg");
+  assert.equal(pickLocale("fr", "ru"), "ru");
+});
+
+test("the .ru edition defaults to Russian, everything else to Bulgarian", async () => {
+  assert.equal(defaultLocaleForHost("makler-realty.ru"), "ru");
+  assert.equal(defaultLocaleForHost("www.makler-realty.com"), "bg");
+  const response = await worker.fetch(new Request("https://makler-realty.ru/"), {});
+  assert.match(await response.text(), /<html lang="ru"/);
 });
 
 test("every public locale is rendered and Hebrew opens right-to-left", () => {
