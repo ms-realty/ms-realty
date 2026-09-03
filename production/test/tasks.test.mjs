@@ -265,7 +265,14 @@ test("the derived half reads exactly the queues Today reads", () => {
   const end = site.indexOf("function TodayBriefingPanel");
   assert.ok(start > -1 && end > start, "todayNextActions is still the Today aggregation");
   const today = site.slice(start, end);
-  const tasks = fs.readFileSync(path.join(ROOT, "production/lib/tasks.mjs"), "utf8");
+  // Compare the two functions that must agree, not the two files: the lead half
+  // of the selection is now one shared implementation both screens call, so its
+  // queue reads belong to neither side of this comparison.
+  const module = fs.readFileSync(path.join(ROOT, "production/lib/tasks.mjs"), "utf8");
+  const derivedStart = module.indexOf("export function deriveSourceTasks");
+  const derivedEnd = module.indexOf("function sortTasks(");
+  assert.ok(derivedStart > -1 && derivedEnd > derivedStart, "deriveSourceTasks is still the derived half");
+  const tasks = module.slice(derivedStart, derivedEnd);
 
   const queuesIn = (source) => [...source.matchAll(/page\.([A-Za-z_]+Queue)\?/g)].map((match) => match[1]);
   assert.deepEqual([...new Set(queuesIn(tasks))].sort(), [...new Set(queuesIn(today))].sort());
