@@ -18,7 +18,7 @@ const CSS = `
     .ph-chip em { font-style:normal; opacity:.7; }
     .ph-list { display:grid; gap:9px; padding:0 16px 16px; }
     .ph-card { background:var(--surface); border:1px solid var(--border); border-radius:14px;
-      box-shadow:var(--shadow-xs); padding:12px 14px; display:grid; gap:9px; }
+      box-shadow:var(--e-1); padding:12px 14px; display:grid; gap:9px; }
     .ph-card-top { display:flex; align-items:center; gap:8px; }
     .ph-card-top b { flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--text-strong);
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -27,7 +27,7 @@ const CSS = `
     .ph-btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:44px;
       padding:0 16px; border-radius:10px; border:1px solid var(--ink-800); background:var(--ink-800); color:#fff;
       font-size:13px; font-weight:600; flex:1 1 auto; }
-    .ph-btn--ghost { background:var(--surface); border-color:var(--border-strong); color:var(--text-strong); flex:0 0 auto; width:44px; padding:0; }
+    .ph-btn--ghost { background:var(--surface); border-color:var(--border-control); color:var(--text-strong); flex:0 0 auto; width:44px; padding:0; }
     .ph-tabs { margin-top:auto; display:grid; grid-template-columns:repeat(5, 1fr); gap:2px;
       padding:8px 8px 20px; background:var(--surface); border-top:1px solid var(--border); }
     .ph-tab { display:grid; justify-items:center; gap:4px; min-height:52px; padding:7px 2px; border-radius:12px;

@@ -7,7 +7,7 @@ const CSS = `
     .inbox-tools { display:flex; align-items:center; gap:8px; padding:9px 12px; border-bottom:1px solid var(--border);
       background:var(--sunken); }
     .inbox-find { display:flex; align-items:center; gap:7px; flex:1 1 auto; height:30px; padding:0 10px;
-      border:1px solid var(--border-strong); border-radius:8px; background:var(--surface); color:var(--text-muted);
+      border:1px solid var(--border-control); border-radius:8px; background:var(--surface); color:var(--text-muted);
       font-size:12.5px; }
     .row { display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:10px; row-gap:4px;
       padding:11px 14px; border-bottom:1px solid var(--border); }
@@ -20,8 +20,6 @@ const CSS = `
     .row-sub { grid-column:2; font-size:12px; color:var(--text-muted); overflow:hidden;
       text-overflow:ellipsis; white-space:nowrap; }
     .row-tags { grid-column:2; display:flex; gap:5px; flex-wrap:wrap; }
-    .box { width:15px; height:15px; border-radius:4px; border:1.5px solid var(--border-strong);
-      background:var(--surface); margin-top:2px; flex:0 0 auto; }
     .detail { display:flex; flex-direction:column; min-width:0; }
     .detail-hd { display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
       padding:16px 20px 14px; border-bottom:1px solid var(--border); }
@@ -34,16 +32,11 @@ const CSS = `
     .fact dt { font-size:11.5px; color:var(--text-muted); margin-bottom:3px; }
     .fact dd { margin:0; font-size:13px; font-weight:600; color:var(--text-strong);
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .sect { padding:16px 20px; border-bottom:1px solid var(--border); }
-    .sect > h3 { font-size:13px; font-weight:600; margin-bottom:10px; display:flex; align-items:center;
-      justify-content:space-between; gap:10px; }
-    .composer { border:1px solid var(--border-strong); border-radius:10px; background:var(--surface); overflow:hidden; }
+    .composer { border:1px solid var(--border-control); border-radius:10px; background:var(--surface); overflow:hidden; }
     .composer-bar { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--sunken);
       border-bottom:1px solid var(--border); }
     .composer-body { padding:12px 14px; font-size:13px; color:var(--text-body); min-height:88px; line-height:1.55; }
     .composer-foot { display:flex; align-items:center; gap:10px; padding:9px 12px; border-top:1px solid var(--border); }
-    .note { display:flex; align-items:flex-start; gap:8px; padding:9px 11px; border-radius:8px;
-      background:var(--warning-50); color:var(--warning-600); font-size:12px; font-weight:500; }
     .ev { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:start; gap:10px;
       padding:10px 0; border-bottom:1px solid var(--border); }
     .ev:last-child { border-bottom:0; }

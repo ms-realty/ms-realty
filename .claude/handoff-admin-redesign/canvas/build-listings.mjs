@@ -2,19 +2,8 @@ import fs from "node:fs";
 import { page, icon } from "./shell.mjs";
 
 const CSS = `
-    .toolbar { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border);
-      background:var(--sunken); }
-    .find { display:flex; align-items:center; gap:7px; width:270px; height:31px; padding:0 10px;
-      border:1px solid var(--border-strong); border-radius:8px; background:var(--surface);
-      color:var(--text-muted); font-size:12.5px; }
     .bulk { display:flex; align-items:center; gap:10px; padding:9px 14px; background:var(--sea-50);
       border-bottom:1px solid var(--sea-100); font-size:12.5px; color:var(--sea-700); font-weight:600; }
-    table { width:100%; border-collapse:separate; border-spacing:0; }
-    th { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); background:var(--stone-50);
-      font-size:11px; font-weight:600; letter-spacing:.02em; color:var(--text-muted); white-space:nowrap; }
-    td { padding:9px 12px; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:middle; }
-    tbody tr:hover td { background:var(--stone-50); }
-    tbody tr:last-child td { border-bottom:0; }
     .t-title { display:grid; gap:1px; min-width:0; }
     .t-title b { font-size:13px; font-weight:600; color:var(--text-strong);
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -24,12 +13,10 @@ const CSS = `
     .locs { display:flex; gap:3px; }
     .loc { display:grid; place-items:center; min-width:22px; height:17px; padding:0 4px; border-radius:4px;
       background:var(--stone-200); color:var(--stone-700); font-size:9.5px; font-weight:700; letter-spacing:.03em; }
-    .loc--off { background:transparent; border:1px dashed var(--border-strong); color:var(--text-subtle); font-weight:600; }
+    .loc--off { background:transparent; border:1px dashed var(--border-control); color:var(--text-subtle); font-weight:600; }
     .bar { width:56px; height:5px; border-radius:999px; background:var(--stone-200); overflow:hidden; }
     .bar i { display:block; height:100%; border-radius:999px; }
     .cell-q { display:flex; align-items:center; gap:8px; }
-    .foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px;
-      font-size:12.5px; color:var(--text-muted); }
 `;
 
 function loc(code, on) {

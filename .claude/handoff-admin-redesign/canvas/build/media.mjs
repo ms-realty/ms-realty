@@ -40,7 +40,6 @@ const MED_CSS = `
     .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
     .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .kvline { display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:4px 0; }
 `;
 
 const TILES = [
@@ -210,7 +209,6 @@ const ED_CSS = `
     .rend { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:center;
       font-size:12.5px; padding:7px 0; border-bottom:1px solid var(--border); }
     .rend:last-child { border-bottom:0; }
-    .kvline { display:flex; justify-content:space-between; gap:10px; font-size:12.5px; }
     .slider { height:4px; border-radius:999px; background:var(--stone-200); position:relative; }
     .slider i { position:absolute; top:-5px; width:14px; height:14px; border-radius:999px; background:var(--surface);
       border:1.5px solid var(--border-control); box-shadow:var(--e-1); }

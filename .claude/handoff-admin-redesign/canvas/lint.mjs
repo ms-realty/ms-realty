@@ -18,8 +18,14 @@ for (const file of fs.readdirSync(dir).filter((n) => n.endsWith(".dc.html"))) {
   const declared = classesIn(style);
   // "local" = declared in this file's style block but not in the shared BASE
   const localCss = style.slice(BASE.length);
-  const local = classesIn(localCss);
-  const collisions = [...local].filter((c) => baseClasses.has(c));
+  // A collision is a BARE redeclaration -- `.pill { ... }` -- which silently
+  // replaces the shared component. `.kc-top .pill { ... }` scopes an addition
+  // to one place and is how the sheet is meant to be extended.
+  const bareLocal = new Set(
+    [...localCss.matchAll(/(^|\n)\s*((?:\.[\w-]+)(?:\s*,\s*\.[\w-]+)*)\s*\{/g)]
+      .flatMap((m) => m[2].split(",").map((s) => s.trim().slice(1))),
+  );
+  const collisions = [...bareLocal].filter((c) => baseClasses.has(c));
 
   const used = new Set();
   for (const m of body.matchAll(/class="([^"]+)"/g)) m[1].split(/\s+/).forEach((c) => c && used.add(c));
@@ -94,6 +100,49 @@ const specimen = [...foundations.matchAll(/font-size:([\d.]+)px; font-weight:600
 claim(specimen.length > 0, "the Foundations type specimen list did not render");
 const stated = foundations.match(/note-b">(\d+) sizes,/);
 claim(Boolean(stated), "the Foundations type panel no longer states how many sizes there are");
+
+// A var() with no fallback that names nothing is silent: a colour falls back to
+// currentColor, a box-shadow is invalid and dropped. That is how five screens
+// drew control edges in the inherited text colour, three lost their elevation,
+// and one chart bar rendered with no fill at all.
+const artboards = fs.readdirSync(dir).filter((n) => n.endsWith(".dc.html"));
+for (const file of artboards) {
+  const src = fs.readFileSync(path.join(dir, file), "utf8");
+  const defined = new Set([...src.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));
+  for (const use of new Set([...src.matchAll(/var\(\s*(--[\w-]+)\s*\)/g)].map((m) => m[1]))) {
+    claim(defined.has(use), `${file} paints with ${use}, which no stylesheet defines`);
+  }
+}
+
+// A bar is read by where it ends, so the fill has to be visible against its own
+// track. WCAG 2.2 AA 1.4.11 puts that at 3:1, and it is arithmetic.
+const CONTRAST_FLOOR = 3;
+const srgb = (channel) => {
+  const c = channel / 255;
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+};
+const luminance = (hex) => {
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.replace("#", "").slice(i, i + 2), 16));
+  return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+};
+const contrast = (left, right) => {
+  const [high, low] = [luminance(left), luminance(right)].sort((a, b) => b - a);
+  return (high + 0.05) / (low + 0.05);
+};
+for (const file of artboards) {
+  const src = fs.readFileSync(path.join(dir, file), "utf8");
+  const palette = Object.fromEntries([...src.matchAll(/(--[\w-]+):\s*(#[0-9A-Fa-f]{6})/g)].map((m) => [m[1], m[2]]));
+  const trackToken = (src.match(/\.bar \.t \{[^}]*background:var\((--[\w-]+)\)/) || [])[1];
+  if (!trackToken || !palette[trackToken]) continue;
+  for (const fill of new Set([...src.matchAll(/class="bar"[\s\S]{0,400}?<i style="width:[^"]*background:var\((--[\w-]+)\)/g)].map((m) => m[1]))) {
+    if (!palette[fill]) continue;
+    const ratio = contrast(palette[fill], palette[trackToken]);
+    claim(
+      ratio >= CONTRAST_FLOOR,
+      `${file} draws a bar in ${fill} on ${trackToken}: ${ratio.toFixed(2)}:1, under the ${CONTRAST_FLOOR}:1 floor`,
+    );
+  }
+}
 
 if (broken.length) {
   console.log(`\nFoundations claims that are not true:`);

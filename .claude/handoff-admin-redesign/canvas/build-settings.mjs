@@ -10,27 +10,6 @@ const CSS = `
     .set-nav a[data-on] { background:var(--ink-800); color:#fff; }
     .set-nav a[data-on] svg { color:#fff; }
     .set-nav p { margin:12px 11px 4px; font-size:10.5px; font-weight:600; color:var(--text-subtle); }
-    .fields { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px 20px; padding:16px 20px; }
-    .field { display:grid; gap:5px; min-width:0; }
-    .field label { font-size:12px; font-weight:600; color:var(--text-body); }
-    .field label em { font-style:normal; color:var(--brick-600); }
-    .field .in { display:flex; align-items:center; height:38px; padding:0 11px; border:1px solid var(--border-strong);
-      border-radius:8px; background:var(--surface); font-size:13px; color:var(--text-strong); }
-    .field .in--empty { color:var(--text-subtle); }
-    .field .in--area { height:auto; min-height:76px; align-items:flex-start; padding:10px 11px; line-height:1.5; }
-    .field .hint { font-size:11.5px; color:var(--text-muted); }
-    .full { grid-column:1 / -1; }
-    .sw { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px;
-      padding:13px 20px; border-top:1px solid var(--border); }
-    .sw b { display:block; font-size:13px; font-weight:600; color:var(--text-strong); }
-    .sw span { font-size:12px; color:var(--text-muted); }
-    .toggle { width:38px; height:22px; border-radius:999px; background:var(--stone-300); position:relative; flex:0 0 auto; }
-    .toggle i { position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:999px; background:#fff;
-      box-shadow:var(--shadow-xs); }
-    .toggle[data-on] { background:var(--success-500); }
-    .toggle[data-on] i { left:19px; }
-    .savebar { display:flex; align-items:center; gap:12px; padding:12px 20px; border-top:1px solid var(--border);
-      background:var(--sunken); }
 `;
 
 const BODY = `      <div class="ph">

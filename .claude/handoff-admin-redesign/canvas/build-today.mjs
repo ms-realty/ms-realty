@@ -32,11 +32,11 @@ const CSS = `
     .conn-name b { font-size:12.5px; font-weight:600; color:var(--text-strong); }
     .conn-name em { font-style:normal; font-size:11.5px; color:var(--text-muted); }
     .tl { display:grid; gap:0; }
-    .tl-row { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; padding:9px 16px;
+    .today-row { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; padding:9px 16px;
       border-bottom:1px solid var(--border); }
-    .tl-row:last-child { border-bottom:0; }
-    .tl-row p { font-size:12.5px; color:var(--text-body); }
-    .tl-row em { display:block; margin-top:2px; font-style:normal; font-size:11.5px; color:var(--text-muted); }
+    .today-row:last-child { border-bottom:0; }
+    .today-row p { font-size:12.5px; color:var(--text-body); }
+    .today-row em { display:block; margin-top:2px; font-style:normal; font-size:11.5px; color:var(--text-muted); }
 `;
 
 const dot = (c) => `<i style="background:${c}"></i>`;
@@ -158,10 +158,10 @@ ${task({ kindColor: "var(--ink-500)", kind: "Consent", title: "Volkov · marketi
           <section class="panel">
             <div class="panel-hd"><h2>Recent activity</h2><a href="#" style="font-size:12.5px; font-weight:600">All</a></div>
             <div class="tl">
-              <div class="tl-row"><span class="av">MR</span><p>Approved the German description for <span class="mono">MS-CRAWL-0032</span><em>18 minutes ago</em></p></div>
-              <div class="tl-row"><span class="av">PD</span><p>Sent a reply to Anna Weber<em>1 hour ago · reviewed by Mariya</em></p></div>
-              <div class="tl-row"><span class="av">MR</span><p>Moved <span class="mono">MS-CRAWL-0087</span> to published<em>3 hours ago</em></p></div>
-              <div class="tl-row"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted 3 translations for review<em>Yesterday · not published</em></p></div>
+              <div class="today-row"><span class="av">MR</span><p>Approved the German description for <span class="mono">MS-CRAWL-0032</span><em>18 minutes ago</em></p></div>
+              <div class="today-row"><span class="av">PD</span><p>Sent a reply to Anna Weber<em>1 hour ago · reviewed by Mariya</em></p></div>
+              <div class="today-row"><span class="av">MR</span><p>Moved <span class="mono">MS-CRAWL-0087</span> to published<em>3 hours ago</em></p></div>
+              <div class="today-row"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted 3 translations for review<em>Yesterday · not published</em></p></div>
             </div>
           </section>
         </div>

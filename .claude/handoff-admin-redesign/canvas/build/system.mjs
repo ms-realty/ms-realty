@@ -44,7 +44,7 @@ const REP_BODY = `      <div class="ph">
         <section class="panel">
           <div class="panel-hd"><h2>Where enquiries came from</h2><span class="sub">63 in August</span></div>
           <div class="bars">
-${[["Website enquiry form",26,"var(--ink-800)"],["WhatsApp",14,"var(--success-500)"],["Phone",11,"var(--sea-600)"],["Legacy .ru pages",7,"var(--stone-500)"],["Facebook",3,"var(--sea-400)"],["Walk-in",2,"var(--stone-400)"]]
+${[["Website enquiry form",26],["WhatsApp",14],["Phone",11],["Legacy .ru pages",7],["Facebook",3],["Walk-in",2]].map(([n, v]) => [n, v, "var(--sea-600)"])
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 26) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
           <div class="savebar"><span style="font-size:12px" class="muted">Seven enquiries still arrive on legacy
@@ -62,14 +62,14 @@ ${[["Under 1 hour",21,"var(--success-500)"],["1 to 4 hours",28,"var(--success-50
         <section class="panel">
           <div class="panel-hd"><h2>Catalogue health</h2></div>
           <div class="bars">
-${[["Published and complete",84,"var(--success-500)"],["Published, facts thin",19,"var(--warning-600)"],["Needs review",43,"var(--warning-600)"],["Archived",38,"var(--stone-400)"]]
+${[["Published and complete",84,"var(--success-500)"],["Published, facts thin",19,"var(--warning-600)"],["Needs review",43,"var(--warning-600)"],["Archived",38,"var(--stone-600)"]]
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 84) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Hermes contribution</h2><span class="pill pill--ai">${icon("sparkles", 11)}Drafts only</span></div>
           <div class="bars">
-${[["Accepted as written",96,"var(--success-500)"],["Accepted after edits",34,"var(--sea-600)"],["Rejected",18,"var(--stone-400)"],["Refused by a guardrail",7,"var(--danger-500)"]]
+${[["Accepted as written",96,"var(--success-500)"],["Accepted after edits",34,"var(--sea-600)"],["Rejected",18,"var(--stone-600)"],["Refused by a guardrail",7,"var(--danger-500)"]]
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 96) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
           <div class="savebar"><span style="font-size:12px" class="muted">Roughly nine hours of translation and
