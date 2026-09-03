@@ -353,6 +353,8 @@ export function page({ title, active, body, health, healthText, width = 1440, he
 <body>
 <x-dc>
 <helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
   <style>${BASE}${extraCss}
   </style>
 </helmet>
@@ -390,6 +392,8 @@ export function sheet({ body, width = 1440, height = 1200, extraCss = "", pad = 
 <body>
 <x-dc>
 <helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
   <style>${BASE}${extraCss}
   </style>
 </helmet>
