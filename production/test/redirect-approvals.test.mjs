@@ -381,3 +381,21 @@ test("crawl evidence attaches to sealed-contract rows, not only to pending ones"
   const home = withEvidence.find((row) => row.old_url === "https://makler-realty.com");
   assert.equal(home.source_evidence.title, "Недвижими имоти в Сандански | MS Realty");
 });
+
+// The workspace's rule for a redirect target: the equivalent page or nowhere,
+// never a homepage and never the generic search page. The sealed launch
+// contract may carry the approver's explicit exceptions; this path may not.
+test("a redirect to the search page is refused here even though the site serves it", () => {
+  const routeMap = loadRouteMap();
+  const searchRoute = routeMap.find((route) => route.old_url === "https://makler-realty.com/search/");
+  assert.ok(searchRoute, "the legacy search URL is in the route map");
+  assert.throws(
+    () =>
+      appendRedirectApproval(
+        routeMap,
+        { oldUrl: searchRoute.old_url, decision: "redirect_301", targetPath: "/bg/tarsene", equivalentContent: true, reviewer: "seo_taxonomy_editor" },
+        { filePath: tempApprovalFile() },
+      ),
+    /non-home, non-search public content/,
+  );
+});

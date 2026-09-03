@@ -1,3 +1,4 @@
+import { searchPath } from "./seo.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "./locales.mjs";
@@ -91,7 +92,15 @@ function legacyDecisionFor({ pathname, url, host, config }) {
 
 function searchLocaleFor(registry, pathname) {
   const normalized = pathname.replace(/\/$/, "");
-  return registry.locales.find((locale) => `/${locale.code}/${locale.route_segments?.search}` === normalized) || null;
+  return (
+    registry.locales.find((locale) => {
+      try {
+        return searchPath(registry, locale.code) === normalized;
+      } catch {
+        return false;
+      }
+    }) || null
+  );
 }
 
 function currentRegistry(config) {

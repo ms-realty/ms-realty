@@ -83,8 +83,12 @@ function currentRuntimeTargetContext() {
 function verifiedPublicTarget(targetPath) {
   const { registry, seed } = currentRuntimeTargetContext();
   const resolved = resolveRuntimePath(registry, seed, targetPath);
-  if (!resolved || ["not_found", "home", "language_fallback"].includes(resolved.type)) {
-    throw new Error("Route decision targetPath must resolve to published, non-home public content");
+  // "No homepage or search fallback" is the workspace's rule for a redirect
+  // target: a visitor following an old link lands on the equivalent page or
+  // nowhere, never on a generic entry point. The sealed launch contract may
+  // carry the approver's explicit exceptions; this path may not mint new ones.
+  if (!resolved || ["not_found", "home", "language_fallback", "search"].includes(resolved.type)) {
+    throw new Error("Route decision targetPath must resolve to published, non-home, non-search public content");
   }
   return resolved;
 }

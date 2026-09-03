@@ -1,3 +1,4 @@
+import { searchPath } from "./seo.mjs";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
@@ -4823,9 +4824,13 @@ export function createHttpApp({
 
     if (request.method === "GET") {
       const normalized = url.pathname.replace(/\/$/, "");
-      const searchLocale = activeRegistry.locales.find(
-        (locale) => locale.route_segments?.search && `/${locale.code}/${locale.route_segments.search}` === normalized,
-      );
+      const searchLocale = activeRegistry.locales.find((locale) => {
+        try {
+          return searchPath(activeRegistry, locale.code) === normalized;
+        } catch {
+          return false;
+        }
+      });
       if (searchLocale) {
         let searchRequest;
         // A reversed or non-numeric range is the visitor's typing, not a broken
