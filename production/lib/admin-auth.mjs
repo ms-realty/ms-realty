@@ -62,6 +62,8 @@ const AGENT_REALTY_CASE_CONDITION_ACTIONS = new Set([
 const OPERATIONS_READ_PATHS = new Set([
   "/admin/today",
   "/api/admin/today",
+  "/admin/tasks",
+  "/api/admin/tasks",
   "/admin/leads",
   "/api/admin/leads",
   "/admin/contacts",
@@ -98,6 +100,8 @@ const CONTENT_READ_PATHS = new Set([
 
 const TRANSLATION_READ_PATHS = new Set(["/admin/translations", "/api/admin/translations"]);
 const OPERATIONS_WRITE_PATHS = new Set([
+  "/api/admin/tasks",
+  "/api/admin/tasks/action",
   "/api/admin/replies",
   "/api/admin/replies/delivery",
   "/api/admin/replies/draft",

@@ -58,6 +58,8 @@ const ADMIN_ACTIONS = new Set([
   "provider_reply_sent",
   "provider_verified",
   "public_request_outcome_recorded",
+  "task_opened",
+  "task_updated",
   "redirect_approval_created",
   "redirect_approvals_imported",
   "reply_approved",

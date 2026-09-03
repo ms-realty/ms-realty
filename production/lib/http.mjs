@@ -119,9 +119,11 @@ import {
   renderAdminRuntimeUnavailablePayload,
   renderAdminWorkspaceSettingsPayload,
   renderAdminRealtyCasesPayload,
+  renderAdminTaskQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
+import { appendTaskAction, buildTaskQueue, openTask, readTaskEvents } from "./tasks.mjs";
 import {
   DocumentStoreUnavailableError,
   createDocument,
@@ -1076,6 +1078,7 @@ export function createHttpApp({
   sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
   documentChecklistLedgerPath = null,
+  taskLedgerPath = null,
   realtyCaseLedgerPath = null,
   realtyCaseConditionLedgerPath = null,
   realtyCaseRequestProjectionEnabled = false,
@@ -5505,6 +5508,52 @@ export function createHttpApp({
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/tasks", "/admin/tasks"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      // Built from the Today payload, so the two screens read one set of
+      // queues and cannot disagree about what is outstanding.
+      const todayPayload = await currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
+      const taskQueue = buildTaskQueue({
+        page: todayPayload,
+        events: readTaskEvents(taskLedgerPath || undefined),
+        now: receivedAt || new Date().toISOString(),
+      });
+      const payload = renderAdminTaskQueuePayload(activeRegistry, adminLocaleParam(url), taskQueue, principal);
+      if (url.pathname === "/admin/tasks" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "POST" && ["/api/admin/tasks", "/api/admin/tasks/action"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = reviewedAt || receivedAt || new Date().toISOString();
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const options = { filePath: taskLedgerPath || undefined, recordedAt };
+        const opening = url.pathname === "/api/admin/tasks";
+        const result = opening ? openTask(input, options) : appendTaskAction(input, options);
+        if (!result.idempotent) {
+          recordAudit({
+            action: opening ? "task_opened" : "task_updated",
+            actor: result.event.actor,
+            objectType: "task",
+            objectId: result.task.task_id,
+            metadata: {
+              action: result.event.action,
+              task_type: result.task.kind,
+              status: result.task.status,
+              owner: result.task.owner,
+              has_reference: Boolean(result.event.reference),
+            },
+          }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, { kind: "task", ...result });
+      } catch (error) {
+        return adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {

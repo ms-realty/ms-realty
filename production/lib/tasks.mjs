@@ -495,7 +495,37 @@ export function assertTaskEvents(events) {
 // release. So the selection lives here, free of copy and hrefs, and the screens
 // decorate it. `task_id` is the key Today already uses, so the two lists name
 // the same work with the same identifier.
+// The lead half of the queue: which enquiries are still outstanding and in what
+// order. Pure, and derived from the payload alone, so the renderer and the task
+// queue read one implementation.
+export function deriveLeadQueueState(page = {}) {
+  const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
+  const deliveryByLeadId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.lead_id, row]));
+  const repliedLeadIds = new Set(
+    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
+  );
+  const priority = (lead) => {
+    const delivery = deliveryByLeadId.get(lead.lead_id);
+    if (repliedLeadIds.has(lead.lead_id)) return 5;
+    if (delivery?.status === "failed") return 0;
+    const status = leadSlaById.get(lead.lead_id)?.status || "pending";
+    if (status === "manager_escalation_required") return 1;
+    if (delivery?.status === "queued") return 2;
+    if (status === "reminder_required") return 3;
+    return 4;
+  };
+  return {
+    leadSlaById,
+    deliveryByLeadId,
+    repliedLeadIds,
+    pending: [...(page.leads || [])]
+      .filter((lead) => !repliedLeadIds.has(lead.lead_id))
+      .sort((left, right) => priority(left) - priority(right)),
+  };
+}
+
 export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
+  const queue = leadQueue || deriveLeadQueueState(page);
   const rows = [];
   const trackingStatus = page.website_funnel?.lead_tracking_status;
   if (trackingStatus === "mismatch" || trackingStatus === "unavailable") {
@@ -513,9 +543,9 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       source: { tracking_status: trackingStatus, tracking_gap: Number(page.website_funnel?.lead_tracking_gap || 0) },
     });
   }
-  for (const lead of leadQueue?.pending || []) {
-    const sla = leadQueue.leadSlaById?.get(lead.lead_id);
-    const delivery = leadQueue.deliveryByLeadId?.get(lead.lead_id);
+  for (const lead of queue.pending || []) {
+    const sla = queue.leadSlaById?.get(lead.lead_id);
+    const delivery = queue.deliveryByLeadId?.get(lead.lead_id);
     const slaStatus = sla?.status || "pending";
     let priority = "normal";
     let dueAt = sla?.sla_due_at || null;

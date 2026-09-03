@@ -14,6 +14,7 @@ export const OWNER_OPERATOR_HERMES_TOOL = "ms_realty_hermes";
 export const OWNER_OPERATOR_CONTEXT_TOOL = "ms_realty_admin_context";
 export const ADMIN_PAGE_SURFACES = Object.freeze([
   { id: "today", group: "today", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
+  { id: "tasks", group: "today", path: "/admin/tasks", icon: "list-checks", kind: "admin_task_queue", capability: "operations:read" },
   { id: "lead_inbox", group: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
   { id: "contacts", group: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
   { id: "consents", group: "crm", path: "/admin/consents", icon: "shield-check", kind: "admin_consents", capability: "operations:read" },
@@ -37,7 +38,7 @@ export const ADMIN_PAGE_SURFACES = Object.freeze([
   { id: "team", group: "workspace", path: "/admin/team", icon: "users", kind: "admin_team", capability: "team:manage" },
 ]);
 export const OWNER_CONSOLE_NAV_DESTINATIONS = Object.freeze([
-  { id: "today", group: "today", primary: "today", children: [] },
+  { id: "today", group: "today", primary: "today", children: ["tasks"] },
   { id: "leads", group: "crm", primary: "lead_inbox", children: ["contacts", "consents", "documents", "document_records", "realty_cases", "lead_pipeline", "requests", "viewings", "reports"] },
   { id: "listings", group: "cms", primary: "listing_manager", children: ["media_library"] },
   { id: "translations", group: "cms", primary: "translation_queue", children: ["approved_content", "locale_rollout", "migration_review"] },
@@ -171,6 +172,9 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/settings"],
   ["GET", "/api/admin/team"],
   ["POST", "/api/admin/team"],
+  ["GET", "/api/admin/tasks"],
+  ["POST", "/api/admin/tasks"],
+  ["POST", "/api/admin/tasks/action"],
   ["GET", "/api/admin/today"],
   ["POST", "/api/admin/tours/approve"],
   ["POST", "/api/admin/translations/approve"],

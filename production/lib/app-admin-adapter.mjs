@@ -119,6 +119,7 @@ import {
   renderAdminRealtyCasesPayload,
   renderAdminRuntimeUnavailablePayload,
   renderAdminApprovedContentPayload,
+  renderAdminTaskQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import {
@@ -127,6 +128,7 @@ import {
   buildDocumentChecklistQueue,
   readDocumentChecklistOutcomes,
 } from "./document-checklists.mjs";
+import { DEFAULT_TASK_LEDGER_PATH, appendTaskAction, buildTaskQueue, openTask, readTaskEvents } from "./tasks.mjs";
 import {
   DocumentStoreUnavailableError,
   createDocument,
@@ -520,6 +522,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     ...realtyCasePayloadAuthorityConfigFromEnv(env),
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
+    taskLedgerPath: env.MS_REALTY_TASK_LEDGER_PATH || DEFAULT_TASK_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -3706,6 +3709,48 @@ async function appendAccountContactLinkEntry(input, config) {
   return result;
 }
 
+async function taskQueuePayload(registry, url, config) {
+  const today = await todayPayload(registry, url, config);
+  return renderAdminTaskQueuePayload(
+    registry,
+    adminLocaleParam(url),
+    buildTaskQueue({
+      page: today,
+      events: readTaskEvents(config.taskLedgerPath),
+      now: config.reviewedAt || new Date().toISOString(),
+    }),
+    config.adminPrincipal,
+  );
+}
+
+function appendTaskEntry(input, config, { opening }) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const recordedAt = config.reviewedAt || new Date().toISOString();
+  const result = opening
+    ? openTask(attributed, { filePath: config.taskLedgerPath, recordedAt })
+    : appendTaskAction(attributed, { filePath: config.taskLedgerPath, recordedAt });
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: opening ? "task_opened" : "task_updated",
+        actor: result.event.actor,
+        objectType: "task",
+        objectId: result.task.task_id,
+        metadata: {
+          action: result.event.action,
+          task_type: result.task.kind,
+          status: result.task.status,
+          owner: result.task.owner,
+          has_reference: Boolean(result.event.reference),
+        },
+      },
+      config,
+      result.event.recorded_at,
+    );
+  }
+  return result;
+}
+
 function appendDocumentChecklistOutcomeEntry(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
   const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
@@ -5050,6 +5095,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         config,
       );
       return url.pathname === "/admin/today" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
+    if (request.method === "GET" && ["/admin/tasks", "/api/admin/tasks"].includes(url.pathname)) {
+      const payload = await taskQueuePayload(registry, url, config);
+      return url.pathname === "/admin/tasks" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
+    if (request.method === "POST" && ["/api/admin/tasks", "/api/admin/tasks/action"].includes(url.pathname)) {
+      const result = appendTaskEntry(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config,
+        { opening: url.pathname === "/api/admin/tasks" },
+      );
+      return jsonResponse(result.idempotent ? 200 : 201, { kind: "task", ...result });
     }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));

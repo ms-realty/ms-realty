@@ -942,6 +942,28 @@ export function renderAdminDocumentChecklistPayload(registry, requestedLocale, c
   };
 }
 
+export function renderAdminTaskQueuePayload(registry, requestedLocale, taskQueue, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_task_queue",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/tasks",
+    canonical: "/admin/tasks",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.tasksWorkspace || "Tasks"} | MS Realty`,
+      description: workspace.copy.tasksDescription || "One ordered work queue.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    taskQueue,
+    summary: taskQueue.summary,
+  };
+}
+
 export function renderAdminConsentPayload(registry, requestedLocale, consentStates, operator = null) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const states = consentStates || [];

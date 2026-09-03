@@ -6,6 +6,7 @@ import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
+import { deriveLeadQueueState } from "./tasks.mjs";
 
 function adminCopy(page) {
   return page.workspace?.copy || {};
@@ -22,6 +23,7 @@ const RAIL_LABEL_KEYS = Object.freeze({
   locale_rollout: { key: "localeRollout", fallback: "Website languages" },
   media_library: { key: "mediaLibrary", fallback: "Media" },
   document_records: { key: "documentRecords", fallback: "Document records" },
+  tasks: { key: "tasksWorkspace", fallback: "Tasks" },
 });
 
 function pageCan(page, capability) {
@@ -797,13 +799,37 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Нищо в този изглед.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност", integrity: "Цялост на данните" },
+        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност", integrity: "Цялост на данните", authored: "Собствена задача" },
         actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността", inspectTracking: "Провери отчета" },
         trackingTitle: "Запитванията от сайта не съвпадат с CRM",
         trackingMissing: "CRM запитвания без събитие за изпращане: {count}.",
         trackingOrphaned: "Отчетени изпращания, които липсват в постоянния CRM: {count}.",
         trackingUnavailable: "Събитията от сайта не могат да бъдат проверени.",
         priorities: { critical: "Критично", urgent: "Спешно", normal: "Нормално" },
+      },
+      tasks: {
+        title: "Задачи",
+        description: "Една подредена работна опашка от всички оперативни списъци.",
+        delegated: "Приключва се на своя екран",
+        delegatedNote: "Тази работа се води от друг екран. Отметка тук би записала, че е свършена, без да е свършена.",
+        openThere: "Отвори там",
+        ownWork: "Собствени задачи",
+        completable: "Може да се отметне тук: {count}",
+        addTitle: "Създай задача",
+        owner: "Отговорник",
+        taskType: "Тип",
+        subject: "Свързан обект",
+        due: "Срок",
+        evidence: "Бележка или вътрешна референция",
+        evidenceNote: "Приключването изисква бележка или вътрешна референция и потвърждение от посочен човек.",
+        confirm: "Потвърждавам, че работата е свършена",
+        complete: "Приключи",
+        dismiss: "Отхвърли",
+        dismissReason: "Причина за отхвърляне",
+        snooze: "Отложи до",
+        reassign: "Преназначи на",
+        empty: "Няма чакаща работа.",
+        ownEmpty: "Няма собствени задачи.",
       },
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", location_verified_at: "Локацията е проверена на", price_verified_at: "Цената е проверена на", price_on_request_verified_at: "Цена при запитване е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
@@ -1549,13 +1575,37 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "В этом виде ничего нет.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность", integrity: "Целостность данных" },
+        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность", integrity: "Целостность данных", authored: "Своя задача" },
         actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность", inspectTracking: "Проверить отчёт" },
         trackingTitle: "Заявки с сайта не совпадают с CRM",
         trackingMissing: "Заявки CRM без события отправки: {count}.",
         trackingOrphaned: "Отмеченные отправки, отсутствующие в постоянной CRM: {count}.",
         trackingUnavailable: "События сайта сейчас нельзя проверить.",
         priorities: { critical: "Критично", urgent: "Срочно", normal: "Обычно" },
+      },
+      tasks: {
+        title: "Задачи",
+        description: "Одна упорядоченная рабочая очередь из всех оперативных списков.",
+        delegated: "Закрывается на своем экране",
+        delegatedNote: "Эту работу ведет другой экран. Отметка здесь записала бы, что она сделана, хотя она не сделана.",
+        openThere: "Открыть там",
+        ownWork: "Свои задачи",
+        completable: "Можно отметить здесь: {count}",
+        addTitle: "Создать задачу",
+        owner: "Ответственный",
+        taskType: "Тип",
+        subject: "Связанный объект",
+        due: "Срок",
+        evidence: "Заметка или внутренняя ссылка",
+        evidenceNote: "Закрытие требует заметки или внутренней ссылки и подтверждения названного человека.",
+        confirm: "Подтверждаю, что работа выполнена",
+        complete: "Закрыть",
+        dismiss: "Отклонить",
+        dismissReason: "Причина отклонения",
+        snooze: "Отложить до",
+        reassign: "Переназначить на",
+        empty: "Нет ожидающей работы.",
+        ownEmpty: "Своих задач нет.",
       },
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", location_verified_at: "Локация проверена", price_verified_at: "Цена проверена", price_on_request_verified_at: "Цена по запросу проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
@@ -2301,13 +2351,37 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Nothing in this view.",
         due: "Due",
         overdue: "Overdue",
-        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity", integrity: "Data integrity" },
+        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity", integrity: "Data integrity", authored: "Own task" },
         actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity", inspectTracking: "Inspect report" },
         trackingTitle: "Website submissions do not match CRM",
         trackingMissing: "Durable CRM leads without a submission event: {count}.",
         trackingOrphaned: "Tracked submissions absent from durable CRM: {count}.",
         trackingUnavailable: "Website submission events cannot be verified.",
         priorities: { critical: "Critical", urgent: "Urgent", normal: "Normal" },
+      },
+      tasks: {
+        title: "Tasks",
+        description: "One ordered work queue across every operating list.",
+        delegated: "Closed on its own screen",
+        delegatedNote: "This work is owned by another screen. A tick here would record that it was done without doing it.",
+        openThere: "Open there",
+        ownWork: "Own tasks",
+        completable: "Completable here: {count}",
+        addTitle: "Raise a task",
+        owner: "Owner",
+        taskType: "Type",
+        subject: "Related object",
+        due: "Due",
+        evidence: "Note or internal reference",
+        evidenceNote: "Completing requires a note or internal reference and a named human who confirmed it.",
+        confirm: "I confirm this work was done",
+        complete: "Complete",
+        dismiss: "Dismiss",
+        dismissReason: "Dismissal reason",
+        snooze: "Snooze until",
+        reassign: "Reassign to",
+        empty: "No outstanding work.",
+        ownEmpty: "No own tasks.",
       },
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", location_verified_at: "Location verified at", price_verified_at: "Price verified at", price_on_request_verified_at: "Price on request verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
@@ -3554,32 +3628,6 @@ function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }
   ];
 }
 
-function leadQueueState(page) {
-  const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
-  const deliveryByLeadId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.lead_id, row]));
-  const repliedLeadIds = new Set(
-    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
-  );
-  const priority = (lead) => {
-    const delivery = deliveryByLeadId.get(lead.lead_id);
-    if (repliedLeadIds.has(lead.lead_id)) return 5;
-    if (delivery?.status === "failed") return 0;
-    const status = leadSlaById.get(lead.lead_id)?.status || "pending";
-    if (status === "manager_escalation_required") return 1;
-    if (delivery?.status === "queued") return 2;
-    if (status === "reminder_required") return 3;
-    return 4;
-  };
-  return {
-    leadSlaById,
-    deliveryByLeadId,
-    repliedLeadIds,
-    pending: [...(page.leads || [])]
-      .filter((lead) => !repliedLeadIds.has(lead.lead_id))
-      .sort((left, right) => priority(left) - priority(right)),
-  };
-}
-
 function queueTone(status) {
   if (status === "ok") return "success";
   if (status?.includes("escalation")) return "brick";
@@ -4056,7 +4104,7 @@ function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const settingsCopy = workbenchCopy(page).workspaceSettings;
-  const queue = leadQueueState(page);
+  const queue = deriveLeadQueueState(page);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
@@ -8704,6 +8752,143 @@ function ListingManagerBody({ page }) {
 // the screen: every document, the version it is on, and who still has to sign
 // it. Counts are links into the rows behind them, and the store being absent is
 // a state the page renders rather than an error it throws.
+function TaskRow({ page, row, copy, na }) {
+  const kindLabel = row.origin === "authored" ? na.kinds.authored : na.kinds[row.kind];
+  const delegated = row.completion.mode === "delegated";
+  return h(
+    "li",
+    {
+      key: row.task_id,
+      "data-task": row.task_id,
+      "data-task-origin": row.origin,
+      "data-task-kind": row.kind,
+      "data-task-priority": row.priority,
+      "data-task-completion": row.completion.mode,
+      "data-overdue": row.overdue ? "true" : "false",
+    },
+    h(
+      "div",
+      { className: "adm-next-actions__body" },
+      h(
+        "div",
+        { className: "adm-next-actions__meta" },
+        h(StatusPill, { tone: row.priority === "critical" ? "brick" : row.priority === "urgent" ? "sun" : "sea" }, kindLabel),
+        row.due_at
+          ? h(
+              "time",
+              { dateTime: row.due_at, title: row.due_at },
+              `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.due_at, page.workspace?.locale)}`,
+            )
+          : null,
+      ),
+      h("strong", null, row.subject_ref || kindLabel),
+      row.origin === "authored" && row.note ? h("small", { className: "adm-lead-context" }, row.note) : null,
+      delegated ? h("small", { className: "adm-lead-context" }, copy.delegated) : null,
+    ),
+    h(
+      "div",
+      { className: "adm-next-actions__action" },
+      // The distinction the entity exists for, drawn: delegated work links to
+      // the screen that owns it and carries no control that could close it.
+      delegated
+        ? h(
+            "a",
+            { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.completion.route, page) },
+            h("span", null, copy.openThere),
+          )
+        : h(TaskCompletionForm, { page, row, copy }),
+    ),
+  );
+}
+
+function TaskCompletionForm({ page, row, copy }) {
+  const id = `task-${row.task_id}`;
+  return h(
+    "form",
+    { method: "post", action: "/api/admin/tasks/action", className: "adm-task-complete", "data-task-form": row.task_id },
+    h("input", { type: "hidden", name: "taskId", value: row.task_id }),
+    h("input", { type: "hidden", name: "action", value: "task_completed" }),
+    h("label", { htmlFor: `${id}-note` }, copy.evidence),
+    h("input", { id: `${id}-note`, name: "note", type: "text", maxLength: 1000 }),
+    h(
+      "label",
+      { className: "adm-check", htmlFor: `${id}-confirm` },
+      h("input", { id: `${id}-confirm`, name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
+      h("span", null, copy.confirm),
+    ),
+    h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.complete),
+  );
+}
+
+function TasksBody({ page }) {
+  const ui = workbenchCopy(page);
+  const copy = ui.workspaceSettings.tasks;
+  const na = ui.workspaceSettings.nextActions;
+  const queue = page.taskQueue;
+  const summary = page.summary;
+  return adminShell(page, {
+    title: copy.title,
+    mainAttrs: {
+      "data-kind": "admin-tasks",
+      "data-react-admin-ui": "tasks",
+      "data-admin-workbench": "crm",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+      "data-task-total": String(summary.total),
+      "data-task-completable": String(summary.completable),
+    },
+    children: [
+      h(PageHeader, { title: copy.title, subtitle: copy.description }),
+      h(
+        SummaryStrip,
+        {
+          cards: [
+            { key: "total", label: copy.title, value: String(summary.total) },
+            { key: "overdue", label: na.overdue, value: String(summary.overdue) },
+            { key: "own", label: copy.ownWork, value: String(summary.authored) },
+            { key: "completable", label: copy.completable.replace("{count}", ""), value: String(summary.completable) },
+          ],
+        },
+      ),
+      h(
+        Panel,
+        { title: copy.title, "data-task-queue": "true" },
+        // Said once, at the top, rather than repeated on every delegated row.
+        h("p", { className: "adm-next-actions__intro", "data-task-delegated-note": "true" }, copy.delegatedNote),
+        queue.rows.length
+          ? h("ol", { className: "adm-next-actions" }, ...queue.rows.map((row) => h(TaskRow, { page, row, copy, na })))
+          : h("p", { className: "adm-empty", "data-task-empty": "true" }, copy.empty),
+      ),
+      h(
+        Panel,
+        { title: copy.addTitle, "data-task-open": "true" },
+        h("p", { className: "adm-next-actions__intro" }, copy.evidenceNote),
+        h(
+          "form",
+          { method: "post", action: "/api/admin/tasks", className: "adm-task-open" },
+          h("label", { htmlFor: "task-new-id" }, copy.subject),
+          h("input", { id: "task-new-id", name: "taskId", type: "text", required: true, maxLength: 160 }),
+          h("label", { htmlFor: "task-new-type" }, copy.taskType),
+          h("input", { id: "task-new-type", name: "taskType", type: "text", required: true, maxLength: 120 }),
+          h("label", { htmlFor: "task-new-owner" }, copy.owner),
+          h("input", { id: "task-new-owner", name: "owner", type: "text", required: true, maxLength: 160 }),
+          h("label", { htmlFor: "task-new-due" }, copy.due),
+          h("input", { id: "task-new-due", name: "dueAt", type: "datetime-local" }),
+          h("label", { htmlFor: "task-new-note" }, copy.evidence),
+          h("input", { id: "task-new-note", name: "note", type: "text", maxLength: 1000 }),
+          h(
+            "label",
+            { className: "adm-check", htmlFor: "task-new-confirm" },
+            h("input", { id: "task-new-confirm", name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
+            h("span", null, copy.confirm),
+          ),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.addTitle),
+        ),
+      ),
+    ],
+  });
+}
+
 function DocumentRecordsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -13869,6 +14054,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_locale_rollout") return renderStaticElement(h(LocaleRolloutBody, { page }));
   if (page.kind === "admin_media_library") return renderStaticElement(h(MediaLibraryBody, { page }));
   if (page.kind === "admin_document_records") return renderStaticElement(h(DocumentRecordsBody, { page }));
+  if (page.kind === "admin_task_queue") return renderStaticElement(h(TasksBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
