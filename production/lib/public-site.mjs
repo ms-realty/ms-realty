@@ -16,6 +16,7 @@ import {
   hreflangForLocation,
   hreflangForHome,
   hreflangForContact,
+  hreflangForSearchFacet,
   hreflangForSeller,
   hreflangForStart,
   homePath,
@@ -30,6 +31,8 @@ import {
   metaDescription,
   publicLocationNames,
   PUBLIC_LOCATION_SCOPES,
+  searchFacetFor,
+  searchFacetPath,
   sellerPath,
   startPath,
 } from "./seo.mjs";
@@ -1782,6 +1785,84 @@ export function localizedSearchFilterValue(localeCode, key, value) {
     return localizedLocationValue(localeCode, area.names?.en || "") || area.names?.en || humanizeIdentifier(value);
   }
   return humanizeIdentifier(value);
+}
+
+// Copy for the eight indexable search facets. Each locale contributes one
+// template; the facet value comes from the same translators that label the
+// filter chips, so the heading and the control the visitor used to reach the
+// page always agree. Titles stay under 60 characters and descriptions inside
+// the 120 to 160 window the translation validator enforces (90 for Hebrew)
+// with every family and offer value substituted; the public-site tests
+// measure all 56 combinations.
+const SEARCH_FACET_COPY = {
+  bg: {
+    title: "{value} · Проверени обяви | MS Realty",
+    h1: "{value} · Проверени обяви",
+    description:
+      "{value}: разгледайте проверени обяви на MS Realty с актуална цена, площ и локация за всеки имот и се свържете с брокер за оглед.",
+  },
+  en: {
+    title: "{value} · Verified listings | MS Realty",
+    h1: "{value} · Verified listings",
+    description:
+      "{value}: browse verified MS Realty listings with a reviewed price, area and location for every property, then book a viewing with a broker.",
+  },
+  de: {
+    title: "{value} · Geprüfte Angebote | MS Realty",
+    h1: "{value} · Geprüfte Angebote",
+    description:
+      "{value}: geprüfte Angebote von MS Realty mit aktuellem Preis, Fläche und Lage für jede Immobilie. Vereinbaren Sie eine Besichtigung mit uns.",
+  },
+  nl: {
+    title: "{value} · Beoordeeld aanbod | MS Realty",
+    h1: "{value} · Beoordeeld aanbod",
+    description:
+      "{value}: bekijk beoordeeld aanbod van MS Realty met actuele prijs, oppervlakte en locatie per object en plan een bezichtiging met een makelaar.",
+  },
+  ru: {
+    title: "{value} · Проверенные объекты | MS Realty",
+    h1: "{value} · Проверенные объекты",
+    description:
+      "{value}: смотрите проверенные объекты MS Realty с актуальной ценой, площадью и локацией по каждому предложению и запишитесь на просмотр.",
+  },
+  el: {
+    title: "{value} · Ελεγμένα ακίνητα | MS Realty",
+    h1: "{value} · Ελεγμένα ακίνητα",
+    description:
+      "{value}: δείτε ελεγμένα ακίνητα της MS Realty με ενημερωμένη τιμή, εμβαδόν και τοποθεσία για κάθε ακίνητο και κλείστε επίσκεψη με μεσίτη.",
+  },
+  he: {
+    title: "{value} · נכסים מאושרים | MS Realty",
+    h1: "{value} · נכסים מאושרים",
+    description: "{value}: עיינו בנכסים מאושרים של MS Realty עם מחיר, שטח ומיקום מעודכנים לכל נכס וקבעו סיור עם מתווך.",
+  },
+};
+
+export function searchFacetCopy(localeCode, facet) {
+  const template = SEARCH_FACET_COPY[localeCode] || SEARCH_FACET_COPY.en;
+  const value = localizedSearchFilterValue(localeCode, facet.param, facet.value);
+  const fill = (text) => text.replaceAll("{value}", value);
+  return { title: fill(template.title), h1: fill(template.h1), description: fill(template.description) };
+}
+
+// A search URL is a facet page only when the normalised intent is exactly one
+// canonical property family or one offer type and nothing else. Comparing the
+// request's intent with the intent the bare parameter produces settles every
+// other field in one step: keywords, references, ranges, geography, status,
+// sort, page and page size all make the two differ. Legacy aliases such as
+// property_type=villa normalise to their canonical family, so they resolve to
+// the same facet and canonicalise onto its URL.
+export function searchFacetFromIntent(intent) {
+  const families = intent?.property_families || [];
+  const facet =
+    families.length === 1 && !intent?.offer_type
+      ? searchFacetFor("property_family", families[0])
+      : families.length === 0 && intent?.offer_type
+        ? searchFacetFor("offer_type", intent.offer_type)
+        : null;
+  if (!facet) return null;
+  const bare = normalizeSearchIntent({ locale: intent.locale, [facet.param]: facet.value }, { defaultLocale: intent.locale });
+  return JSON.stringify(bare) === JSON.stringify(intent) ? facet : null;
 }
 
 const PUBLIC_COPY = {
@@ -3727,6 +3808,12 @@ export function renderSearchPage({
     : searchableListings.filter((listing) => matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, intentFilters));
   const selectedSort = publicSearchSort(searchIntent.sort);
   const selectedView = !savedView && view === "map" ? "map" : "list";
+  // Only the bare list view of a single facet is a public landing page; the
+  // saved shortlist and the map are per-visitor surfaces (see the robots
+  // policy below).
+  const facet = savedView || selectedView !== "list" ? null : searchFacetFromIntent(searchIntent);
+  const facetCopy = facet ? searchFacetCopy(locale.code, facet) : null;
+  const searchRoute = `/${locale.code}/${locale.route_segments.search}`;
   const sortedListings = databasePage ? matchedListings : sortListingsForPublicSearch(matchedListings, selectedSort);
   const requestedPage = Number(page);
   const normalizedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
@@ -3788,17 +3875,23 @@ export function renderSearchPage({
     locale: locale.code,
     lang: locale.code,
     dir: locale.direction,
-    path: `/${locale.code}/${locale.route_segments.search}`,
-    canonical: `/${locale.code}/${locale.route_segments.search}`,
+    path: searchRoute,
     // Search results are a private, mutable utility surface. Curated location
     // and listing pages carry indexable inventory; query/filter combinations
-    // must not become thin or duplicate landing pages.
-    indexable: false,
+    // must not become thin or duplicate landing pages. The one exception is
+    // the eight facet pages (one property family or one offer type, nothing
+    // else): each is a stable, non-duplicate landing page, so it carries a
+    // self canonical that keeps its single parameter, an hreflang cluster and
+    // index,follow. Every other query keeps the bare canonical and noindex.
+    canonical: facet ? searchFacetPath(registry, locale.code, facet) : searchRoute,
+    indexable: Boolean(facet),
     metadata: {
-      title: savedView ? `${labels.savedListings} | MS Realty` : ui.searchTitle,
-      description: savedView ? labels.savedEmpty : ui.searchDescription,
-      robots: savedView ? "noindex,nofollow" : "noindex,follow",
+      title: savedView ? `${labels.savedListings} | MS Realty` : facet ? facetCopy.title : ui.searchTitle,
+      description: savedView ? labels.savedEmpty : facet ? facetCopy.description : ui.searchDescription,
+      robots: savedView ? "noindex,nofollow" : facet ? "index,follow" : "noindex,follow",
     },
+    hreflang: facet ? hreflangForSearchFacet(registry, facet) : [],
+    ...(facet ? { body: { h1: facetCopy.h1 } } : {}),
     mobile_policy: {
       list_first_mobile: true,
       // This is an official-area browser, not a property-pin map. Listing
@@ -3814,6 +3907,7 @@ export function renderSearchPage({
     }),
     search: {
       saved_view: savedView === true,
+      facet: facet ? { param: facet.param, value: facet.value } : null,
       engines: ["postgres"],
       intent: searchIntent,
       query: searchIntent.text_query,
