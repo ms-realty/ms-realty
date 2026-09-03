@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { BASE } from "./shell.mjs";
-import { CANONICAL_SPACING, ICON_BANDS, SPACING_STEPS } from "./tokens.mjs";
+import { CANONICAL_SPACING, ICON_BANDS, RADII, SPACING_STEPS, TYPE_SCALE } from "./tokens.mjs";
 
 const dir = new URL(".", import.meta.url).pathname;
 const classesIn = (css) => new Set([...css.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]));
@@ -61,11 +61,11 @@ const declared = (selector, pattern) => {
   return found ? found.slice(1).map(Number) : [];
 };
 claim(
-  String(declared("td", /\n\s*td \{ padding:(\d+)px (\d+)px;/)) === String(CANONICAL_SPACING.rowPadding),
+  String(declared("td", /\n\s*td \{[^}]*padding:(\d+)px (\d+)px;/)) === String(CANONICAL_SPACING.rowPadding),
   "the row padding in shell.mjs is not the row padding the sheet publishes",
 );
 claim(
-  String(declared(".panel-hd", /\n\s*padding:(\d+)px (\d+)px; border-bottom:1px solid var\(--border\); \}/)) ===
+  String(declared(".sect", /\n\s*\.sect \{ padding:(\d+)px (\d+)px;/)) ===
     String(CANONICAL_SPACING.panelPadding),
   "the panel padding in shell.mjs is not the panel padding the sheet publishes",
 );
@@ -142,6 +142,20 @@ for (const file of artboards) {
       `${file} draws a bar in ${fill} on ${trackToken}: ${ratio.toFixed(2)}:1, under the ${CONTRAST_FLOOR}:1 floor`,
     );
   }
+}
+
+// Three radii. A radius no rule produced is the most common Gate 3 defect, so
+// every literal border-radius in every artboard must be one of the three (or a
+// token that resolves to one). 0 is allowed: a square corner is not a radius.
+const allowedRadii = new Set([0, ...Object.values(RADII)]);
+for (const file of artboards) {
+  const src = fs.readFileSync(path.join(dir, file), "utf8");
+  const literal = [...src.matchAll(/border-radius\s*:\s*([^;"}]+)/g)]
+    .flatMap((m) => m[1].split(/\s+/))
+    .filter((v) => /^\d+(\.\d+)?px$/.test(v))
+    .map((v) => Number.parseFloat(v))
+    .filter((v) => !allowedRadii.has(v));
+  if (literal.length) claim(false, `${file} uses radii outside the system: ${[...new Set(literal)].join(", ")}px`);
 }
 
 if (broken.length) {
