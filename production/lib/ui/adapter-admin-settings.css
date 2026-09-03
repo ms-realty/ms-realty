@@ -26,9 +26,14 @@
   padding: 0 var(--space-5) var(--space-4);
 }
 .adm-today-briefing__action .mk-btn {
-  width: 100%;
+  width: auto;
   min-height: 40px;
   justify-content: center;
+}
+/* Full width is a phone layout, not a desktop one: stretched across a 1150px
+   column the same action reads as a banner rather than a button. */
+@media (max-width: 767px) {
+  .adm-today-briefing__action .mk-btn { width: 100%; }
 }
 .adm-today-briefing__source { margin: 0; padding: var(--space-3) var(--space-5) var(--space-4); border-top: 1px solid var(--border); color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
 .adm-today-briefing__hermes { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); margin: 0 var(--space-5) var(--space-4); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-sunken); }

@@ -5777,7 +5777,13 @@ function RealtyCaseConditionCard({ page, condition, caseIsActive }) {
     h(
       "header",
       { className: "adm-pipeline-card__header" },
-      h("div", null, h("h2", null, condition.id), h("small", null, `${condition.case_id} · ${valueText(workbenchCopy(page), condition.type)}`)),
+      h(
+        "div",
+        null,
+        h("h2", null, valueText(workbenchCopy(page), condition.type)),
+        h("small", null, condition.case_id),
+        h("code", { className: "crm-mono adm-id-caption" }, condition.id),
+      ),
       h(StatusPill, { tone: conditionTone(condition) }, statusText(workbenchCopy(page), condition.status)),
     ),
     h(
@@ -5998,12 +6004,13 @@ function RealtyCaseCard({ page, caseRecord }) {
       h(
         "div",
         null,
-        h("h2", null, caseRecord.id),
+        h("h2", null, [caseRecord.client_ref, caseRecord.property_ref].filter(Boolean).join(" · ") || caseRecord.id),
         h(
           "small",
           null,
           `${caseVocabulary(copy, "jurisdictions", caseRecord.jurisdiction)} · ${caseVocabulary(copy, "caseTypes", caseRecord.case_type)} · ${caseVocabulary(copy, "assetKinds", caseRecord.asset_kind)}`,
         ),
+        h("code", { className: "crm-mono adm-id-caption" }, caseRecord.id),
       ),
       h(StatusPill, { tone: modeTone }, caseRecord.execution_mode === "autonomous" ? copy.autonomous : copy.manual),
     ),

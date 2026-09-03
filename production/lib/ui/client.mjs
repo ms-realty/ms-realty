@@ -4306,6 +4306,18 @@ ${THEME_SWITCH_JS}
     });
     return pairs.sort().join("&");
   }
+  function initSettingsSectionLinks() {
+    var open = function () {
+      var id = (window.location.hash || "").replace(/^#/, "");
+      if (!id) return;
+      var section = document.getElementById(id);
+      if (section && section.tagName === "DETAILS") section.open = true;
+    };
+    if (!document.querySelector("[data-settings-index-row]")) return;
+    window.addEventListener("hashchange", open);
+    open();
+  }
+
   function initWorkspaceSettingsForms() {
     var forms = document.querySelectorAll("[data-workspace-settings-form]");
     for (var i = 0; i < forms.length; i += 1) {
@@ -4854,6 +4866,7 @@ ${THEME_SWITCH_JS}
     initMediaUploadForm(mediaUploadForms[mediaUploadIndex]);
   }
   initWorkspaceOnboarding();
+  initSettingsSectionLinks();
   initWorkspaceSettingsForms();
   initLeadBulkForm();
   initSavedViews();

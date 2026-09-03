@@ -1080,7 +1080,7 @@ main form label.sr-toolbar__sort { display: flex; align-items: center; gap: var(
 .sr-area-map__directory summary { min-height: 44px; padding-block: var(--space-2); color: var(--text-strong); font-weight: var(--fw-semibold); cursor: pointer; }
 .sr-area-map__directory ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px var(--space-3); padding: 0; margin: 0; list-style: none; }
 .sr-area-map__directory a { display: flex; min-height: 40px; align-items: center; justify-content: space-between; gap: var(--space-2); color: var(--text-body); font-size: var(--text-sm); text-decoration: none; }
-.sr-area-map__directory a[aria-current="page"] { color: var(--accent-strong); font-weight: var(--fw-semibold); }
+.sr-area-map__directory a[aria-current="page"] { color: var(--accent-active); font-weight: var(--fw-semibold); }
 .sr-area-map__directory strong { font-variant-numeric: tabular-nums; }
 .sr-body--saved { grid-template-columns: minmax(0, 1fr); max-width: var(--container-lg); }
 .sr-results--saved .sr-results__head { margin-bottom: var(--space-5); }
