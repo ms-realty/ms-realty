@@ -541,6 +541,7 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       status: "open",
       completion: { mode: "delegated", route: TASK_SOURCE_ROUTES.integrity },
       source: { tracking_status: trackingStatus, tracking_gap: Number(page.website_funnel?.lead_tracking_gap || 0) },
+      source_row: page.website_funnel,
     });
   }
   for (const lead of queue.pending || []) {
@@ -567,6 +568,7 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       status: "open",
       completion: { mode: "delegated", route: TASK_SOURCE_ROUTES.lead },
       source: { sla_status: slaStatus, delivery_status: delivery?.status || null },
+      source_row: lead,
     });
   }
   for (const row of page.viewingFollowUpQueue?.rows || []) {
@@ -583,6 +585,7 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       status: "open",
       completion: { mode: "delegated", route: TASK_SOURCE_ROUTES.viewing },
       source: { task: row.task, viewing_status: row.viewing_status || null },
+      source_row: row,
     });
   }
   for (const row of page.sellerPipelineQueue?.rows || []) {
@@ -599,6 +602,7 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       status: "open",
       completion: { mode: "delegated", route: TASK_SOURCE_ROUTES.seller },
       source: { task: row.task, stage: row.stage || null },
+      source_row: row,
     });
   }
   for (const row of page.publicRequestQueue?.rows || []) {
@@ -615,6 +619,7 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       status: "open",
       completion: { mode: "delegated", route: TASK_SOURCE_ROUTES.request },
       source: { request_type: row.request_type, request_status: row.status || null },
+      source_row: row,
     });
   }
   for (const row of page.leadPipelineQueue?.rows || []) {
@@ -631,20 +636,22 @@ export function deriveSourceTasks(page = {}, { leadQueue = null } = {}) {
       status: "open",
       completion: { mode: "delegated", route: TASK_SOURCE_ROUTES.pipeline },
       source: { stage: row.stage || null, lead_type: row.lead_type || null },
+      source_row: row,
     });
   }
   return rows;
 }
 
-function sortTasks(rows) {
+export function sortTasks(rows) {
   return rows.sort((left, right) => {
     if (left.overdue !== right.overdue) return left.overdue ? -1 : 1;
     const rank = PRIORITY_RANK[left.priority] - PRIORITY_RANK[right.priority];
     if (rank !== 0) return rank;
-    return (
-      Date.parse(left.due_at || "9999-12-31") - Date.parse(right.due_at || "9999-12-31") ||
-      left.task_id.localeCompare(right.task_id)
-    );
+    // Ties keep queue order, which is meaningful: a follow-up after a viewing
+    // outranks a seller step due at the same moment, and both outrank a
+    // website request. An alphabetical tie-break by id would put "seller"
+    // ahead of "viewing" and mean nothing.
+    return Date.parse(left.due_at || "9999-12-31") - Date.parse(right.due_at || "9999-12-31");
   });
 }
 

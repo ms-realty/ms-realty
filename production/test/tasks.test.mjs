@@ -259,30 +259,38 @@ test("the queue merges both origins and marks only the authored ones completable
 // Today already fuses these queues. If Tasks read a different set the two
 // screens would disagree about what is outstanding, which is worse than not
 // having a Tasks screen at all.
-test("the derived half reads exactly the queues Today reads", () => {
+test("Today reads the task queue's derivation and no queue of its own", () => {
   const site = fs.readFileSync(path.join(ROOT, "production/lib/react-admin-site.mjs"), "utf8");
   const start = site.indexOf("function todayNextActions");
   const end = site.indexOf("function TodayBriefingPanel");
   assert.ok(start > -1 && end > start, "todayNextActions is still the Today aggregation");
   const today = site.slice(start, end);
-  // Compare the two functions that must agree, not the two files: the lead half
-  // of the selection is now one shared implementation both screens call, so its
-  // queue reads belong to neither side of this comparison.
-  const module = fs.readFileSync(path.join(ROOT, "production/lib/tasks.mjs"), "utf8");
-  const derivedStart = module.indexOf("export function deriveSourceTasks");
-  const derivedEnd = module.indexOf("function sortTasks(");
-  assert.ok(derivedStart > -1 && derivedEnd > derivedStart, "deriveSourceTasks is still the derived half");
-  const tasks = module.slice(derivedStart, derivedEnd);
+  // It used to hold its own copy of the selection, compared here queue by
+  // queue against the derivation. Now it holds none: every row comes from
+  // deriveSourceTasks, keyed by task_id, and no queue is read directly.
+  assert.match(today, /deriveSourceTasks\(page, \{ leadQueue: queue \}\)/);
+  assert.doesNotMatch(today, /page\.[A-Za-z_]+Queue\?/);
+  assert.doesNotMatch(today, /key: `/);
+  assert.match(today, /key: task\.task_id/);
+  // And the rail's overdue count goes through the same rows.
+  const body = site.slice(site.indexOf("function TodayBody"), site.indexOf("function ViewingWeekPanel"));
+  assert.doesNotMatch(body, /const overdueTasks = \[/);
+  assert.match(body, /const overdueTasks = nextActions\.filter/);
+});
 
-  const queuesIn = (source) => [...source.matchAll(/page\.([A-Za-z_]+Queue)\?/g)].map((match) => match[1]);
-  assert.deepEqual([...new Set(queuesIn(tasks))].sort(), [...new Set(queuesIn(today))].sort());
-
-  // And it names each item identically, so the two lists point at one thing.
-  const keysIn = (source, field) =>
-    [...source.matchAll(new RegExp(`${field}: \`([^\`]+)\``, "g"))].map((match) => match[1].replace(/\$\{[^}]+\}/g, "*"));
-  const todayKeys = [...new Set(keysIn(today, "key")), "integrity:website-leads"].sort();
-  const taskKeys = [...new Set(keysIn(tasks, "task_id")), "integrity:website-leads"].sort();
-  assert.deepEqual(taskKeys, todayKeys);
+test("every derived task carries the row it was read from", () => {
+  const page = {
+    website_funnel: { lead_tracking_status: "mismatch", lead_tracking_gap: 2 },
+    leads: [{ lead_id: "L-1", listing_reference: "MS-1" }],
+    leadSla: { rows: [{ lead_id: "L-1", status: "reminder_required" }] },
+    viewingFollowUpQueue: { rows: [{ viewing_id: "V-1", task: "feedback", listing_reference: "MS-2" }] },
+    publicRequestQueue: { rows: [{ request_id: "R-1", request_type: "saved_search", status: "open" }] },
+  };
+  for (const task of deriveSourceTasks(page)) {
+    assert.ok(task.source_row && typeof task.source_row === "object", `${task.task_id} carries its source row`);
+  }
+  const lead = deriveSourceTasks(page).find((task) => task.kind === "lead");
+  assert.equal(lead.source_row.listing_reference, "MS-1");
 });
 
 test("a hand-edited ledger row is rejected rather than half-read", () => {

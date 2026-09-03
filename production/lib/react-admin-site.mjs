@@ -6,7 +6,7 @@ import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
-import { deriveLeadQueueState } from "./tasks.mjs";
+import { deriveLeadQueueState, deriveSourceTasks, sortTasks } from "./tasks.mjs";
 
 function adminCopy(page) {
   return page.workspace?.copy || {};
@@ -3643,138 +3643,99 @@ const NEXT_ACTION_PRIORITY_RANK = { critical: 0, urgent: 1, normal: 2 };
 // the same payload the queue previews below use, so nothing is invented here.
 function todayNextActions(page, copy, ui, queue, inboxHref) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const rows = [];
-  const trackingStatus = page.website_funnel?.lead_tracking_status;
-  const trackingGap = Number(page.website_funnel?.lead_tracking_gap || 0);
-  if (trackingStatus === "mismatch" || trackingStatus === "unavailable") {
-    rows.push({
-      key: "integrity:website-leads",
-      kind: "integrity",
-      tags: "requests",
-      priority: "critical",
-      dueAt: null,
-      overdue: true,
-      title: na.trackingTitle,
-      context:
-        trackingStatus === "unavailable"
-          ? na.trackingUnavailable
-          : (trackingGap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(trackingGap))),
-      reference: "website-lead-tracking",
-      href: `${adminHref("/admin/reports", page)}#website-funnel`,
-      action: na.actions.inspectTracking,
-    });
-  }
-  for (const lead of queue.pending) {
-    const sla = queue.leadSlaById.get(lead.lead_id);
-    const delivery = queue.deliveryByLeadId.get(lead.lead_id);
-    const slaStatus = sla?.status || "pending";
-    let priority = "normal";
-    let action = na.actions.reply;
-    let dueAt = sla?.sla_due_at || null;
-    if (delivery?.status === "failed") {
-      priority = "critical";
-      action = na.actions.requeue;
-    } else if (slaStatus === "manager_escalation_required") {
-      priority = "critical";
-      action = na.actions.review;
-      dueAt = sla?.manager_escalation_due_at || dueAt;
-    } else if (delivery?.status === "queued") {
-      priority = "urgent";
-      action = na.actions.sendQueued;
-    } else if (slaStatus === "reminder_required") {
-      priority = "urgent";
+  // The selection is the task queue's; Today only puts words on it. Reading
+  // the queues here again is exactly how the two screens would drift.
+  const decorate = (task) => {
+    const row = task.source_row || {};
+    const base = {
+      key: task.task_id,
+      kind: task.kind,
+      tags: task.tags,
+      priority: task.priority,
+      dueAt: task.due_at,
+      overdue: task.overdue,
+      reference: task.subject_ref,
+    };
+    if (task.kind === "integrity") {
+      const gap = task.source.tracking_gap;
+      return {
+        ...base,
+        title: na.trackingTitle,
+        context:
+          task.source.tracking_status === "unavailable"
+            ? na.trackingUnavailable
+            : (gap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(gap))),
+        href: `${adminHref("/admin/reports", page)}#website-funnel`,
+        action: na.actions.inspectTracking,
+      };
     }
-    rows.push({
-      key: `lead:${lead.lead_id}`,
-      kind: "lead",
-      tags: "enquiries",
-      priority,
-      dueAt,
-      overdue: priority !== "normal",
-      title: [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source),
-      context: statusText(ui, delivery?.status === "failed" ? "failed" : slaStatus),
-      reference: lead.lead_id,
-      href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}`,
-      action,
-    });
-  }
-  for (const row of page.viewingFollowUpQueue?.rows || []) {
-    if (row.task_status && row.task_status !== "open") continue;
-    rows.push({
-      key: `viewing:${row.viewing_id}:${row.task}`,
-      tags: "follow-ups",
-      kind: "viewing",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.due_at || null,
-      overdue: row.overdue === true,
-      title: row.listing_reference || (row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
-      context: `${row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")} · ${statusText(ui, row.viewing_status)}`,
-      reference: row.viewing_id,
-      href: adminHref("/admin/viewings", page),
-      action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
-    });
-  }
-  for (const row of page.sellerPipelineQueue?.rows || []) {
-    if (row.task_status && row.task_status !== "open") continue;
-    rows.push({
-      key: `seller:${row.seller_pipeline_id}:${row.task}`,
-      tags: "follow-ups",
-      kind: "seller",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.due_at || null,
-      overdue: row.overdue === true,
-      title: row.property?.location || na.actions.sellerStep,
-      context: statusText(ui, row.stage),
-      reference: row.seller_pipeline_id,
-      href: adminHref("/admin/viewings", page),
-      action: na.actions.sellerStep,
-    });
-  }
-  for (const row of page.publicRequestQueue?.rows || []) {
-    if (row.status && !["open", "contacted"].includes(row.status)) continue;
-    const requestType =
-      row.request_type === "saved_search"
-        ? label(copy, "savedSearchRequest", "Saved search")
-        : label(copy, "languageRequest", "Language request");
-    const requestLocale = row.requested_locale || row.locale;
-    rows.push({
-      key: `request:${row.request_type}:${row.request_id}`,
-      tags: "requests",
-      kind: "request",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.next_follow_up_at || null,
-      overdue: row.overdue === true,
-      title: publicRequestCriteria(row) || row.requested_path || requestType,
-      context: [requestType, requestLocale ? String(requestLocale).toUpperCase() : null, row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null, statusText(ui, row.status)]
-        .filter(Boolean)
-        .join(" · "),
-      reference: row.request_id,
-      href: adminHref("/admin/requests", page),
-      action: na.actions.outcome,
-    });
-  }
-  for (const row of page.leadPipelineQueue?.rows || []) {
-    if (row.status && row.status !== "open") continue;
-    rows.push({
-      key: `pipeline:${row.lead_id}`,
-      tags: "opportunities",
-      kind: "pipeline",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.next_follow_up_at || null,
-      overdue: row.overdue === true,
+    if (task.kind === "lead") {
+      const { sla_status: slaStatus, delivery_status: deliveryStatus } = task.source;
+      const action =
+        deliveryStatus === "failed"
+          ? na.actions.requeue
+          : slaStatus === "manager_escalation_required"
+            ? na.actions.review
+            : deliveryStatus === "queued"
+              ? na.actions.sendQueued
+              : na.actions.reply;
+      return {
+        ...base,
+        title: [row.listing_reference, row.property?.location].filter(Boolean).join(" · ") || valueText(ui, row.source),
+        context: statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus),
+        href: `${inboxHref}#lead-${encodeURIComponent(row.lead_id)}`,
+        action,
+      };
+    }
+    if (task.kind === "viewing") {
+      const kindLabel = row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up");
+      return {
+        ...base,
+        title: row.listing_reference || kindLabel,
+        context: `${kindLabel} · ${statusText(ui, row.viewing_status)}`,
+        href: adminHref("/admin/viewings", page),
+        action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
+      };
+    }
+    if (task.kind === "seller") {
+      return {
+        ...base,
+        title: row.property?.location || na.actions.sellerStep,
+        context: statusText(ui, row.stage),
+        href: adminHref("/admin/viewings", page),
+        action: na.actions.sellerStep,
+      };
+    }
+    if (task.kind === "request") {
+      const requestType =
+        row.request_type === "saved_search"
+          ? label(copy, "savedSearchRequest", "Saved search")
+          : label(copy, "languageRequest", "Language request");
+      const requestLocale = row.requested_locale || row.locale;
+      return {
+        ...base,
+        title: publicRequestCriteria(row) || row.requested_path || requestType,
+        context: [
+          requestType,
+          requestLocale ? String(requestLocale).toUpperCase() : null,
+          row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null,
+          statusText(ui, row.status),
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        href: adminHref("/admin/requests", page),
+        action: na.actions.outcome,
+      };
+    }
+    return {
+      ...base,
       title: `${statusText(ui, row.lead_type)} · ${statusText(ui, row.stage)}`,
       context: row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
-      reference: row.lead_id,
       href: adminHref("/admin/pipeline", page),
       action: na.actions.opportunity,
-    });
-  }
-  return rows.sort((left, right) => {
-    if (left.overdue !== right.overdue) return left.overdue ? -1 : 1;
-    const rank = NEXT_ACTION_PRIORITY_RANK[left.priority] - NEXT_ACTION_PRIORITY_RANK[right.priority];
-    if (rank !== 0) return rank;
-    return Date.parse(left.dueAt || "9999-12-31") - Date.parse(right.dueAt || "9999-12-31");
-  });
+    };
+  };
+  return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map(decorate);
 }
 
 function TodayBriefingPanel({ page, rows, total }) {
@@ -4117,14 +4078,9 @@ function TodayBody({ page }) {
     page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
   const openSellerTasks =
     page.sellerPipelineQueue?.summary?.open || (page.sellerPipelineQueue?.rows || []).filter((row) => !row.task_status || row.task_status === "open").length;
-  const overdueTasks = [
-    ...(page.viewingFollowUpQueue?.rows || []).filter((row) => row.overdue === true && (!row.task_status || row.task_status === "open")),
-    ...(page.sellerPipelineQueue?.rows || []).filter((row) => row.overdue === true && (!row.task_status || row.task_status === "open")),
-    ...(page.publicRequestQueue?.rows || []).filter(
-      (row) => row.overdue === true && (!row.status || row.status === "open" || row.status === "contacted"),
-    ),
-    ...(page.leadPipelineQueue?.rows || []).filter((row) => row.overdue === true && (!row.status || row.status === "open")),
-  ].length;
+  // The same four queues the readiness rail counts, read through the queue
+  // derivation rather than a third hand-rolled copy of its open filters.
+  const overdueTasks = nextActions.filter((row) => row.overdue && ["viewing", "seller", "request", "pipeline"].includes(row.kind)).length;
   return adminShell(page, {
     title,
     titleAsHeading: true,
