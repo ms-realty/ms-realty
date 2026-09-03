@@ -376,6 +376,7 @@ import {
   appendRedirectApproval,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
+  buildLegacyRouteReviewState,
   buildPendingRedirectApprovalWorkbook,
   buildRedirectApprovalWorkbook,
   importRedirectApprovalsCsv,
@@ -2524,10 +2525,15 @@ async function authoritativePreflightReports(config) {
 function migrationReviewPayload(registry, url, config) {
   const routes = routeMapRows();
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
-  const decisions = currentLegacyRouteDecisions(config);
-  const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
-  const sourceReviewRequired = routes.filter((route) => route.review_required);
-  const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const reviewState = buildLegacyRouteReviewState(
+    routes,
+    readRedirectApprovals(config.redirectApprovalPath),
+    approvedRouteArtifact(config).decisions,
+  );
+  const decisions = reviewState.workspaceDecisions;
+  const decidedOldUrls = reviewState.workspaceDecidedUrls;
+  const sourceReviewRequired = reviewState.sourceReviewRequired;
+  const reviewRequired = reviewState.pending;
   const reviewSelection = filterMigrationReviewRoutes(
     attachMigrationReviewEvidence(reviewRequired, loadMigrationRecords()),
     {
@@ -2535,6 +2541,7 @@ function migrationReviewPayload(registry, url, config) {
       type: url.searchParams.get("routeType"),
       domain: url.searchParams.get("routeDomain"),
     },
+    { vocabulary: reviewState.sourceReviewRequired },
   );
   // Match the HTTP workbench's short, phone-friendly human review batches.
   const routePageSize = 10;
@@ -2580,6 +2587,8 @@ function migrationReviewPayload(registry, url, config) {
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
       terminalDecisionsReviewed: decisions.length,
+      contractDecided: reviewState.contractOnly.length,
+      contractApprovalIds: reviewState.contractApprovalIds,
       pendingSample: pendingRoutesWithEvidence,
       filters: reviewSelection.filters,
       filterOptions: reviewSelection.filterOptions,

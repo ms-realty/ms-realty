@@ -484,6 +484,34 @@ export function buildDeployableRedirects(routeMap, approvals) {
     }));
 }
 
+// What the review screen owes the operator is the truth about what is still
+// undecided. Two things decide a legacy URL: a row in the workspace ledger,
+// and the sealed launch-freeze contract the runtime actually serves from. The
+// screen used to count only the first, and reported 292 URLs as pending that
+// had been approved and sealed weeks earlier. Both runtimes read this one
+// function so they cannot disagree about it.
+export function buildLegacyRouteReviewState(routeMap, approvals, contractDecisions = []) {
+  const workspace = buildLegacyRouteDecisions(routeMap, approvals);
+  const workspaceByUrl = new Map(workspace.map((row) => [row.old_url, row]));
+  const contractByUrl = new Map(
+    contractDecisions
+      .filter((row) => row?.old_url && row.approval_state === "approved" && row.deployable === true)
+      .map((row) => [row.old_url, row]),
+  );
+  const sourceReviewRequired = routeMap.filter((route) => route.review_required);
+  const pending = sourceReviewRequired.filter((route) => !workspaceByUrl.has(route.old_url) && !contractByUrl.has(route.old_url));
+  const contractOnly = sourceReviewRequired.filter((route) => !workspaceByUrl.has(route.old_url) && contractByUrl.has(route.old_url));
+  return {
+    sourceReviewRequired,
+    pending,
+    contractOnly,
+    workspaceDecisions: workspace,
+    workspaceDecidedUrls: new Set(workspaceByUrl.keys()),
+    contractDecidedUrls: new Set(contractByUrl.keys()),
+    contractApprovalIds: [...new Set([...contractByUrl.values()].map((row) => row.approval_id).filter(Boolean))],
+  };
+}
+
 export function buildPendingRedirectApprovalWorkbook(routeMap, approvals) {
   const decided = new Set(buildLegacyRouteDecisions(routeMap, approvals).map((row) => row.old_url));
   return buildRedirectApprovalWorkbook(routeMap).filter((row) => !decided.has(row.old_url));

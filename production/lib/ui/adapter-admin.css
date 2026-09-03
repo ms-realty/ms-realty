@@ -580,6 +580,9 @@ html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
   color: var(--text-strong);
 }
 .crm-panel__hd a.mk-btn { font-size: var(--text-sm); line-height: 1; }
+/* Two provenance pills share the panel's action slot: reviewed here, and
+   approved in the sealed contract. */
+.crm-panel__hd .adm-inline-pills { display: inline-flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .crm-panel--compact-empty > .crm-panel__hd { padding-bottom: var(--space-2); border-bottom: 0; }
 .crm-panel--compact-empty > .adm-empty { margin: 0; padding: 0 var(--space-5) var(--space-5); }
 .crm-panel--compact-empty > .adm-empty .mk-icon { color: var(--text-muted); }

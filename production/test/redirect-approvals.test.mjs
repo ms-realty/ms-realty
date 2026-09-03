@@ -12,6 +12,7 @@ import {
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
   buildPendingRedirectApprovalWorkbook,
+  buildLegacyRouteReviewState,
   importRedirectApprovalsCsv,
   loadLegacyRouteDecisions,
   readRedirectApprovals,
@@ -328,4 +329,55 @@ test("generated deployable redirect file is valid when present", () => {
   assert.equal(summary.homepageTargets, 0);
   assert.equal(summary.duplicateOldUrls, 0);
   assert.equal(data.redirects.length, 165);
+});
+
+// The review screen owes the operator the truth about what is undecided, and
+// two things decide a URL: the workspace ledger and the sealed launch contract.
+test("a legacy URL is pending only when neither the workspace nor the sealed contract decides it", () => {
+  const routes = loadRouteMap();
+  const contract = [
+    { old_url: routes[0].old_url, approval_state: "approved", deployable: true, approval_id: "MSR-LAUNCH-FREEZE-1" },
+    { old_url: routes[1].old_url, approval_state: "approved", deployable: true, approval_id: "MSR-LAUNCH-FREEZE-1" },
+    // Proposed but never approved: decides nothing.
+    { old_url: routes[2].old_url, approval_state: "required", deployable: false },
+  ];
+  const workspace = [
+    {
+      old_url: routes[1].old_url,
+      decision: "approved_410",
+      equivalent_content: false,
+      reviewer: "seo_taxonomy_editor",
+      reason: "Reviewed and retired in the workspace.",
+      approved_at: "2026-09-01T09:00:00Z",
+      deployable: true,
+    },
+  ];
+  const state = buildLegacyRouteReviewState(routes, workspace, contract);
+
+  assert.equal(state.sourceReviewRequired.length, routes.filter((route) => route.review_required).length);
+  // routes[0]: contract only. routes[1]: workspace overrides the contract.
+  // routes[2]: proposed, so still pending. Everything else: pending.
+  assert.deepEqual(state.contractOnly.map((route) => route.old_url), [routes[0].old_url]);
+  assert.equal(state.workspaceDecidedUrls.has(routes[1].old_url), true);
+  assert.equal(state.contractDecidedUrls.has(routes[2].old_url), false);
+  assert.equal(state.pending.some((route) => route.old_url === routes[2].old_url), true);
+  assert.equal(state.pending.length, state.sourceReviewRequired.length - 2);
+  assert.deepEqual(state.contractApprovalIds, ["MSR-LAUNCH-FREEZE-1"]);
+
+  // The same rows without the contract read as if nothing had been sealed --
+  // which is exactly the defect the screen had.
+  const blind = buildLegacyRouteReviewState(routes, workspace, []);
+  assert.equal(blind.pending.length, state.sourceReviewRequired.length - 1);
+  assert.deepEqual(blind.contractOnly, []);
+});
+
+test("crawl evidence attaches to sealed-contract rows, not only to pending ones", () => {
+  // The smoke used to prove evidence attachment on the first pending row.
+  // Nothing is pending any more, and evidence is not a property of pendingness.
+  const routes = loadRouteMap();
+  const contract = routes.map((route) => ({ old_url: route.old_url, approval_state: "approved", deployable: true, approval_id: "MSR-LAUNCH-FREEZE-1" }));
+  const state = buildLegacyRouteReviewState(routes, [], contract);
+  const withEvidence = attachMigrationReviewEvidence(state.contractOnly, loadMigrationRecords());
+  const home = withEvidence.find((row) => row.old_url === "https://makler-realty.com");
+  assert.equal(home.source_evidence.title, "Недвижими имоти в Сандански | MS Realty");
 });

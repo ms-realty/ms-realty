@@ -169,6 +169,7 @@ const ADMIN_UI_COPY = {
       local_preview_only: "само локален преглед",
     },
     reviewedDecisions: "Прегледани решения",
+    contractDecisions: "Одобрени в запечатания договор за пускане",
     pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
     pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници, никога начална страница или общо търсене.",
     sourceEvidence: "Данни от стария сайт",
@@ -945,6 +946,7 @@ const ADMIN_UI_COPY = {
       local_preview_only: "только локальный просмотр",
     },
     reviewedDecisions: "Проверенные решения",
+    contractDecisions: "Утверждены в запечатанном контракте запуска",
     pendingLegacyDecisions: "Ожидающие решения по старым URL",
     pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница, а не главная и не общий поиск.",
     sourceEvidence: "Данные со старого сайта",
@@ -1721,6 +1723,7 @@ const ADMIN_UI_COPY = {
       local_preview_only: "local preview only",
     },
     reviewedDecisions: "Reviewed decisions",
+    contractDecisions: "Approved in the sealed launch contract",
     pendingLegacyDecisions: "Pending legacy URL decisions",
     pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages, never a homepage or generic search fallback.",
     sourceEvidence: "Legacy source evidence",
@@ -11481,15 +11484,36 @@ function MigrationReviewBody({ page }) {
             h("span", { "data-pending-route-value": "true" }, page.routeMap.reviewRequired),
           ),
           action: h(
-            StatusPill,
-            { tone: "success", "data-reviewed-route-progress": "true" },
-            `${ui.reviewedDecisions}: `,
-            h("span", { "data-reviewed-route-value": "true" }, page.routeMap.terminalDecisionsReviewed),
+            "span",
+            { className: "adm-inline-pills" },
+            h(
+              StatusPill,
+              { tone: "success", "data-reviewed-route-progress": "true" },
+              `${ui.reviewedDecisions}: `,
+              h("span", { "data-reviewed-route-value": "true" }, page.routeMap.terminalDecisionsReviewed),
+            ),
+            // The sealed contract decides URLs the workspace ledger never saw.
+            // Counting only the ledger told the operator 292 URLs were pending
+            // that had been approved and sealed; this pill says where the rest
+            // were decided, and by which approval.
+            page.routeMap.contractDecided
+              ? h(
+                  StatusPill,
+                  {
+                    tone: "sea",
+                    "data-contract-route-progress": "true",
+                    title: (page.routeMap.contractApprovalIds || []).join(", "),
+                  },
+                  `${ui.contractDecisions}: `,
+                  h("span", { "data-contract-route-value": "true" }, page.routeMap.contractDecided),
+                )
+              : null,
           ),
           "aria-label": ui.pendingLegacyDecisions,
           "data-pending-route-count": page.routeMap.reviewRequired,
           "data-filtered-route-count": page.routeMap.pendingPagination.totalRows,
           "data-reviewed-route-count": page.routeMap.terminalDecisionsReviewed,
+          "data-contract-route-count": page.routeMap.contractDecided || 0,
         },
         h("p", { className: "adm-note" }, ui.pendingLegacyHint),
         h(

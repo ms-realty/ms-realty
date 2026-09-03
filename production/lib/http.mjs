@@ -243,6 +243,7 @@ import {
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
+  buildLegacyRouteReviewState,
   approvedLaunchFreezeRouteArtifact,
   importRedirectApprovalsCsv,
   readRedirectApprovals,
@@ -905,13 +906,14 @@ function renderMigrationReviewPayload(
   seoEvidence,
   listingQuality,
   launchReadiness,
-  { listingVerification, translationCoverage, brokerContacts, brokerProfiles = [] } = {},
+  { listingVerification, translationCoverage, brokerContacts, brokerProfiles = [], contractDecisions = [] } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
-  const decisions = buildLegacyRouteDecisions(routes, approvals);
-  const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
-  const sourceReviewRequired = routes.filter((route) => route.review_required);
-  const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const reviewState = buildLegacyRouteReviewState(routes, approvals, contractDecisions);
+  const decisions = reviewState.workspaceDecisions;
+  const decidedOldUrls = reviewState.workspaceDecidedUrls;
+  const sourceReviewRequired = reviewState.sourceReviewRequired;
+  const reviewRequired = reviewState.pending;
   const reviewSelection = filterMigrationReviewRoutes(
     attachMigrationReviewEvidence(reviewRequired, loadMigrationRecords()),
     {
@@ -919,6 +921,7 @@ function renderMigrationReviewPayload(
       type: url.searchParams.get("routeType"),
       domain: url.searchParams.get("routeDomain"),
     },
+    { vocabulary: reviewState.sourceReviewRequired },
   );
   // Keep human review batches deliberately small. Ten decisions are enough for
   // a focused operator session on a phone without turning the launch queue into
@@ -952,6 +955,8 @@ function renderMigrationReviewPayload(
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
       terminalDecisionsReviewed: decisions.length,
+      contractDecided: reviewState.contractOnly.length,
+      contractApprovalIds: reviewState.contractApprovalIds,
       pendingSample: pendingRoutesWithEvidence,
       filters: reviewSelection.filters,
       filterOptions: reviewSelection.filterOptions,
@@ -5787,6 +5792,7 @@ export function createHttpApp({
           translationCoverage: currentTranslationCoverage(),
           brokerContacts: currentBrokerContacts(),
           brokerProfiles: await currentBrokerProfiles(payloadSession),
+          contractDecisions: activeLegacyDecisions,
         },
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -5809,6 +5815,7 @@ export function createHttpApp({
           translationCoverage: currentTranslationCoverage(),
           brokerContacts: currentBrokerContacts(),
           brokerProfiles: await currentBrokerProfiles(payloadSession),
+          contractDecisions: activeLegacyDecisions,
         },
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -8301,8 +8308,14 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.launchInputChecklistEndpoint !== "/api/admin/launch-input-checklist" ||
     smoke.adminMigrationReview.body.cmsCollectionsEndpoint !== "/api/admin/cms-collections" ||
     smoke.adminMigrationReview.body.payloadCollectionsEndpoint !== "/api/admin/payload-collections" ||
-    smoke.adminMigrationReview.body.routeMap.pendingSample?.length < 1 ||
-    !smoke.adminMigrationReview.body.routeMap.pendingSample[0].source_evidence?.title
+    // Every legacy URL is decided: 165 in this workspace, 292 in the sealed
+    // launch contract. This used to demand at least one pending row, which
+    // pinned the screen ignoring the contract the runtime serves from.
+    smoke.adminMigrationReview.body.routeMap.reviewRequired !== 0 ||
+    smoke.adminMigrationReview.body.routeMap.terminalDecisionsReviewed !== 165 ||
+    smoke.adminMigrationReview.body.routeMap.contractDecided !== 292 ||
+    !smoke.adminMigrationReview.body.routeMap.contractApprovalIds?.includes("MSR-LAUNCH-FREEZE-1") ||
+    smoke.adminMigrationReview.body.routeMap.pendingSample?.length !== 0
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
   }
@@ -8310,8 +8323,8 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReviewHtml?.status !== 200 ||
     smoke.adminMigrationReviewHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-source-evidence=\"true\"") ||
+    smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-contract-route-count=\"292\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-export-endpoint=\"/api/admin/deployable-redirects/export\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||

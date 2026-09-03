@@ -1270,20 +1270,29 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows, 11859);
   assert.equal(smoke.adminMigrationReview.body.routeMap.total, 457);
   assert.equal(smoke.adminMigrationReview.body.routeMap.sourceReviewRequired, 457);
-  assert.equal(smoke.adminMigrationReview.body.routeMap.reviewRequired, 292);
+  // 165 listings were decided in this workspace; the other 292 were approved
+  // and sealed in the launch contract. The screen used to count only the
+  // first and report 292 pending. Nothing is pending, and both provenances
+  // are shown.
+  assert.equal(smoke.adminMigrationReview.body.routeMap.reviewRequired, 0);
+  assert.equal(smoke.adminMigrationReview.body.routeMap.terminalDecisionsReviewed, 165);
+  assert.equal(smoke.adminMigrationReview.body.routeMap.contractDecided, 292);
+  assert.deepEqual(smoke.adminMigrationReview.body.routeMap.contractApprovalIds, ["MSR-LAUNCH-FREEZE-1"]);
   assert.equal(smoke.adminMigrationReview.body.routeMap.mappedListings, 165);
   assert.deepEqual(smoke.adminMigrationReview.body.routeMap.pendingPagination, {
     page: 1,
     pageSize: 10,
-    totalPages: 30,
-    totalRows: 292,
+    totalPages: 1,
+    totalRows: 0,
   });
-  assert.equal(smoke.adminMigrationReview.body.routeMap.pendingSample[0].source_evidence.title, "Недвижими имоти в Сандански | MS Realty");
+  assert.deepEqual(smoke.adminMigrationReview.body.routeMap.pendingSample, []);
+  // The review queue no longer carries a lane of 292 phantom tasks.
+  assert.equal(smoke.adminMigrationReview.body.agencyReviewQueue.lanes.some((lane) => lane.id === "legacy_routes"), false);
   assert.equal(smoke.adminMigrationReview.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\""), true);
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-react-admin-ui=\"migration-review\""), true);
-  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-source-evidence=\"true\""), true);
-  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\""), true);
+  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-contract-route-count=\"292\""), true);
+  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\""), false);
   assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["www-authenticate"], 'Bearer realm="ms-realty-admin"');

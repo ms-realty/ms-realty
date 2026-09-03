@@ -102,7 +102,7 @@ function normalizedFilter(value, maxLength = 300) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
-export function filterMigrationReviewRoutes(routes, requestedFilters = {}) {
+export function filterMigrationReviewRoutes(routes, requestedFilters = {}, { vocabulary = routes } = {}) {
   const filters = {
     q: normalizedFilter(requestedFilters.q),
     type: normalizedFilter(requestedFilters.type, 40),
@@ -129,8 +129,8 @@ export function filterMigrationReviewRoutes(routes, requestedFilters = {}) {
     rows,
     filters,
     filterOptions: {
-      types: [...new Set(routes.map((route) => route.url_type).filter(Boolean))].sort(),
-      domains: [...new Set(routes.map((route) => route.source_domain).filter(Boolean))].sort(),
+      types: [...new Set(vocabulary.map((route) => route.url_type).filter(Boolean))].sort(),
+      domains: [...new Set(vocabulary.map((route) => route.source_domain).filter(Boolean))].sort(),
     },
   };
 }
