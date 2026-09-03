@@ -136,6 +136,7 @@ const DOCUMENT_READ_PATHS = new Set([
 ]);
 const DOCUMENT_WRITE_PATHS = new Set([
   "/api/admin/documents",
+  "/api/admin/documents/bytes",
   "/api/admin/signature-requests",
 ]);
 

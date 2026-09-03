@@ -500,7 +500,8 @@ import {
 } from "./operator-views.mjs";
 // B4 media upload
 import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
-import { applyMediaUploads, mediaUploadLimitsFromEnv, mediaUploadRequestBytes, readMediaUploads } from "./media-uploads.mjs";
+import { applyMediaUploads, mediaUploadLimitsFromEnv, mediaUploadRequestBytes, parseMediaUploadRequest, readMediaUploads } from "./media-uploads.mjs";
+import { storeDocumentBytes } from "./document-storage.mjs";
 import {
   ADMIN_MEDIA_UPLOAD_PATH,
   SELLER_PHOTO_UPLOAD_PATH,
@@ -5327,8 +5328,34 @@ export function createHttpApp({
             }),
           });
         }
+        const documentStorage = () =>
+          mediaUploadStorage || createMediaUploadStorage(mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+        if (request.method === "POST" && url.pathname === "/api/admin/documents/bytes") {
+          if (!principal?.id) {
+            return adminJson(403, { kind: "operator_identity_required", message: "Document bytes require a named authenticated operator" });
+          }
+          // Bytes first, row second. The triple this returns is the only kind
+          // of storage_ref the document routes will accept from now on.
+          const upload = parseMediaUploadRequest(request, { limits: mediaUploadLimits || mediaUploadLimitsFromEnv(), fileField: "document" });
+          const file = upload.files[0];
+          if (!file) return adminJson(400, { kind: "document_bytes_required", message: "Attach the document as the \"document\" file field" });
+          const stored = await storeDocumentBytes({
+            storage: documentStorage(),
+            workspaceId: upload.fields.workspace_id || upload.fields.workspaceId || url.searchParams.get("workspace_id") || "",
+            bytes: file.bytes,
+            mimeType: file.contentType || upload.fields.mime_type || upload.fields.mimeType,
+          });
+          recordAudit({
+            action: "document_bytes_stored",
+            actor: principal.id,
+            objectType: "document_bytes",
+            objectId: stored.content_digest,
+            metadata: { byte_size: stored.byte_size, mime_type: stored.mime_type },
+          }, recordedAt);
+          return adminJson(201, { kind: "document_bytes", ...stored });
+        }
         if (request.method === "POST" && url.pathname === "/api/admin/documents") {
-          const result = await createDocument({ payload: servicePayload, principal, input: parseBody(request), recordedAt });
+          const result = await createDocument({ payload: servicePayload, principal, input: parseBody(request), recordedAt, storage: documentStorage() });
           if (!result.idempotent) {
             recordAudit({
               action: "document_created",
@@ -5368,6 +5395,7 @@ export function createHttpApp({
               documentId,
               input: parseBody(request),
               recordedAt,
+              storage: documentStorage(),
             });
             if (!result.idempotent) {
               recordAudit({

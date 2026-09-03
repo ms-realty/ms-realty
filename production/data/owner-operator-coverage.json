@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 114,
-    "admin_methods": 134,
+    "admin_route_files": 115,
+    "admin_methods": 135,
     "admin_pages": 23,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 160,
-    "structurally_covered_workflows": 160,
+    "authorized_workflows": 161,
+    "structurally_covered_workflows": 161,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -1816,6 +1816,34 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/documents/[documentId]/revisions/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_documents_bytes",
+      "method": "POST",
+      "pathname": "/api/admin/documents/bytes",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "documents:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/documents/bytes/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {

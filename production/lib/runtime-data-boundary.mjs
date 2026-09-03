@@ -18,6 +18,7 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/consents/withdraw",
   "/api/admin/deals/close",
   "/api/admin/deployable-redirects/export",
+  "/api/admin/documents/bytes",
   "/api/admin/documents/outcome",
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads",
@@ -132,7 +133,7 @@ export function productionRuntimeDataUnavailable({
   if (path === "/api/events" && durableEvent) return false;
   if (path === "/api/viewing-trips" && durableViewingTrip) return false;
   if (path === "/api/admin/replies/delivery" && durableProviderDelivery) return false;
-  if (["/api/admin/media/uploads", "/api/admin/media/reviews"].includes(path) && durableMedia) return false;
+  if (["/api/admin/media/uploads", "/api/admin/media/reviews", "/api/admin/documents/bytes"].includes(path) && durableMedia) return false;
   if (["/api/admin/viewings", "/api/admin/viewings/follow-up"].includes(path) && durableViewing) return false;
   if (durableLeadOperations && DURABLE_LEAD_OPERATION_PATHS.has(path)) return false;
   return FILE_BACKED_PUBLIC_MUTATIONS.has(path) || FILE_BACKED_ADMIN_MUTATIONS.has(path);

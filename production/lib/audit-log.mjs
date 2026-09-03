@@ -21,6 +21,7 @@ const ADMIN_ACTIONS = new Set([
   "consent_withdrawn",
   "deal_closed",
   "deployable_redirects_exported",
+  "document_bytes_stored",
   "document_created",
   "document_checklist_updated",
   "document_revision_created",

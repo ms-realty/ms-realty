@@ -90,6 +90,7 @@ const ADMIN_ROUTE_METHODS = [
   ["GET", "/api/admin/documents/records"],
   ["GET", "/api/admin/documents"],
   ["POST", "/api/admin/documents"],
+  ["POST", "/api/admin/documents/bytes"],
   ["GET", "/api/admin/hermes"],
   ["POST", "/api/admin/hermes"],
   ["GET", "/api/admin/integrations"],

@@ -271,7 +271,8 @@ import {
   readMediaReviews,
 } from "./media-reviews.mjs";
 // B4 media upload
-import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, readMediaUploads } from "./media-uploads.mjs";
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, parseMediaUploadRequest, readMediaUploads } from "./media-uploads.mjs";
+import { storeDocumentBytes } from "./document-storage.mjs";
 import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
 import {
   listMediaUploadsDurably,
@@ -5146,6 +5147,37 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             }),
           });
         }
+        const documentStorage = () =>
+          config.mediaUploadStorage || createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+        if (request.method === "POST" && url.pathname === "/api/admin/documents/bytes") {
+          if (!config.adminPrincipal?.id) {
+            return jsonResponse(403, { kind: "operator_identity_required", message: "Document bytes require a named authenticated operator" });
+          }
+          const upload = parseMediaUploadRequest(
+            { headers: { "content-type": request.headers.get("content-type") || "" }, bodyBytes: Buffer.from(await request.arrayBuffer()) },
+            { limits: mediaUploadLimitsFromEnv(), fileField: "document" },
+          );
+          const file = upload.files[0];
+          if (!file) return jsonResponse(400, { kind: "document_bytes_required", message: "Attach the document as the \"document\" file field" });
+          const stored = await storeDocumentBytes({
+            storage: documentStorage(),
+            workspaceId: upload.fields.workspace_id || upload.fields.workspaceId || url.searchParams.get("workspace_id") || "",
+            bytes: file.bytes,
+            mimeType: file.contentType || upload.fields.mime_type || upload.fields.mimeType,
+          });
+          recordAudit(
+            {
+              action: "document_bytes_stored",
+              actor: config.adminPrincipal?.id || "admin",
+              objectType: "document_bytes",
+              objectId: stored.content_digest,
+              metadata: { byte_size: stored.byte_size, mime_type: stored.mime_type },
+            },
+            config,
+            recordedAt,
+          );
+          return jsonResponse(201, { kind: "document_bytes", ...stored });
+        }
         if (request.method === "POST" && url.pathname === "/api/admin/documents") {
           const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
           const result = await createDocument({
@@ -5153,6 +5185,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             principal: config.adminPrincipal,
             input,
             recordedAt,
+            storage: documentStorage(),
           });
           if (!result.idempotent) {
             recordAudit({
@@ -5197,6 +5230,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               documentId,
               input: parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
               recordedAt,
+              storage: documentStorage(),
             });
             if (!result.idempotent) {
               recordAudit({
