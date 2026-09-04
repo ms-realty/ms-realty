@@ -34,3 +34,17 @@ jobs:
         run: |
           test "$MS_REALTY_PRODUCTION_URL" = "https://ms-realty.ms-realty-bg.workers.dev"
           node production/scripts/probe-production-journeys.mjs
+
+      # The workers.dev origin can be perfectly healthy while the canonical
+      # domain serves something else entirely: a second Worker on the zone took
+      # every public URL on 2026-09-03 and closed the site behind a 503 for a
+      # day, and this probe never looked. The canonical host is the one with the
+      # search equity, so it is probed too, and its own indexing contract
+      # (indexable, canonical links, sitemap on the real domain) is asserted by
+      # the same script.
+      - name: Probe canonical production journeys
+        env:
+          MS_REALTY_PRODUCTION_URL: https://makler-realty.com
+        run: |
+          test "$MS_REALTY_PRODUCTION_URL" = "https://makler-realty.com"
+          node production/scripts/probe-production-journeys.mjs

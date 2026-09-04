@@ -1,0 +1,68 @@
+name: Schedule the monitoring drill
+
+# The monitoring_rollback launch gate expires 24 hours after the drill that
+# produced its evidence, and the deploy job refuses to finish while any gate is
+# blocked. So a release more than a day after the last drill fails verification
+# and rolls itself back — which is what silently stranded #172 on main.
+#
+# This dispatches the real drill once a day against whatever release is actually
+# deployed, so the gate is fresh whenever a deploy needs it. It runs the same
+# workflow_dispatch a person would run, with the same typed confirmation, so the
+# evidence it produces is the same evidence and no launch contract is widened.
+
+on:
+  schedule:
+    # 03:23 UTC — after the nightly quiet period, well before working hours in
+    # Sandanski, and offset so it never collides with the hourly health check.
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    name: Dispatch a drill for the deployed release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve the deployed release
+        id: release
+        run: |
+          curl --fail --silent --show-error --max-time 20 \
+            --header 'Cache-Control: no-cache' \
+            https://ms-realty.ms-realty-bg.workers.dev/api/health --output health.json
+          release_sha="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync("health.json","utf8")); const edge=String(d.build_marker||""); const origin=String(d.origin_build_marker||edge); if (d.service !== "ms-realty" || !/^[0-9a-f]{40}$/i.test(edge) || edge !== origin) process.exit(1); process.stdout.write(edge)')"
+          # A drill only means something for a release that is on main and is the
+          # one actually serving traffic at both layers.
+          git merge-base --is-ancestor "$release_sha" origin/main
+          echo "sha=$release_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Skip while the gate is already fresh
+        id: gate
+        run: |
+          curl --fail --silent --show-error --max-time 20 \
+            --header 'Cache-Control: no-cache' \
+            https://ms-realty.ms-realty-bg.workers.dev/api/health --output gate.json
+          blocked="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync("gate.json","utf8")); const b=Array.isArray(d.blockers)?d.blockers:[]; process.stdout.write(b.includes("monitoring_rollback") ? "yes" : "no")')"
+          echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
+          echo "monitoring_rollback blocked: $blocked"
+
+      # Running it daily regardless of the gate keeps the evidence inside its
+      # 24-hour window before a deploy needs it, rather than after.
+      - name: Dispatch the monitoring drill
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          gh workflow run monitoring-drill.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f release_sha="$RELEASE_SHA" \
+            -f confirm_alert_drill=true
+          echo "Dispatched a monitoring drill for $RELEASE_SHA" >> "$GITHUB_STEP_SUMMARY"
