@@ -1,0 +1,1269 @@
+{
+  "MS-3000": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "The legacy post was hard-deleted, so no wtf_area survives. Tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0001": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 1394.0
+    },
+    "reason": "wtf_area=1394 is the area the legacy page published for the building. wtf_total_area=20000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0002": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='38-200' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0003": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 86.0
+    },
+    "reason": "wtf_area=86 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0004": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "следен/, състои се от хол с кухня, спалня, баня с тоалетна и голяма панорамна тераса. Застроената площ на апартамента е 99"
+    },
+    "facts": {
+      "built_area_sqm": 99.0
+    },
+    "reason": "wtf_area=99 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0005": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 75.0
+    },
+    "reason": "wtf_area=75 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0006": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 1700.0
+    },
+    "reason": "wtf_area=1700 is the area the legacy page published for the building. wtf_total_area=5000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0007": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "едвидено за края на 2026г. Двустаен апартамент на първи жилищен етаж: Застроената му площ е 50, 65 кв.м., а общата площ 59,21"
+    },
+    "facts": {
+      "built_area_sqm": 59.21
+    },
+    "reason": "wtf_area=59.21 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0008": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "The legacy post was hard-deleted, so no wtf_area survives. Tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0009": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "рети етаж в нова, модерна и отлично завършена сграда с асансьор и добре поддържани общи части. Апартаментът е с площ от 65"
+    },
+    "facts": {
+      "built_area_sqm": 65.0
+    },
+    "reason": "wtf_area=65 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0010": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 55.0
+    },
+    "reason": "wtf_area=55 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0011": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "gross_floor_area_sqm": 92.0
+    },
+    "reason": "wtf_area=92 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0012": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "инвестиционен проект, в гр, Сандански: Имот с площ от 861 кв.м., с построен върху него хотел и ресторант с обща площ от 1189",
+      "total_area_phrase": "Предлагаме на вашето внимание следния инвестиционен проект, в гр, Сандански: Имот с площ от 861"
+    },
+    "facts": {
+      "gross_floor_area_sqm": 1189.0,
+      "land_area_sqm": 861.0
+    },
+    "reason": "wtf_area=1189 is the area the legacy page published for the building. wtf_total_area=861 is named as the plot in the description."
+  },
+  "MS-CRAWL-0013": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "къщи, залепени на калкан, всяка със застроена площ 80 кв.м., или общо 160 кв.м., върху два съседни парцела с обща площ 440"
+    },
+    "facts": {
+      "built_area_sqm": 320.0
+    },
+    "reason": "wtf_area=320 is the area the legacy page published for the building. wtf_total_area=440 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0014": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": ". Състои се от кухня с всекидневна, спалня с тераса, WC. Застроената площ на апартамента е 40 кв.м., а общата му площ е 45"
+    },
+    "facts": {
+      "built_area_sqm": 45.0
+    },
+    "reason": "wtf_area=45 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0015": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "лощ от 55 кв.м. и разполага с два жилищни етажа, както и мазе. Към къщата принадлежи равен и поддържан парцел с площ от 350"
+    },
+    "facts": {
+      "built_area_sqm": 110.0,
+      "land_area_sqm": 350.0
+    },
+    "reason": "wtf_area=110 is the area the legacy page published for the building. wtf_total_area=350 is named as the plot in the description."
+  },
+  "MS-CRAWL-0016": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ящ се проект от три еднакви еднофамилни жилищни сгради – А,Б и В. Къщите са със застроена площ от 83 кв.м., и обща площ 174,1"
+    },
+    "facts": {
+      "built_area_sqm": 174.1
+    },
+    "reason": "wtf_area=174.1 is the area the legacy page published for the building. wtf_total_area=487 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0017": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "непосредствена близост до хотел Аква Сан – гр.Сандански. Апартамента е със застроена площ от 54,86 кв.м. и обща площ от 63,93"
+    },
+    "facts": {
+      "built_area_sqm": 63.93
+    },
+    "reason": "wtf_area=63.93 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0018": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 2800.0
+    },
+    "reason": "wtf_area=2800 is the area the legacy page published for the building. wtf_total_area=6000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0019": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='15-122' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0020": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Офиса се намира на пешеходната улица на гр.Сандански /ул.Македония/. Състои се от едно помещение с площ от 18"
+    },
+    "facts": {
+      "usable_area_sqm": 18.0
+    },
+    "reason": "wtf_area=18 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0021": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "спокойствие, чист въздух и удобен достъп до централната част. Жилището е със застроена площ от 106 кв.м и обща площ от 117"
+    },
+    "facts": {
+      "built_area_sqm": 117.0
+    },
+    "reason": "wtf_area=117 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0022": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='220-920' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0023": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "лючва три стаи и баня с тоалетна, а първият — дневна с кухня, две спални и две бани с тоалетни. Към имота има парцел от 547"
+    },
+    "facts": {
+      "built_area_sqm": 148.0,
+      "land_area_sqm": 547.0
+    },
+    "reason": "wtf_area=148 is the area the legacy page published for the building. wtf_total_area=547 is named as the plot in the description."
+  },
+  "MS-CRAWL-0024": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Апартамент в центъра на Солун, на четвърти жилищен етаж. Жилището е с площ 45"
+    },
+    "facts": {
+      "built_area_sqm": 45.0
+    },
+    "reason": "wtf_area=45 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0025": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "с всички необходими документи. Намира се в собствен поземлен имот с площ от 947 кв.м., а застроената площ на сградата е 51",
+      "total_area_phrase": "вата на съвременния живот. Вилата разполага с всички необходими документи. Намира се в собствен поземлен имот с площ от 947"
+    },
+    "facts": {
+      "built_area_sqm": 51.0,
+      "land_area_sqm": 947.0
+    },
+    "reason": "wtf_area=51 is the area the legacy page published for the building. wtf_total_area=947 is named as the plot in the description."
+  },
+  "MS-CRAWL-0026": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "Къщата се намира в едно от големите и предпочитани села в близост до СПА курорт Сандански Парцела е с площ от 760"
+    },
+    "facts": {
+      "built_area_sqm": 313.0,
+      "land_area_sqm": 760.0
+    },
+    "reason": "wtf_area=313 is the area the legacy page published for the building. wtf_total_area=760 is named as the plot in the description."
+  },
+  "MS-CRAWL-0027": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "The legacy post was hard-deleted, so no wtf_area survives. Tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0028": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "а тераса и лесно може да се трансформира в един апартамент. Застроената площ на апартамента е 55,47 кв.м /общата площ е 62,12"
+    },
+    "facts": {
+      "built_area_sqm": 62.12
+    },
+    "reason": "wtf_area=62.12 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0029": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": ". Апартамента се намира на 3-ти жилищен етаж, с източно изложение е. Застроената му площ е 25,88 кв.м., а общата площ е 29"
+    },
+    "facts": {
+      "built_area_sqm": 29.0
+    },
+    "reason": "wtf_area=29 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0030": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "отел Медите. Разположен е на 4ти жилищен етаж. Източно изложение. Застроената му площ е 32,10 кв.м., а общата му площ е 36,92"
+    },
+    "facts": {
+      "built_area_sqm": 36.92
+    },
+    "reason": "wtf_area=36.92 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0031": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Имота представлява целия трети жилищен етаж от 4 етажна къща. Застроената му площ е 112"
+    },
+    "facts": {
+      "built_area_sqm": 112.0
+    },
+    "reason": "wtf_area=112 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0032": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "от двуетажна къща. Състои се от 3 помещения – кухня, 2 стаи, баня и тоалетна и входно антре. Ведно с етажа се продава и 77"
+    },
+    "facts": {
+      "built_area_sqm": 73.0
+    },
+    "reason": "wtf_area=73 is the area the legacy page published for the building. wtf_total_area=77 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0033": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Предлагаме за продажба втори жилищен етаж от триетажна къща. Застроената площ на етажа е 120"
+    },
+    "facts": {
+      "built_area_sqm": 120.0
+    },
+    "reason": "wtf_area=120 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0034": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 90.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0035": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Имота се намира в центъра на с.Левуново. Представлява първи етаж от къща. Площта му е 90",
+      "total_area_phrase": "ощта му е 90 кв.м., ведно с мазе и таван, както и 2/3 идеална част от парцела, върху който е построена къщата, а именно 421"
+    },
+    "facts": {
+      "built_area_sqm": 90.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building. wtf_total_area=421 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0038": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "Property family is still unmapped, and a property fact cannot be recorded without one. Blocked by the taxonomy review, not by the area data."
+  },
+  "MS-CRAWL-0043": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Предлага се за продажба ексклузивна триетажна вила в Еретрия-Котрони, Гърция. Сградата с обща площ от 300"
+    },
+    "facts": {
+      "built_area_sqm": 300.0
+    },
+    "reason": "wtf_area=300 is the area the legacy page published for the building. wtf_total_area=5000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0044": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 100.0
+    },
+    "reason": "wtf_area=100 is the area the legacy page published for the building. wtf_total_area=980 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0045": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "128 кв.м., като размера на имота е напълно характерен за такива планински села. Върху него е построена сграда с площ от 58",
+      "total_area_phrase": "10 души. През летния сезон е предпочитана дестинация за туризъм. Къщата, която ви предлагаме е разположена на парцел от 128"
+    },
+    "facts": {
+      "built_area_sqm": 58.0,
+      "land_area_sqm": 128.0
+    },
+    "reason": "wtf_area=58 is the area the legacy page published for the building. wtf_total_area=128 is named as the plot in the description."
+  },
+  "MS-CRAWL-0046": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "13.23 кв.м Склад – 5.35 кв.м Тераса – 25.50 кв.м Стълбищна клетка – 15.35 кв.м Обща застроена площ: 473.67 кв.м, парцел 470"
+    },
+    "facts": {
+      "built_area_sqm": 474.0,
+      "land_area_sqm": 470.0
+    },
+    "reason": "wtf_area=474 is the area the legacy page published for the building. wtf_total_area=470 is named as the plot in the description."
+  },
+  "MS-CRAWL-0047": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "в живописното село Спатово , само на няколко километра от град Сандански. Къщата е с разгъната застроена площ (РЗП) от 56",
+      "total_area_phrase": "километра от град Сандански. Къщата е с разгъната застроена площ (РЗП) от 56 кв.м. , разположена върху парцел с площ от 475"
+    },
+    "facts": {
+      "built_area_sqm": 56.0,
+      "land_area_sqm": 475.0
+    },
+    "reason": "wtf_area=56 is the area the legacy page published for the building. wtf_total_area=475 is named as the plot in the description."
+  },
+  "MS-CRAWL-0048": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "е пътя, който предстои да свързва България и Северна Македония през новия ГКПП Клепало. Къщата е със застроена площ от 67"
+    },
+    "facts": {
+      "built_area_sqm": 67.0
+    },
+    "reason": "wtf_area=67 is the area the legacy page published for the building. wtf_total_area=872 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0049": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "Къщата е построена върху имот от 417"
+    },
+    "facts": {
+      "built_area_sqm": 470.0,
+      "land_area_sqm": 417.0
+    },
+    "reason": "wtf_area=470 is the area the legacy page published for the building. wtf_total_area=417 is named as the plot in the description."
+  },
+  "MS-CRAWL-0050": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Ризорт. Мезонета е построен през 2005 г. Състои се от хол с кухня, 2 бани с тоалетни и 3 спални. Общата площ на имота е 110",
+      "total_area_phrase": "2005 г. Състои се от хол с кухня, 2 бани с тоалетни и 3 спални. Общата площ на имота е 110 кв.м., има и градина с площ 150"
+    },
+    "facts": {
+      "built_area_sqm": 110.0
+    },
+    "reason": "wtf_area=110 is the area the legacy page published for the building. wtf_total_area=150 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0051": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "на, кафене, парк с детска площадка, поща и редовен автобус до Сандански. Застроената площ на къщата е 96 кв.м Парцела е 780"
+    },
+    "facts": {
+      "built_area_sqm": 192.0,
+      "land_area_sqm": 780.0
+    },
+    "reason": "wtf_area=192 is the area the legacy page published for the building. wtf_total_area=780 is named as the plot in the description."
+  },
+  "MS-CRAWL-0052": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 1100.0
+    },
+    "reason": "wtf_area=1100 is the area the legacy page published for the building. wtf_total_area=25000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0053": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Офиса се намира в нова сграда, в непосредствена близост до Интер Хотел Сандански. Офиса е на 3 нива с обща площ от 315"
+    },
+    "facts": {
+      "usable_area_sqm": 315.0
+    },
+    "reason": "wtf_area=315 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0054": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 70.0
+    },
+    "reason": "wtf_area=70 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0062": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Имота се състои от парцел с площ 3 000 кв.м., и няколко на брой промишлени халета с обща застроена площ от 2600"
+    },
+    "facts": {
+      "usable_area_sqm": 2600.0
+    },
+    "reason": "wtf_area=2600 is the area the legacy page published for the building. wtf_total_area=3000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0063": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "на кухнята и банята според предпочитанията на новия собственик. Сградата е построена върху урегулиран парцел с площ от 342"
+    },
+    "facts": {
+      "built_area_sqm": 36.0,
+      "land_area_sqm": 342.0
+    },
+    "reason": "wtf_area=36 is the area the legacy page published for the building. wtf_total_area=342 is named as the plot in the description."
+  },
+  "MS-CRAWL-0064": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Къщата се намира в центъра на с.Хотово. Къщата е гредоред, на 2 нива, като всеки етаж е по 80 кв.м. или общо 160",
+      "total_area_phrase": "ъра на с.Хотово. Къщата е гредоред, на 2 нива, като всеки етаж е по 80 кв.м. или общо 160 кв.м. Парцела е равен, с площ 218"
+    },
+    "facts": {
+      "built_area_sqm": 160.0,
+      "land_area_sqm": 218.0
+    },
+    "reason": "wtf_area=160 is the area the legacy page published for the building. wtf_total_area=218 is named as the plot in the description."
+  },
+  "MS-CRAWL-0065": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ре поддържана 4 етажна сграда. Асансьор. Удобен достъп. Застроената площ на апартамента е 24.26 кв.м., общата му площ е 30"
+    },
+    "facts": {
+      "built_area_sqm": 30.0
+    },
+    "reason": "wtf_area=30 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0066": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "м, състои се от хол с кухня, 2 спални, 2 тераси и баня с тоалетна. Чистата жилищната площ по документи за собственост е 42"
+    },
+    "facts": {
+      "built_area_sqm": 42.0
+    },
+    "reason": "wtf_area=42 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0067": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ки градини, магазини, Община Сандански и пешеходната улица. Апартамента е със застроена площ от 80 кв.м. и обща площ от 90"
+    },
+    "facts": {
+      "built_area_sqm": 90.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0070": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 3111.0
+    },
+    "reason": "wtf_area=3111 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0072": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "йчивостта, създавайки модерен, но и вечен житейски простор. No. House Pricelist Euro Size sq.m. T1 продаден T2 продаден 66"
+    },
+    "facts": {
+      "built_area_sqm": 66.0
+    },
+    "reason": "wtf_area=66 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0073": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='41-112' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0074": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ски, така и към Пирин планина. Къщата е част от затворен комплекс от идентични еднофамилни сгради. Застроената и площ е 220"
+    },
+    "facts": {
+      "built_area_sqm": 220.0
+    },
+    "reason": "wtf_area=220 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0075": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "а в нова сграда с лице към улицата. Сградата е построена и въведена в експлоатация през 2009 г., Общата площ на имота е 175"
+    },
+    "facts": {
+      "usable_area_sqm": 175.0
+    },
+    "reason": "wtf_area=175 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0077": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "южно изложение, което осигурява много естествена светлина и комфорт през всички сезони. Имотът е със застроена площ от 40"
+    },
+    "facts": {
+      "built_area_sqm": 40.0
+    },
+    "reason": "wtf_area=40 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0078": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "волява да се отдели и още една спалня при необходимост Апартамента е със застроена площ от 96,5 кв.м., или обща площ от 107"
+    },
+    "facts": {
+      "built_area_sqm": 107.0
+    },
+    "reason": "wtf_area=107 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0079": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Многостаен обзаведен и напълно оборудван апартамент. Апартамента е с площ 120"
+    },
+    "facts": {
+      "built_area_sqm": 120.0
+    },
+    "reason": "wtf_area=120 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0080": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Тристаен апартамент в с. Поленица край Сандански с площ 120"
+    },
+    "facts": {
+      "built_area_sqm": 120.0
+    },
+    "reason": "wtf_area=120 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0083": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "area_phrase": "ада в центъра на град Сандански. Обособен е като самостоятелен обект от подземен етаж на кота -3,95м., с площ на обекта 164,5"
+    },
+    "facts": {
+      "usable_area_sqm": 164.5
+    },
+    "reason": "wtf_area=164.5 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0084": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 190.0
+    },
+    "reason": "wtf_area=190 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0085": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "The legacy post was hard-deleted, so no wtf_area survives. Tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0086": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='67-195' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0087": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "total_area_phrase": "Big plot of land 20 740 sq.m., buildings 720"
+    },
+    "facts": {
+      "land_area_sqm": 20740.0
+    },
+    "reason": "wtf_area=20740 is the plot area. wtf_total_area=720 contradicts wtf_area and the description does not support it; withheld."
+  },
+  "MS-CRAWL-0089": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 67.57
+    },
+    "reason": "wtf_area=67.57 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0090": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "200 метра плюс 40 метра балкони общо 240"
+    },
+    "facts": {
+      "built_area_sqm": 240.0
+    },
+    "reason": "wtf_area=240 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0091": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ло реставрирана стара сграда, в която е направено всичко необходимо за комфортното ви пребиваване. Застроената и площ е 90",
+      "total_area_phrase": "в която е направено всичко необходимо за комфортното ви пребиваване. Застроената и площ е 90 кв.м., а парцела е с площ 350"
+    },
+    "facts": {
+      "built_area_sqm": 90.0,
+      "land_area_sqm": 350.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building. wtf_total_area=350 is named as the plot in the description."
+  },
+  "MS-CRAWL-0092": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Сградата със застроена площ 514"
+    },
+    "facts": {
+      "built_area_sqm": 514.0
+    },
+    "reason": "wtf_area=514 is the area the legacy page published for the building. wtf_total_area=245 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0093": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 50.0
+    },
+    "reason": "wtf_area=50 is the area the legacy page published for the building. wtf_total_area=594 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0094": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 1500.0
+    },
+    "reason": "wtf_area=1500 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0095": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ат на община Петрич. Имота върху който е построена сградата е с площ от 2205 кв.м., а самата сграда е едноетажна с площ 417",
+      "total_area_phrase": "се намира на асфалтов път в едно от големите селат на община Петрич. Имота върху който е построена сградата е с площ от 2205"
+    },
+    "facts": {
+      "usable_area_sqm": 417.0
+    },
+    "reason": "wtf_area=417 is the area the legacy page published for the building. wtf_total_area=2205 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0096": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 2859.0
+    },
+    "reason": "wtf_area=2859 is the area the legacy page published for the building. wtf_total_area=7000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0097": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Индустриална сграда под наем в гр. Петрич с площ 500"
+    },
+    "facts": {
+      "usable_area_sqm": 500.0
+    },
+    "reason": "wtf_area=500 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0098": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 2850.0
+    },
+    "reason": "wtf_area=2850 is the area the legacy page published for the building. wtf_total_area=7000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0099": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "area_phrase": "тка, телевизор баня с тоалетна обща тераса Къщи за продажба: Къщи номер 2 и 3 – абсолютно идентични, със застроена площ 140,66"
+    },
+    "facts": {
+      "built_area_sqm": 140.66
+    },
+    "reason": "wtf_area=140.66 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0100": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 60.0
+    },
+    "reason": "wtf_area=60 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0101": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 65.0
+    },
+    "reason": "wtf_area=65 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0102": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "външно парко място, което се намира във вътрешния двор на сградата. Застроена площ на апартамента 61 кв.м. Обща площ – 76,7"
+    },
+    "facts": {
+      "built_area_sqm": 76.7
+    },
+    "reason": "wtf_area=76.7 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0103": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ин в гр.Сандански Разпределение: Имота представлява апартамент на 2 нива със застроена площ от 102 кв.м. и обща площ от 113"
+    },
+    "facts": {
+      "built_area_sqm": 113.0
+    },
+    "reason": "wtf_area=113 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0104": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 285.0
+    },
+    "reason": "wtf_area=285 is the area the legacy page published for the building. wtf_total_area=9000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0105": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "gross_floor_area_sqm": 2771.0
+    },
+    "reason": "wtf_area=2771 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0106": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 40.39
+    },
+    "reason": "wtf_area=40.39 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0107": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 88.0
+    },
+    "reason": "wtf_area=88 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0108": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "area_phrase": "ункт/. Вилата е строена през 90-те години. Сградата е двуетажна, масивна, застроената и площ е 260 кв.м., а обща площ е 520"
+    },
+    "facts": {
+      "built_area_sqm": 520.0
+    },
+    "reason": "wtf_area=520 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0109": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 55.0
+    },
+    "reason": "wtf_area=55 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0110": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Апартамент под наем в комплекс Медите, Сандански, 73,73"
+    },
+    "facts": {
+      "built_area_sqm": 73.73
+    },
+    "reason": "wtf_area=73.73 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0111": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 2500.0
+    },
+    "reason": "wtf_area=2500 is the area the legacy page published for the building. wtf_total_area=24416 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0113": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 93.0
+    },
+    "reason": "wtf_area=93 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0114": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='67-195' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0115": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 67.39
+    },
+    "reason": "wtf_area=67.39 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0116": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {},
+    "facts": {
+      "land_area_sqm": 20740.0
+    },
+    "reason": "wtf_area=20740 is the plot area. wtf_total_area=720 contradicts wtf_area and the description does not support it; withheld."
+  },
+  "MS-CRAWL-0117": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "ьких километрах от города Сандански, рядом с трассой на архитектурный город музей Мелник. Общая площадь дома составляет 56",
+      "total_area_phrase": "а архитектурный город музей Мелник. Общая площадь дома составляет 56 кв. м, он расположен на земельном участке площадью 475"
+    },
+    "facts": {
+      "built_area_sqm": 56.0,
+      "land_area_sqm": 475.0
+    },
+    "reason": "wtf_area=56 is the area the legacy page published for the building. wtf_total_area=475 is named as the plot in the description."
+  },
+  "MS-CRAWL-0118": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Представляем вашему вниманию просторный и функциональный дом общей площадью 163",
+      "total_area_phrase": "ально подходит для тех, кто ищет тишины и покоя. Характеристики объекта: Общая площадь дома: 163 кв.м. Площадь участка: 600"
+    },
+    "facts": {
+      "built_area_sqm": 163.0,
+      "land_area_sqm": 600.0
+    },
+    "reason": "wtf_area=163 is the area the legacy page published for the building. wtf_total_area=600 is named as the plot in the description."
+  },
+  "MS-CRAWL-0119": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Трехкомнатная квартира в Парк Отеле Пирин - Сандански. Продажа квартиры площадью 93"
+    },
+    "facts": {
+      "built_area_sqm": 93.0
+    },
+    "reason": "wtf_area=93 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0120": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Дом для гостей с рестораном на территории г. Сандански, пятиэтажный, с застроенной площадью 650",
+      "total_area_phrase": "м для гостей с рестораном на территории г. Сандански, пятиэтажный, с застроенной площадью 650 кв. м и дворовым участком 450"
+    },
+    "facts": {
+      "gross_floor_area_sqm": 650.0,
+      "land_area_sqm": 450.0
+    },
+    "reason": "wtf_area=650 is the area the legacy page published for the building. wtf_total_area=450 is named as the plot in the description."
+  },
+  "MS-CRAWL-0121": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Офис находится в новом здании, рядом с Интер Отелем Сандански. Офис на 3-х уровнях, общей площадью 315"
+    },
+    "facts": {
+      "usable_area_sqm": 315.0
+    },
+    "reason": "wtf_area=315 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0122": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "Property family is still unmapped, and a property fact cannot be recorded without one. Blocked by the taxonomy review, not by the area data."
+  },
+  "MS-CRAWL-0123": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Одноэтажное производственное здание площадью 417"
+    },
+    "facts": {
+      "usable_area_sqm": 417.0
+    },
+    "reason": "wtf_area=417 is the area the legacy page published for the building. wtf_total_area=2205 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0124": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 138.7
+    },
+    "reason": "wtf_area=138.7 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0125": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "Дом расположен в одном из крупных и предпочитаемых поселков недалеко от СПА-курорта Сандански Участок имеет площадь 760"
+    },
+    "facts": {
+      "built_area_sqm": 313.0,
+      "land_area_sqm": 760.0
+    },
+    "reason": "wtf_area=313 is the area the legacy page published for the building. wtf_total_area=760 is named as the plot in the description."
+  },
+  "MS-CRAWL-0129": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "Property family is still unmapped, and a property fact cannot be recorded without one. Blocked by the taxonomy review, not by the area data."
+  },
+  "MS-CRAWL-0130": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 514.0
+    },
+    "reason": "wtf_area=514 is the area the legacy page published for the building. wtf_total_area=245 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0131": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 84.0
+    },
+    "reason": "wtf_area=84 is the area the legacy page published for the building. wtf_total_area=146 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0132": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "комнат, ванной и туалета; второй этаж — гостиная с кухней, 2 спальни, 2 ванные комнаты и туалеты Участок имеет площадь 547"
+    },
+    "facts": {
+      "built_area_sqm": 148.0,
+      "land_area_sqm": 547.0
+    },
+    "reason": "wtf_area=148 is the area the legacy page published for the building. wtf_total_area=547 is named as the plot in the description."
+  },
+  "MS-CRAWL-0133": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "Дом построен на участке площадью 417"
+    },
+    "facts": {
+      "built_area_sqm": 470.0,
+      "land_area_sqm": 417.0
+    },
+    "reason": "wtf_area=470 is the area the legacy page published for the building. wtf_total_area=417 is named as the plot in the description."
+  },
+  "MS-CRAWL-0134": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 67.57
+    },
+    "reason": "wtf_area=67.57 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0135": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "вый, в хорошем состоянии 4-этажный дом. Лифт. Удобный подъезд. Площадь квартиры составляет 24,26 кв.м., общая площадь – 30"
+    },
+    "facts": {
+      "built_area_sqm": 30.0
+    },
+    "reason": "wtf_area=30 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0138": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='41-112' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0139": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 2850.0
+    },
+    "reason": "wtf_area=2850 is the area the legacy page published for the building. wtf_total_area=7000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0140": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "gross_floor_area_sqm": 2771.0
+    },
+    "reason": "wtf_area=2771 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0142": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "total_area_phrase": "жен на холме, на окраине деревни, благодаря чему с участка открывается невероятная панорама. Площадь участка составляет 1180"
+    },
+    "facts": {
+      "land_area_sqm": 60.0
+    },
+    "reason": "wtf_area=60 is the plot area. wtf_total_area=1180 contradicts wtf_area and the description does not support it; withheld."
+  },
+  "MS-CRAWL-0146": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "gross_floor_area_sqm": 2140.0
+    },
+    "reason": "wtf_area=2140 is the area the legacy page published for the building. wtf_total_area=1220 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0147": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 60.0
+    },
+    "reason": "wtf_area=60 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0148": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "area_phrase": "Новый дом в 15 км от СПА курорта Сандански. Две спальни, зал с кухней, санузел, большой подвал. Застроенная площадь 90"
+    },
+    "facts": {
+      "built_area_sqm": 90.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building. wtf_total_area=350 is unlabelled in the description; withheld rather than guessed as land. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0149": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area='220-920' is a range across units, not this property's area; withheld."
+  },
+  "MS-CRAWL-0151": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "usable_area_sqm": 1100.0
+    },
+    "reason": "wtf_area=1100 is the area the legacy page published for the building. wtf_total_area=13000 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0159": {
+    "action": "assign",
+    "confidence": "medium",
+    "evidence": {
+      "area_phrase": "ажа центра профилактики, реабилитации и косметических процедур в бальнеологическом курорте Сандански, Болгария. Площадь 165"
+    },
+    "facts": {
+      "usable_area_sqm": 165.0
+    },
+    "reason": "wtf_area=165 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+  },
+  "MS-CRAWL-0160": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Недвижимость находится в центре села Левуново. Это первый этаж дома. Его площадь составляет 90",
+      "total_area_phrase": "ставляет 90 кв.м, вместе с подвалом и мансардой, а также 2/3 идеальной части участка, на котором построен дом, а именно 421"
+    },
+    "facts": {
+      "built_area_sqm": 90.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building. wtf_total_area=421 is unlabelled in the description; withheld rather than guessed as land."
+  },
+  "MS-CRAWL-0161": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "total_area_phrase": "т – кухни, 2 спален, ванной комнаты и туалета, а также прихожей. Вместе с этажом продается также часть участка площадью 77"
+    },
+    "facts": {
+      "built_area_sqm": 73.0,
+      "land_area_sqm": 77.0
+    },
+    "reason": "wtf_area=73 is the area the legacy page published for the building. wtf_total_area=77 is named as the plot in the description."
+  },
+  "MS-CRAWL-0162": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {},
+    "facts": {
+      "built_area_sqm": 65.0
+    },
+    "reason": "wtf_area=65 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0163": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "Долгосрочная аренда - Двухкомнатная квартира с гаражом в Сандански. Общая площадь квартиры 90"
+    },
+    "facts": {
+      "built_area_sqm": 90.0
+    },
+    "reason": "wtf_area=90 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0164": {
+    "action": "assign",
+    "confidence": "high",
+    "evidence": {
+      "area_phrase": "с кухней, 2 спален, 2 террас и ванной комнаты с туалетом. Чистая жилая площадь по документам на недвижимость составляет 42"
+    },
+    "facts": {
+      "built_area_sqm": 42.0
+    },
+    "reason": "wtf_area=42 is the area the legacy page published for the building."
+  },
+  "MS-CRAWL-0165": {
+    "action": "skip",
+    "confidence": "high",
+    "reason": "The legacy post was hard-deleted, so no wtf_area survives. Tracked in legacy-lot-id-overrides.json."
+  }
+}
