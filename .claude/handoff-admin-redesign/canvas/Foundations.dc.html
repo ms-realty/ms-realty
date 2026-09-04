@@ -335,56 +335,37 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .doc-hd h1 { font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; }
-    .doc-hd p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:640px; }
-    .grp { margin-bottom:32px; }
-    .grp > h2 { font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:12px;
-      padding-bottom:8px; border-bottom:1px solid var(--border); }
-    .cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
-    .ramp { display:grid; grid-template-columns:96px repeat(11,minmax(0,1fr)); align-items:center; gap:0;
-      margin-bottom:8px; }
-    .ramp b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .swatch { height:46px; display:grid; align-items:end; padding:4px 4px; font:500 11px var(--font-mono); }
-    .roles { width:100%; }
-    .roles td, .roles th { padding:8px 12px; font-size:13px; }
-    .chipbox { display:inline-flex; align-items:center; gap:8px; }
-    .dot { width:15px; height:15px; border-radius:var(--r-xs); border:1px solid rgba(0,0,0,.12); flex:0 0 auto; }
-    .ok { color:var(--success-600); font-weight:600; }
-    .bad { color:var(--danger-600); font-weight:600; }
-    .type-row { display:grid; grid-template-columns:118px minmax(0,1fr); gap:16px; align-items:baseline;
-      padding:8px 0; border-bottom:1px solid var(--border); }
-    .type-row:last-child { border-bottom:0; }
-    .type-row .m { font:500 11px var(--font-mono); color:var(--text-muted); }
-    .scale { display:flex; align-items:flex-end; gap:12px; }
-    .scale div { background:var(--spring-100); border-radius:var(--r-edge) var(--r-edge) 0 0; }
-    .scale span { display:block; margin-top:4px; font:500 11px var(--font-mono); color:var(--text-muted);
-      text-align:center; }
-    .rad { display:flex; gap:16px; }
-    .rad div { width:74px; height:56px; background:var(--joint); border:1px solid var(--border-control);
-      display:grid; place-items:end center; padding-bottom:4px; font:500 11px var(--font-mono);
-      color:var(--marble-700); }
-    .elev { display:flex; gap:16px; }
-    .elev div { width:120px; height:64px; border-radius:var(--r-lg); background:var(--surface);
-      border:1px solid var(--border); display:grid; place-items:center; font:500 11px var(--font-mono);
-      color:var(--text-muted); }
-    .icons { display:grid; grid-template-columns:repeat(14,1fr); gap:4px; }
-    .icons span { display:grid; place-items:center; height:44px; border-radius:var(--r-md);
-      background:var(--surface); border:1px solid var(--border); color:var(--text-body); }
-    .gridfig { display:grid; grid-template-columns:244px minmax(0,1fr); height:150px; border-radius:var(--r-md);
-      overflow:hidden; border:1px solid var(--border); }
-    .gridfig .a { background:var(--ink-900); color:#fff; font:600 11px var(--font-mono); display:grid;
-      place-items:center; }
-    .gridfig .b { background:var(--surface); padding:12px; display:grid; grid-template-rows:auto minmax(0,1fr); gap:8px; }
-    .gridfig .bar { height:22px; border-radius:var(--r-sm); background:var(--sunken); display:grid;
-      place-items:center; font:500 11px var(--font-mono); color:var(--text-muted); }
-    .g12 { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:20px; }
-    .g12 i { background:var(--spring-50); border:1px dashed var(--spring-200); border-radius:var(--r-edge); }
-    .note-b { font-size:13px; color:var(--text-muted); margin-top:8px; }
-    .rtl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
-    .rtl .c { padding:12px 16px; border:1px solid var(--border); border-radius:var(--r-md);
-      background:var(--surface); }
-    .rtl .c b { display:block; font-size:13px; margin-bottom:8px; }
+  .fd { display:grid; gap:32px; }
+  .fd h1 { font-size:22px; font-weight:600; }
+  .fd h2 { font-size:16px; font-weight:600; }
+  .fd p { max-width:72ch; }
+  .fd-header { display:flex; justify-content:space-between; align-items:start; gap:24px; }
+  .fd-header p { margin-top:8px; color:var(--text-muted); }
+  .fd-section { display:grid; gap:16px; border-top:1px solid var(--joint); padding-top:20px; }
+  .fd-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:start; }
+  .fd-example { display:grid; gap:12px; padding:20px; background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); }
+  .fd-example h3 { font-size:16px; font-weight:600; }
+  .fd-fact { display:flex; justify-content:space-between; align-items:center; gap:16px; min-height:var(--row); border-bottom:1px solid var(--joint); }
+  .fd-fact .price { font-size:22px; }
+  .fd-ramp { display:grid; grid-template-columns:96px repeat(4,minmax(0,1fr)); gap:16px; align-items:center; }
+  .fd-swatch { display:grid; gap:4px; }
+  .fd-swatch i { height:32px; border:1px solid var(--joint); border-radius:var(--r-edge); }
+  .fd code { font:400 13px var(--font-mono); }
+  .fd-roles td { padding:12px; }
+  .fd-type { display:grid; grid-template-columns:80px minmax(0,1fr); gap:16px; padding:8px 0; align-items:baseline; border-bottom:1px solid var(--joint); }
+  .fd-type span:last-child { overflow-wrap:anywhere; }
+  .fd-steps { display:flex; align-items:end; gap:12px; }
+  .fd-step { display:grid; gap:8px; text-align:center; }
+  .fd-step i { display:block; background:var(--spring-700); }
+  .fd-radii { display:flex; gap:16px; }
+  .fd-radius { display:grid; place-items:center; width:128px; min-height:64px; background:var(--surface); border:1px solid var(--border-control); }
+  .fd-layout { display:grid; grid-template-columns:244px minmax(0,1fr); min-height:176px; border:1px solid var(--joint); }
+  .fd-rail { display:grid; align-content:center; gap:8px; background:var(--sb-bg); padding:20px; }
+  .fd-room { display:grid; grid-template-rows:56px auto; background:var(--surface); }
+  .fd-room > div { display:flex; align-items:center; padding:0 24px; border-bottom:1px solid var(--joint); }
+  .fd-icons { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }
+  .fd-icons span { display:flex; align-items:center; gap:8px; min-height:44px; border-bottom:1px solid var(--joint); }
+  .fd .note-b { color:var(--text-muted); }
 
   </style>
 </helmet>
@@ -396,395 +377,43 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div style="width:1440px; min-height:2560px; background:var(--canvas); padding:40px">
-<div class="doc-hd">
-  <div>
-    <h1>Foundations</h1>
-    <p>The resolved values every screen in this workspace is built from. Ramps come from the MS Realty
-      design system. Four roles were corrected where an inherited value misses a WCAG 2.2 AA threshold at
-      the densities this tool runs at: one new value (--warning-700), one role re-pointed to an existing
-      step (--border-control to stone-500), one withdrawn from text altogether (--text-ghost, 2.40:1), and
-      one composited alpha raised (--sb-label, .38 was 3.59:1).</p>
-  </div>
-  <div style="display:grid; gap:8px; justify-items:end">
-    <span class="pill pill--ok"><i></i>WCAG 2.2 AA verified</span>
-    <span class="mono">13 pairs measured · 4 corrected</span>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Colour ramps</h2>
-  <div class="ramp"><b>Stone</b><span class="swatch" style="background:#FAF7F1; color:rgba(0,0,0,.55)">50</span><span class="swatch" style="background:#F2ECE1; color:rgba(0,0,0,.55)">100</span><span class="swatch" style="background:#E6DCCB; color:rgba(0,0,0,.55)">200</span><span class="swatch" style="background:#D3C4AC; color:rgba(0,0,0,.55)">300</span><span class="swatch" style="background:#B7A585; color:rgba(0,0,0,.55)">400</span><span class="swatch" style="background:#948263; color:rgba(0,0,0,.55)">500</span><span class="swatch" style="background:#73644A; color:rgba(255,255,255,.82)">600</span><span class="swatch" style="background:#574B38; color:rgba(255,255,255,.82)">700</span><span class="swatch" style="background:#3A3227; color:rgba(255,255,255,.82)">800</span><span class="swatch" style="background:#241F18; color:rgba(255,255,255,.82)">900</span><span class="swatch" style="background:#16130E; color:rgba(255,255,255,.82)">950</span></div>
-  <div class="ramp"><b>Ink</b><span class="swatch" style="background:#F4F4F3; color:rgba(0,0,0,.55)">50</span><span class="swatch" style="background:#E6E6E5; color:rgba(0,0,0,.55)">100</span><span class="swatch" style="background:#C9C9C7; color:rgba(0,0,0,.55)">200</span><span class="swatch" style="background:#A6A6A4; color:rgba(0,0,0,.55)">300</span><span class="swatch" style="background:#7A7A78; color:rgba(0,0,0,.55)">400</span><span class="swatch" style="background:#545453; color:rgba(0,0,0,.55)">500</span><span class="swatch" style="background:#3F3F3F; color:rgba(255,255,255,.82)">600</span><span class="swatch" style="background:#2E2E2E; color:rgba(255,255,255,.82)">700</span><span class="swatch" style="background:#222222; color:rgba(255,255,255,.82)">800</span><span class="swatch" style="background:#181818; color:rgba(255,255,255,.82)">900</span><span class="swatch" style="background:#0E0E0E; color:rgba(255,255,255,.82)">950</span></div>
-  <div class="ramp"><b>Brick</b><span class="swatch" style="background:#FCEBEB; color:rgba(0,0,0,.55)">50</span><span class="swatch" style="background:#F9D4D4; color:rgba(0,0,0,.55)">100</span><span class="swatch" style="background:#F3ADAD; color:rgba(0,0,0,.55)">200</span><span class="swatch" style="background:#ED8484; color:rgba(0,0,0,.55)">300</span><span class="swatch" style="background:#E45D5D; color:rgba(0,0,0,.55)">400</span><span class="swatch" style="background:#DB3E3E; color:rgba(0,0,0,.55)">500</span><span class="swatch" style="background:#C42D2D; color:rgba(255,255,255,.82)">600</span><span class="swatch" style="background:#A32323; color:rgba(255,255,255,.82)">700</span><span class="swatch" style="background:#7F1B1B; color:rgba(255,255,255,.82)">800</span><span class="swatch" style="background:#571212; color:rgba(255,255,255,.82)">900</span><span class="swatch" style="background:transparent"></span></div>
-  <div class="ramp"><b>Sea</b><span class="swatch" style="background:#ECF3F2; color:rgba(0,0,0,.55)">50</span><span class="swatch" style="background:#D2E3E1; color:rgba(0,0,0,.55)">100</span><span class="swatch" style="background:#A6C7C4; color:rgba(0,0,0,.55)">200</span><span class="swatch" style="background:#71A29E; color:rgba(0,0,0,.55)">300</span><span class="swatch" style="background:#467D79; color:rgba(0,0,0,.55)">400</span><span class="swatch" style="background:#2C615E; color:rgba(0,0,0,.55)">500</span><span class="swatch" style="background:#204B49; color:rgba(255,255,255,.82)">600</span><span class="swatch" style="background:#183B39; color:rgba(255,255,255,.82)">700</span><span class="swatch" style="background:#122C2B; color:rgba(255,255,255,.82)">800</span><span class="swatch" style="background:#0D2120; color:rgba(255,255,255,.82)">900</span><span class="swatch" style="background:transparent"></span></div>
-  <div class="ramp"><b>Sun</b><span class="swatch" style="background:transparent"></span><span class="swatch" style="background:#FBEECF; color:rgba(0,0,0,.55)">100</span><span class="swatch" style="background:transparent"></span><span class="swatch" style="background:#F0CE7A; color:rgba(0,0,0,.55)">300</span><span class="swatch" style="background:#E6B048; color:rgba(0,0,0,.55)">400</span><span class="swatch" style="background:#D2952A; color:rgba(0,0,0,.55)">500</span><span class="swatch" style="background:#AE7420; color:rgba(255,255,255,.82)">600</span><span class="swatch" style="background:transparent"></span><span class="swatch" style="background:transparent"></span><span class="swatch" style="background:transparent"></span><span class="swatch" style="background:transparent"></span></div>
-  <div class="ramp" style="margin-top:12px">
-    <b>Status</b>
-    <span class="swatch" style="background:#E7F3EC; color:rgba(0,0,0,.55)">succ 50</span>
-    <span class="swatch" style="background:#2F7D57; color:rgba(255,255,255,.85)">500</span>
-    <span class="swatch" style="background:#256345; color:rgba(255,255,255,.85)">600</span>
-    <span class="swatch" style="background:#FBF1DD; color:rgba(0,0,0,.55)">warn 50</span>
-    <span class="swatch" style="background:#9A6A1B; color:rgba(255,255,255,.85)">600</span>
-    <span class="swatch" style="background:#8A5F18; color:rgba(255,255,255,.85)">700 new</span>
-    <span class="swatch" style="background:#F9E7EA; color:rgba(0,0,0,.55)">dngr 50</span>
-    <span class="swatch" style="background:#C42E44; color:rgba(255,255,255,.85)">500</span>
-    <span class="swatch" style="background:#9E2334; color:rgba(255,255,255,.85)">600</span>
-    <span class="swatch" style="background:transparent"></span>
-    <span class="swatch" style="background:transparent"></span>
-  </div>
-  <p class="note-b">Brick is the identity red and stays rare: one call to action, the active rail marker,
-    unread counts. Everything structural is charcoal on warm stone.</p>
-</div>
-
-<div class="grp">
-  <h2>Semantic roles and their measured contrast</h2>
-  <div class="panel">
-    <table class="roles">
-      <thead><tr><th>Token</th><th>Value</th><th>Used for</th><th>Against</th><th>Ratio</th><th>AA</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><span class="mono">--text-strong</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#241F18"></span><span class="mono">#241F18</span></span></td>
-          <td>Headings, table primaries</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
-          <td><b>16.35:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--text-body</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#3A3227"></span><span class="mono">#3A3227</span></span></td>
-          <td>Paragraphs, cell values</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FAF7F1"></span><span class="mono">#FAF7F1</span></span></td>
-          <td><b>11.79:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--text-muted</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#73644A"></span><span class="mono">#73644A</span></span></td>
-          <td>Labels, meta, placeholders</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
-          <td><b>5.75:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--text-muted</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#73644A"></span><span class="mono">#73644A</span></span></td>
-          <td>Same, on a sunken toolbar</td>
-          <td><span class="chipbox"><span class="dot" style="background:#F2ECE1"></span><span class="mono">#F2ECE1</span></span></td>
-          <td><b>4.89:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--border-control</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#948263"></span><span class="mono">#948263</span></span></td>
-          <td>Input and button edges (1.4.11)</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
-          <td><b>3.73:1</b></td>
-          <td class="ok">pass · needs 3</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--brand</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#222222"></span><span class="mono">#222222</span></span></td>
-          <td>Primary button fill</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
-          <td><b>15.91:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--accent</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#C42D2D"></span><span class="mono">#C42D2D</span></span></td>
-          <td>One CTA, and counts</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FFFFFF"></span><span class="mono">#FFFFFF</span></span></td>
-          <td><b>5.58:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--brick-500</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#DB3E3E"></span><span class="mono">#DB3E3E</span></span></td>
-          <td>The active rail marker</td>
-          <td><span class="chipbox"><span class="dot" style="background:#181818"></span><span class="mono">#181818</span></span></td>
-          <td><b>4.03:1</b></td>
-          <td class="ok">pass · needs 3</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--sb-label</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:rgba(255,255,255,.54)"></span><span class="mono">rgba(255,255,255,.54)</span></span></td>
-          <td>Rail group labels, composited</td>
-          <td><span class="chipbox"><span class="dot" style="background:#181818"></span><span class="mono">#181818</span></span></td>
-          <td><b>5.93:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--warning-700</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#8A5F18"></span><span class="mono">#8A5F18</span></span></td>
-          <td>Warning text and pills</td>
-          <td><span class="chipbox"><span class="dot" style="background:#FBF1DD"></span><span class="mono">#FBF1DD</span></span></td>
-          <td><b>5.02:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--danger-600</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#9E2334"></span><span class="mono">#9E2334</span></span></td>
-          <td>Overdue, destructive</td>
-          <td><span class="chipbox"><span class="dot" style="background:#F9E7EA"></span><span class="mono">#F9E7EA</span></span></td>
-          <td><b>6.43:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--success-600</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#256345"></span><span class="mono">#256345</span></span></td>
-          <td>Live, approved, won</td>
-          <td><span class="chipbox"><span class="dot" style="background:#E7F3EC"></span><span class="mono">#E7F3EC</span></span></td>
-          <td><b>6.25:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-        <tr>
-          <td><span class="mono">--spring-800</span></td>
-          <td><span class="chipbox"><span class="dot" style="background:#183B39"></span><span class="mono">#183B39</span></span></td>
-          <td>Neutral informational state</td>
-          <td><span class="chipbox"><span class="dot" style="background:#ECF3F2"></span><span class="mono">#ECF3F2</span></span></td>
-          <td><b>10.83:1</b></td>
-          <td class="ok">pass · needs 4.5</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="note-b">Every ratio above is computed from the two colours beside it when this sheet is built,
-    and the verdict against the floor its role actually has to clear — 4.5:1 for text, 3:1 for the boundary
-    of a control. Four corrections, each forced by a number rather than taste: warning text moved from 600
-    to a new 700 step (600 measured 4.21:1 on its own tint); control edges moved off the hairline grey to
-    stone-500, because an input's border is the only thing identifying it; the palest text role was
-    withdrawn from text altogether at 2.40:1 — an empty value now says <b>Not set</b> in muted type instead
-    of being greyed out, which also clears 1.4.1; and the rail's group labels went from .38 alpha to .54,
-    because .38 composites to 3.59:1 on the rail.</p>
-</div>
-
-<div class="grp">
-  <h2>Type</h2>
-  <div class="cols">
-    <div class="panel" style="padding:8px 16px">
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">Display / 32</b><span class="m">Source Serif 4 · 600 · −0.02em</span></span>
-        <span style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em">Operator workspace</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">Display / 26</b><span class="m">Page titles only</span></span>
-        <span style="font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.015em">Lead inbox</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">Display / 19</b><span class="m">Record names in a detail pane</span></span>
-        <span style="font-family:var(--font-display); font-size:19px; font-weight:600; letter-spacing:-.01em">Maria Petrova</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">UI / 14.5 semi</b><span class="m">Panel headings</span></span>
-        <span style="font-size:16px; font-weight:600">Needs you now</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">UI / 13.5</b><span class="m">Default body and rows</span></span>
-        <span style="font-size:13px">Two-bedroom apartment with a south terrace</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">UI / 13 semi</b><span class="m">Row primaries, field labels</span></span>
-        <span style="font-size:13px; font-weight:600">Reply deadline</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">UI / 12.5</b><span class="m">Table cells, secondary rows</span></span>
-        <span style="font-size:13px">Sandanski · Apartment · €68,000</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">UI / 12</b><span class="m">Meta, hints, captions</span></span>
-        <span style="font-size:13px; color:var(--text-muted)">Escalated to manager 4 Jul, 04:00</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">UI / 11.5 semi</b><span class="m">Pills and chips</span></span>
-        <span style="font-size:11px; font-weight:600">Needs review</span>
-      </div>
-      <div class="type-row">
-        <span><b style="font-size:13px; display:block">Mono / 11.5</b><span class="m">References, ids, env keys</span></span>
-        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted)">MS-00815 · HERMES_API_KEY</span>
-      </div>
+<div style="width:1440px; min-height:0px; background:var(--canvas); padding:24px">
+<main class="fd">
+  <header class="fd-header"><div><h1>Foundations</h1><p>Every fact carries its witness. The number, the source and the person who checked it stay together.</p></div><span class="pill pill--ink">System reference</span></header>
+  <section class="fd-section"><h2>The decision and its witness</h2><p class="note-b">Illustrative states below. Names, dates and values demonstrate the design; they are not live confirmations.</p>
+    <div class="fd-pair">
+      <div class="fd-example"><h3>Source supplied, awaiting review</h3><div class="fd-fact"><span>Asking price</span><span class="price">€185,000</span></div><span class="wit wit--none">Owner supplied · not yet checked</span><p>Keep the amount visible. Say which review is missing beside it.</p></div>
+      <div class="fd-example"><h3>Checked against the source</h3><div class="fd-fact"><span>Asking price</span><span class="price">€185,000</span></div><span class="wit"><b>Mariya Ruseva</b> · 4 Sep 2026 · owner instruction</span><p>The filled square records a completed check. The name and date remain readable without colour.</p></div>
     </div>
-    <div>
-      <div class="panel" style="padding:16px">
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px">
-          Two families do the work. Source Serif 4 carries identity and appears only where a person names
-          something — page titles, record names, prices. Commissioner carries every working surface.
-          IBM Plex Mono is reserved for strings a person may have to type or quote exactly.</p>
-        <div class="scale">
-          <div style="width:32px; height:20px"></div><div style="width:38px; height:24px"></div>
-          <div style="width:38px; height:26px"></div><div style="width:38px; height:29px"></div>
-          <div style="width:38px; height:32px"></div><div style="width:38px; height:36px"></div>
-          <div style="width:38px; height:44px"></div><div style="width:38px; height:52px"></div>
-          <div style="width:38px; height:64px"></div>
-        </div>
-        <div style="display:flex; gap:12px; margin-top:4px">
-          <span style="width:38px; font:500 11px var(--font-mono); color:var(--text-muted); text-align:center">11</span><span style="width:38px; font:500 11px var(--font-mono); color:var(--text-muted); text-align:center">13</span><span style="width:38px; font:500 11px var(--font-mono); color:var(--text-muted); text-align:center">16</span><span style="width:38px; font:500 11px var(--font-mono); color:var(--text-muted); text-align:center">19</span><span style="width:38px; font:500 11px var(--font-mono); color:var(--text-muted); text-align:center">27</span><span style="width:38px; font:500 11px var(--font-mono); color:var(--text-muted); text-align:center">32</span>
-        </div>
-        <p class="note-b">6 sizes, and the chart above is the specimen list beside it —
-          both are rendered from the same array, so they cannot come to disagree. Line height is 1.45 for
-          running text, 1.25 for headings, 1 for anything inside a pill or a chip.</p>
-      </div>
-      <div class="panel" style="padding:16px; margin-top:16px">
-        <b style="font-size:12px">Prices and references keep their own faces</b>
-        <div style="display:flex; align-items:baseline; gap:16px; margin-top:8px">
-          <span class="price" style="font-size:20px">€185,000</span>
-          <span class="price" style="font-size:12px">€400 / month</span>
-          <span class="mono" style="font-size:12px">MS-00191</span>
-        </div>
-        <p class="note-b">A price is a fact a buyer acts on, so it gets the display face and never wraps.
-          A reference is a string someone reads out on the phone, so it gets mono and never breaks mid-token.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Spacing, radius, elevation</h2>
-  <div class="cols" style="grid-template-columns:1.1fr .9fr">
-    <div class="panel" style="padding:16px">
-      <b style="font-size:12px">Spacing — a 4px unit, 10 steps</b>
-      <div class="scale" style="margin-top:12px">
-        <div style="width:4px; height:4px; background:var(--spring-100)"></div><div style="width:8px; height:8px; background:var(--spring-100)"></div><div style="width:12px; height:12px; background:var(--spring-100)"></div><div style="width:16px; height:16px; background:var(--spring-100)"></div><div style="width:20px; height:20px; background:var(--spring-100)"></div><div style="width:24px; height:24px; background:var(--spring-100)"></div><div style="width:32px; height:32px; background:var(--spring-100)"></div><div style="width:48px; height:48px; background:var(--spring-100)"></div><div style="width:64px; height:64px; background:var(--spring-100)"></div><div style="width:96px; height:96px; background:var(--spring-100)"></div>
-      </div>
-      <div style="display:flex; gap:12px; margin-top:4px">
-        <span style="width:4px; font:500 11px var(--font-mono); color:var(--text-muted)">4</span><span style="width:8px; font:500 11px var(--font-mono); color:var(--text-muted)">8</span><span style="width:12px; font:500 11px var(--font-mono); color:var(--text-muted)">12</span><span style="width:16px; font:500 11px var(--font-mono); color:var(--text-muted)">16</span><span style="width:20px; font:500 11px var(--font-mono); color:var(--text-muted)">20</span><span style="width:24px; font:500 11px var(--font-mono); color:var(--text-muted)">24</span><span style="width:32px; font:500 11px var(--font-mono); color:var(--text-muted)">32</span><span style="width:48px; font:500 11px var(--font-mono); color:var(--text-muted)">48</span><span style="width:64px; font:500 11px var(--font-mono); color:var(--text-muted)">64</span><span style="width:96px; font:500 11px var(--font-mono); color:var(--text-muted)">96</span>
-      </div>
-      <p class="note-b">Row padding 12/12. Panel padding
-        16/20. Page gutter 24.
-        Column gap 20. Every measurement this sheet publishes is a step, and
-        the linter refuses one that is not. Optical nudges below 4px are not spacing and are not on it.</p>
-      <b style="font-size:13px; display:block; margin-top:20px">Radius — five, and one rule each</b>
-      <div class="rad" style="margin-top:12px">
-        <div style="border-radius:var(--r-edge)">4 chip</div>
-        <div style="border-radius:var(--r-panel)">6 inner</div>
-        <div style="border-radius:var(--r-panel)">8 control</div>
-        <div style="border-radius:var(--r-panel)">14 panel</div>
-        <div style="border-radius:var(--r-pill)">999 pill</div>
-      </div>
-    </div>
-    <div class="panel" style="padding:16px">
-      <b style="font-size:12px">Elevation — two, and one of them is nothing</b>
-      <div class="elev" style="margin-top:12px">
-        <div style="box-shadow:var(--e-rest)">rest — a grout line, no shadow</div>
-        <div style="box-shadow:var(--e-float)">float — over the page, traps focus</div>
-      </div>
-      <p class="note-b">A panel at rest is separated by the grout line between it and the tile, never by a
-        shadow. Only what floats over the page casts one: a menu, a dialog, a toast. The older three-step
-        names still resolve, and two of them resolve to nothing.</p>
-      <b style="font-size:12px; display:block; margin-top:20px">Motion</b>
-      <p class="note-b" style="margin-top:8px">140ms ease-out on hover and state, 200ms on anything entering
-        the page, nothing over 240ms. No motion carries meaning on its own, and every transition is
-        suppressed under <span class="mono">prefers-reduced-motion</span>.</p>
-    </div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Layout</h2>
-  <div class="cols">
-    <div>
-      <div class="gridfig">
-        <div class="a">244 rail</div>
-        <div class="b">
-          <span class="bar">64 topbar</span>
-          <span style="border:4px dashed var(--border-control); border-radius:var(--r-md); display:grid; place-items:center; font:500 11px var(--font-mono); color:var(--text-muted)">content · 26px gutter</span>
-        </div>
-      </div>
-      <p class="note-b">The rail is fixed at 244 and never collapses on desktop; below 1280 it becomes a
-        drawer and the phone layout takes over below 768.</p>
-    </div>
-    <div>
-      <div class="g12" style="height:150px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <p class="note-b">Twelve columns, 20px gutters, inside a 1240 maximum. Tables, boards and the media
-        library break out to full width on purpose — that break is named, so it is emphasis rather than drift.</p>
-    </div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Icons</h2>
-  <div class="icons">
-    <span title="today"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg></span>
-    <span title="inbox"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
-    <span title="board"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h4v13H4z"/><path d="M10 3h4v9h-4z"/><path d="M16 3h4v17h-4z"/></svg></span>
-    <span title="calendar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></span>
-    <span title="check"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-    <span title="checkbox"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></svg></span>
-    <span title="bell"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M21 18H3l1.5-2.5V11a7.5 7.5 0 0 1 15 0v4.5z"/></svg></span>
-    <span title="users"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-    <span title="company"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="8" height="14" rx="1"/><path d="M11 21h10V3h-6v4"/><path d="M6 11h2"/><path d="M6 15h2"/><path d="M16 11h2"/><path d="M16 15h2"/></svg></span>
-    <span title="shield"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg></span>
-    <span title="case"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
-    <span title="file"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-    <span title="filesign"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg></span>
-    <span title="building"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span>
-    <span title="globe"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg></span>
-    <span title="languages"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></span>
-    <span title="image"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg></span>
-    <span title="route"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></span>
-    <span title="chart"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>
-    <span title="list"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></span>
-    <span title="sparkles"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-    <span title="link"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></span>
-    <span title="team"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="8" r="4"/></svg></span>
-    <span title="gear"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M20.3 14.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9.8 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 8.8a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.8a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.04A1.7 1.7 0 0 0 21.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03z"/></svg></span>
-    <span title="search"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
-    <span title="plus"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>
-    <span title="arrow"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
-    <span title="chevron"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
-    <span title="left"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span>
-    <span title="down"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
-    <span title="up"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></span>
-    <span title="clock"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
-    <span title="alert"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-    <span title="phone"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></span>
-    <span title="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg></span>
-    <span title="mail"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-    <span title="filter"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg></span>
-    <span title="x"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-    <span title="edit"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
-    <span title="trash"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></span>
-    <span title="eye"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span>
-    <span title="play"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 4 14 8-14 8z"/></svg></span>
-    <span title="pause"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></span>
-    <span title="bolt"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span>
-    <span title="grid"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-    <span title="tree"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6"/><path d="M4 4v16"/><path d="M4 12h6"/><path d="M4 20h6"/><rect x="10" y="1.5" width="10" height="5" rx="1"/><rect x="10" y="9.5" width="10" height="5" rx="1"/><rect x="10" y="17.5" width="10" height="5" rx="1"/></svg></span>
-    <span title="form"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h5"/></svg></span>
-    <span title="key"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 9-9"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg></span>
-    <span title="lock"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-    <span title="download"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg></span>
-    <span title="upload"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m7 13 5-5 5 5"/><path d="M4 3h16"/></svg></span>
-    <span title="copy"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></span>
-    <span title="history"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></span>
-    <span title="flag"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg></span>
-    <span title="map"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></span>
-    <span title="webhook"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0-3.4 3.95"/><path d="m9 20 3.5-6"/><path d="M15 20a4 4 0 1 0-1.5-7.7"/><path d="M6 14a4 4 0 0 0 3 6h6"/></svg></span>
-  </div>
-  <p class="note-b">One stroke family: 24px grid, 1.6 stroke, round caps. Two densities:
-    11–22px beside a word, 26–30px as the
-    single figure in an empty state, and the linter refuses a drawing outside them. Icons never carry a
-    state on their own — every one of them sits beside a word, because there is no drawing for undo, sync
-    scope, or approval.</p>
-</div>
-
-<div class="grp" style="margin-bottom:0">
-  <h2>Locale and direction</h2>
-  <div class="rtl">
-    <div class="c">
-      <b>Seven public languages, three in the workspace</b>
-      <p style="font-size:12px; color:var(--text-muted)">Operators work in Bulgarian, Russian or English.
-        Every label is written to survive a Bulgarian string roughly a third longer than its English source,
-        so nothing is sized to fit its English width.</p>
-    </div>
-    <div class="c" dir="rtl">
-      <b>עברית — full right-to-left</b>
-      <p style="font-size:13px; color:var(--text-muted)">Hebrew mirrors the whole shell: the rail moves right,
-        icons and chevrons flip, and numbers, prices and references stay left-to-right inside the mirrored line.</p>
-    </div>
-  </div>
-</div>
+  </section>
+  <section class="fd-section"><h2>The Sandanski palette</h2><p class="note-b">Tile separates working surfaces. Spring fills the public opening. Brick marks one primary action.</p>
+    <div class="fd-ramp"><b>Tile</b><span class="fd-swatch"><i style="background:var(--tile)"></i><code>--tile</code><span>#F6F5F1</span></span><span class="fd-swatch"><i style="background:var(--tile-glaze)"></i><code>--tile-glaze</code><span>#FFFFFF</span></span><span class="fd-swatch"><i style="background:var(--tile-deep)"></i><code>--tile-deep</code><span>#ECEAE4</span></span><span class="fd-swatch"><i style="background:var(--joint)"></i><code>--joint</code><span>#D9D5CC</span></span></div><div class="fd-ramp"><b>Marble</b><span class="fd-swatch"><i style="background:var(--marble-900)"></i><code>--marble-900</code><span>#241F18</span></span><span class="fd-swatch"><i style="background:var(--marble-800)"></i><code>--marble-800</code><span>#3A3227</span></span><span class="fd-swatch"><i style="background:var(--marble-600)"></i><code>--marble-600</code><span>#73644A</span></span><span class="fd-swatch"><i style="background:var(--marble-500)"></i><code>--marble-500</code><span>#948263</span></span></div><div class="fd-ramp"><b>Spring</b><span class="fd-swatch"><i style="background:var(--spring-900)"></i><code>--spring-900</code><span>#0F2F2D</span></span><span class="fd-swatch"><i style="background:var(--spring-800)"></i><code>--spring-800</code><span>#163E3B</span></span><span class="fd-swatch"><i style="background:var(--spring-200)"></i><code>--spring-200</code><span>#A9CBC6</span></span><span class="fd-swatch"><i style="background:var(--spring-50)"></i><code>--spring-50</code><span>#EEF4F2</span></span></div><div class="fd-ramp"><b>Brick</b><span class="fd-swatch"><i style="background:var(--brick-800)"></i><code>--brick-800</code><span>#7F1B1B</span></span><span class="fd-swatch"><i style="background:var(--brick-700)"></i><code>--brick-700</code><span>#A32323</span></span><span class="fd-swatch"><i style="background:var(--brick-600)"></i><code>--brick-600</code><span>#C42D2D</span></span><span class="fd-swatch"><i style="background:var(--brick-50)"></i><code>--brick-50</code><span>#FCEBEB</span></span></div>
+  </section>
+  <section class="fd-section"><h2>Contrast at the point of use</h2><p class="note-b">13 token pairs measured during this build. Text needs 4.5:1; control boundaries and navigation icons need 3:1. Ratios are tested before rounding for display.</p>
+    <table class="fd-roles"><thead><tr><th>Use</th><th>Foreground</th><th>Background</th><th>Ratio</th><th>Required</th></tr></thead><tbody>
+      <tr><td>Headings and identity</td><td><code>--text-strong</code></td><td><code>--surface</code></td><td>16.35:1</td><td>Pass · 4.5:1</td></tr><tr><td>Body text on tile</td><td><code>--text-body</code></td><td><code>--canvas</code></td><td>11.56:1</td><td>Pass · 4.5:1</td></tr><tr><td>Hints and source notes</td><td><code>--text-muted</code></td><td><code>--surface</code></td><td>5.75:1</td><td>Pass · 4.5:1</td></tr><tr><td>Secondary text on the rail</td><td><code>--text-muted</code></td><td><code>--sunken</code></td><td>4.78:1</td><td>Pass · 4.5:1</td></tr><tr><td>Control boundaries</td><td><code>--border-control</code></td><td><code>--surface</code></td><td>3.73:1</td><td>Pass · 3:1</td></tr><tr><td>The primary action</td><td><code>--tile-glaze</code></td><td><code>--accent</code></td><td>5.58:1</td><td>Pass · 4.5:1</td></tr><tr><td>Selected navigation icon</td><td><code>--brick-400</code></td><td><code>--sb-on</code></td><td>5.09:1</td><td>Pass · 3:1</td></tr><tr><td>Navigation group labels</td><td><code>--sb-label</code></td><td><code>--sb-bg</code></td><td>4.78:1</td><td>Pass · 4.5:1</td></tr><tr><td>Waiting for a decision</td><td><code>--warning-700</code></td><td><code>--warning-50</code></td><td>5.02:1</td><td>Pass · 4.5:1</td></tr><tr><td>Error and overdue text</td><td><code>--danger-600</code></td><td><code>--danger-50</code></td><td>6.43:1</td><td>Pass · 4.5:1</td></tr><tr><td>Completed work</td><td><code>--success-600</code></td><td><code>--success-50</code></td><td>6.25:1</td><td>Pass · 4.5:1</td></tr><tr><td>Public heading and body</td><td><code>--field-text</code></td><td><code>--field</code></td><td>10.78:1</td><td>Pass · 4.5:1</td></tr><tr><td>Public supporting text</td><td><code>--field-muted</code></td><td><code>--field</code></td><td>6.74:1</td><td>Pass · 4.5:1</td></tr>
+    </tbody></table>
+  </section>
+  <section class="fd-section"><h2>Type, figures and direction</h2><div class="fd-pair"><div>
+    <div class="fd-type"><span>UI / 11</span><span style="font-size:11px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 13</span><span style="font-size:13px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 16</span><span style="font-size:16px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 19</span><span style="font-size:19px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 22</span><span style="font-size:22px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 27</span><span style="font-size:27px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 32</span><span style="font-size:32px; font-weight:600; letter-spacing:0">The next task and its witness</span></div><div class="fd-type"><span>UI / 39</span><span style="font-size:39px; font-weight:600; letter-spacing:0">A place in Sandanski</span></div><div class="fd-type"><span>UI / 47</span><span style="font-size:47px; font-weight:600; letter-spacing:0">A place in Sandanski</span></div><div class="fd-type"><span>UI / 56</span><span style="font-size:56px; font-weight:600; letter-spacing:0">A place in Sandanski</span></div>
+    <p class="note-b">10 sizes, rendered from the published type scale.</p>
+    </div><div class="fd-example"><h3>One working face</h3><p>Commissioner carries workspace text and tabular figures. Operate screens use 13px body text, 16px headings and one 22px page title. Witnesses use 11px.</p>
+      <div class="fd-fact"><b>MS-00191</b><span class="price">€1,245,000</span><span>1,280 m²</span></div>
+      <p>Sofia Sans Semi Condensed, weight 800, carries public display text at 39, 47 or 56px.</p><p class="display" style="font-size:39px">A place in Sandanski</p>
+      <p>Monospace is for code: <code>{"status":"draft"}</code></p><h3>Allow the words to grow</h3><p lang="bg">Потвърдете информацията за имота</p>
+      <div dir="rtl" lang="he"><h3>פרטי הנכס</h3><div class="fd-fact"><span>מחיר</span><bdi dir="ltr">€1,245,000</bdi><bdi dir="ltr">MS-00191</bdi></div></div>
+      <p>Public languages: BG, EN, DE, NL, RU, EL and HE. Workspace languages: BG, RU and EN. Hebrew mirrors layout and reading order; isolate figures and references.</p>
+    </div></div>
+  </section>
+  <section class="fd-section"><h2>Space and edges</h2><div class="fd-pair"><div>
+    <div class="fd-steps"><span class="fd-step"><i style="width:4px;height:4px"></i><span>4</span></span><span class="fd-step"><i style="width:8px;height:8px"></i><span>8</span></span><span class="fd-step"><i style="width:12px;height:12px"></i><span>12</span></span><span class="fd-step"><i style="width:16px;height:16px"></i><span>16</span></span><span class="fd-step"><i style="width:20px;height:20px"></i><span>20</span></span><span class="fd-step"><i style="width:24px;height:24px"></i><span>24</span></span><span class="fd-step"><i style="width:32px;height:32px"></i><span>32</span></span><span class="fd-step"><i style="width:48px;height:48px"></i><span>48</span></span><span class="fd-step"><i style="width:64px;height:64px"></i><span>64</span></span><span class="fd-step"><i style="width:96px;height:96px"></i><span>96</span></span></div>
+    <p class="note-b">Row padding 12 / 12px. Panel padding 16 / 20px. Page gutter 24px. Column gap 20px. Section gap 32px; public sections 96px.</p>
+    </div><div><div class="fd-radii"><span class="fd-radius" style="border-radius:var(--r-edge)">edge · 2px</span><span class="fd-radius" style="border-radius:var(--r-panel)">panel · 6px</span><span class="fd-radius" style="border-radius:var(--r-pill)">pill · 999px</span></div><p class="note-b">3 radii. Controls use edge, containers use panel, avatars and pills use pill. Square corners may use zero.</p></div></div>
+    <p>rest and float: panels sit on a grout line. Menus, dialogs and toasts may float. Do not put a panel inside another panel.</p>
+  </section>
+  <section class="fd-section"><h2>The workspace grid</h2><div class="fd-layout"><div class="fd-rail"><b>244px rail</b><span>Tile, with the current destination in ink</span></div><div class="fd-room"><div>56px top bar</div><div>24px side gutters · 44px rows · one action at the decision</div></div></div><p class="note-b">This sheet stays 1440px wide. Phone frames stay 390px wide with touch targets of at least 44px. Their layout is reviewed separately.</p></section>
+  <section class="fd-section"><h2>Icons stay beside words</h2><div class="fd-icons"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Lead inbox</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>Listings</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>Viewings</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg>Documents</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>Translations</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg>Consent</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Search</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg>Filter</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Waiting</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>Needs attention</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Complete</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M20.3 14.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9.8 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 8.8a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.8a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.04A1.7 1.7 0 0 0 21.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03z"/></svg>Settings</span></div><p class="note-b">Use 16, 18 or 20px inline; 28px in an empty state. Keep labels for approval, sending and other actions whose meaning depends on context.</p></section>
+</main>
 </div>
 </x-dc>
 </body>

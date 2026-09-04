@@ -335,39 +335,40 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .doc-hd h1 { font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; }
-    .doc-hd p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:660px; }
-    .grp { margin-bottom:32px; }
-    .grp > h2 { font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:12px;
-      padding-bottom:8px; border-bottom:1px solid var(--border); }
-    .spec { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:16px 20px;
-      box-shadow:var(--e-2); }
-    .spec > b { display:block; font-size:13px; margin-bottom:4px; }
-    .spec > .why { font-size:11px; color:var(--text-muted); margin-bottom:12px; }
-    .row2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; }
-    .row3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:start; }
-    .demo { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
-    .lbl { font:500 11px var(--font-mono); color:var(--text-muted); display:block; margin-bottom:4px; }
-    .stack { display:grid; gap:12px; }
-    .statecol { display:grid; gap:8px; justify-items:start; }
-    .modal { width:100%; border-radius:var(--r-lg); background:var(--surface); box-shadow:var(--e-3);
-      border:1px solid var(--border); overflow:hidden; }
-    .modal-hd { display:flex; align-items:center; justify-content:space-between; padding:16px 20px;
-      border-bottom:1px solid var(--border); }
-    .modal-hd b { font-family:var(--font-display); font-size:16px; font-weight:600; }
-    .modal-bd { padding:16px 20px; font-size:13px; color:var(--text-body); }
-    .modal-ft { display:flex; align-items:center; gap:12px; padding:12px 20px; border-top:1px solid var(--border);
-      background:var(--sunken); }
-    .drawer { border:1px solid var(--border); border-radius:var(--r-lg) 0 0 var(--r-lg); background:var(--surface);
-      box-shadow:var(--e-3); overflow:hidden; }
-    .stepper { display:flex; align-items:center; gap:0; }
-    .stepper .s { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; }
-    .stepper .n { display:grid; place-items:center; width:22px; height:22px; border-radius:var(--r-full);
-      font-size:11px; background:var(--joint); color:var(--marble-700); }
-    .stepper .n[data-done] { background:var(--success-500); color:#fff; }
-    .stepper .n[data-on] { background:var(--ink-800); color:#fff; }
-    .stepper .line { flex:1 1 auto; height:1px; background:var(--border); margin:0 12px; min-width:24px; }
+  .cp { display:grid; gap:32px; }
+  .cp h1 { font-size:22px; font-weight:600; }
+  .cp h2,.cp h3 { font-size:16px; font-weight:600; }
+  .cp p { max-width:72ch; }
+  .cp-header { display:flex; justify-content:space-between; align-items:start; gap:24px; }
+  .cp-header p { margin-top:8px; color:var(--text-muted); }
+  .cp-section { display:grid; gap:16px; padding-top:20px; border-top:1px solid var(--joint); }
+  .cp-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:start; }
+  .cp-stack { display:grid; gap:16px; }
+  .cp-sample { display:grid; gap:16px; padding:20px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--surface); }
+  .cp-line { display:flex; align-items:center; gap:12px; min-height:var(--row); border-bottom:1px solid var(--joint); }
+  .cp-line > span:first-child { flex:1; min-width:0; }
+  .cp-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+  .cp-states { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; }
+  .cp-state { display:grid; justify-items:start; gap:12px; padding:16px 0; border-top:1px solid var(--joint); }
+  .cp-state p { color:var(--text-muted); }
+  .cp .field { gap:8px; }
+  .cp input,.cp textarea,.cp select { font:inherit; }
+  .cp input:not([type=checkbox]),.cp textarea,.cp select { width:100%; }
+  .cp textarea { resize:vertical; padding:12px; }
+  .cp-check { display:flex; align-items:center; gap:12px; min-height:44px; }
+  .cp-check input { width:20px; height:20px; accent-color:var(--ink-900); flex-shrink:0; }
+  .cp .btn[disabled] { opacity:.5; cursor:not-allowed; }
+  .cp .cp-hover { background:var(--sunken); }
+  .cp-empty { display:grid; gap:12px; justify-items:start; padding:20px 0; }
+  .cp-empty svg { color:var(--text-muted); }
+  .cp-dialog { display:grid; gap:16px; padding:20px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--surface); box-shadow:var(--e-float); }
+  .cp-note { color:var(--text-muted); }
+  .cp .toast span { color:var(--tile-glaze); }
+  .cp-long { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cp-count { flex:0 0 auto; font-variant-numeric:tabular-nums; }
+  .cp-section,.cp-sample,.cp-line { min-width:0; }
+  .cp-sample > .pill { justify-self:start; }
+  .cp .assist { border-color:var(--brick-700); }
 
   </style>
 </helmet>
@@ -379,243 +380,56 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div style="width:1440px; min-height:2020px; background:var(--canvas); padding:40px">
-<div class="doc-hd">
-  <div>
-    <h1>Components</h1>
-    <p>Every control this workspace uses, with the states it is required to have. A component with an
-      undesigned state is a defect here, not an omission — the empty list, the failed save and the
-      half-loaded table are the ones an operator meets on a bad morning.</p>
-  </div>
-  <span class="pill pill--ink"><i></i>34 components · 9 states each where they apply</span>
-</div>
-
-<div class="grp">
-  <h2>Actions</h2>
-  <div class="row3">
-    <div class="spec">
-      <b>Button</b><p class="why">One primary per surface. Brick is reserved for a single highest-intent action.</p>
-      <span class="lbl">variants</span>
-      <div class="demo">
-        <button class="btn btn--primary" type="button">Approve and send</button>
-        <button class="btn" type="button">Save as draft</button>
-        <button class="btn btn--accent" type="button">Call now</button>
-        <button class="btn btn--danger" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>Delete</button>
-        <button class="btn btn--ghost" type="button">Discard</button>
+<div style="width:1440px; min-height:0px; background:var(--canvas); padding:24px">
+<main class="cp">
+  <header class="cp-header"><div><h1>Components</h1><p>Read the fact, review the source, record the decision. Controls keep those steps visible.</p></div><span class="pill pill--ink">Illustrative states</span></header>
+  <section class="cp-section"><h2>A person owns the change</h2><p class="cp-note">Design examples only. The people, values and receipts below do not record live approvals.</p>
+    <div class="cp-pair">
+      <div class="cp-sample" id="assignment"><h3>Assign Elena’s valuation enquiry</h3><p>Choose a broker and record why the enquiry is moving.</p>
+        <div class="field"><label for="cp-assignee">Assign to</label><select class="in" id="cp-assignee" required><option>Petar Dimitrov</option><option>Mariya Ruseva</option></select></div>
+        <div class="field"><label for="cp-reason">Reason <em>*</em></label><textarea class="in in--area" id="cp-reason" required>Petar is available for the requested viewing.</textarea></div>
+        <label class="cp-check"><input type="checkbox" checked required><span>I, Mariya Ruseva, confirm this assignment and its reason.</span></label>
+        <span class="wit wit--none">Waiting for Mariya’s confirmation</span>
+        <div class="cp-actions"><button class="btn btn--accent" type="button">Confirm assignment</button><button class="btn btn--ghost" type="button">Cancel</button></div>
       </div>
-      <span class="lbl" style="margin-top:12px">states</span>
-      <div class="demo">
-        <button class="btn btn--sm" type="button">Default</button>
-        <button class="btn btn--sm" type="button" style="background:var(--sunken)">Hover</button>
-        <button class="btn btn--sm" type="button" data-focus="1">Focus</button>
-        <button class="btn btn--sm" type="button" data-disabled="1">Disabled</button>
-        <button class="btn btn--sm" type="button"><span class="skel" style="width:12px; height:12px; border-radius:var(--r-pill)"></span>Saving…</button>
-      </div>
-      <span class="lbl" style="margin-top:12px">sizes — 30 / 34 / 40, and 44 on touch</span>
-      <div class="demo">
-        <button class="btn btn--sm" type="button">Small</button>
-        <button class="btn" type="button">Default</button>
-        <button class="btn btn--lg" type="button">Large</button>
+      <div class="cp-stack"><div class="cp-sample"><h3>The resulting receipt</h3><div class="cp-line"><span>Assigned to Petar Dimitrov</span><span class="pill pill--ok">Recorded</span></div><span class="wit"><b>Mariya Ruseva</b> · 4 Sep 2026, 11:00</span><p>Reason: Petar is available for the requested viewing.</p><a href="#activity">View the activity record</a></div>
+        <h3>Use the same boundary</h3><p>Media approval, document completion, consent withdrawal, condition waivers and lead snoozing also need a reason and a named human confirmation.</p>
+        <div class="cp-actions"><a class="btn" href="#assignment">Review assignment</a><button class="assist" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Draft a note</button></div>
+        <p class="cp-note">Hermes may prepare text. Publishing, sending, indexing, price changes and redirect changes stay with a person.</p>
       </div>
     </div>
-    <div class="spec">
-      <b>Segmented control and filter chips</b><p class="why">Counts live in the filter, not in a separate tile row. A number you cannot click is decoration.</p>
-      <span class="lbl">segmented</span>
-      <div class="seg">
-        <button type="button" data-on="1">All <em>28</em></button>
-        <button type="button">Needs reply <em>4</em></button>
-        <button type="button">Overdue <em>3</em></button>
-      </div>
-      <span class="lbl" style="margin-top:12px">tabs</span>
-      <nav class="tabs"><a href="#" data-on="1">Facts</a><a href="#">Media</a><a href="#">Translations</a><a href="#">Publication</a></nav>
-      <span class="lbl" style="margin-top:12px">breadcrumb</span>
-      <div class="crumbs">Website <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg> Pages <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg> <b style="color:var(--text-strong)">Sandanski</b></div>
-      <span class="lbl" style="margin-top:12px">stepper</span>
-      <div class="stepper">
-        <span class="s"><span class="n" data-done="1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>Facts</span><span class="line"></span>
-        <span class="s"><span class="n" data-on="1">2</span>Translations</span><span class="line"></span>
-        <span class="s"><span class="n">3</span>Publish</span>
-      </div>
-    </div>
-    <div class="spec">
-      <b>Status pill</b><p class="why">Colour never carries the state alone — each pill has a word, and the dot is a second cue for colour-deficient reading (1.4.1).</p>
-      <div class="demo">
-        <span class="pill pill--ok"><i></i>Published</span>
-        <span class="pill pill--warn"><i></i>Needs review</span>
-        <span class="pill pill--danger"><i></i>Overdue 2 d</span>
-        <span class="pill pill--sea"><i></i>Scheduled</span>
-        <span class="pill pill--sand"><i></i>Draft</span>
-        <span class="pill pill--ink"><i></i>Archived</span>
-        <span class="pill pill--ai"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Hermes draft</span>
-      </div>
-      <span class="lbl" style="margin-top:16px">counts and markers</span>
-      <div class="demo">
-        <span class="sb-badge" style="background:var(--brick-600)">4</span>
-        <span class="sb-badge sb-badge--warn">!</span>
-        <span class="av">MR</span>
-        <span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
-        <span class="mono">MS-00191</span>
-      </div>
-      <span class="lbl" style="margin-top:16px">progress</span>
-      <div class="prog" style="width:96px"><i style="width:64%"></i></div>
-      <p style="font-size:12px; color:var(--text-muted); margin-top:8px">4 of 7 documents complete</p>
-    </div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Input</h2>
-  <div class="row3">
-    <div class="spec">
-      <b>Text field</b><p class="why">The border is the only thing identifying a field, so it carries 3:1 (1.4.11) rather than a hairline.</p>
-      <div class="stack">
-        <div class="field"><label for="c1">Agency name <em>*</em></label><span class="in" id="c1">MS Realty</span></div>
-        <div class="field"><label for="c2">Focused</label><span class="in in--focus" id="c2">Sandanski, ul.&nbsp;Makedonia 22</span></div>
-        <div class="field"><label for="c3">Empty</label><span class="in in--empty" id="c3">Not set — shown on every listing page</span></div>
-        <div class="field"><label for="c4">Error</label><span class="in in--error" id="c4">office@</span>
-          <span class="hint hint--error"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg> An address needs a domain, for example office@ms-realty.bg</span></div>
-      </div>
-    </div>
-    <div class="spec">
-      <b>Choice</b><p class="why">A toggle changes something immediately and says so; a checkbox waits for Save.</p>
-      <div class="stack">
-        <div style="display:flex; align-items:center; gap:12px"><span class="box" data-on="1"></span><span style="font-size:12px">Selected</span></div>
-        <div style="display:flex; align-items:center; gap:12px"><span class="box"></span><span style="font-size:12px">Unselected</span></div>
-        <div style="display:flex; align-items:center; gap:12px"><span class="toggle" data-on="1"><i></i></span><span style="font-size:12px">Require approval before sending</span></div>
-        <div style="display:flex; align-items:center; gap:12px"><span class="toggle"><i></i></span><span style="font-size:12px">Let brokers reassign leads</span></div>
-        <div class="field" style="margin-top:4px"><label for="c5">Select</label>
-          <span class="in" id="c5" style="justify-content:space-between">Bulgarian <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
-        <div class="field"><label for="c6">Date and time</label>
-          <span class="in" id="c6" style="justify-content:space-between">4 Sep 2026, 11:00 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></span></div>
-      </div>
-    </div>
-    <div class="spec">
-      <b>Search, filter, saved view</b><p class="why">Saved views are a real endpoint, so the toolbar treats them as records, not as a client-side memory.</p>
-      <div class="stack">
-        <span class="find" style="width:auto"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Reference, title or location</span>
-        <div class="demo">
-          <button class="btn btn--sm" type="button">Sandanski <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Needs review <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm btn--ghost" type="button">Clear</button>
-        </div>
-        <div class="demo">
-          <span class="pill pill--ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>My overdue buyers</span>
-          <span class="pill pill--sand">Unassigned this week</span>
-          <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Save this view</button>
-        </div>
-        <div class="demo" style="padding:8px 12px; background:var(--spring-50); border-radius:var(--r-md)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span style="font-size:13px; font-weight:600; color:var(--spring-800)">3 selected</span>
-          <button class="btn btn--sm" type="button">Assign</button>
-          <button class="btn btn--sm" type="button">Request translation</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Every state a surface must have</h2>
-  <div class="row3">
-    <div class="spec" style="padding:0">
-      <div style="padding:16px 20px 0"><b>Empty — nothing yet</b><p class="why">Says what would put something here, and offers it.</p></div>
-      <div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><b>No enquiries waiting</b>
-        <p>Everything that came in today has an answer. New enquiries arrive here from the website, WhatsApp and email.</p>
-        <button class="btn btn--sm" type="button">Log one by hand</button></div>
-    </div>
-    <div class="spec" style="padding:0">
-      <div style="padding:16px 20px 0"><b>Empty — filtered to nothing</b><p class="why">A different state from the one above: the fix is to widen the filter.</p></div>
-      <div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg><b>No leads match these filters</b>
-        <p>Overdue · unassigned · Greek. Clearing the language filter brings back 11.</p>
-        <button class="btn btn--sm" type="button">Clear filters</button></div>
-    </div>
-    <div class="spec" style="padding:0">
-      <div style="padding:16px 20px 0"><b>Loading</b><p class="why">Row-shaped, so the layout does not jump when the data lands.</p></div>
-      <div style="padding:12px 20px 20px; display:grid; gap:12px">
-        <div style="display:grid; grid-template-columns:auto minmax(0,1fr) 70px; gap:12px; align-items:center">
-          <span class="skel" style="width:26px; height:26px; border-radius:var(--r-pill)"></span>
-          <span style="display:grid; gap:4px"><span class="skel" style="height:8px; width:55%"></span><span class="skel" style="height:8px; width:80%"></span></span>
-          <span class="skel" style="height:22px"></span></div><div style="display:grid; grid-template-columns:auto minmax(0,1fr) 70px; gap:12px; align-items:center">
-          <span class="skel" style="width:26px; height:26px; border-radius:var(--r-pill)"></span>
-          <span style="display:grid; gap:4px"><span class="skel" style="height:8px; width:55%"></span><span class="skel" style="height:8px; width:80%"></span></span>
-          <span class="skel" style="height:22px"></span></div><div style="display:grid; grid-template-columns:auto minmax(0,1fr) 70px; gap:12px; align-items:center">
-          <span class="skel" style="width:26px; height:26px; border-radius:var(--r-pill)"></span>
-          <span style="display:grid; gap:4px"><span class="skel" style="height:8px; width:55%"></span><span class="skel" style="height:8px; width:80%"></span></span>
-          <span class="skel" style="height:22px"></span></div><div style="display:grid; grid-template-columns:auto minmax(0,1fr) 70px; gap:12px; align-items:center">
-          <span class="skel" style="width:26px; height:26px; border-radius:var(--r-pill)"></span>
-          <span style="display:grid; gap:4px"><span class="skel" style="height:8px; width:55%"></span><span class="skel" style="height:8px; width:80%"></span></span>
-          <span class="skel" style="height:22px"></span></div>
-      </div>
-    </div>
-  </div>
-  <div class="row3" style="margin-top:16px">
-    <div class="spec" style="padding:0">
-      <div style="padding:16px 20px 0"><b>Error — the request failed</b><p class="why">Names the cause and the retry. Never a bare code.</p></div>
-      <div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><b>Could not load the lead inbox</b>
-        <p>The workspace database did not answer. Nothing was lost — your filters are still set.</p>
-        <div class="demo"><button class="btn btn--sm btn--primary" type="button">Try again</button>
-        <button class="btn btn--sm" type="button">Workspace status</button></div></div>
-    </div>
-    <div class="spec" style="padding:0">
-      <div style="padding:16px 20px 0"><b>Not permitted</b><p class="why">Says who can, so the operator knows whom to ask.</p></div>
-      <div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><b>Only an owner or manager can approve translations</b>
-        <p>You can read this queue and leave a note. Mariya Ruseva and Petar Dimitrov can approve.</p>
-        <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>Ask Mariya to review</button></div>
-    </div>
-    <div class="spec" style="padding:0">
-      <div style="padding:16px 20px 0"><b>Degraded — part of the page works</b><p class="why">Partial data is shown, and the missing half is named rather than blank.</p></div>
-      <div style="padding:16px 20px 20px; display:grid; gap:12px">
-        <div class="note note--warn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Search is not answering, so matching inventory is hidden. Everything else on this lead is current.</span></div>
-        <div class="kv" style="border-radius:var(--r-md); overflow:hidden; border-bottom:0">
-          <div><dt>Reply deadline</dt><dd style="color:var(--danger-600)">Overdue 2 days</dd></div>
-          <div><dt>Matching inventory</dt><dd class="muted">Unavailable</dd></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="grp" style="margin-bottom:0">
-  <h2>Overlays and feedback</h2>
-  <div class="row3">
-    <div class="stack">
-      <div class="modal">
-        <div class="modal-hd"><b>Archive 3 listings?</b><span class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></div>
-        <div class="modal-bd">They stop appearing in search and keep a preservation page at their existing URLs,
-          so no legacy link breaks. You can restore them from the Archived filter.
-          <div class="note note--warn" style="margin-top:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>One of the three, <span class="mono">MS-00191</span>, has a viewing booked for today.</span></div>
-        </div>
-        <div class="modal-ft"><button class="btn btn--sm btn--danger" type="button">Archive 3</button>
-          <button class="btn btn--sm btn--ghost" type="button">Cancel</button>
-          <span style="margin-left:auto; font-size:11px" class="muted">Recorded in the activity log</span></div>
-      </div>
-      <p class="why" style="font-size:11px; color:var(--text-muted)">A destructive dialog states the
-        consequence and the count, and never carries a mascot or an exclamation mark.</p>
-    </div>
-    <div class="stack">
-      <div class="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Reply sent to Maria Petrova</b><span>Delivered over WhatsApp · recorded by Mariya</span></span><a href="#">Undo</a></div>
-      <div class="toast" style="background:var(--danger-600)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span><b>Reply not sent</b><span>Google Workspace needs reauthorising</span></span><a href="#">Fix</a></div>
-      <div class="toast" style="background:var(--surface); color:var(--text-strong); border:1px solid var(--border)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b>Publishing 12 listings</b><span class="muted">4 done · you can keep working</span></span><a href="#" style="color:var(--ink-800)">View</a></div>
-      <p class="why" style="font-size:11px; color:var(--text-muted)">Anything reversible offers Undo for
-        as long as the toast is up. Anything not reversible asked first.</p>
-    </div>
-    <div class="stack">
-      <div class="drawer">
-        <div class="modal-hd"><b>Quick look — Anna Weber</b><span class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></div>
-        <div style="padding:16px 20px; display:grid; gap:12px">
-          <div class="demo"><span class="pill pill--sea"><i></i>Buyer</span><span class="pill pill--warn"><i></i>Viewing today 15:00</span></div>
-          <p style="font-size:12px; color:var(--text-body)">Villa, Katuntsi · <span class="mono">MS-00191</span> · €185,000</p>
-          <p style="font-size:13px; color:var(--text-muted)">Case CASE-0007 · preliminary contract · notary 8 Sep</p>
-          <div class="demo"><button class="btn btn--sm btn--primary" type="button">Open the record</button>
-            <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></button>
-            <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></button></div>
-        </div>
-      </div>
-      <p class="why" style="font-size:11px; color:var(--text-muted)">A drawer previews a record without
-        losing the list behind it. It never contains the only way to do something.</p>
-    </div>
-  </div>
-</div>
+  </section>
+  <section class="cp-section"><h2>Action states</h2><div class="cp-states">
+    <div class="cp-state"><b>Default</b><button class="btn" type="button">Save draft</button><p>One clear verb.</p></div>
+    <div class="cp-state"><b>Hover</b><button class="btn cp-hover" type="button">Save draft</button><p>The surface changes.</p></div>
+    <div class="cp-state"><b>Focus</b><button class="btn" type="button" data-focus="1">Save draft</button><p>Keyboard position stays visible.</p></div>
+    <div class="cp-state"><b>Disabled</b><button class="btn" type="button" disabled>Save draft</button><p>Add a note first.</p></div>
+    <div class="cp-state"><b>Loading</b><button class="btn" type="button" disabled aria-busy="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Saving…</button><p>Repeat submission is unavailable.</p></div>
+  </div><div class="cp-actions"><button class="btn btn--sm" type="button">Compact · 32px</button><button class="btn" type="button">Standard · 36px</button><button class="btn btn--lg" type="button">Touch · 44px</button><button class="btn btn--danger" type="button">Review archive</button></div></section>
+  <section class="cp-section"><h2>Fields explain what is missing</h2><div class="cp-pair">
+    <div class="cp-sample"><div class="field"><label for="cp-name">Agency name</label><input class="in" id="cp-name" value="MS Realty"></div><div class="field"><label for="cp-email">Reply email</label><input class="in in--error" id="cp-email" type="email" value="office@" aria-invalid="true" aria-describedby="cp-email-error"><span class="hint hint--error" id="cp-email-error">Add the domain after @.</span></div><div class="field"><label for="cp-empty">Source note</label><input class="in" id="cp-empty" placeholder="Not set" aria-describedby="cp-source-hint"><span class="hint" id="cp-source-hint">Required before you can confirm the fact.</span></div></div>
+    <div class="cp-sample"><div class="field"><label for="cp-locale">Working language</label><select class="in" id="cp-locale"><option>Bulgarian</option><option>Russian</option><option>English</option></select></div><div class="field"><label for="cp-date">Viewing date</label><input class="in" id="cp-date" type="date" value="2026-09-04"></div><label class="cp-check"><input type="checkbox" checked><span>Show completed tasks</span></label><p>Approval requirements are fixed. They are not preferences that an operator can switch off.</p><span class="pill pill--ink">Human approval required</span></div>
+  </div></section>
+  <section class="cp-section"><h2>One line per record</h2><div class="cp-sample">
+    <div class="cp-actions"><div class="seg"><button type="button" data-on="1">All <em>28</em></button><button type="button">Needs reply <em>4</em></button><button type="button">Overdue <em>3</em></button></div><label for="cp-search">Search</label><input class="in" id="cp-search" type="search" placeholder="Name or reference" style="width:256px"><button class="btn" type="button">Save this view</button></div>
+    <div class="cp-line"><span class="cp-long">Maria Petrova · enquiry about MS-00815</span><span class="wit wit--none">MR · review due</span><span class="pill pill--warn">Needs reply</span><button class="btn btn--sm" type="button">Open enquiry</button></div>
+    <div class="cp-line"><span class="cp-long" lang="bg">Александрина Константинова Димитрова · Потвърдете информацията за имота</span><span class="cp-count">€1,245,000</span><span class="wit">MR · 4 Sep</span><button class="btn btn--sm" type="button">Open record</button></div>
+    <p class="cp-note">The full name stays available in the record. Actions and the witness keep their own columns when a name grows.</p>
+    <div class="cp-actions"><span class="pill pill--ok">Published</span><span class="pill pill--warn">Needs review</span><span class="pill pill--danger">Overdue</span><span class="pill pill--ink">Archived</span><span class="pill pill--ai">Hermes draft</span><span class="wit wit--none">Not checked</span><span class="wit">MR · 4 Sep</span></div>
+  </div></section>
+  <section class="cp-section"><h2>When the list cannot show everything</h2><div class="cp-pair">
+    <div class="cp-state"><h3>Empty</h3><div class="cp-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><b>No enquiries yet</b><p>New enquiries appear here when they arrive.</p><button class="btn" type="button">Log an enquiry</button></div></div>
+    <div class="cp-state"><h3>Filtered to nothing</h3><div class="cp-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg><b>No enquiries match</b><p>Overdue · unassigned · Greek</p><button class="btn" type="button">Clear filters</button></div></div>
+    <div class="cp-state"><h3>Error</h3><div class="note note--warn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>We could not save your note. Keep this form open and try again.</span></div><button class="btn" type="button">Try again</button></div>
+    <div class="cp-state"><h3>Partial</h3><div class="note note--info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Enquiry details loaded. Matching properties are unavailable.</span></div><div class="cp-line"><span>Maria Petrova · enquiry received</span><span class="pill pill--warn">Matches unavailable</span></div><button class="btn" type="button">Retry matching</button></div>
+    <div class="cp-state"><h3>Offline</h3><p>No connection. Reconnect before saving or confirming a change.</p><button class="btn" type="button" disabled>Save draft</button></div>
+    <div class="cp-state"><h3>Too much data</h3><p>Showing 1–25 of 1,280 enquiries.</p><div class="cp-actions"><button class="btn" type="button" disabled>Previous</button><button class="btn" type="button">Next 25</button><button class="btn" type="button">Filter</button></div></div>
+  </div></section>
+  <section class="cp-section" id="activity"><h2>Feedback records what happened</h2><div class="cp-pair">
+    <div class="cp-stack"><div class="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Reply sent to Maria Petrova</b><span>Mariya Ruseva · 4 Sep, 11:00</span></span><a href="#activity">View receipt</a></div><p>A delivered message cannot be recalled through an Undo control. A failed send keeps its error and offers a reviewed retry.</p><div class="toast"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span><b>Reply not sent</b><span>Reconnect the email account, then review the draft.</span></span><a href="#assignment">Review</a></div></div>
+    <div class="cp-dialog"><h3>Archive this listing</h3><p>It leaves public search. Review the current URL and any booked viewing before confirming.</p><div class="field"><label for="cp-archive-reason">Reason <em>*</em></label><textarea class="in in--area" id="cp-archive-reason" placeholder="Explain why this listing is being archived" required></textarea></div><label class="cp-check"><input type="checkbox" required><span>I, Mariya Ruseva, confirm the archive decision.</span></label><button class="btn btn--danger" type="button" disabled>Confirm archive</button><p class="cp-note">Awaiting a reason and confirmation.</p></div>
+  </div></section>
+</main>
 </div>
 </x-dc>
 </body>
