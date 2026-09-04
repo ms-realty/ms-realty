@@ -51,3 +51,37 @@ This creates a new `migration/content-evidence/<timestamp>/` directory with a
 robots-respecting `content-inventory.jsonl`, an explicit skip report, and a
 SHA-256 manifest. It never overwrites a non-empty evidence directory and does
 not change the existing migration baseline or public content.
+
+Recover the legacy area figures from the WordPress dumps, without touching the
+catalog:
+
+```bash
+python3 migration/extract_legacy_areas.py \
+  --dump-dir ~/Downloads/MS-Realty-SuperHosting-Recovery-2026-08-31/cpmove-maklerre/mysql
+```
+
+Every listing in `production/data/cms-seed.json` carries a null area; the legacy
+`wtf_area` and `wtf_total_area` postmeta still hold the figures. The script joins
+them to each catalog record through `production/data/legacy-lot-id-map.json` and
+its overrides, normalises the stored strings, and writes
+`production/data/legacy-area-map.json`.
+
+The legacy field says how much area, never which area. A `plot` has one area
+field, so its number can only mean `land_area_sqm` and the row is marked `ready`.
+Every other family carries several, and the legacy copy uses them
+interchangeably, so the row is held with its candidate fields and the sentence
+around the number. Ranges, a total that contradicts the area, and one lot
+reporting two areas across the domains are held the same way.
+
+Apply the reviewed rows as ordinary listing edits, so they survive
+`npm run cms:build` and appear in the admin queues:
+
+```bash
+node production/scripts/apply-legacy-area-facts.mjs           # dry run
+node production/scripts/apply-legacy-area-facts.mjs --apply
+```
+
+Held rows need a decision in `production/data/legacy-area-overrides.json`, keyed
+by listing reference, before the applier will write them. Facts land as
+`entered_pending_review`: the source stated them, no broker has confirmed them,
+and the public page reports that provenance.
