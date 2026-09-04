@@ -4,7 +4,7 @@
   "approved_by": "agency_owner",
   "approved_at": "2026-08-30T00:00:00.000+03:00",
   "reason": "Owner directive of 2026-08-30, given in the operations session: complete every listing translation and publish everything; keep every admin review queue.",
-  "based_on_freeze_sha256": "a9820b9e1e1ce03288dc44546a0b7d1606c50ea6524762b905f38397e0f7de9e",
+  "based_on_freeze_sha256": "ed38df26e0b1c1e84cf2e846b693c5efee00c441eeb69af35b04a1e81edb5329",
   "based_on_freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
   "scope": "full_freeze_catalog",
   "decision": "publish_source_as_is",

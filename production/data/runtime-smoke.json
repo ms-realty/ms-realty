@@ -6428,6 +6428,7 @@
       "description": "חפשו נכסים מאושרים של MS Realty.",
       "robots": "noindex,follow"
     },
+    "hreflang": [],
     "mobile_policy": {
       "list_first_mobile": true,
       "map_optional": true,
@@ -6589,6 +6590,7 @@
     },
     "search": {
       "saved_view": false,
+      "facet": null,
       "engines": [
         "postgres"
       ],
@@ -9171,6 +9173,7 @@
       "description": "חפשו נכסים מאושרים של MS Realty.",
       "robots": "noindex,follow"
     },
+    "hreflang": [],
     "mobile_policy": {
       "list_first_mobile": true,
       "map_optional": true,
@@ -9332,6 +9335,7 @@
     },
     "search": {
       "saved_view": false,
+      "facet": null,
       "engines": [
         "postgres"
       ],
@@ -10761,9 +10765,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-0729d26c-2032-4769-a5a5-0ef33c81f207",
+    "id": "inbox-lead-draft-53944781-d815-4374-aa8d-4d28fff86eb5",
     "lead": {
-      "id": "lead-draft-0729d26c-2032-4769-a5a5-0ef33c81f207",
+      "id": "lead-draft-53944781-d815-4374-aa8d-4d28fff86eb5",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10864,9 +10868,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-f8c028df-dd26-433e-9792-4eaf885533ba",
+    "id": "inbox-lead-draft-de73392d-f027-4dd7-856d-cbf7a0c2370f",
     "lead": {
-      "id": "lead-draft-f8c028df-dd26-433e-9792-4eaf885533ba",
+      "id": "lead-draft-de73392d-f027-4dd7-856d-cbf7a0c2370f",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10970,9 +10974,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-85736e60-0e6b-4500-af38-f7f701e116da",
+    "id": "inbox-lead-draft-f7a40626-435b-402b-a605-8313e9e8b32c",
     "lead": {
-      "id": "lead-draft-85736e60-0e6b-4500-af38-f7f701e116da",
+      "id": "lead-draft-f7a40626-435b-402b-a605-8313e9e8b32c",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

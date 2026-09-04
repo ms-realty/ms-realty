@@ -86,7 +86,7 @@
           "artifact_id": "20260817-deterministic-launch-freeze",
           "approval_id": "MSR-LAUNCH-FREEZE-1",
           "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-          "source_sha256": "a9820b9e1e1ce03288dc44546a0b7d1606c50ea6524762b905f38397e0f7de9e",
+          "source_sha256": "ed38df26e0b1c1e84cf2e846b693c5efee00c441eeb69af35b04a1e81edb5329",
           "approved_homepage_redirects": 5,
           "approved_homepage_decisions": 15
         },
@@ -105,15 +105,16 @@
         "seller_pages": 7,
         "contact_pages": 7,
         "guide_pages": 5,
-        "entries": 197,
+        "search_facet_pages": 56,
+        "entries": 253,
         "byLocale": {
-          "bg": 122,
-          "en": 5,
-          "de": 3,
-          "nl": 3,
-          "ru": 58,
-          "el": 3,
-          "he": 3
+          "bg": 130,
+          "en": 13,
+          "de": 11,
+          "nl": 11,
+          "ru": 66,
+          "el": 11,
+          "he": 11
         },
         "public": {
           "listings": 127,
@@ -123,15 +124,16 @@
           "seller_pages": 7,
           "contact_pages": 7,
           "guide_pages": 5,
-          "entries": 157,
+          "search_facet_pages": 56,
+          "entries": 213,
           "byLocale": {
-            "bg": 122,
-            "en": 5,
-            "de": 3,
-            "nl": 3,
-            "ru": 18,
-            "el": 3,
-            "he": 3
+            "bg": 130,
+            "en": 13,
+            "de": 11,
+            "nl": 11,
+            "ru": 26,
+            "el": 11,
+            "he": 11
           }
         }
       }
@@ -170,7 +172,7 @@
         "mode": "operator_publication_of_freeze_active",
         "path": "production/data/listing-publication-approval.json",
         "approval_id": "MSR-LISTING-PUBLICATION-1",
-        "freeze_sha256": "a9820b9e1e1ce03288dc44546a0b7d1606c50ea6524762b905f38397e0f7de9e",
+        "freeze_sha256": "ed38df26e0b1c1e84cf2e846b693c5efee00c441eeb69af35b04a1e81edb5329",
         "freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
         "approved_by": "agency_owner",
         "approved_at": "2026-08-30T00:00:00.000+03:00",

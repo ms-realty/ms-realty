@@ -3798,6 +3798,7 @@
       "description": "חפשו נכסים מאושרים של MS Realty.",
       "robots": "noindex,follow"
     },
+    "hreflang": [],
     "mobile_policy": {
       "list_first_mobile": true,
       "map_optional": true,
@@ -3959,6 +3960,7 @@
     },
     "search": {
       "saved_view": false,
+      "facet": null,
       "engines": [
         "postgres"
       ],

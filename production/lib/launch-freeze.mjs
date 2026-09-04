@@ -10,12 +10,14 @@ const APPROVED_SOURCE_ARTIFACT_SHA256 = "c627594492d253a2831bb72227920e092d32d25
 // The frozen catalog and route contract are unchanged (165 listings, 30 active
 // / 135 archived, 457 approved routes); only the recorded digest of the derived
 // app route manifest moved after correcting source-locale route authority.
-// Re-sealed again for the lot-number rekey. Every counted invariant held across
-// it: 457 legacy URLs, 165 listings, 30 active and 135 archived, 0 publish
-// ready, 10 routes answering 200, 179 redirecting and 268 gone, all 457
-// approved. What moved is the name of each listing inside the contract, from
-// its crawl-era reference to the agency's lot number.
-export const APPROVED_LAUNCH_FREEZE_SHA256 = "a9820b9e1e1ce03288dc44546a0b7d1606c50ea6524762b905f38397e0f7de9e";
+// Re-sealed again for the lot-number rekey and the search facet pages. Every
+// counted invariant held across both: 457 legacy URLs, 165 listings, 30 active
+// and 135 archived, 0 publish ready, 10 routes answering 200, 179 redirecting
+// and 268 gone, all 457 approved. What moved is the name of each listing inside
+// the contract, from its crawl-era reference to the agency's lot number, and
+// the derived route manifest the freeze digests, which gained the eight
+// indexable search facets on each public locale.
+export const APPROVED_LAUNCH_FREEZE_SHA256 = "ed38df26e0b1c1e84cf2e846b693c5efee00c441eeb69af35b04a1e81edb5329";
 export const DEFAULT_LAUNCH_FREEZE_PATH = fromRoot("production", "data", "launch-freeze.json");
 
 const EXPECTED = Object.freeze({
