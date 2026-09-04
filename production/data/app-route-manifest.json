@@ -1,10 +1,10 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
-  "source_sitemap_entries": 197,
+  "source_sitemap_entries": 253,
   "summary": {
-    "routes": 204,
-    "eligible_routes": 197,
-    "sitemap_indexable_routes": 157,
+    "routes": 260,
+    "eligible_routes": 253,
+    "sitemap_indexable_routes": 213,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
@@ -13,16 +13,17 @@
       "contact": 7,
       "location": 6,
       "seller": 7,
-      "search": 7
+      "search": 7,
+      "search_facet": 56
     },
     "by_locale": {
-      "bg": 123,
-      "de": 4,
-      "el": 4,
-      "en": 6,
-      "he": 4,
-      "nl": 4,
-      "ru": 59
+      "bg": 131,
+      "de": 12,
+      "el": 12,
+      "en": 14,
+      "he": 12,
+      "nl": 12,
+      "ru": 67
     }
   },
   "routes": [
@@ -3098,6 +3099,230 @@
       "hreflang_count": 0
     },
     {
+      "type": "search_facet",
+      "path": "/bg/tarsene?offer_type=rent",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?offer_type=sale",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?property_family=agricultural_land",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?property_family=apartment",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?property_family=commercial",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?property_family=hotel",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?property_family=house",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/bg/tarsene?property_family=plot",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "bg",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
       "type": "home",
       "path": "/de",
       "locale": "de",
@@ -3170,6 +3395,230 @@
       "hreflang_count": 0
     },
     {
+      "type": "search_facet",
+      "path": "/de/suche?offer_type=rent",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?offer_type=sale",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?property_family=agricultural_land",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?property_family=apartment",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?property_family=commercial",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?property_family=hotel",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?property_family=house",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/de/suche?property_family=plot",
+      "locale": "de",
+      "lang": "de",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche",
+        "location": "orte",
+        "seller": "verkaufen",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "de",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
       "type": "seller",
       "path": "/de/verkaufen",
       "locale": "de",
@@ -3240,6 +3689,230 @@
         "locale": "el"
       },
       "hreflang_count": 0
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?offer_type=rent",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?offer_type=sale",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?property_family=agricultural_land",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?property_family=apartment",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?property_family=commercial",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?property_family=hotel",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?property_family=house",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/el/anazitisi?property_family=plot",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi",
+        "location": "topothesies",
+        "seller": "polisi",
+        "contact": "epikoinonia"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "el",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
     },
     {
       "type": "contact",
@@ -3412,6 +4085,230 @@
       "hreflang_count": 0
     },
     {
+      "type": "search_facet",
+      "path": "/en/search?offer_type=rent",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?offer_type=sale",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?property_family=agricultural_land",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?property_family=apartment",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?property_family=commercial",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?property_family=hotel",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?property_family=house",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/en/search?property_family=plot",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "en",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
       "type": "seller",
       "path": "/en/sell",
       "locale": "en",
@@ -3506,6 +4403,230 @@
         "locale": "he"
       },
       "hreflang_count": 0
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?offer_type=rent",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?offer_type=sale",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?property_family=agricultural_land",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?property_family=apartment",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?property_family=commercial",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?property_family=hotel",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?property_family=house",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/he/search?property_family=plot",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "he",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
     },
     {
       "type": "seller",
@@ -3626,6 +4747,230 @@
         "locale": "nl"
       },
       "hreflang_count": 0
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?offer_type=rent",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?offer_type=sale",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?property_family=agricultural_land",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?property_family=apartment",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?property_family=commercial",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?property_family=hotel",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?property_family=house",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/nl/zoeken?property_family=plot",
+      "locale": "nl",
+      "lang": "nl",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken",
+        "location": "locaties",
+        "seller": "verkopen",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "nl",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
     },
     {
       "type": "home",
@@ -5073,6 +6418,230 @@
         "locale": "ru"
       },
       "hreflang_count": 0
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?offer_type=rent",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "offer_type",
+          "value": "rent"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?offer_type=sale",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "offer_type",
+          "value": "sale"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?property_family=agricultural_land",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "property_family",
+          "value": "agricultural_land"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?property_family=apartment",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "property_family",
+          "value": "apartment"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?property_family=commercial",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "property_family",
+          "value": "commercial"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?property_family=hotel",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "property_family",
+          "value": "hotel"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?property_family=house",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "property_family",
+          "value": "house"
+        }
+      },
+      "hreflang_count": 8
+    },
+    {
+      "type": "search_facet",
+      "path": "/ru/search?property_family=plot",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/search/route",
+      "renderer": "renderSearchPage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "no-store",
+      "params": {
+        "locale": "ru",
+        "facet": {
+          "param": "property_family",
+          "value": "plot"
+        }
+      },
+      "hreflang_count": 8
     },
     {
       "type": "seller",

@@ -256,9 +256,10 @@ if (
   sitemap.summary.location_pages < 6 ||
   sitemap.summary.seller_pages !== 7 ||
   sitemap.summary.contact_pages !== 7 ||
-  sitemap.summary.guide_pages !== 5
+  sitemap.summary.guide_pages !== 5 ||
+  sitemap.summary.search_facet_pages !== 56
 ) {
-  throw new Error("Localized sitemap must include approved home, listing, location, seller, contact, and guide pages");
+  throw new Error("Localized sitemap must include approved home, listing, location, seller, contact, guide, and search facet pages");
 }
 const expectedSitemapEntries =
   sitemap.summary.home_pages +
@@ -266,14 +267,17 @@ const expectedSitemapEntries =
   sitemap.summary.location_pages +
   sitemap.summary.seller_pages +
   sitemap.summary.contact_pages +
-  sitemap.summary.guide_pages;
+  sitemap.summary.guide_pages +
+  sitemap.summary.search_facet_pages;
 if (sitemap.summary.entries !== expectedSitemapEntries) {
   throw new Error("Localized sitemap route count must match approved route buckets");
 }
-if (sitemap.summary.byLocale.bg < 118 || sitemap.summary.byLocale.ru !== 58) {
+// Every public locale carries its 8 search facet pages on top of the listing
+// and static routes: 118 + 8 for BG, 58 + 8 for RU, 3 + 8 for EL and HE.
+if (sitemap.summary.byLocale.bg < 126 || sitemap.summary.byLocale.ru !== 66) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 3) {
+if (sitemap.summary.byLocale.el !== 11 || sitemap.summary.byLocale.he !== 11) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew static routes");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
@@ -304,10 +308,12 @@ const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
-  appRouteManifest.summary.routes !== 204 ||
+  // Every sitemap entry plus the seven plain search utility routes.
+  appRouteManifest.summary.routes !== sitemap.summary.entries + 7 ||
   appRouteManifest.summary.eligible_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.public.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
+  appRouteManifest.summary.by_type.search_facet !== 56 ||
   appRouteManifest.summary.by_type.guide !== 5 ||
   appRouteManifest.routes.find((route) => route.path === "/he")?.dir !== "rtl"
 ) {
@@ -325,7 +331,15 @@ if (
 ) {
   throw new Error("Sitemap XML must include approved Hebrew/guide routes and exclude French");
 }
-const sitemapXmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname).sort();
+// A search facet entry is a path plus one query parameter, so comparing
+// pathnames alone would collapse the eight facets of a locale onto its search
+// route and read as eight missing entries.
+const sitemapXmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+  .map(([, loc]) => {
+    const url = new URL(loc);
+    return `${url.pathname}${url.search}`;
+  })
+  .sort();
 const sitemapPublicPaths = sitemap.entries
   .filter((entry) => entry.public !== false)
   .map((entry) => entry.loc)

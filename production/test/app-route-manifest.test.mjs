@@ -71,10 +71,14 @@ test("generated App Router manifest is valid when present", () => {
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.routes, 204);
+  // Every sitemap entry plus the seven plain search routes, which the sitemap
+  // leaves out because a bare search page is not indexable.
+  assert.equal(manifest.summary.routes, 260);
+  assert.equal(manifest.summary.routes, sitemap.summary.entries + 7);
   assert.equal(manifest.summary.eligible_routes, sitemap.summary.entries);
   assert.equal(manifest.summary.sitemap_indexable_routes, sitemap.summary.public.entries);
   assert.equal(manifest.summary.by_type.search, 7);
+  assert.equal(manifest.summary.by_type.search_facet, 56);
   assert.equal(manifest.summary.by_type.guide, 5);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);
   assert.equal(assertAppRouteFiles(manifest), true);
@@ -84,7 +88,10 @@ test("every manifest page renders a complete public content contract", () => {
   const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
 
   for (const route of manifest.routes) {
-    const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}`, config: approvedConfig });
+    // A search facet route is a path plus one query parameter; the router is
+    // given the two separately, the way a request arrives.
+    const [pathname] = route.path.split("?");
+    const page = renderAppRoute({ pathname, url: `https://audit.test${route.path}`, config: approvedConfig });
     const label = `${route.type} ${route.path}`;
     assert.equal(page.status, 200, `${label} must render`);
     if (route.type === "listing" && !approvedPublicListingIds.has(route.params.listingId)) {
@@ -94,12 +101,17 @@ test("every manifest page renders a complete public content contract", () => {
       assert.match(page.html, /data-react-public-ui="listing-preservation"/);
       continue;
     }
-    assert.equal(page.rendered.kind, route.type, `${label} must use its declared renderer`);
+    // A facet renders the search page it is a view of, and says which facet.
+    const expectedKind = route.type === "search_facet" ? "search" : route.type;
+    assert.equal(page.rendered.kind, expectedKind, `${label} must use its declared renderer`);
+    if (route.type === "search_facet") {
+      assert.deepEqual(page.rendered.search.facet, route.params.facet, `${label} must name its facet`);
+    }
     assert.equal(page.rendered.indexable, route.public_indexable, `${label} must match its sitemap indexability`);
     assert.match(page.html, /<title>\s*[^<\s]/, `${label} must have a title`);
     assert.match(page.html, /<meta name="description" content="[^"\s]/, `${label} must have a description`);
     assert.match(page.html, /<h1(?:\s[^>]*)?>\s*[^<\s]/, `${label} must have an H1`);
-    assert.match(page.html, new RegExp(`data-react-public-ui="${route.type}"`), `${label} must render its public shell`);
+    assert.match(page.html, new RegExp(`data-react-public-ui="${expectedKind}"`), `${label} must render its public shell`);
   }
 });
 

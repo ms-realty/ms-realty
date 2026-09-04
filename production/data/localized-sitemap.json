@@ -8,15 +8,16 @@
     "seller_pages": 7,
     "contact_pages": 7,
     "guide_pages": 5,
-    "entries": 197,
+    "search_facet_pages": 56,
+    "entries": 253,
     "byLocale": {
-      "bg": 122,
-      "en": 5,
-      "de": 3,
-      "nl": 3,
-      "ru": 58,
-      "el": 3,
-      "he": 3
+      "bg": 130,
+      "en": 13,
+      "de": 11,
+      "nl": 11,
+      "ru": 66,
+      "el": 11,
+      "he": 11
     },
     "public": {
       "listings": 127,
@@ -26,15 +27,16 @@
       "seller_pages": 7,
       "contact_pages": 7,
       "guide_pages": 5,
-      "entries": 157,
+      "search_facet_pages": 56,
+      "entries": 213,
       "byLocale": {
-        "bg": 122,
-        "en": 5,
-        "de": 3,
-        "nl": 3,
-        "ru": 18,
-        "el": 3,
-        "he": 3
+        "bg": 130,
+        "en": 13,
+        "de": 11,
+        "nl": 11,
+        "ru": 26,
+        "el": 11,
+        "he": 11
       }
     }
   },
@@ -3518,6 +3520,2470 @@
         {
           "hreflang": "x-default",
           "href": "/bg/guides/petrich-obstinski-kontekst"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?property_family=apartment",
+      "facet": {
+        "param": "property_family",
+        "value": "apartment"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=apartment"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=apartment"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=apartment"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=apartment"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=apartment"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=apartment"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=apartment"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=apartment"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?property_family=house",
+      "facet": {
+        "param": "property_family",
+        "value": "house"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=house"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=house"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=house"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=house"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=house"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=house"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=house"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=house"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?property_family=plot",
+      "facet": {
+        "param": "property_family",
+        "value": "plot"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=plot"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=plot"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=plot"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=plot"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=plot"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=plot"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=plot"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=plot"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?property_family=agricultural_land",
+      "facet": {
+        "param": "property_family",
+        "value": "agricultural_land"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=agricultural_land"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=agricultural_land"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?property_family=commercial",
+      "facet": {
+        "param": "property_family",
+        "value": "commercial"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=commercial"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=commercial"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=commercial"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=commercial"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=commercial"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=commercial"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=commercial"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=commercial"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?property_family=hotel",
+      "facet": {
+        "param": "property_family",
+        "value": "hotel"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?property_family=hotel"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?property_family=hotel"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?property_family=hotel"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?property_family=hotel"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?property_family=hotel"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?property_family=hotel"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?property_family=hotel"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?property_family=hotel"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?offer_type=sale",
+      "facet": {
+        "param": "offer_type",
+        "value": "sale"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=sale"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=sale"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=sale"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=sale"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=sale"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=sale"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=sale"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=sale"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "bg",
+      "loc": "/bg/tarsene?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "en",
+      "loc": "/en/search?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "de",
+      "loc": "/de/suche?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "nl",
+      "loc": "/nl/zoeken?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "ru",
+      "loc": "/ru/search?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "el",
+      "loc": "/el/anazitisi?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
+        }
+      ],
+      "public": true
+    },
+    {
+      "type": "search_facet",
+      "locale": "he",
+      "loc": "/he/search?offer_type=rent",
+      "facet": {
+        "param": "offer_type",
+        "value": "rent"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/tarsene?offer_type=rent"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/search?offer_type=rent"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/suche?offer_type=rent"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/zoeken?offer_type=rent"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/search?offer_type=rent"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/anazitisi?offer_type=rent"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/search?offer_type=rent"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/tarsene?offer_type=rent"
         }
       ],
       "public": true

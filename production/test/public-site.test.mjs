@@ -4,7 +4,7 @@ import { approvedContentDocumentsForPath, readApprovedCmsContent } from "../lib/
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { approvedTranslationRecordsForListing, findListingById, loadListings } from "../lib/content.mjs";
 import { loadListingTranslationsCatalog } from "../lib/listing-translations-catalog.mjs";
-import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { loadLocaleRegistry, requiredPublicLocales } from "../lib/locales.mjs";
 import { publicMediaLibrary } from "../lib/media.mjs";
 import { absolutePublicUrl } from "../lib/public-origin.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
@@ -26,6 +26,7 @@ import {
   renderStartPage,
 } from "../lib/public-site.mjs";
 import { CANONICAL_PROPERTY_FAMILIES } from "../lib/listing-facts.mjs";
+import { SEARCH_FACETS, searchFacetPath } from "../lib/seo.mjs";
 import { contentHash } from "../lib/translations.mjs";
 
 Object.assign(process.env, {
@@ -1312,4 +1313,58 @@ test("rendered public fixtures do not introduce Sandanski sea framing", () => {
   });
 
   assert.doesNotMatch(rendered, /Sandanski sea|sea destination|Сандански море/i);
+});
+
+// The eight indexable search facets on each of the seven public locales are the
+// 301 targets the legacy taxonomy review proposes, so every one of the 56 has to
+// be a real page with its own canonical, heading and hreflang cluster — and a
+// search that is anything more than one bare facet must stay out of the index.
+test("every search facet renders one indexable page per public locale", () => {
+  const locales = requiredPublicLocales(registry);
+  assert.equal(locales.length * SEARCH_FACETS.length, 56);
+  const canonicals = new Set();
+  for (const localeCode of locales) {
+    for (const facet of SEARCH_FACETS) {
+      const where = `${localeCode} ${facet.param}=${facet.value}`;
+      const page = renderSearchPage({
+        registry,
+        listings,
+        localeCode,
+        filters: { [facet.param]: facet.value },
+      });
+      assert.equal(page.indexable, true, `${where} must be indexable`);
+      assert.equal(page.metadata.robots, "index,follow", `${where} robots`);
+      assert.deepEqual(page.search.facet, facet, `${where} names its facet`);
+      assert.ok(page.body.h1, `${where} needs a heading of its own`);
+
+      assert.equal(page.canonical, searchFacetPath(registry, localeCode, facet), `${where} canonical`);
+      const canonical = new URL(page.canonical, "https://ms-realty.test");
+      assert.deepEqual([...canonical.searchParams.entries()], [[facet.param, facet.value]], `${where} canonical keeps one parameter`);
+      assert.equal(canonicals.has(page.canonical), false, `${where} canonical must be unique`);
+      canonicals.add(page.canonical);
+
+      const alternates = page.chrome.languages.map((language) => language.code);
+      for (const other of locales) assert.ok(alternates.includes(other), `${where} must offer ${other}`);
+    }
+  }
+  assert.equal(canonicals.size, 56);
+});
+
+test("a search that is more than one bare facet stays out of the index", () => {
+  const facet = { property_family: "apartment" };
+  const notIndexable = {
+    "a keyword": { filters: facet, query: "Sandanski" },
+    "a second filter": { filters: { ...facet, offer_type: "rent" } },
+    "a price band": { filters: { ...facet, price_max: 200000 } },
+    "a sort": { filters: facet, sort: "price_asc" },
+    "a second page": { filters: facet, page: 2, pageSize: 5 },
+    "the map view": { filters: facet, view: "map" },
+    "a saved view": { filters: facet, savedView: true },
+    "no filter at all": {},
+  };
+  for (const [what, options] of Object.entries(notIndexable)) {
+    const page = renderSearchPage({ registry, listings, localeCode: "bg", ...options });
+    assert.equal(page.indexable, false, `${what} must not be indexable`);
+    assert.equal(page.search.facet ?? null, null, `${what} names no facet`);
+  }
 });
