@@ -54,8 +54,11 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
     },
   ]);
 
-  assert.equal(sitemap.summary.byLocale.es, 5);
+  // Home, listing, location, seller and contact plus the eight search facets
+  // every public locale carries.
+  assert.equal(sitemap.summary.byLocale.es, 13);
   assert.equal(sitemap.summary.seller_pages, 8);
+  assert.equal(sitemap.summary.search_facet_pages, 64);
   assert.equal(sitemap.summary.contact_pages, 8);
   assert.equal(sitemap.summary.guide_pages, 5);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es" && entry.type === "home"), true);
