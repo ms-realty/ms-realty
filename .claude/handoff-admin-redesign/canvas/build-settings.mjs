@@ -2,14 +2,14 @@ import fs from "node:fs";
 import { page, icon } from "./shell.mjs";
 
 const CSS = `
-    .set-grid { display:grid; grid-template-columns:212px minmax(0,1fr); gap:22px; align-items:start; }
-    .set-nav { display:grid; gap:1px; position:sticky; top:0; }
-    .set-nav a { display:flex; align-items:center; gap:9px; min-height:34px; padding:7px 11px;
-      border-radius:8px; font-size:13px; font-weight:500; color:var(--text-body); }
-    .set-nav a:hover { background:var(--stone-100); }
+    .set-grid { display:grid; grid-template-columns:212px minmax(0,1fr); gap:24px; align-items:start; }
+    .set-nav { display:grid; gap:4px; position:sticky; top:0; }
+    .set-nav a { display:flex; align-items:center; gap:8px; min-height:34px; padding:8px 12px;
+      border-radius:var(--r-panel); font-size:13px; font-weight:500; color:var(--text-body); }
+    .set-nav a:hover { background:var(--tile-deep); }
     .set-nav a[data-on] { background:var(--ink-800); color:#fff; }
     .set-nav a[data-on] svg { color:#fff; }
-    .set-nav p { margin:12px 11px 4px; font-size:10.5px; font-weight:600; color:var(--text-subtle); }
+    .set-nav p { margin:12px 12px 4px; font-size:11px; font-weight:600; color:var(--text-subtle); }
 `;
 
 const BODY = `      <div class="ph">
@@ -68,7 +68,7 @@ const BODY = `      <div class="ph">
             <div class="savebar">
               <button class="btn btn--sm btn--primary" type="button">${icon("check", 14)}<span>Save changes</span></button>
               <button class="btn btn--sm btn--ghost" type="button">Discard</button>
-              <span style="margin-left:auto; font-size:12px" class="muted">Saved changes are visible on the public site within a minute.</span>
+              <span style="margin-left:auto; font-size:13px" class="muted">Saved changes are visible on the public site within a minute.</span>
             </div>
           </section>
 

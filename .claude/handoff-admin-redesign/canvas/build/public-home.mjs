@@ -3,56 +3,56 @@ import { pubPage, pubHeader, pubFooter, icon } from "../public-shell.mjs";
 const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const CSS = `
-    .hero { position:relative; padding:0 0 0; background:var(--stone-100); }
-    .hero-in { max-width:1240px; margin:0 auto; padding:52px 32px 44px; display:grid;
-      grid-template-columns:1.02fr .98fr; gap:44px; align-items:center; }
+    .hero { position:relative; padding:0 0 0; background:var(--tile-deep); }
+    .hero-in { max-width:1240px; margin:0 auto; padding:48px 32px 48px; display:grid;
+      grid-template-columns:1.02fr .98fr; gap:48px; align-items:center; }
     .hero-im { height:392px; border-radius:var(--r-lg); position:relative; overflow:hidden;
       background:linear-gradient(150deg,#5f5544 0%,#8d7c5e 38%,#c4b394 70%,#7d6f56 100%); }
     .hero-im::after { content:''; position:absolute; inset:0;
       background:radial-gradient(110% 80% at 26% 20%, rgba(255,255,255,.22), transparent 56%),
         radial-gradient(90% 70% at 82% 86%, rgba(20,19,14,.34), transparent 60%); }
-    .hero-badge { position:absolute; left:18px; bottom:18px; z-index:1; display:flex; align-items:center; gap:10px;
-      padding:10px 14px; border-radius:var(--r-md); background:rgba(255,255,255,.94); }
+    .hero-badge { position:absolute; left:18px; bottom:18px; z-index:1; display:flex; align-items:center; gap:12px;
+      padding:12px 16px; border-radius:var(--r-md); background:rgba(255,255,255,.94); }
     .searchbox { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
       box-shadow:var(--e-2); padding:8px; display:grid; gap:8px; }
     .searchrow { display:grid; grid-template-columns:1.5fr 1fr 1fr auto; gap:8px; }
-    .sfield { display:grid; gap:3px; padding:9px 13px; border-radius:var(--r-md); background:var(--stone-50);
+    .sfield { display:grid; gap:4px; padding:8px 12px; border-radius:var(--r-md); background:var(--tile);
       min-width:0; }
-    .sfield label { font-size:12px; font-weight:600; color:var(--text-muted); }
-    .sfield span { font-size:15px; font-weight:600; color:var(--stone-900); display:flex;
+    .sfield label { font-size:13px; font-weight:600; color:var(--text-muted); }
+    .sfield span { font-size:16px; font-weight:600; color:var(--marble-900); display:flex;
       align-items:center; justify-content:space-between; gap:8px; }
     .quick { display:flex; flex-wrap:wrap; gap:8px; }
-    .quick a { display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 14px;
+    .quick a { display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 16px;
       border:1px solid var(--border); border-radius:var(--r-full); background:var(--surface);
-      font-size:14px; font-weight:600; color:var(--text-body); }
+      font-size:13px; font-weight:600; color:var(--text-body); }
     .strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; border-top:1px solid var(--border);
       border-bottom:1px solid var(--border); background:var(--surface); }
-    .strip > div { padding:22px 26px; border-right:1px solid var(--border); }
+    .strip > div { padding:24px 24px; border-right:1px solid var(--border); }
     .strip > div:last-child { border-right:0; }
-    .strip b { display:block; font-family:var(--font-display); font-size:28px; font-weight:600;
-      letter-spacing:-.02em; color:var(--stone-900); }
-    .strip span { display:block; margin-top:4px; font-size:14px; color:var(--text-muted); }
-    .split { display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; }
-    .steps { display:grid; gap:18px; }
-    .step { display:grid; grid-template-columns:auto minmax(0,1fr); gap:15px; align-items:start; }
+    .strip b { display:block; font-family:var(--font-display); font-size:27px; font-weight:600;
+      letter-spacing:-.02em; color:var(--marble-900); }
+    .strip span { display:block; margin-top:4px; font-size:13px; color:var(--text-muted); }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
+    .steps { display:grid; gap:20px; }
+    .step { display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px; align-items:start; }
     .step .n { display:grid; place-items:center; width:36px; height:36px; border-radius:var(--r-full);
       background:var(--ink-800); color:#fff; font-family:var(--font-display); font-size:16px; font-weight:600; }
-    .step b { display:block; font-size:17px; font-weight:600; color:var(--stone-900); margin-bottom:4px; }
-    .step p { font-size:15px; color:var(--text-body); line-height:1.55; }
-    .locs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+    .step b { display:block; font-size:16px; font-weight:600; color:var(--marble-900); margin-bottom:4px; }
+    .step p { font-size:16px; color:var(--text-body); line-height:1.55; }
+    .locs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
     .loc { position:relative; height:184px; border-radius:var(--r-lg); overflow:hidden;
       background:linear-gradient(160deg,#6b5f4c 0%,#96866a 46%,#bda98a 100%); display:grid; align-content:end;
       padding:16px; }
     .loc::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 34%,rgba(20,19,14,.66)); }
     .loc b, .loc span { position:relative; z-index:1; color:#fff; }
     .loc b { font-family:var(--font-display); font-size:19px; font-weight:600; }
-    .loc span { font-size:13.5px; color:rgba(255,255,255,.82); }
-    .guides { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
-    .guide { border:1px solid var(--border); border-radius:var(--r-lg); padding:22px; background:var(--surface);
-      display:grid; gap:11px; align-content:start; }
-    .guide b { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--stone-900);
+    .loc span { font-size:13px; color:rgba(255,255,255,.82); }
+    .guides { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    .guide { border:1px solid var(--border); border-radius:var(--r-lg); padding:24px; background:var(--surface);
+      display:grid; gap:12px; align-content:start; }
+    .guide b { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--marble-900);
       line-height:1.3; }
-    .guide p { font-size:14.5px; color:var(--text-body); line-height:1.55; }
+    .guide p { font-size:16px; color:var(--text-body); line-height:1.55; }
     /* The shared band is the public field. BASE colours its links and muted
        text but not its headings, so the section carries those, scoped to
        itself: tile on spring-800 is 10.8:1. */
@@ -87,7 +87,7 @@ const BODY = `${pubHeader("")}
         <p class="lede" style="margin-top:16px; max-width:520px">165 обяви от 2011 година насам. Всяка цена,
           площ и локация е сверена с документ, преди да излезе тук.</p>
 
-        <div class="searchbox" style="margin-top:26px">
+        <div class="searchbox" style="margin-top:24px">
           <div class="searchrow">
             <span class="sfield"><label for="h1f">Къде</label><span id="h1f">Сандански ${icon("down", 16)}</span></span>
             <span class="sfield"><label for="h2f">Вид</label><span id="h2f">Апартамент ${icon("down", 16)}</span></span>
@@ -95,7 +95,7 @@ const BODY = `${pubHeader("")}
             <button class="pbtn pbtn--accent pbtn--lg" type="button" style="min-width:132px">${icon("search", 18)}Търсене</button>
           </div>
         </div>
-        <div class="quick" style="margin-top:14px">
+        <div class="quick" style="margin-top:16px">
           <a href="#">${icon("building", 15)}Апартаменти до 70 000 €</a>
           <a href="#">${icon("map", 15)}Къщи в Мелник</a>
           <a href="#">${icon("key", 15)}Под наем</a>
@@ -105,7 +105,7 @@ const BODY = `${pubHeader("")}
       <div class="hero-im">
         <div class="hero-badge">
           <span class="trust">${icon("check", 15)}Проверена обява</span>
-          <span style="font-size:14px; color:var(--text-body)">Вила в Катунци · 185 000 €</span>
+          <span style="font-size:13px; color:var(--text-body)">Вила в Катунци · 185 000 €</span>
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@ const BODY = `${pubHeader("")}
   <section class="sec"><div class="pub-wrap">
     <div class="sec-hd">
       <div><h2 class="h2">Нови обяви</h2>
-        <p class="meta" style="margin-top:6px">Публикувани през последните 14 дни, всичките с одобрени снимки.</p></div>
+        <p class="meta" style="margin-top:8px">Публикувани през последните 14 дни, всичките с одобрени снимки.</p></div>
       <a class="pbtn" href="#">Всички 165 обяви ${icon("arrow", 16)}</a>
     </div>
     <div class="cards">
@@ -131,18 +131,18 @@ ${CARD("54 500 €", "Реновирана селска къща с двор", "
     </div>
   </div></section>
 
-  <section class="sec--tight" style="background:var(--stone-50); border-top:1px solid var(--border); border-bottom:1px solid var(--border)">
+  <section class="sec--tight" style="background:var(--tile); border-top:1px solid var(--border); border-bottom:1px solid var(--border)">
     <div class="pub-wrap">
       <div class="split">
         <div>
           <h2 class="h2">Купувате от чужбина?</h2>
-          <p class="lede" style="margin-top:14px">Говорим български, руски и английски, а обявите ни излизат
+          <p class="lede" style="margin-top:16px">Говорим български, руски и английски, а обявите ни излизат
             на седем езика. Обясняваме процеса, документите и разходите преди да платите каквото и да е.</p>
           <div style="display:flex; gap:12px; margin-top:20px">
             <a class="pbtn pbtn--brand" href="#">Как се купува имот в България</a>
             <a class="pbtn" href="#">Такси и данъци</a>
           </div>
-          <p class="meta" style="margin-top:14px">${icon("shield", 14)} Правната информация е прегледана от адвокат
+          <p class="meta" style="margin-top:16px">${icon("shield", 14)} Правната информация е прегледана от адвокат
             и носи дата на последна проверка.</p>
         </div>
         <div class="steps">
@@ -160,7 +160,7 @@ ${CARD("54 500 €", "Реновирана селска къща с двор", "
   <section class="sec"><div class="pub-wrap">
     <div class="sec-hd">
       <div><h2 class="h2">Локации</h2>
-        <p class="meta" style="margin-top:6px">Сандански е балнеоложки град в подножието на Пирин, на 20 км от границата с Гърция.</p></div>
+        <p class="meta" style="margin-top:8px">Сандански е балнеоложки град в подножието на Пирин, на 20 км от границата с Гърция.</p></div>
       <a class="pbtn" href="#">Всички локации ${icon("arrow", 16)}</a>
     </div>
     <div class="locs">
@@ -173,7 +173,7 @@ ${CARD("54 500 €", "Реновирана селска къща с двор", "
 
   <section class="sec--tight"><div class="pub-wrap">
     <div class="sec-hd"><div><h2 class="h2">Ръководства</h2>
-      <p class="meta" style="margin-top:6px">Написани за конкретния случай, а не преписани отнякъде.</p></div></div>
+      <p class="meta" style="margin-top:8px">Написани за конкретния случай, а не преписани отнякъде.</p></div></div>
     <div class="guides">
       <div class="guide">
         <b>Може ли чужденец да купи земя в България?</b>

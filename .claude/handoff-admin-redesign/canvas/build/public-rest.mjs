@@ -3,58 +3,58 @@ import { pubPage, pubHeader, pubFooter, icon } from "../public-shell.mjs";
 const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const CSS = `
-    .crumb { display:flex; align-items:center; gap:9px; padding:18px 0; font-size:14px; color:var(--text-muted); }
+    .crumb { display:flex; align-items:center; gap:8px; padding:20px 0; font-size:13px; color:var(--text-muted); }
     .hero2 { position:relative; height:340px; border-radius:var(--r-lg); overflow:hidden; display:grid;
-      align-content:end; padding:30px;
+      align-content:end; padding:32px;
       background:linear-gradient(150deg,#5a5142 0%,#8a7a5e 40%,#bcaa8b 74%,#7a6c54 100%); }
     .hero2::after { content:''; position:absolute; inset:0;
       background:linear-gradient(transparent 30%, rgba(20,19,14,.7)),
         repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
     .hero2 > * { position:relative; z-index:1; color:#fff; }
-    .hero2 h1 { font-family:var(--font-display); font-size:40px; font-weight:600; letter-spacing:-.02em; }
-    .hero2 p { font-size:17px; color:rgba(255,255,255,.84); margin-top:8px; max-width:640px; }
-    .two { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:40px; align-items:start; }
-    .prose h2 { font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.018em;
-      color:var(--stone-900); margin:32px 0 12px; }
+    .hero2 h1 { font-family:var(--font-display); font-size:39px; font-weight:600; letter-spacing:-.02em; }
+    .hero2 p { font-size:16px; color:rgba(255,255,255,.84); margin-top:8px; max-width:640px; }
+    .two { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:48px; align-items:start; }
+    .prose h2 { font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.018em;
+      color:var(--marble-900); margin:32px 0 12px; }
     .prose h2:first-child { margin-top:0; }
-    .prose p { font-size:16.5px; line-height:1.7; color:var(--text-body); margin-bottom:14px; }
-    .prose ul { margin:0 0 16px; padding-left:22px; }
-    .prose li { font-size:16.5px; line-height:1.7; color:var(--text-body); margin-bottom:7px; }
-    .callout { padding:18px 20px; border-radius:var(--r-lg); background:var(--sea-50);
-      border:1px solid var(--sea-200); margin:20px 0; }
-    .callout b { display:block; font-size:16px; font-weight:600; color:var(--sea-700); margin-bottom:6px; }
-    .callout p { font-size:15px; color:var(--sea-700); line-height:1.6; margin:0; }
-    .toc { border:1px solid var(--border); border-radius:var(--r-lg); padding:18px 20px; background:var(--surface); }
-    .toc b { display:block; font-size:14px; font-weight:600; color:var(--stone-900); margin-bottom:11px; }
-    .toc a { display:block; padding:6px 0; font-size:14.5px; color:var(--text-body); border-bottom:1px solid var(--border); }
+    .prose p { font-size:16px; line-height:1.7; color:var(--text-body); margin-bottom:16px; }
+    .prose ul { margin:0 0 16px; padding-left:24px; }
+    .prose li { font-size:16px; line-height:1.7; color:var(--text-body); margin-bottom:8px; }
+    .callout { padding:20px 20px; border-radius:var(--r-lg); background:var(--spring-50);
+      border:1px solid var(--spring-200); margin:20px 0; }
+    .callout b { display:block; font-size:16px; font-weight:600; color:var(--spring-800); margin-bottom:8px; }
+    .callout p { font-size:16px; color:var(--spring-800); line-height:1.6; margin:0; }
+    .toc { border:1px solid var(--border); border-radius:var(--r-lg); padding:20px 20px; background:var(--surface); }
+    .toc b { display:block; font-size:13px; font-weight:600; color:var(--marble-900); margin-bottom:12px; }
+    .toc a { display:block; padding:8px 0; font-size:16px; color:var(--text-body); border-bottom:1px solid var(--border); }
     .toc a:last-child { border-bottom:0; }
     .pbox2 { border:1px solid var(--border); border-radius:var(--r-lg); background:var(--surface);
-      box-shadow:var(--e-2); padding:20px; display:grid; gap:13px; }
-    .form2 { display:grid; gap:14px; }
-    .fld { display:grid; gap:6px; }
-    .fld label { font-size:14px; font-weight:600; color:var(--text-body); }
+      box-shadow:var(--e-2); padding:20px; display:grid; gap:12px; }
+    .form2 { display:grid; gap:16px; }
+    .fld { display:grid; gap:8px; }
+    .fld label { font-size:13px; font-weight:600; color:var(--text-body); }
     .fld .pin { min-height:52px; }
-    .radio { display:flex; gap:10px; flex-wrap:wrap; }
-    .radio span { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 15px;
-      border:1px solid var(--border-control); border-radius:var(--r-md); font-size:14.5px; font-weight:600;
+    .radio { display:flex; gap:12px; flex-wrap:wrap; }
+    .radio span { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 16px;
+      border:1px solid var(--border-control); border-radius:var(--r-md); font-size:16px; font-weight:600;
       color:var(--text-body); }
     .radio span[data-on] { border-color:var(--ink-800); background:var(--ink-800); color:#fff; }
-    .offices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
-    .office { border:1px solid var(--border); border-radius:var(--r-lg); padding:22px; background:var(--surface); }
-    .office b { font-family:var(--font-display); font-size:20px; font-weight:600; color:var(--stone-900); }
-    .office p { font-size:15px; color:var(--text-body); line-height:1.7; margin-top:8px; }
-    .peop { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
-    .per { display:grid; gap:11px; }
+    .offices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+    .office { border:1px solid var(--border); border-radius:var(--r-lg); padding:24px; background:var(--surface); }
+    .office b { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--marble-900); }
+    .office p { font-size:16px; color:var(--text-body); line-height:1.7; margin-top:8px; }
+    .peop { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    .per { display:grid; gap:12px; }
     .per .pic { height:210px; border-radius:var(--r-lg);
       background:linear-gradient(155deg,#6f6350 0%,#9b8a6b 45%,#c4b394 100%); }
-    .per b { font-size:17px; font-weight:600; color:var(--stone-900); }
-    .per span { font-size:14.5px; color:var(--text-muted); display:block; }
-    .stepbig { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:26px; }
-    .stepbig > div { display:grid; gap:10px; align-content:start; }
+    .per b { font-size:16px; font-weight:600; color:var(--marble-900); }
+    .per span { font-size:16px; color:var(--text-muted); display:block; }
+    .stepbig { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    .stepbig > div { display:grid; gap:12px; align-content:start; }
     .stepbig .n { display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-full);
       background:var(--ink-800); color:#fff; font-family:var(--font-display); font-size:19px; font-weight:600; }
-    .stepbig b { font-size:19px; font-weight:600; color:var(--stone-900); font-family:var(--font-display); }
-    .stepbig p { font-size:15.5px; color:var(--text-body); line-height:1.6; }
+    .stepbig b { font-size:19px; font-weight:600; color:var(--marble-900); font-family:var(--font-display); }
+    .stepbig p { font-size:16px; color:var(--text-body); line-height:1.6; }
     .mapbox2 { height:320px; border-radius:var(--r-lg); position:relative; overflow:hidden;
       background:linear-gradient(140deg,#e7ecdf 0%,#dbe3d2 42%,#cfd9c5 100%); }
     .mapbox2::after { content:''; position:absolute; inset:0;
@@ -75,7 +75,7 @@ const CARD = (price, title, place, ref, beds, area) => `      <article class="lc
 /* ------------------------------------------------------------------ Location */
 const LOC_BODY = `${pubHeader("loc")}
   <div class="pub-wrap">
-    <div class="crumb"><a href="#">Локации</a> ${icon("chevron", 14)} <b style="color:var(--stone-900)">Сандански</b></div>
+    <div class="crumb"><a href="#">Локации</a> ${icon("chevron", 14)} <b style="color:var(--marble-900)">Сандански</b></div>
     <div class="hero2">
       <h1>Сандански</h1>
       <p>Балнеоложки град в подножието на Пирин, на 20 км от границата с Гърция и на 160 км от София.
@@ -117,8 +117,8 @@ const LOC_BODY = `${pubHeader("loc")}
           <a href="#">Какво е Сандански</a><a href="#">Кой купува тук</a>
           <a href="#">Как се стига</a><a href="#">Имоти в Сандански</a></div>
         <div class="pbox2">
-          <b style="font-size:16px; font-weight:600; color:var(--stone-900)">Търсите нещо конкретно?</b>
-          <p style="font-size:14.5px; color:var(--text-body)">Кажете бюджет и брой стаи и ще ви пратим
+          <b style="font-size:16px; font-weight:600; color:var(--marble-900)">Търсите нещо конкретно?</b>
+          <p style="font-size:16px; color:var(--text-body)">Кажете бюджет и брой стаи и ще ви пратим
             подходящите, включително непубликуваните.</p>
           <a class="pbtn pbtn--brand" href="#">Опишете какво търсите</a>
         </div>
@@ -128,7 +128,7 @@ const LOC_BODY = `${pubHeader("loc")}
 
     <section class="sec--tight">
       <div class="sec-hd"><div><h2 class="h2">Имоти в Сандански</h2>
-        <p class="meta" style="margin-top:6px">71 обяви · от 19 500 € до 340 000 €</p></div>
+        <p class="meta" style="margin-top:8px">71 обяви · от 19 500 € до 340 000 €</p></div>
         <a class="pbtn" href="#">Всички 71 ${icon("arrow", 16)}</a></div>
       <div class="cards">
 ${CARD("68 000 €", "Двустаен апартамент с южна тераса", "Център", "MS-00815", "2 спални", "72 м²")}
@@ -142,30 +142,30 @@ fs.writeFileSync(W("PublicLocation.dc.html"), pubPage({ body: LOC_BODY, extraCss
 
 /* --------------------------------------------------------------------- Seller */
 const SELL_BODY = `${pubHeader("sell")}
-  <section style="background:var(--stone-100); border-bottom:1px solid var(--border)">
-    <div class="pub-wrap" style="padding-top:56px; padding-bottom:52px">
+  <section style="background:var(--tile-deep); border-bottom:1px solid var(--border)">
+    <div class="pub-wrap" style="padding-top:64px; padding-bottom:48px">
       <div class="two" style="grid-template-columns:1.05fr .95fr; gap:48px; align-items:center">
         <div>
           <h1 class="h1">Продайте имота си в Сандански с брокер, който вдига телефона.</h1>
           <p class="lede" style="margin-top:16px">Безплатна оценка на място в рамките на два работни дни.
             Договор за посредничество с ясен срок, без скрити такси и без изключителни права, ако не ги искате.</p>
-          <div style="display:flex; gap:22px; margin-top:22px; flex-wrap:wrap">
-            <span style="display:flex; align-items:center; gap:9px; font-size:15px">${icon("check", 17)}Оценка на място, не по телефона</span>
-            <span style="display:flex; align-items:center; gap:9px; font-size:15px">${icon("check", 17)}Обява на 7 езика</span>
-            <span style="display:flex; align-items:center; gap:9px; font-size:15px">${icon("check", 17)}Хонорар само при сделка</span>
+          <div style="display:flex; gap:24px; margin-top:24px; flex-wrap:wrap">
+            <span style="display:flex; align-items:center; gap:8px; font-size:16px">${icon("check", 17)}Оценка на място, не по телефона</span>
+            <span style="display:flex; align-items:center; gap:8px; font-size:16px">${icon("check", 17)}Обява на 7 езика</span>
+            <span style="display:flex; align-items:center; gap:8px; font-size:16px">${icon("check", 17)}Хонорар само при сделка</span>
           </div>
         </div>
         <div class="pbox2" style="padding:24px">
-          <b style="font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--stone-900)">Заявете безплатна оценка</b>
+          <b style="font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--marble-900)">Заявете безплатна оценка</b>
           <div class="form2">
             <div class="fld"><label for="s1">Какъв е имотът</label>
               <div class="radio"><span data-on="1">Апартамент</span><span>Къща</span><span>Парцел</span><span>Друго</span></div></div>
             <div class="fld"><label for="s2">Къде се намира</label><span class="pin" id="s2">Град или село</span></div>
             <div class="fld"><label for="s3">Вашето име</label><span class="pin" id="s3">Име и фамилия</span></div>
             <div class="fld"><label for="s4">Телефон</label><span class="pin" id="s4">0888 000 000</span></div>
-            <div style="display:flex; align-items:flex-start; gap:11px">
-              <span class="box" style="margin-top:2px"></span>
-              <span style="font-size:14px; color:var(--text-body); line-height:1.5">Съгласен съм да се свържете
+            <div style="display:flex; align-items:flex-start; gap:12px">
+              <span class="box" style="margin-top:4px"></span>
+              <span style="font-size:12px; color:var(--text-body); line-height:1.5">Съгласен съм да се свържете
                 с мен за тази оценка. <a href="#" style="font-weight:600">Поверителност</a></span>
             </div>
             <a class="pbtn pbtn--accent pbtn--lg" href="#" style="justify-content:center">Заявете оценка</a>
@@ -179,7 +179,7 @@ const SELL_BODY = `${pubHeader("sell")}
   <div class="pub-wrap">
     <section class="sec">
       <div class="sec-hd"><div><h2 class="h2">Как работим</h2>
-        <p class="meta" style="margin-top:6px">Три стъпки, и знаете какво следва на всяка.</p></div></div>
+        <p class="meta" style="margin-top:8px">Три стъпки, и знаете какво следва на всяка.</p></div></div>
       <div class="stepbig">
         <div><span class="n">1</span><b>Оценка</b>
           <p>Идваме на място, снимаме и даваме реалистична цена — не най-високата, а тази, на която имотът
@@ -193,9 +193,9 @@ const SELL_BODY = `${pubHeader("sell")}
       </div>
     </section>
 
-    <section class="sec--tight" style="border-top:1px solid var(--border)">
+    <section class="sec--tight" style="border-top:4px solid var(--border)">
       <div class="sec-hd"><div><h2 class="h2">Продадени наскоро</h2>
-        <p class="meta" style="margin-top:6px">С разрешение на собствениците.</p></div></div>
+        <p class="meta" style="margin-top:8px">С разрешение на собствениците.</p></div></div>
       <div class="cards">
 ${CARD("96 000 €", "Къща с двор, продадена за 6 седмици", "Сандански", "MS-00183", "3 спални", "146 м²")}
 ${CARD("62 000 €", "Двустаен, продаден на първия оглед", "Сандански", "MS-00182", "2 спални", "68 м²")}
@@ -210,20 +210,20 @@ fs.writeFileSync(W("PublicSeller.dc.html"), pubPage({ body: SELL_BODY, extraCss:
 const CONT_BODY = `${pubHeader("contact")}
   <div class="pub-wrap">
     <section class="sec--tight">
-      <h1 class="h1" style="font-size:40px">Контакти</h1>
+      <h1 class="h1" style="font-size:39px">Контакти</h1>
       <p class="lede" style="margin-top:12px; max-width:640px">Обадете се, пишете или минете през офиса.
         Работим на място в Сандански от 2011 година.</p>
     </section>
 
     <section class="sec--tight" style="padding-top:0">
-      <div class="two" style="grid-template-columns:1fr 1fr; gap:40px; align-items:start">
+      <div class="two" style="grid-template-columns:1fr 1fr; gap:48px; align-items:start">
         <div class="offices" style="grid-template-columns:minmax(0,1fr)">
           <div class="office">
             <b>Офис Сандански</b>
             <p>ул. Македония 22, 2800 Сандански<br>
               Понеделник – петък 09:00 – 18:00<br>
               Събота 10:00 – 14:00</p>
-            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:16px">
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:16px">
               <a class="pbtn" href="#">${icon("phone", 16)}0888 12 34 56</a>
               <a class="pbtn" href="#">${icon("mail", 16)}office@ms-realty.bg</a>
             </div>
@@ -232,17 +232,17 @@ const CONT_BODY = `${pubHeader("contact")}
         </div>
 
         <div class="pbox2" style="padding:24px">
-          <b style="font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--stone-900)">Напишете ни</b>
+          <b style="font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--marble-900)">Напишете ни</b>
           <div class="form2">
             <div class="fld"><label for="c0">За какво пишете</label>
               <div class="radio"><span data-on="1">Питане за имот</span><span>Продажба</span><span>Друго</span></div></div>
             <div class="fld"><label for="c1">Име</label><span class="pin" id="c1">Име и фамилия</span></div>
             <div class="fld"><label for="c2">Имейл или телефон</label><span class="pin" id="c2">Как да се свържем</span></div>
             <div class="fld"><label for="c3">Съобщение</label>
-              <span class="pin" id="c3" style="min-height:120px; align-items:flex-start; padding-top:14px">Кажете какво търсите</span></div>
-            <div style="display:flex; align-items:flex-start; gap:11px">
-              <span class="box" style="margin-top:2px"></span>
-              <span style="font-size:14px; color:var(--text-body); line-height:1.5">Съгласен съм да ми
+              <span class="pin" id="c3" style="min-height:120px; align-items:flex-start; padding-top:16px">Кажете какво търсите</span></div>
+            <div style="display:flex; align-items:flex-start; gap:12px">
+              <span class="box" style="margin-top:4px"></span>
+              <span style="font-size:12px; color:var(--text-body); line-height:1.5">Съгласен съм да ми
                 отговорите на този въпрос. <a href="#" style="font-weight:600">Поверителност</a></span>
             </div>
             <a class="pbtn pbtn--brand pbtn--lg" href="#" style="justify-content:center">Изпратете</a>
@@ -254,7 +254,7 @@ const CONT_BODY = `${pubHeader("contact")}
 
     <section class="sec">
       <div class="sec-hd"><div><h2 class="h2">Екипът</h2>
-        <p class="meta" style="margin-top:6px">Семейна агенция — двама брокери и преводач.</p></div></div>
+        <p class="meta" style="margin-top:8px">Семейна агенция — двама брокери и преводач.</p></div></div>
       <div class="peop">
         <div class="per"><span class="pic"></span><b>Мария Русева</b>
           <span>Собственик и брокер</span><span class="meta">Български, руски, английски</span></div>

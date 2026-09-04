@@ -8,9 +8,9 @@ const CSS = `
     /* The most urgent item sits alone under the title: its heading, its facts,
        its witness and the one brick action on the screen. */
     .now { display:grid; grid-template-columns:96px minmax(0,1fr) auto auto auto; align-items:center;
-      column-gap:14px; padding:12px 20px; }
+      column-gap:16px; padding:12px 20px; }
     .now h2 { font-size:16px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .now-meta { display:flex; align-items:center; gap:8px; margin-top:2px; font-size:13px; color:var(--text-muted);
+    .now-meta { display:flex; align-items:center; gap:8px; margin-top:4px; font-size:13px; color:var(--text-muted);
       white-space:nowrap; overflow:hidden; }
     .now-meta span { overflow:hidden; text-overflow:ellipsis; }
 
@@ -18,10 +18,10 @@ const CSS = `
     .queue-bar { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 20px;
       border-bottom:1px solid var(--joint); }
     .task { display:grid; grid-template-columns:96px minmax(0,1fr) 164px 108px 84px; align-items:center;
-      column-gap:14px; min-height:var(--row); padding:0 20px; border-bottom:1px solid var(--joint); }
+      column-gap:16px; min-height:var(--row); padding:0 20px; border-bottom:1px solid var(--joint); }
     .task:last-child { border-bottom:0; }
     .task:hover { background:var(--tile); }
-    .kind { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:var(--text-muted);
+    .kind { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--text-muted);
       white-space:nowrap; }
     .kind i { width:6px; height:6px; border-radius:var(--r-pill); flex:0 0 auto; }
     .task-main { display:flex; align-items:baseline; gap:8px; min-width:0; overflow:hidden; white-space:nowrap; }
@@ -35,17 +35,17 @@ const CSS = `
 
     /* What else is open: three flat panels of rows below the queue. */
     .aside { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin-top:20px; align-items:start; }
-    .qrow { display:flex; align-items:center; gap:10px; min-height:var(--row); padding:0 20px;
+    .qrow { display:flex; align-items:center; gap:12px; min-height:var(--row); padding:0 20px;
       border-bottom:1px solid var(--joint); font-size:13px; color:var(--text-body); }
     .qrow:last-child { border-bottom:0; }
     .qrow:hover { background:var(--tile); text-decoration:none; }
     .qrow svg { color:var(--text-muted); flex:0 0 auto; }
     .qrow span { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .qrow b { font-weight:600; color:var(--text-strong); }
-    .conn { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px;
+    .conn { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px;
       min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
     .conn:last-child { border-bottom:0; }
-    .act { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start;
+    .act { display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:start;
       min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
     .act:last-child { border-bottom:0; }
     .act p { font-size:13px; }

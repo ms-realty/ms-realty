@@ -11,7 +11,7 @@ const CASE_CSS = `
     .cs-id { display:flex; align-items:baseline; gap:8px; min-width:0; }
     .cs-id b { font-size:13px; font-weight:600; color:var(--text-strong); overflow:hidden;
       text-overflow:ellipsis; white-space:nowrap; }
-    .cs-phases { display:flex; gap:3px; align-items:center; }
+    .cs-phases { display:flex; gap:4px; align-items:center; }
     .cs-phase { height:6px; flex:1 1 auto; border-radius:var(--r-pill); background:var(--tile-shadow); }
     .cs-phase[data-done] { background:var(--success-500); }
     .cs-phase[data-on] { background:var(--ink-800); }
@@ -20,13 +20,13 @@ const CASE_CSS = `
     .cs-next { color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .cs-owner { display:flex; justify-content:flex-end; }
     .cs-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin-top:20px; align-items:start; }
-    .cs-item { display:grid; gap:2px; min-height:var(--row); padding:12px 20px; border-bottom:1px solid var(--joint); }
+    .cs-item { display:grid; gap:4px; min-height:var(--row); padding:12px 20px; border-bottom:1px solid var(--joint); }
     .cs-item:last-child { border-bottom:0; }
     .cs-item-hd { display:flex; align-items:baseline; justify-content:space-between; gap:12px; min-width:0; }
-    .cs-tags { display:flex; flex-wrap:wrap; gap:6px; padding:16px 20px; }
-    .cs-rule { display:flex; gap:10px; align-items:flex-start; min-height:var(--row); padding:12px 20px;
+    .cs-tags { display:flex; flex-wrap:wrap; gap:8px; padding:16px 20px; }
+    .cs-rule { display:flex; gap:12px; align-items:flex-start; min-height:var(--row); padding:12px 20px;
       border-bottom:1px solid var(--joint); }
-    .cs-rule svg { flex:0 0 auto; margin-top:2px; color:var(--text-muted); }
+    .cs-rule svg { flex:0 0 auto; margin-top:4px; color:var(--text-muted); }
 `;
 
 const CASES = [
@@ -55,8 +55,8 @@ const CASES_BODY = `      <div class="ph">
         </div>
         <table>
           <thead><tr>
-            <th>Case</th><th style="width:176px">Phases</th><th style="width:330px">Now, and the next step</th>
-            <th style="width:128px">Mode</th><th style="width:72px; text-align:right">Owner</th>
+            <th>Case</th><th style="width:96px">Phases</th><th style="width:96px">Now, and the next step</th>
+            <th style="width:96px">Mode</th><th style="width:64px; text-align:right">Owner</th>
           </tr></thead>
           <tbody>
 ${CASES.map(([id, who, typeLabel, juris, phases, phase, next, tone, mode, owner]) => `            <tr>
@@ -114,7 +114,7 @@ const CD_CSS = `
     .cd-side { display:grid; gap:20px; }
     .cd-phase { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:36px;
       padding:0 20px; background:var(--tile); border-bottom:1px solid var(--joint); font-weight:600; color:var(--text-muted); }
-    .cd-step { display:grid; grid-template-columns:22px minmax(0,1fr) 200px 96px; gap:14px; align-items:center;
+    .cd-step { display:grid; grid-template-columns:22px minmax(0,1fr) 200px 96px; gap:16px; align-items:center;
       min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
     .cd-step:last-child { border-bottom:0; }
     .cd-step:hover { background:var(--tile); }
@@ -128,12 +128,12 @@ const CD_CSS = `
     .cd-who { display:flex; align-items:center; gap:8px; min-width:0; }
     .cd-act { display:flex; justify-content:flex-end; white-space:nowrap; }
     .cd-form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; align-items:end;
-      padding:12px 20px 16px 56px; background:var(--tile); border-bottom:1px solid var(--joint); }
+      padding:12px 20px 16px 64px; background:var(--tile); border-bottom:1px solid var(--joint); }
     .cd-form .hint { grid-column:1 / -1; }
-    .cd-actions { display:flex; gap:8px; margin-top:10px; white-space:nowrap; }
+    .cd-actions { display:flex; gap:8px; margin-top:12px; white-space:nowrap; }
     .cd-waive { display:grid; gap:12px; padding:12px 20px 16px; background:var(--tile); border-bottom:1px solid var(--joint); }
     .cd-waive > b { font-size:13px; color:var(--text-strong); }
-    .cd-confirm { display:flex; align-items:center; gap:10px; }
+    .cd-confirm { display:flex; align-items:center; gap:12px; }
     .cd-formrow { display:flex; align-items:center; gap:12px; }
     .cd-stat { display:grid; gap:8px; }
 `;

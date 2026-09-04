@@ -335,24 +335,24 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .bars { display:grid; gap:9px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:12.5px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--stone-200); overflow:hidden; }
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .bars { display:grid; gap:8px; padding:16px 20px; }
+    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
+    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
     .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:14px 18px; }
-    .kpi dt { font-size:11.5px; color:var(--text-muted); margin-bottom:5px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.02em;
+    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
+    .kpi > div { background:var(--surface); padding:16px 20px; }
+    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
       color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:5px; font-size:11.5px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:14px; align-items:center;
-      padding:11px 16px; border-bottom:1px solid var(--border); }
+    .kpi small { display:block; margin-top:4px; font-size:11px; }
+    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .gate:last-child { border-bottom:0; }
     .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:12px; color:var(--text-muted); }
+    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
 
   </style>
 </helmet>
@@ -421,25 +421,25 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <table>
             <thead><tr><th>Person</th><th>Role</th><th>May approve</th><th>Two-factor</th><th>Last active</th><th></th></tr></thead>
             <tbody>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av" style="background:var(--brick-600); color:#fff">MR</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-600); color:#fff">MR</span>
                 <span class="t2"><b>Mariya Ruseva</b><span>mariya@ms-realty.bg</span></span></span></td>
                 <td><span class="pill pill--ink"><i></i>Owner</span></td>
                 <td class="muted">Everything, including publication</td>
                 <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">now</td>
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av">PD</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">PD</span>
                 <span class="t2"><b>Petar Dimitrov</b><span>petar@ms-realty.bg</span></span></span></td>
                 <td><span class="pill pill--sea"><i></i>Broker</span></td>
                 <td class="muted">Replies and viewings, not publication</td>
                 <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">1 hour ago</td>
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av">DK</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">DK</span>
                 <span class="t2"><b>Desislava Koleva</b><span>desi@ms-realty.bg</span></span></span></td>
                 <td><span class="pill pill--sand"><i></i>Translator</span></td>
                 <td class="muted">Translations in DE and NL only</td>
                 <td><span class="pill pill--warn"><i></i>Not set up</span></td><td class="muted">3 days ago</td>
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
                 <span class="t2"><b>Hermes</b><span>Agent · agency hardware</span></span></span></td>
                 <td><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Agent</span></td>
                 <td class="muted">Nothing. It drafts only.</td>
@@ -447,13 +447,13 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Limits</button></td></tr>
             </tbody>
           </table>
-          <div class="savebar"><span style="font-size:12px" class="muted">Removing a person revokes their
+          <div class="savebar"><span style="font-size:13px" class="muted">Removing a person revokes their
             sessions immediately and leaves their name on everything they approved.</span></div>
         </section>
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Needs attention</h2></div>
-            <div class="side-sect" style="display:grid; gap:9px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div class="note note--warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Desislava has no second factor. She can approve
                 translations that go straight to the public site.</span></div>
               <button class="btn btn--sm btn--primary" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Send her the setup link</span></button>
@@ -461,14 +461,14 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Sessions</h2><span class="sub">4 open</span></div>
-            <div class="side-sect" style="display:grid; gap:9px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between; align-items:center"><span>Mariya · Mac · Sandanski</span><span class="muted">now</span></div><div style="display:flex; justify-content:space-between; align-items:center"><span>Mariya · iPhone</span><span class="muted">2 hours ago</span></div><div style="display:flex; justify-content:space-between; align-items:center"><span>Petar · Android</span><span class="muted">1 hour ago</span></div><div style="display:flex; justify-content:space-between; align-items:center"><span>Desislava · Windows · Sofia</span><span class="muted">3 days ago</span></div>
               <button class="btn btn--sm" type="button" style="margin-top:4px">Revoke the 3-day-old session</button>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What a role means</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div><b>Owner</b><span style="display:block" class="muted">Publication, settings, team, exports.</span></div>
               <div><b>Broker</b><span style="display:block" class="muted">Leads, viewings, cases, documents. Cannot publish.</span></div>
               <div><b>Translator</b><span style="display:block" class="muted">Only the languages named on their account.</span></div>

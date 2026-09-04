@@ -325,30 +325,30 @@
     .subtle { color:var(--text-muted); }
 
     .int-grid { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; }
-    .grp-hd { display:flex; align-items:baseline; gap:10px; padding:12px 16px 10px; }
-    .grp-hd h2 { font-size:13.5px; font-weight:600; }
-    .grp-hd p { font-size:12px; color:var(--text-muted); }
+    .grp-hd { display:flex; align-items:baseline; gap:12px; padding:12px 16px 12px; }
+    .grp-hd h2 { font-size:13px; font-weight:600; }
+    .grp-hd p { font-size:13px; color:var(--text-muted); }
     .prov { display:grid; grid-template-columns:38px minmax(0,1fr) 214px 124px; align-items:center;
-      column-gap:14px; padding:12px 16px; border-top:1px solid var(--border); }
-    .prov:hover { background:var(--stone-50); }
-    .prov-logo { width:34px; height:34px; border-radius:9px; display:grid; place-items:center;
-      font-size:11.5px; font-weight:700; letter-spacing:.02em; }
-    .prov-name { display:grid; gap:2px; min-width:0; }
-    .prov-name b { font-size:13.5px; font-weight:600; color:var(--text-strong); }
-    .prov-name span { font-size:12px; color:var(--text-muted); }
-    .prov-state { display:grid; gap:3px; }
-    .prov-state small { font-size:11.5px; color:var(--text-muted); }
+      column-gap:16px; padding:12px 16px; border-top:1px solid var(--border); }
+    .prov:hover { background:var(--tile); }
+    .prov-logo { width:34px; height:34px; border-radius:var(--r-panel); display:grid; place-items:center;
+      font-size:11px; font-weight:700; letter-spacing:.02em; }
+    .prov-name { display:grid; gap:4px; min-width:0; }
+    .prov-name b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .prov-name span { font-size:13px; color:var(--text-muted); }
+    .prov-state { display:grid; gap:4px; }
+    .prov-state small { font-size:11px; color:var(--text-muted); }
     .prov-act { display:flex; justify-content:flex-end; }
-    .req { display:grid; grid-template-columns:auto minmax(0,1fr); gap:9px; align-items:start;
-      padding:10px 16px; border-top:1px solid var(--border); }
-    .req code { font-family:var(--font-mono); font-size:11.5px; color:var(--text-strong);
-      background:var(--stone-100); border-radius:4px; padding:1px 5px; }
-    .req p { font-size:12px; color:var(--text-muted); margin-top:3px; }
+    .req { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:start;
+      padding:12px 16px; border-top:1px solid var(--border); }
+    .req code { font-family:var(--font-mono); font-size:11px; color:var(--text-strong);
+      background:var(--tile-deep); border-radius:var(--r-edge); padding:4px 4px; }
+    .req p { font-size:13px; color:var(--text-muted); margin-top:4px; }
     .banner { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px;
-      padding:12px 16px; border-radius:12px; background:var(--warning-50); border:1px solid #EFDDB6;
-      color:var(--warning-600); margin-bottom:16px; }
+      padding:12px 16px; border-radius:var(--r-panel); background:var(--warning-50); border:1px solid #EFDDB6;
+      color:var(--warning-700); margin-bottom:16px; }
     .banner b { display:block; font-size:13px; font-weight:600; }
-    .banner span { font-size:12.5px; }
+    .banner span { font-size:13px; }
 
   </style></head><body>
 <!--
@@ -434,13 +434,13 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <span class="prov-act"><button class="btn btn--sm btn--primary" type="button">Connect</button></span>
           </div>
           <div class="prov">
-            <span class="prov-logo" style="background:var(--warning-50); color:var(--warning-600)">GW</span>
+            <span class="prov-logo" style="background:var(--warning-50); color:var(--warning-700)">GW</span>
             <span class="prov-name"><b>Google Workspace</b><span>Approved email delivery · viewing calendar sync</span></span>
             <span class="prov-state"><span class="pill pill--warn" style="justify-self:start"><i></i>Reauthorise</span><small>Token expired 28 Aug</small></span>
             <span class="prov-act"><button class="btn btn--sm btn--primary" type="button">Reauthorise</button></span>
           </div>
           <div class="prov">
-            <span class="prov-logo" style="background:var(--stone-100); color:var(--stone-600)">VB</span>
+            <span class="prov-logo" style="background:var(--tile-deep); color:var(--marble-600)">VB</span>
             <span class="prov-name"><b>Viber</b><span>Bulgarian buyer replies</span></span>
             <span class="prov-state"><span class="pill pill--sand" style="justify-self:start"><i></i>Unavailable</span><small>Token-only API, no owner sign-in yet</small></span>
             <span class="prov-act"><button class="btn btn--sm" type="button">Read why</button></span>
@@ -450,13 +450,13 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <section class="panel">
             <div class="grp-hd"><h2>Publishing</h2><p>Where an approved listing can be pushed.</p></div>
           <div class="prov">
-            <span class="prov-logo" style="background:var(--sea-50); color:var(--sea-700)">FB</span>
+            <span class="prov-logo" style="background:var(--spring-50); color:var(--spring-800)">FB</span>
             <span class="prov-name"><b>Facebook Page</b><span>Publish approved listings to the agency page</span></span>
             <span class="prov-state"><span class="pill pill--ok" style="justify-self:start"><i></i>Connected</span><small>MS Realty Sandanski · renews 2 Dec</small></span>
             <span class="prov-act"><button class="btn btn--sm" type="button">Manage</button></span>
           </div>
           <div class="prov">
-            <span class="prov-logo" style="background:var(--sea-50); color:var(--sea-700)">IG</span>
+            <span class="prov-logo" style="background:var(--spring-50); color:var(--spring-800)">IG</span>
             <span class="prov-name"><b>Instagram</b><span>Publish approved listing photos</span></span>
             <span class="prov-state"><span class="pill pill--ok" style="justify-self:start"><i></i>Connected</span><small>@msrealty.bg · renews 2 Dec</small></span>
             <span class="prov-act"><button class="btn btn--sm" type="button">Manage</button></span>
@@ -484,7 +484,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <span class="prov-act"><button class="btn btn--sm" type="button">Resync</button></span>
           </div>
           <div class="prov">
-            <span class="prov-logo" style="background:var(--stone-100); color:var(--stone-600)">GH</span>
+            <span class="prov-logo" style="background:var(--tile-deep); color:var(--marble-600)">GH</span>
             <span class="prov-name"><b>GitHub</b><span>Agency repository access for the operator agent</span></span>
             <span class="prov-state"><span class="pill pill--sand" style="justify-self:start"><i></i>Not connected</span><small>Optional</small></span>
             <span class="prov-act"><button class="btn btn--sm" type="button">Connect</button></span>
@@ -500,7 +500,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <span class="prov-act"><button class="btn btn--sm btn--primary" type="button">Set up</button></span>
           </div>
           <div class="prov">
-            <span class="prov-logo" style="background:var(--stone-100); color:var(--stone-600)">OR</span>
+            <span class="prov-logo" style="background:var(--tile-deep); color:var(--marble-600)">OR</span>
             <span class="prov-name"><b>OpenRouter</b><span>Fallback model routing</span></span>
             <span class="prov-state"><span class="pill pill--sand" style="justify-self:start"><i></i>Not connected</span><small>Optional</small></span>
             <span class="prov-act"><button class="btn btn--sm" type="button">Connect</button></span>
@@ -539,23 +539,23 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <div class="panel-hd"><h2>What this unblocks</h2></div>
             <div class="req" style="grid-template-columns:auto minmax(0,1fr)">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-              <span><b style="font-size:12.5px">Send replies from the inbox</b><p>Needs Google Workspace or WhatsApp.</p></span>
+              <span><b style="font-size:13px">Send replies from the inbox</b><p>Needs Google Workspace or WhatsApp.</p></span>
             </div>
             <div class="req">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-              <span><b style="font-size:12.5px">Hermes translation drafts</b><p>7 listings are waiting on this.</p></span>
+              <span><b style="font-size:13px">Hermes translation drafts</b><p>7 listings are waiting on this.</p></span>
             </div>
             <div class="req">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-              <span><b style="font-size:12.5px">Viewing invitations in the calendar</b><p>Needs Google Workspace.</p></span>
+              <span><b style="font-size:13px">Viewing invitations in the calendar</b><p>Needs Google Workspace.</p></span>
             </div>
           </section>
 
           <section class="panel">
             <div class="panel-hd"><h2>Recent connection events</h2></div>
-            <div class="req"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b style="font-size:12.5px">Google token expired</b><p>28 Aug, 04:12 · delivery paused</p></span></div>
-            <div class="req"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b style="font-size:12.5px">Instagram connected by Mariya</b><p>2 Aug, 11:04</p></span></div>
-            <div class="req"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b style="font-size:12.5px">Typesense schema rebuilt</b><p>29 Jul, 09:30</p></span></div>
+            <div class="req"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b style="font-size:13px">Google token expired</b><p>28 Aug, 04:12 · delivery paused</p></span></div>
+            <div class="req"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b style="font-size:13px">Instagram connected by Mariya</b><p>2 Aug, 11:04</p></span></div>
+            <div class="req"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span><b style="font-size:13px">Typesense schema rebuilt</b><p>29 Jul, 09:30</p></span></div>
           </section>
         </div>
       </div>

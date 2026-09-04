@@ -4,24 +4,24 @@ const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const CSS = `
     .fbar { border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:5; }
-    .fbar-in { max-width:1240px; margin:0 auto; padding:14px 32px; display:flex; align-items:center;
-      gap:10px; flex-wrap:wrap; }
-    .fchip { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 15px;
+    .fbar-in { max-width:1240px; margin:0 auto; padding:16px 32px; display:flex; align-items:center;
+      gap:12px; flex-wrap:wrap; }
+    .fchip { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 16px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
-      font-size:14.5px; font-weight:600; color:var(--text-body); white-space:nowrap; }
+      font-size:16px; font-weight:600; color:var(--text-body); white-space:nowrap; }
     .fchip[data-on] { border-color:var(--ink-800); background:var(--ink-800); color:#fff; }
     .fchip[data-on] svg { color:#fff; }
-    .fsearch { display:flex; align-items:center; gap:9px; height:46px; padding:0 14px; min-width:250px;
+    .fsearch { display:flex; align-items:center; gap:8px; height:46px; padding:0 16px; min-width:250px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
-      color:var(--text-muted); font-size:14.5px; flex:1 1 auto; }
-    .applied { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 32px 14px;
+      color:var(--text-muted); font-size:16px; flex:1 1 auto; }
+    .applied { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 32px 16px;
       max-width:1240px; margin:0 auto; }
-    .atag { display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 12px;
-      border-radius:var(--r-full); background:var(--stone-100); font-size:13.5px; font-weight:600;
-      color:var(--stone-700); }
+    .atag { display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 12px;
+      border-radius:var(--r-full); background:var(--tile-deep); font-size:13px; font-weight:600;
+      color:var(--marble-700); }
     .split2 { display:grid; grid-template-columns:minmax(0,1fr) 486px; gap:0; align-items:stretch; }
-    .results { padding:22px 32px 40px; }
-    .rhead { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .results { padding:24px 32px 48px; }
+    .rhead { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
     .rgrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
     /* Sticky in the product; drawn full height here so the artboard shows the pairing. */
     .mapcol { border-left:1px solid var(--border);
@@ -29,22 +29,22 @@ const CSS = `
     .mapcol::after { content:''; position:absolute; inset:0;
       background:repeating-linear-gradient(0deg, rgba(120,130,105,.16) 0 1px, transparent 1px 48px),
         repeating-linear-gradient(90deg, rgba(120,130,105,.16) 0 1px, transparent 1px 48px); }
-    .mpin { position:absolute; z-index:2; display:inline-flex; align-items:center; height:32px; padding:0 11px;
+    .mpin { position:absolute; z-index:2; display:inline-flex; align-items:center; height:32px; padding:0 12px;
       border-radius:var(--r-full); background:var(--surface); border:1px solid var(--border-control);
-      font-size:13.5px; font-weight:600; color:var(--stone-900); box-shadow:var(--e-2); white-space:nowrap; }
+      font-size:13px; font-weight:600; color:var(--marble-900); box-shadow:var(--e-2); white-space:nowrap; }
     .mpin[data-on] { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .mtools { position:absolute; z-index:3; right:16px; top:16px; display:grid; gap:8px; }
     .mtool { display:grid; place-items:center; width:40px; height:40px; border-radius:var(--r-md);
-      background:var(--surface); border:1px solid var(--border-control); color:var(--stone-900);
+      background:var(--surface); border:1px solid var(--border-control); color:var(--marble-900);
       box-shadow:var(--e-1); }
     .mdraw { position:absolute; z-index:3; left:16px; bottom:16px; display:inline-flex; align-items:center;
-      gap:8px; height:42px; padding:0 15px; border-radius:var(--r-md); background:var(--surface);
-      border:1px solid var(--border-control); font-size:14px; font-weight:600; box-shadow:var(--e-1); }
-    .alertbar { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:14px; align-items:center;
-      padding:16px 18px; border:1px solid var(--sea-200); border-radius:var(--r-lg);
-      background:var(--sea-50); margin-bottom:20px; }
-    .alertbar b { display:block; font-size:15.5px; font-weight:600; color:var(--sea-700); }
-    .alertbar span { font-size:14px; color:var(--sea-700); }
+      gap:8px; height:42px; padding:0 16px; border-radius:var(--r-md); background:var(--surface);
+      border:1px solid var(--border-control); font-size:13px; font-weight:600; box-shadow:var(--e-1); }
+    .alertbar { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center;
+      padding:16px 20px; border:1px solid var(--spring-200); border-radius:var(--r-lg);
+      background:var(--spring-50); margin-bottom:20px; }
+    .alertbar b { display:block; font-size:16px; font-weight:600; color:var(--spring-800); }
+    .alertbar span { font-size:13px; color:var(--spring-800); }
 `;
 
 const CARD = (price, title, place, ref, beds, area, tag, tone, extra) => `          <article class="lcard">
@@ -76,7 +76,7 @@ const BODY = `${pubHeader("search")}
       <span class="atag">Апартамент ${icon("x", 13)}</span>
       <span class="atag">До 100 000 € ${icon("x", 13)}</span>
       <span class="atag">Поне 2 спални ${icon("x", 13)}</span>
-      <a href="#" style="font-size:13.5px; font-weight:600">Изчистете всички</a>
+      <a href="#" style="font-size:13px; font-weight:600">Изчистете всички</a>
     </div>
   </div>
 
@@ -84,7 +84,7 @@ const BODY = `${pubHeader("search")}
     <div class="results">
       <div class="rhead">
         <div><h1 class="h2">Апартаменти в Сандански</h1>
-          <p class="meta" style="margin-top:5px">18 обяви · всичките с проверени факти и одобрени снимки</p></div>
+          <p class="meta" style="margin-top:4px">18 обяви · всичките с проверени факти и одобрени снимки</p></div>
         <span class="fchip">Най-нови ${icon("down", 15)}</span>
       </div>
 
@@ -104,14 +104,14 @@ ${CARD("89 000 €", "Мезонет с две тераси", "Санданск�
 ${CARD("44 000 €", "Двустаен до парка", "Сандански", "MS-00662", "2 спални", "64 м²", "", "", "Обновена преди 8 дни")}
       </div>
 
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:26px">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:24px">
         <p class="meta">Показани 6 от 18</p>
         <a class="pbtn" href="#">Покажете още 12 ${icon("down", 16)}</a>
       </div>
 
-      <div style="margin-top:34px; padding:22px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--stone-50)">
+      <div style="margin-top:32px; padding:24px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--tile)">
         <h2 class="h3">Не намирате това, което търсите?</h2>
-        <p style="font-size:15px; color:var(--text-body); margin-top:8px; max-width:640px">Част от имотите ни
+        <p style="font-size:16px; color:var(--text-body); margin-top:8px; max-width:640px">Част от имотите ни
           не са публикувани, защото собствениците не искат обява. Кажете какво търсите и брокер ще провери
           какво има в момента.</p>
         <div style="display:flex; gap:12px; margin-top:16px">

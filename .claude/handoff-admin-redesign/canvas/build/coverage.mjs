@@ -3,23 +3,23 @@ import { sheet, icon } from "../shell.mjs";
 const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const C_CSS = `
-    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:22px; }
-    .doc-hd h1 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em; }
-    .doc-hd p { margin-top:5px; font-size:13.5px; color:var(--text-muted); max-width:760px; }
-    .grp > h2 { font-size:12px; font-weight:600; color:var(--text-muted); margin:0 0 10px;
-      padding-bottom:7px; border-bottom:1px solid var(--border); }
-    .grp { margin-bottom:26px; }
+    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
+    .doc-hd h1 { font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; }
+    .doc-hd p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:760px; }
+    .grp > h2 { font-size:13px; font-weight:600; color:var(--text-muted); margin:0 0 12px;
+      padding-bottom:8px; border-bottom:1px solid var(--border); }
+    .grp { margin-bottom:24px; }
     .cov { width:100%; }
-    .cov th { font-size:10.5px; }
-    .cov td { font-size:12px; vertical-align:top; padding:8px 12px; }
+    .cov th { font-size:11px; }
+    .cov td { font-size:13px; vertical-align:top; padding:8px 12px; }
     .cov td.api { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); line-height:1.6; }
-    .cov td b { font-size:12.5px; color:var(--text-strong); }
-    .gapc { display:grid; grid-template-columns:auto minmax(0,1fr) 190px 108px; gap:14px; align-items:start;
+    .cov td b { font-size:13px; color:var(--text-strong); }
+    .gapc { display:grid; grid-template-columns:auto minmax(0,1fr) 190px 108px; gap:16px; align-items:start;
       padding:12px 16px; border-bottom:1px solid var(--border); }
     .gapc:last-child { border-bottom:0; }
     .gapc b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .gapc em { font-style:normal; font-size:12px; color:var(--text-muted); display:block; margin-top:3px; }
-    .cols2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; align-items:start; }
+    .gapc em { font-style:normal; font-size:13px; color:var(--text-muted); display:block; margin-top:4px; }
+    .cols2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
 `;
 
 const ROWS = [
@@ -65,7 +65,7 @@ const BODY = `<div class="doc-hd">
     <p>Every screen in this canvas checked against the 118 admin routes, the 8 CMS collections and the 7 public
       page types that exist in the repository today. Twenty of twenty-four surfaces are already backed. Four
       are designed ahead of the code, and this page says which.</p></div>
-  <div style="display:grid; gap:6px; justify-items:end">
+  <div style="display:grid; gap:8px; justify-items:end">
     <span class="pill pill--ok"><i></i>20 backed</span>
     <span class="pill pill--warn"><i></i>4 partial</span>
     <span class="pill pill--danger"><i></i>4 need new backend</span>
@@ -97,7 +97,7 @@ ${ROWS.map(([surface, board, api, tone, state]) => `        <tr>
 ${GAPS.map(([tone, title, detail, needs, size]) => `    <div class="gapc">
       <span class="av" style="background:var(--${tone === "danger" ? "danger" : "warning"}-50); color:var(--${tone === "danger" ? "danger-600" : "warning-700"})">${icon("alert", 14)}</span>
       <span style="min-width:0"><b>${title}</b><em>${detail}</em></span>
-      <span style="font-size:12px" class="muted">${needs}</span>
+      <span style="font-size:13px" class="muted">${needs}</span>
       <span><span class="pill pill--${tone}"><i></i>${size}</span></span>
     </div>`).join("\n")}
   </div>
@@ -108,24 +108,24 @@ ${GAPS.map(([tone, title, detail, needs, size]) => `    <div class="gapc">
   <div class="cols2">
     <div class="panel">
       <div class="panel-hd"><h2>Now given a surface</h2></div>
-      <div class="sect" style="display:grid; gap:9px; font-size:12.5px">
-        <div style="display:flex; gap:9px">${icon("check", 15)}<span><b>Transaction cases</b> — six case types across eight phases, Bulgarian and Greek step lists, and a manual or autonomous execution mode per case. The richest model in the repository and the least visible.</span></div>
-        <div style="display:flex; gap:9px">${icon("check", 15)}<span><b>Case conditions</b> — subject-to clauses with deadlines, met, waived or extended.</span></div>
-        <div style="display:flex; gap:9px">${icon("check", 15)}<span><b>Saved views</b> — a real endpoint, previously invisible in the interface.</span></div>
-        <div style="display:flex; gap:9px">${icon("check", 15)}<span><b>Two-factor, sessions, audit retention</b> — three security endpoints with no screen.</span></div>
-        <div style="display:flex; gap:9px">${icon("check", 15)}<span><b>Launch readiness and live-service provisioning</b> — thirteen gates that decide whether the site may go live.</span></div>
-        <div style="display:flex; gap:9px">${icon("check", 15)}<span><b>Listing publication schedules</b> — publish at a date, with the approval taken in advance.</span></div>
+      <div class="sect" style="display:grid; gap:8px; font-size:13px">
+        <div style="display:flex; gap:8px">${icon("check", 15)}<span><b>Transaction cases</b> — six case types across eight phases, Bulgarian and Greek step lists, and a manual or autonomous execution mode per case. The richest model in the repository and the least visible.</span></div>
+        <div style="display:flex; gap:8px">${icon("check", 15)}<span><b>Case conditions</b> — subject-to clauses with deadlines, met, waived or extended.</span></div>
+        <div style="display:flex; gap:8px">${icon("check", 15)}<span><b>Saved views</b> — a real endpoint, previously invisible in the interface.</span></div>
+        <div style="display:flex; gap:8px">${icon("check", 15)}<span><b>Two-factor, sessions, audit retention</b> — three security endpoints with no screen.</span></div>
+        <div style="display:flex; gap:8px">${icon("check", 15)}<span><b>Launch readiness and live-service provisioning</b> — thirteen gates that decide whether the site may go live.</span></div>
+        <div style="display:flex; gap:8px">${icon("check", 15)}<span><b>Listing publication schedules</b> — publish at a date, with the approval taken in advance.</span></div>
       </div>
     </div>
     <div class="panel">
       <div class="panel-hd"><h2>Constraints the design had to obey</h2></div>
-      <div class="sect" style="display:grid; gap:9px; font-size:12.5px">
-        <div style="display:flex; gap:9px">${icon("lock", 15)}<span>Five actions are refused to Hermes in code — publish, send a message, mark indexable, change a price, change a redirect. The interface never offers them to it.</span></div>
-        <div style="display:flex; gap:9px">${icon("lock", 15)}<span>Sandanski may never be described as a sea destination. The guardrail is a token list, and the run detail shows it firing.</span></div>
-        <div style="display:flex; gap:9px">${icon("lock", 15)}<span>A published listing needs facts, media and freeze-active approval. The publication boundary is why a seeded workspace shows zero public listings.</span></div>
-        <div style="display:flex; gap:9px">${icon("lock", 15)}<span>A new audit action has to be registered before it can be written, so every screen's actions map to registered names.</span></div>
-        <div style="display:flex; gap:9px">${icon("lock", 15)}<span>Completing a document checklist item requires a note or a reference plus a named human confirmation.</span></div>
-        <div style="display:flex; gap:9px">${icon("lock", 15)}<span>Admin locales are BG, RU and EN only; the public site carries seven, and Hebrew is a full right-to-left build.</span></div>
+      <div class="sect" style="display:grid; gap:8px; font-size:13px">
+        <div style="display:flex; gap:8px">${icon("lock", 15)}<span>Five actions are refused to Hermes in code — publish, send a message, mark indexable, change a price, change a redirect. The interface never offers them to it.</span></div>
+        <div style="display:flex; gap:8px">${icon("lock", 15)}<span>Sandanski may never be described as a sea destination. The guardrail is a token list, and the run detail shows it firing.</span></div>
+        <div style="display:flex; gap:8px">${icon("lock", 15)}<span>A published listing needs facts, media and freeze-active approval. The publication boundary is why a seeded workspace shows zero public listings.</span></div>
+        <div style="display:flex; gap:8px">${icon("lock", 15)}<span>A new audit action has to be registered before it can be written, so every screen's actions map to registered names.</span></div>
+        <div style="display:flex; gap:8px">${icon("lock", 15)}<span>Completing a document checklist item requires a note or a reference plus a named human confirmation.</span></div>
+        <div style="display:flex; gap:8px">${icon("lock", 15)}<span>Admin locales are BG, RU and EN only; the public site carries seven, and Hebrew is a full right-to-left build.</span></div>
       </div>
     </div>
   </div>

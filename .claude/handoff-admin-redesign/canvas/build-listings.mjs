@@ -6,7 +6,7 @@ import { page, icon } from "./shell.mjs";
 // publish state, the collapsed witness: a filled square and the approver's
 // initials when someone signed it, an outlined square when nobody has.
 const CSS = `
-    .bulk { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 14px;
+    .bulk { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 16px;
       background:var(--tile-deep); border-bottom:1px solid var(--joint); font-size:13px; font-weight:600;
       color:var(--text-strong); }
     .bulk a { margin-left:auto; font-weight:600; }
@@ -14,8 +14,8 @@ const CSS = `
     .ident b { min-width:0; font-weight:600; color:var(--text-strong); overflow:hidden; text-overflow:ellipsis;
       white-space:nowrap; }
     .state { display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .lcs { display:flex; align-items:center; gap:3px; white-space:nowrap; }
-    .lc { display:inline-grid; place-items:center; min-width:24px; height:20px; padding:0 5px;
+    .lcs { display:flex; align-items:center; gap:4px; white-space:nowrap; }
+    .lc { display:inline-grid; place-items:center; min-width:24px; height:20px; padding:0 4px;
       border-radius:var(--r-edge); background:var(--tile-deep); color:var(--marble-700); font-size:11px;
       font-weight:600; }
     /* Completeness: the fill has to be read against its own track, so every
@@ -109,14 +109,14 @@ const BODY = `      <div class="ph">
             <tr>
               <th style="width:36px; padding-right:0"></th>
               <th>Property</th>
-              <th style="width:104px">Location</th>
-              <th style="width:104px">Type</th>
-              <th style="width:112px">Price</th>
-              <th style="width:176px">Status</th>
-              <th style="width:176px">Languages</th>
-              <th style="width:124px">Completeness</th>
-              <th style="width:104px">Updated</th>
-              <th style="width:36px; padding-left:0"></th>
+              <th style="width:96px">Location</th>
+              <th style="width:96px">Type</th>
+              <th style="width:96px">Price</th>
+              <th style="width:96px">Status</th>
+              <th style="width:96px">Languages</th>
+              <th style="width:96px">Completeness</th>
+              <th style="width:96px">Updated</th>
+              <th style="width:32px; padding-left:0"></th>
             </tr>
           </thead>
           <tbody>

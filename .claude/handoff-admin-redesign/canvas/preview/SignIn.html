@@ -324,24 +324,24 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .bars { display:grid; gap:9px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:12.5px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--stone-200); overflow:hidden; }
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .bars { display:grid; gap:8px; padding:16px 20px; }
+    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
+    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
     .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:14px 18px; }
-    .kpi dt { font-size:11.5px; color:var(--text-muted); margin-bottom:5px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.02em;
+    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
+    .kpi > div { background:var(--surface); padding:16px 20px; }
+    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
       color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:5px; font-size:11.5px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:14px; align-items:center;
-      padding:11px 16px; border-bottom:1px solid var(--border); }
+    .kpi small { display:block; margin-top:4px; font-size:11px; }
+    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .gate:last-child { border-bottom:0; }
     .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:12px; color:var(--text-muted); }
+    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
 
   </style></head><body>
 <!--
@@ -354,35 +354,35 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 -->
 <div style="width:1440px; min-height:900px; background:var(--canvas); padding:0px">
 <div style="display:grid; grid-template-columns:minmax(0,1fr) 520px; min-height:900px">
-  <div style="background:var(--ink-900); color:#fff; padding:56px 60px; display:grid; align-content:space-between">
+  <div style="background:var(--ink-900); color:#fff; padding:64px 64px; display:grid; align-content:space-between">
     <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="78" height="40" style="display:block; height:40px; width:auto" />
     <div>
-      <p style="font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1.25; max-width:440px">
+      <p style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; line-height:1.25; max-width:440px">
         The workspace for a family agency in Sandanski.</p>
-      <p style="margin-top:16px; font-size:14px; color:rgba(255,255,255,.66); max-width:420px; line-height:1.6">
+      <p style="margin-top:16px; font-size:13px; color:rgba(255,255,255,.66); max-width:420px; line-height:1.6">
         Listings, enquiries, viewings, contracts and the website itself — in one place, in Bulgarian,
         Russian or English.</p>
     </div>
-    <p style="font-size:12px; color:rgba(255,255,255,.44)">Every sign-in is recorded. Report anything you
+    <p style="font-size:13px; color:rgba(255,255,255,.44)">Every sign-in is recorded. Report anything you
       did not do to the owner.</p>
   </div>
-  <div style="background:var(--surface); padding:56px 60px; display:grid; align-content:center; gap:18px">
+  <div style="background:var(--surface); padding:64px 64px; display:grid; align-content:center; gap:20px">
     <div>
-      <h1 style="font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.015em">Sign in</h1>
-      <p style="margin-top:5px; font-size:13px; color:var(--text-muted)">Use your MS Realty address.</p>
+      <h1 style="font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.015em">Sign in</h1>
+      <p style="margin-top:4px; font-size:13px; color:var(--text-muted)">Use your MS Realty address.</p>
     </div>
     <div class="field"><label for="s1">Email</label><span class="in" id="s1">mariya@ms-realty.bg</span></div>
     <div class="field"><label for="s2">Password</label><span class="in in--focus" id="s2">••••••••••••</span></div>
-    <div style="display:flex; align-items:center; gap:9px">
-      <span class="box" data-on="1"></span><span style="font-size:12.5px">Remember this device for 30 days</span>
-      <a href="#" style="margin-left:auto; font-size:12.5px; font-weight:600">Forgot your password?</a>
+    <div style="display:flex; align-items:center; gap:8px">
+      <span class="box" data-on="1"></span><span style="font-size:12px">Remember this device for 30 days</span>
+      <a href="#" style="margin-left:auto; font-size:13px; font-weight:600">Forgot your password?</a>
     </div>
     <button class="btn btn--lg btn--primary" type="button" style="justify-content:center">Sign in</button>
     <div class="note note--info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>A second factor is asked for after the password.
       If you have lost your device, the owner can reset it for you.</span></div>
-    <div style="display:flex; align-items:center; gap:10px; margin-top:6px">
-      <span style="height:1px; flex:1 1 auto; background:var(--border)"></span>
-      <span style="font-size:11.5px" class="muted">or</span>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:8px">
+      <span style="height:4px; flex:1 1 auto; background:var(--border)"></span>
+      <span style="font-size:11px" class="muted">or</span>
       <span style="height:1px; flex:1 1 auto; background:var(--border)"></span>
     </div>
     <button class="btn btn--lg" type="button" style="justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg><span>Continue with Google Workspace</span></button>

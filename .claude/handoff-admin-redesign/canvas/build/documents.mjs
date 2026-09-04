@@ -9,7 +9,7 @@ const W = (n) => new URL(`../${n}`, import.meta.url);
    case that needs a person, with the outcome form the server asks for drawn
    open on the item that is due. */
 const DOC_CSS = `
-    .dc-doc { display:flex; align-items:center; gap:10px; min-width:0; }
+    .dc-doc { display:flex; align-items:center; gap:12px; min-width:0; }
     .dc-doc svg { flex:0 0 auto; color:var(--text-muted); }
     .dc-doc b { font-size:13px; font-weight:600; color:var(--text-strong); overflow:hidden;
       text-overflow:ellipsis; white-space:nowrap; }
@@ -19,23 +19,23 @@ const DOC_CSS = `
     .dc-cols { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; margin-top:20px; }
     .dc-side { display:grid; gap:20px; }
     .dc-prog { padding:12px 20px; border-bottom:1px solid var(--joint); }
-    .dc-chk { display:grid; grid-template-columns:16px minmax(0,1fr) 200px 88px; gap:14px; align-items:center;
+    .dc-chk { display:grid; grid-template-columns:16px minmax(0,1fr) 200px 88px; gap:16px; align-items:center;
       min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
     .dc-chk:hover { background:var(--tile); }
     .dc-label { font-weight:500; color:var(--text-strong); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .dc-chk[data-done] .dc-label { color:var(--text-muted); text-decoration:line-through; font-weight:400; }
-    .dc-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 20px; padding:12px 20px 16px 50px;
+    .dc-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 20px; padding:12px 20px 16px 48px;
       background:var(--tile); border-bottom:1px solid var(--joint); }
-    .dc-confirm { display:flex; align-items:center; gap:10px; grid-column:1 / -1; }
+    .dc-confirm { display:flex; align-items:center; gap:12px; grid-column:1 / -1; }
     .dc-formrow { display:flex; align-items:center; gap:12px; grid-column:1 / -1; }
     .dc-tp { display:grid; grid-template-columns:18px minmax(0,1fr) auto; gap:12px; align-items:center;
       min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
     .dc-tp:last-child { border-bottom:0; }
     .dc-tp svg { color:var(--text-muted); }
-    .dc-may { display:flex; gap:10px; align-items:flex-start; min-height:var(--row); padding:12px 20px;
+    .dc-may { display:flex; gap:12px; align-items:flex-start; min-height:var(--row); padding:12px 20px;
       border-bottom:1px solid var(--joint); }
     .dc-may:last-child { border-bottom:0; }
-    .dc-may svg { flex:0 0 auto; margin-top:1px; color:var(--success-600); }
+    .dc-may svg { flex:0 0 auto; margin-top:4px; color:var(--success-600); }
     .dc-may[data-no] { color:var(--danger-600); }
     .dc-may[data-no] svg { color:var(--danger-600); }
 `;
@@ -84,8 +84,8 @@ const DOC_BODY = `      <div class="ph">
         </div>
         <table>
           <thead><tr>
-            <th>Document</th><th style="width:270px">Case</th><th style="width:140px">Status</th>
-            <th style="width:180px">Now</th><th style="width:176px">Confirmed by</th><th style="width:96px"></th>
+            <th>Document</th><th style="width:96px">Case</th><th style="width:96px">Status</th>
+            <th style="width:96px">Now</th><th style="width:96px">Confirmed by</th><th style="width:96px"></th>
           </tr></thead>
           <tbody>
 ${DOCS.map(([ic, title, ctx, ref, state, tone, note, wit, flag]) => `            <tr>
@@ -156,15 +156,15 @@ const ED_CSS = `
     .ed-cols { display:grid; grid-template-columns:minmax(0,1fr) 348px; gap:20px; align-items:start; }
     .ed-side { display:grid; gap:20px; }
     .ed-state { display:flex; align-items:center; gap:12px; margin-left:auto; }
-    .ed-doc { padding:32px 44px; line-height:1.7; color:var(--text-body); }
-    .ed-doc h4 { font-size:16px; font-weight:600; margin-bottom:14px; }
-    .ed-doc p { margin-bottom:11px; }
+    .ed-doc { padding:32px 48px; line-height:1.7; color:var(--text-body); }
+    .ed-doc h4 { font-size:16px; font-weight:600; margin-bottom:16px; }
+    .ed-doc p { margin-bottom:12px; }
     .ed-doc p:last-child { margin-bottom:0; }
-    .ed-fill { background:var(--spring-50); border-bottom:1px solid var(--spring-200); padding:0 3px; font-weight:600;
+    .ed-fill { background:var(--spring-50); border-bottom:1px solid var(--spring-200); padding:0 4px; font-weight:600;
       color:var(--spring-800); }
-    .ed-gap { background:var(--warning-50); border-bottom:1px dashed var(--warning-700); padding:0 3px;
+    .ed-gap { background:var(--warning-50); border-bottom:1px dashed var(--warning-700); padding:0 4px;
       font-weight:600; color:var(--warning-700); }
-    .ed-src { display:grid; grid-template-columns:16px minmax(0,1fr) auto; gap:10px; align-items:center;
+    .ed-src { display:grid; grid-template-columns:16px minmax(0,1fr) auto; gap:12px; align-items:center;
       min-height:var(--row); padding:0 20px; border-bottom:1px solid var(--joint); }
     .ed-src svg { color:var(--success-600); }
     .ed-req { display:grid; gap:8px; padding:12px 20px; border-bottom:1px solid var(--joint); }
@@ -216,12 +216,12 @@ const ED_BODY = `      <div class="crumbs">
             <div class="panel-hd"><h2>Two fields need a person</h2><span class="pill pill--warn"><i></i>2</span></div>
             <div class="sect">
               <h3>Reservation amount — article 2</h3>
-              <p class="muted" style="margin-bottom:10px">The case records that a reservation was received on 4 August but not the amount. Hermes will not guess a figure that goes into a contract.</p>
+              <p class="muted" style="margin-bottom:12px">The case records that a reservation was received on 4 August but not the amount. Hermes will not guess a figure that goes into a contract.</p>
               <span class="in in--empty">Enter the amount in EUR</span>
             </div>
             <div class="sect">
               <h3>Mortgage condition wording — article 4</h3>
-              <p class="muted" style="margin-bottom:10px">The case carries the condition and its deadline, but the wording is a legal choice.</p>
+              <p class="muted" style="margin-bottom:12px">The case carries the condition and its deadline, but the wording is a legal choice.</p>
               <button class="btn btn--sm" type="button">Use the lawyer's standard clause</button>
             </div>
           </section>

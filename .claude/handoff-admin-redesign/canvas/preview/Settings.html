@@ -324,14 +324,14 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .set-grid { display:grid; grid-template-columns:212px minmax(0,1fr); gap:22px; align-items:start; }
-    .set-nav { display:grid; gap:1px; position:sticky; top:0; }
-    .set-nav a { display:flex; align-items:center; gap:9px; min-height:34px; padding:7px 11px;
-      border-radius:8px; font-size:13px; font-weight:500; color:var(--text-body); }
-    .set-nav a:hover { background:var(--stone-100); }
+    .set-grid { display:grid; grid-template-columns:212px minmax(0,1fr); gap:24px; align-items:start; }
+    .set-nav { display:grid; gap:4px; position:sticky; top:0; }
+    .set-nav a { display:flex; align-items:center; gap:8px; min-height:34px; padding:8px 12px;
+      border-radius:var(--r-panel); font-size:13px; font-weight:500; color:var(--text-body); }
+    .set-nav a:hover { background:var(--tile-deep); }
     .set-nav a[data-on] { background:var(--ink-800); color:#fff; }
     .set-nav a[data-on] svg { color:#fff; }
-    .set-nav p { margin:12px 11px 4px; font-size:10.5px; font-weight:600; color:var(--text-subtle); }
+    .set-nav p { margin:12px 12px 4px; font-size:11px; font-weight:600; color:var(--text-subtle); }
 
   </style></head><body>
 <!--
@@ -445,7 +445,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <div class="savebar">
               <button class="btn btn--sm btn--primary" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Save changes</span></button>
               <button class="btn btn--sm btn--ghost" type="button">Discard</button>
-              <span style="margin-left:auto; font-size:12px" class="muted">Saved changes are visible on the public site within a minute.</span>
+              <span style="margin-left:auto; font-size:13px" class="muted">Saved changes are visible on the public site within a minute.</span>
             </div>
           </section>
 

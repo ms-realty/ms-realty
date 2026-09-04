@@ -3,8 +3,8 @@ import { pubPage, pubHeader, pubFooter, icon } from "../public-shell.mjs";
 const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const CSS = `
-    .crumb { display:flex; align-items:center; gap:9px; padding:18px 0; font-size:14px; color:var(--text-muted); }
-    .gal { display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows:186px 186px; gap:10px; }
+    .crumb { display:flex; align-items:center; gap:8px; padding:20px 0; font-size:13px; color:var(--text-muted); }
+    .gal { display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows:186px 186px; gap:12px; }
     .gp { position:relative; border-radius:var(--r-md); overflow:hidden;
       background:linear-gradient(155deg,#5f5544 0%,#8d7c5e 40%,#c4b394 72%,#7d6f56 100%); }
     .gp::after { content:''; position:absolute; inset:0;
@@ -13,21 +13,21 @@ const CSS = `
         repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
     .gp--main { grid-row:span 2; }
     .gp .btn-ov { position:absolute; z-index:1; right:12px; bottom:12px; display:flex; gap:8px; }
-    .ovb { display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 13px; border-radius:var(--r-md);
-      background:rgba(255,255,255,.94); color:var(--stone-900); font-size:13.5px; font-weight:600; }
-    .lay { display:grid; grid-template-columns:minmax(0,1fr) 372px; gap:38px; align-items:start; padding:30px 0 0; }
-    .facts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--border);
+    .ovb { display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 12px; border-radius:var(--r-md);
+      background:rgba(255,255,255,.94); color:var(--marble-900); font-size:13px; font-weight:600; }
+    .lay { display:grid; grid-template-columns:minmax(0,1fr) 372px; gap:32px; align-items:start; padding:32px 0 0; }
+    .facts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border);
       border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; }
-    .facts > div { background:var(--surface); padding:16px 18px; }
-    .facts dt { font-size:13.5px; color:var(--text-muted); margin-bottom:5px; }
-    .facts dd { margin:0; font-size:17px; font-weight:600; color:var(--stone-900); }
-    .blk { padding:30px 0; border-bottom:1px solid var(--border); }
-    .blk h2 { margin-bottom:14px; }
+    .facts > div { background:var(--surface); padding:16px 20px; }
+    .facts dt { font-size:13px; color:var(--text-muted); margin-bottom:4px; }
+    .facts dd { margin:0; font-size:16px; font-weight:600; color:var(--marble-900); }
+    .blk { padding:32px 0; border-bottom:1px solid var(--border); }
+    .blk h2 { margin-bottom:16px; }
     .blk p { font-size:16px; line-height:1.65; color:var(--text-body); }
     .speclist { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 32px; }
-    .specrow { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:11px 0;
-      border-bottom:1px solid var(--border); font-size:15px; }
-    .specrow b { font-weight:600; color:var(--stone-900); }
+    .specrow { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 0;
+      border-bottom:1px solid var(--border); font-size:16px; }
+    .specrow b { font-weight:600; color:var(--marble-900); }
     .mapbox { height:290px; border-radius:var(--r-lg); position:relative; overflow:hidden;
       background:linear-gradient(140deg,#e7ecdf 0%,#dbe3d2 40%,#cfd9c5 100%); }
     .mapbox::after { content:''; position:absolute; inset:0;
@@ -41,23 +41,23 @@ const CSS = `
     .aside { position:sticky; top:20px; display:grid; gap:16px; }
     .pbox { border:1px solid var(--border); border-radius:var(--r-lg); background:var(--surface);
       box-shadow:var(--e-2); overflow:hidden; }
-    .pbox-bd { padding:20px; display:grid; gap:14px; }
-    .broker { display:flex; align-items:center; gap:13px; }
-    .broker .av2 { width:52px; height:52px; border-radius:var(--r-full); background:var(--stone-200);
-      display:grid; place-items:center; color:var(--stone-700); font-size:16px; font-weight:600; flex:0 0 auto; }
-    .broker b { display:block; font-size:16px; font-weight:600; color:var(--stone-900); }
-    .broker span { font-size:14px; color:var(--text-muted); }
-    .intents { display:grid; gap:9px; }
-    .prov { display:grid; gap:9px; font-size:14px; }
-    .prov div { display:flex; align-items:flex-start; gap:9px; }
-    .simil { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
+    .pbox-bd { padding:20px; display:grid; gap:16px; }
+    .broker { display:flex; align-items:center; gap:12px; }
+    .broker .av2 { width:52px; height:52px; border-radius:var(--r-full); background:var(--joint);
+      display:grid; place-items:center; color:var(--marble-700); font-size:16px; font-weight:600; flex:0 0 auto; }
+    .broker b { display:block; font-size:16px; font-weight:600; color:var(--marble-900); }
+    .broker span { font-size:13px; color:var(--text-muted); }
+    .intents { display:grid; gap:8px; }
+    .prov { display:grid; gap:8px; font-size:13px; }
+    .prov div { display:flex; align-items:flex-start; gap:8px; }
+    .simil { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
 `;
 
 const BODY = `${pubHeader("search")}
   <div class="pub-wrap">
     <div class="crumb"><a href="#">Имоти</a> ${icon("chevron", 14)} <a href="#">Сандански</a>
       ${icon("chevron", 14)} <a href="#">Катунци</a> ${icon("chevron", 14)}
-      <b style="color:var(--stone-900)">Вила с басейн</b></div>
+      <b style="color:var(--marble-900)">Вила с басейн</b></div>
 
     <div class="gal">
       <div class="gp gp--main"><div class="btn-ov">
@@ -72,21 +72,21 @@ const BODY = `${pubHeader("search")}
       <div>
         <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:24px">
           <div>
-            <h1 class="h2" style="font-size:34px">Вила с басейн и изглед към планината</h1>
+            <h1 class="h2" style="font-size:32px">Вила с басейн и изглед към планината</h1>
             <p class="lede" style="margin-top:8px">Катунци, община Сандански</p>
-            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:14px">
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:16px">
               <span class="trust">${icon("check", 15)}Фактите са сверени с документ</span>
               <span class="pill pill--sand"><i></i>Обновена днес</span>
-              <span class="mono" style="font-size:13.5px">MS-00191</span>
+              <span class="mono" style="font-size:13px">MS-00191</span>
             </div>
           </div>
           <div style="text-align:right">
-            <div class="lprice" style="font-size:34px">185 000 €</div>
+            <div class="lprice" style="font-size:32px">185 000 €</div>
             <p class="meta" style="margin-top:4px">864 €/м² · без такси за купувача</p>
           </div>
         </div>
 
-        <dl class="facts" style="margin-top:22px">
+        <dl class="facts" style="margin-top:24px">
           <div><dt>Тип</dt><dd>Вила</dd></div>
           <div><dt>Застроена площ</dt><dd>214 м²</dd></div>
           <div><dt>Двор</dt><dd>1 180 м²</dd></div>
@@ -109,12 +109,12 @@ const BODY = `${pubHeader("search")}
             <div class="specrow"><span>Етажи</span><b>2</b></div>
             <div class="specrow"><span>Бани</span><b>2</b></div>
             <div class="specrow"><span>Енергиен клас</span><b>C · валиден до 2033</b></div>
-            <div class="specrow"><span>Кадастрален идентификатор</span><b class="mono" style="font-size:13.5px">36693.501.114</b></div>
+            <div class="specrow"><span>Кадастрален идентификатор</span><b class="mono" style="font-size:12px">36693.501.114</b></div>
             <div class="specrow"><span>Отопление</span><b class="muted" style="font-weight:500">Не е потвърдено</b></div>
             <div class="specrow"><span>Паркиране</span><b class="muted" style="font-weight:500">Не е потвърдено</b></div>
             <div class="specrow"><span>Обзавеждане</span><b class="muted" style="font-weight:500">Не е потвърдено</b></div>
           </div>
-          <p class="meta" style="margin-top:14px">${icon("alert", 14)} Показваме само това, което е потвърдено.
+          <p class="meta" style="margin-top:16px">${icon("alert", 14)} Показваме само това, което е потвърдено.
             Три полета още не са проверени и затова стоят празни, вместо да гадаем.</p>
         </div>
 
@@ -126,7 +126,7 @@ const BODY = `${pubHeader("search")}
           </div>
           <p class="meta" style="margin-top:12px">${icon("shield", 14)} Точният адрес се дава при огледа.
             Кръгът показва района с точност до 300 метра.</p>
-          <div style="display:flex; flex-wrap:wrap; gap:22px; margin-top:16px; font-size:15px">
+          <div style="display:flex; flex-wrap:wrap; gap:24px; margin-top:16px; font-size:16px">
             <span>${icon("building", 15)} Магазин — 400 м</span>
             <span>${icon("users", 15)} Училище — 700 м</span>
             <span>${icon("route", 15)} Сандански — 14 км</span>
@@ -163,7 +163,7 @@ const BODY = `${pubHeader("search")}
         </div></div>
 
         <div class="pbox"><div class="pbox-bd">
-          <b style="font-size:15px; font-weight:600; color:var(--stone-900)">Откъде знаем тези факти</b>
+          <b style="font-size:16px; font-weight:600; color:var(--marble-900)">Откъде знаем тези факти</b>
           <div class="prov">
             <div>${icon("check", 16)}<span>Площ и кадастрален номер — от кадастралната скица, 22 юли 2026</span></div>
             <div>${icon("check", 16)}<span>Тежести — от справка в имотния регистър, 24 юли 2026</span></div>
@@ -174,8 +174,8 @@ const BODY = `${pubHeader("search")}
         </div></div>
 
         <div class="pbox"><div class="pbox-bd">
-          <b style="font-size:15px; font-weight:600; color:var(--stone-900)">Запазете търсенето</b>
-          <p style="font-size:14.5px; color:var(--text-body)">Ще ви пишем, когато излезе подобен имот в
+          <b style="font-size:16px; font-weight:600; color:var(--marble-900)">Запазете търсенето</b>
+          <p style="font-size:16px; color:var(--text-body)">Ще ви пишем, когато излезе подобен имот в
             Катунци до 200 000 €. Един имейл седмично, спирате го с един клик.</p>
           <span class="pin">вашият@имейл.bg</span>
           <a class="pbtn pbtn--brand" href="#">Запазете търсенето</a>
@@ -187,7 +187,7 @@ const BODY = `${pubHeader("search")}
 
     <section class="sec">
       <div class="sec-hd"><div><h2 class="h2">Подобни имоти</h2>
-        <p class="meta" style="margin-top:6px">В Катунци и околността, до 220 000 €.</p></div>
+        <p class="meta" style="margin-top:8px">В Катунци и околността, до 220 000 €.</p></div>
         <a class="pbtn" href="#">Вижте всички ${icon("arrow", 16)}</a></div>
       <div class="simil">
 ${[["139 000 €","Къща с двор и лозе","Катунци","MS-00345","3 спални","168 м²"],

@@ -3,24 +3,24 @@ import { page, sheet, icon, subnav } from "../shell.mjs";
 const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const SYS_CSS = `
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .bars { display:grid; gap:9px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:12.5px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--stone-200); overflow:hidden; }
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .bars { display:grid; gap:8px; padding:16px 20px; }
+    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
+    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
     .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:14px 18px; }
-    .kpi dt { font-size:11.5px; color:var(--text-muted); margin-bottom:5px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.02em;
+    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
+    .kpi > div { background:var(--surface); padding:16px 20px; }
+    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
       color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:5px; font-size:11.5px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:14px; align-items:center;
-      padding:11px 16px; border-bottom:1px solid var(--border); }
+    .kpi small { display:block; margin-top:4px; font-size:11px; }
+    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .gate:last-child { border-bottom:0; }
     .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:12px; color:var(--text-muted); }
+    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
 `;
 
 /* ------------------------------------------------------------------- Insight */
@@ -44,35 +44,35 @@ const REP_BODY = `      <div class="ph">
         <section class="panel">
           <div class="panel-hd"><h2>Where enquiries came from</h2><span class="sub">63 in August</span></div>
           <div class="bars">
-${[["Website enquiry form",26],["WhatsApp",14],["Phone",11],["Legacy .ru pages",7],["Facebook",3],["Walk-in",2]].map(([n, v]) => [n, v, "var(--sea-600)"])
+${[["Website enquiry form",26],["WhatsApp",14],["Phone",11],["Legacy .ru pages",7],["Facebook",3],["Walk-in",2]].map(([n, v]) => [n, v, "var(--spring-700)"])
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 26) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">Seven enquiries still arrive on legacy
+          <div class="savebar"><span style="font-size:13px" class="muted">Seven enquiries still arrive on legacy
             Russian pages, which is the strongest argument for keeping every one of those URLs alive.</span></div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Reply speed against the target</h2><span class="sub">Target: first reply in 4 hours</span></div>
           <div class="bars">
-${[["Under 1 hour",21,"var(--success-500)"],["1 to 4 hours",28,"var(--success-500)"],["4 to 24 hours",9,"var(--warning-600)"],["Over 24 hours",5,"var(--danger-500)"]]
+${[["Under 1 hour",21,"var(--success-500)"],["1 to 4 hours",28,"var(--success-500)"],["4 to 24 hours",9,"var(--warning-700)"],["Over 24 hours",5,"var(--danger-500)"]]
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 28) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">The five over 24 hours were all
+          <div class="savebar"><span style="font-size:13px" class="muted">The five over 24 hours were all
             Hebrew or Greek and all arrived at the weekend. That is a staffing question, not a tooling one.</span></div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Catalogue health</h2></div>
           <div class="bars">
-${[["Published and complete",84,"var(--success-500)"],["Published, facts thin",19,"var(--warning-600)"],["Needs review",43,"var(--warning-600)"],["Archived",38,"var(--stone-600)"]]
+${[["Published and complete",84,"var(--success-500)"],["Published, facts thin",19,"var(--warning-700)"],["Needs review",43,"var(--warning-700)"],["Archived",38,"var(--marble-600)"]]
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 84) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Hermes contribution</h2><span class="pill pill--ai">${icon("sparkles", 11)}Drafts only</span></div>
           <div class="bars">
-${[["Accepted as written",96,"var(--success-500)"],["Accepted after edits",34,"var(--sea-600)"],["Rejected",18,"var(--stone-600)"],["Refused by a guardrail",7,"var(--danger-500)"]]
+${[["Accepted as written",96,"var(--success-500)"],["Accepted after edits",34,"var(--spring-700)"],["Rejected",18,"var(--marble-600)"],["Refused by a guardrail",7,"var(--danger-500)"]]
   .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 96) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">Roughly nine hours of translation and
+          <div class="savebar"><span style="font-size:13px" class="muted">Roughly nine hours of translation and
             drafting time in August, all of it reviewed by a person before anyone outside saw it.</span></div>
         </section>
       </div>`;
@@ -108,7 +108,7 @@ ${[
   ["28 Aug 09:00","System","system","automation_failed","Saved-search digest","Google delivery unavailable, nothing sent","Scheduler"],
 ].map(([when, who, kind, action, record, what, where]) => `            <tr>
               <td class="mono">${when}</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av"${kind === "agent" ? ' style="background:var(--brick-50); color:var(--brick-700)"' : kind === "system" ? ' style="background:var(--sea-50); color:var(--sea-700)"' : ""}>${who.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()}</span>${who}</span></td>
+              <td><span style="display:flex; align-items:center; gap:8px"><span class="av"${kind === "agent" ? ' style="background:var(--brick-50); color:var(--brick-700)"' : kind === "system" ? ' style="background:var(--spring-50); color:var(--spring-800)"' : ""}>${who.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()}</span>${who}</span></td>
               <td><span class="mono">${action}</span></td>
               <td>${record}</td>
               <td class="muted">${what}</td>
@@ -119,7 +119,7 @@ ${[
         <div class="foot"><span>Showing 8 of 4,182</span>
           <span style="display:flex; gap:8px"><button class="btn btn--sm" type="button">Previous</button><button class="btn btn--sm" type="button">Next</button></span></div>
       </section>
-      <div class="note note--info" style="margin-top:14px">${icon("lock", 15)}
+      <div class="note note--info" style="margin-top:16px">${icon("lock", 15)}
         <span>An entry cannot be edited or deleted from the workspace, and a new kind of action has to be
           registered in code before it can appear here at all — an unregistered action fails the write.</span></div>`;
 fs.writeFileSync(W("Activity.dc.html"), page({ active: "insight", body: ACT_BODY, extraCss: SYS_CSS, height: 900 }));
@@ -152,12 +152,12 @@ ${[
 ].map(([state, title, detail, evidence]) => `        <div class="gate">
           <span class="av" style="background:${state === "ok" ? "var(--success-50); color:var(--success-600)" : "var(--danger-50); color:var(--danger-600)"}">${icon(state === "ok" ? "check" : "alert", 14)}</span>
           <span style="min-width:0"><b>${title}</b><em>${detail}</em></span>
-          <span style="font-size:12px" class="muted">${evidence}</span>
+          <span style="font-size:13px" class="muted">${evidence}</span>
           <span style="display:flex; justify-content:flex-end">${state === "ok"
             ? `<span class="pill pill--ok"><i></i>Passing</span>`
             : `<button class="btn btn--sm btn--primary" type="button">Open</button>`}</span>
         </div>`).join("\n")}
-        <div class="savebar"><span style="font-size:12px" class="muted">Production-Ready is the whole portfolio
+        <div class="savebar"><span style="font-size:13px" class="muted">Production-Ready is the whole portfolio
           passing on the temporary host. Production-Live needs the owner's DNS change and post-cutover
           verification. Neither can be asserted from this screen.</span></div>
       </section>`;
@@ -174,25 +174,25 @@ const TEAM_BODY = `      <div class="ph">
           <table>
             <thead><tr><th>Person</th><th>Role</th><th>May approve</th><th>Two-factor</th><th>Last active</th><th></th></tr></thead>
             <tbody>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av" style="background:var(--brick-600); color:#fff">MR</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-600); color:#fff">MR</span>
                 <span class="t2"><b>Mariya Ruseva</b><span>mariya@ms-realty.bg</span></span></span></td>
                 <td><span class="pill pill--ink"><i></i>Owner</span></td>
                 <td class="muted">Everything, including publication</td>
                 <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">now</td>
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av">PD</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">PD</span>
                 <span class="t2"><b>Petar Dimitrov</b><span>petar@ms-realty.bg</span></span></span></td>
                 <td><span class="pill pill--sea"><i></i>Broker</span></td>
                 <td class="muted">Replies and viewings, not publication</td>
                 <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">1 hour ago</td>
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av">DK</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">DK</span>
                 <span class="t2"><b>Desislava Koleva</b><span>desi@ms-realty.bg</span></span></span></td>
                 <td><span class="pill pill--sand"><i></i>Translator</span></td>
                 <td class="muted">Translations in DE and NL only</td>
                 <td><span class="pill pill--warn"><i></i>Not set up</span></td><td class="muted">3 days ago</td>
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:10px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
+              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
                 <span class="t2"><b>Hermes</b><span>Agent · agency hardware</span></span></span></td>
                 <td><span class="pill pill--ai">${icon("sparkles", 11)}Agent</span></td>
                 <td class="muted">Nothing. It drafts only.</td>
@@ -200,13 +200,13 @@ const TEAM_BODY = `      <div class="ph">
                 <td style="text-align:right"><button class="btn btn--sm" type="button">Limits</button></td></tr>
             </tbody>
           </table>
-          <div class="savebar"><span style="font-size:12px" class="muted">Removing a person revokes their
+          <div class="savebar"><span style="font-size:13px" class="muted">Removing a person revokes their
             sessions immediately and leaves their name on everything they approved.</span></div>
         </section>
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Needs attention</h2></div>
-            <div class="side-sect" style="display:grid; gap:9px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div class="note note--warn">${icon("alert", 14)}<span>Desislava has no second factor. She can approve
                 translations that go straight to the public site.</span></div>
               <button class="btn btn--sm btn--primary" type="button">${icon("send", 13)}<span>Send her the setup link</span></button>
@@ -214,7 +214,7 @@ const TEAM_BODY = `      <div class="ph">
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Sessions</h2><span class="sub">4 open</span></div>
-            <div class="side-sect" style="display:grid; gap:9px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               ${[["Mariya · Mac · Sandanski","now"],["Mariya · iPhone","2 hours ago"],["Petar · Android","1 hour ago"],["Desislava · Windows · Sofia","3 days ago"]]
                 .map(([a, b]) => `<div style="display:flex; justify-content:space-between; align-items:center"><span>${a}</span><span class="muted">${b}</span></div>`).join("")}
               <button class="btn btn--sm" type="button" style="margin-top:4px">Revoke the 3-day-old session</button>
@@ -222,7 +222,7 @@ const TEAM_BODY = `      <div class="ph">
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What a role means</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div><b>Owner</b><span style="display:block" class="muted">Publication, settings, team, exports.</span></div>
               <div><b>Broker</b><span style="display:block" class="muted">Leads, viewings, cases, documents. Cannot publish.</span></div>
               <div><b>Translator</b><span style="display:block" class="muted">Only the languages named on their account.</span></div>
@@ -235,35 +235,35 @@ fs.writeFileSync(W("Team.dc.html"), page({ active: "settings", body: TEAM_BODY, 
 
 /* ----------------------------------------------------------------- Sign in */
 const SI_BODY = `<div style="display:grid; grid-template-columns:minmax(0,1fr) 520px; min-height:900px">
-  <div style="background:var(--ink-900); color:#fff; padding:56px 60px; display:grid; align-content:space-between">
+  <div style="background:var(--ink-900); color:#fff; padding:64px 64px; display:grid; align-content:space-between">
     <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="78" height="40" style="display:block; height:40px; width:auto" />
     <div>
-      <p style="font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1.25; max-width:440px">
+      <p style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; line-height:1.25; max-width:440px">
         The workspace for a family agency in Sandanski.</p>
-      <p style="margin-top:16px; font-size:14px; color:rgba(255,255,255,.66); max-width:420px; line-height:1.6">
+      <p style="margin-top:16px; font-size:13px; color:rgba(255,255,255,.66); max-width:420px; line-height:1.6">
         Listings, enquiries, viewings, contracts and the website itself — in one place, in Bulgarian,
         Russian or English.</p>
     </div>
-    <p style="font-size:12px; color:rgba(255,255,255,.44)">Every sign-in is recorded. Report anything you
+    <p style="font-size:13px; color:rgba(255,255,255,.44)">Every sign-in is recorded. Report anything you
       did not do to the owner.</p>
   </div>
-  <div style="background:var(--surface); padding:56px 60px; display:grid; align-content:center; gap:18px">
+  <div style="background:var(--surface); padding:64px 64px; display:grid; align-content:center; gap:20px">
     <div>
-      <h1 style="font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.015em">Sign in</h1>
-      <p style="margin-top:5px; font-size:13px; color:var(--text-muted)">Use your MS Realty address.</p>
+      <h1 style="font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.015em">Sign in</h1>
+      <p style="margin-top:4px; font-size:13px; color:var(--text-muted)">Use your MS Realty address.</p>
     </div>
     <div class="field"><label for="s1">Email</label><span class="in" id="s1">mariya@ms-realty.bg</span></div>
     <div class="field"><label for="s2">Password</label><span class="in in--focus" id="s2">••••••••••••</span></div>
-    <div style="display:flex; align-items:center; gap:9px">
-      <span class="box" data-on="1"></span><span style="font-size:12.5px">Remember this device for 30 days</span>
-      <a href="#" style="margin-left:auto; font-size:12.5px; font-weight:600">Forgot your password?</a>
+    <div style="display:flex; align-items:center; gap:8px">
+      <span class="box" data-on="1"></span><span style="font-size:12px">Remember this device for 30 days</span>
+      <a href="#" style="margin-left:auto; font-size:13px; font-weight:600">Forgot your password?</a>
     </div>
     <button class="btn btn--lg btn--primary" type="button" style="justify-content:center">Sign in</button>
     <div class="note note--info">${icon("shield", 15)}<span>A second factor is asked for after the password.
       If you have lost your device, the owner can reset it for you.</span></div>
-    <div style="display:flex; align-items:center; gap:10px; margin-top:6px">
-      <span style="height:1px; flex:1 1 auto; background:var(--border)"></span>
-      <span style="font-size:11.5px" class="muted">or</span>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:8px">
+      <span style="height:4px; flex:1 1 auto; background:var(--border)"></span>
+      <span style="font-size:11px" class="muted">or</span>
       <span style="height:1px; flex:1 1 auto; background:var(--border)"></span>
     </div>
     <button class="btn btn--lg" type="button" style="justify-content:center">${icon("mail", 16)}<span>Continue with Google Workspace</span></button>

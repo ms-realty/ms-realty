@@ -332,7 +332,7 @@
     .pub-bar img { display:block; height:38px; width:auto; }
     .pub-nav { display:flex; align-items:center; gap:24px; margin-left:14px; }
     .pub-nav a { font-size:15px; font-weight:600; color:var(--text-body); }
-    .pub-nav a:hover { color:var(--stone-900); }
+    .pub-nav a:hover { color:var(--marble-900); }
     .pub-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
     .lang { display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 13px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
@@ -342,23 +342,23 @@
     .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
     .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px;
       padding:0 20px; border-radius:var(--r-md); border:1px solid var(--border-control);
-      background:var(--surface); color:var(--stone-900); font-size:15px; font-weight:600; cursor:pointer; }
+      background:var(--surface); color:var(--marble-900); font-size:15px; font-weight:600; cursor:pointer; }
     .pbtn--brand { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
     /* .pub a is (0,1,1) and beat the (0,1,0) button classes, so a brand button
        rendered ink-on-ink. The anchor forms of the buttons carry their own colour. */
-    .pub a.pbtn { color:var(--stone-900); }
+    .pub a.pbtn { color:var(--marble-900); }
     .pub a.pbtn--brand, .pub a.pbtn--accent { color:#fff; }
     .pub a.callbtn { color:#fff; }
     .pbtn--lg { min-height:54px; padding:0 26px; font-size:16px; }
     .pin { display:flex; align-items:center; height:52px; padding:0 15px; border:1px solid var(--border-control);
       border-radius:var(--r-md); background:var(--surface); font-size:15px; color:var(--text-body); }
     .h1 { font-family:var(--font-display); font-size:46px; font-weight:600; letter-spacing:-.025em;
-      line-height:1.1; color:var(--stone-900); }
+      line-height:1.1; color:var(--marble-900); }
     .h2 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em;
-      line-height:1.2; color:var(--stone-900); }
+      line-height:1.2; color:var(--marble-900); }
     .h3 { font-family:var(--font-display); font-size:21px; font-weight:600; letter-spacing:-.01em;
-      color:var(--stone-900); }
+      color:var(--marble-900); }
     .lede { font-size:18px; line-height:1.55; color:var(--text-body); }
     .meta { font-size:14px; color:var(--text-muted); }
     .sec { padding:56px 0; }
@@ -377,9 +377,9 @@
     .lcard .fav { position:absolute; top:12px; right:12px; z-index:1; display:grid; place-items:center;
       width:38px; height:38px; border-radius:var(--r-full); background:rgba(255,255,255,.94); color:var(--ink-800); }
     .lcard .bd { padding:16px 18px 18px; display:grid; gap:9px; }
-    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--stone-900);
+    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--marble-900);
       letter-spacing:-.015em; }
-    .lcard h3 { font-size:16px; font-weight:600; color:var(--stone-900); line-height:1.35; }
+    .lcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
     .lfacts { display:flex; flex-wrap:wrap; gap:14px; font-size:14px; color:var(--text-muted); }
     .lfacts span { display:inline-flex; align-items:center; gap:6px; }
     .lfoot { display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -394,58 +394,58 @@
     .pub-foot .base { display:flex; align-items:center; gap:18px; margin-top:34px; padding-top:20px;
       border-top:1px solid rgba(255,255,255,.14); font-size:13.5px; color:rgba(255,255,255,.5); flex-wrap:wrap; }
 
-    .crumb { display:flex; align-items:center; gap:9px; padding:18px 0; font-size:14px; color:var(--text-muted); }
+    .crumb { display:flex; align-items:center; gap:8px; padding:20px 0; font-size:13px; color:var(--text-muted); }
     .hero2 { position:relative; height:340px; border-radius:var(--r-lg); overflow:hidden; display:grid;
-      align-content:end; padding:30px;
+      align-content:end; padding:32px;
       background:linear-gradient(150deg,#5a5142 0%,#8a7a5e 40%,#bcaa8b 74%,#7a6c54 100%); }
     .hero2::after { content:''; position:absolute; inset:0;
       background:linear-gradient(transparent 30%, rgba(20,19,14,.7)),
         repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
     .hero2 > * { position:relative; z-index:1; color:#fff; }
-    .hero2 h1 { font-family:var(--font-display); font-size:40px; font-weight:600; letter-spacing:-.02em; }
-    .hero2 p { font-size:17px; color:rgba(255,255,255,.84); margin-top:8px; max-width:640px; }
-    .two { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:40px; align-items:start; }
-    .prose h2 { font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.018em;
-      color:var(--stone-900); margin:32px 0 12px; }
+    .hero2 h1 { font-family:var(--font-display); font-size:39px; font-weight:600; letter-spacing:-.02em; }
+    .hero2 p { font-size:16px; color:rgba(255,255,255,.84); margin-top:8px; max-width:640px; }
+    .two { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:48px; align-items:start; }
+    .prose h2 { font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.018em;
+      color:var(--marble-900); margin:32px 0 12px; }
     .prose h2:first-child { margin-top:0; }
-    .prose p { font-size:16.5px; line-height:1.7; color:var(--text-body); margin-bottom:14px; }
-    .prose ul { margin:0 0 16px; padding-left:22px; }
-    .prose li { font-size:16.5px; line-height:1.7; color:var(--text-body); margin-bottom:7px; }
-    .callout { padding:18px 20px; border-radius:var(--r-lg); background:var(--sea-50);
-      border:1px solid var(--sea-200); margin:20px 0; }
-    .callout b { display:block; font-size:16px; font-weight:600; color:var(--sea-700); margin-bottom:6px; }
-    .callout p { font-size:15px; color:var(--sea-700); line-height:1.6; margin:0; }
-    .toc { border:1px solid var(--border); border-radius:var(--r-lg); padding:18px 20px; background:var(--surface); }
-    .toc b { display:block; font-size:14px; font-weight:600; color:var(--stone-900); margin-bottom:11px; }
-    .toc a { display:block; padding:6px 0; font-size:14.5px; color:var(--text-body); border-bottom:1px solid var(--border); }
+    .prose p { font-size:16px; line-height:1.7; color:var(--text-body); margin-bottom:16px; }
+    .prose ul { margin:0 0 16px; padding-left:24px; }
+    .prose li { font-size:16px; line-height:1.7; color:var(--text-body); margin-bottom:8px; }
+    .callout { padding:20px 20px; border-radius:var(--r-lg); background:var(--spring-50);
+      border:1px solid var(--spring-200); margin:20px 0; }
+    .callout b { display:block; font-size:16px; font-weight:600; color:var(--spring-800); margin-bottom:8px; }
+    .callout p { font-size:16px; color:var(--spring-800); line-height:1.6; margin:0; }
+    .toc { border:1px solid var(--border); border-radius:var(--r-lg); padding:20px 20px; background:var(--surface); }
+    .toc b { display:block; font-size:13px; font-weight:600; color:var(--marble-900); margin-bottom:12px; }
+    .toc a { display:block; padding:8px 0; font-size:16px; color:var(--text-body); border-bottom:1px solid var(--border); }
     .toc a:last-child { border-bottom:0; }
     .pbox2 { border:1px solid var(--border); border-radius:var(--r-lg); background:var(--surface);
-      box-shadow:var(--e-2); padding:20px; display:grid; gap:13px; }
-    .form2 { display:grid; gap:14px; }
-    .fld { display:grid; gap:6px; }
-    .fld label { font-size:14px; font-weight:600; color:var(--text-body); }
+      box-shadow:var(--e-2); padding:20px; display:grid; gap:12px; }
+    .form2 { display:grid; gap:16px; }
+    .fld { display:grid; gap:8px; }
+    .fld label { font-size:13px; font-weight:600; color:var(--text-body); }
     .fld .pin { min-height:52px; }
-    .radio { display:flex; gap:10px; flex-wrap:wrap; }
-    .radio span { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 15px;
-      border:1px solid var(--border-control); border-radius:var(--r-md); font-size:14.5px; font-weight:600;
+    .radio { display:flex; gap:12px; flex-wrap:wrap; }
+    .radio span { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 16px;
+      border:1px solid var(--border-control); border-radius:var(--r-md); font-size:16px; font-weight:600;
       color:var(--text-body); }
     .radio span[data-on] { border-color:var(--ink-800); background:var(--ink-800); color:#fff; }
-    .offices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
-    .office { border:1px solid var(--border); border-radius:var(--r-lg); padding:22px; background:var(--surface); }
-    .office b { font-family:var(--font-display); font-size:20px; font-weight:600; color:var(--stone-900); }
-    .office p { font-size:15px; color:var(--text-body); line-height:1.7; margin-top:8px; }
-    .peop { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
-    .per { display:grid; gap:11px; }
+    .offices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+    .office { border:1px solid var(--border); border-radius:var(--r-lg); padding:24px; background:var(--surface); }
+    .office b { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--marble-900); }
+    .office p { font-size:16px; color:var(--text-body); line-height:1.7; margin-top:8px; }
+    .peop { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    .per { display:grid; gap:12px; }
     .per .pic { height:210px; border-radius:var(--r-lg);
       background:linear-gradient(155deg,#6f6350 0%,#9b8a6b 45%,#c4b394 100%); }
-    .per b { font-size:17px; font-weight:600; color:var(--stone-900); }
-    .per span { font-size:14.5px; color:var(--text-muted); display:block; }
-    .stepbig { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:26px; }
-    .stepbig > div { display:grid; gap:10px; align-content:start; }
+    .per b { font-size:16px; font-weight:600; color:var(--marble-900); }
+    .per span { font-size:16px; color:var(--text-muted); display:block; }
+    .stepbig { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    .stepbig > div { display:grid; gap:12px; align-content:start; }
     .stepbig .n { display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-full);
       background:var(--ink-800); color:#fff; font-family:var(--font-display); font-size:19px; font-weight:600; }
-    .stepbig b { font-size:19px; font-weight:600; color:var(--stone-900); font-family:var(--font-display); }
-    .stepbig p { font-size:15.5px; color:var(--text-body); line-height:1.6; }
+    .stepbig b { font-size:19px; font-weight:600; color:var(--marble-900); font-family:var(--font-display); }
+    .stepbig p { font-size:16px; color:var(--text-body); line-height:1.6; }
     .mapbox2 { height:320px; border-radius:var(--r-lg); position:relative; overflow:hidden;
       background:linear-gradient(140deg,#e7ecdf 0%,#dbe3d2 42%,#cfd9c5 100%); }
     .mapbox2::after { content:''; position:absolute; inset:0;
@@ -473,30 +473,30 @@
       </div>
     </div>
   </header>
-  <section style="background:var(--stone-100); border-bottom:1px solid var(--border)">
-    <div class="pub-wrap" style="padding-top:56px; padding-bottom:52px">
+  <section style="background:var(--tile-deep); border-bottom:1px solid var(--border)">
+    <div class="pub-wrap" style="padding-top:64px; padding-bottom:48px">
       <div class="two" style="grid-template-columns:1.05fr .95fr; gap:48px; align-items:center">
         <div>
           <h1 class="h1">Продайте имота си в Сандански с брокер, който вдига телефона.</h1>
           <p class="lede" style="margin-top:16px">Безплатна оценка на място в рамките на два работни дни.
             Договор за посредничество с ясен срок, без скрити такси и без изключителни права, ако не ги искате.</p>
-          <div style="display:flex; gap:22px; margin-top:22px; flex-wrap:wrap">
-            <span style="display:flex; align-items:center; gap:9px; font-size:15px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Оценка на място, не по телефона</span>
-            <span style="display:flex; align-items:center; gap:9px; font-size:15px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Обява на 7 езика</span>
-            <span style="display:flex; align-items:center; gap:9px; font-size:15px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Хонорар само при сделка</span>
+          <div style="display:flex; gap:24px; margin-top:24px; flex-wrap:wrap">
+            <span style="display:flex; align-items:center; gap:8px; font-size:16px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Оценка на място, не по телефона</span>
+            <span style="display:flex; align-items:center; gap:8px; font-size:16px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Обява на 7 езика</span>
+            <span style="display:flex; align-items:center; gap:8px; font-size:16px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Хонорар само при сделка</span>
           </div>
         </div>
         <div class="pbox2" style="padding:24px">
-          <b style="font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--stone-900)">Заявете безплатна оценка</b>
+          <b style="font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--marble-900)">Заявете безплатна оценка</b>
           <div class="form2">
             <div class="fld"><label for="s1">Какъв е имотът</label>
               <div class="radio"><span data-on="1">Апартамент</span><span>Къща</span><span>Парцел</span><span>Друго</span></div></div>
             <div class="fld"><label for="s2">Къде се намира</label><span class="pin" id="s2">Град или село</span></div>
             <div class="fld"><label for="s3">Вашето име</label><span class="pin" id="s3">Име и фамилия</span></div>
             <div class="fld"><label for="s4">Телефон</label><span class="pin" id="s4">0888 000 000</span></div>
-            <div style="display:flex; align-items:flex-start; gap:11px">
-              <span class="box" style="margin-top:2px"></span>
-              <span style="font-size:14px; color:var(--text-body); line-height:1.5">Съгласен съм да се свържете
+            <div style="display:flex; align-items:flex-start; gap:12px">
+              <span class="box" style="margin-top:4px"></span>
+              <span style="font-size:12px; color:var(--text-body); line-height:1.5">Съгласен съм да се свържете
                 с мен за тази оценка. <a href="#" style="font-weight:600">Поверителност</a></span>
             </div>
             <a class="pbtn pbtn--accent pbtn--lg" href="#" style="justify-content:center">Заявете оценка</a>
@@ -510,7 +510,7 @@
   <div class="pub-wrap">
     <section class="sec">
       <div class="sec-hd"><div><h2 class="h2">Как работим</h2>
-        <p class="meta" style="margin-top:6px">Три стъпки, и знаете какво следва на всяка.</p></div></div>
+        <p class="meta" style="margin-top:8px">Три стъпки, и знаете какво следва на всяка.</p></div></div>
       <div class="stepbig">
         <div><span class="n">1</span><b>Оценка</b>
           <p>Идваме на място, снимаме и даваме реалистична цена — не най-високата, а тази, на която имотът
@@ -524,9 +524,9 @@
       </div>
     </section>
 
-    <section class="sec--tight" style="border-top:1px solid var(--border)">
+    <section class="sec--tight" style="border-top:4px solid var(--border)">
       <div class="sec-hd"><div><h2 class="h2">Продадени наскоро</h2>
-        <p class="meta" style="margin-top:6px">С разрешение на собствениците.</p></div></div>
+        <p class="meta" style="margin-top:8px">С разрешение на собствениците.</p></div></div>
       <div class="cards">
       <article class="lcard">
         <div class="im"><span class="fav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></span></div>

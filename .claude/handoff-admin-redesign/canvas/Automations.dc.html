@@ -336,25 +336,25 @@
     .subtle { color:var(--text-muted); }
 
     .cat { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px; }
-    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:13px; background:var(--surface);
+    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
       display:grid; gap:8px; }
-    .capp .hd { display:flex; align-items:center; gap:9px; }
+    .capp .hd { display:flex; align-items:center; gap:8px; }
     .capp .lg { display:grid; place-items:center; width:32px; height:32px; border-radius:var(--r-sm);
       font:700 11px var(--font-sans); flex:0 0 auto; }
-    .capp b { font-size:12.5px; font-weight:600; color:var(--text-strong); }
-    .capp p { font-size:11.5px; color:var(--text-muted); min-height:30px; }
+    .capp b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .capp p { font-size:11px; color:var(--text-muted); min-height:30px; }
     .capp .ft { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:14px; align-items:center;
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:16px; align-items:center;
       padding:12px 16px; border-bottom:1px solid var(--border); }
     .auto:last-child { border-bottom:0; }
     .auto b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .auto em { font-style:normal; font-size:12px; color:var(--text-muted); }
-    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:5px; font-size:11.5px; }
-    .rule span.k { padding:2px 7px; border-radius:var(--r-xs); background:var(--stone-100); color:var(--stone-700); font-weight:600; }
-    .rule span.v { padding:2px 7px; border-radius:var(--r-xs); background:var(--sea-50); color:var(--sea-700); font-weight:600; }
+    .auto em { font-style:normal; font-size:13px; color:var(--text-muted); }
+    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:11px; }
+    .rule span.k { padding:4px 8px; border-radius:var(--r-xs); background:var(--tile-deep); color:var(--marble-700); font-weight:600; }
+    .rule span.v { padding:4px 8px; border-radius:var(--r-xs); background:var(--spring-50); color:var(--spring-800); font-weight:600; }
 
   </style>
 </helmet>
@@ -430,90 +430,90 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Escalate a lead with no reply</b>
             <span class="rule"><span class="k">when lead age > SLA</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then notify the manager and mark it escalated</span></span></span>
-          <span style="font-size:12px" class="muted">Every 15 min</span>
-          <span style="font-size:12px" class="muted">4 today</span>
+          <span style="font-size:13px" class="muted">Every 15 min</span>
+          <span style="font-size:13px" class="muted">4 today</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
         </div>
         <div class="auto">
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Run due saved-search alerts</b>
             <span class="rule"><span class="k">when a saved search has a new match</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then queue a digest for approval</span></span></span>
-          <span style="font-size:12px" class="muted">Daily 08:00</span>
-          <span style="font-size:12px" class="muted">2 queued</span>
+          <span style="font-size:13px" class="muted">Daily 08:00</span>
+          <span style="font-size:13px" class="muted">2 queued</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--warn"><i></i>Needs approval</span></span>
         </div>
         <div class="auto">
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Publish listings scheduled for today</b>
             <span class="rule"><span class="k">when publication date = today and approval is on file</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then publish</span></span></span>
-          <span style="font-size:12px" class="muted">Daily 06:00</span>
-          <span style="font-size:12px" class="muted">1 today</span>
+          <span style="font-size:13px" class="muted">Daily 06:00</span>
+          <span style="font-size:13px" class="muted">1 today</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Approved in advance</span></span>
         </div>
         <div class="auto">
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Re-check register extracts before a deed</b>
             <span class="rule"><span class="k">when a notary date is within 24 h</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then request a fresh extract</span></span></span>
-          <span style="font-size:12px" class="muted">Daily 07:00</span>
-          <span style="font-size:12px" class="muted">0 today</span>
+          <span style="font-size:13px" class="muted">Daily 07:00</span>
+          <span style="font-size:13px" class="muted">0 today</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
         </div>
         <div class="auto">
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Warn on consent expiring in 30 days</b>
             <span class="rule"><span class="k">when consent expiry < 30 days</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then create a renewal task</span></span></span>
-          <span style="font-size:12px" class="muted">Weekly Mon</span>
-          <span style="font-size:12px" class="muted">3 open</span>
+          <span style="font-size:13px" class="muted">Weekly Mon</span>
+          <span style="font-size:13px" class="muted">3 open</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
         </div>
         <div class="auto">
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Sync approved listings to search</b>
             <span class="rule"><span class="k">when a listing is published or edited</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then reindex</span></span></span>
-          <span style="font-size:12px" class="muted">On change</span>
-          <span style="font-size:12px" class="muted">84 documents</span>
+          <span style="font-size:13px" class="muted">On change</span>
+          <span style="font-size:13px" class="muted">84 documents</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
         </div>
         <div class="auto">
           <span class="toggle" data-on="1"><i></i></span>
           <span style="min-width:0"><b>Mirror new media to R2</b>
             <span class="rule"><span class="k">when a photo is uploaded</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then mirror and record the checksum</span></span></span>
-          <span style="font-size:12px" class="muted">On change</span>
-          <span style="font-size:12px" class="muted">12 today</span>
+          <span style="font-size:13px" class="muted">On change</span>
+          <span style="font-size:13px" class="muted">12 today</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
         </div>
         <div class="auto">
           <span class="toggle"><i></i></span>
           <span style="min-width:0"><b>Draft translations for new listings</b>
             <span class="rule"><span class="k">when a listing is approved in Bulgarian</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then draft DE, NL, RU</span></span></span>
-          <span style="font-size:12px" class="muted">On change</span>
-          <span style="font-size:12px" class="muted">paused</span>
+          <span style="font-size:13px" class="muted">On change</span>
+          <span style="font-size:13px" class="muted">paused</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--sand"><i></i>Needs approval</span></span>
         </div>
         <div class="auto">
           <span class="toggle"><i></i></span>
           <span style="min-width:0"><b>Post a published listing to Facebook</b>
             <span class="rule"><span class="k">when a listing is published</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then draft a post for approval</span></span></span>
-          <span style="font-size:12px" class="muted">On change</span>
-          <span style="font-size:12px" class="muted">paused</span>
+          <span style="font-size:13px" class="muted">On change</span>
+          <span style="font-size:13px" class="muted">paused</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--sand"><i></i>Needs approval</span></span>
         </div>
         <div class="auto">
           <span class="toggle"><i></i></span>
           <span style="min-width:0"><b>Chase a viewing with no feedback</b>
             <span class="rule"><span class="k">when a viewing is 3 days old with no outcome</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then create a task</span></span></span>
-          <span style="font-size:12px" class="muted">Daily 09:00</span>
-          <span style="font-size:12px" class="muted">paused</span>
+          <span style="font-size:13px" class="muted">Daily 09:00</span>
+          <span style="font-size:13px" class="muted">paused</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--sand"><i></i>Internal only</span></span>
         </div>
-        <div class="savebar"><span style="font-size:12px" class="muted">A failing automation raises a workspace
+        <div class="savebar"><span style="font-size:13px" class="muted">A failing automation raises a workspace
           alert rather than retrying silently. The last failure was the saved-search digest on 28 August, when
           Google delivery expired.</span></div>
       </section>
       <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px">
         <section class="panel">
           <div class="panel-hd"><h2>Webhooks in</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+          <div class="sect" style="display:grid; gap:8px; font-size:13px">
             <div style="display:flex; justify-content:space-between"><span class="mono">meta/whatsapp</span><span class="pill pill--sand"><i></i>Awaiting token</span></div>
             <div style="display:flex; justify-content:space-between"><span class="mono">meta/leadgen</span><span class="pill pill--ok"><i></i>Verified</span></div>
             <div style="display:flex; justify-content:space-between"><span class="mono">payload/afterChange</span><span class="pill pill--ok"><i></i>Verified</span></div>
@@ -521,7 +521,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Webhooks out</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+          <div class="sect" style="display:grid; gap:8px; font-size:13px">
             <div style="display:flex; justify-content:space-between"><span>Lead created</span><span class="muted">2 subscribers</span></div>
             <div style="display:flex; justify-content:space-between"><span>Listing published</span><span class="muted">1 subscriber</span></div>
             <div style="display:flex; justify-content:space-between"><span>Case step closed</span><span class="muted">none</span></div>
@@ -530,10 +530,10 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Agent access</h2><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>MCP</span></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+          <div class="sect" style="display:grid; gap:8px; font-size:13px">
             <p class="muted">The owner's own assistant can reach this workspace over four tools, each bound to
               the same permissions the person has.</p>
-            <div style="display:grid; gap:5px">
+            <div style="display:grid; gap:4px">
               <span class="mono">ms_realty_admin_read</span><span class="mono">ms_realty_admin_write</span><span class="mono">ms_realty_hermes</span><span class="mono">ms_realty_admin_context</span>
             </div>
             <button class="btn btn--sm" type="button" style="margin-top:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 9-9"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg><span>Connect an assistant</span></button>

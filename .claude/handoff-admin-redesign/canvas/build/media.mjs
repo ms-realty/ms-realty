@@ -9,18 +9,18 @@ const SITE_NAV = (on) => subnav([
 ]);
 
 const MED_CSS = `
-    .drop { display:grid; place-items:center; gap:7px; margin:16px; padding:22px; border-radius:var(--r-md);
-      border:1.5px dashed var(--border-control); background:var(--stone-50); text-align:center; }
+    .drop { display:grid; place-items:center; gap:8px; margin:16px; padding:24px; border-radius:var(--r-md);
+      border:1.5px dashed var(--border-control); background:var(--tile); text-align:center; }
     .drop b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .drop span { font-size:12px; color:var(--text-muted); }
+    .drop span { font-size:13px; color:var(--text-muted); }
     .gal { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; padding:0 16px 16px; }
     .tile { border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; background:var(--surface);
       position:relative; }
-    .tile .im { height:104px; display:grid; place-items:center; background:var(--stone-200); color:var(--stone-500);
+    .tile .im { height:104px; display:grid; place-items:center; background:var(--joint); color:var(--marble-500);
       position:relative; }
     /* Actions appear on hover; the tile shows three, and the rest live in the editor.
        Five buttons in a 150px tile was a scrollbar pretending to be a toolbar. */
-    .tile .ov { position:absolute; inset:auto 0 0 0; display:flex; gap:5px; padding:6px; justify-content:center;
+    .tile .ov { position:absolute; inset:auto 0 0 0; display:flex; gap:4px; padding:8px; justify-content:center;
       background:linear-gradient(transparent,rgba(24,24,24,.78)); opacity:0; transition:opacity .14s ease-out; }
     .tile:hover .ov, .tile[data-hover] .ov { opacity:1; }
     .tile .ov button { display:grid; place-items:center; width:28px; height:28px; border-radius:var(--r-sm);
@@ -31,15 +31,15 @@ const MED_CSS = `
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E");
       background-size:12px 12px; background-position:center; background-repeat:no-repeat; }
     .tile .flag { position:absolute; top:6px; right:6px; }
-    .tile .mt { padding:8px 9px; display:grid; gap:4px; }
-    .tile .mt b { font-size:11.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .tile .mt span { font-size:10.5px; color:var(--text-muted); }
-    .bulk { display:flex; align-items:center; gap:9px; padding:10px 16px; background:var(--sea-50);
-      border-bottom:1px solid var(--sea-100); font-size:12.5px; font-weight:600; color:var(--sea-700);
+    .tile .mt { padding:8px 8px; display:grid; gap:4px; }
+    .tile .mt b { font-size:11px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tile .mt span { font-size:11px; color:var(--text-muted); }
+    .bulk { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--spring-50);
+      border-bottom:1px solid var(--spring-100); font-size:13px; font-weight:600; color:var(--spring-800);
       flex-wrap:wrap; }
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
 `;
 
 const TILES = [
@@ -74,7 +74,7 @@ const MED_BODY = `      <div class="ph">
             <button class="btn btn--sm" type="button">Any listing ${icon("down", 13)}</button>
             <button class="btn btn--sm" type="button">Missing alt text ${icon("down", 13)}</button>
             <button class="btn btn--sm btn--ghost" type="button">Clear</button>
-            <span style="margin-left:auto; display:flex; gap:6px">
+            <span style="margin-left:auto; display:flex; gap:8px">
               <button class="btn btn--sm" type="button">${icon("grid", 13)}</button>
               <button class="btn btn--sm" type="button">${icon("list", 13)}</button></span>
           </div>
@@ -98,7 +98,7 @@ const MED_BODY = `      <div class="ph">
 ${TILES.map(([n, m, flag, tone, hover]) => `            <div class="tile">
               <div class="im">${icon("image", 26)}
                 <span class="sel"${flag === "Cover" ? ' data-on="1"' : ""}></span>
-                ${flag ? `<span class="flag pill pill--${tone}" style="padding:2px 7px; font-size:9.5px">${flag}</span>` : ""}
+                ${flag ? `<span class="flag pill pill--${tone}" style="padding:4px 8px; font-size:11px">${flag}</span>` : ""}
                 <span class="ov"${hover ? ' style="opacity:1"' : ""}>
                   <button type="button" title="Open the editor">${icon("crop", 15)}</button>
                   <button type="button" title="Set as cover">${icon("star", 15)}</button>
@@ -116,12 +116,12 @@ ${TILES.map(([n, m, flag, tone, hover]) => `            <div class="tile">
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Review queue</h2><span class="sub">46</span></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div class="kvline"><span>Awaiting a human review</span><b>46</b></div>
               <div class="kvline"><span>Without alt text</span><b>312</b></div>
               <div class="kvline"><span>Gallery too thin to publish</span><b>18</b></div>
               <div class="kvline"><span>Tour awaiting review</span><b>3</b></div>
-              <button class="btn btn--sm btn--primary" type="button" style="margin-top:5px">Start reviewing</button>
+              <button class="btn btn--sm btn--primary" type="button" style="margin-top:4px">Start reviewing</button>
               <span class="hint">These four are what listing-quality computes: media_review_pending,
                 missing_alt_text, thin_public_gallery, tour_review_pending. Nothing here detects a face,
                 a number plate or a watermark — a person does, and records it as a note.</span>
@@ -129,21 +129,21 @@ ${TILES.map(([n, m, flag, tone, hover]) => `            <div class="tile">
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What happens on upload</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; gap:9px">${icon("shield", 15)}<span>EXIF, XMP and IPTC are stripped in process, so a seller's home coordinates never reach storage.</span></div>
-              <div style="display:flex; gap:9px">${icon("image", 15)}<span>Resized to a 2560px long edge at quality 82, and a 640px thumbnail is written beside it.</span></div>
-              <div style="display:flex; gap:9px">${icon("layers", 15)}<span>Stored as JPEG, PNG or WebP, whichever is smaller for that photo.</span></div>
-              <div style="display:flex; gap:9px">${icon("lock", 15)}<span>Nothing is public until a person approves it.</span></div>
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
+              <div style="display:flex; gap:8px">${icon("shield", 15)}<span>EXIF, XMP and IPTC are stripped in process, so a seller's home coordinates never reach storage.</span></div>
+              <div style="display:flex; gap:8px">${icon("image", 15)}<span>Resized to a 2560px long edge at quality 82, and a 640px thumbnail is written beside it.</span></div>
+              <div style="display:flex; gap:8px">${icon("layers", 15)}<span>Stored as JPEG, PNG or WebP, whichever is smaller for that photo.</span></div>
+              <div style="display:flex; gap:8px">${icon("lock", 15)}<span>Nothing is public until a person approves it.</span></div>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Storage</h2></div>
-            <div class="side-sect" style="display:grid; gap:6px">
+            <div class="side-sect" style="display:grid; gap:8px">
               <div class="kvline"><span>Files in R2</span><b>11,859</b></div>
               <div class="kvline"><span>Originals kept</span><b>4,978</b></div>
               <div class="kvline"><span>Total</span><b>38.4 GB</b></div>
               <div class="kvline"><span>Unreferenced</span><b>15 · 41 MB</b></div>
-              <button class="btn btn--sm" type="button" style="margin-top:5px">Review the unreferenced</button>
+              <button class="btn btn--sm" type="button" style="margin-top:4px">Review the unreferenced</button>
             </div>
           </section>
         </div>
@@ -154,21 +154,21 @@ fs.writeFileSync(W("Media.dc.html"), page({ active: "website", body: MED_BODY, e
 const ED_CSS = `
     .ed { display:grid; grid-template-columns:52px minmax(0,1fr) 352px; gap:0; border:1px solid var(--border);
       border-radius:var(--r-lg); overflow:hidden; background:var(--surface); box-shadow:var(--e-2); }
-    .tools { border-right:1px solid var(--border); background:var(--stone-50); display:grid;
-      align-content:start; gap:3px; padding:8px 7px; }
+    .tools { border-right:1px solid var(--border); background:var(--tile); display:grid;
+      align-content:start; gap:4px; padding:8px 8px; }
     .tool { display:grid; place-items:center; width:38px; height:38px; border-radius:var(--r-md);
       border:1px solid transparent; background:transparent; color:var(--text-body); cursor:pointer; }
-    .tool:hover { background:var(--stone-200); }
+    .tool:hover { background:var(--joint); }
     .tool[data-on] { background:var(--ink-800); color:#fff; }
-    .tool-sep { height:1px; background:var(--border); margin:5px 4px; }
-    .stage { background:var(--stone-900); display:grid; grid-template-rows:auto minmax(0,1fr) auto; min-width:0; }
-    .stage-top { display:flex; align-items:center; gap:8px; padding:9px 12px;
+    .tool-sep { height:1px; background:var(--border); margin:4px 4px; }
+    .stage { background:var(--marble-900); display:grid; grid-template-rows:auto minmax(0,1fr) auto; min-width:0; }
+    .stage-top { display:flex; align-items:center; gap:8px; padding:8px 12px;
       border-bottom:1px solid rgba(255,255,255,.1); }
-    .chip { display:inline-flex; align-items:center; gap:6px; height:27px; padding:0 10px; border-radius:var(--r-sm);
-      background:rgba(255,255,255,.09); color:rgba(255,255,255,.82); font-size:11.5px; font-weight:600;
+    .chip { display:inline-flex; align-items:center; gap:8px; height:27px; padding:0 12px; border-radius:var(--r-sm);
+      background:rgba(255,255,255,.09); color:rgba(255,255,255,.82); font-size:11px; font-weight:600;
       border:1px solid transparent; cursor:pointer; }
-    .chip[data-on] { background:#fff; color:var(--stone-900); }
-    .canvas { position:relative; display:grid; place-items:center; padding:26px; min-height:396px; }
+    .chip[data-on] { background:#fff; color:var(--marble-900); }
+    .canvas { position:relative; display:grid; place-items:center; padding:24px; min-height:396px; }
     /* A stand-in for the photograph itself: warm stone tones so the crop overlay,
        the focal marker and the redaction box are all judged against a real value range. */
     .photo { position:relative; width:576px; height:384px; overflow:hidden;
@@ -185,32 +185,32 @@ const ED_CSS = `
     .cropbox .br { bottom:-2px; right:-2px; border-left:0; border-top:0; }
     .thirds { position:absolute; inset:0; }
     .thirds span { position:absolute; background:rgba(255,255,255,.3); }
-    .focal { position:absolute; width:24px; height:24px; border-radius:999px; border:2px solid #fff;
+    .focal { position:absolute; width:24px; height:24px; border-radius:var(--r-pill); border:2px solid #fff;
       background:rgba(255,255,255,.22); display:grid; place-items:center; }
-    .focal::after { content:''; width:5px; height:5px; border-radius:999px; background:#fff; }
+    .focal::after { content:''; width:5px; height:5px; border-radius:var(--r-pill); background:#fff; }
     .redact { position:absolute; border:1.5px dashed var(--brick-400); background:rgba(219,62,62,.2);
       display:grid; place-items:center; }
-    .redact span { font:600 9.5px var(--font-sans); color:#fff; background:var(--brick-600);
-      padding:1px 5px; border-radius:3px; }
-    .stage-foot { display:flex; align-items:center; gap:10px; padding:9px 12px;
-      border-top:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.66); font-size:11.5px; }
+    .redact span { font:600 11px var(--font-sans); color:#fff; background:var(--brick-600);
+      padding:4px 4px; border-radius:var(--r-edge); }
+    .stage-foot { display:flex; align-items:center; gap:12px; padding:8px 12px;
+      border-top:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.66); font-size:11px; }
     .insp { display:grid; align-content:start; min-width:0; }
     .insp-tabs { display:flex; gap:16px; padding:0 16px; border-bottom:1px solid var(--border); }
-    .insp-tabs a { padding:11px 0 12px; font-size:12.5px; font-weight:600; color:var(--text-muted);
-      border-bottom:2px solid transparent; margin-bottom:-1px; }
+    .insp-tabs a { padding:12px 0 12px; font-size:13px; font-weight:600; color:var(--text-muted);
+      border-bottom:2px solid transparent; margin-bottom:-4px; }
     .insp-tabs a[data-on] { color:var(--text-strong); border-bottom-color:var(--ink-800); }
-    .isect { padding:14px 16px; border-bottom:1px solid var(--border); display:grid; gap:9px; }
-    .isect > b { font-size:12.5px; font-weight:600; }
-    .locline { display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:9px; align-items:center;
-      font-size:12.5px; padding:5px 0; border-bottom:1px solid var(--border); }
+    .isect { padding:16px 16px; border-bottom:1px solid var(--border); display:grid; gap:8px; }
+    .isect > b { font-size:13px; font-weight:600; }
+    .locline { display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:8px; align-items:center;
+      font-size:13px; padding:4px 0; border-bottom:1px solid var(--border); }
     .locline:last-child { border-bottom:0; }
     .locline u { text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
       color:var(--text-body); }
-    .rend { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:center;
-      font-size:12.5px; padding:7px 0; border-bottom:1px solid var(--border); }
+    .rend { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center;
+      font-size:13px; padding:8px 0; border-bottom:1px solid var(--border); }
     .rend:last-child { border-bottom:0; }
-    .slider { height:4px; border-radius:999px; background:var(--stone-200); position:relative; }
-    .slider i { position:absolute; top:-5px; width:14px; height:14px; border-radius:999px; background:var(--surface);
+    .slider { height:4px; border-radius:var(--r-pill); background:var(--joint); position:relative; }
+    .slider i { position:absolute; top:-5px; width:14px; height:14px; border-radius:var(--r-pill); background:var(--surface);
       border:1.5px solid var(--border-control); box-shadow:var(--e-1); }
 `;
 
@@ -254,7 +254,7 @@ const ED_BODY = `      <div class="crumbs">
             <span class="chip">1:1</span>
             <span class="chip">Card 5:4</span>
             <span class="chip" style="margin-left:8px">${icon("rotate", 13)}−1.5°</span>
-            <span style="margin-left:auto; display:flex; gap:7px">
+            <span style="margin-left:auto; display:flex; gap:8px">
               <span class="chip">${icon("undo", 13)}Undo</span>
               <span class="chip">Reset</span>
             </span>
@@ -287,11 +287,11 @@ const ED_BODY = `      <div class="crumbs">
 
           <div class="isect">
             <b>Alt text <span class="muted" style="font-weight:400">— what a screen reader says</span></b>
-            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">BG</span>
+            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">BG</span>
               <u class="muted">Not set</u><button class="btn btn--sm" type="button">Write</button></div>
-            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">EN</span>
+            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">EN</span>
               <u class="muted">Not set</u><button class="btn btn--sm" type="button">Write</button></div>
-            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">DE</span>
+            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">DE</span>
               <u class="muted">Not set</u><button class="btn btn--sm" type="button">Write</button></div>
             <div class="note note--ai">${icon("sparkles", 14)}<span>Hermes can describe what is visible in all five published languages. It flagged a face in this photo.</span></div>
             <button class="btn btn--sm" type="button">${icon("sparkles", 13)}<span>Draft alt text</span></button>
@@ -306,7 +306,7 @@ const ED_BODY = `      <div class="crumbs">
             <b>Placement</b>
             <div class="kvline"><span>Listing</span><span class="mono">MS-00191</span></div>
             <div class="kvline"><span>Position in the gallery</span><b>3 of 14</b></div>
-            <div style="display:flex; gap:7px; flex-wrap:wrap">
+            <div style="display:flex; gap:8px; flex-wrap:wrap">
               <button class="btn btn--sm" type="button">${icon("star", 12)}<span>Set as cover</span></button>
               <button class="btn btn--sm" type="button">${icon("swap", 12)}<span>Move</span></button>
               <button class="btn btn--sm" type="button">${icon("building", 12)}<span>Reattach</span></button>
@@ -326,7 +326,7 @@ const ED_BODY = `      <div class="crumbs">
             <b>Review</b>
             <div class="note note--warn">${icon("alert", 14)}<span>Reviewer's note: a face is visible. Publish
               it only with the person's permission, or redact it first.</span></div>
-            <div style="display:grid; gap:10px; margin-top:9px">
+            <div style="display:grid; gap:12px; margin-top:8px">
               <div class="field"><label for="media-decision">Decision</label>
                 <span class="in" id="media-decision">Publish on the public site ${icon("down", 13)}</span></div>
               <div class="field"><label for="media-kind">Kind</label>
@@ -336,12 +336,12 @@ const ED_BODY = `      <div class="crumbs">
                   looking towards the Pirin ridge.</span></div>
               <div class="field"><label for="media-reviewer">Reviewer <em>required</em></label>
                 <span class="in" id="media-reviewer">mariya.ivanova</span></div>
-              <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+              <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px">
                 <span class="box" data-on="1"></span>
                 <span>I have looked at this image and I am accountable for publishing it.</span>
               </div>
             </div>
-            <div style="display:flex; gap:7px; margin-top:10px">
+            <div style="display:flex; gap:8px; margin-top:12px">
               <button class="btn btn--sm btn--primary" type="button">${icon("check", 12)}<span>Save this review</span></button>
               <button class="btn btn--sm" type="button">Hold</button>
             </div>
@@ -354,21 +354,21 @@ const ED_BODY = `      <div class="crumbs">
       <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px">
         <section class="panel">
           <div class="panel-hd"><h2>Renditions</h2><span class="sub">Written on save</span></div>
-          <div style="padding:6px 16px 12px">
-            <div class="rend">${icon("image", 16)}<span><b style="font-size:12.5px">Original</b>
-              <span style="display:block; font-size:11.5px" class="muted">2400 × 1600 · JPEG · 412 KB</span></span>
+          <div style="padding:8px 16px 12px">
+            <div class="rend">${icon("image", 16)}<span><b style="font-size:13px">Original</b>
+              <span style="display:block; font-size:11px" class="muted">2400 × 1600 · JPEG · 412 KB</span></span>
               <button class="btn btn--sm" type="button">Download</button></div>
-            <div class="rend">${icon("image", 16)}<span><b style="font-size:12.5px">Public</b>
-              <span style="display:block; font-size:11.5px" class="muted">1980 × 1320 after crop · WebP · 168 KB</span></span>
+            <div class="rend">${icon("image", 16)}<span><b style="font-size:13px">Public</b>
+              <span style="display:block; font-size:11px" class="muted">1980 × 1320 after crop · WebP · 168 KB</span></span>
               <span class="pill pill--ok"><i></i>Served</span></div>
-            <div class="rend">${icon("image", 16)}<span><b style="font-size:12.5px">Thumbnail</b>
-              <span style="display:block; font-size:11.5px" class="muted">640 × 427 · WebP · 34 KB · quality 75</span></span>
+            <div class="rend">${icon("image", 16)}<span><b style="font-size:13px">Thumbnail</b>
+              <span style="display:block; font-size:11px" class="muted">640 × 427 · WebP · 34 KB · quality 75</span></span>
               <span class="pill pill--ok"><i></i>Served</span></div>
           </div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Provenance</h2></div>
-          <div style="padding:12px 16px; display:grid; gap:7px">
+          <div style="padding:12px 16px; display:grid; gap:8px">
             <div class="kvline"><span>Source</span><span class="mono">makler-realty.com/obj/0114</span></div>
             <div class="kvline"><span>Mirrored</span><span class="muted">2 Aug 2026, 11:04</span></div>
             <div class="kvline"><span>Checksum</span><span class="mono">sha256:9c1f…a4e2</span></div>
@@ -379,10 +379,10 @@ const ED_BODY = `      <div class="crumbs">
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Where it appears</h2><span class="sub">3 surfaces</span></div>
-          <div style="padding:12px 16px; display:grid; gap:8px; font-size:12.5px">
-            <div style="display:flex; gap:9px">${icon("building", 15)}<span>Listing gallery, position 3 — five languages</span></div>
-            <div style="display:flex; gap:9px">${icon("globe", 15)}<span>Katuntsi location page, featured strip</span></div>
-            <div style="display:flex; gap:9px">${icon("mail", 15)}<span>Viewing invitation to Anna Weber, 28 Aug</span></div>
+          <div style="padding:12px 16px; display:grid; gap:8px; font-size:13px">
+            <div style="display:flex; gap:8px">${icon("building", 15)}<span>Listing gallery, position 3 — five languages</span></div>
+            <div style="display:flex; gap:8px">${icon("globe", 15)}<span>Katuntsi location page, featured strip</span></div>
+            <div style="display:flex; gap:8px">${icon("mail", 15)}<span>Viewing invitation to Anna Weber, 28 Aug</span></div>
             <div class="note note--info">${icon("alert", 14)}<span>Removing it changes all three. The listing needs at least six photos to stay published.</span></div>
           </div>
         </section>

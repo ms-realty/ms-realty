@@ -9,25 +9,25 @@ const INT_NAV = (on) => subnav([
 
 const CAT_CSS = `
     .cat { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px; }
-    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:13px; background:var(--surface);
+    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
       display:grid; gap:8px; }
-    .capp .hd { display:flex; align-items:center; gap:9px; }
+    .capp .hd { display:flex; align-items:center; gap:8px; }
     .capp .lg { display:grid; place-items:center; width:32px; height:32px; border-radius:var(--r-sm);
       font:700 11px var(--font-sans); flex:0 0 auto; }
-    .capp b { font-size:12.5px; font-weight:600; color:var(--text-strong); }
-    .capp p { font-size:11.5px; color:var(--text-muted); min-height:30px; }
+    .capp b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .capp p { font-size:11px; color:var(--text-muted); min-height:30px; }
     .capp .ft { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:14px; align-items:center;
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:16px; align-items:center;
       padding:12px 16px; border-bottom:1px solid var(--border); }
     .auto:last-child { border-bottom:0; }
     .auto b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .auto em { font-style:normal; font-size:12px; color:var(--text-muted); }
-    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:5px; font-size:11.5px; }
-    .rule span.k { padding:2px 7px; border-radius:var(--r-xs); background:var(--stone-100); color:var(--stone-700); font-weight:600; }
-    .rule span.v { padding:2px 7px; border-radius:var(--r-xs); background:var(--sea-50); color:var(--sea-700); font-weight:600; }
+    .auto em { font-style:normal; font-size:13px; color:var(--text-muted); }
+    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:11px; }
+    .rule span.k { padding:4px 8px; border-radius:var(--r-xs); background:var(--tile-deep); color:var(--marble-700); font-weight:600; }
+    .rule span.v { padding:4px 8px; border-radius:var(--r-xs); background:var(--spring-50); color:var(--spring-800); font-weight:600; }
 `;
 
 const CAT_APPS = [
@@ -67,17 +67,17 @@ const CAT_BODY = `      <div class="ph">
             </div>
             <span style="margin-left:auto" class="pill pill--sea"><i></i>via Composio</span>
           </div>
-          <div class="note note--info" style="border-radius:0; padding:11px 16px">${icon("puzzle", 16)}
+          <div class="note note--info" style="border-radius:0; padding:12px 16px">${icon("puzzle", 16)}
             <span>These are brokered by one aggregator that holds the OAuth app registrations. The agency
               consents once per service; MS Realty never stores a third-party password, and a service the
               agency drops takes its tokens with it.</span></div>
           <div class="cat">
 ${CAT_APPS.map(([name, colour, ini, what, cta, cat]) => `            <div class="capp">
               <div class="hd"><span class="lg" style="background:${colour}; color:#fff">${ini}</span>
-                <span style="min-width:0"><b>${name}</b><span style="display:block; font-size:10.5px" class="muted">${cat}</span></span></div>
+                <span style="min-width:0"><b>${name}</b><span style="display:block; font-size:11px" class="muted">${cat}</span></span></div>
               <p>${what}</p>
               <div class="ft"><button class="btn btn--sm" type="button">${cta}</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>`).join("\n")}
           </div>
           <div class="foot"><span>Showing 16 of 312 available services</span>
@@ -86,26 +86,26 @@ ${CAT_APPS.map(([name, colour, ini, what, cta, cat]) => `            <div class=
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Wired directly</h2><span class="sub">10</span></div>
-            <div class="side-sect" style="display:grid; gap:7px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               ${[["WhatsApp Business","Not connected","sand"],["Google Workspace","Reauthorise","warn"],["Facebook Page","Connected","ok"],["Instagram","Connected","ok"],["PostgreSQL · Payload","Live","ok"],["Cloudflare R2","Live","ok"],["Typesense","Live","ok"],["Hermes endpoint","Not configured","sand"],["GitHub","Not connected","sand"],["Viber","Unavailable","sand"]]
                 .map(([n, s, t]) => `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>${n}</span><span class="pill pill--${t}"><i></i>${s}</span></div>`).join("")}
-              <p class="muted" style="font-size:11.5px; margin-top:5px">These ten carry a named workflow, so they
+              <p class="muted" style="font-size:11px; margin-top:4px">These ten carry a named workflow, so they
                 stay first-party: an aggregator outage must not stop a reply from being delivered.</p>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What a connection may touch</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>Only the scopes shown before you consent, and each one is named in plain words.</span></div>
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>Only records the connected workflow needs — a calendar link never sees lead contact details.</span></div>
-              <div style="display:flex; gap:9px; color:var(--danger-600)">${icon("x", 15)}<span>Nothing may send to a customer without the same approval a broker needs.</span></div>
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Only the scopes shown before you consent, and each one is named in plain words.</span></div>
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Only records the connected workflow needs — a calendar link never sees lead contact details.</span></div>
+              <div style="display:flex; gap:8px; color:var(--danger-600)">${icon("x", 15)}<span>Nothing may send to a customer without the same approval a broker needs.</span></div>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Not listed?</h2></div>
-            <div class="side-sect" style="font-size:12.5px; color:var(--text-body)">
+            <div class="side-sect" style="font-size:13px; color:var(--text-body)">
               Ask for it and the agency's own developer sees the request with the workflow you described.
-              <button class="btn btn--sm" type="button" style="margin-top:9px">${icon("send", 13)}<span>Request a service</span></button>
+              <button class="btn btn--sm" type="button" style="margin-top:8px">${icon("send", 13)}<span>Request a service</span></button>
             </div>
           </section>
         </div>
@@ -143,19 +143,19 @@ ${[
           <span class="toggle"${on ? ' data-on="1"' : ""}><i></i></span>
           <span style="min-width:0"><b>${name}</b>
             <span class="rule"><span class="k">${k}</span>${icon("arrow", 12)}<span class="v">then ${v}</span></span></span>
-          <span style="font-size:12px" class="muted">${when}</span>
-          <span style="font-size:12px" class="muted">${last}</span>
+          <span style="font-size:13px" class="muted">${when}</span>
+          <span style="font-size:13px" class="muted">${last}</span>
           <span style="display:flex; justify-content:flex-end"><span class="pill pill--${tone}"><i></i>${boundary}</span></span>
         </div>`;
 }).join("\n")}
-        <div class="savebar"><span style="font-size:12px" class="muted">A failing automation raises a workspace
+        <div class="savebar"><span style="font-size:13px" class="muted">A failing automation raises a workspace
           alert rather than retrying silently. The last failure was the saved-search digest on 28 August, when
           Google delivery expired.</span></div>
       </section>
       <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px">
         <section class="panel">
           <div class="panel-hd"><h2>Webhooks in</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+          <div class="sect" style="display:grid; gap:8px; font-size:13px">
             <div style="display:flex; justify-content:space-between"><span class="mono">meta/whatsapp</span><span class="pill pill--sand"><i></i>Awaiting token</span></div>
             <div style="display:flex; justify-content:space-between"><span class="mono">meta/leadgen</span><span class="pill pill--ok"><i></i>Verified</span></div>
             <div style="display:flex; justify-content:space-between"><span class="mono">payload/afterChange</span><span class="pill pill--ok"><i></i>Verified</span></div>
@@ -163,7 +163,7 @@ ${[
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Webhooks out</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+          <div class="sect" style="display:grid; gap:8px; font-size:13px">
             <div style="display:flex; justify-content:space-between"><span>Lead created</span><span class="muted">2 subscribers</span></div>
             <div style="display:flex; justify-content:space-between"><span>Listing published</span><span class="muted">1 subscriber</span></div>
             <div style="display:flex; justify-content:space-between"><span>Case step closed</span><span class="muted">none</span></div>
@@ -172,10 +172,10 @@ ${[
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Agent access</h2><span class="pill pill--ai">${icon("sparkles", 11)}MCP</span></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+          <div class="sect" style="display:grid; gap:8px; font-size:13px">
             <p class="muted">The owner's own assistant can reach this workspace over four tools, each bound to
               the same permissions the person has.</p>
-            <div style="display:grid; gap:5px">
+            <div style="display:grid; gap:4px">
               ${["ms_realty_admin_read","ms_realty_admin_write","ms_realty_hermes","ms_realty_admin_context"].map((t) => `<span class="mono">${t}</span>`).join("")}
             </div>
             <button class="btn btn--sm" type="button" style="margin-top:4px">${icon("key", 13)}<span>Connect an assistant</span></button>

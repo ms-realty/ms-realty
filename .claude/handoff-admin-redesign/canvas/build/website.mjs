@@ -10,30 +10,30 @@ const SITE_NAV = (on) => subnav([
 
 const LOC = ["BG","EN","DE","NL","RU","EL","HE"];
 function locBar(states) {
-  return `<span style="display:flex; gap:3px">${LOC.map((c, i) => {
+  return `<span style="display:flex; gap:4px">${LOC.map((c, i) => {
     const s = states[i];
     const style = s === 2 ? "background:var(--success-50); color:var(--success-600)"
       : s === 1 ? "background:var(--warning-50); color:var(--warning-700)"
       : "background:transparent; border:1px dashed var(--border-control); color:var(--text-muted)";
-    return `<span style="display:grid; place-items:center; min-width:23px; height:18px; padding:0 4px; border-radius:var(--r-xs); font:700 9.5px var(--font-sans); ${style}">${c}</span>`;
+    return `<span style="display:grid; place-items:center; min-width:23px; height:18px; padding:0 4px; border-radius:var(--r-xs); font:700 11px var(--font-sans); ${style}">${c}</span>`;
   }).join("")}</span>`;
 }
 
 /* -------------------------------------------------------------- Site pages */
 const PG_CSS = `
-    .tr { display:grid; grid-template-columns:minmax(0,1fr) 250px 190px 150px 112px; gap:14px; align-items:center;
-      padding:10px 16px; border-bottom:1px solid var(--border); }
+    .tr { display:grid; grid-template-columns:minmax(0,1fr) 250px 190px 150px 112px; gap:16px; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .tr:last-child { border-bottom:0; }
-    .tr--hd { padding:9px 16px; background:var(--stone-50); font-size:11px; font-weight:600;
+    .tr--hd { padding:8px 16px; background:var(--tile); font-size:11px; font-weight:600;
       letter-spacing:.02em; color:var(--text-muted); }
-    .tr--hd:hover { background:var(--stone-50); }
-    .tr:hover { background:var(--stone-50); }
-    .tr-name { display:flex; align-items:center; gap:9px; min-width:0; }
+    .tr--hd:hover { background:var(--tile); }
+    .tr:hover { background:var(--tile); }
+    .tr-name { display:flex; align-items:center; gap:8px; min-width:0; }
     .tr-name b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .tr-name span.p { font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted); }
+    .tr-name span.p { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); }
     .ind { display:inline-block; }
-    .newnote { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; padding:12px 16px;
-      background:var(--sea-50); border-bottom:1px solid var(--sea-100); color:var(--sea-700); font-size:12.5px; }
+    .newnote { display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; padding:12px 16px;
+      background:var(--spring-50); border-bottom:1px solid var(--spring-100); color:var(--spring-800); font-size:13px; }
 `;
 const PG_BODY = `      <div class="ph">
         <div><h1>Website</h1><p>Every page the public site serves, in all seven languages. Bulgarian is the source; nothing is indexed in another language until a person approves it.</p></div>
@@ -73,8 +73,8 @@ ${[
           <span class="tr-name"><span class="ind" style="width:${depth * 18}px"></span>${icon(depth ? "file" : kind === "guide" ? "map" : kind === "legal" ? "shield" : "globe", 16)}
             <span style="min-width:0"><b>${name}</b> <span class="p">${path}</span></span></span>
           <span>${locBar(locs)}</span>
-          <span style="font-size:12px" class="muted">${type}</span>
-          <span style="font-size:12px" class="muted">${updated}</span>
+          <span style="font-size:13px" class="muted">${type}</span>
+          <span style="font-size:13px" class="muted">${updated}</span>
           <span><span class="pill pill--${tone}"><i></i>${state}</span></span>
         </div>`).join("\n")}
         <div class="foot"><span>Legend: solid = approved and indexed · amber = drafted, not approved · dashed = not translated</span>
@@ -84,28 +84,28 @@ fs.writeFileSync(W("SitePages.dc.html"), page({ active: "website", body: PG_BODY
 
 /* ------------------------------------------------------------- Page editor */
 const PE_CSS = `
-    .blocks { display:grid; gap:10px; padding:16px; background:var(--stone-100); }
+    .blocks { display:grid; gap:12px; padding:16px; background:var(--tile-deep); }
     .blk { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; }
-    .blk-hd { display:flex; align-items:center; gap:9px; padding:8px 12px; border-bottom:1px solid var(--border);
-      background:var(--stone-50); }
-    .blk-hd b { font-size:11.5px; font-weight:600; color:var(--text-muted); flex:1 1 auto; }
-    .blk-bd { padding:14px 16px; }
+    .blk-hd { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border);
+      background:var(--tile); }
+    .blk-hd b { font-size:11px; font-weight:600; color:var(--text-muted); flex:1 1 auto; }
+    .blk-bd { padding:16px 16px; }
     .blk-bd h3 { font-family:var(--font-display); font-size:22px; font-weight:600; letter-spacing:-.015em; }
-    .blk-bd p { font-size:13px; color:var(--text-body); margin-top:7px; }
+    .blk-bd p { font-size:13px; color:var(--text-body); margin-top:8px; }
     .drag { color:var(--text-muted); cursor:grab; }
-    .add { display:flex; align-items:center; justify-content:center; gap:8px; padding:13px;
+    .add { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px;
       border:1px dashed var(--border-control); border-radius:var(--r-md); color:var(--text-muted);
-      font-size:12.5px; font-weight:600; background:var(--surface); }
-    .cards3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
-    .cards3 div { border:1px solid var(--border); border-radius:var(--r-sm); padding:10px; font-size:12px; }
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+      font-size:13px; font-weight:600; background:var(--surface); }
+    .cards3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .cards3 div { border:1px solid var(--border); border-radius:var(--r-sm); padding:12px; font-size:13px; }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:9px; }
-    .locrow { display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:10px; align-items:center;
-      padding:7px 0; border-bottom:1px solid var(--border); font-size:12.5px; }
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .locrow { display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:12px; align-items:center;
+      padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
     .locrow:last-child { border-bottom:0; }
 `;
-const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); margin-bottom:10px">
+const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:12px">
         <a href="#">Website</a> ${icon("chevron", 13)} <a href="#">Pages</a> ${icon("chevron", 13)}
         <b style="color:var(--text-strong)">Sell with us</b>
       </div>
@@ -128,7 +128,7 @@ const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:cent
                 <h3>Продайте имота си в Сандански с брокер, който вдига телефона</h3>
                 <p>Безплатна оценка на място в рамките на два работни дни. Договор за посредничество без
                   скрити такси и с ясен срок.</p>
-                <div style="display:flex; gap:8px; margin-top:11px">
+                <div style="display:flex; gap:8px; margin-top:12px">
                   <span class="btn btn--sm btn--accent">Заявете оценка</span>
                   <span class="btn btn--sm">Вижте как работим</span>
                 </div>
@@ -137,22 +137,22 @@ const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:cent
             <div class="blk">
               <div class="blk-hd">${icon("layers", 14)}<b>Three steps</b><span class="drag">${icon("list", 14)}</span></div>
               <div class="blk-bd"><div class="cards3">
-                <div><b>1. Оценка</b><p style="margin-top:4px; font-size:11.5px; color:var(--text-muted)">Идваме на място, снимаме и даваме реалистична цена.</p></div>
-                <div><b>2. Подготовка</b><p style="margin-top:4px; font-size:11.5px; color:var(--text-muted)">Проверяваме документите и подготвяме обявата на пет езика.</p></div>
-                <div><b>3. Сделка</b><p style="margin-top:4px; font-size:11.5px; color:var(--text-muted)">Организираме огледите и водим сделката до нотариуса.</p></div>
+                <div><b>1. Оценка</b><p style="margin-top:4px; font-size:11px; color:var(--text-muted)">Идваме на място, снимаме и даваме реалистична цена.</p></div>
+                <div><b>2. Подготовка</b><p style="margin-top:4px; font-size:11px; color:var(--text-muted)">Проверяваме документите и подготвяме обявата на пет езика.</p></div>
+                <div><b>3. Сделка</b><p style="margin-top:4px; font-size:11px; color:var(--text-muted)">Организираме огледите и водим сделката до нотариуса.</p></div>
               </div></div>
             </div>
             <div class="blk">
               <div class="blk-hd">${icon("form", 14)}<b>Valuation form</b><span class="pill pill--sea"><i></i>Creates a seller lead</span><span class="drag">${icon("list", 14)}</span></div>
-              <div class="blk-bd" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px">
+              <div class="blk-bd" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px">
                 <span class="in in--empty">Име</span><span class="in in--empty">Телефон</span>
                 <span class="in in--empty" style="grid-column:1/-1">Адрес на имота</span>
-                <span style="grid-column:1/-1; font-size:11.5px; color:var(--text-muted)">Consent checkbox and privacy link are added automatically and cannot be removed.</span>
+                <span style="grid-column:1/-1; font-size:11px; color:var(--text-muted)">Consent checkbox and privacy link are added automatically and cannot be removed.</span>
               </div>
             </div>
             <div class="blk">
               <div class="blk-hd">${icon("building", 14)}<b>Recently sold</b><span class="pill pill--sand">Pulls from the catalogue</span><span class="drag">${icon("list", 14)}</span></div>
-              <div class="blk-bd"><p style="font-size:12.5px; color:var(--text-muted)">Shows the last four
+              <div class="blk-bd"><p style="font-size:13px; color:var(--text-muted)">Shows the last four
                 completed sales with an approved public record. Nothing to configure — it follows the catalogue.</p></div>
             </div>
             <div class="add">${icon("plus", 15)}Add a block</div>
@@ -161,7 +161,7 @@ const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:cent
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Languages</h2><span class="sub">5 of 7</span></div>
-            <div class="side-sect" style="padding-top:4px; padding-bottom:6px">
+            <div class="side-sect" style="padding-top:4px; padding-bottom:8px">
               ${[
                 ["BG","Source","ok","Published"],
                 ["EN","Human, approved","ok","Published"],
@@ -171,7 +171,7 @@ const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:cent
                 ["EL","Not translated","sand","—"],
                 ["HE","Not translated","sand","—"],
               ].map(([c, s, tone, state]) => `<div class="locrow">
-                <span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">${c}</span>
+                <span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">${c}</span>
                 <span><b style="font-weight:600">${s}</b></span>
                 <span class="pill pill--${tone}">${tone === "ai" ? icon("sparkles", 11) : "<i></i>"}${state}</span></div>`).join("")}
             </div>
@@ -180,20 +180,20 @@ const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:cent
           <section class="panel">
             <div class="panel-hd"><h2>Search appearance</h2></div>
             <div class="side-sect">
-              <p style="font-size:12px; color:var(--sea-700); font-family:var(--font-mono)">ms-realty.bg › prodai</p>
-              <p style="font-size:15px; color:#1a0dab; margin-top:3px">Продажба на имот в Сандански — MS Realty</p>
-              <p style="font-size:12px; color:var(--text-muted); margin-top:3px">Безплатна оценка на място за два
+              <p style="font-size:13px; color:var(--spring-800); font-family:var(--font-mono)">ms-realty.bg › prodai</p>
+              <p style="font-size:16px; color:#1a0dab; margin-top:4px">Продажба на имот в Сандански — MS Realty</p>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:4px">Безплатна оценка на място за два
                 работни дни. Договор без скрити такси. Семейна агенция в Сандански от 2011 г.</p>
-              <div style="display:flex; gap:6px; margin-top:9px">
+              <div style="display:flex; gap:8px; margin-top:8px">
                 <span class="pill pill--ok"><i></i>Title 52 of 60</span><span class="pill pill--ok"><i></i>Description 148 of 160</span></div>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Before publishing</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>The Dutch draft is unapproved and will not be indexed.</span></div>
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>No claim on this page requires a legal review.</span></div>
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>The path has not changed, so no redirect is needed.</span></div>
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>The Dutch draft is unapproved and will not be indexed.</span></div>
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>No claim on this page requires a legal review.</span></div>
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>The path has not changed, so no redirect is needed.</span></div>
             </div>
           </section>
         </div>
@@ -238,27 +238,27 @@ ${[
                 <td><span class="mono" style="white-space:normal">${url}</span></td>
                 <td class="muted">${was}</td>
                 <td class="muted">${ev}</td>
-                <td><b style="font-size:12.5px">${prop}</b><span style="display:block; font-size:11.5px" class="muted">${who}</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:6px; justify-content:flex-end">
+                <td><b style="font-size:13px">${prop}</b><span style="display:block; font-size:11px" class="muted">${who}</span></td>
+                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
                   <button class="btn btn--sm btn--primary" type="button">Approve</button>
                   <button class="btn btn--sm" type="button">Change</button></span></td>
               </tr>`).join("\n")}
             </tbody>
           </table>
-          <div class="savebar"><span style="font-size:12px" class="muted">A redirect file is only built from approved decisions. An unapproved proposal never reaches production.</span></div>
+          <div class="savebar"><span style="font-size:13px" class="muted">A redirect file is only built from approved decisions. An unapproved proposal never reaches production.</span></div>
         </section>
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Launch gate</h2><span class="pill pill--warn"><i></i>Blocked</span></div>
-            <div class="sect" style="display:grid; gap:9px; font-size:12.5px">
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between"><span>URLs with a decision</span><b>419 of 457</b></div>
-              <div class="prog" style="height:6px; border-radius:99px; background:var(--stone-200); overflow:hidden"><i style="display:block; height:100%; width:92%; background:var(--success-500)"></i></div>
-              <div class="note note--warn" style="margin-top:3px">${icon("alert", 14)}<span>Launch stays blocked until all 457 have a terminal outcome.</span></div>
+              <div class="prog" style="height:6px; border-radius:var(--r-pill); background:var(--joint); overflow:hidden"><i style="display:block; height:100%; width:92%; background:var(--success-500)"></i></div>
+              <div class="note note--warn" style="margin-top:4px">${icon("alert", 14)}<span>Launch stays blocked until all 457 have a terminal outcome.</span></div>
             </div>
           </section>
           <section class="panel">
-            <div class="panel-hd"><h2>Search evidence</h2><a href="#" style="font-size:12.5px; font-weight:600">Import</a></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="panel-hd"><h2>Search evidence</h2><a href="#" style="font-size:13px; font-weight:600">Import</a></div>
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between"><span>Google Search Console</span><span class="pill pill--warn"><i></i>Not verified</span></div>
               <div style="display:flex; justify-content:space-between"><span>Yandex Webmaster</span><span class="pill pill--warn"><i></i>Not verified</span></div>
               <div style="display:flex; justify-content:space-between"><span>Sitemap submitted</span><span class="pill pill--sand"><i></i>After cutover</span></div>
@@ -267,7 +267,7 @@ ${[
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Structured data</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between"><span>RealEstateListing</span><span class="pill pill--ok"><i></i>84 valid</span></div>
               <div style="display:flex; justify-content:space-between"><span>RealEstateAgent</span><span class="pill pill--ok"><i></i>Valid</span></div>
               <div style="display:flex; justify-content:space-between"><span>BreadcrumbList</span><span class="pill pill--ok"><i></i>Valid</span></div>

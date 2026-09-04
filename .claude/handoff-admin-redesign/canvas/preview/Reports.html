@@ -324,24 +324,24 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .bars { display:grid; gap:9px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:12.5px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--stone-200); overflow:hidden; }
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .bars { display:grid; gap:8px; padding:16px 20px; }
+    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
+    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
     .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:14px 18px; }
-    .kpi dt { font-size:11.5px; color:var(--text-muted); margin-bottom:5px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:26px; font-weight:600; letter-spacing:-.02em;
+    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
+    .kpi > div { background:var(--surface); padding:16px 20px; }
+    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
       color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:5px; font-size:11.5px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:14px; align-items:center;
-      padding:11px 16px; border-bottom:1px solid var(--border); }
+    .kpi small { display:block; margin-top:4px; font-size:11px; }
+    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .gate:last-child { border-bottom:0; }
     .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:12px; color:var(--text-muted); }
+    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
 
   </style></head><body>
 <!--
@@ -419,14 +419,14 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <section class="panel">
           <div class="panel-hd"><h2>Where enquiries came from</h2><span class="sub">63 in August</span></div>
           <div class="bars">
-            <div class="bar"><span>Website enquiry form</span><span class="t"><i style="width:100%; background:var(--sea-600)"></i></span><b style="text-align:right">26</b></div>
-            <div class="bar"><span>WhatsApp</span><span class="t"><i style="width:53.84615384615385%; background:var(--sea-600)"></i></span><b style="text-align:right">14</b></div>
-            <div class="bar"><span>Phone</span><span class="t"><i style="width:42.30769230769231%; background:var(--sea-600)"></i></span><b style="text-align:right">11</b></div>
-            <div class="bar"><span>Legacy .ru pages</span><span class="t"><i style="width:26.923076923076923%; background:var(--sea-600)"></i></span><b style="text-align:right">7</b></div>
-            <div class="bar"><span>Facebook</span><span class="t"><i style="width:11.538461538461538%; background:var(--sea-600)"></i></span><b style="text-align:right">3</b></div>
-            <div class="bar"><span>Walk-in</span><span class="t"><i style="width:7.6923076923076925%; background:var(--sea-600)"></i></span><b style="text-align:right">2</b></div>
+            <div class="bar"><span>Website enquiry form</span><span class="t"><i style="width:100%; background:var(--spring-700)"></i></span><b style="text-align:right">26</b></div>
+            <div class="bar"><span>WhatsApp</span><span class="t"><i style="width:53.84615384615385%; background:var(--spring-700)"></i></span><b style="text-align:right">14</b></div>
+            <div class="bar"><span>Phone</span><span class="t"><i style="width:42.30769230769231%; background:var(--spring-700)"></i></span><b style="text-align:right">11</b></div>
+            <div class="bar"><span>Legacy .ru pages</span><span class="t"><i style="width:26.923076923076923%; background:var(--spring-700)"></i></span><b style="text-align:right">7</b></div>
+            <div class="bar"><span>Facebook</span><span class="t"><i style="width:11.538461538461538%; background:var(--spring-700)"></i></span><b style="text-align:right">3</b></div>
+            <div class="bar"><span>Walk-in</span><span class="t"><i style="width:7.6923076923076925%; background:var(--spring-700)"></i></span><b style="text-align:right">2</b></div>
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">Seven enquiries still arrive on legacy
+          <div class="savebar"><span style="font-size:13px" class="muted">Seven enquiries still arrive on legacy
             Russian pages, which is the strongest argument for keeping every one of those URLs alive.</span></div>
         </section>
         <section class="panel">
@@ -434,30 +434,30 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <div class="bars">
             <div class="bar"><span>Under 1 hour</span><span class="t"><i style="width:75%; background:var(--success-500)"></i></span><b style="text-align:right">21</b></div>
             <div class="bar"><span>1 to 4 hours</span><span class="t"><i style="width:100%; background:var(--success-500)"></i></span><b style="text-align:right">28</b></div>
-            <div class="bar"><span>4 to 24 hours</span><span class="t"><i style="width:32.142857142857146%; background:var(--warning-600)"></i></span><b style="text-align:right">9</b></div>
+            <div class="bar"><span>4 to 24 hours</span><span class="t"><i style="width:32.142857142857146%; background:var(--warning-700)"></i></span><b style="text-align:right">9</b></div>
             <div class="bar"><span>Over 24 hours</span><span class="t"><i style="width:17.857142857142858%; background:var(--danger-500)"></i></span><b style="text-align:right">5</b></div>
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">The five over 24 hours were all
+          <div class="savebar"><span style="font-size:13px" class="muted">The five over 24 hours were all
             Hebrew or Greek and all arrived at the weekend. That is a staffing question, not a tooling one.</span></div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Catalogue health</h2></div>
           <div class="bars">
             <div class="bar"><span>Published and complete</span><span class="t"><i style="width:100%; background:var(--success-500)"></i></span><b style="text-align:right">84</b></div>
-            <div class="bar"><span>Published, facts thin</span><span class="t"><i style="width:22.61904761904762%; background:var(--warning-600)"></i></span><b style="text-align:right">19</b></div>
-            <div class="bar"><span>Needs review</span><span class="t"><i style="width:51.19047619047619%; background:var(--warning-600)"></i></span><b style="text-align:right">43</b></div>
-            <div class="bar"><span>Archived</span><span class="t"><i style="width:45.23809523809524%; background:var(--stone-600)"></i></span><b style="text-align:right">38</b></div>
+            <div class="bar"><span>Published, facts thin</span><span class="t"><i style="width:22.61904761904762%; background:var(--warning-700)"></i></span><b style="text-align:right">19</b></div>
+            <div class="bar"><span>Needs review</span><span class="t"><i style="width:51.19047619047619%; background:var(--warning-700)"></i></span><b style="text-align:right">43</b></div>
+            <div class="bar"><span>Archived</span><span class="t"><i style="width:45.23809523809524%; background:var(--marble-600)"></i></span><b style="text-align:right">38</b></div>
           </div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Hermes contribution</h2><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Drafts only</span></div>
           <div class="bars">
             <div class="bar"><span>Accepted as written</span><span class="t"><i style="width:100%; background:var(--success-500)"></i></span><b style="text-align:right">96</b></div>
-            <div class="bar"><span>Accepted after edits</span><span class="t"><i style="width:35.41666666666667%; background:var(--sea-600)"></i></span><b style="text-align:right">34</b></div>
-            <div class="bar"><span>Rejected</span><span class="t"><i style="width:18.75%; background:var(--stone-600)"></i></span><b style="text-align:right">18</b></div>
+            <div class="bar"><span>Accepted after edits</span><span class="t"><i style="width:35.41666666666667%; background:var(--spring-700)"></i></span><b style="text-align:right">34</b></div>
+            <div class="bar"><span>Rejected</span><span class="t"><i style="width:18.75%; background:var(--marble-600)"></i></span><b style="text-align:right">18</b></div>
             <div class="bar"><span>Refused by a guardrail</span><span class="t"><i style="width:7.291666666666667%; background:var(--danger-500)"></i></span><b style="text-align:right">7</b></div>
           </div>
-          <div class="savebar"><span style="font-size:12px" class="muted">Roughly nine hours of translation and
+          <div class="savebar"><span style="font-size:13px" class="muted">Roughly nine hours of translation and
             drafting time in August, all of it reviewed by a person before anyone outside saw it.</span></div>
         </section>
       </div>

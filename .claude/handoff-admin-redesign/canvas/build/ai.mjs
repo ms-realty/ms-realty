@@ -4,25 +4,25 @@ const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const AI_CSS = `
     .cap { display:grid; grid-template-columns:auto minmax(0,1fr) 118px 118px; gap:12px; align-items:center;
-      padding:10px 16px; border-bottom:1px solid var(--border); font-size:12.5px; }
+      padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; }
     .cap:last-child { border-bottom:0; }
-    .cap b { font-size:12.5px; font-weight:600; color:var(--text-strong); display:block; }
-    .cap em { font-style:normal; font-size:11.5px; color:var(--text-muted); }
-    .yes { color:var(--success-600); font-weight:600; display:flex; align-items:center; gap:6px; }
-    .no { color:var(--danger-600); font-weight:600; display:flex; align-items:center; gap:6px; }
-    .dq { display:grid; grid-template-columns:auto minmax(0,1fr) 148px 128px 156px; gap:14px; align-items:center;
-      padding:11px 16px; border-bottom:1px solid var(--border); }
+    .cap b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
+    .cap em { font-style:normal; font-size:11px; color:var(--text-muted); }
+    .yes { color:var(--success-600); font-weight:600; display:flex; align-items:center; gap:8px; }
+    .no { color:var(--danger-600); font-weight:600; display:flex; align-items:center; gap:8px; }
+    .dq { display:grid; grid-template-columns:auto minmax(0,1fr) 148px 128px 156px; gap:16px; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
     .dq:last-child { border-bottom:0; }
-    .dq:hover { background:var(--stone-50); }
+    .dq:hover { background:var(--tile); }
     .dq b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .dq em { font-style:normal; font-size:12px; color:var(--text-muted); }
+    .dq em { font-style:normal; font-size:13px; color:var(--text-muted); }
     .runstep { display:grid; grid-template-columns:26px minmax(0,1fr) 132px 104px; gap:12px; align-items:start;
-      padding:12px 18px; border-bottom:1px solid var(--border); }
+      padding:12px 20px; border-bottom:1px solid var(--border); }
     .runstep:last-child { border-bottom:0; }
-    .runstep b { font-size:12.5px; font-weight:600; display:block; }
-    .runstep em { font-style:normal; font-size:11.5px; color:var(--text-muted); display:block; margin-top:3px; }
-    .quote { margin-top:8px; padding:10px 12px; border-left:2px solid var(--border-control);
-      background:var(--stone-50); font-size:12px; color:var(--text-body); border-radius:0 var(--r-sm) var(--r-sm) 0; }
+    .runstep b { font-size:13px; font-weight:600; display:block; }
+    .runstep em { font-style:normal; font-size:11px; color:var(--text-muted); display:block; margin-top:4px; }
+    .quote { margin-top:8px; padding:12px 12px; border-left:2px solid var(--border-control);
+      background:var(--tile); font-size:13px; color:var(--text-body); border-radius:0 var(--r-sm) var(--r-sm) 0; }
 `;
 
 const HERMES_BODY = `      <div class="ph">
@@ -40,12 +40,12 @@ const HERMES_BODY = `      <div class="ph">
             <div class="sect">
               <span class="in in--area" style="min-height:64px; color:var(--text-body)">Which listings in Sandanski
                 under €80,000 have no German description, and what is missing from each before it can be published?</span>
-              <div style="display:flex; align-items:center; gap:9px; margin-top:11px">
+              <div style="display:flex; align-items:center; gap:8px; margin-top:12px">
                 <button class="btn btn--sm btn--primary" type="button" data-disabled="1">${icon("sparkles", 13)}<span>Prepare a plan</span></button>
                 <span class="pill pill--sand">Read-only</span>
-                <span style="margin-left:auto; font-size:11.5px" class="muted">Every answer names the records it used.</span>
+                <span style="margin-left:auto; font-size:11px" class="muted">Every answer names the records it used.</span>
               </div>
-              <div class="note note--warn" style="margin-top:11px">${icon("alert", 15)}
+              <div class="note note--warn" style="margin-top:12px">${icon("alert", 15)}
                 <span>Hermes cannot run until <span class="mono">HERMES_CHAT_COMPLETIONS_URL</span> and
                   <span class="mono">HERMES_API_KEY</span> are set. Everything below is from the last configured run.</span></div>
             </div>
@@ -64,7 +64,7 @@ ${[
               <span style="min-width:0"><b>${title}</b><em>${sub}</em></span>
               <span><span class="pill pill--sand">${kind}</span></span>
               <span><span class="pill pill--${tone}"><i></i>${state}</span></span>
-              <span style="display:flex; gap:7px; justify-content:flex-end">
+              <span style="display:flex; gap:8px; justify-content:flex-end">
                 <button class="btn btn--sm btn--primary" type="button">Review</button>
                 <button class="btn btn--sm" type="button">Discard</button></span>
             </div>`).join("\n")}
@@ -89,7 +89,7 @@ ${[
               <span class="${ok ? "yes" : "no"}">${ok ? "May draft" : "Refused"}</span>
               <span class="muted">${ok ? "Human approves" : "Always a person"}</span>
             </div>`).join("\n")}
-            <div class="savebar"><span style="font-size:12px" class="muted">The five refusals are a hard list in
+            <div class="savebar"><span style="font-size:13px" class="muted">The five refusals are a hard list in
               <span class="mono">hermes.mjs</span>. A prompt cannot widen them, and a refused action fails loudly rather than silently.</span></div>
           </section>
         </div>
@@ -97,31 +97,31 @@ ${[
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Setup</h2><span class="pill pill--warn"><i></i>2 of 4</span></div>
-            <div class="sect" style="display:grid; gap:9px; font-size:12.5px">
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>Model chosen — Hermes, open weights, self-hosted</span></div>
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>Guardrails and refusals in force</span></div>
-              <div style="display:flex; gap:9px; color:var(--warning-700)">${icon("alert", 15)}<span class="mono">HERMES_CHAT_COMPLETIONS_URL</span></div>
-              <div style="display:flex; gap:9px; color:var(--warning-700)">${icon("alert", 15)}<span class="mono">HERMES_API_KEY</span></div>
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Model chosen — Hermes, open weights, self-hosted</span></div>
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Guardrails and refusals in force</span></div>
+              <div style="display:flex; gap:8px; color:var(--warning-700)">${icon("alert", 15)}<span class="mono">HERMES_CHAT_COMPLETIONS_URL</span></div>
+              <div style="display:flex; gap:8px; color:var(--warning-700)">${icon("alert", 15)}<span class="mono">HERMES_API_KEY</span></div>
               <button class="btn btn--sm btn--primary" type="button" style="margin-top:4px">Enter these two</button>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What it reads</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
               ${[["Approved listing facts","165 listings"],["Approved CMS guides","6 documents"],["Approved area guides","31 locations"],["Lead and case records","the ones you open"],["Crawl and archive evidence","457 URLs"]]
                 .map(([a,b]) => `<div style="display:flex; justify-content:space-between"><span>${a}</span><span class="muted">${b}</span></div>`).join("")}
-              <div class="note note--info" style="margin-top:3px">${icon("lock", 14)}<span>Contact details are decrypted only for the one lead a draft is about, and the value never enters the draft.</span></div>
+              <div class="note note--info" style="margin-top:4px">${icon("lock", 14)}<span>Contact details are decrypted only for the one lead a draft is about, and the value never enters the draft.</span></div>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Last 30 days</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between"><span>Drafts produced</span><b>148</b></div>
               <div style="display:flex; justify-content:space-between"><span>Accepted as written</span><b>96</b></div>
               <div style="display:flex; justify-content:space-between"><span>Accepted after edits</span><b>34</b></div>
               <div style="display:flex; justify-content:space-between"><span>Rejected</span><b>18</b></div>
               <div style="display:flex; justify-content:space-between"><span>Refused by a guardrail</span><b>7</b></div>
-              <div class="note note--info" style="margin-top:3px">${icon("alert", 14)}<span>Five of the seven refusals were a Sandanski sea claim in a translated marketing line.</span></div>
+              <div class="note note--info" style="margin-top:4px">${icon("alert", 14)}<span>Five of the seven refusals were a Sandanski sea claim in a translated marketing line.</span></div>
             </div>
           </section>
         </div>
@@ -129,7 +129,7 @@ ${[
 fs.writeFileSync(W("Hermes.dc.html"), page({ active: "hermes", body: HERMES_BODY, extraCss: AI_CSS, height: 1240 }));
 
 /* --------------------------------------------------------------- Hermes run */
-const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); margin-bottom:10px">
+const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:12px">
         <a href="#">Hermes</a> ${icon("chevron", 13)} <a href="#">Runs</a> ${icon("chevron", 13)}
         <b style="color:var(--text-strong)">run-2026-08-31-0142</b>
       </div>
@@ -149,14 +149,14 @@ const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:cen
             <span class="av" style="background:var(--success-50); color:var(--success-600)">${icon("check", 13)}</span>
             <span><b>Read the approved Bulgarian descriptions</b>
               <em>7 listings · source hash recorded for each, so a later edit invalidates the draft</em></span>
-            <span class="mono">09:04:11</span><span class="muted" style="font-size:12px">0.4 s</span>
+            <span class="mono">09:04:11</span><span class="muted" style="font-size:13px">0.4 s</span>
           </div>
           <div class="runstep">
             <span class="av" style="background:var(--success-50); color:var(--success-600)">${icon("check", 13)}</span>
             <span><b>Copied the property facts verbatim</b>
               <em>Price, area, bedrooms, location, reference and source URL are moved, never re-expressed</em>
               <div class="quote">MS-00932 · €54,500 · 96 m² · 3 bedrooms · Katuntsi · makler-realty.com/obj/0032.html</div></span>
-            <span class="mono">09:04:19</span><span class="muted" style="font-size:12px">1.1 s</span>
+            <span class="mono">09:04:19</span><span class="muted" style="font-size:13px">1.1 s</span>
           </div>
           <div class="runstep">
             <span class="av" style="background:var(--success-50); color:var(--success-600)">${icon("check", 13)}</span>
@@ -164,7 +164,7 @@ const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:cen
               <em>7 listings × 3 languages · tone rules applied · no marketing claim added</em>
               <div class="quote">Renoviertes Dorfhaus mit Garten in Katunzi. Das Haus hat 96 m² Wohnfläche,
                 drei Schlafzimmer und einen eigenen Garten. Preis: 54.500 EUR.</div></span>
-            <span class="mono">09:05:02</span><span class="muted" style="font-size:12px">1 m 43 s</span>
+            <span class="mono">09:05:02</span><span class="muted" style="font-size:13px">1 m 43 s</span>
           </div>
           <div class="runstep">
             <span class="av" style="background:var(--warning-50); color:var(--warning-700)">${icon("alert", 13)}</span>
@@ -173,26 +173,26 @@ const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:cen
                 sentence was dropped rather than softened.</em>
               <div class="quote" style="border-left-color:var(--warning-700)">Rejected: «παραθαλάσσια πόλη Σαντάνσκι»
                 → replaced with the approved description of the spa town.</div></span>
-            <span class="mono">09:06:12</span><span class="muted" style="font-size:12px">0.8 s</span>
+            <span class="mono">09:06:12</span><span class="muted" style="font-size:13px">0.8 s</span>
           </div>
           <div class="runstep">
             <span class="av" style="background:var(--success-50); color:var(--success-600)">${icon("check", 13)}</span>
             <span><b>Checked every draft against its source</b>
               <em>Facts compared field by field · 21 of 21 match · 3 SEO titles were over 60 characters and were shortened</em></span>
-            <span class="mono">09:06:20</span><span class="muted" style="font-size:12px">2.1 s</span>
+            <span class="mono">09:06:20</span><span class="muted" style="font-size:13px">2.1 s</span>
           </div>
           <div class="runstep">
-            <span class="av" style="background:var(--stone-200); color:var(--stone-700)">${icon("lock", 13)}</span>
+            <span class="av" style="background:var(--joint); color:var(--marble-700)">${icon("lock", 13)}</span>
             <span><b>Stopped at the approval boundary</b>
               <em>Marking a translation indexable is a refused action. The 21 drafts are stored unpublished and
                 appear in the translation queue.</em></span>
-            <span class="mono">09:06:22</span><span class="muted" style="font-size:12px">—</span>
+            <span class="mono">09:06:22</span><span class="muted" style="font-size:13px">—</span>
           </div>
         </section>
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Cost and model</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between"><span>Model</span><span class="mono">hermes-3-70b</span></div>
               <div style="display:flex; justify-content:space-between"><span>Where it ran</span><span class="muted">Agency hardware</span></div>
               <div style="display:flex; justify-content:space-between"><span>Tokens in / out</span><span class="mono">41,208 / 9,644</span></div>
@@ -201,7 +201,7 @@ const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:cen
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Audit entry</h2></div>
-            <div class="sect" style="font-size:12px; color:var(--text-body)">
+            <div class="sect" style="font-size:13px; color:var(--text-body)">
               <p class="mono" style="white-space:pre-wrap; font-size:11px; line-height:1.6">{
   "action": "hermes_translation_draft",
   "actor": "hermes",
@@ -211,16 +211,16 @@ const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:cen
   "published": false,
   "refusals": 2
 }</p>
-              <p class="muted" style="margin-top:9px">Written to the append-only audit log. A registered action
+              <p class="muted" style="margin-top:8px">Written to the append-only audit log. A registered action
                 is the only way a run can record anything at all.</p>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>If you approve</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>21 descriptions become indexable in DE, NL and EL.</span></div>
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>The sitemap picks them up on the next build.</span></div>
-              <div style="display:flex; gap:9px">${icon("check", 15)}<span>Your name goes on each one.</span></div>
+            <div class="sect" style="display:grid; gap:8px; font-size:13px">
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>21 descriptions become indexable in DE, NL and EL.</span></div>
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>The sitemap picks them up on the next build.</span></div>
+              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Your name goes on each one.</span></div>
               <button class="btn btn--sm btn--primary" type="button" style="margin-top:4px">Review them one by one</button>
             </div>
           </section>

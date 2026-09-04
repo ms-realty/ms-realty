@@ -332,7 +332,7 @@
     .pub-bar img { display:block; height:38px; width:auto; }
     .pub-nav { display:flex; align-items:center; gap:24px; margin-left:14px; }
     .pub-nav a { font-size:15px; font-weight:600; color:var(--text-body); }
-    .pub-nav a:hover { color:var(--stone-900); }
+    .pub-nav a:hover { color:var(--marble-900); }
     .pub-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
     .lang { display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 13px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
@@ -342,23 +342,23 @@
     .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
     .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px;
       padding:0 20px; border-radius:var(--r-md); border:1px solid var(--border-control);
-      background:var(--surface); color:var(--stone-900); font-size:15px; font-weight:600; cursor:pointer; }
+      background:var(--surface); color:var(--marble-900); font-size:15px; font-weight:600; cursor:pointer; }
     .pbtn--brand { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
     /* .pub a is (0,1,1) and beat the (0,1,0) button classes, so a brand button
        rendered ink-on-ink. The anchor forms of the buttons carry their own colour. */
-    .pub a.pbtn { color:var(--stone-900); }
+    .pub a.pbtn { color:var(--marble-900); }
     .pub a.pbtn--brand, .pub a.pbtn--accent { color:#fff; }
     .pub a.callbtn { color:#fff; }
     .pbtn--lg { min-height:54px; padding:0 26px; font-size:16px; }
     .pin { display:flex; align-items:center; height:52px; padding:0 15px; border:1px solid var(--border-control);
       border-radius:var(--r-md); background:var(--surface); font-size:15px; color:var(--text-body); }
     .h1 { font-family:var(--font-display); font-size:46px; font-weight:600; letter-spacing:-.025em;
-      line-height:1.1; color:var(--stone-900); }
+      line-height:1.1; color:var(--marble-900); }
     .h2 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em;
-      line-height:1.2; color:var(--stone-900); }
+      line-height:1.2; color:var(--marble-900); }
     .h3 { font-family:var(--font-display); font-size:21px; font-weight:600; letter-spacing:-.01em;
-      color:var(--stone-900); }
+      color:var(--marble-900); }
     .lede { font-size:18px; line-height:1.55; color:var(--text-body); }
     .meta { font-size:14px; color:var(--text-muted); }
     .sec { padding:56px 0; }
@@ -377,9 +377,9 @@
     .lcard .fav { position:absolute; top:12px; right:12px; z-index:1; display:grid; place-items:center;
       width:38px; height:38px; border-radius:var(--r-full); background:rgba(255,255,255,.94); color:var(--ink-800); }
     .lcard .bd { padding:16px 18px 18px; display:grid; gap:9px; }
-    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--stone-900);
+    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--marble-900);
       letter-spacing:-.015em; }
-    .lcard h3 { font-size:16px; font-weight:600; color:var(--stone-900); line-height:1.35; }
+    .lcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
     .lfacts { display:flex; flex-wrap:wrap; gap:14px; font-size:14px; color:var(--text-muted); }
     .lfacts span { display:inline-flex; align-items:center; gap:6px; }
     .lfoot { display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -395,24 +395,24 @@
       border-top:1px solid rgba(255,255,255,.14); font-size:13.5px; color:rgba(255,255,255,.5); flex-wrap:wrap; }
 
     .fbar { border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:5; }
-    .fbar-in { max-width:1240px; margin:0 auto; padding:14px 32px; display:flex; align-items:center;
-      gap:10px; flex-wrap:wrap; }
-    .fchip { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 15px;
+    .fbar-in { max-width:1240px; margin:0 auto; padding:16px 32px; display:flex; align-items:center;
+      gap:12px; flex-wrap:wrap; }
+    .fchip { display:inline-flex; align-items:center; gap:8px; height:46px; padding:0 16px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
-      font-size:14.5px; font-weight:600; color:var(--text-body); white-space:nowrap; }
+      font-size:16px; font-weight:600; color:var(--text-body); white-space:nowrap; }
     .fchip[data-on] { border-color:var(--ink-800); background:var(--ink-800); color:#fff; }
     .fchip[data-on] svg { color:#fff; }
-    .fsearch { display:flex; align-items:center; gap:9px; height:46px; padding:0 14px; min-width:250px;
+    .fsearch { display:flex; align-items:center; gap:8px; height:46px; padding:0 16px; min-width:250px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
-      color:var(--text-muted); font-size:14.5px; flex:1 1 auto; }
-    .applied { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 32px 14px;
+      color:var(--text-muted); font-size:16px; flex:1 1 auto; }
+    .applied { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 32px 16px;
       max-width:1240px; margin:0 auto; }
-    .atag { display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 12px;
-      border-radius:var(--r-full); background:var(--stone-100); font-size:13.5px; font-weight:600;
-      color:var(--stone-700); }
+    .atag { display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 12px;
+      border-radius:var(--r-full); background:var(--tile-deep); font-size:13px; font-weight:600;
+      color:var(--marble-700); }
     .split2 { display:grid; grid-template-columns:minmax(0,1fr) 486px; gap:0; align-items:stretch; }
-    .results { padding:22px 32px 40px; }
-    .rhead { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .results { padding:24px 32px 48px; }
+    .rhead { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
     .rgrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
     /* Sticky in the product; drawn full height here so the artboard shows the pairing. */
     .mapcol { border-left:1px solid var(--border);
@@ -420,22 +420,22 @@
     .mapcol::after { content:''; position:absolute; inset:0;
       background:repeating-linear-gradient(0deg, rgba(120,130,105,.16) 0 1px, transparent 1px 48px),
         repeating-linear-gradient(90deg, rgba(120,130,105,.16) 0 1px, transparent 1px 48px); }
-    .mpin { position:absolute; z-index:2; display:inline-flex; align-items:center; height:32px; padding:0 11px;
+    .mpin { position:absolute; z-index:2; display:inline-flex; align-items:center; height:32px; padding:0 12px;
       border-radius:var(--r-full); background:var(--surface); border:1px solid var(--border-control);
-      font-size:13.5px; font-weight:600; color:var(--stone-900); box-shadow:var(--e-2); white-space:nowrap; }
+      font-size:13px; font-weight:600; color:var(--marble-900); box-shadow:var(--e-2); white-space:nowrap; }
     .mpin[data-on] { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .mtools { position:absolute; z-index:3; right:16px; top:16px; display:grid; gap:8px; }
     .mtool { display:grid; place-items:center; width:40px; height:40px; border-radius:var(--r-md);
-      background:var(--surface); border:1px solid var(--border-control); color:var(--stone-900);
+      background:var(--surface); border:1px solid var(--border-control); color:var(--marble-900);
       box-shadow:var(--e-1); }
     .mdraw { position:absolute; z-index:3; left:16px; bottom:16px; display:inline-flex; align-items:center;
-      gap:8px; height:42px; padding:0 15px; border-radius:var(--r-md); background:var(--surface);
-      border:1px solid var(--border-control); font-size:14px; font-weight:600; box-shadow:var(--e-1); }
-    .alertbar { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:14px; align-items:center;
-      padding:16px 18px; border:1px solid var(--sea-200); border-radius:var(--r-lg);
-      background:var(--sea-50); margin-bottom:20px; }
-    .alertbar b { display:block; font-size:15.5px; font-weight:600; color:var(--sea-700); }
-    .alertbar span { font-size:14px; color:var(--sea-700); }
+      gap:8px; height:42px; padding:0 16px; border-radius:var(--r-md); background:var(--surface);
+      border:1px solid var(--border-control); font-size:13px; font-weight:600; box-shadow:var(--e-1); }
+    .alertbar { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center;
+      padding:16px 20px; border:1px solid var(--spring-200); border-radius:var(--r-lg);
+      background:var(--spring-50); margin-bottom:20px; }
+    .alertbar b { display:block; font-size:16px; font-weight:600; color:var(--spring-800); }
+    .alertbar span { font-size:13px; color:var(--spring-800); }
 
   </style></head><body>
 <div class="pub" style="width:1440px; min-height:1720px">
@@ -471,7 +471,7 @@
       <span class="atag">Апартамент <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
       <span class="atag">До 100 000 € <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
       <span class="atag">Поне 2 спални <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-      <a href="#" style="font-size:13.5px; font-weight:600">Изчистете всички</a>
+      <a href="#" style="font-size:13px; font-weight:600">Изчистете всички</a>
     </div>
   </div>
 
@@ -479,7 +479,7 @@
     <div class="results">
       <div class="rhead">
         <div><h1 class="h2">Апартаменти в Сандански</h1>
-          <p class="meta" style="margin-top:5px">18 обяви · всичките с проверени факти и одобрени снимки</p></div>
+          <p class="meta" style="margin-top:4px">18 обяви · всичките с проверени факти и одобрени снимки</p></div>
         <span class="fchip">Най-нови <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
 
@@ -559,14 +559,14 @@
           </article>
       </div>
 
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:26px">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:24px">
         <p class="meta">Показани 6 от 18</p>
         <a class="pbtn" href="#">Покажете още 12 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
       </div>
 
-      <div style="margin-top:34px; padding:22px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--stone-50)">
+      <div style="margin-top:32px; padding:24px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--tile)">
         <h2 class="h3">Не намирате това, което търсите?</h2>
-        <p style="font-size:15px; color:var(--text-body); margin-top:8px; max-width:640px">Част от имотите ни
+        <p style="font-size:16px; color:var(--text-body); margin-top:8px; max-width:640px">Част от имотите ни
           не са публикувани, защото собствениците не искат обява. Кажете какво търсите и брокер ще провери
           какво има в момента.</p>
         <div style="display:flex; gap:12px; margin-top:16px">

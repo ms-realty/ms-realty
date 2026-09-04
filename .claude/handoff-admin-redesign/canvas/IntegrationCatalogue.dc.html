@@ -336,25 +336,25 @@
     .subtle { color:var(--text-muted); }
 
     .cat { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px; }
-    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:13px; background:var(--surface);
+    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
       display:grid; gap:8px; }
-    .capp .hd { display:flex; align-items:center; gap:9px; }
+    .capp .hd { display:flex; align-items:center; gap:8px; }
     .capp .lg { display:grid; place-items:center; width:32px; height:32px; border-radius:var(--r-sm);
       font:700 11px var(--font-sans); flex:0 0 auto; }
-    .capp b { font-size:12.5px; font-weight:600; color:var(--text-strong); }
-    .capp p { font-size:11.5px; color:var(--text-muted); min-height:30px; }
+    .capp b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .capp p { font-size:11px; color:var(--text-muted); min-height:30px; }
     .capp .ft { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .side-sect { padding:14px 16px; border-bottom:1px solid var(--border); }
+    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
     .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:12.5px; margin-bottom:8px; }
-    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:14px; align-items:center;
+    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:16px; align-items:center;
       padding:12px 16px; border-bottom:1px solid var(--border); }
     .auto:last-child { border-bottom:0; }
     .auto b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .auto em { font-style:normal; font-size:12px; color:var(--text-muted); }
-    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:5px; font-size:11.5px; }
-    .rule span.k { padding:2px 7px; border-radius:var(--r-xs); background:var(--stone-100); color:var(--stone-700); font-weight:600; }
-    .rule span.v { padding:2px 7px; border-radius:var(--r-xs); background:var(--sea-50); color:var(--sea-700); font-weight:600; }
+    .auto em { font-style:normal; font-size:13px; color:var(--text-muted); }
+    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:11px; }
+    .rule span.k { padding:4px 8px; border-radius:var(--r-xs); background:var(--tile-deep); color:var(--marble-700); font-weight:600; }
+    .rule span.v { padding:4px 8px; border-radius:var(--r-xs); background:var(--spring-50); color:var(--spring-800); font-weight:600; }
 
   </style>
 </helmet>
@@ -431,122 +431,122 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             </div>
             <span style="margin-left:auto" class="pill pill--sea"><i></i>via Composio</span>
           </div>
-          <div class="note note--info" style="border-radius:0; padding:11px 16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg>
+          <div class="note note--info" style="border-radius:0; padding:12px 16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg>
             <span>These are brokered by one aggregator that holds the OAuth app registrations. The agency
               consents once per service; MS Realty never stores a third-party password, and a service the
               agency drops takes its tokens with it.</span></div>
           <div class="cat">
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#C5221F; color:#fff">GM</span>
-                <span style="min-width:0"><b>Gmail</b><span style="display:block; font-size:10.5px" class="muted">Messaging</span></span></div>
+                <span style="min-width:0"><b>Gmail</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
               <p>Send approved replies from the agency address</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#1A73E8; color:#fff">GC</span>
-                <span style="min-width:0"><b>Google Calendar</b><span style="display:block; font-size:10.5px" class="muted">Calendar</span></span></div>
+                <span style="min-width:0"><b>Google Calendar</b><span style="display:block; font-size:11px" class="muted">Calendar</span></span></div>
               <p>Put viewings in the broker's calendar</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#0F9D58; color:#fff">GD</span>
-                <span style="min-width:0"><b>Google Drive</b><span style="display:block; font-size:10.5px" class="muted">Storage</span></span></div>
+                <span style="min-width:0"><b>Google Drive</b><span style="display:block; font-size:11px" class="muted">Storage</span></span></div>
               <p>File signed contracts by case</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#0F6CBD; color:#fff">OL</span>
-                <span style="min-width:0"><b>Outlook</b><span style="display:block; font-size:10.5px" class="muted">Messaging</span></span></div>
+                <span style="min-width:0"><b>Outlook</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
               <p>For brokers who live in Outlook</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#229ED9; color:#fff">TG</span>
-                <span style="min-width:0"><b>Telegram</b><span style="display:block; font-size:10.5px" class="muted">Messaging</span></span></div>
+                <span style="min-width:0"><b>Telegram</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
               <p>A channel Russian buyers actually use</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#7360F2; color:#fff">VB</span>
-                <span style="min-width:0"><b>Viber</b><span style="display:block; font-size:10.5px" class="muted">Messaging</span></span></div>
+                <span style="min-width:0"><b>Viber</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
               <p>Common with Bulgarian sellers</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#D4AF37; color:#fff">DS</span>
-                <span style="min-width:0"><b>DocuSign</b><span style="display:block; font-size:10.5px" class="muted">Signature</span></span></div>
+                <span style="min-width:0"><b>DocuSign</b><span style="display:block; font-size:11px" class="muted">Signature</span></span></div>
               <p>Qualified signature on a preliminary contract</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#0061FF; color:#fff">DB</span>
-                <span style="min-width:0"><b>Dropbox Sign</b><span style="display:block; font-size:10.5px" class="muted">Signature</span></span></div>
+                <span style="min-width:0"><b>Dropbox Sign</b><span style="display:block; font-size:11px" class="muted">Signature</span></span></div>
               <p>A cheaper signature route</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#13B5EA; color:#fff">XR</span>
-                <span style="min-width:0"><b>Xero</b><span style="display:block; font-size:10.5px" class="muted">Finance</span></span></div>
+                <span style="min-width:0"><b>Xero</b><span style="display:block; font-size:11px" class="muted">Finance</span></span></div>
               <p>Commission invoices against a closed deal</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#635BFF; color:#fff">ST</span>
-                <span style="min-width:0"><b>Stripe</b><span style="display:block; font-size:10.5px" class="muted">Finance</span></span></div>
+                <span style="min-width:0"><b>Stripe</b><span style="display:block; font-size:11px" class="muted">Finance</span></span></div>
               <p>Take a reservation fee online</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#FFE01B; color:#fff">MC</span>
-                <span style="min-width:0"><b>Mailchimp</b><span style="display:block; font-size:10.5px" class="muted">Marketing</span></span></div>
+                <span style="min-width:0"><b>Mailchimp</b><span style="display:block; font-size:11px" class="muted">Marketing</span></span></div>
               <p>Newsletters to consented contacts only</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#0866FF; color:#fff">MA</span>
-                <span style="min-width:0"><b>Meta Ads</b><span style="display:block; font-size:10.5px" class="muted">Marketing</span></span></div>
+                <span style="min-width:0"><b>Meta Ads</b><span style="display:block; font-size:11px" class="muted">Marketing</span></span></div>
               <p>Boost a listing that is already published</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#611F69; color:#fff">SL</span>
-                <span style="min-width:0"><b>Slack</b><span style="display:block; font-size:10.5px" class="muted">Notify</span></span></div>
+                <span style="min-width:0"><b>Slack</b><span style="display:block; font-size:11px" class="muted">Notify</span></span></div>
               <p>Overdue-lead alerts where the team already is</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#111111; color:#fff">NO</span>
-                <span style="min-width:0"><b>Notion</b><span style="display:block; font-size:10.5px" class="muted">Docs</span></span></div>
+                <span style="min-width:0"><b>Notion</b><span style="display:block; font-size:11px" class="muted">Docs</span></span></div>
               <p>Where the agency keeps its own notes</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#2D8CFF; color:#fff">ZM</span>
-                <span style="min-width:0"><b>Zoom</b><span style="display:block; font-size:10.5px" class="muted">Calls</span></span></div>
+                <span style="min-width:0"><b>Zoom</b><span style="display:block; font-size:11px" class="muted">Calls</span></span></div>
               <p>Remote viewings for buyers abroad</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
             <div class="capp">
               <div class="hd"><span class="lg" style="background:#F22F46; color:#fff">TW</span>
-                <span style="min-width:0"><b>Twilio</b><span style="display:block; font-size:10.5px" class="muted">Messaging</span></span></div>
+                <span style="min-width:0"><b>Twilio</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
               <p>SMS fallback when a message will not deliver</p>
               <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:10.5px">OAuth</span></div>
+                <span class="mono" style="font-size:11px">OAuth</span></div>
             </div>
           </div>
           <div class="foot"><span>Showing 16 of 312 available services</span>
@@ -555,25 +555,25 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <div style="display:grid; gap:16px">
           <section class="panel">
             <div class="panel-hd"><h2>Wired directly</h2><span class="sub">10</span></div>
-            <div class="side-sect" style="display:grid; gap:7px; font-size:12.5px">
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>WhatsApp Business</span><span class="pill pill--sand"><i></i>Not connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Google Workspace</span><span class="pill pill--warn"><i></i>Reauthorise</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Facebook Page</span><span class="pill pill--ok"><i></i>Connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Instagram</span><span class="pill pill--ok"><i></i>Connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>PostgreSQL · Payload</span><span class="pill pill--ok"><i></i>Live</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Cloudflare R2</span><span class="pill pill--ok"><i></i>Live</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Typesense</span><span class="pill pill--ok"><i></i>Live</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Hermes endpoint</span><span class="pill pill--sand"><i></i>Not configured</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>GitHub</span><span class="pill pill--sand"><i></i>Not connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Viber</span><span class="pill pill--sand"><i></i>Unavailable</span></div>
-              <p class="muted" style="font-size:11.5px; margin-top:5px">These ten carry a named workflow, so they
+              <p class="muted" style="font-size:11px; margin-top:4px">These ten carry a named workflow, so they
                 stay first-party: an aggregator outage must not stop a reply from being delivered.</p>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What a connection may touch</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Only the scopes shown before you consent, and each one is named in plain words.</span></div>
-              <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Only records the connected workflow needs — a calendar link never sees lead contact details.</span></div>
-              <div style="display:flex; gap:9px; color:var(--danger-600)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span>Nothing may send to a customer without the same approval a broker needs.</span></div>
+            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
+              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Only the scopes shown before you consent, and each one is named in plain words.</span></div>
+              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Only records the connected workflow needs — a calendar link never sees lead contact details.</span></div>
+              <div style="display:flex; gap:8px; color:var(--danger-600)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span>Nothing may send to a customer without the same approval a broker needs.</span></div>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Not listed?</h2></div>
-            <div class="side-sect" style="font-size:12.5px; color:var(--text-body)">
+            <div class="side-sect" style="font-size:13px; color:var(--text-body)">
               Ask for it and the agency's own developer sees the request with the workflow you described.
-              <button class="btn btn--sm" type="button" style="margin-top:9px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Request a service</span></button>
+              <button class="btn btn--sm" type="button" style="margin-top:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Request a service</span></button>
             </div>
           </section>
         </div>

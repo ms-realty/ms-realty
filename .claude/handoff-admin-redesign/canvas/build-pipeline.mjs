@@ -2,30 +2,30 @@ import fs from "node:fs";
 import { page, icon } from "./shell.mjs";
 
 const CSS = `
-    .board { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(200px,1fr); gap:14px; align-items:start; }
-    .col { background:var(--sunken); border-radius:14px; display:flex; flex-direction:column; min-height:420px; }
-    .col-hd { display:flex; align-items:center; gap:8px; padding:12px 14px 8px; }
-    .col-hd b { font-size:12.5px; font-weight:600; color:var(--text-strong); }
-    .col-n { min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:var(--stone-300);
-      color:var(--stone-800); font-size:11px; font-weight:600; line-height:20px; text-align:center; }
-    .col-sum { padding:0 14px 9px; font-size:11.5px; color:var(--text-muted); }
-    .col-list { display:flex; flex-direction:column; gap:8px; padding:0 9px 12px; min-width:0; }
-    .kc { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:11px 12px;
+    .board { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(200px,1fr); gap:16px; align-items:start; }
+    .col { background:var(--sunken); border-radius:var(--r-panel); display:flex; flex-direction:column; min-height:420px; }
+    .col-hd { display:flex; align-items:center; gap:8px; padding:12px 16px 8px; }
+    .col-hd b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .col-n { min-width:20px; height:20px; padding:0 8px; border-radius:var(--r-pill); background:var(--marble-300);
+      color:var(--marble-800); font-size:11px; font-weight:600; line-height:20px; text-align:center; }
+    .col-sum { padding:0 16px 8px; font-size:11px; color:var(--text-muted); }
+    .col-list { display:flex; flex-direction:column; gap:8px; padding:0 8px 12px; min-width:0; }
+    .kc { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-panel); padding:12px 12px;
       box-shadow:var(--e-1); display:grid; gap:8px; min-width:0; }
     .kc-top { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
     .kc-top .pill { flex:0 0 auto; }
     .kc-top b { flex:1 1 auto; min-width:0; font-size:13px; font-weight:600; color:var(--text-strong);
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .kc-line { font-size:12px; color:var(--text-muted); }
+    .kc-line { font-size:13px; color:var(--text-muted); }
     .kc-line .mono { white-space:nowrap; }
     .kc-line b { display:block; font-weight:400; }
     .kc-next { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:center;
-      padding:7px 9px; border-radius:8px; background:var(--stone-50); border:1px solid var(--border); }
-    .kc-next b { font-size:12px; font-weight:600; color:var(--text-strong); display:block; }
-    .kc-next em { font-style:normal; font-size:11.5px; color:var(--text-muted); }
+      padding:8px 8px; border-radius:var(--r-panel); background:var(--tile); border:1px solid var(--border); }
+    .kc-next b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
+    .kc-next em { font-style:normal; font-size:11px; color:var(--text-muted); }
     .kc-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .col-empty { margin:0 9px 12px; padding:22px 12px; border:1px dashed var(--border-control);
-      border-radius:10px; text-align:center; font-size:12px; color:var(--text-subtle); }
+    .col-empty { margin:0 8px 12px; padding:24px 12px; border:1px dashed var(--border-control);
+      border-radius:var(--r-panel); text-align:center; font-size:13px; color:var(--text-subtle); }
 `;
 
 function card({ name, line, budget, nextTitle, nextWhen, tone = "ink", tag, broker, overdue }) {
@@ -37,7 +37,7 @@ function card({ name, line, budget, nextTitle, nextWhen, tone = "ink", tag, brok
                 <span><b>${nextTitle}</b><em style="${overdue ? "color:var(--danger-600); font-weight:600" : ""}">${nextWhen}</em></span>
               </div>
               <div class="kc-foot">
-                <span class="price" style="font-size:13.5px">${budget}</span>
+                <span class="price" style="font-size:13px">${budget}</span>
                 <span class="av">${broker}</span>
               </div>
             </article>`;

@@ -326,21 +326,21 @@
 
     .ed { display:grid; grid-template-columns:52px minmax(0,1fr) 352px; gap:0; border:1px solid var(--border);
       border-radius:var(--r-lg); overflow:hidden; background:var(--surface); box-shadow:var(--e-2); }
-    .tools { border-right:1px solid var(--border); background:var(--stone-50); display:grid;
-      align-content:start; gap:3px; padding:8px 7px; }
+    .tools { border-right:1px solid var(--border); background:var(--tile); display:grid;
+      align-content:start; gap:4px; padding:8px 8px; }
     .tool { display:grid; place-items:center; width:38px; height:38px; border-radius:var(--r-md);
       border:1px solid transparent; background:transparent; color:var(--text-body); cursor:pointer; }
-    .tool:hover { background:var(--stone-200); }
+    .tool:hover { background:var(--joint); }
     .tool[data-on] { background:var(--ink-800); color:#fff; }
-    .tool-sep { height:1px; background:var(--border); margin:5px 4px; }
-    .stage { background:var(--stone-900); display:grid; grid-template-rows:auto minmax(0,1fr) auto; min-width:0; }
-    .stage-top { display:flex; align-items:center; gap:8px; padding:9px 12px;
+    .tool-sep { height:1px; background:var(--border); margin:4px 4px; }
+    .stage { background:var(--marble-900); display:grid; grid-template-rows:auto minmax(0,1fr) auto; min-width:0; }
+    .stage-top { display:flex; align-items:center; gap:8px; padding:8px 12px;
       border-bottom:1px solid rgba(255,255,255,.1); }
-    .chip { display:inline-flex; align-items:center; gap:6px; height:27px; padding:0 10px; border-radius:var(--r-sm);
-      background:rgba(255,255,255,.09); color:rgba(255,255,255,.82); font-size:11.5px; font-weight:600;
+    .chip { display:inline-flex; align-items:center; gap:8px; height:27px; padding:0 12px; border-radius:var(--r-sm);
+      background:rgba(255,255,255,.09); color:rgba(255,255,255,.82); font-size:11px; font-weight:600;
       border:1px solid transparent; cursor:pointer; }
-    .chip[data-on] { background:#fff; color:var(--stone-900); }
-    .canvas { position:relative; display:grid; place-items:center; padding:26px; min-height:396px; }
+    .chip[data-on] { background:#fff; color:var(--marble-900); }
+    .canvas { position:relative; display:grid; place-items:center; padding:24px; min-height:396px; }
     /* A stand-in for the photograph itself: warm stone tones so the crop overlay,
        the focal marker and the redaction box are all judged against a real value range. */
     .photo { position:relative; width:576px; height:384px; overflow:hidden;
@@ -357,32 +357,32 @@
     .cropbox .br { bottom:-2px; right:-2px; border-left:0; border-top:0; }
     .thirds { position:absolute; inset:0; }
     .thirds span { position:absolute; background:rgba(255,255,255,.3); }
-    .focal { position:absolute; width:24px; height:24px; border-radius:999px; border:2px solid #fff;
+    .focal { position:absolute; width:24px; height:24px; border-radius:var(--r-pill); border:2px solid #fff;
       background:rgba(255,255,255,.22); display:grid; place-items:center; }
-    .focal::after { content:''; width:5px; height:5px; border-radius:999px; background:#fff; }
+    .focal::after { content:''; width:5px; height:5px; border-radius:var(--r-pill); background:#fff; }
     .redact { position:absolute; border:1.5px dashed var(--brick-400); background:rgba(219,62,62,.2);
       display:grid; place-items:center; }
-    .redact span { font:600 9.5px var(--font-sans); color:#fff; background:var(--brick-600);
-      padding:1px 5px; border-radius:3px; }
-    .stage-foot { display:flex; align-items:center; gap:10px; padding:9px 12px;
-      border-top:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.66); font-size:11.5px; }
+    .redact span { font:600 11px var(--font-sans); color:#fff; background:var(--brick-600);
+      padding:4px 4px; border-radius:var(--r-edge); }
+    .stage-foot { display:flex; align-items:center; gap:12px; padding:8px 12px;
+      border-top:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.66); font-size:11px; }
     .insp { display:grid; align-content:start; min-width:0; }
     .insp-tabs { display:flex; gap:16px; padding:0 16px; border-bottom:1px solid var(--border); }
-    .insp-tabs a { padding:11px 0 12px; font-size:12.5px; font-weight:600; color:var(--text-muted);
-      border-bottom:2px solid transparent; margin-bottom:-1px; }
+    .insp-tabs a { padding:12px 0 12px; font-size:13px; font-weight:600; color:var(--text-muted);
+      border-bottom:2px solid transparent; margin-bottom:-4px; }
     .insp-tabs a[data-on] { color:var(--text-strong); border-bottom-color:var(--ink-800); }
-    .isect { padding:14px 16px; border-bottom:1px solid var(--border); display:grid; gap:9px; }
-    .isect > b { font-size:12.5px; font-weight:600; }
-    .locline { display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:9px; align-items:center;
-      font-size:12.5px; padding:5px 0; border-bottom:1px solid var(--border); }
+    .isect { padding:16px 16px; border-bottom:1px solid var(--border); display:grid; gap:8px; }
+    .isect > b { font-size:13px; font-weight:600; }
+    .locline { display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:8px; align-items:center;
+      font-size:13px; padding:4px 0; border-bottom:1px solid var(--border); }
     .locline:last-child { border-bottom:0; }
     .locline u { text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
       color:var(--text-body); }
-    .rend { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:center;
-      font-size:12.5px; padding:7px 0; border-bottom:1px solid var(--border); }
+    .rend { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center;
+      font-size:13px; padding:8px 0; border-bottom:1px solid var(--border); }
     .rend:last-child { border-bottom:0; }
-    .slider { height:4px; border-radius:999px; background:var(--stone-200); position:relative; }
-    .slider i { position:absolute; top:-5px; width:14px; height:14px; border-radius:999px; background:var(--surface);
+    .slider { height:4px; border-radius:var(--r-pill); background:var(--joint); position:relative; }
+    .slider i { position:absolute; top:-5px; width:14px; height:14px; border-radius:var(--r-pill); background:var(--surface);
       border:1.5px solid var(--border-control); box-shadow:var(--e-1); }
 
   </style></head><body>
@@ -481,7 +481,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <span class="chip">1:1</span>
             <span class="chip">Card 5:4</span>
             <span class="chip" style="margin-left:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>−1.5°</span>
-            <span style="margin-left:auto; display:flex; gap:7px">
+            <span style="margin-left:auto; display:flex; gap:8px">
               <span class="chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Undo</span>
               <span class="chip">Reset</span>
             </span>
@@ -514,11 +514,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
           <div class="isect">
             <b>Alt text <span class="muted" style="font-weight:400">— what a screen reader says</span></b>
-            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">BG</span>
+            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">BG</span>
               <u class="muted">Not set</u><button class="btn btn--sm" type="button">Write</button></div>
-            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">EN</span>
+            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">EN</span>
               <u class="muted">Not set</u><button class="btn btn--sm" type="button">Write</button></div>
-            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--stone-200); color:var(--stone-700); font:700 9.5px var(--font-sans)">DE</span>
+            <div class="locline"><span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">DE</span>
               <u class="muted">Not set</u><button class="btn btn--sm" type="button">Write</button></div>
             <div class="note note--ai"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Hermes can describe what is visible in all five published languages. It flagged a face in this photo.</span></div>
             <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft alt text</span></button>
@@ -533,7 +533,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <b>Placement</b>
             <div class="kvline"><span>Listing</span><span class="mono">MS-00191</span></div>
             <div class="kvline"><span>Position in the gallery</span><b>3 of 14</b></div>
-            <div style="display:flex; gap:7px; flex-wrap:wrap">
+            <div style="display:flex; gap:8px; flex-wrap:wrap">
               <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg><span>Set as cover</span></button>
               <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v13"/><path d="m4 7 3-3 3 3"/><path d="M17 20V7"/><path d="m20 17-3 3-3-3"/></svg><span>Move</span></button>
               <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg><span>Reattach</span></button>
@@ -553,7 +553,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <b>Review</b>
             <div class="note note--warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Reviewer's note: a face is visible. Publish
               it only with the person's permission, or redact it first.</span></div>
-            <div style="display:grid; gap:10px; margin-top:9px">
+            <div style="display:grid; gap:12px; margin-top:8px">
               <div class="field"><label for="media-decision">Decision</label>
                 <span class="in" id="media-decision">Publish on the public site <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
               <div class="field"><label for="media-kind">Kind</label>
@@ -563,12 +563,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
                   looking towards the Pirin ridge.</span></div>
               <div class="field"><label for="media-reviewer">Reviewer <em>required</em></label>
                 <span class="in" id="media-reviewer">mariya.ivanova</span></div>
-              <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+              <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px">
                 <span class="box" data-on="1"></span>
                 <span>I have looked at this image and I am accountable for publishing it.</span>
               </div>
             </div>
-            <div style="display:flex; gap:7px; margin-top:10px">
+            <div style="display:flex; gap:8px; margin-top:12px">
               <button class="btn btn--sm btn--primary" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Save this review</span></button>
               <button class="btn btn--sm" type="button">Hold</button>
             </div>
@@ -581,21 +581,21 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px">
         <section class="panel">
           <div class="panel-hd"><h2>Renditions</h2><span class="sub">Written on save</span></div>
-          <div style="padding:6px 16px 12px">
-            <div class="rend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span><b style="font-size:12.5px">Original</b>
-              <span style="display:block; font-size:11.5px" class="muted">2400 × 1600 · JPEG · 412 KB</span></span>
+          <div style="padding:8px 16px 12px">
+            <div class="rend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span><b style="font-size:13px">Original</b>
+              <span style="display:block; font-size:11px" class="muted">2400 × 1600 · JPEG · 412 KB</span></span>
               <button class="btn btn--sm" type="button">Download</button></div>
-            <div class="rend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span><b style="font-size:12.5px">Public</b>
-              <span style="display:block; font-size:11.5px" class="muted">1980 × 1320 after crop · WebP · 168 KB</span></span>
+            <div class="rend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span><b style="font-size:13px">Public</b>
+              <span style="display:block; font-size:11px" class="muted">1980 × 1320 after crop · WebP · 168 KB</span></span>
               <span class="pill pill--ok"><i></i>Served</span></div>
-            <div class="rend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span><b style="font-size:12.5px">Thumbnail</b>
-              <span style="display:block; font-size:11.5px" class="muted">640 × 427 · WebP · 34 KB · quality 75</span></span>
+            <div class="rend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span><b style="font-size:13px">Thumbnail</b>
+              <span style="display:block; font-size:11px" class="muted">640 × 427 · WebP · 34 KB · quality 75</span></span>
               <span class="pill pill--ok"><i></i>Served</span></div>
           </div>
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Provenance</h2></div>
-          <div style="padding:12px 16px; display:grid; gap:7px">
+          <div style="padding:12px 16px; display:grid; gap:8px">
             <div class="kvline"><span>Source</span><span class="mono">makler-realty.com/obj/0114</span></div>
             <div class="kvline"><span>Mirrored</span><span class="muted">2 Aug 2026, 11:04</span></div>
             <div class="kvline"><span>Checksum</span><span class="mono">sha256:9c1f…a4e2</span></div>
@@ -606,10 +606,10 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         </section>
         <section class="panel">
           <div class="panel-hd"><h2>Where it appears</h2><span class="sub">3 surfaces</span></div>
-          <div style="padding:12px 16px; display:grid; gap:8px; font-size:12.5px">
-            <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg><span>Listing gallery, position 3 — five languages</span></div>
-            <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg><span>Katuntsi location page, featured strip</span></div>
-            <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg><span>Viewing invitation to Anna Weber, 28 Aug</span></div>
+          <div style="padding:12px 16px; display:grid; gap:8px; font-size:13px">
+            <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg><span>Listing gallery, position 3 — five languages</span></div>
+            <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg><span>Katuntsi location page, featured strip</span></div>
+            <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg><span>Viewing invitation to Anna Weber, 28 Aug</span></div>
             <div class="note note--info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Removing it changes all three. The listing needs at least six photos to stay published.</span></div>
           </div>
         </section>

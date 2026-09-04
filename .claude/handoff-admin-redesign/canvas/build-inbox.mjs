@@ -4,43 +4,43 @@ import { page, icon } from "./shell.mjs";
 const CSS = `
     .inbox { display:grid; grid-template-columns:352px minmax(0,1fr); align-items:stretch; }
     .inbox-list { border-right:1px solid var(--border); display:flex; flex-direction:column; min-width:0; }
-    .inbox-tools { display:flex; align-items:center; gap:8px; padding:9px 12px; border-bottom:1px solid var(--border);
+    .inbox-tools { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border);
       background:var(--sunken); }
-    .inbox-find { display:flex; align-items:center; gap:7px; flex:1 1 auto; height:30px; padding:0 10px;
-      border:1px solid var(--border-control); border-radius:8px; background:var(--surface); color:var(--text-muted);
-      font-size:12.5px; }
-    .row { display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:10px; row-gap:4px;
-      padding:11px 14px; border-bottom:1px solid var(--border); }
-    .row:hover { background:var(--stone-50); }
+    .inbox-find { display:flex; align-items:center; gap:8px; flex:1 1 auto; height:30px; padding:0 12px;
+      border:1px solid var(--border-control); border-radius:var(--r-panel); background:var(--surface); color:var(--text-muted);
+      font-size:13px; }
+    .row { display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:12px; row-gap:4px;
+      padding:12px 16px; border-bottom:1px solid var(--border); }
+    .row:hover { background:var(--tile); }
     .row--on { background:var(--surface); box-shadow:inset 3px 0 0 var(--brick-500); }
     .row-hd { display:flex; align-items:baseline; gap:8px; min-width:0; }
     .row-hd b { flex:1 1 auto; min-width:0; font-size:13px; font-weight:600; color:var(--text-strong);
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .row-hd time { font-size:11.5px; color:var(--text-muted); flex:0 0 auto; }
-    .row-sub { grid-column:2; font-size:12px; color:var(--text-muted); overflow:hidden;
+    .row-hd time { font-size:11px; color:var(--text-muted); flex:0 0 auto; }
+    .row-sub { grid-column:2; font-size:13px; color:var(--text-muted); overflow:hidden;
       text-overflow:ellipsis; white-space:nowrap; }
-    .row-tags { grid-column:2; display:flex; gap:5px; flex-wrap:wrap; }
+    .row-tags { grid-column:2; display:flex; gap:4px; flex-wrap:wrap; }
     .detail { display:flex; flex-direction:column; min-width:0; }
     .detail-hd { display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
-      padding:16px 20px 14px; border-bottom:1px solid var(--border); }
+      padding:16px 20px 16px; border-bottom:1px solid var(--border); }
     .detail-hd h2 { font-family:var(--font-display); font-size:19px; font-weight:600; letter-spacing:-.01em; }
-    .detail-hd .who { display:flex; align-items:center; gap:8px; margin-top:5px; font-size:12.5px;
+    .detail-hd .who { display:flex; align-items:center; gap:8px; margin-top:4px; font-size:13px;
       color:var(--text-muted); flex-wrap:wrap; }
-    .facts { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:1px; background:var(--border);
+    .facts { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:4px; background:var(--border);
       border-bottom:1px solid var(--border); }
-    .fact { background:var(--surface); padding:11px 20px; min-width:0; }
-    .fact dt { font-size:11.5px; color:var(--text-muted); margin-bottom:3px; }
+    .fact { background:var(--surface); padding:12px 20px; min-width:0; }
+    .fact dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
     .fact dd { margin:0; font-size:13px; font-weight:600; color:var(--text-strong);
       overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .composer { border:1px solid var(--border-control); border-radius:10px; background:var(--surface); overflow:hidden; }
-    .composer-bar { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--sunken);
+    .composer { border:1px solid var(--border-control); border-radius:var(--r-panel); background:var(--surface); overflow:hidden; }
+    .composer-bar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--sunken);
       border-bottom:1px solid var(--border); }
-    .composer-body { padding:12px 14px; font-size:13px; color:var(--text-body); min-height:88px; line-height:1.55; }
-    .composer-foot { display:flex; align-items:center; gap:10px; padding:9px 12px; border-top:1px solid var(--border); }
-    .ev { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:start; gap:10px;
-      padding:10px 0; border-bottom:1px solid var(--border); }
+    .composer-body { padding:12px 16px; font-size:13px; color:var(--text-body); min-height:88px; line-height:1.55; }
+    .composer-foot { display:flex; align-items:center; gap:12px; padding:8px 12px; border-top:1px solid var(--border); }
+    .ev { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:start; gap:12px;
+      padding:12px 0; border-bottom:1px solid var(--border); }
     .ev:last-child { border-bottom:0; }
-    .ev p { font-size:12.5px; }
+    .ev p { font-size:13px; }
     .ev em { font-style:normal; color:var(--text-muted); }
 `;
 
@@ -84,7 +84,7 @@ ${row({ name: "Ivan Georgiev", time: "2 d", sub: "Callback · weekdays after 14:
   tags: `<span class="pill pill--danger"><i></i>Escalated</span><span class="pill pill--sand">Phone</span>` })}
 ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, Sandanski",
   tags: `<span class="pill pill--warn"><i></i>Unassigned</span><span class="pill pill--sand">Website form</span>` })}
-            <p style="padding:14px; font-size:12px; color:var(--text-subtle)">
+            <p style="padding:16px; font-size:13px; color:var(--text-subtle)">
               24 answered leads are in <a href="#" style="font-weight:600">All</a>.
             </p>
           </div>
@@ -111,24 +111,24 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
             <dl class="facts">
               <div class="fact"><dt>Reply deadline</dt><dd style="color:var(--danger-600)">Overdue 2 days</dd></div>
               <div class="fact"><dt>Received</dt><dd>4 Jul, 03:00</dd></div>
-              <div class="fact"><dt>Property</dt><dd><span class="mono" style="font-size:12.5px">MS-00815</span></dd></div>
+              <div class="fact"><dt>Property</dt><dd><span class="mono" style="font-size:13px">MS-00815</span></dd></div>
               <div class="fact"><dt>Assigned broker</dt><dd class="subtle">Not set</dd></div>
               <div class="fact"><dt>Matching inventory</dt><dd>5 properties</dd></div>
             </dl>
 
             <div class="sect">
               <h3>Reassign this enquiry
-                <span style="font-weight:500; font-size:12px; color:var(--text-muted)">
+                <span style="font-weight:500; font-size:13px; color:var(--text-muted)">
                   Both fields are required — the server refuses a reassignment without them.
                 </span>
               </h3>
-              <div style="display:grid; gap:10px; max-width:520px">
+              <div style="display:grid; gap:12px; max-width:520px">
                 <div class="field"><label for="ra-broker">To</label>
                   <span class="in" id="ra-broker">Mariya Ruseva ${icon("down", 13)}</span></div>
                 <div class="field"><label for="ra-reason">Why <em>required</em></label>
                   <span class="in in--area" id="ra-reason">Hebrew enquiry; Mariya answers in Hebrew and
                     the previous broker is on leave until the 12th.</span></div>
-                <div style="display:flex; align-items:flex-start; gap:9px; font-size:12.5px">
+                <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px">
                   <span class="box" data-on="1"></span>
                   <span>I am reassigning this enquiry and my name goes on it.</span>
                 </div>
@@ -143,7 +143,7 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
 
             <div class="sect">
               <h3>Reply
-                <span style="font-weight:500; font-size:12px; color:var(--text-muted)">
+                <span style="font-weight:500; font-size:13px; color:var(--text-muted)">
                   Approved by a named person before sending — Hermes may only draft.
                 </span>
               </h3>
@@ -161,10 +161,10 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
                 <div class="composer-foot">
                   <button class="btn btn--sm btn--primary" type="button">${icon("send", 14)}<span>Approve and send</span></button>
                   <button class="btn btn--sm" type="button">Save as draft</button>
-                  <span style="margin-left:auto; font-size:12px" class="muted">Sends over WhatsApp Business</span>
+                  <span style="margin-left:auto; font-size:13px" class="muted">Sends over WhatsApp Business</span>
                 </div>
               </div>
-              <div class="note" style="margin-top:10px">
+              <div class="note" style="margin-top:12px">
                 ${icon("alert", 15)}
                 <span>WhatsApp Business is not connected yet, so this reply will be marked ready for manual sending.
                   <a href="#" style="font-weight:600; text-decoration:underline">Connect it</a>.</span>
@@ -172,22 +172,22 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
             </div>
 
             <div class="sect">
-              <h3>Conversation <span style="font-weight:500; font-size:12px" class="muted">2 events</span></h3>
+              <h3>Conversation <span style="font-weight:500; font-size:13px" class="muted">2 events</span></h3>
               <div class="ev">
                 <span class="av">MP</span>
                 <p><em>Maria Petrova asked</em> whether the apartment is still available and if a viewing is possible next week.</p>
                 <span class="mono">4 Jul, 03:00</span>
               </div>
               <div class="ev">
-                <span class="av" style="background:var(--sea-50); color:var(--sea-700)">SY</span>
+                <span class="av" style="background:var(--spring-50); color:var(--spring-800)">SY</span>
                 <p><em>Automatic acknowledgement sent</em> in Hebrew. No property facts included.</p>
                 <span class="mono">4 Jul, 03:01</span>
               </div>
             </div>
 
             <div class="sect" style="border-bottom:0">
-              <h3>Requirements <a href="#" style="font-weight:600; font-size:12px">Edit</a></h3>
-              <div style="display:flex; flex-wrap:wrap; gap:6px">
+              <h3>Requirements <a href="#" style="font-weight:600; font-size:13px">Edit</a></h3>
+              <div style="display:flex; flex-wrap:wrap; gap:8px">
                 <span class="pill pill--ink">Sandanski</span>
                 <span class="pill pill--ink">Apartment</span>
                 <span class="pill pill--ink">2 bedrooms</span>

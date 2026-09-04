@@ -12,7 +12,7 @@ export const PUB_CSS = `
     .pub-bar img { display:block; height:38px; width:auto; }
     .pub-nav { display:flex; align-items:center; gap:24px; margin-left:14px; }
     .pub-nav a { font-size:15px; font-weight:600; color:var(--text-body); }
-    .pub-nav a:hover { color:var(--stone-900); }
+    .pub-nav a:hover { color:var(--marble-900); }
     .pub-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
     .lang { display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 13px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
@@ -22,23 +22,23 @@ export const PUB_CSS = `
     .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
     .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px;
       padding:0 20px; border-radius:var(--r-md); border:1px solid var(--border-control);
-      background:var(--surface); color:var(--stone-900); font-size:15px; font-weight:600; cursor:pointer; }
+      background:var(--surface); color:var(--marble-900); font-size:15px; font-weight:600; cursor:pointer; }
     .pbtn--brand { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
     /* .pub a is (0,1,1) and beat the (0,1,0) button classes, so a brand button
        rendered ink-on-ink. The anchor forms of the buttons carry their own colour. */
-    .pub a.pbtn { color:var(--stone-900); }
+    .pub a.pbtn { color:var(--marble-900); }
     .pub a.pbtn--brand, .pub a.pbtn--accent { color:#fff; }
     .pub a.callbtn { color:#fff; }
     .pbtn--lg { min-height:54px; padding:0 26px; font-size:16px; }
     .pin { display:flex; align-items:center; height:52px; padding:0 15px; border:1px solid var(--border-control);
       border-radius:var(--r-md); background:var(--surface); font-size:15px; color:var(--text-body); }
     .h1 { font-family:var(--font-display); font-size:46px; font-weight:600; letter-spacing:-.025em;
-      line-height:1.1; color:var(--stone-900); }
+      line-height:1.1; color:var(--marble-900); }
     .h2 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em;
-      line-height:1.2; color:var(--stone-900); }
+      line-height:1.2; color:var(--marble-900); }
     .h3 { font-family:var(--font-display); font-size:21px; font-weight:600; letter-spacing:-.01em;
-      color:var(--stone-900); }
+      color:var(--marble-900); }
     .lede { font-size:18px; line-height:1.55; color:var(--text-body); }
     .meta { font-size:14px; color:var(--text-muted); }
     .sec { padding:56px 0; }
@@ -57,9 +57,9 @@ export const PUB_CSS = `
     .lcard .fav { position:absolute; top:12px; right:12px; z-index:1; display:grid; place-items:center;
       width:38px; height:38px; border-radius:var(--r-full); background:rgba(255,255,255,.94); color:var(--ink-800); }
     .lcard .bd { padding:16px 18px 18px; display:grid; gap:9px; }
-    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--stone-900);
+    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--marble-900);
       letter-spacing:-.015em; }
-    .lcard h3 { font-size:16px; font-weight:600; color:var(--stone-900); line-height:1.35; }
+    .lcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
     .lfacts { display:flex; flex-wrap:wrap; gap:14px; font-size:14px; color:var(--text-muted); }
     .lfacts span { display:inline-flex; align-items:center; gap:6px; }
     .lfoot { display:flex; align-items:center; justify-content:space-between; gap:10px;

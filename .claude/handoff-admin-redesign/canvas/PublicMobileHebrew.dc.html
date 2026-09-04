@@ -343,7 +343,7 @@
     .pub-bar img { display:block; height:38px; width:auto; }
     .pub-nav { display:flex; align-items:center; gap:24px; margin-left:14px; }
     .pub-nav a { font-size:15px; font-weight:600; color:var(--text-body); }
-    .pub-nav a:hover { color:var(--stone-900); }
+    .pub-nav a:hover { color:var(--marble-900); }
     .pub-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
     .lang { display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 13px;
       border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
@@ -353,23 +353,23 @@
     .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
     .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px;
       padding:0 20px; border-radius:var(--r-md); border:1px solid var(--border-control);
-      background:var(--surface); color:var(--stone-900); font-size:15px; font-weight:600; cursor:pointer; }
+      background:var(--surface); color:var(--marble-900); font-size:15px; font-weight:600; cursor:pointer; }
     .pbtn--brand { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
     /* .pub a is (0,1,1) and beat the (0,1,0) button classes, so a brand button
        rendered ink-on-ink. The anchor forms of the buttons carry their own colour. */
-    .pub a.pbtn { color:var(--stone-900); }
+    .pub a.pbtn { color:var(--marble-900); }
     .pub a.pbtn--brand, .pub a.pbtn--accent { color:#fff; }
     .pub a.callbtn { color:#fff; }
     .pbtn--lg { min-height:54px; padding:0 26px; font-size:16px; }
     .pin { display:flex; align-items:center; height:52px; padding:0 15px; border:1px solid var(--border-control);
       border-radius:var(--r-md); background:var(--surface); font-size:15px; color:var(--text-body); }
     .h1 { font-family:var(--font-display); font-size:46px; font-weight:600; letter-spacing:-.025em;
-      line-height:1.1; color:var(--stone-900); }
+      line-height:1.1; color:var(--marble-900); }
     .h2 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em;
-      line-height:1.2; color:var(--stone-900); }
+      line-height:1.2; color:var(--marble-900); }
     .h3 { font-family:var(--font-display); font-size:21px; font-weight:600; letter-spacing:-.01em;
-      color:var(--stone-900); }
+      color:var(--marble-900); }
     .lede { font-size:18px; line-height:1.55; color:var(--text-body); }
     .meta { font-size:14px; color:var(--text-muted); }
     .sec { padding:56px 0; }
@@ -388,9 +388,9 @@
     .lcard .fav { position:absolute; top:12px; right:12px; z-index:1; display:grid; place-items:center;
       width:38px; height:38px; border-radius:var(--r-full); background:rgba(255,255,255,.94); color:var(--ink-800); }
     .lcard .bd { padding:16px 18px 18px; display:grid; gap:9px; }
-    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--stone-900);
+    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--marble-900);
       letter-spacing:-.015em; }
-    .lcard h3 { font-size:16px; font-weight:600; color:var(--stone-900); line-height:1.35; }
+    .lcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
     .lfacts { display:flex; flex-wrap:wrap; gap:14px; font-size:14px; color:var(--text-muted); }
     .lfacts span { display:inline-flex; align-items:center; gap:6px; }
     .lfoot { display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -406,25 +406,25 @@
       border-top:1px solid rgba(255,255,255,.14); font-size:13.5px; color:rgba(255,255,255,.5); flex-wrap:wrap; }
 
     .m { width:390px; min-height:844px; background:var(--surface); display:flex; flex-direction:column; }
-    .mtop { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); }
+    .mtop { display:flex; align-items:center; gap:12px; padding:16px 16px; border-bottom:1px solid var(--border); }
     .mtop img { display:block; height:30px; width:auto; }
-    .mic { display:grid; place-items:center; width:44px; height:44px; border-radius:12px;
+    .mic { display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-panel);
       border:1px solid var(--border); background:var(--surface); color:var(--text-body); flex:0 0 auto; }
     .mcall { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px;
-      border-radius:12px; background:var(--brick-600); color:#fff; flex:0 0 auto; }
-    .mbody { flex:1 1 auto; display:grid; gap:14px; padding:16px; align-content:start; }
-    .msearch { display:grid; gap:9px; padding:14px; border-radius:var(--r-lg); background:var(--stone-100); }
-    .mfield { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:50px;
-      padding:0 14px; border-radius:var(--r-md); background:var(--surface); border:1px solid var(--border-control);
-      font-size:15px; font-weight:600; color:var(--stone-900); }
-    .mbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:50px;
-      padding:0 18px; border-radius:var(--r-md); background:var(--brick-600); color:#fff; font-size:15.5px;
+      border-radius:var(--r-panel); background:var(--brick-600); color:#fff; flex:0 0 auto; }
+    .mbody { flex:1 1 auto; display:grid; gap:16px; padding:16px; align-content:start; }
+    .msearch { display:grid; gap:8px; padding:16px; border-radius:var(--r-lg); background:var(--tile-deep); }
+    .mfield { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:50px;
+      padding:0 16px; border-radius:var(--r-md); background:var(--surface); border:1px solid var(--border-control);
+      font-size:16px; font-weight:600; color:var(--marble-900); }
+    .mbtn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:50px;
+      padding:0 20px; border-radius:var(--r-md); background:var(--brick-600); color:#fff; font-size:16px;
       font-weight:600; border:1px solid var(--brick-600); }
-    .mbtn--g { background:var(--surface); border-color:var(--border-control); color:var(--stone-900); }
+    .mbtn--g { background:var(--surface); border-color:var(--border-control); color:var(--marble-900); }
     .mbtn--d { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .mchips { display:flex; gap:8px; overflow:hidden; }
-    .mchip { display:inline-flex; align-items:center; gap:7px; height:40px; padding:0 14px; border-radius:999px;
-      border:1px solid var(--border); background:var(--surface); font-size:14px; font-weight:600;
+    .mchip { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border-radius:var(--r-pill);
+      border:1px solid var(--border); background:var(--surface); font-size:13px; font-weight:600;
       color:var(--text-body); white-space:nowrap; }
     .mchip[data-on] { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
     .mcard { border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; background:var(--surface); }
@@ -435,19 +435,19 @@
         repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
     .mcard .tag { position:absolute; z-index:1; top:12px; left:12px; }
     .mcard .fav { position:absolute; z-index:1; top:10px; right:10px; display:grid; place-items:center;
-      width:44px; height:44px; border-radius:999px; background:rgba(255,255,255,.94); color:var(--ink-800); }
-    .mcard .bd { padding:14px 15px 16px; display:grid; gap:8px; }
-    .mcard .p { font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--stone-900); }
-    .mcard h3 { font-size:16px; font-weight:600; color:var(--stone-900); line-height:1.35; }
-    .mfacts { display:flex; flex-wrap:wrap; gap:12px; font-size:14px; color:var(--text-muted); }
-    .mfacts span { display:inline-flex; align-items:center; gap:6px; }
-    .mtabs { margin-top:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:2px;
-      padding:8px 8px 22px; background:var(--surface); border-top:1px solid var(--border); }
-    .mtab { display:grid; justify-items:center; gap:4px; min-height:54px; padding:8px 2px; border-radius:12px;
+      width:44px; height:44px; border-radius:var(--r-pill); background:rgba(255,255,255,.94); color:var(--ink-800); }
+    .mcard .bd { padding:16px 16px 16px; display:grid; gap:8px; }
+    .mcard .p { font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--marble-900); }
+    .mcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
+    .mfacts { display:flex; flex-wrap:wrap; gap:12px; font-size:13px; color:var(--text-muted); }
+    .mfacts span { display:inline-flex; align-items:center; gap:8px; }
+    .mtabs { margin-top:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:4px;
+      padding:8px 8px 24px; background:var(--surface); border-top:1px solid var(--border); }
+    .mtab { display:grid; justify-items:center; gap:4px; min-height:54px; padding:8px 4px; border-radius:var(--r-panel);
       color:var(--text-muted); font-size:11px; font-weight:600; }
-    .mtab[data-on] { color:var(--stone-900); }
+    .mtab[data-on] { color:var(--marble-900); }
     .mtab[data-on] svg { color:var(--brick-600); }
-    .mbar { position:sticky; bottom:0; display:flex; gap:10px; padding:12px 16px 20px;
+    .mbar { position:sticky; bottom:0; display:flex; gap:12px; padding:12px 16px 20px;
       background:rgba(255,255,255,.96); border-top:1px solid var(--border); }
     .mgal { position:relative; height:262px;
       background:linear-gradient(155deg,#5f5544 0%,#8d7c5e 40%,#c4b394 72%,#7d6f56 100%); }
@@ -455,15 +455,15 @@
       background:radial-gradient(110% 80% at 26% 20%, rgba(255,255,255,.2), transparent 56%),
         repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
     .mgal .cnt { position:absolute; z-index:1; right:12px; bottom:12px; display:inline-flex; align-items:center;
-      gap:7px; height:34px; padding:0 12px; border-radius:var(--r-md); background:rgba(255,255,255,.94);
-      font-size:13.5px; font-weight:600; color:var(--stone-900); }
+      gap:8px; height:34px; padding:0 12px; border-radius:var(--r-md); background:rgba(255,255,255,.94);
+      font-size:13px; font-weight:600; color:var(--marble-900); }
     .mgal .back { position:absolute; z-index:1; left:12px; top:12px; display:grid; place-items:center;
-      width:44px; height:44px; border-radius:999px; background:rgba(255,255,255,.94); color:var(--stone-900); }
-    .mkv { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:var(--border);
+      width:44px; height:44px; border-radius:var(--r-pill); background:rgba(255,255,255,.94); color:var(--marble-900); }
+    .mkv { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; background:var(--border);
       border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; }
-    .mkv > div { background:var(--surface); padding:12px 14px; }
-    .mkv dt { font-size:13px; color:var(--text-muted); margin-bottom:3px; }
-    .mkv dd { margin:0; font-size:16px; font-weight:600; color:var(--stone-900); }
+    .mkv > div { background:var(--surface); padding:12px 16px; }
+    .mkv dt { font-size:13px; color:var(--text-muted); margin-bottom:4px; }
+    .mkv dd { margin:0; font-size:16px; font-weight:600; color:var(--marble-900); }
 
   </style>
 </helmet>
@@ -475,9 +475,9 @@
   </div>
   <div class="mbody">
     <div>
-      <span style="font-family:var(--font-display); font-size:26px; font-weight:600; color:var(--stone-900)" dir="ltr">€185,000</span>
-      <h1 style="font-size:19px; font-weight:600; color:var(--stone-900); line-height:1.45; margin-top:6px">וילה עם בריכה ונוף להרים</h1>
-      <p style="font-size:15px; color:var(--text-muted); margin-top:5px">קטונצי, אזור סנדנסקי</p>
+      <span style="font-family:var(--font-display); font-size:27px; font-weight:600; color:var(--marble-900)" dir="ltr">€185,000</span>
+      <h1 style="font-size:19px; font-weight:600; color:var(--marble-900); line-height:1.45; margin-top:8px">וילה עם בריכה ונוף להרים</h1>
+      <p style="font-size:16px; color:var(--text-muted); margin-top:4px">קטונצי, אזור סנדנסקי</p>
     </div>
     <div style="display:flex; flex-wrap:wrap; gap:8px">
       <span class="trust"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>נתונים מאומתים</span>
@@ -489,9 +489,9 @@
       <div><dt>חדרי שינה</dt><dd>4</dd></div>
       <div><dt>חדרי רחצה</dt><dd>2</dd></div>
     </dl>
-    <p style="font-size:15.5px; line-height:1.7; color:var(--text-body)">וילה דו-קומתית בקצה הכפר קטונצי,
+    <p style="font-size:16px; line-height:1.7; color:var(--text-body)">וילה דו-קומתית בקצה הכפר קטונצי,
       14 ק״מ מסנדנסקי. חצר פרטית עם בריכה, מטבח קיץ וחניה מקורה לשתי מכוניות.</p>
-    <a href="#" style="font-size:15px; font-weight:600">קראו עוד <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    <a href="#" style="font-size:16px; font-weight:600">קראו עוד <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
     <span class="mbtn mbtn--g" style="width:100%"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>הצג במפה</span>
   </div>
   <div class="mbar">
