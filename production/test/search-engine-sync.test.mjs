@@ -1003,7 +1003,7 @@ test("benchmark bootstrap imports the declared corpus and waits for Meilisearch 
     ],
   );
   assert.match(calls[3].options.body, /MS-00815:bg/);
-  assert.match(calls[6].options.body, /"meili_id":"MS-CRAWL-0001_bg"/);
+  assert.match(calls[6].options.body, /"meili_id":"MS-00815_bg"/);
 });
 
 test("benchmark bootstrap rejects failed or invalid Typesense JSONL results", async () => {

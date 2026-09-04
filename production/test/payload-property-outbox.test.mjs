@@ -32,7 +32,7 @@ test("property change enqueues an upsert for its legacy listing", async () => {
     {
       collection: "search_outbox",
       data: {
-        id: "search-c2VhcmNoOk1TLUNSQVdMLTAwMDE6dXBzZXJ0OjIwMjYtMDctMzBUMTA6MDA6MDAuMDAwWg",
+        id: "search-c2VhcmNoOk1TLTAwODE1OnVwc2VydDoyMDI2LTA3LTMwVDEwOjAwOjAwLjAwMFo",
         listing: "MS-00815",
         event_type: "upsert",
         outbox_state: "pending",

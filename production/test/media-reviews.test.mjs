@@ -48,7 +48,9 @@ test("human media review publishes a replacement floor plan without losing its s
   assert.equal(reviewedAsset.source_url, asset.source_url);
   assert.equal(reviewedAsset.asset_url, "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-00719-floor-plan.webp");
   assert.equal(reviewedAsset.media_reviewer, "media_editor");
-  assert.equal(listing.media_workflow.review_gated_assets, 0);
+  // The lot absorbed its Russian twin's media, so the twin's own floor plan is
+  // still waiting for a reviewer while this one is published.
+  assert.equal(listing.media_workflow.review_gated_assets, 1);
   assert.equal(library.floor_plans.length, 1);
   assert.equal(library.floor_plans[0].alt, "Reviewed floor plan for the property");
 });

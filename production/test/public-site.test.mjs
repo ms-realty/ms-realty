@@ -653,7 +653,7 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-action="detail"/);
   assert.match(html, /data-card-action="inquiry"/);
   assert.match(html, /data-card-action="save"/);
-  assert.match(html, /data-listing-id="MS-CRAWL-/);
+  assert.match(html, /data-listing-id="MS-0\d{4}/);
   // Several crawl listings share a title word-for-word (three parcels in
   // Sandanski, two identical rentals); the reference chip is the one visible
   // differentiator, so cards show it - it is the listing's public identity in

@@ -117,7 +117,7 @@ test("the comparison renders one column per saved id, capped at four", () => {
 
   const html = renderReactPublicBody(page);
   assert.match(html, /data-react-public-ui="compare"/);
-  assert.equal((html.match(/data-compare-column="MS-CRAWL-\d+"/g) || []).length, 4);
+  assert.equal((html.match(/data-compare-column="MS-0\d{4}(?:-\d+)?"/g) || []).length, 4);
   assert.match(html, /data-compare-limit="true"/);
   assert.doesNotMatch(html, /data-compare-limit="true"[^>]*hidden/);
 });

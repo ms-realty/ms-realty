@@ -766,31 +766,41 @@ test("the apply step refuses a runtime that cannot open a transaction", async ()
 
 // --- the committed catalogue -------------------------------------------------
 
-test("the committed seed and owner approval publish the full 165-listing catalogue", () => {
+test("the committed seed and owner approval publish the 127 surviving listings", () => {
   const seed = loadCmsSeed();
   const approval = operatorPublishedListingApproval(loadApprovedLaunchFreeze());
   assert.ok(approval, "the committed publication approval must validate against the approved launch freeze");
 
   const seedRecords = seedListingRecords(seed);
   assert.equal(seedRecords.length, 165);
-  for (const record of seedRecords) {
+  // The approval names all 165, but a cross-domain twin is archived into its
+  // survivor and is never published on its own.
+  const published = seedRecords.filter((record) => record.cms_status === "published");
+  const archived = seedRecords.filter((record) => record.cms_status === "archived");
+  assert.equal(published.length, 127);
+  assert.equal(archived.length, 38);
+  for (const record of published) {
     const state = seedPublicationStateFor(record);
     assert.equal(state.ok, true, `${record.id} must carry the owner approval`);
     assert.equal(state.state.publish_approved_by, APPROVER);
   }
+  for (const record of archived) {
+    assert.ok(record.merged_into, `${record.id} must name the listing it merged into`);
+    assert.equal(seedPublicationStateFor(record).ok, false, `${record.id} must not publish on its own`);
+  }
 
   const rows = importedRows(seedRecords);
   const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords, approval });
-  assert.equal(plan.summary.apply, 165);
-  assert.equal(plan.summary.refused, 0);
+  assert.equal(plan.summary.apply, 127);
+  assert.equal(plan.summary.refused, 38, "a merged twin is refused: the seed archives it");
   assert.equal(plan.summary.skipped, 0);
-  assert.equal(plan.summary.translations_apply, 165);
+  assert.equal(plan.summary.translations_apply, 127);
   assert.equal(plan.summary.translations_held, 0);
-  assert.equal(publicationSyncAuditRecords(plan).length, 165);
+  assert.equal(publicationSyncAuditRecords(plan).length, 127);
 
   applyPlanToRows(plan, rows);
   const second = buildListingPublicationSyncPlan({ ...rows, seedRecords, approval });
   assert.equal(second.idempotent, true);
-  assert.equal(second.summary.unchanged, 165);
-  assert.equal(second.summary.refused, 0);
+  assert.equal(second.summary.unchanged, 127);
+  assert.equal(second.summary.refused, 38, "the archived twins stay refused on every run");
 });

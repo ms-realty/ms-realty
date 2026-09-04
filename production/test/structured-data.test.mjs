@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertStructuredDataReport, buildStructuredDataReport } from "../lib/structured-data-report.mjs";
+import { assertStructuredDataReport, buildStructuredDataReport ,
+  PUBLIC_LISTING_SCHEMA_ENTRIES,
+} from "../lib/structured-data-report.mjs";
 import { assertListingSchema, buildListingSchema, schemaIssues } from "../lib/structured-data.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -120,7 +122,7 @@ test("missing approved media is a review warning instead of a schema failure", (
     seed: {
       ...seed,
       records: seed.records.map((record) =>
-        record.id === "MS-CRAWL-0114"
+        record.id === "MS-00191"
           ? { ...record, media: [], facts: { ...record.facts, thumbnail_url: "" } }
           : record,
       ),
@@ -129,8 +131,8 @@ test("missing approved media is a review warning instead of a schema failure", (
   });
 
   assert.equal(assertListingSchema(schema), true);
-  assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").every((row) => row.issues.length === 0));
-  assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").some((row) => row.warnings.includes("missing_public_images")));
+  assert.ok(report.rows.filter((row) => row.listing_id === "MS-00191").every((row) => row.issues.length === 0));
+  assert.ok(report.rows.filter((row) => row.listing_id === "MS-00191").some((row) => row.warnings.includes("missing_public_images")));
 });
 
 test("structured data warnings use broker-verified property edits", () => {
@@ -213,7 +215,7 @@ test("generated structured data report covers indexable listing sitemap entries"
   if (!fs.existsSync(file)) return;
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertStructuredDataReport(report), true);
-  assert.equal(report.summary.listing_entries, 165);
+  assert.equal(report.summary.listing_entries, PUBLIC_LISTING_SCHEMA_ENTRIES);
   assert.equal(report.summary.guide_entries, 5);
   assert.equal(report.summary.failing_entries, 0);
   assert.equal(report.rows.some((row) => row.loc === "/en/guides/foreign-buyers" && row.schema_type === "Article"), true);
