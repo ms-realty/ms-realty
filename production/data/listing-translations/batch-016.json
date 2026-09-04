@@ -1,362 +1,1262 @@
 [
   {
-    "listing_id":"MS-CRAWL-0151","source_locale":"ru","locale":"bg","source_hash":"59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
-    "title":"Продава се оранжерия в град Сандански","description":"Оранжерия с площ 1 100 кв.м се намира в Сандански, до асфалтиран път и река Струма.",
-    "seo_title":"Оранжерия за продажба в Сандански","meta_description":"Оранжерия с площ 1 100 кв.м в Сандански, разположена в непосредствена близост до асфалтиран път и река Струма, се предлага за продажба.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0151",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
+    "title": "Продава се оранжерия в град Сандански",
+    "description": "Оранжерия с площ 1 100 кв.м се намира в Сандански, до асфалтиран път и река Струма.",
+    "seo_title": "Оранжерия за продажба в Сандански",
+    "meta_description": "Оранжерия с площ 1 100 кв.м в Сандански, разположена в непосредствена близост до асфалтиран път и река Струма, се предлага за продажба.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0151","source_locale":"ru","locale":"en","source_hash":"59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
-    "title":"Greenhouse for sale in the town of Sandanski","description":"The greenhouse covers 1 100 sq.m and is located in Sandanski, next to an asphalt road and the Struma River.",
-    "seo_title":"Greenhouse for sale in Sandanski","meta_description":"Greenhouse covering 1 100 sq.m in Sandanski, located beside an asphalt road and the Struma River, is offered for sale in the town.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0151",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
+    "title": "Greenhouse for sale in the town of Sandanski",
+    "description": "The greenhouse covers 1 100 sq.m and is located in Sandanski, next to an asphalt road and the Struma River.",
+    "seo_title": "Greenhouse for sale in Sandanski",
+    "meta_description": "Greenhouse covering 1 100 sq.m in Sandanski, located beside an asphalt road and the Struma River, is offered for sale in the town.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0151","source_locale":"ru","locale":"de","source_hash":"59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
-    "title":"Gewächshaus in der Stadt Sandanski zu verkaufen","description":"Das Gewächshaus mit 1 100 qm Fläche befindet sich in Sandanski, neben einer asphaltierten Straße und dem Fluss Struma.",
-    "seo_title":"Gewächshaus in Sandanski zu verkaufen","meta_description":"Gewächshaus mit 1 100 qm Fläche in Sandanski, unmittelbar an einer asphaltierten Straße und am Fluss Struma gelegen, wird zum Verkauf angeboten.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0151",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
+    "title": "Gewächshaus in der Stadt Sandanski zu verkaufen",
+    "description": "Das Gewächshaus mit 1 100 qm Fläche befindet sich in Sandanski, neben einer asphaltierten Straße und dem Fluss Struma.",
+    "seo_title": "Gewächshaus in Sandanski zu verkaufen",
+    "meta_description": "Gewächshaus mit 1 100 qm Fläche in Sandanski, unmittelbar an einer asphaltierten Straße und am Fluss Struma gelegen, wird zum Verkauf angeboten.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0151","source_locale":"ru","locale":"nl","source_hash":"59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
-    "title":"Kas te koop in de stad Sandanski","description":"De kas met een oppervlakte van 1 100 m² ligt in Sandanski, naast een geasfalteerde weg en de rivier de Struma.",
-    "seo_title":"Kas te koop in Sandanski","meta_description":"Kas van 1 100 m² in Sandanski, direct naast een geasfalteerde weg en de rivier de Struma gelegen, wordt in de stad te koop aangeboden.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0151",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
+    "title": "Kas te koop in de stad Sandanski",
+    "description": "De kas met een oppervlakte van 1 100 m² ligt in Sandanski, naast een geasfalteerde weg en de rivier de Struma.",
+    "seo_title": "Kas te koop in Sandanski",
+    "meta_description": "Kas van 1 100 m² in Sandanski, direct naast een geasfalteerde weg en de rivier de Struma gelegen, wordt in de stad te koop aangeboden.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0151","source_locale":"ru","locale":"el","source_hash":"59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
-    "title":"Πωλείται θερμοκήπιο στην πόλη Σαντάνσκι","description":"Το θερμοκήπιο επιφάνειας 1 100 τ.μ. βρίσκεται στο Σαντάνσκι, δίπλα σε ασφαλτοστρωμένο δρόμο και στον ποταμό Στρούμα.",
-    "seo_title":"Θερμοκήπιο προς πώληση στο Σαντάνσκι","meta_description":"Θερμοκήπιο επιφάνειας 1 100 τ.μ. στο Σαντάνσκι, ακριβώς δίπλα σε ασφαλτοστρωμένο δρόμο και στον ποταμό Στρούμα, προσφέρεται προς πώληση.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0151",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
+    "title": "Πωλείται θερμοκήπιο στην πόλη Σαντάνσκι",
+    "description": "Το θερμοκήπιο επιφάνειας 1 100 τ.μ. βρίσκεται στο Σαντάνσκι, δίπλα σε ασφαλτοστρωμένο δρόμο και στον ποταμό Στρούμα.",
+    "seo_title": "Θερμοκήπιο προς πώληση στο Σαντάνσκι",
+    "meta_description": "Θερμοκήπιο επιφάνειας 1 100 τ.μ. στο Σαντάνσκι, ακριβώς δίπλα σε ασφαλτοστρωμένο δρόμο και στον ποταμό Στρούμα, προσφέρεται προς πώληση.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0151","source_locale":"ru","locale":"he","source_hash":"59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
-    "title":"חממה למכירה בעיר סנדנסקי","description":"חממה בשטח 1 100 מ״ר נמצאת בסנדנסקי, ליד כביש אספלט ונהר סטרומה.",
-    "seo_title":"חממה למכירה בסנדנסקי","meta_description":"חממה בשטח 1 100 מ״ר בסנדנסקי מוצעת למכירה בעיר, והיא נמצאת בסמיכות לכביש אספלט ולנהר סטרומה, בהתאם לפרטי הנכס שבמקור בלבד.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0151",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "59d07bce9abe171a6863d64622cc2e590b9a63b2a7e1a2e82a389f005f22da12",
+    "title": "חממה למכירה בעיר סנדנסקי",
+    "description": "חממה בשטח 1 100 מ״ר נמצאת בסנדנסקי, ליד כביש אספלט ונהר סטרומה.",
+    "seo_title": "חממה למכירה בסנדנסקי",
+    "meta_description": "חממה בשטח 1 100 מ״ר בסנדנסקי מוצעת למכירה בעיר, והיא נמצאת בסמיכות לכביש אספלט ולנהר סטרומה, בהתאם לפרטי הנכס שבמקור בלבד.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0152","source_locale":"ru","locale":"bg","source_hash":"e0b7050482a0f764b8b9b71c60d2a13a258484ab5b27c9af163627d753aa112f",
-    "title":"Парцел в село Лешница - районът на град Сандански","description":"Парцел в село Лешница - районът на град Сандански. Продажба на недвижим имот.",
-    "seo_title":"Парцел за продажба в село Лешница","meta_description":"Парцел в село Лешница, в района на град Сандански, е обявен за продажба като недвижим имот; източникът не посочва допълнителни характеристики.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"]
+    "listing_id": "MS-00296",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "d1179229b58612a6368a39547f0bda77302f2e5c7840e63b7913bd2bfb5b0dc7",
+    "title": "Парцел в село Лешница - районът на град Сандански",
+    "description": "Парцел в село Лешница - районът на град Сандански. Продажба на недвижим имот.",
+    "seo_title": "Парцел за продажба в село Лешница",
+    "meta_description": "Парцел в село Лешница, в района на град Сандански, е обявен за продажба като недвижим имот; източникът не посочва допълнителни характеристики.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0152","source_locale":"ru","locale":"en","source_hash":"e0b7050482a0f764b8b9b71c60d2a13a258484ab5b27c9af163627d753aa112f",
-    "title":"Plot in the village of Leshnitsa - Sandanski area","description":"Plot in the village of Leshnitsa, in the Sandanski area. Property for sale.",
-    "seo_title":"Plot for sale in Leshnitsa near Sandanski","meta_description":"Plot in the village of Leshnitsa, in the area of Sandanski, is offered as property for sale; the source provides no further property details.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"]
+    "listing_id": "MS-00296",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "d1179229b58612a6368a39547f0bda77302f2e5c7840e63b7913bd2bfb5b0dc7",
+    "title": "Plot in the village of Leshnitsa - Sandanski area",
+    "description": "Plot in the village of Leshnitsa, in the Sandanski area. Property for sale.",
+    "seo_title": "Plot for sale in Leshnitsa near Sandanski",
+    "meta_description": "Plot in the village of Leshnitsa, in the area of Sandanski, is offered as property for sale; the source provides no further property details.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0152","source_locale":"ru","locale":"de","source_hash":"e0b7050482a0f764b8b9b71c60d2a13a258484ab5b27c9af163627d753aa112f",
-    "title":"Grundstück im Dorf Leshnitsa - Raum Sandanski","description":"Grundstück im Dorf Leshnitsa, im Gebiet der Stadt Sandanski. Immobilie zum Verkauf.",
-    "seo_title":"Grundstück in Leshnitsa bei Sandanski","meta_description":"Grundstück im Dorf Leshnitsa, im Gebiet der Stadt Sandanski, wird als Immobilie zum Verkauf angeboten; weitere Merkmale nennt die Quelle nicht.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"]
+    "listing_id": "MS-00296",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "d1179229b58612a6368a39547f0bda77302f2e5c7840e63b7913bd2bfb5b0dc7",
+    "title": "Grundstück im Dorf Leshnitsa - Raum Sandanski",
+    "description": "Grundstück im Dorf Leshnitsa, im Gebiet der Stadt Sandanski. Immobilie zum Verkauf.",
+    "seo_title": "Grundstück in Leshnitsa bei Sandanski",
+    "meta_description": "Grundstück im Dorf Leshnitsa, im Gebiet der Stadt Sandanski, wird als Immobilie zum Verkauf angeboten; weitere Merkmale nennt die Quelle nicht.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0152","source_locale":"ru","locale":"nl","source_hash":"e0b7050482a0f764b8b9b71c60d2a13a258484ab5b27c9af163627d753aa112f",
-    "title":"Perceel in het dorp Leshnitsa - regio Sandanski","description":"Perceel in het dorp Leshnitsa, in de regio van de stad Sandanski. Vastgoed te koop.",
-    "seo_title":"Perceel te koop in Leshnitsa bij Sandanski","meta_description":"Perceel in het dorp Leshnitsa, in de regio van Sandanski, wordt als vastgoed te koop aangeboden; de bron vermeldt geen verdere kenmerken.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"]
+    "listing_id": "MS-00296",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "d1179229b58612a6368a39547f0bda77302f2e5c7840e63b7913bd2bfb5b0dc7",
+    "title": "Perceel in het dorp Leshnitsa - regio Sandanski",
+    "description": "Perceel in het dorp Leshnitsa, in de regio van de stad Sandanski. Vastgoed te koop.",
+    "seo_title": "Perceel te koop in Leshnitsa bij Sandanski",
+    "meta_description": "Perceel in het dorp Leshnitsa, in de regio van Sandanski, wordt als vastgoed te koop aangeboden; de bron vermeldt geen verdere kenmerken.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0152","source_locale":"ru","locale":"el","source_hash":"e0b7050482a0f764b8b9b71c60d2a13a258484ab5b27c9af163627d753aa112f",
-    "title":"Οικόπεδο στο χωριό Λέσνιτσα - περιοχή της πόλης Σαντάνσκι","description":"Οικόπεδο στο χωριό Λέσνιτσα, στην περιοχή της πόλης Σαντάνσκι. Πώληση ακινήτου.",
-    "seo_title":"Οικόπεδο στη Λέσνιτσα κοντά στο Σαντάνσκι","meta_description":"Οικόπεδο στο χωριό Λέσνιτσα, στην περιοχή της πόλης Σαντάνσκι, προσφέρεται ως ακίνητο προς πώληση· η πηγή δεν αναφέρει άλλα χαρακτηριστικά.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"]
+    "listing_id": "MS-00296",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "d1179229b58612a6368a39547f0bda77302f2e5c7840e63b7913bd2bfb5b0dc7",
+    "title": "Οικόπεδο στο χωριό Λέσνιτσα - περιοχή της πόλης Σαντάνσκι",
+    "description": "Οικόπεδο στο χωριό Λέσνιτσα, στην περιοχή της πόλης Σαντάνσκι. Πώληση ακινήτου.",
+    "seo_title": "Οικόπεδο στη Λέσνιτσα κοντά στο Σαντάνσκι",
+    "meta_description": "Οικόπεδο στο χωριό Λέσνιτσα, στην περιοχή της πόλης Σαντάνσκι, προσφέρεται ως ακίνητο προς πώληση· η πηγή δεν αναφέρει άλλα χαρακτηριστικά.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0152","source_locale":"ru","locale":"he","source_hash":"e0b7050482a0f764b8b9b71c60d2a13a258484ab5b27c9af163627d753aa112f",
-    "title":"מגרש בכפר לשניצה - אזור העיר סנדנסקי","description":"מגרש בכפר לשניצה, באזור העיר סנדנסקי. נכס למכירה.",
-    "seo_title":"מגרש למכירה בלשניצה ליד סנדנסקי","meta_description":"מגרש בכפר לשניצה שבאזור העיר סנדנסקי מוצע למכירה כנכס מקרקעין; המקור מציין את המיקום והמכירה ואינו מוסר מאפייני נכס נוספים.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"]
+    "listing_id": "MS-00296",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "d1179229b58612a6368a39547f0bda77302f2e5c7840e63b7913bd2bfb5b0dc7",
+    "title": "מגרש בכפר לשניצה - אזור העיר סנדנסקי",
+    "description": "מגרש בכפר לשניצה, באזור העיר סנדנסקי. נכס למכירה.",
+    "seo_title": "מגרש למכירה בלשניצה ליד סנדנסקי",
+    "meta_description": "מגרש בכפר לשניצה שבאזור העיר סנדנסקי מוצע למכירה כנכס מקרקעין; המקור מציין את המיקום והמכירה ואינו מוסר מאפייני נכס נוספים.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0153","source_locale":"ru","locale":"bg","source_hash":"e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
-    "title":"Парцел в село Струмяни. Имоти в района на балнеоложкия курорт Сандански","description":"Парцел в село Струмяни. Продажба на парцел за строителство в село Струмяни. Недвижими имоти в Сандански.",
-    "seo_title":"Парцел за строителство в Струмяни","meta_description":"Парцел за строителство в село Струмяни се предлага за продажба като недвижим имот в района на балнеоложкия курорт Сандански.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"]
+    "listing_id": "MS-CRAWL-0153",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
+    "title": "Парцел в село Струмяни. Имоти в района на балнеоложкия курорт Сандански",
+    "description": "Парцел в село Струмяни. Продажба на парцел за строителство в село Струмяни. Недвижими имоти в Сандански.",
+    "seo_title": "Парцел за строителство в Струмяни",
+    "meta_description": "Парцел за строителство в село Струмяни се предлага за продажба като недвижим имот в района на балнеоложкия курорт Сандански.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0153","source_locale":"ru","locale":"en","source_hash":"e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
-    "title":"Plot in Strumyani. Property near the balneological resort of Sandanski","description":"Plot in the village of Strumyani. Building plot for sale in the village of Strumyani. Property in Sandanski.",
-    "seo_title":"Building plot for sale in Strumyani","meta_description":"Building plot in the village of Strumyani is offered for sale as property in the area of the balneological resort of Sandanski.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"]
+    "listing_id": "MS-CRAWL-0153",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
+    "title": "Plot in Strumyani. Property near the balneological resort of Sandanski",
+    "description": "Plot in the village of Strumyani. Building plot for sale in the village of Strumyani. Property in Sandanski.",
+    "seo_title": "Building plot for sale in Strumyani",
+    "meta_description": "Building plot in the village of Strumyani is offered for sale as property in the area of the balneological resort of Sandanski.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0153","source_locale":"ru","locale":"de","source_hash":"e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
-    "title":"Grundstück in Strumyani. Immobilie beim balneologischen Kurort Sandanski","description":"Grundstück im Dorf Strumyani. Baugrundstück im Dorf Strumyani zu verkaufen. Immobilien in Sandanski.",
-    "seo_title":"Baugrundstück in Strumyani zu verkaufen","meta_description":"Baugrundstück im Dorf Strumyani wird als Immobilie zum Verkauf angeboten und liegt im Gebiet des balneologischen Kurorts Sandanski.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"]
+    "listing_id": "MS-CRAWL-0153",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
+    "title": "Grundstück in Strumyani. Immobilie beim balneologischen Kurort Sandanski",
+    "description": "Grundstück im Dorf Strumyani. Baugrundstück im Dorf Strumyani zu verkaufen. Immobilien in Sandanski.",
+    "seo_title": "Baugrundstück in Strumyani zu verkaufen",
+    "meta_description": "Baugrundstück im Dorf Strumyani wird als Immobilie zum Verkauf angeboten und liegt im Gebiet des balneologischen Kurorts Sandanski.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0153","source_locale":"ru","locale":"nl","source_hash":"e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
-    "title":"Perceel in Strumyani. Vastgoed nabij het kuuroord Sandanski","description":"Perceel in het dorp Strumyani. Bouwperceel te koop in het dorp Strumyani. Vastgoed in Sandanski.",
-    "seo_title":"Bouwperceel te koop in Strumyani","meta_description":"Bouwperceel in het dorp Strumyani wordt als vastgoed te koop aangeboden en ligt in de regio van het balneologische kuuroord Sandanski.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"]
+    "listing_id": "MS-CRAWL-0153",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
+    "title": "Perceel in Strumyani. Vastgoed nabij het kuuroord Sandanski",
+    "description": "Perceel in het dorp Strumyani. Bouwperceel te koop in het dorp Strumyani. Vastgoed in Sandanski.",
+    "seo_title": "Bouwperceel te koop in Strumyani",
+    "meta_description": "Bouwperceel in het dorp Strumyani wordt als vastgoed te koop aangeboden en ligt in de regio van het balneologische kuuroord Sandanski.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0153","source_locale":"ru","locale":"el","source_hash":"e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
-    "title":"Οικόπεδο στο χωριό Στρουμιάνι. Ακίνητο στην περιοχή του λουτροθεραπευτικού θέρετρου Σαντάνσκι","description":"Οικόπεδο στο χωριό Στρουμιάνι. Πώληση οικοπέδου για δόμηση στο χωριό Στρουμιάνι. Ακίνητα στο Σαντάνσκι.",
-    "seo_title":"Οικόπεδο για δόμηση στο Στρουμιάνι","meta_description":"Οικόπεδο για δόμηση στο χωριό Στρουμιάνι προσφέρεται προς πώληση ως ακίνητο στην περιοχή του λουτροθεραπευτικού θέρετρου Σαντάνσκι.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"]
+    "listing_id": "MS-CRAWL-0153",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
+    "title": "Οικόπεδο στο χωριό Στρουμιάνι. Ακίνητο στην περιοχή του λουτροθεραπευτικού θέρετρου Σαντάνσκι",
+    "description": "Οικόπεδο στο χωριό Στρουμιάνι. Πώληση οικοπέδου για δόμηση στο χωριό Στρουμιάνι. Ακίνητα στο Σαντάνσκι.",
+    "seo_title": "Οικόπεδο για δόμηση στο Στρουμιάνι",
+    "meta_description": "Οικόπεδο για δόμηση στο χωριό Στρουμιάνι προσφέρεται προς πώληση ως ακίνητο στην περιοχή του λουτροθεραπευτικού θέρετρου Σαντάνσκι.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0153","source_locale":"ru","locale":"he","source_hash":"e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
-    "title":"מגרש בכפר סטרומיאני. נדל״ן באזור אתר המרפא הבלנאולוגי סנדנסקי","description":"מגרש בכפר סטרומיאני. מגרש לבנייה למכירה בכפר סטרומיאני. נדל״ן בסנדנסקי.",
-    "seo_title":"מגרש לבנייה למכירה בסטרומיאני","meta_description":"מגרש לבנייה בכפר סטרומיאני מוצע למכירה כנכס מקרקעין באזור אתר המרפא הבלנאולוגי של סנדנסקי, בהתאם לתיאור המקור הזמין בלבד.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"]
+    "listing_id": "MS-CRAWL-0153",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "e6f6e896cf2f2cf4fd84bc409247a5cd8a3f72f24a66e2cb9199dc2f6885ff07",
+    "title": "מגרש בכפר סטרומיאני. נדל״ן באזור אתר המרפא הבלנאולוגי סנדנסקי",
+    "description": "מגרש בכפר סטרומיאני. מגרש לבנייה למכירה בכפר סטרומיאני. נדל״ן בסנדנסקי.",
+    "seo_title": "מגרש לבנייה למכירה בסטרומיאני",
+    "meta_description": "מגרש לבנייה בכפר סטרומיאני מוצע למכירה כנכס מקרקעין באזור אתר המרפא הבלנאולוגי של סנדנסקי, בהתאם לתיאור המקור הזמין בלבד.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0154","source_locale":"ru","locale":"bg","source_hash":"ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
-    "title":"Продажба на парцел в село Струмяни. Имоти в Сандански","description":"Продава се парцел в село Струмяни. Имотът е на 10 км от Сандански. Панорамен парцел с гледка към планините и река Струма. 677 м2, цена 11 000 евро. Всички комуникации.",
-    "seo_title":"Панорамен парцел в Струмяни за 11 000 евро","meta_description":"Панорамен парцел от 677 м2 в село Струмяни, на 10 км от Сандански, с гледка към планините и река Струма, всички комуникации и цена 11 000 евро.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0154",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
+    "title": "Продажба на парцел в село Струмяни. Имоти в Сандански",
+    "description": "Продава се парцел в село Струмяни. Имотът е на 10 км от Сандански. Панорамен парцел с гледка към планините и река Струма. 677 м2, цена 11 000 евро. Всички комуникации.",
+    "seo_title": "Панорамен парцел в Струмяни за 11 000 евро",
+    "meta_description": "Панорамен парцел от 677 м2 в село Струмяни, на 10 км от Сандански, с гледка към планините и река Струма, всички комуникации и цена 11 000 евро.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0154","source_locale":"ru","locale":"en","source_hash":"ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
-    "title":"Plot for sale in Strumyani. Property in Sandanski","description":"Plot for sale in the village of Strumyani. Property 10 km from Sandanski. Panoramic plot with views of the mountains and the Struma River. 677 m2, price 11 000 euros. All utilities.",
-    "seo_title":"Panoramic plot in Strumyani for 11 000 euros","meta_description":"Panoramic 677 m2 plot in Strumyani, 10 km from Sandanski, with views of the mountains and Struma River, all utilities and a price of 11 000 euros.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0154",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
+    "title": "Plot for sale in Strumyani. Property in Sandanski",
+    "description": "Plot for sale in the village of Strumyani. Property 10 km from Sandanski. Panoramic plot with views of the mountains and the Struma River. 677 m2, price 11 000 euros. All utilities.",
+    "seo_title": "Panoramic plot in Strumyani for 11 000 euros",
+    "meta_description": "Panoramic 677 m2 plot in Strumyani, 10 km from Sandanski, with views of the mountains and Struma River, all utilities and a price of 11 000 euros.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0154","source_locale":"ru","locale":"de","source_hash":"ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
-    "title":"Grundstück in Strumyani zu verkaufen. Immobilien in Sandanski","description":"Grundstück im Dorf Strumyani zu verkaufen. Immobilie 10 km von Sandanski entfernt. Panoramagrundstück mit Blick auf die Berge und den Fluss Struma. 677 m2, Preis 11 000 Euro. Sämtliche Versorgungsanschlüsse.",
-    "seo_title":"Panoramagrundstück in Strumyani für 11 000 Euro","meta_description":"Panoramagrundstück mit 677 m2 in Strumyani, 10 km von Sandanski entfernt, mit Berg- und Struma-Blick, allen Versorgungsanschlüssen und Preis 11 000 Euro.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0154",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
+    "title": "Grundstück in Strumyani zu verkaufen. Immobilien in Sandanski",
+    "description": "Grundstück im Dorf Strumyani zu verkaufen. Immobilie 10 km von Sandanski entfernt. Panoramagrundstück mit Blick auf die Berge und den Fluss Struma. 677 m2, Preis 11 000 Euro. Sämtliche Versorgungsanschlüsse.",
+    "seo_title": "Panoramagrundstück in Strumyani für 11 000 Euro",
+    "meta_description": "Panoramagrundstück mit 677 m2 in Strumyani, 10 km von Sandanski entfernt, mit Berg- und Struma-Blick, allen Versorgungsanschlüssen und Preis 11 000 Euro.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0154","source_locale":"ru","locale":"nl","source_hash":"ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
-    "title":"Perceel te koop in Strumyani. Vastgoed in Sandanski","description":"Perceel te koop in het dorp Strumyani. Vastgoed op 10 km van Sandanski. Panoramisch perceel met uitzicht op de bergen en de rivier de Struma. 677 m2, prijs 11 000 euro. Alle nutsvoorzieningen.",
-    "seo_title":"Panoramisch perceel in Strumyani voor 11 000 euro","meta_description":"Panoramisch perceel van 677 m2 in Strumyani, op 10 km van Sandanski, met berg- en Struma-uitzicht, alle nutsvoorzieningen en een prijs van 11 000 euro.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0154",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
+    "title": "Perceel te koop in Strumyani. Vastgoed in Sandanski",
+    "description": "Perceel te koop in het dorp Strumyani. Vastgoed op 10 km van Sandanski. Panoramisch perceel met uitzicht op de bergen en de rivier de Struma. 677 m2, prijs 11 000 euro. Alle nutsvoorzieningen.",
+    "seo_title": "Panoramisch perceel in Strumyani voor 11 000 euro",
+    "meta_description": "Panoramisch perceel van 677 m2 in Strumyani, op 10 km van Sandanski, met berg- en Struma-uitzicht, alle nutsvoorzieningen en een prijs van 11 000 euro.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0154","source_locale":"ru","locale":"el","source_hash":"ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
-    "title":"Πώληση οικοπέδου στο Στρουμιάνι. Ακίνητα στο Σαντάνσκι","description":"Πωλείται οικόπεδο στο χωριό Στρουμιάνι. Ακίνητο 10 χλμ. από το Σαντάνσκι. Πανοραμικό οικόπεδο με θέα στα βουνά και στον ποταμό Στρούμα. 677 m2, τιμή 11 000 ευρώ. Όλες οι παροχές.",
-    "seo_title":"Πανοραμικό οικόπεδο στο Στρουμιάνι 11 000 ευρώ","meta_description":"Πανοραμικό οικόπεδο 677 m2 στο Στρουμιάνι, 10 χλμ. από το Σαντάνσκι, με θέα στα βουνά και στον Στρούμα, όλες τις παροχές και τιμή 11 000 ευρώ.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0154",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
+    "title": "Πώληση οικοπέδου στο Στρουμιάνι. Ακίνητα στο Σαντάνσκι",
+    "description": "Πωλείται οικόπεδο στο χωριό Στρουμιάνι. Ακίνητο 10 χλμ. από το Σαντάνσκι. Πανοραμικό οικόπεδο με θέα στα βουνά και στον ποταμό Στρούμα. 677 m2, τιμή 11 000 ευρώ. Όλες οι παροχές.",
+    "seo_title": "Πανοραμικό οικόπεδο στο Στρουμιάνι 11 000 ευρώ",
+    "meta_description": "Πανοραμικό οικόπεδο 677 m2 στο Στρουμιάνι, 10 χλμ. από το Σαντάνσκι, με θέα στα βουνά και στον Στρούμα, όλες τις παροχές και τιμή 11 000 ευρώ.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0154","source_locale":"ru","locale":"he","source_hash":"ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
-    "title":"מגרש למכירה בכפר סטרומיאני. נדל״ן בסנדנסקי","description":"מגרש למכירה בכפר סטרומיאני. נכס במרחק 10 ק״מ מסנדנסקי. מגרש פנורמי עם נוף להרים ולנהר סטרומה. 677 m2, מחיר 11 000 אירו. כל התשתיות.",
-    "seo_title":"מגרש פנורמי בסטרומיאני ב־11 000 אירו","meta_description":"מגרש פנורמי בשטח 677 m2 בסטרומיאני, 10 ק״מ מסנדנסקי, עם נוף להרים ולנהר סטרומה, כל התשתיות ומחיר של 11 000 אירו, מוצע למכירה.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-CRAWL-0154",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "ab361f87a97ec8b50bf5fa128f772f1001d44601218ede561158ad58367e89a6",
+    "title": "מגרש למכירה בכפר סטרומיאני. נדל״ן בסנדנסקי",
+    "description": "מגרש למכירה בכפר סטרומיאני. נכס במרחק 10 ק״מ מסנדנסקי. מגרש פנורמי עם נוף להרים ולנהר סטרומה. 677 m2, מחיר 11 000 אירו. כל התשתיות.",
+    "seo_title": "מגרש פנורמי בסטרומיאני ב־11 000 אירו",
+    "meta_description": "מגרש פנורמי בשטח 677 m2 בסטרומיאני, 10 ק״מ מסנדנסקי, עם נוף להרים ולנהר סטרומה, כל התשתיות ומחיר של 11 000 אירו, מוצע למכירה.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0155","source_locale":"ru","locale":"bg","source_hash":"7dd575e7db089167d3c52a789bd5982a41098c7c922ea65f0049e198a5c73334",
-    "title":"Парцел за застрояване в Сандански","description":"Парцел за застрояване в Сандански.",
-    "seo_title":"Парцел за застрояване в Сандански","meta_description":"Парцел за застрояване в Сандански се предлага като имот за строителство; наличното изходно описание не съдържа други подробности за парцела.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-00232",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "8e3e81803295153251bc3a2c88370ae3bb8f56d5f97021515f5d10ed0b515bc5",
+    "title": "Парцел за застрояване в Сандански",
+    "description": "Парцел за застрояване в Сандански.",
+    "seo_title": "Парцел за застрояване в Сандански",
+    "meta_description": "Парцел за застрояване в Сандански се предлага като имот за строителство; наличното изходно описание не съдържа други подробности за парцела.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0155","source_locale":"ru","locale":"en","source_hash":"7dd575e7db089167d3c52a789bd5982a41098c7c922ea65f0049e198a5c73334",
-    "title":"Building plot in Sandanski","description":"Building plot in Sandanski.",
-    "seo_title":"Building plot in Sandanski","meta_description":"Building plot in Sandanski is offered as land for development; the available source description provides no further details about the plot.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-00232",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "8e3e81803295153251bc3a2c88370ae3bb8f56d5f97021515f5d10ed0b515bc5",
+    "title": "Building plot in Sandanski",
+    "description": "Building plot in Sandanski.",
+    "seo_title": "Building plot in Sandanski",
+    "meta_description": "Building plot in Sandanski is offered as land for development; the available source description provides no further details about the plot.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0155","source_locale":"ru","locale":"de","source_hash":"7dd575e7db089167d3c52a789bd5982a41098c7c922ea65f0049e198a5c73334",
-    "title":"Baugrundstück in Sandanski","description":"Baugrundstück in Sandanski.",
-    "seo_title":"Baugrundstück in Sandanski","meta_description":"Baugrundstück in Sandanski wird als Fläche zur Bebauung angeboten; die verfügbare Ausgangsbeschreibung enthält keine weiteren Angaben zum Grundstück.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-00232",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "8e3e81803295153251bc3a2c88370ae3bb8f56d5f97021515f5d10ed0b515bc5",
+    "title": "Baugrundstück in Sandanski",
+    "description": "Baugrundstück in Sandanski.",
+    "seo_title": "Baugrundstück in Sandanski",
+    "meta_description": "Baugrundstück in Sandanski wird als Fläche zur Bebauung angeboten; die verfügbare Ausgangsbeschreibung enthält keine weiteren Angaben zum Grundstück.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0155","source_locale":"ru","locale":"nl","source_hash":"7dd575e7db089167d3c52a789bd5982a41098c7c922ea65f0049e198a5c73334",
-    "title":"Bouwperceel in Sandanski","description":"Bouwperceel in Sandanski.",
-    "seo_title":"Bouwperceel in Sandanski","meta_description":"Bouwperceel in Sandanski wordt aangeboden als grond voor bebouwing; de beschikbare bronomschrijving bevat geen verdere gegevens over het perceel.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-00232",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "8e3e81803295153251bc3a2c88370ae3bb8f56d5f97021515f5d10ed0b515bc5",
+    "title": "Bouwperceel in Sandanski",
+    "description": "Bouwperceel in Sandanski.",
+    "seo_title": "Bouwperceel in Sandanski",
+    "meta_description": "Bouwperceel in Sandanski wordt aangeboden als grond voor bebouwing; de beschikbare bronomschrijving bevat geen verdere gegevens over het perceel.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0155","source_locale":"ru","locale":"el","source_hash":"7dd575e7db089167d3c52a789bd5982a41098c7c922ea65f0049e198a5c73334",
-    "title":"Οικόπεδο για δόμηση στο Σαντάνσκι","description":"Οικόπεδο για δόμηση στο Σαντάνσκι.",
-    "seo_title":"Οικόπεδο για δόμηση στο Σαντάνσκι","meta_description":"Οικόπεδο για δόμηση στο Σαντάνσκι προσφέρεται ως γη προς οικοδόμηση· η διαθέσιμη περιγραφή της πηγής δεν δίνει άλλα στοιχεία για το οικόπεδο.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-00232",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "8e3e81803295153251bc3a2c88370ae3bb8f56d5f97021515f5d10ed0b515bc5",
+    "title": "Οικόπεδο για δόμηση στο Σαντάνσκι",
+    "description": "Οικόπεδο για δόμηση στο Σαντάνσκι.",
+    "seo_title": "Οικόπεδο για δόμηση στο Σαντάνσκι",
+    "meta_description": "Οικόπεδο για δόμηση στο Σαντάνσκι προσφέρεται ως γη προς οικοδόμηση· η διαθέσιμη περιγραφή της πηγής δεν δίνει άλλα στοιχεία για το οικόπεδο.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0155","source_locale":"ru","locale":"he","source_hash":"7dd575e7db089167d3c52a789bd5982a41098c7c922ea65f0049e198a5c73334",
-    "title":"מגרש לבנייה בסנדנסקי","description":"מגרש לבנייה בסנדנסקי.",
-    "seo_title":"מגרש לבנייה בסנדנסקי","meta_description":"מגרש לבנייה בסנדנסקי מוצע כקרקע לפיתוח; תיאור המקור הזמין מזהה אותו כמגרש לבנייה בעיר ואינו מוסר פרטים נוספים על הנכס מעבר לכך.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"]
+    "listing_id": "MS-00232",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "8e3e81803295153251bc3a2c88370ae3bb8f56d5f97021515f5d10ed0b515bc5",
+    "title": "מגרש לבנייה בסנדנסקי",
+    "description": "מגרש לבנייה בסנדנסקי.",
+    "seo_title": "מגרש לבנייה בסנדנסקי",
+    "meta_description": "מגרש לבנייה בסנדנסקי מוצע כקרקע לפיתוח; תיאור המקור הזמין מזהה אותו כמגרש לבנייה בעיר ואינו מוסר פרטים נוספים על הנכס מעבר לכך.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0156","source_locale":"ru","locale":"bg","source_hash":"32f3a85ce9ec705bd89f46f17eb9555c141a140486b6aea9de5cfe9c3d3be652",
-    "title":"Парцел за застрояване в село Ласкарево","description":"Продава се парцел за застрояване в село Ласкарево - на 8 км от град Сандански.",
-    "seo_title":"Парцел за застрояване в Ласкарево","meta_description":"Парцел за застрояване в село Ласкарево се предлага за продажба; селото се намира на 8 км от град Сандански според изходното описание.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"]
+    "listing_id": "MS-00362",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "ec3887496a9151a52439615c33129205a73a492ac0900a673c97c8e038c1873d",
+    "title": "Парцел за застрояване в село Ласкарево",
+    "description": "Продава се парцел за застрояване в село Ласкарево - на 8 км от град Сандански.",
+    "seo_title": "Парцел за застрояване в Ласкарево",
+    "meta_description": "Парцел за застрояване в село Ласкарево се предлага за продажба; селото се намира на 8 км от град Сандански според изходното описание.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0156","source_locale":"ru","locale":"en","source_hash":"32f3a85ce9ec705bd89f46f17eb9555c141a140486b6aea9de5cfe9c3d3be652",
-    "title":"Building plot in the village of Laskarevo","description":"Building plot for sale in the village of Laskarevo, 8 km from the town of Sandanski.",
-    "seo_title":"Building plot for sale in Laskarevo","meta_description":"Building plot in the village of Laskarevo is offered for sale; the village is 8 km from the town of Sandanski according to the source description.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"]
+    "listing_id": "MS-00362",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "ec3887496a9151a52439615c33129205a73a492ac0900a673c97c8e038c1873d",
+    "title": "Building plot in the village of Laskarevo",
+    "description": "Building plot for sale in the village of Laskarevo, 8 km from the town of Sandanski.",
+    "seo_title": "Building plot for sale in Laskarevo",
+    "meta_description": "Building plot in the village of Laskarevo is offered for sale; the village is 8 km from the town of Sandanski according to the source description.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0156","source_locale":"ru","locale":"de","source_hash":"32f3a85ce9ec705bd89f46f17eb9555c141a140486b6aea9de5cfe9c3d3be652",
-    "title":"Baugrundstück im Dorf Laskarevo","description":"Baugrundstück im Dorf Laskarevo zu verkaufen, 8 km von der Stadt Sandanski entfernt.",
-    "seo_title":"Baugrundstück in Laskarevo zu verkaufen","meta_description":"Baugrundstück im Dorf Laskarevo wird zum Verkauf angeboten; das Dorf liegt laut Ausgangsbeschreibung 8 km von der Stadt Sandanski entfernt.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"]
+    "listing_id": "MS-00362",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "ec3887496a9151a52439615c33129205a73a492ac0900a673c97c8e038c1873d",
+    "title": "Baugrundstück im Dorf Laskarevo",
+    "description": "Baugrundstück im Dorf Laskarevo zu verkaufen, 8 km von der Stadt Sandanski entfernt.",
+    "seo_title": "Baugrundstück in Laskarevo zu verkaufen",
+    "meta_description": "Baugrundstück im Dorf Laskarevo wird zum Verkauf angeboten; das Dorf liegt laut Ausgangsbeschreibung 8 km von der Stadt Sandanski entfernt.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0156","source_locale":"ru","locale":"nl","source_hash":"32f3a85ce9ec705bd89f46f17eb9555c141a140486b6aea9de5cfe9c3d3be652",
-    "title":"Bouwperceel in het dorp Laskarevo","description":"Bouwperceel te koop in het dorp Laskarevo, op 8 km van de stad Sandanski.",
-    "seo_title":"Bouwperceel te koop in Laskarevo","meta_description":"Bouwperceel in het dorp Laskarevo wordt te koop aangeboden; volgens de bronomschrijving ligt het dorp op 8 km van de stad Sandanski.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"]
+    "listing_id": "MS-00362",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "ec3887496a9151a52439615c33129205a73a492ac0900a673c97c8e038c1873d",
+    "title": "Bouwperceel in het dorp Laskarevo",
+    "description": "Bouwperceel te koop in het dorp Laskarevo, op 8 km van de stad Sandanski.",
+    "seo_title": "Bouwperceel te koop in Laskarevo",
+    "meta_description": "Bouwperceel in het dorp Laskarevo wordt te koop aangeboden; volgens de bronomschrijving ligt het dorp op 8 km van de stad Sandanski.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0156","source_locale":"ru","locale":"el","source_hash":"32f3a85ce9ec705bd89f46f17eb9555c141a140486b6aea9de5cfe9c3d3be652",
-    "title":"Οικόπεδο για δόμηση στο χωριό Λασκάρεβο","description":"Πωλείται οικόπεδο για δόμηση στο χωριό Λασκάρεβο, 8 χλμ. από την πόλη Σαντάνσκι.",
-    "seo_title":"Οικόπεδο για δόμηση στο Λασκάρεβο","meta_description":"Οικόπεδο για δόμηση στο χωριό Λασκάρεβο προσφέρεται προς πώληση· σύμφωνα με την πηγή, το χωριό απέχει 8 χλμ. από την πόλη Σαντάνσκι.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"]
+    "listing_id": "MS-00362",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "ec3887496a9151a52439615c33129205a73a492ac0900a673c97c8e038c1873d",
+    "title": "Οικόπεδο για δόμηση στο χωριό Λασκάρεβο",
+    "description": "Πωλείται οικόπεδο για δόμηση στο χωριό Λασκάρεβο, 8 χλμ. από την πόλη Σαντάνσκι.",
+    "seo_title": "Οικόπεδο για δόμηση στο Λασκάρεβο",
+    "meta_description": "Οικόπεδο για δόμηση στο χωριό Λασκάρεβο προσφέρεται προς πώληση· σύμφωνα με την πηγή, το χωριό απέχει 8 χλμ. από την πόλη Σαντάνσκι.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0156","source_locale":"ru","locale":"he","source_hash":"32f3a85ce9ec705bd89f46f17eb9555c141a140486b6aea9de5cfe9c3d3be652",
-    "title":"מגרש לבנייה בכפר לסקרבו","description":"מגרש לבנייה למכירה בכפר לסקרבו, במרחק 8 ק״מ מהעיר סנדנסקי.",
-    "seo_title":"מגרש לבנייה למכירה בלסקרבו","meta_description":"מגרש לבנייה בכפר לסקרבו מוצע למכירה; לפי תיאור המקור, הכפר נמצא במרחק 8 ק״מ מהעיר סנדנסקי, ואין במקור פרטים נוספים על המגרש.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"]
+    "listing_id": "MS-00362",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "ec3887496a9151a52439615c33129205a73a492ac0900a673c97c8e038c1873d",
+    "title": "מגרש לבנייה בכפר לסקרבו",
+    "description": "מגרש לבנייה למכירה בכפר לסקרבו, במרחק 8 ק״מ מהעיר סנדנסקי.",
+    "seo_title": "מגרש לבנייה למכירה בלסקרבו",
+    "meta_description": "מגרש לבנייה בכפר לסקרבו מוצע למכירה; לפי תיאור המקור, הכפר נמצא במרחק 8 ק״מ מהעיר סנדנסקי, ואין במקור פרטים נוספים על המגרש.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0157","source_locale":"ru","locale":"bg","source_hash":"da0fb69c3614cb42d76c9f7340de5b19d5f52cee6a3dc338fb71b66d9e4310fa",
-    "title":"Парцел за строителство на хотел - Имоти в България. Агенция за недвижими имоти в Сандански","description":"Парцел за строителство на хотел в Сандански.",
-    "seo_title":"Парцел за хотел в Сандански","meta_description":"Парцел в Сандански се предлага за строителство на хотел; наличното изходно описание не съдържа допълнителни характеристики на имота.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"]
+    "listing_id": "MS-00074",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "1a4e50b36f27ff9b9293b74e34341f6e23baaee958537548f09cb6e623acca2d",
+    "title": "Парцел за строителство на хотел - Имоти в България. Агенция за недвижими имоти в Сандански",
+    "description": "Парцел за строителство на хотел в Сандански.",
+    "seo_title": "Парцел за хотел в Сандански",
+    "meta_description": "Парцел в Сандански се предлага за строителство на хотел; наличното изходно описание не съдържа допълнителни характеристики на имота.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0157","source_locale":"ru","locale":"en","source_hash":"da0fb69c3614cb42d76c9f7340de5b19d5f52cee6a3dc338fb71b66d9e4310fa",
-    "title":"Plot for hotel construction - Property in Bulgaria. Real estate agency in Sandanski","description":"Plot for hotel construction in Sandanski.",
-    "seo_title":"Plot for hotel construction in Sandanski","meta_description":"Plot in Sandanski is offered for the construction of a hotel; the available source description provides no additional property characteristics.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"]
+    "listing_id": "MS-00074",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "1a4e50b36f27ff9b9293b74e34341f6e23baaee958537548f09cb6e623acca2d",
+    "title": "Plot for hotel construction - Property in Bulgaria. Real estate agency in Sandanski",
+    "description": "Plot for hotel construction in Sandanski.",
+    "seo_title": "Plot for hotel construction in Sandanski",
+    "meta_description": "Plot in Sandanski is offered for the construction of a hotel; the available source description provides no additional property characteristics.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0157","source_locale":"ru","locale":"de","source_hash":"da0fb69c3614cb42d76c9f7340de5b19d5f52cee6a3dc338fb71b66d9e4310fa",
-    "title":"Grundstück für Hotelbau - Immobilien in Bulgarien. Immobilienagentur in Sandanski","description":"Grundstück für den Bau eines Hotels in Sandanski.",
-    "seo_title":"Grundstück für Hotelbau in Sandanski","meta_description":"Grundstück in Sandanski wird für den Bau eines Hotels angeboten; die verfügbare Ausgangsbeschreibung enthält keine weiteren Merkmale der Immobilie.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"]
+    "listing_id": "MS-00074",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "1a4e50b36f27ff9b9293b74e34341f6e23baaee958537548f09cb6e623acca2d",
+    "title": "Grundstück für Hotelbau - Immobilien in Bulgarien. Immobilienagentur in Sandanski",
+    "description": "Grundstück für den Bau eines Hotels in Sandanski.",
+    "seo_title": "Grundstück für Hotelbau in Sandanski",
+    "meta_description": "Grundstück in Sandanski wird für den Bau eines Hotels angeboten; die verfügbare Ausgangsbeschreibung enthält keine weiteren Merkmale der Immobilie.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0157","source_locale":"ru","locale":"nl","source_hash":"da0fb69c3614cb42d76c9f7340de5b19d5f52cee6a3dc338fb71b66d9e4310fa",
-    "title":"Perceel voor hotelbouw - Vastgoed in Bulgarije. Makelaardij in Sandanski","description":"Perceel voor de bouw van een hotel in Sandanski.",
-    "seo_title":"Perceel voor hotelbouw in Sandanski","meta_description":"Perceel in Sandanski wordt aangeboden voor de bouw van een hotel; de beschikbare bronomschrijving bevat geen verdere kenmerken van het vastgoed.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"]
+    "listing_id": "MS-00074",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "1a4e50b36f27ff9b9293b74e34341f6e23baaee958537548f09cb6e623acca2d",
+    "title": "Perceel voor hotelbouw - Vastgoed in Bulgarije. Makelaardij in Sandanski",
+    "description": "Perceel voor de bouw van een hotel in Sandanski.",
+    "seo_title": "Perceel voor hotelbouw in Sandanski",
+    "meta_description": "Perceel in Sandanski wordt aangeboden voor de bouw van een hotel; de beschikbare bronomschrijving bevat geen verdere kenmerken van het vastgoed.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0157","source_locale":"ru","locale":"el","source_hash":"da0fb69c3614cb42d76c9f7340de5b19d5f52cee6a3dc338fb71b66d9e4310fa",
-    "title":"Οικόπεδο για κατασκευή ξενοδοχείου - Ακίνητα στη Βουλγαρία. Μεσιτικό γραφείο στο Σαντάνσκι","description":"Οικόπεδο για την κατασκευή ξενοδοχείου στο Σαντάνσκι.",
-    "seo_title":"Οικόπεδο για ξενοδοχείο στο Σαντάνσκι","meta_description":"Οικόπεδο στο Σαντάνσκι προσφέρεται για την κατασκευή ξενοδοχείου· η διαθέσιμη περιγραφή της πηγής δεν αναφέρει άλλα χαρακτηριστικά του ακινήτου.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"]
+    "listing_id": "MS-00074",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "1a4e50b36f27ff9b9293b74e34341f6e23baaee958537548f09cb6e623acca2d",
+    "title": "Οικόπεδο για κατασκευή ξενοδοχείου - Ακίνητα στη Βουλγαρία. Μεσιτικό γραφείο στο Σαντάνσκι",
+    "description": "Οικόπεδο για την κατασκευή ξενοδοχείου στο Σαντάνσκι.",
+    "seo_title": "Οικόπεδο για ξενοδοχείο στο Σαντάνσκι",
+    "meta_description": "Οικόπεδο στο Σαντάνσκι προσφέρεται για την κατασκευή ξενοδοχείου· η διαθέσιμη περιγραφή της πηγής δεν αναφέρει άλλα χαρακτηριστικά του ακινήτου.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0157","source_locale":"ru","locale":"he","source_hash":"da0fb69c3614cb42d76c9f7340de5b19d5f52cee6a3dc338fb71b66d9e4310fa",
-    "title":"מגרש לבניית מלון - נדל״ן בבולגריה. סוכנות נדל״ן בסנדנסקי","description":"מגרש לבניית מלון בסנדנסקי.",
-    "seo_title":"מגרש לבניית מלון בסנדנסקי","meta_description":"מגרש בסנדנסקי מוצע לצורך בניית מלון; תיאור המקור הזמין מציין רק ייעוד זה ואת המיקום, ואינו מוסר מאפיינים נוספים על המגרש.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"]
+    "listing_id": "MS-00074",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "1a4e50b36f27ff9b9293b74e34341f6e23baaee958537548f09cb6e623acca2d",
+    "title": "מגרש לבניית מלון - נדל״ן בבולגריה. סוכנות נדל״ן בסנדנסקי",
+    "description": "מגרש לבניית מלון בסנדנסקי.",
+    "seo_title": "מגרש לבניית מלון בסנדנסקי",
+    "meta_description": "מגרש בסנדנסקי מוצע לצורך בניית מלון; תיאור המקור הזמין מציין רק ייעוד זה ואת המיקום, ואינו מוסר מאפיינים נוספים על המגרש.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0158","source_locale":"ru","locale":"bg","source_hash":"e4e530ef30a87d24ce90d80bc47b286992246b228fee9cdeab3eee112e3cc45f",
-    "title":"Парцел за строителство","description":"Парцел за строителство, парцел с проект.",
-    "seo_title":"Парцел за строителство с проект","meta_description":"Парцел за строителство се предлага с проект; наличното изходно описание посочва единствено предназначението и наличието на проект.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"]
+    "listing_id": "MS-00046",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "a14cc9ad24bc9b220d979937557de2a05705a98ec2dab070dcaef22671feb6c9",
+    "title": "Парцел за строителство",
+    "description": "Парцел за строителство, парцел с проект.",
+    "seo_title": "Парцел за строителство с проект",
+    "meta_description": "Парцел за строителство се предлага с проект; наличното изходно описание посочва единствено предназначението и наличието на проект.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0158","source_locale":"ru","locale":"en","source_hash":"e4e530ef30a87d24ce90d80bc47b286992246b228fee9cdeab3eee112e3cc45f",
-    "title":"Building plot","description":"Building plot, plot with a project.",
-    "seo_title":"Building plot with a project","meta_description":"Building plot is offered with a project; the available source description states only the intended construction use and the presence of a project.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"]
+    "listing_id": "MS-00046",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "a14cc9ad24bc9b220d979937557de2a05705a98ec2dab070dcaef22671feb6c9",
+    "title": "Building plot",
+    "description": "Building plot, plot with a project.",
+    "seo_title": "Building plot with a project",
+    "meta_description": "Building plot is offered with a project; the available source description states only the intended construction use and the presence of a project.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0158","source_locale":"ru","locale":"de","source_hash":"e4e530ef30a87d24ce90d80bc47b286992246b228fee9cdeab3eee112e3cc45f",
-    "title":"Baugrundstück","description":"Baugrundstück, Grundstück mit Projekt.",
-    "seo_title":"Baugrundstück mit Projekt","meta_description":"Baugrundstück wird mit einem Projekt angeboten; die verfügbare Ausgangsbeschreibung nennt nur den Bauzweck und das Vorhandensein eines Projekts.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"]
+    "listing_id": "MS-00046",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "a14cc9ad24bc9b220d979937557de2a05705a98ec2dab070dcaef22671feb6c9",
+    "title": "Baugrundstück",
+    "description": "Baugrundstück, Grundstück mit Projekt.",
+    "seo_title": "Baugrundstück mit Projekt",
+    "meta_description": "Baugrundstück wird mit einem Projekt angeboten; die verfügbare Ausgangsbeschreibung nennt nur den Bauzweck und das Vorhandensein eines Projekts.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0158","source_locale":"ru","locale":"nl","source_hash":"e4e530ef30a87d24ce90d80bc47b286992246b228fee9cdeab3eee112e3cc45f",
-    "title":"Bouwperceel","description":"Bouwperceel, perceel met een project.",
-    "seo_title":"Bouwperceel met een project","meta_description":"Bouwperceel wordt met een project aangeboden; de beschikbare bronomschrijving vermeldt alleen de bouwbestemming en de aanwezigheid van een project.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"]
+    "listing_id": "MS-00046",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "a14cc9ad24bc9b220d979937557de2a05705a98ec2dab070dcaef22671feb6c9",
+    "title": "Bouwperceel",
+    "description": "Bouwperceel, perceel met een project.",
+    "seo_title": "Bouwperceel met een project",
+    "meta_description": "Bouwperceel wordt met een project aangeboden; de beschikbare bronomschrijving vermeldt alleen de bouwbestemming en de aanwezigheid van een project.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0158","source_locale":"ru","locale":"el","source_hash":"e4e530ef30a87d24ce90d80bc47b286992246b228fee9cdeab3eee112e3cc45f",
-    "title":"Οικόπεδο για δόμηση","description":"Οικόπεδο για δόμηση, οικόπεδο με έργο.",
-    "seo_title":"Οικόπεδο για δόμηση με έργο","meta_description":"Οικόπεδο για δόμηση προσφέρεται με έργο· η διαθέσιμη περιγραφή της πηγής αναφέρει μόνο τον σκοπό δόμησης και την ύπαρξη έργου.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"]
+    "listing_id": "MS-00046",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "a14cc9ad24bc9b220d979937557de2a05705a98ec2dab070dcaef22671feb6c9",
+    "title": "Οικόπεδο για δόμηση",
+    "description": "Οικόπεδο για δόμηση, οικόπεδο με έργο.",
+    "seo_title": "Οικόπεδο για δόμηση με έργο",
+    "meta_description": "Οικόπεδο για δόμηση προσφέρεται με έργο· η διαθέσιμη περιγραφή της πηγής αναφέρει μόνο τον σκοπό δόμησης και την ύπαρξη έργου.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0158","source_locale":"ru","locale":"he","source_hash":"e4e530ef30a87d24ce90d80bc47b286992246b228fee9cdeab3eee112e3cc45f",
-    "title":"מגרש לבנייה","description":"מגרש לבנייה, מגרש עם פרויקט.",
-    "seo_title":"מגרש לבנייה עם פרויקט","meta_description":"מגרש לבנייה מוצע עם פרויקט; תיאור המקור הזמין מציין רק שמדובר במגרש לבנייה עם פרויקט, ואינו מוסר מאפיינים נוספים על המגרש.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"]
+    "listing_id": "MS-00046",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "a14cc9ad24bc9b220d979937557de2a05705a98ec2dab070dcaef22671feb6c9",
+    "title": "מגרש לבנייה",
+    "description": "מגרש לבנייה, מגרש עם פרויקט.",
+    "seo_title": "מגרש לבנייה עם פרויקט",
+    "meta_description": "מגרש לבנייה מוצע עם פרויקט; תיאור המקור הזמין מציין רק שמדובר במגרש לבנייה עם פרויקט, ואינו מוסר מאפיינים נוספים על המגרש.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0159","source_locale":"ru","locale":"bg","source_hash":"6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
-    "title":"Център за профилактика, рехабилитация и козметични процедури - продажба","description":"Продава се център за профилактика, рехабилитация и козметични процедури в балнеоложкия курорт Сандански, България. Площ 165 кв.м, цена 185 000 евро.",
-    "seo_title":"Център за процедури в Сандански за продажба","meta_description":"Център за профилактика, рехабилитация и козметични процедури в балнеоложкия курорт Сандански, с площ 165 кв.м и цена 185 000 евро.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"]
+    "listing_id": "MS-CRAWL-0159",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
+    "title": "Център за профилактика, рехабилитация и козметични процедури - продажба",
+    "description": "Продава се център за профилактика, рехабилитация и козметични процедури в балнеоложкия курорт Сандански, България. Площ 165 кв.м, цена 185 000 евро.",
+    "seo_title": "Център за процедури в Сандански за продажба",
+    "meta_description": "Център за профилактика, рехабилитация и козметични процедури в балнеоложкия курорт Сандански, с площ 165 кв.м и цена 185 000 евро.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0159","source_locale":"ru","locale":"en","source_hash":"6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
-    "title":"Prevention, rehabilitation and cosmetic treatment centre for sale","description":"Centre for prevention, rehabilitation and cosmetic treatments for sale in the balneological resort of Sandanski, Bulgaria. Area 165 sq.m, price 185 000 euros.",
-    "seo_title":"Treatment centre for sale in Sandanski","meta_description":"Prevention, rehabilitation and cosmetic treatment centre in the balneological resort of Sandanski, covering 165 sq.m and priced at 185 000 euros.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"]
+    "listing_id": "MS-CRAWL-0159",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
+    "title": "Prevention, rehabilitation and cosmetic treatment centre for sale",
+    "description": "Centre for prevention, rehabilitation and cosmetic treatments for sale in the balneological resort of Sandanski, Bulgaria. Area 165 sq.m, price 185 000 euros.",
+    "seo_title": "Treatment centre for sale in Sandanski",
+    "meta_description": "Prevention, rehabilitation and cosmetic treatment centre in the balneological resort of Sandanski, covering 165 sq.m and priced at 185 000 euros.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0159","source_locale":"ru","locale":"de","source_hash":"6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
-    "title":"Zentrum für Prävention, Rehabilitation und kosmetische Behandlungen zu verkaufen","description":"Zentrum für Prävention, Rehabilitation und kosmetische Behandlungen im balneologischen Kurort Sandanski, Bulgarien, zu verkaufen. Fläche 165 qm, Preis 185 000 Euro.",
-    "seo_title":"Behandlungszentrum in Sandanski zu verkaufen","meta_description":"Zentrum für Prävention, Rehabilitation und kosmetische Behandlungen im balneologischen Kurort Sandanski, mit 165 qm Fläche zum Preis von 185 000 Euro.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"]
+    "listing_id": "MS-CRAWL-0159",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
+    "title": "Zentrum für Prävention, Rehabilitation und kosmetische Behandlungen zu verkaufen",
+    "description": "Zentrum für Prävention, Rehabilitation und kosmetische Behandlungen im balneologischen Kurort Sandanski, Bulgarien, zu verkaufen. Fläche 165 qm, Preis 185 000 Euro.",
+    "seo_title": "Behandlungszentrum in Sandanski zu verkaufen",
+    "meta_description": "Zentrum für Prävention, Rehabilitation und kosmetische Behandlungen im balneologischen Kurort Sandanski, mit 165 qm Fläche zum Preis von 185 000 Euro.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0159","source_locale":"ru","locale":"nl","source_hash":"6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
-    "title":"Centrum voor preventie, revalidatie en cosmetische behandelingen te koop","description":"Centrum voor preventie, revalidatie en cosmetische behandelingen te koop in het balneologische kuuroord Sandanski, Bulgarije. Oppervlakte 165 m², prijs 185 000 euro.",
-    "seo_title":"Behandelcentrum te koop in Sandanski","meta_description":"Centrum voor preventie, revalidatie en cosmetische behandelingen in het balneologische kuuroord Sandanski, met 165 m² voor een prijs van 185 000 euro.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"]
+    "listing_id": "MS-CRAWL-0159",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
+    "title": "Centrum voor preventie, revalidatie en cosmetische behandelingen te koop",
+    "description": "Centrum voor preventie, revalidatie en cosmetische behandelingen te koop in het balneologische kuuroord Sandanski, Bulgarije. Oppervlakte 165 m², prijs 185 000 euro.",
+    "seo_title": "Behandelcentrum te koop in Sandanski",
+    "meta_description": "Centrum voor preventie, revalidatie en cosmetische behandelingen in het balneologische kuuroord Sandanski, met 165 m² voor een prijs van 185 000 euro.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0159","source_locale":"ru","locale":"el","source_hash":"6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
-    "title":"Κέντρο πρόληψης, αποκατάστασης και αισθητικών θεραπειών προς πώληση","description":"Πωλείται κέντρο πρόληψης, αποκατάστασης και αισθητικών θεραπειών στο λουτροθεραπευτικό θέρετρο Σαντάνσκι, Βουλγαρία. Επιφάνεια 165 τ.μ., τιμή 185 000 ευρώ.",
-    "seo_title":"Κέντρο θεραπειών προς πώληση στο Σαντάνσκι","meta_description":"Κέντρο πρόληψης, αποκατάστασης και αισθητικών θεραπειών στο λουτροθεραπευτικό θέρετρο Σαντάνσκι, επιφάνειας 165 τ.μ. και τιμής 185 000 ευρώ.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"]
+    "listing_id": "MS-CRAWL-0159",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
+    "title": "Κέντρο πρόληψης, αποκατάστασης και αισθητικών θεραπειών προς πώληση",
+    "description": "Πωλείται κέντρο πρόληψης, αποκατάστασης και αισθητικών θεραπειών στο λουτροθεραπευτικό θέρετρο Σαντάνσκι, Βουλγαρία. Επιφάνεια 165 τ.μ., τιμή 185 000 ευρώ.",
+    "seo_title": "Κέντρο θεραπειών προς πώληση στο Σαντάνσκι",
+    "meta_description": "Κέντρο πρόληψης, αποκατάστασης και αισθητικών θεραπειών στο λουτροθεραπευτικό θέρετρο Σαντάνσκι, επιφάνειας 165 τ.μ. και τιμής 185 000 ευρώ.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0159","source_locale":"ru","locale":"he","source_hash":"6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
-    "title":"מרכז למניעה, שיקום וטיפולים קוסמטיים למכירה","description":"מרכז למניעה, שיקום וטיפולים קוסמטיים למכירה באתר המרפא הבלנאולוגי סנדנסקי, בולגריה. שטח 165 מ״ר, מחיר 185 000 אירו.",
-    "seo_title":"מרכז טיפולים למכירה בסנדנסקי","meta_description":"מרכז למניעה, שיקום וטיפולים קוסמטיים באתר המרפא הבלנאולוגי סנדנסקי שבבולגריה, בשטח 165 מ״ר ובמחיר של 185 000 אירו, מוצע למכירה.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"]
+    "listing_id": "MS-CRAWL-0159",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "6a776214bd4e3c7fc31fed64fb8924d867572cb5396d2a182d1f6206e57bff22",
+    "title": "מרכז למניעה, שיקום וטיפולים קוסמטיים למכירה",
+    "description": "מרכז למניעה, שיקום וטיפולים קוסמטיים למכירה באתר המרפא הבלנאולוגי סנדנסקי, בולגריה. שטח 165 מ״ר, מחיר 185 000 אירו.",
+    "seo_title": "מרכז טיפולים למכירה בסנדנסקי",
+    "meta_description": "מרכז למניעה, שיקום וטיפולים קוסמטיים באתר המרפא הבלנאולוגי סנדנסקי שבבולגריה, בשטח 165 מ״ר ובמחיר של 185 000 אירו, מוצע למכירה.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0160","source_locale":"ru","locale":"bg","source_hash":"11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
-    "title":"Етаж от къща с поземлен имот в село Левуново, Сандански - Имоти в България. Агенция за недвижими имоти в Сандански","description":"Имотът се намира в центъра на село Левуново. Представлява първи етаж от къща. Площта му е 90 кв.м заедно с мазето и таванското помещение, както и 2/3 идеални части от парцела, върху който е построена къщата, а именно 421 кв.м. Къщата е монолитна / стоманобетонна и тухлена /. Нуждае се от освежителен ремонт. Подовете са дървени. Стените са с варова мазилка.",
-    "seo_title":"Етаж от къща с парцел в Левуново","meta_description":"Първи етаж от монолитна къща в центъра на Левуново, 90 кв.м с мазе и таван, плюс 2/3 идеални части от парцел 421 кв.м; нужен е освежителен ремонт.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"]
+    "listing_id": "MS-CRAWL-0160",
+    "source_locale": "ru",
+    "locale": "bg",
+    "source_hash": "11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
+    "title": "Етаж от къща с поземлен имот в село Левуново, Сандански - Имоти в България. Агенция за недвижими имоти в Сандански",
+    "description": "Имотът се намира в центъра на село Левуново. Представлява първи етаж от къща. Площта му е 90 кв.м заедно с мазето и таванското помещение, както и 2/3 идеални части от парцела, върху който е построена къщата, а именно 421 кв.м. Къщата е монолитна / стоманобетонна и тухлена /. Нуждае се от освежителен ремонт. Подовете са дървени. Стените са с варова мазилка.",
+    "seo_title": "Етаж от къща с парцел в Левуново",
+    "meta_description": "Първи етаж от монолитна къща в центъра на Левуново, 90 кв.м с мазе и таван, плюс 2/3 идеални части от парцел 421 кв.м; нужен е освежителен ремонт.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0160","source_locale":"ru","locale":"en","source_hash":"11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
-    "title":"Floor of a house with land in Levunovo village, Sandanski - Property in Bulgaria. Real estate agency in Sandanski","description":"The property is in the centre of the village of Levunovo. It is the first floor of a house. Its area is 90 sq.m, together with the basement and attic, plus a 2/3 ideal share of the plot on which the house is built, namely 421 sq.m. The house is monolithic / concrete and brick /. It needs refreshing renovation. The floors are wooden. The walls have lime plaster.",
-    "seo_title":"House floor with land in Levunovo","meta_description":"First floor of a monolithic house in central Levunovo, 90 sq.m with basement and attic, plus a 2/3 share of a 421 sq.m plot; refreshing renovation is needed.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"]
+    "listing_id": "MS-CRAWL-0160",
+    "source_locale": "ru",
+    "locale": "en",
+    "source_hash": "11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
+    "title": "Floor of a house with land in Levunovo village, Sandanski - Property in Bulgaria. Real estate agency in Sandanski",
+    "description": "The property is in the centre of the village of Levunovo. It is the first floor of a house. Its area is 90 sq.m, together with the basement and attic, plus a 2/3 ideal share of the plot on which the house is built, namely 421 sq.m. The house is monolithic / concrete and brick /. It needs refreshing renovation. The floors are wooden. The walls have lime plaster.",
+    "seo_title": "House floor with land in Levunovo",
+    "meta_description": "First floor of a monolithic house in central Levunovo, 90 sq.m with basement and attic, plus a 2/3 share of a 421 sq.m plot; refreshing renovation is needed.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0160","source_locale":"ru","locale":"de","source_hash":"11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
-    "title":"Hausetage mit Grundstück im Dorf Levunovo, Sandanski - Immobilien in Bulgarien. Immobilienagentur in Sandanski","description":"Die Immobilie befindet sich im Zentrum des Dorfes Levunovo. Es handelt sich um das erste Geschoss eines Hauses. Seine Fläche beträgt 90 qm einschließlich Keller und Dachgeschoss, dazu kommen 2/3 ideeller Anteil am Grundstück, auf dem das Haus errichtet wurde, nämlich 421 qm. Das Haus ist monolithisch / aus Beton und Ziegeln /. Es benötigt eine Auffrischungsrenovierung. Die Böden sind aus Holz. Die Wände haben Kalkputz.",
-    "seo_title":"Hausetage mit Grundstück in Levunovo","meta_description":"Erstes Geschoss eines monolithischen Hauses in Levunovo, 90 qm mit Keller und Dachgeschoss sowie 2/3 Anteil an einem 421-qm-Grundstück; Renovierung nötig.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"]
+    "listing_id": "MS-CRAWL-0160",
+    "source_locale": "ru",
+    "locale": "de",
+    "source_hash": "11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
+    "title": "Hausetage mit Grundstück im Dorf Levunovo, Sandanski - Immobilien in Bulgarien. Immobilienagentur in Sandanski",
+    "description": "Die Immobilie befindet sich im Zentrum des Dorfes Levunovo. Es handelt sich um das erste Geschoss eines Hauses. Seine Fläche beträgt 90 qm einschließlich Keller und Dachgeschoss, dazu kommen 2/3 ideeller Anteil am Grundstück, auf dem das Haus errichtet wurde, nämlich 421 qm. Das Haus ist monolithisch / aus Beton und Ziegeln /. Es benötigt eine Auffrischungsrenovierung. Die Böden sind aus Holz. Die Wände haben Kalkputz.",
+    "seo_title": "Hausetage mit Grundstück in Levunovo",
+    "meta_description": "Erstes Geschoss eines monolithischen Hauses in Levunovo, 90 qm mit Keller und Dachgeschoss sowie 2/3 Anteil an einem 421-qm-Grundstück; Renovierung nötig.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0160","source_locale":"ru","locale":"nl","source_hash":"11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
-    "title":"Verdieping van huis met grond in Levunovo, Sandanski - Vastgoed in Bulgarije. Makelaardij in Sandanski","description":"Het pand ligt in het centrum van het dorp Levunovo. Het betreft de eerste verdieping van een huis. De oppervlakte is 90 m², inclusief kelder en zolder, plus een onverdeeld aandeel van 2/3 in het perceel waarop het huis is gebouwd, namelijk 421 m². Het huis is monolithisch / van beton en baksteen /. Het heeft een opfrisrenovatie nodig. De vloeren zijn van hout. De muren hebben kalkpleister.",
-    "seo_title":"Huisverdieping met grond in Levunovo","meta_description":"Eerste verdieping van een monolithisch huis in centraal Levunovo, 90 m² met kelder en zolder, plus 2/3 aandeel in een perceel van 421 m²; opfrisrenovatie nodig.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"]
+    "listing_id": "MS-CRAWL-0160",
+    "source_locale": "ru",
+    "locale": "nl",
+    "source_hash": "11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
+    "title": "Verdieping van huis met grond in Levunovo, Sandanski - Vastgoed in Bulgarije. Makelaardij in Sandanski",
+    "description": "Het pand ligt in het centrum van het dorp Levunovo. Het betreft de eerste verdieping van een huis. De oppervlakte is 90 m², inclusief kelder en zolder, plus een onverdeeld aandeel van 2/3 in het perceel waarop het huis is gebouwd, namelijk 421 m². Het huis is monolithisch / van beton en baksteen /. Het heeft een opfrisrenovatie nodig. De vloeren zijn van hout. De muren hebben kalkpleister.",
+    "seo_title": "Huisverdieping met grond in Levunovo",
+    "meta_description": "Eerste verdieping van een monolithisch huis in centraal Levunovo, 90 m² met kelder en zolder, plus 2/3 aandeel in een perceel van 421 m²; opfrisrenovatie nodig.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0160","source_locale":"ru","locale":"el","source_hash":"11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
-    "title":"Όροφος κατοικίας με οικόπεδο στο χωριό Λεβούνοβο, Σαντάνσκι - Ακίνητα στη Βουλγαρία. Μεσιτικό γραφείο στο Σαντάνσκι","description":"Το ακίνητο βρίσκεται στο κέντρο του χωριού Λεβούνοβο. Είναι ο πρώτος όροφος κατοικίας. Η επιφάνειά του είναι 90 τ.μ., μαζί με το υπόγειο και τη σοφίτα, καθώς και 2/3 εξ αδιαιρέτου μερίδιο του οικοπέδου όπου έχει χτιστεί το σπίτι, δηλαδή 421 τ.μ. Το σπίτι είναι μονολιθικό / από σκυρόδεμα και τούβλα /. Χρειάζεται ανακαίνιση ανανέωσης. Τα δάπεδα είναι ξύλινα. Οι τοίχοι έχουν ασβεστοκονίαμα.",
-    "seo_title":"Όροφος κατοικίας με οικόπεδο στο Λεβούνοβο","meta_description":"Πρώτος όροφος μονολιθικής κατοικίας στο κέντρο του Λεβούνοβο, 90 τ.μ. με υπόγειο και σοφίτα, συν 2/3 μερίδιο οικοπέδου 421 τ.μ.· χρειάζεται ανανέωση.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"]
+    "listing_id": "MS-CRAWL-0160",
+    "source_locale": "ru",
+    "locale": "el",
+    "source_hash": "11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
+    "title": "Όροφος κατοικίας με οικόπεδο στο χωριό Λεβούνοβο, Σαντάνσκι - Ακίνητα στη Βουλγαρία. Μεσιτικό γραφείο στο Σαντάνσκι",
+    "description": "Το ακίνητο βρίσκεται στο κέντρο του χωριού Λεβούνοβο. Είναι ο πρώτος όροφος κατοικίας. Η επιφάνειά του είναι 90 τ.μ., μαζί με το υπόγειο και τη σοφίτα, καθώς και 2/3 εξ αδιαιρέτου μερίδιο του οικοπέδου όπου έχει χτιστεί το σπίτι, δηλαδή 421 τ.μ. Το σπίτι είναι μονολιθικό / από σκυρόδεμα και τούβλα /. Χρειάζεται ανακαίνιση ανανέωσης. Τα δάπεδα είναι ξύλινα. Οι τοίχοι έχουν ασβεστοκονίαμα.",
+    "seo_title": "Όροφος κατοικίας με οικόπεδο στο Λεβούνοβο",
+    "meta_description": "Πρώτος όροφος μονολιθικής κατοικίας στο κέντρο του Λεβούνοβο, 90 τ.μ. με υπόγειο και σοφίτα, συν 2/3 μερίδιο οικοπέδου 421 τ.μ.· χρειάζεται ανανέωση.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+    ]
   },
   {
-    "listing_id":"MS-CRAWL-0160","source_locale":"ru","locale":"he","source_hash":"11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
-    "title":"קומת בית עם מגרש בכפר לבונובו, סנדנסקי - נדל״ן בבולגריה. סוכנות נדל״ן בסנדנסקי","description":"הנכס נמצא במרכז הכפר לבונובו. זוהי הקומה הראשונה של בית. שטחה 90 מ״ר, יחד עם המרתף ועליית הגג, וכן חלק בלתי מסוים של 2/3 במגרש שעליו נבנה הבית, כלומר 421 מ״ר. הבית מונוליטי / בטון ולבנים /. הוא זקוק לשיפוץ רענון. הרצפות מעץ. הקירות מטויחים בטיח סיד.",
-    "seo_title":"קומת בית עם מגרש בלבונובו","meta_description":"קומה ראשונה בבית מונוליטי במרכז לבונובו, 90 מ״ר עם מרתף ועליית גג, ועוד חלק בלתי מסוים של 2/3 במגרש 421 מ״ר; נדרש שיפוץ רענון.",
-    "translator":"codex-manual-translation","content_origin":"manual_translation","reviewed_by":null,"reviewed_at":null,"human_approved":false,"publication_authorized_by":"ms-realty-owner-directive-2026-08-30","publication_authorized_at":"2026-08-30T00:00:00+03:00","status":"human_review_pending","citations":["https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"]
+    "listing_id": "MS-CRAWL-0160",
+    "source_locale": "ru",
+    "locale": "he",
+    "source_hash": "11922de5a559018f74a995b44f42600b2c2f0a2cd7ea12f153dbeb2886579cb0",
+    "title": "קומת בית עם מגרש בכפר לבונובו, סנדנסקי - נדל״ן בבולגריה. סוכנות נדל״ן בסנדנסקי",
+    "description": "הנכס נמצא במרכז הכפר לבונובו. זוהי הקומה הראשונה של בית. שטחה 90 מ״ר, יחד עם המרתף ועליית הגג, וכן חלק בלתי מסוים של 2/3 במגרש שעליו נבנה הבית, כלומר 421 מ״ר. הבית מונוליטי / בטון ולבנים /. הוא זקוק לשיפוץ רענון. הרצפות מעץ. הקירות מטויחים בטיח סיד.",
+    "seo_title": "קומת בית עם מגרש בלבונובו",
+    "meta_description": "קומה ראשונה בבית מונוליטי במרכז לבונובו, 90 מ״ר עם מרתף ועליית גג, ועוד חלק בלתי מסוים של 2/3 במגרש 421 מ״ר; נדרש שיפוץ רענון.",
+    "translator": "codex-manual-translation",
+    "content_origin": "manual_translation",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "human_approved": false,
+    "publication_authorized_by": "ms-realty-owner-directive-2026-08-30",
+    "publication_authorized_at": "2026-08-30T00:00:00+03:00",
+    "status": "human_review_pending",
+    "citations": [
+      "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+    ]
   }
 ]

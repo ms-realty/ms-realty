@@ -4,7 +4,7 @@
   "summary": {
     "routes": 204,
     "eligible_routes": 197,
-    "sitemap_indexable_routes": 197,
+    "sitemap_indexable_routes": 26,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
@@ -127,7 +127,7 @@
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-3000",
+      "path": "/bg/imoti/MS-00100",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -141,18 +141,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-3000"
+        "listingId": "MS-00100"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0001",
+      "path": "/bg/imoti/MS-00101",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -166,18 +166,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0001"
+        "listingId": "MS-00101"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0002",
+      "path": "/bg/imoti/MS-00123",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -191,18 +191,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0002"
+        "listingId": "MS-00123"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0003",
+      "path": "/bg/imoti/MS-00190",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -216,18 +216,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0003"
+        "listingId": "MS-00190"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0004",
+      "path": "/bg/imoti/MS-00191",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -241,18 +241,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0004"
+        "listingId": "MS-00191"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0005",
+      "path": "/bg/imoti/MS-00234",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -266,18 +266,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0005"
+        "listingId": "MS-00234"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0006",
+      "path": "/bg/imoti/MS-00242",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -291,18 +291,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0006"
+        "listingId": "MS-00242"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0007",
+      "path": "/bg/imoti/MS-00286",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -316,18 +316,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0007"
+        "listingId": "MS-00286"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0008",
+      "path": "/bg/imoti/MS-00321",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -341,18 +341,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0008"
+        "listingId": "MS-00321"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0009",
+      "path": "/bg/imoti/MS-00345",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -366,18 +366,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0009"
+        "listingId": "MS-00345"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0010",
+      "path": "/bg/imoti/MS-00356",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -391,18 +391,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0010"
+        "listingId": "MS-00356"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0011",
+      "path": "/bg/imoti/MS-00394",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -416,18 +416,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0011"
+        "listingId": "MS-00394"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0012",
+      "path": "/bg/imoti/MS-00432",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -441,18 +441,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0012"
+        "listingId": "MS-00432"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0013",
+      "path": "/bg/imoti/MS-00443",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -466,18 +466,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0013"
+        "listingId": "MS-00443"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0014",
+      "path": "/bg/imoti/MS-00444",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -491,18 +491,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0014"
+        "listingId": "MS-00444"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0015",
+      "path": "/bg/imoti/MS-00456",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -516,18 +516,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0015"
+        "listingId": "MS-00456"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0016",
+      "path": "/bg/imoti/MS-00470",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -541,18 +541,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0016"
+        "listingId": "MS-00470"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0017",
+      "path": "/bg/imoti/MS-00499",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -566,18 +566,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0017"
+        "listingId": "MS-00499"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0018",
+      "path": "/bg/imoti/MS-00543",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -591,18 +591,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0018"
+        "listingId": "MS-00543"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0019",
+      "path": "/bg/imoti/MS-00555",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -616,18 +616,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0019"
+        "listingId": "MS-00555"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0020",
+      "path": "/bg/imoti/MS-00567",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -641,18 +641,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0020"
+        "listingId": "MS-00567"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0021",
+      "path": "/bg/imoti/MS-00567-1",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -666,18 +666,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0021"
+        "listingId": "MS-00567-1"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0022",
+      "path": "/bg/imoti/MS-00619",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -691,18 +691,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0022"
+        "listingId": "MS-00619"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0023",
+      "path": "/bg/imoti/MS-00635",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -716,18 +716,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0023"
+        "listingId": "MS-00635"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0024",
+      "path": "/bg/imoti/MS-00651",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -741,18 +741,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0024"
+        "listingId": "MS-00651"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0025",
+      "path": "/bg/imoti/MS-00657",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -766,18 +766,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0025"
+        "listingId": "MS-00657"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0026",
+      "path": "/bg/imoti/MS-00662",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -791,18 +791,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0026"
+        "listingId": "MS-00662"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0027",
+      "path": "/bg/imoti/MS-00666",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -816,18 +816,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0027"
+        "listingId": "MS-00666"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0028",
+      "path": "/bg/imoti/MS-00671",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -841,18 +841,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0028"
+        "listingId": "MS-00671"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0029",
+      "path": "/bg/imoti/MS-00695",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -866,18 +866,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0029"
+        "listingId": "MS-00695"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0030",
+      "path": "/bg/imoti/MS-00699",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -891,18 +891,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0030"
+        "listingId": "MS-00699"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0031",
+      "path": "/bg/imoti/MS-00707",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -916,18 +916,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0031"
+        "listingId": "MS-00707"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0032",
+      "path": "/bg/imoti/MS-00719",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -941,18 +941,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0032"
+        "listingId": "MS-00719"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0033",
+      "path": "/bg/imoti/MS-00720",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -966,18 +966,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0033"
+        "listingId": "MS-00720"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0034",
+      "path": "/bg/imoti/MS-00731",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -991,18 +991,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0034"
+        "listingId": "MS-00731"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0035",
+      "path": "/bg/imoti/MS-00734",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1016,18 +1016,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0035"
+        "listingId": "MS-00734"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0036",
+      "path": "/bg/imoti/MS-00739",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1041,18 +1041,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0036"
+        "listingId": "MS-00739"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0037",
+      "path": "/bg/imoti/MS-00744",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1066,18 +1066,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0037"
+        "listingId": "MS-00744"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0038",
+      "path": "/bg/imoti/MS-00749",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1091,18 +1091,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0038"
+        "listingId": "MS-00749"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0039",
+      "path": "/bg/imoti/MS-00750",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1116,18 +1116,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0039"
+        "listingId": "MS-00750"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0040",
+      "path": "/bg/imoti/MS-00751",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1141,18 +1141,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0040"
+        "listingId": "MS-00751"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0041",
+      "path": "/bg/imoti/MS-00756",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1166,18 +1166,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0041"
+        "listingId": "MS-00756"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0042",
+      "path": "/bg/imoti/MS-00758",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1191,18 +1191,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0042"
+        "listingId": "MS-00758"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0043",
+      "path": "/bg/imoti/MS-00760",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1216,18 +1216,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0043"
+        "listingId": "MS-00760"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0044",
+      "path": "/bg/imoti/MS-00766",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1241,18 +1241,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0044"
+        "listingId": "MS-00766"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0045",
+      "path": "/bg/imoti/MS-00770",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1266,18 +1266,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0045"
+        "listingId": "MS-00770"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0046",
+      "path": "/bg/imoti/MS-00774",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1291,18 +1291,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0046"
+        "listingId": "MS-00774"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0047",
+      "path": "/bg/imoti/MS-00778",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1316,18 +1316,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0047"
+        "listingId": "MS-00778"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0048",
+      "path": "/bg/imoti/MS-00788",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1341,18 +1341,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0048"
+        "listingId": "MS-00788"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0049",
+      "path": "/bg/imoti/MS-00791",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1366,18 +1366,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0049"
+        "listingId": "MS-00791"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0050",
+      "path": "/bg/imoti/MS-00803",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1391,18 +1391,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0050"
+        "listingId": "MS-00803"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0051",
+      "path": "/bg/imoti/MS-00811",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1416,18 +1416,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0051"
+        "listingId": "MS-00811"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0052",
+      "path": "/bg/imoti/MS-00812",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1441,18 +1441,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0052"
+        "listingId": "MS-00812"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0053",
+      "path": "/bg/imoti/MS-00814",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1466,18 +1466,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0053"
+        "listingId": "MS-00814"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0054",
+      "path": "/bg/imoti/MS-00815",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1491,18 +1491,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0054"
+        "listingId": "MS-00815"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0055",
+      "path": "/bg/imoti/MS-00816",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1516,18 +1516,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0055"
+        "listingId": "MS-00816"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0056",
+      "path": "/bg/imoti/MS-00833",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1541,18 +1541,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0056"
+        "listingId": "MS-00833"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0057",
+      "path": "/bg/imoti/MS-00851",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1566,18 +1566,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0057"
+        "listingId": "MS-00851"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0058",
+      "path": "/bg/imoti/MS-00852",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1591,18 +1591,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0058"
+        "listingId": "MS-00852"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0059",
+      "path": "/bg/imoti/MS-00858",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1616,18 +1616,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0059"
+        "listingId": "MS-00858"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0060",
+      "path": "/bg/imoti/MS-00860",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1641,18 +1641,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0060"
+        "listingId": "MS-00860"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0061",
+      "path": "/bg/imoti/MS-00865",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1666,18 +1666,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0061"
+        "listingId": "MS-00865"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0062",
+      "path": "/bg/imoti/MS-00869",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1691,18 +1691,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0062"
+        "listingId": "MS-00869"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0063",
+      "path": "/bg/imoti/MS-00870",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1716,18 +1716,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0063"
+        "listingId": "MS-00870"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0064",
+      "path": "/bg/imoti/MS-00872",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1741,18 +1741,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0064"
+        "listingId": "MS-00872"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0065",
+      "path": "/bg/imoti/MS-00873",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1766,18 +1766,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0065"
+        "listingId": "MS-00873"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0066",
+      "path": "/bg/imoti/MS-00876",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1791,18 +1791,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0066"
+        "listingId": "MS-00876"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0067",
+      "path": "/bg/imoti/MS-00879",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1816,18 +1816,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0067"
+        "listingId": "MS-00879"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0068",
+      "path": "/bg/imoti/MS-00890",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1841,18 +1841,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0068"
+        "listingId": "MS-00890"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0069",
+      "path": "/bg/imoti/MS-00891",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1866,18 +1866,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0069"
+        "listingId": "MS-00891"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0070",
+      "path": "/bg/imoti/MS-00893",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1891,18 +1891,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0070"
+        "listingId": "MS-00893"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0071",
+      "path": "/bg/imoti/MS-00894",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1916,18 +1916,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0071"
+        "listingId": "MS-00894"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0072",
+      "path": "/bg/imoti/MS-00895",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1941,18 +1941,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0072"
+        "listingId": "MS-00895"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0073",
+      "path": "/bg/imoti/MS-00896",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1966,18 +1966,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0073"
+        "listingId": "MS-00896"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0074",
+      "path": "/bg/imoti/MS-00897",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -1991,18 +1991,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0074"
+        "listingId": "MS-00897"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0075",
+      "path": "/bg/imoti/MS-00898",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2016,18 +2016,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0075"
+        "listingId": "MS-00898"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0077",
+      "path": "/bg/imoti/MS-00899",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2041,18 +2041,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0077"
+        "listingId": "MS-00899"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0078",
+      "path": "/bg/imoti/MS-00900",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2066,18 +2066,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0078"
+        "listingId": "MS-00900"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0079",
+      "path": "/bg/imoti/MS-00902",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2091,18 +2091,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0079"
+        "listingId": "MS-00902"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0080",
+      "path": "/bg/imoti/MS-00903",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2116,18 +2116,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0080"
+        "listingId": "MS-00903"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0081",
+      "path": "/bg/imoti/MS-00904",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2141,18 +2141,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0081"
+        "listingId": "MS-00904"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0082",
+      "path": "/bg/imoti/MS-00905",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2166,18 +2166,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0082"
+        "listingId": "MS-00905"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0083",
+      "path": "/bg/imoti/MS-00906",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2191,18 +2191,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0083"
+        "listingId": "MS-00906"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0084",
+      "path": "/bg/imoti/MS-00907",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2216,18 +2216,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0084"
+        "listingId": "MS-00907"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0085",
+      "path": "/bg/imoti/MS-00908",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2241,18 +2241,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0085"
+        "listingId": "MS-00908"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0086",
+      "path": "/bg/imoti/MS-00911",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2266,18 +2266,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0086"
+        "listingId": "MS-00911"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0087",
+      "path": "/bg/imoti/MS-00922",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2291,18 +2291,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0087"
+        "listingId": "MS-00922"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0088",
+      "path": "/bg/imoti/MS-00924",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2316,18 +2316,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0088"
+        "listingId": "MS-00924"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0089",
+      "path": "/bg/imoti/MS-00927",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2341,18 +2341,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0089"
+        "listingId": "MS-00927"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0090",
+      "path": "/bg/imoti/MS-00930",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2366,18 +2366,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0090"
+        "listingId": "MS-00930"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0091",
+      "path": "/bg/imoti/MS-00931",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2391,18 +2391,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0091"
+        "listingId": "MS-00931"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0092",
+      "path": "/bg/imoti/MS-00932",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2416,18 +2416,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0092"
+        "listingId": "MS-00932"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0093",
+      "path": "/bg/imoti/MS-00933",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2441,18 +2441,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0093"
+        "listingId": "MS-00933"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0094",
+      "path": "/bg/imoti/MS-00937",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2466,18 +2466,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0094"
+        "listingId": "MS-00937"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0095",
+      "path": "/bg/imoti/MS-00938",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2491,18 +2491,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0095"
+        "listingId": "MS-00938"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0096",
+      "path": "/bg/imoti/MS-00939",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2516,18 +2516,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0096"
+        "listingId": "MS-00939"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0097",
+      "path": "/bg/imoti/MS-00940",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2541,18 +2541,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0097"
+        "listingId": "MS-00940"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0098",
+      "path": "/bg/imoti/MS-00941",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2566,18 +2566,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0098"
+        "listingId": "MS-00941"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0099",
+      "path": "/bg/imoti/MS-00942",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2591,18 +2591,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0099"
+        "listingId": "MS-00942"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0100",
+      "path": "/bg/imoti/MS-00943",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2616,18 +2616,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0100"
+        "listingId": "MS-00943"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0101",
+      "path": "/bg/imoti/MS-00944",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2641,18 +2641,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0101"
+        "listingId": "MS-00944"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0102",
+      "path": "/bg/imoti/MS-00945",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2666,18 +2666,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0102"
+        "listingId": "MS-00945"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0103",
+      "path": "/bg/imoti/MS-00955",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2691,18 +2691,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0103"
+        "listingId": "MS-00955"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0104",
+      "path": "/bg/imoti/MS-00956",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2716,18 +2716,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0104"
+        "listingId": "MS-00956"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0105",
+      "path": "/bg/imoti/MS-00957",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2741,18 +2741,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0105"
+        "listingId": "MS-00957"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0106",
+      "path": "/bg/imoti/MS-00959",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2766,18 +2766,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0106"
+        "listingId": "MS-00959"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0107",
+      "path": "/bg/imoti/MS-00960",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2791,18 +2791,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0107"
+        "listingId": "MS-00960"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0108",
+      "path": "/bg/imoti/MS-00963",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2816,18 +2816,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0108"
+        "listingId": "MS-00963"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0109",
+      "path": "/bg/imoti/MS-00987",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2841,18 +2841,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0109"
+        "listingId": "MS-00987"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0110",
+      "path": "/bg/imoti/MS-00999",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2866,18 +2866,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0110"
+        "listingId": "MS-00999"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0111",
+      "path": "/bg/imoti/MS-01000",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2891,18 +2891,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0111"
+        "listingId": "MS-01000"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0112",
+      "path": "/bg/imoti/MS-01001",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2916,18 +2916,18 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0112"
+        "listingId": "MS-01001"
       },
       "hreflang_count": 2
     },
     {
       "type": "listing",
-      "path": "/bg/imoti/MS-CRAWL-0113",
+      "path": "/bg/imoti/MS-01002",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -2941,12 +2941,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
-        "listingId": "MS-CRAWL-0113"
+        "listingId": "MS-01002"
       },
       "hreflang_count": 2
     },
@@ -2990,8 +2990,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
@@ -3015,8 +3015,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
@@ -3040,8 +3040,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "bg",
@@ -3691,8 +3691,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3716,8 +3716,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3741,14 +3741,364 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "location": "sandanski"
       },
       "hreflang_count": 3
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00046",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00046"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00074",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00074"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00232",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00232"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00280",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00280"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00296",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00296"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00340",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00340"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00362",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00362"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00382",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00382"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00628",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00628"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00645",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00645"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00696",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00696"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00697",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00697"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00920",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00920"
+      },
+      "hreflang_count": 1
+    },
+    {
+      "type": "listing",
+      "path": "/ru/properties/MS-00935",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderListingPage",
+      "dynamic": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "ru",
+        "listingId": "MS-00935"
+      },
+      "hreflang_count": 1
     },
     {
       "type": "listing",
@@ -3766,8 +4116,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3791,8 +4141,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3816,8 +4166,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3841,37 +4191,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0117"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0118",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0118"
       },
       "hreflang_count": 1
     },
@@ -3891,37 +4216,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0119"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0120",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0120"
       },
       "hreflang_count": 1
     },
@@ -3941,8 +4241,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3966,8 +4266,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -3991,8 +4291,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4016,8 +4316,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4041,8 +4341,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4066,8 +4366,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4091,37 +4391,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0127"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0128",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0128"
       },
       "hreflang_count": 1
     },
@@ -4141,8 +4416,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4166,37 +4441,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0130"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0131",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0131"
       },
       "hreflang_count": 1
     },
@@ -4216,8 +4466,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4241,8 +4491,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4266,8 +4516,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4291,8 +4541,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4316,8 +4566,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4341,8 +4591,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4366,8 +4616,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4391,8 +4641,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4416,62 +4666,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0140"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0141",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0141"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0142",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0142"
       },
       "hreflang_count": 1
     },
@@ -4491,8 +4691,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4516,62 +4716,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0144"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0145",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0145"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0146",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0146"
       },
       "hreflang_count": 1
     },
@@ -4591,8 +4741,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4616,8 +4766,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4641,8 +4791,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4666,8 +4816,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4691,37 +4841,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0151"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0152",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0152"
       },
       "hreflang_count": 1
     },
@@ -4741,8 +4866,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4766,112 +4891,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0154"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0155",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0155"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0156",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0156"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0157",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0157"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0158",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0158"
       },
       "hreflang_count": 1
     },
@@ -4891,8 +4916,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4916,8 +4941,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4941,8 +4966,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -4966,37 +4991,12 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
         "listingId": "MS-CRAWL-0162"
-      },
-      "hreflang_count": 1
-    },
-    {
-      "type": "listing",
-      "path": "/ru/properties/MS-CRAWL-0163",
-      "locale": "ru",
-      "lang": "ru",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "properties",
-        "search": "search",
-        "location": "locations",
-        "seller": "sell",
-        "contact": "contact"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "ru",
-        "listingId": "MS-CRAWL-0163"
       },
       "hreflang_count": 1
     },
@@ -5016,8 +5016,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",
@@ -5041,8 +5041,8 @@
       "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
+      "sitemap_indexable": false,
+      "public_indexable": false,
       "cache": "public, max-age=300, s-maxage=3600",
       "params": {
         "locale": "ru",

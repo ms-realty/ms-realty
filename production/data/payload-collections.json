@@ -75,9 +75,9 @@
         "useAsTitle": "id",
         "defaultColumns": [
           "id",
+          "lot_number",
           "cms_status",
-          "source_locale",
-          "source_domain"
+          "source_locale"
         ]
       },
       "versions": {
@@ -95,6 +95,13 @@
           "required": true,
           "localized": false,
           "unique": true
+        },
+        {
+          "name": "lot_number",
+          "type": "number",
+          "required": true,
+          "localized": false,
+          "index": true
         },
         {
           "name": "cms_status",
@@ -131,6 +138,58 @@
           "admin": {
             "description": "URL field from migration manifest."
           }
+        },
+        {
+          "name": "lot_suffix",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "migration_id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true,
+          "index": true
+        },
+        {
+          "name": "legacy_lot_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "index": true
+        },
+        {
+          "name": "legacy_post_id",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "legacy_urls",
+          "type": "array",
+          "required": false,
+          "localized": false,
+          "fields": [
+            {
+              "name": "domain",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "url",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "merged_into",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "index": true
         },
         {
           "name": "facts",
@@ -1252,7 +1311,8 @@
           "required": true,
           "localized": false,
           "options": [
-            "verify_imported_facts"
+            "verify_imported_facts",
+            "reconcile_legacy_translation"
           ]
         },
         {

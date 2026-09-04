@@ -52,7 +52,7 @@
   "priority_review30": [
     {
       "rank": 1,
-      "id": "MS-3000",
+      "id": "MS-00356",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
       "selection_score": 1101,
       "classifications": [
@@ -63,7 +63,7 @@
     },
     {
       "rank": 2,
-      "id": "MS-CRAWL-0008",
+      "id": "MS-00662",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
       "selection_score": 1101,
       "classifications": [
@@ -74,7 +74,7 @@
     },
     {
       "rank": 3,
-      "id": "MS-CRAWL-0027",
+      "id": "MS-01002",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
       "selection_score": 1101,
       "classifications": [
@@ -85,7 +85,7 @@
     },
     {
       "rank": 4,
-      "id": "MS-CRAWL-0065",
+      "id": "MS-00937",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
       "selection_score": 1101,
       "classifications": [
@@ -96,7 +96,7 @@
     },
     {
       "rank": 5,
-      "id": "MS-CRAWL-0066",
+      "id": "MS-00893",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/",
       "selection_score": 1101,
       "classifications": [
@@ -107,7 +107,7 @@
     },
     {
       "rank": 6,
-      "id": "MS-CRAWL-0077",
+      "id": "MS-00959",
       "source_url": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/",
       "selection_score": 1101,
       "classifications": [
@@ -118,7 +118,7 @@
     },
     {
       "rank": 7,
-      "id": "MS-CRAWL-0085",
+      "id": "MS-00851",
       "source_url": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
       "selection_score": 1101,
       "classifications": [
@@ -140,7 +140,7 @@
     },
     {
       "rank": 9,
-      "id": "MS-CRAWL-0021",
+      "id": "MS-00944",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
       "selection_score": 1001,
       "classifications": [
@@ -152,7 +152,7 @@
     },
     {
       "rank": 10,
-      "id": "MS-CRAWL-0007",
+      "id": "MS-00911",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "selection_score": 801,
       "classifications": [
@@ -163,7 +163,7 @@
     },
     {
       "rank": 11,
-      "id": "MS-CRAWL-0017",
+      "id": "MS-00938",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
       "selection_score": 801,
       "classifications": [
@@ -174,7 +174,7 @@
     },
     {
       "rank": 12,
-      "id": "MS-CRAWL-0032",
+      "id": "MS-00932",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "selection_score": 801,
       "classifications": [
@@ -185,7 +185,7 @@
     },
     {
       "rank": 13,
-      "id": "MS-CRAWL-0063",
+      "id": "MS-00960",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
       "selection_score": 801,
       "classifications": [
@@ -196,7 +196,7 @@
     },
     {
       "rank": 14,
-      "id": "MS-CRAWL-0087",
+      "id": "MS-00791",
       "source_url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
       "selection_score": 801,
       "classifications": [
@@ -229,7 +229,7 @@
     },
     {
       "rank": 17,
-      "id": "MS-CRAWL-0026",
+      "id": "MS-01001",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "selection_score": 301,
       "classifications": [
@@ -240,7 +240,7 @@
     },
     {
       "rank": 18,
-      "id": "MS-CRAWL-0030",
+      "id": "MS-00943",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
       "selection_score": 301,
       "classifications": [
@@ -251,7 +251,7 @@
     },
     {
       "rank": 19,
-      "id": "MS-CRAWL-0051",
+      "id": "MS-00816",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "selection_score": 301,
       "classifications": [
@@ -262,7 +262,7 @@
     },
     {
       "rank": 20,
-      "id": "MS-CRAWL-0083",
+      "id": "MS-00891",
       "source_url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
       "selection_score": 301,
       "classifications": [
@@ -273,7 +273,7 @@
     },
     {
       "rank": 21,
-      "id": "MS-CRAWL-0086",
+      "id": "MS-00191",
       "source_url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
       "selection_score": 301,
       "classifications": [
@@ -284,7 +284,7 @@
     },
     {
       "rank": 22,
-      "id": "MS-CRAWL-0095",
+      "id": "MS-00699",
       "source_url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
       "selection_score": 301,
       "classifications": [
@@ -295,7 +295,7 @@
     },
     {
       "rank": 23,
-      "id": "MS-CRAWL-0096",
+      "id": "MS-00758",
       "source_url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
       "selection_score": 301,
       "classifications": [
@@ -306,7 +306,7 @@
     },
     {
       "rank": 24,
-      "id": "MS-CRAWL-0098",
+      "id": "MS-00750",
       "source_url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
       "selection_score": 301,
       "classifications": [
@@ -317,7 +317,7 @@
     },
     {
       "rank": 25,
-      "id": "MS-CRAWL-0106",
+      "id": "MS-00635",
       "source_url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
       "selection_score": 301,
       "classifications": [
@@ -339,7 +339,7 @@
     },
     {
       "rank": 27,
-      "id": "MS-CRAWL-0128",
+      "id": "MS-00697",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
       "selection_score": 301,
       "classifications": [
@@ -372,7 +372,7 @@
     },
     {
       "rank": 30,
-      "id": "MS-CRAWL-0141",
+      "id": "MS-00645",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/",
       "selection_score": 301,
       "classifications": [
@@ -397,7 +397,7 @@
   "launch_candidate30": [
     {
       "rank": 1,
-      "id": "MS-CRAWL-0038",
+      "id": "MS-00873",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "candidate_score": 384,
       "source_locale": "bg",
@@ -411,7 +411,7 @@
     },
     {
       "rank": 2,
-      "id": "MS-CRAWL-0111",
+      "id": "MS-00444",
       "source_url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
       "candidate_score": 359,
       "source_locale": "bg",
@@ -425,7 +425,7 @@
     },
     {
       "rank": 3,
-      "id": "MS-CRAWL-0104",
+      "id": "MS-00999",
       "source_url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
       "candidate_score": 345,
       "source_locale": "bg",
@@ -439,7 +439,7 @@
     },
     {
       "rank": 4,
-      "id": "MS-CRAWL-0090",
+      "id": "MS-00543",
       "source_url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
       "candidate_score": 342,
       "source_locale": "bg",
@@ -453,7 +453,7 @@
     },
     {
       "rank": 5,
-      "id": "MS-CRAWL-0018",
+      "id": "MS-00814",
       "source_url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "candidate_score": 341,
       "source_locale": "bg",
@@ -467,7 +467,7 @@
     },
     {
       "rank": 6,
-      "id": "MS-CRAWL-0080",
+      "id": "MS-00955",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
       "candidate_score": 337,
       "source_locale": "bg",
@@ -481,7 +481,7 @@
     },
     {
       "rank": 7,
-      "id": "MS-CRAWL-0105",
+      "id": "MS-00739",
       "source_url": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/",
       "candidate_score": 324,
       "source_locale": "bg",
@@ -495,7 +495,7 @@
     },
     {
       "rank": 8,
-      "id": "MS-CRAWL-0113",
+      "id": "MS-00778",
       "source_url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
       "candidate_score": 321,
       "source_locale": "bg",
@@ -509,7 +509,7 @@
     },
     {
       "rank": 9,
-      "id": "MS-CRAWL-0074",
+      "id": "MS-00939",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
       "candidate_score": 319,
       "source_locale": "bg",
@@ -523,7 +523,7 @@
     },
     {
       "rank": 10,
-      "id": "MS-CRAWL-0099",
+      "id": "MS-00666",
       "source_url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
       "candidate_score": 318,
       "source_locale": "bg",
@@ -537,7 +537,7 @@
     },
     {
       "rank": 11,
-      "id": "MS-CRAWL-0016",
+      "id": "MS-00803",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
       "candidate_score": 310,
       "source_locale": "bg",
@@ -551,7 +551,7 @@
     },
     {
       "rank": 12,
-      "id": "MS-CRAWL-0025",
+      "id": "MS-00956",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/",
       "candidate_score": 307,
       "source_locale": "bg",
@@ -565,7 +565,7 @@
     },
     {
       "rank": 13,
-      "id": "MS-CRAWL-0101",
+      "id": "MS-00731",
       "source_url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
       "candidate_score": 291,
       "source_locale": "bg",
@@ -579,7 +579,7 @@
     },
     {
       "rank": 14,
-      "id": "MS-CRAWL-0010",
+      "id": "MS-01000",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
       "candidate_score": 290,
       "source_locale": "bg",
@@ -593,7 +593,7 @@
     },
     {
       "rank": 15,
-      "id": "MS-CRAWL-0075",
+      "id": "MS-00852",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
       "candidate_score": 284,
       "source_locale": "bg",
@@ -607,7 +607,7 @@
     },
     {
       "rank": 16,
-      "id": "MS-CRAWL-0079",
+      "id": "MS-00242",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
       "candidate_score": 283,
       "source_locale": "bg",
@@ -621,7 +621,7 @@
     },
     {
       "rank": 17,
-      "id": "MS-CRAWL-0092",
+      "id": "MS-00671",
       "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
       "candidate_score": 279,
       "source_locale": "bg",
@@ -635,7 +635,7 @@
     },
     {
       "rank": 18,
-      "id": "MS-CRAWL-0072",
+      "id": "MS-00930",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
       "candidate_score": 278,
       "source_locale": "bg",
@@ -649,7 +649,7 @@
     },
     {
       "rank": 19,
-      "id": "MS-CRAWL-0107",
+      "id": "MS-00933",
       "source_url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
       "candidate_score": 278,
       "source_locale": "bg",
@@ -677,7 +677,7 @@
     },
     {
       "rank": 21,
-      "id": "MS-CRAWL-0003",
+      "id": "MS-00922",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
       "candidate_score": 275,
       "source_locale": "bg",
@@ -691,7 +691,7 @@
     },
     {
       "rank": 22,
-      "id": "MS-CRAWL-0054",
+      "id": "MS-00432",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/",
       "candidate_score": 275,
       "source_locale": "bg",
@@ -705,7 +705,7 @@
     },
     {
       "rank": 23,
-      "id": "MS-CRAWL-0084",
+      "id": "MS-00869",
       "source_url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
       "candidate_score": 275,
       "source_locale": "bg",
@@ -719,7 +719,7 @@
     },
     {
       "rank": 24,
-      "id": "MS-CRAWL-0043",
+      "id": "MS-00987",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
       "candidate_score": 271,
       "source_locale": "bg",
@@ -733,7 +733,7 @@
     },
     {
       "rank": 25,
-      "id": "MS-CRAWL-0048",
+      "id": "MS-00904",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "candidate_score": 268,
       "source_locale": "bg",
@@ -747,7 +747,7 @@
     },
     {
       "rank": 26,
-      "id": "MS-CRAWL-0102",
+      "id": "MS-00879",
       "source_url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
       "candidate_score": 268,
       "source_locale": "bg",
@@ -761,7 +761,7 @@
     },
     {
       "rank": 27,
-      "id": "MS-CRAWL-0046",
+      "id": "MS-00941",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
       "candidate_score": 267,
       "source_locale": "bg",
@@ -775,7 +775,7 @@
     },
     {
       "rank": 28,
-      "id": "MS-CRAWL-0011",
+      "id": "MS-00858",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
       "candidate_score": 266,
       "source_locale": "bg",
@@ -789,7 +789,7 @@
     },
     {
       "rank": 29,
-      "id": "MS-CRAWL-0062",
+      "id": "MS-00894",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
       "candidate_score": 265,
       "source_locale": "bg",
@@ -803,7 +803,7 @@
     },
     {
       "rank": 30,
-      "id": "MS-CRAWL-0023",
+      "id": "MS-00833",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "candidate_score": 263,
       "source_locale": "bg",
@@ -818,7 +818,7 @@
   ],
   "listings": [
     {
-      "id": "MS-3000",
+      "id": "MS-00356",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
       "source_locale": "bg",
       "public_gallery_assets": 5,
@@ -844,7 +844,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0001",
+      "id": "MS-00815",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
       "source_locale": "bg",
       "public_gallery_assets": 17,
@@ -869,7 +869,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0002",
+      "id": "MS-00907",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/",
       "source_locale": "bg",
       "public_gallery_assets": 2,
@@ -894,7 +894,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0003",
+      "id": "MS-00922",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
       "source_locale": "bg",
       "public_gallery_assets": 14,
@@ -919,7 +919,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0004",
+      "id": "MS-00905",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -944,7 +944,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0005",
+      "id": "MS-00899",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -969,7 +969,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0006",
+      "id": "MS-00443",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -994,7 +994,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0007",
+      "id": "MS-00911",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -1020,7 +1020,7 @@
       "selection_score": 801
     },
     {
-      "id": "MS-CRAWL-0008",
+      "id": "MS-00662",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
       "source_locale": "bg",
       "public_gallery_assets": 17,
@@ -1046,7 +1046,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0009",
+      "id": "MS-00957",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -1071,7 +1071,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0010",
+      "id": "MS-01000",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -1096,7 +1096,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0011",
+      "id": "MS-00858",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
       "source_locale": "bg",
       "public_gallery_assets": 20,
@@ -1121,7 +1121,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0012",
+      "id": "MS-00895",
       "source_url": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -1146,7 +1146,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0013",
+      "id": "MS-00567-1",
       "source_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -1172,7 +1172,7 @@
       "selection_score": 226
     },
     {
-      "id": "MS-CRAWL-0014",
+      "id": "MS-00876",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 5,
@@ -1197,7 +1197,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0015",
+      "id": "MS-00942",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 21,
@@ -1222,7 +1222,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0016",
+      "id": "MS-00803",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 20,
@@ -1247,7 +1247,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0017",
+      "id": "MS-00938",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
       "source_locale": "bg",
       "public_gallery_assets": 11,
@@ -1273,7 +1273,7 @@
       "selection_score": 801
     },
     {
-      "id": "MS-CRAWL-0018",
+      "id": "MS-00814",
       "source_url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 28,
@@ -1298,7 +1298,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0019",
+      "id": "MS-00812",
       "source_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 13,
@@ -1323,7 +1323,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0020",
+      "id": "MS-00890",
       "source_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 3,
@@ -1348,7 +1348,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0021",
+      "id": "MS-00944",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 26,
@@ -1375,7 +1375,7 @@
       "selection_score": 1001
     },
     {
-      "id": "MS-CRAWL-0022",
+      "id": "MS-00756",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
       "source_locale": "bg",
       "public_gallery_assets": 13,
@@ -1400,7 +1400,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0023",
+      "id": "MS-00833",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 13,
@@ -1425,7 +1425,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0024",
+      "id": "MS-00101",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -1450,7 +1450,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0025",
+      "id": "MS-00956",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 18,
@@ -1475,7 +1475,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0026",
+      "id": "MS-01001",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 13,
@@ -1501,7 +1501,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0027",
+      "id": "MS-01002",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -1527,7 +1527,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0028",
+      "id": "MS-00924",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
       "source_locale": "bg",
       "public_gallery_assets": 13,
@@ -1552,7 +1552,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0029",
+      "id": "MS-00903",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 7,
@@ -1577,7 +1577,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0030",
+      "id": "MS-00943",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -1603,7 +1603,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0031",
+      "id": "MS-00940",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 11,
@@ -1628,7 +1628,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0032",
+      "id": "MS-00932",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 5,
@@ -1654,7 +1654,7 @@
       "selection_score": 801
     },
     {
-      "id": "MS-CRAWL-0033",
+      "id": "MS-00865",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 12,
@@ -1679,7 +1679,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0034",
+      "id": "MS-00963",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 7,
@@ -1704,7 +1704,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0035",
+      "id": "MS-00774",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 12,
@@ -1729,7 +1729,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0036",
+      "id": "MS-00897",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -1754,7 +1754,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0037",
+      "id": "MS-00719",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -1779,7 +1779,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0038",
+      "id": "MS-00873",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 30,
@@ -1804,7 +1804,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0039",
+      "id": "MS-00906",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 2,
@@ -1829,7 +1829,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0040",
+      "id": "MS-00555",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 2,
@@ -1854,7 +1854,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0041",
+      "id": "MS-00788",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -1879,7 +1879,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0042",
+      "id": "MS-00811",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 7,
@@ -1904,7 +1904,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0043",
+      "id": "MS-00987",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 15,
@@ -1929,7 +1929,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0044",
+      "id": "MS-00345",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -1954,7 +1954,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0045",
+      "id": "MS-00908",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -1979,7 +1979,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0046",
+      "id": "MS-00941",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 9,
@@ -2004,7 +2004,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0047",
+      "id": "MS-00927",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -2029,7 +2029,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0048",
+      "id": "MS-00904",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 14,
@@ -2054,7 +2054,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0049",
+      "id": "MS-00931",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -2079,7 +2079,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0050",
+      "id": "MS-00100",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -2104,7 +2104,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0051",
+      "id": "MS-00816",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -2130,7 +2130,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0052",
+      "id": "MS-00657",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 12,
@@ -2155,7 +2155,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0053",
+      "id": "MS-00766",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -2180,7 +2180,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0054",
+      "id": "MS-00432",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -2205,7 +2205,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0055",
+      "id": "MS-00770",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -2230,7 +2230,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0056",
+      "id": "MS-00321",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 2,
@@ -2255,7 +2255,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0057",
+      "id": "MS-00898",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -2280,7 +2280,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0058",
+      "id": "MS-00749",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -2305,7 +2305,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0059",
+      "id": "MS-00945",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -2330,7 +2330,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0060",
+      "id": "MS-00234",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -2355,7 +2355,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0061",
+      "id": "MS-00470",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -2380,7 +2380,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0062",
+      "id": "MS-00894",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
       "source_locale": "bg",
       "public_gallery_assets": 14,
@@ -2405,7 +2405,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0063",
+      "id": "MS-00960",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 5,
@@ -2431,7 +2431,7 @@
       "selection_score": 801
     },
     {
-      "id": "MS-CRAWL-0064",
+      "id": "MS-00567",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 3,
@@ -2456,7 +2456,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0065",
+      "id": "MS-00937",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -2482,7 +2482,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0066",
+      "id": "MS-00893",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 24,
@@ -2508,7 +2508,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0067",
+      "id": "MS-00902",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -2533,7 +2533,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0068",
+      "id": "MS-00720",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -2558,7 +2558,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0069",
+      "id": "MS-00744",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 3,
@@ -2583,7 +2583,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0070",
+      "id": "MS-00456",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -2608,7 +2608,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0071",
+      "id": "MS-00499",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -2633,7 +2633,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0072",
+      "id": "MS-00930",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -2658,7 +2658,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0073",
+      "id": "MS-00860",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -2683,7 +2683,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0074",
+      "id": "MS-00939",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
       "source_locale": "bg",
       "public_gallery_assets": 22,
@@ -2708,7 +2708,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0075",
+      "id": "MS-00852",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
       "source_locale": "bg",
       "public_gallery_assets": 18,
@@ -2733,7 +2733,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0077",
+      "id": "MS-00959",
       "source_url": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/",
       "source_locale": "bg",
       "public_gallery_assets": 9,
@@ -2759,7 +2759,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0078",
+      "id": "MS-00900",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 9,
@@ -2784,7 +2784,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0079",
+      "id": "MS-00242",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
       "source_locale": "bg",
       "public_gallery_assets": 17,
@@ -2809,7 +2809,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0080",
+      "id": "MS-00955",
       "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 26,
@@ -2834,7 +2834,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0081",
+      "id": "MS-00286",
       "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -2859,7 +2859,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0082",
+      "id": "MS-00394",
       "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -2884,7 +2884,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0083",
+      "id": "MS-00891",
       "source_url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -2910,7 +2910,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0084",
+      "id": "MS-00869",
       "source_url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -2935,7 +2935,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0085",
+      "id": "MS-00851",
       "source_url": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -2961,7 +2961,7 @@
       "selection_score": 1101
     },
     {
-      "id": "MS-CRAWL-0086",
+      "id": "MS-00191",
       "source_url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -2987,7 +2987,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0087",
+      "id": "MS-00791",
       "source_url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 8,
@@ -3013,7 +3013,7 @@
       "selection_score": 801
     },
     {
-      "id": "MS-CRAWL-0088",
+      "id": "MS-00734",
       "source_url": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 3,
@@ -3038,7 +3038,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0089",
+      "id": "MS-00707",
       "source_url": "https://makler-realty.com/listing/ein-zimmer-wohnung-zum-verkauf-im-park-hotel-pirin-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -3063,7 +3063,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0090",
+      "id": "MS-00543",
       "source_url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
       "source_locale": "bg",
       "public_gallery_assets": 30,
@@ -3088,7 +3088,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0091",
+      "id": "MS-00872",
       "source_url": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/",
       "source_locale": "bg",
       "public_gallery_assets": 12,
@@ -3113,7 +3113,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0092",
+      "id": "MS-00671",
       "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 16,
@@ -3138,7 +3138,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0093",
+      "id": "MS-00190",
       "source_url": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/",
       "source_locale": "bg",
       "public_gallery_assets": 7,
@@ -3163,7 +3163,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0094",
+      "id": "MS-00619",
       "source_url": "https://makler-realty.com/listing/industrial-building-for-rent-in-petrich/",
       "source_locale": "bg",
       "public_gallery_assets": 3,
@@ -3188,7 +3188,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0095",
+      "id": "MS-00699",
       "source_url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
       "source_locale": "bg",
       "public_gallery_assets": 9,
@@ -3214,7 +3214,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0096",
+      "id": "MS-00758",
       "source_url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -3240,7 +3240,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0097",
+      "id": "MS-00751",
       "source_url": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/",
       "source_locale": "bg",
       "public_gallery_assets": 4,
@@ -3265,7 +3265,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0098",
+      "id": "MS-00750",
       "source_url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 10,
@@ -3291,7 +3291,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0099",
+      "id": "MS-00666",
       "source_url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 21,
@@ -3316,7 +3316,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0100",
+      "id": "MS-00695",
       "source_url": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 9,
@@ -3341,7 +3341,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0101",
+      "id": "MS-00731",
       "source_url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 19,
@@ -3366,7 +3366,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0102",
+      "id": "MS-00879",
       "source_url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 13,
@@ -3391,7 +3391,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0103",
+      "id": "MS-00123",
       "source_url": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 9,
@@ -3416,7 +3416,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0104",
+      "id": "MS-00999",
       "source_url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
       "source_locale": "bg",
       "public_gallery_assets": 30,
@@ -3441,7 +3441,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0105",
+      "id": "MS-00739",
       "source_url": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/",
       "source_locale": "bg",
       "public_gallery_assets": 30,
@@ -3466,7 +3466,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0106",
+      "id": "MS-00635",
       "source_url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 14,
@@ -3492,7 +3492,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0107",
+      "id": "MS-00933",
       "source_url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
       "source_locale": "bg",
       "public_gallery_assets": 14,
@@ -3517,7 +3517,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0108",
+      "id": "MS-00870",
       "source_url": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 6,
@@ -3542,7 +3542,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0109",
+      "id": "MS-00760",
       "source_url": "https://makler-realty.com/listing/wohnung-zu-vermieten-beim-aquasun-in-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 17,
@@ -3567,7 +3567,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0110",
+      "id": "MS-00651",
       "source_url": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 11,
@@ -3592,7 +3592,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0111",
+      "id": "MS-00444",
       "source_url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
       "source_locale": "bg",
       "public_gallery_assets": 22,
@@ -3617,7 +3617,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0112",
+      "id": "MS-00896",
       "source_url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
       "source_locale": "bg",
       "public_gallery_assets": 1,
@@ -3642,7 +3642,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0113",
+      "id": "MS-00778",
       "source_url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
       "source_locale": "bg",
       "public_gallery_assets": 20,
@@ -3768,7 +3768,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0118",
+      "id": "MS-00935",
       "source_url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b5%d1%82%d1%80%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0/",
       "source_locale": "ru",
       "public_gallery_assets": 9,
@@ -3818,7 +3818,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0120",
+      "id": "MS-00382",
       "source_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "ru",
       "public_gallery_assets": 23,
@@ -4019,7 +4019,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0128",
+      "id": "MS-00697",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
       "source_locale": "ru",
       "public_gallery_assets": 7,
@@ -4095,7 +4095,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0131",
+      "id": "MS-00280",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "ru",
       "public_gallery_assets": 9,
@@ -4347,7 +4347,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0141",
+      "id": "MS-00645",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/",
       "source_locale": "ru",
       "public_gallery_assets": 5,
@@ -4373,7 +4373,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0142",
+      "id": "MS-00920",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bb%d0%b8%d0%bb%d1%8f%d0%bd%d0%be%d0%b2%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "ru",
       "public_gallery_assets": 7,
@@ -4449,7 +4449,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0145",
+      "id": "MS-00628",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-2-%d0%b3%d0%ba%d0%b0-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
       "source_locale": "ru",
       "public_gallery_assets": 0,
@@ -4475,7 +4475,7 @@
       "selection_score": 226
     },
     {
-      "id": "MS-CRAWL-0146",
+      "id": "MS-00340",
       "source_url": "https://makler-realty.ru/listing/%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd-%d1%81-%d0%be%d1%82%d0%b5%d0%bb%d0%b5%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "ru",
       "public_gallery_assets": 0,
@@ -4626,7 +4626,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0152",
+      "id": "MS-00296",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/",
       "source_locale": "ru",
       "public_gallery_assets": 5,
@@ -4702,7 +4702,7 @@
       "selection_score": 801
     },
     {
-      "id": "MS-CRAWL-0155",
+      "id": "MS-00232",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "source_locale": "ru",
       "public_gallery_assets": 1,
@@ -4727,7 +4727,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0156",
+      "id": "MS-00362",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "source_locale": "ru",
       "public_gallery_assets": 5,
@@ -4752,7 +4752,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0157",
+      "id": "MS-00074",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/",
       "source_locale": "ru",
       "public_gallery_assets": 1,
@@ -4778,7 +4778,7 @@
       "selection_score": 301
     },
     {
-      "id": "MS-CRAWL-0158",
+      "id": "MS-00046",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/",
       "source_locale": "ru",
       "public_gallery_assets": 5,
@@ -4904,7 +4904,7 @@
       "selection_score": 101
     },
     {
-      "id": "MS-CRAWL-0163",
+      "id": "MS-00696",
       "source_url": "https://makler-realty.ru/listing/arenda-dvuhkomnatnaia-kvartira-garazh-sandanski/",
       "source_locale": "ru",
       "public_gallery_assets": 14,

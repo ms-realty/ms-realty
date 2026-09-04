@@ -11,6 +11,19 @@
 //
 // Usage:
 //   node migration/rename_listing_ids.mjs [--check]
+//
+// The catalogue and the ledger depend on each other, so the flip is two passes:
+//
+//   python3 search/build_search_indexes.py   # ids flip; listing edits miss
+//   node migration/rename_listing_ids.mjs    # the ledger and translations flip
+//   python3 search/build_search_indexes.py   # the edits land, content is final
+//   node migration/rename_listing_ids.mjs    # source_hash follows the content
+//   npm run cms:build
+//
+// The middle minter run is the dangerous one: its catalogue carries the new ids
+// while the ledger still carries the old, so every reviewed edit misses. The
+// minter refuses that state rather than quietly publishing 165 listings with no
+// description.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

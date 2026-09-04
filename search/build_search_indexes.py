@@ -475,6 +475,19 @@ def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, obj
     if not patches:
         return docs
 
+    # An edit that names no catalogue listing is not a no-op: it is a listing
+    # whose reviewed title, description, location or price is about to be
+    # dropped in silence. That is what a minter run between the id flip and the
+    # ledger rewrite does to every one of them, and nothing downstream notices,
+    # because a listing with an empty description is a valid listing.
+    orphans = sorted(patches.keys() - {str(doc["id"]) for doc in docs})
+    if orphans:
+        raise ListingIdentityError(
+            "Listing edits name listings the catalogue does not hold: "
+            + ", ".join(orphans[:10])
+            + (f" (and {len(orphans) - 10} more)" if len(orphans) > 10 else "")
+        )
+
     for doc in docs:
         patch = patches.get(str(doc["id"]))
         if not patch:
