@@ -1206,12 +1206,16 @@ const slugHistory = fs
   .filter(Boolean)
   .map((line) => JSON.parse(line));
 assertSlugHistory(slugHistory);
+// The editor's own slug change, plus one row per listing the lot-number rekey
+// moved: those paths were live and indexed, so each must still resolve.
+const rekeyRows = slugHistory.filter((row) => row.changed_by === "listing_identity_rekey");
 if (
-  slugHistory.length !== 1 ||
   slugHistory[0].old_path !== "/he/properties/old-sandanski-slug" ||
-  slugHistory[0].new_path !== "/he/properties/MS-00815"
+  slugHistory[0].new_path !== "/he/properties/MS-00815" ||
+  slugHistory.length !== rekeyRows.length + 1 ||
+  rekeyRows.length !== 127
 ) {
-  throw new Error("Slug history artifact must contain the deterministic listing 301 row");
+  throw new Error("Slug history artifact must contain the deterministic listing 301 row and one per rekeyed listing");
 }
 
 const seoEvidence = JSON.parse(fs.readFileSync(fromRoot("production", "data", "seo-evidence.json"), "utf8"));

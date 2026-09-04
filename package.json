@@ -35,6 +35,7 @@
     "migration:build": "node production/scripts/build-migration-records.mjs",
     "migration:compare:test": "python3 -m unittest migration/test_compare_crawl_artifacts.py",
     "migration:db": "python3 migration/build_migration_db.py",
+    "rekey:redirects": "node migration/build_rekey_slug_history.mjs",
     "routes:build": "node production/scripts/build-route-map.mjs",
     "migration:review": "node production/scripts/build-migration-review-queue.mjs",
     "redirects:preflight": "node production/scripts/validate-redirect-approvals.mjs",
