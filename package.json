@@ -76,6 +76,8 @@
     "hermes:mcp": "node production/scripts/hermes-mcp-server.mjs",
     "hermes:provisioning": "node production/scripts/build-hermes-provider-provisioning-report.mjs",
     "hermes:runtime": "node production/scripts/run-hermes-agent-runtime.mjs",
+    "hermes:compatibility": "node production/scripts/hermes-agent-compatibility-smoke.mjs",
+    "hermes:upstream:update": "node production/scripts/update-hermes-upstream.mjs",
     "hermes:drafts": "node production/scripts/build-hermes-draft-dispatch.mjs",
     "hermes:worker": "node production/scripts/run-hermes-draft-worker.mjs",
     "hermes:worker:smoke": "node production/scripts/build-hermes-draft-worker-smoke.mjs",
@@ -138,7 +140,7 @@
       "esbuild": "0.25.12"
     },
     "dompurify": "3.4.13",
-    "fast-uri": "3.1.5",
+    "fast-uri": "3.1.7",
     "js-yaml": "4.3.1",
     "nanoid": "3.3.18",
     "postcss": "8.5.25",

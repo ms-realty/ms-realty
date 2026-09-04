@@ -11,7 +11,7 @@ export const DEFAULT_SELF_HOSTED_HERMES_MODEL = "NousResearch/Hermes-4-14B";
 export const DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
 export const HERMES_AGENT_OFFICIAL_URL = "https://hermes-agent.nousresearch.com/";
 export const HERMES_AGENT_INSTALL_COMMAND = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash";
-export const HERMES_AGENT_DOCKER_IMAGE = "nousresearch/hermes-agent:v2026.7.7.2";
+export const HERMES_AGENT_DOCKER_IMAGE = "nousresearch/hermes-agent:v2026.8.31@sha256:64923faeae267792bf9bf87fe3b4c4869e35004e360c7df01730ad801b74d524";
 export const HERMES_CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
 export const HERMES_AGENT_REQUIRED_CAPABILITIES = Object.freeze([
   "tool_gateway",
