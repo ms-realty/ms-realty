@@ -40,7 +40,7 @@ function artifact(directory, name, value) {
 }
 
 const ROWS = [
-  { input: { action: "listing_edited", actor: "editor_bg", objectType: "listing", objectId: "MS-CRAWL-0001" }, recordedAt: daysBefore(1) },
+  { input: { action: "listing_edited", actor: "editor_bg", objectType: "listing", objectId: "MS-00815" }, recordedAt: daysBefore(1) },
   { input: { action: "listing_edited", actor: "editor_bg", objectType: "listing", objectId: "MS-CRAWL-9999" }, recordedAt: daysBefore(4000) },
   { input: { action: "lead_created", actor: "broker_ru", objectType: "lead", objectId: "lead-referenced" }, recordedAt: daysBefore(4000) },
   { input: { action: "consent_withdrawn", actor: "ivan", objectType: "consent", objectId: "consent-1" }, recordedAt: daysBefore(4000) },
@@ -113,7 +113,7 @@ test("an unreadable or missing protected artifact refuses the whole plan", () =>
 
 test("a row with an unparsable timestamp is retained rather than guessed at", () => {
   const plan = auditRetentionPlan(
-    [{ recorded_at: "not-a-date", action: "listing_edited", actor: "x", object_type: "listing", object_id: "MS-CRAWL-0002" }],
+    [{ recorded_at: "not-a-date", action: "listing_edited", actor: "x", object_type: "listing", object_id: "MS-00907" }],
     { now: NOW, retentionDays: 2555, references: new Set() },
   );
   assert.equal(plan.prunable, 0);

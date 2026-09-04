@@ -18,7 +18,7 @@ test("reply outbox requires known lead and broker approval", () => {
   const leads = [
     {
       lead_id: "lead-test",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "he",
       message_original: "Interested in this property.",
     },
@@ -72,7 +72,7 @@ test("reply outbox requires known lead and broker approval", () => {
 test("reviewed reply retries are idempotent and conflicting duplicates are rejected", () => {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reply-idempotency-`)}/replies.jsonl`;
   resetReplyOutbox(file);
-  const leads = [{ lead_id: "lead-retry", listing_reference: "MS-CRAWL-0001", original_language: "en" }];
+  const leads = [{ lead_id: "lead-retry", listing_reference: "MS-00815", original_language: "en" }];
   const input = {
     leadId: "lead-retry",
     language: "en",
@@ -105,7 +105,7 @@ test("Hermes reply draft calls provider and logs redacted model audit before bro
   const leads = [
     {
       lead_id: "lead-draft-test",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "he",
       message_original: "Interested in this property.",
       contact_preference: "whatsapp",
@@ -115,14 +115,14 @@ test("Hermes reply draft calls provider and logs redacted model audit before bro
 
   const draft = await createHermesReplyDraft(
     leads,
-    { leadId: "lead-draft-test", language: "he", listingFacts: { id: "MS-CRAWL-0001", location: "Sandanski" } },
+    { leadId: "lead-draft-test", language: "he", listingFacts: { id: "MS-00815", location: "Sandanski" } },
     {
       auditLogPath,
       recordedAt: "2026-07-08T12:00:00Z",
       provider: async (prompt) => {
         capturedPrompt = prompt;
         return {
-          text: "MS-CRAWL-0001 Sandanski reply draft for broker review.",
+          text: "MS-00815 Sandanski reply draft for broker review.",
           language: "he",
           citations: [{ source: "listing", field: "id" }],
         };
@@ -224,7 +224,7 @@ test("Hermes reply drafts reject function-call responses and audit the failure b
   const leads = [
     {
       lead_id: "lead-tool-call-test",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "en",
       message_original: "Interested in this property.",
     },

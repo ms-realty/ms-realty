@@ -8755,7 +8755,7 @@ function editorInputFor(ui, field, value, disabled = false) {
     ]);
   }
   if (["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field)) return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
-  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-CRAWL-0001" });
+  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-00815" });
   return h("input", shared);
 }
 

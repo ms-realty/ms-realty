@@ -27,12 +27,12 @@ Object.assign(process.env, {
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
 const currentSourceHash = seed.records
-  .find((record) => record.id === "MS-CRAWL-0001")
+  .find((record) => record.id === "MS-00815")
   .translations.find((translation) => translation.locale === "en").source_hash;
 const approvedSpanishTranslation = {
-  id: "translation-listing-MS-CRAWL-0001-es",
+  id: "translation-listing-MS-00815-es",
   object_type: "listing",
-  object_id: "MS-CRAWL-0001",
+  object_id: "MS-00815",
   source_locale: "bg",
   target_locale: "es",
   locale: "es",
@@ -55,8 +55,8 @@ const approvedSpanishTranslation = {
 };
 
 test("runtime resolves locale-prefixed listing and fallback routes from CMS seed", () => {
-  const he = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001");
-  const enSourceFallback = renderRuntimePath(registry, seed, "/en/properties/MS-CRAWL-0001");
+  const he = renderRuntimePath(registry, seed, "/he/properties/MS-00815");
+  const enSourceFallback = renderRuntimePath(registry, seed, "/en/properties/MS-00815");
   const home = renderRuntimePath(registry, seed, "/he/");
   const seller = renderRuntimePath(registry, seed, "/he/sell");
   const contact = renderRuntimePath(registry, seed, "/he/contact");
@@ -64,8 +64,8 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const bgGuide = renderRuntimePath(registry, seed, "/bg/guides/proverka-na-imot-sandanski");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
-  const sourceLanguageRepair = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0006");
-  const sourceLanguageRecord = seed.records.find((record) => record.id === "MS-CRAWL-0006");
+  const sourceLanguageRepair = renderRuntimePath(registry, seed, "/bg/imoti/MS-00443");
+  const sourceLanguageRecord = seed.records.find((record) => record.id === "MS-00443");
 
   assert.equal(he.status, 200);
   assert.equal(he.dir, "rtl");
@@ -168,13 +168,13 @@ test("runtime renders only validated, source-faithful legacy archive entries", (
 test("runtime renders every second-batch source-reviewed listing description", () => {
   const reviewedSeed = applyListingEdits(seed, readListingEdits());
   const routes = {
-    "MS-CRAWL-0023": "/bg/imoti/MS-CRAWL-0023",
-    "MS-CRAWL-0080": "/bg/imoti/MS-CRAWL-0080",
+    "MS-00833": "/bg/imoti/MS-00833",
+    "MS-00955": "/bg/imoti/MS-00955",
     "MS-CRAWL-0116": "/ru/properties/MS-CRAWL-0116",
-    "MS-CRAWL-0120": "/ru/properties/MS-CRAWL-0120",
+    "MS-00382": "/ru/properties/MS-00382",
     "MS-CRAWL-0124": "/ru/properties/MS-CRAWL-0124",
     "MS-CRAWL-0127": "/ru/properties/MS-CRAWL-0127",
-    "MS-CRAWL-0128": "/ru/properties/MS-CRAWL-0128",
+    "MS-00697": "/ru/properties/MS-00697",
     "MS-CRAWL-0129": "/ru/properties/MS-CRAWL-0129",
     "MS-CRAWL-0130": "/ru/properties/MS-CRAWL-0130",
     "MS-CRAWL-0139": "/ru/properties/MS-CRAWL-0139",
@@ -191,18 +191,18 @@ test("runtime renders every second-batch source-reviewed listing description", (
 test("runtime home uses a source-backed curated hero instead of crawler annotation media", () => {
   const home = renderRuntimePath(registry, seed, "/bg/");
 
-  assert.equal(home.body.hero.image.listing_id, "MS-CRAWL-0074");
+  assert.equal(home.body.hero.image.listing_id, "MS-00939");
   assert.doesNotMatch(home.body.hero.image.url, /DJI_0696|907-dron/i);
 });
 
 test("runtime overlays approved broker contact links on listing routes", () => {
-  const page = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001", [], [
+  const page = renderRuntimePath(registry, seed, "/he/properties/MS-00815", [], [
     createBrokerContact({
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       broker: "broker_ru",
       phone: "+447700900001",
       reviewer: "owner",
-      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      sourceReference: "test://broker-contact/MS-00815",
       validationStatus: "broker_verified",
       approved: true,
     }),
@@ -216,7 +216,7 @@ test("runtime overlays approved 360 tour before public listing render", () => {
   const page = renderRuntimePath(
     registry,
     seed,
-    "/he/properties/MS-CRAWL-0001",
+    "/he/properties/MS-00815",
     [],
     [],
     [
@@ -224,9 +224,9 @@ test("runtime overlays approved 360 tour before public listing render", () => {
         seed,
         {
           id: "tour-approval-runtime-test",
-          listingId: "MS-CRAWL-0001",
-          panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-          accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+          listingId: "MS-00815",
+          panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+          accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
           reviewer: "media_editor",
           reviewConfirmed: true,
         },
@@ -242,18 +242,18 @@ test("runtime overlays approved 360 tour before public listing render", () => {
 });
 
 test("runtime overlays stale translation ledger rows before public rendering", () => {
-  const stale = renderRuntimePath(registry, seed, "/el/akinita/MS-CRAWL-0001", [
+  const stale = renderRuntimePath(registry, seed, "/el/akinita/MS-00815", [
     {
-      id: "translation-listing-MS-CRAWL-0001-el",
+      id: "translation-listing-MS-00815-el",
       object_type: "listing",
-      object_id: "MS-CRAWL-0001",
+      object_id: "MS-00815",
       target_locale: "el",
       status: "stale",
       human_approved: true,
       public_indexable: false,
     },
   ]);
-  const source = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0001");
+  const source = renderRuntimePath(registry, seed, "/bg/imoti/MS-00815");
 
   assert.equal(stale.status, 200);
   assert.equal(stale.locale, "el");
@@ -273,7 +273,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
     route_segments: { listing: "propiedades", search: "buscar", seller: "vender" },
   });
   const translationTasks = [approvedSpanishTranslation];
-  const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-CRAWL-0001", translationTasks);
+  const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-00815", translationTasks);
 
   assert.equal(page.status, 200);
   assert.equal(page.locale, "es");
@@ -299,7 +299,7 @@ test("runtime search uses CMS seed listings and keeps mobile-first contract", ()
   assert.ok(search.search.total_matches > search.cards.length);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
-  const pendingHebrewCard = search.cards.find((card) => card.id === "MS-CRAWL-0001");
+  const pendingHebrewCard = search.cards.find((card) => card.id === "MS-00815");
   assert.equal(pendingHebrewCard.translation_display, "fallback_source_locale");
   assert.equal(pendingHebrewCard.translation_indexable, false);
   assert.equal(pendingHebrewCard.content_locale, pendingHebrewCard.source_locale);
@@ -335,12 +335,12 @@ test("runtime prioritizes same-language related listings before source fallbacks
 test("runtime keeps sold listing pages live while removing them from active inventory", () => {
   const soldSeed = applyListingEdits(seed, [
     {
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       patch: { listing_status: "sold" },
     },
   ]);
-  const listing = renderRuntimePath(registry, soldSeed, "/bg/imoti/MS-CRAWL-0001");
-  const pendingTranslation = renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001");
+  const listing = renderRuntimePath(registry, soldSeed, "/bg/imoti/MS-00815");
+  const pendingTranslation = renderRuntimePath(registry, soldSeed, "/he/properties/MS-00815");
   const search = searchRuntimeListings(registry, soldSeed, { localeCode: "he", query: "Sandanski" });
   const location = renderRuntimePath(registry, soldSeed, "/he/locations/sandanski");
 
@@ -352,8 +352,8 @@ test("runtime keeps sold listing pages live while removing them from active inve
   assert.equal(listing.body.lifecycle.active_in_search, false);
   assert.equal(listing.body.lifecycle.seo_kept_live, true);
   assert.equal(listing.body.related_listings.length > 0, true);
-  assert.equal(search.cards.some((card) => card.id === "MS-CRAWL-0001"), false);
-  assert.equal((location.cards || []).some((card) => card.id === "MS-CRAWL-0001"), false);
+  assert.equal(search.cards.some((card) => card.id === "MS-00815"), false);
+  assert.equal((location.cards || []).some((card) => card.id === "MS-00815"), false);
 });
 
 test("runtime search overlays stale translation ledger rows before card rendering", () => {
@@ -362,9 +362,9 @@ test("runtime search overlays stale translation ledger rows before card renderin
     query: "Sandanski",
     translationTasks: [
       {
-        id: "translation-listing-MS-CRAWL-0001-el",
+        id: "translation-listing-MS-00815-el",
         object_type: "listing",
-        object_id: "MS-CRAWL-0001",
+        object_id: "MS-00815",
         target_locale: "el",
         status: "stale",
         human_approved: true,
@@ -372,7 +372,7 @@ test("runtime search overlays stale translation ledger rows before card renderin
       },
     ],
   });
-  const card = search.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const card = search.cards.find((candidate) => candidate.id === "MS-00815");
 
   assert.equal(search.status, 200);
   assert.equal(card.translation_display, "stale_translation_fallback");
@@ -394,12 +394,12 @@ test("runtime search shows reviewed cards for admin-added approved locales", () 
     query: "Sandanski",
     translationTasks: [approvedSpanishTranslation],
   });
-  const card = search.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const card = search.cards.find((candidate) => candidate.id === "MS-00815");
 
   assert.equal(search.path, "/es/buscar");
   assert.equal(search.indexable, false);
   assert.equal(search.metadata.robots, "noindex,follow");
-  assert.equal(card.path, "/es/propiedades/MS-CRAWL-0001");
+  assert.equal(card.path, "/es/propiedades/MS-00815");
   assert.equal(card.translation_display, "reviewed_translation");
   assert.equal(card.translation_indexable, true);
 });
@@ -409,7 +409,7 @@ test("runtime lead intake stores language and keeps Hermes reply review-gated", 
     id: "runtime-lead-test",
     leadType: "buyer",
     language: "he",
-    listingReference: "MS-CRAWL-0001",
+    listingReference: "MS-00815",
     contact: { name: "Noa Levi", whatsapp: "+359880000001" },
     contact_preference: "whatsapp",
     message: "Interested in this property.",
@@ -432,7 +432,7 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
     source: "website_viewing_request",
     leadType: "buyer",
     language: "he",
-    listingReference: "MS-CRAWL-0001",
+    listingReference: "MS-00815",
     contact: { name: "Noa Levi", phone: "+359880000001" },
     contact_preference: "phone",
     request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
@@ -442,7 +442,7 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
   assert.equal(lead.lead.source, "website_viewing_request");
   assert.equal(lead.lead.intent, "viewing");
   assert.equal(lead.lead.leadType, "renter");
-  assert.equal(lead.lead.listingReference, "MS-CRAWL-0001");
+  assert.equal(lead.lead.listingReference, "MS-00815");
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "phone");
@@ -459,7 +459,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
     intent: "inquiry",
     leadType: "buyer",
     language: "ru",
-    listingReference: "MS-CRAWL-0001",
+    listingReference: "MS-00815",
     contact: { name: "Nina", whatsapp: "+359880000000" },
     contact_preference: "whatsapp",
   });
@@ -469,7 +469,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
     intent: "callback",
     leadType: "buyer",
     language: "ru",
-    listingReference: "MS-CRAWL-0001",
+    listingReference: "MS-00815",
     contact: { name: "Nina", phone: "+359880000000" },
     contact_preference: "phone",
   });
@@ -479,7 +479,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
     intent: "viewing",
     leadType: "buyer",
     language: "ru",
-    listingReference: "MS-CRAWL-0001",
+    listingReference: "MS-00815",
     contact: { name: "Nina", phone: "+359880000000" },
     contact_preference: "phone",
     request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
@@ -499,7 +499,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
         source: "website_viewing_request",
         intent: "callback",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Nina", phone: "+359880000000" },
       }),
     /intent must match source/,
@@ -510,7 +510,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
         source: "website_callback_request",
         intent: "callback",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Nina" },
       }),
     /requires a phone/,
@@ -521,7 +521,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
         source: "website_listing_detail",
         intent: "inquiry",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Nina" },
       }),
     /reachable contact channel/,
@@ -532,7 +532,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
         source: "website_viewing_request",
         intent: "viewing",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Nina", phone: "+359880000000" },
       }),
     /preferred date/,
@@ -543,7 +543,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
         source: "website_untrusted",
         intent: "inquiry",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Nina", phone: "+359880000000" },
       }),
     /known canonical source/,

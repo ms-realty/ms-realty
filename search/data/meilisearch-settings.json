@@ -10,11 +10,17 @@
     "municipality",
     "district",
     "region",
-    "listing_reference"
+    "listing_reference",
+    "migration_id",
+    "legacy_lot_id"
   ],
   "filterableAttributes": [
     "source_listing_id",
     "listing_reference",
+    "lot_number",
+    "migration_id",
+    "legacy_lot_id",
+    "merged_into",
     "search_document_type",
     "publication_state",
     "listing_status",

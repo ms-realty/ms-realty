@@ -51,7 +51,7 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
     payload: runtime.payload,
     principal,
     input: {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       patch: {
         title: "Durable operator title",
         location_precision: "exact",
@@ -65,7 +65,7 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
   assert.deepEqual(result.changedFields.sort(), ["availability_verified_at", "location_precision", "title"]);
   assert.equal(result.projectedSeed.payload_overlay.source, "payload_draft_overlay");
   assert.equal(
-    result.projectedSeed.records.find((record) => record.id === "MS-CRAWL-0001").facts.title,
+    result.projectedSeed.records.find((record) => record.id === "MS-00815").facts.title,
     "Durable operator title",
   );
   assert.deepEqual(
@@ -74,12 +74,12 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
   );
   assert.equal(result.staleTranslations.every((translation) => translation.previous_status === "human_edited"), true);
   for (const locale of targetLocales) {
-    const translationRow = listingTranslationRow(runtime, "MS-CRAWL-0001", locale);
+    const translationRow = listingTranslationRow(runtime, "MS-00815", locale);
     assert.equal(translationRow.status, "draft");
     assert.equal(translationRow.translation_state, "stale");
     assert.equal(translationRow.public_indexable, false);
     const overlayTranslation = result.projectedSeed.records
-      .find((record) => record.id === "MS-CRAWL-0001")
+      .find((record) => record.id === "MS-00815")
       .translations.find((translation) => translation.locale === locale);
     assert.equal(overlayTranslation.status, "stale");
     assert.equal(overlayTranslation.translation_state, "stale");
@@ -91,7 +91,7 @@ test("saveListingDraft writes one durable draft mutation and overlays the import
   assert.equal(runtime.payload.calls.findByID.every((call) => call.transactionID === "tx-1"), true);
   assert.equal(runtime.payload.calls.find.every((call) => call.transactionID === "tx-1"), true);
   assert.equal(runtime.payload.calls.update[0].context.ms_realty_operator.id, "editor_bg");
-  const event = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
+  const event = runtime.currentRows().listings.find((row) => row.id === "MS-00815").workflow.last_edit_event;
   assert.deepEqual({ ...event, stale_locales: [...event.stale_locales].sort(), source_hash_before: "hash", source_hash_after: "hash" }, {
     actor_id: "editor_bg",
     auth_source: "credential_registry",
@@ -115,12 +115,12 @@ test("saveListingDraft records the trusted MCP channel in the durable listing ve
   await saveListingDraft(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingId: "MS-CRAWL-0001", patch: { condition: "MCP-reviewed condition" } },
+    input: { listingId: "MS-00815", patch: { condition: "MCP-reviewed condition" } },
     editedAt: "2026-08-10T09:05:00.000Z",
     requestChannel: "mcp",
   });
 
-  const event = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
+  const event = runtime.currentRows().listings.find((row) => row.id === "MS-00815").workflow.last_edit_event;
   assert.equal(event.channel, "mcp");
   assert.equal(event.auth_source, "credential_registry");
   assert.deepEqual(event.changed_fields, ["condition"]);
@@ -128,7 +128,7 @@ test("saveListingDraft records the trusted MCP channel in the durable listing ve
 
 test("saveListingDraft stores blank verification timestamps as null without changing sibling fields", async () => {
   const seed = loadCmsSeed();
-  const source = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const source = seed.records.find((record) => record.id === "MS-00815");
   source.workflow = {
     ...source.workflow,
     availability_verified_at: null,
@@ -138,13 +138,13 @@ test("saveListingDraft stores blank verification timestamps as null without chan
     review_status: "review_required",
   };
   const runtime = createPayloadDraftRuntime(seed);
-  const before = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001");
+  const before = runtime.currentRows().listings.find((row) => row.id === "MS-00815");
 
   const result = await saveListingDraft(seed, {
     payload: runtime.payload,
     principal,
     input: {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       patch: {
         title: "Full-form title update",
         description: before.facts.description,
@@ -157,7 +157,7 @@ test("saveListingDraft stores blank verification timestamps as null without chan
     editedAt: "2026-08-10T09:05:00.000Z",
   });
 
-  const after = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001");
+  const after = runtime.currentRows().listings.find((row) => row.id === "MS-00815");
   assert.deepEqual(result.changedFields, ["title"]);
   for (const field of [
     "availability_verified_at",
@@ -175,7 +175,7 @@ test("saveListingDraft stores blank verification timestamps as null without chan
       saveListingDraft(seed, {
         payload: runtime.payload,
         principal,
-        input: { listingId: "MS-CRAWL-0001", patch: { availability_verified_at: "not-a-date" } },
+        input: { listingId: "MS-00815", patch: { availability_verified_at: "not-a-date" } },
         editedAt: "2026-08-10T09:06:00.000Z",
       }),
     /availability_verified_at must be a valid date and time/,
@@ -185,7 +185,7 @@ test("saveListingDraft stores blank verification timestamps as null without chan
 test("saveListingDraft treats the unchanged 29-field admin form as idempotent", async () => {
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed);
-  const current = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001");
+  const current = runtime.currentRows().listings.find((row) => row.id === "MS-00815");
   const seo = current.seo || {};
   const form = { listingId: current.id, editor: principal.id };
   for (const field of DURABLE_LISTING_EDIT_FIELDS) {
@@ -223,7 +223,7 @@ test("saveListingDraft is idempotent when the same patch is already present", as
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed);
   const input = {
-    listingId: "MS-CRAWL-0001",
+    listingId: "MS-00815",
     patch: { description: "Shared durable draft description for idempotency." },
   };
   const first = await saveListingDraft(seed, {
@@ -266,7 +266,7 @@ test("saveListingDraft retries one exact concurrent enrichment-task id duplicate
   const result = await saveListingDraft(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingId: "MS-CRAWL-0001", patch: { title: "Concurrent retry title" } },
+    input: { listingId: "MS-00815", patch: { title: "Concurrent retry title" } },
     editedAt: "2026-08-10T09:12:00.000Z",
   });
 
@@ -274,7 +274,7 @@ test("saveListingDraft retries one exact concurrent enrichment-task id duplicate
   assert.equal(runtime.payload.calls.begin, 2);
   assert.equal(runtime.payload.calls.rollback, 1);
   assert.equal(runtime.payload.calls.commit, 1);
-  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Concurrent retry title");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.title, "Concurrent retry title");
 });
 
 test("saveListingDraft retries one raw work-queue unique conflict in a fresh transaction", async () => {
@@ -290,7 +290,7 @@ test("saveListingDraft retries one raw work-queue unique conflict in a fresh tra
   const result = await saveListingDraft(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingId: "MS-CRAWL-0001", patch: { title: "Raw duplicate retry title" } },
+    input: { listingId: "MS-00815", patch: { title: "Raw duplicate retry title" } },
     editedAt: "2026-08-10T09:12:30.000Z",
   });
 
@@ -322,7 +322,7 @@ for (const [label, data] of [
         saveListingDraft(seed, {
           payload: runtime.payload,
           principal,
-          input: { listingId: "MS-CRAWL-0001", patch: { title: "Must not retry" } },
+          input: { listingId: "MS-00815", patch: { title: "Must not retry" } },
           editedAt: "2026-08-10T09:13:00.000Z",
         }),
       /simulated validation failure/,
@@ -347,7 +347,7 @@ test("saveListingDraft does not retry a raw unique conflict from an unrelated co
       saveListingDraft(seed, {
         payload: runtime.payload,
         principal,
-        input: { listingId: "MS-CRAWL-0001", patch: { title: "Must not retry raw constraint" } },
+        input: { listingId: "MS-00815", patch: { title: "Must not retry raw constraint" } },
         editedAt: "2026-08-10T09:14:00.000Z",
       }),
     /unrelated unique conflict/,
@@ -365,14 +365,14 @@ test("saveListingDraft rolls back the draft mutation when readback fails", async
       return null;
     },
   });
-  const preservedBefore = listingTranslationRows(runtime, "MS-CRAWL-0001").filter((row) => row.locale !== "bg");
+  const preservedBefore = listingTranslationRows(runtime, "MS-00815").filter((row) => row.locale !== "bg");
 
   await assert.rejects(
     () =>
       saveListingDraft(seed, {
         payload: runtime.payload,
         principal,
-        input: { listingId: "MS-CRAWL-0001", patch: { title: "Should roll back" } },
+        input: { listingId: "MS-00815", patch: { title: "Should roll back" } },
         editedAt: "2026-08-10T09:15:00.000Z",
       }),
     /simulated snapshot failure/,
@@ -380,8 +380,8 @@ test("saveListingDraft rolls back the draft mutation when readback fails", async
 
   assert.equal(runtime.payload.calls.commit, 0);
   assert.equal(runtime.payload.calls.rollback, 1);
-  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Should roll back");
-  const preservedRows = listingTranslationRows(runtime, "MS-CRAWL-0001").filter((row) => row.locale !== "bg");
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.title, "Should roll back");
+  const preservedRows = listingTranslationRows(runtime, "MS-00815").filter((row) => row.locale !== "bg");
   assert.deepEqual(preservedRows, preservedBefore);
 });
 
@@ -391,11 +391,11 @@ test("projectListingDraftSeed overlays durable draft rows without requiring a se
   await saveListingDraft(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingId: "MS-CRAWL-0001", patch: { title: "Projected title" } },
+    input: { listingId: "MS-00815", patch: { title: "Projected title" } },
     editedAt: "2026-08-10T09:20:00.000Z",
   });
   const overlay = await projectListingDraftSeed(seed, { payload: runtime.payload });
-  assert.equal(overlay.records.find((record) => record.id === "MS-CRAWL-0001").facts.title, "Projected title");
+  assert.equal(overlay.records.find((record) => record.id === "MS-00815").facts.title, "Projected title");
 });
 
 test("saveBulkListingStatusDrafts keeps the batch durable and idempotent", async () => {
@@ -404,13 +404,13 @@ test("saveBulkListingStatusDrafts keeps the batch durable and idempotent", async
   const first = await saveBulkListingStatusDrafts(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002"], targetStatus: "reserved" },
+    input: { listingIds: ["MS-00815", "MS-00907"], targetStatus: "reserved" },
     editedAt: "2026-08-10T09:30:00.000Z",
   });
   const second = await saveBulkListingStatusDrafts(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002"], targetStatus: "reserved" },
+    input: { listingIds: ["MS-00815", "MS-00907"], targetStatus: "reserved" },
     editedAt: "2026-08-10T09:31:00.000Z",
   });
 
@@ -419,8 +419,8 @@ test("saveBulkListingStatusDrafts keeps the batch durable and idempotent", async
   assert.deepEqual(
     first.edits.map((edit) => ({ listingId: edit.listing_id, staleCount: edit.staleTranslations.length })),
     [
-      { listingId: "MS-CRAWL-0001", staleCount: 6 },
-      { listingId: "MS-CRAWL-0002", staleCount: 6 },
+      { listingId: "MS-00815", staleCount: 6 },
+      { listingId: "MS-00907", staleCount: 6 },
     ],
   );
   assert.equal(second.edits.filter((edit) => edit.idempotent).length, 2);
@@ -449,7 +449,7 @@ test("saveBulkListingStatusDrafts retries the full transaction after an enrichme
   const result = await saveBulkListingStatusDrafts(seed, {
     payload: runtime.payload,
     principal,
-    input: { listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002"], targetStatus: "reserved" },
+    input: { listingIds: ["MS-00815", "MS-00907"], targetStatus: "reserved" },
     editedAt: "2026-08-10T09:32:00.000Z",
   });
 

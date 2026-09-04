@@ -32,17 +32,17 @@ function seedWithUnapprovedListing() {
   return filePath;
 }
 const hit = {
-  id: "MS-CRAWL-0001:bg",
-  source_listing_id: "MS-CRAWL-0001",
+  id: "MS-00815:bg",
+  source_listing_id: "MS-00815",
   locale: "bg",
-  locale_path: "/bg/imoti/MS-CRAWL-0001",
+  locale_path: "/bg/imoti/MS-00815",
   title: "Reviewed Sandanski listing",
 };
 const higherRankedHit = {
   ...hit,
-  id: "MS-CRAWL-0002:bg",
-  source_listing_id: "MS-CRAWL-0002",
-  locale_path: "/bg/imoti/MS-CRAWL-0002",
+  id: "MS-00907:bg",
+  source_listing_id: "MS-00907",
+  locale_path: "/bg/imoti/MS-00907",
 };
 
 function response(body, status = 200) {
@@ -154,7 +154,7 @@ test("Typesense hit IDs drive the public renderer without rerunning raw text mat
 
   assert.deepEqual(local.cards, []);
   assert.equal(engineResult.engine, "typesense");
-  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0002", "MS-CRAWL-0001"]);
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-00907", "MS-00815"]);
   assert.equal(result.search.query, "Sndanski");
   assert.equal(result.search.intent.text_query, "Sndanski");
   assert.equal(result.search.controls.save_search.payload.query, "Sndanski");
@@ -180,7 +180,7 @@ test("public search falls back from unavailable Typesense to Meilisearch", async
   assert.equal(engineResult.engine, "meilisearch");
   assert.equal(result.search.backend.mode, "fallback");
   assert.deepEqual(result.search.backend.unavailable_engines, ["postgres", "typesense"]);
-  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-00815"]);
   assert.equal(calls.length, 2);
 });
 
@@ -235,13 +235,13 @@ test("private review keeps the production Postgres search contract while exposin
   };
   const reviewConfig = appRouterConfigFromEnv(reviewEnv);
   const productionListing = renderAppRoute({
-    pathname: "/bg/imoti/MS-CRAWL-0001",
-    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    pathname: "/bg/imoti/MS-00815",
+    url: "https://example.test/bg/imoti/MS-00815",
     config: productionConfig,
   });
   const reviewListing = renderAppRoute({
-    pathname: "/bg/imoti/MS-CRAWL-0001",
-    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    pathname: "/bg/imoti/MS-00815",
+    url: "https://example.test/bg/imoti/MS-00815",
     config: reviewConfig,
   });
 
@@ -294,7 +294,7 @@ test("localized HTML and API search share engine-ranked cards and request intent
   assert.deepEqual(html.rendered.cards.map((card) => card.id), api.cards.map((card) => card.id));
   assert.equal(html.rendered.search.query, api.search.query);
   assert.deepEqual(html.rendered.search.intent, api.search.intent);
-  assert.match(html.html, /MS-CRAWL-0001/);
+  assert.match(html.html, /MS-00815/);
 });
 
 test("Postgres result pages preserve database totals and requested page size", async () => {
@@ -334,7 +334,7 @@ test("Postgres result pages preserve database totals and requested page size", a
     has_previous: true,
     has_next: true,
   });
-  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0002", "MS-CRAWL-0001"]);
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-00907", "MS-00815"]);
 });
 
 test("Postgres cards keep database-only listings and database-updated facts authoritative", async () => {
@@ -394,7 +394,7 @@ test("Postgres cards keep database-only listings and database-updated facts auth
   });
 
   assert.equal(result.cards.length, 2);
-  assert.deepEqual(result.cards.map((card) => card.id), ["MS-CRAWL-0001", "MS-DB-ONLY-0001"]);
+  assert.deepEqual(result.cards.map((card) => card.id), ["MS-00815", "MS-DB-ONLY-0001"]);
   assert.equal(result.cards[0].title, "Authoritative database title");
   assert.equal(result.cards[0].location, "Database Sandanski");
   assert.equal(result.cards[0].price_eur, 123456);

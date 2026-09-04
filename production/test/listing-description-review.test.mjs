@@ -94,25 +94,25 @@ function writeVerifiedEvidenceArtifact() {
 
 test("description review queue preserves ledger provenance and keeps captured source text out", () => {
   const review = buildListingDescriptionReview({ generatedAt: "2026-07-29T12:39:33+00:00" });
-  const repaired = review.rows.find((row) => row.listing_id === "MS-CRAWL-0001");
-  const conflict = review.rows.find((row) => row.listing_id === "MS-CRAWL-0070");
-  const unavailable = review.rows.find((row) => row.listing_id === "MS-CRAWL-0008");
-  const sourceReviewed = review.rows.find((row) => row.listing_id === "MS-CRAWL-0002");
+  const repaired = review.rows.find((row) => row.listing_id === "MS-00815");
+  const conflict = review.rows.find((row) => row.listing_id === "MS-00456");
+  const unavailable = review.rows.find((row) => row.listing_id === "MS-00662");
+  const sourceReviewed = review.rows.find((row) => row.listing_id === "MS-00907");
   const restoredListingIds = [
-    "MS-CRAWL-0023",
-    "MS-CRAWL-0006",
-    "MS-CRAWL-0013",
-    "MS-CRAWL-0024",
-    "MS-CRAWL-0059",
-    "MS-CRAWL-0069",
-    "MS-CRAWL-0071",
-    "MS-CRAWL-0080",
-    "MS-CRAWL-0081",
+    "MS-00833",
+    "MS-00443",
+    "MS-00567-1",
+    "MS-00101",
+    "MS-00945",
+    "MS-00744",
+    "MS-00499",
+    "MS-00955",
+    "MS-00286",
     "MS-CRAWL-0116",
-    "MS-CRAWL-0120",
+    "MS-00382",
     "MS-CRAWL-0124",
     "MS-CRAWL-0127",
-    "MS-CRAWL-0128",
+    "MS-00697",
     "MS-CRAWL-0129",
     "MS-CRAWL-0130",
     "MS-CRAWL-0139",
@@ -148,7 +148,7 @@ test("description review queue preserves ledger provenance and keeps captured so
     assert.equal(row.fresh_capture.state, "captured");
   }
   assert.match(
-    review.rows.find((row) => row.listing_id === "MS-CRAWL-0006").public_description,
+    review.rows.find((row) => row.listing_id === "MS-00443").public_description,
     /^Производствено\/складово помещение в промишлената зона на Сандански/,
   );
   assert.match(

@@ -35,7 +35,7 @@ test("every head URL a crawler resolves is absolute, on every page type and loca
     ["home bg", renderHomePage({ registry, listings, localeCode: "bg" })],
     ["home he", renderHomePage({ registry, listings, localeCode: "he" })],
     ["search bg", renderSearchPage({ registry, listings, localeCode: "bg", query: "Sandanski" })],
-    ["listing bg", renderListingPage({ registry, listing: findListingById(listings, "MS-CRAWL-0001"), localeCode: "bg" })],
+    ["listing bg", renderListingPage({ registry, listing: findListingById(listings, "MS-00815"), localeCode: "bg" })],
     ["guide en", renderRuntimePath(registry, seed, "/en/guides/foreign-buyers")],
     ["location bg", renderRuntimePath(registry, seed, "/bg/lokacii/sandanski")],
     ["seller bg", renderRuntimePath(registry, seed, "/bg/prodai")],
@@ -55,7 +55,7 @@ test("the head and the sitemap advertise the same absolute URLs", () => {
   const sitemapXml = renderSitemapXml(buildRuntimeLocalizedSitemap(registry, seed, []), { origin });
   const locs = new Set([...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => loc));
 
-  for (const path of ["/bg", "/en", "/bg/imoti/MS-CRAWL-0001", "/en/guides/foreign-buyers"]) {
+  for (const path of ["/bg", "/en", "/bg/imoti/MS-00815", "/en/guides/foreign-buyers"]) {
     const head = headOf(renderHtmlPage(renderRuntimePath(registry, seed, path)));
     const canonical = /<link rel="canonical" href="([^"]*)"/.exec(head)[1];
     assert.ok(locs.has(canonical), `sitemap must advertise the canonical the head publishes: ${canonical}`);
@@ -74,7 +74,7 @@ test("the hreflang cluster is fully qualified so Google can group the seven lang
 test("share cards read a territory locale and a declared card type", () => {
   const homeHead = headOf(renderHtmlPage(renderHomePage({ registry, listings, localeCode: "bg" })));
   const listingHead = headOf(
-    renderHtmlPage(renderListingPage({ registry, listing: findListingById(listings, "MS-CRAWL-0001"), localeCode: "bg" })),
+    renderHtmlPage(renderListingPage({ registry, listing: findListingById(listings, "MS-00815"), localeCode: "bg" })),
   );
 
   assert.equal(metaContent(homeHead, 'property="og:locale"'), "bg_BG");
@@ -97,7 +97,7 @@ test("the page assertion refuses a head that goes back to relative URLs", () => 
 });
 
 test("a listing snippet is a readable sentence, not the whole property description", () => {
-  const listing = findListingById(listings, "MS-CRAWL-0001");
+  const listing = findListingById(listings, "MS-00815");
   const page = renderListingPage({ registry, listing, localeCode: "bg" });
 
   assert.ok(page.body.description.length > META_DESCRIPTION_LIMIT, "fixture must have a long body to truncate");

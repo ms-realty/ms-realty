@@ -76,7 +76,7 @@ test("publication schedules are human-owned, future-dated, single-open, cancella
   const seed = loadCmsSeed();
   const input = {
     id: "publication-schedule-review-1",
-    listingId: "MS-CRAWL-0001",
+    listingId: "MS-00815",
     action: "unpublish",
     scheduledAt: "2026-07-20T10:00:00.000Z",
     actor: "content_editor",
@@ -108,7 +108,7 @@ test("publication schedules are human-owned, future-dated, single-open, cancella
       appendListingPublicationSchedule(
         seed,
         {
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           action: "publish",
           scheduledAt: "2026-07-21T10:00:00.000Z",
           actor: "content_editor",
@@ -122,7 +122,7 @@ test("publication schedules are human-owned, future-dated, single-open, cancella
       appendListingPublicationSchedule(
         seed,
         {
-          listingId: "MS-CRAWL-0002",
+          listingId: "MS-00907",
           action: "publish",
           scheduledAt: "2026-07-21T10:00:00.000Z",
           actor: "hermes_agent",
@@ -157,7 +157,7 @@ test("due publication execution appends an attributed listing edit and preserves
     seed,
     {
       id: "publication-unpublish-due-1",
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       action: "unpublish",
       scheduledAt: "2026-07-20T10:00:00.000Z",
       actor: "content_editor",
@@ -178,7 +178,7 @@ test("due publication execution appends an attributed listing edit and preserves
   assert.equal(result.results[0].event.approved_by, "content_editor");
   assert.equal(result.results[0].event.resulting_status, "archived");
   assert.equal(readListingEdits(paths.edits).length, 1);
-  const archived = applyListingEdits(seed, readListingEdits(paths.edits)).records.find((row) => row.id === "MS-CRAWL-0001");
+  const archived = applyListingEdits(seed, readListingEdits(paths.edits)).records.find((row) => row.id === "MS-00815");
   assert.equal(archived.facts.listing_status, "archived");
   assert.ok(archived.source_url, "the retained source-backed listing record remains addressable");
   assertListingPublicationSchedules(readListingPublicationSchedules(paths.schedules));
@@ -204,7 +204,7 @@ test("publish schedules require current verified completion at creation and exec
         loadCmsSeed(),
         {
           id: "publication-incomplete-1",
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           action: "publish",
           scheduledAt: "2026-07-20T10:00:00.000Z",
           actor: "content_editor",
@@ -256,7 +256,7 @@ test("publication scheduler CLI executes only due human-approved changes and is 
     loadCmsSeed(),
     {
       id: "publication-cli-due-1",
-      listingId: "MS-CRAWL-0002",
+      listingId: "MS-00907",
       action: "unpublish",
       scheduledAt: "2026-07-20T10:00:00.000Z",
       actor: "content_editor",

@@ -13,7 +13,7 @@ const listings = loadListings();
 const css = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
 const PUBLIC_LOCALES = ["bg", "en", "de", "nl", "ru", "el", "he"];
 const listingById = (id) => listings.find((entry) => entry.id === id);
-const rentListing = listingById("MS-CRAWL-0003");
+const rentListing = listingById("MS-00922");
 const relatedFor = (listing) => listings.filter((entry) => entry.id !== listing.id && entry.location === listing.location).slice(0, 3);
 
 function richListingPage(localeCode = "en", { related = true, broker = false } = {}) {

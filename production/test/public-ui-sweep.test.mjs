@@ -47,21 +47,21 @@ test("mobile menu overlay covers the viewport under the sticky header and the bu
 });
 
 test("listing pages without approved translations still offer every public language", () => {
-  const listing = listings.find((entry) => entry.id === "MS-CRAWL-0003");
+  const listing = listings.find((entry) => entry.id === "MS-00922");
   const page = renderListingPage({ registry, listing, localeCode: "en" });
   assert.equal(page.hreflang.length, 0);
   assert.deepEqual(page.chrome.languages.map((language) => language.code), PUBLIC_LOCALES);
   assert.equal(page.chrome.languages.find((language) => language.code === "en").active, true);
   // A missing translation is a reason for the source-language badge, not for
   // dropping the visitor on a home page: the German route renders this listing.
-  assert.equal(page.chrome.languages.find((language) => language.code === "de").href, "/de/immobilien/MS-CRAWL-0003");
+  assert.equal(page.chrome.languages.find((language) => language.code === "de").href, "/de/immobilien/MS-00922");
   const html = renderReactPublicBody(page);
   assert.match(html, /data-language-switcher="desktop"/);
   assert.equal((html.match(/class="site-hd__mobile-langs"[^>]*>/g) || []).length, 1);
 });
 
 test("public dialogs declare aria-modal and the map directory disclosure has a chevron", () => {
-  const listing = listings.find((entry) => entry.id === "MS-CRAWL-0003");
+  const listing = listings.find((entry) => entry.id === "MS-00922");
   const listingHtml = renderReactPublicBody(renderListingPage({ registry, listing, localeCode: "en" }));
   assert.match(listingHtml, /<dialog id="mk-enquiry" class="ct-modal mk-enquiry" aria-modal="true"/);
   assert.match(listingHtml, /<dialog id="mk-contact-options" class="ld-contact-options" aria-modal="true"/);

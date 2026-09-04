@@ -14,7 +14,7 @@
       "original_language": "he",
       "admin_locale": "en",
       "assigned_broker": "broker_international",
-      "source_listing_id": "MS-CRAWL-0001",
+      "source_listing_id": "MS-00815",
       "pipeline_stage": "viewing",
       "qualification_complete": true,
       "criteria": {
@@ -31,8 +31,8 @@
       "match_count": 1,
       "matches": [
         {
-          "listing_id": "MS-CRAWL-0003",
-          "path": "/he/properties/MS-CRAWL-0003",
+          "listing_id": "MS-00922",
+          "path": "/he/properties/MS-00922",
           "title": "Тристаен апартамент под наем в Сандански + паркомясто",
           "location": "סנדנסקי",
           "property_type": "apartment",
@@ -54,7 +54,7 @@
       "original_language": "he",
       "admin_locale": "en",
       "assigned_broker": "broker_international",
-      "source_listing_id": "MS-CRAWL-0001",
+      "source_listing_id": "MS-00815",
       "pipeline_stage": "inquiry",
       "qualification_complete": false,
       "criteria": {
@@ -65,8 +65,8 @@
       "match_count": 5,
       "matches": [
         {
-          "listing_id": "MS-CRAWL-0006",
-          "path": "/he/properties/MS-CRAWL-0006",
+          "listing_id": "MS-00443",
+          "path": "/he/properties/MS-00443",
           "title": "Дава под наем промишлена сграда в Сандански",
           "location": "סנדנסקי",
           "property_type": "commercial",
@@ -75,8 +75,8 @@
           "price_on_request": true
         },
         {
-          "listing_id": "MS-CRAWL-0019",
-          "path": "/he/properties/MS-CRAWL-0019",
+          "listing_id": "MS-00812",
+          "path": "/he/properties/MS-00812",
           "title": "Офиси/магазини под наем в гр.Сандански",
           "location": "סנדנסקי",
           "property_type": "commercial",
@@ -85,8 +85,8 @@
           "price_on_request": true
         },
         {
-          "listing_id": "MS-CRAWL-0020",
-          "path": "/he/properties/MS-CRAWL-0020",
+          "listing_id": "MS-00890",
+          "path": "/he/properties/MS-00890",
           "title": "Офис под наем в центъра на гр.Сандански",
           "location": "סנדנסקי",
           "property_type": "commercial",
@@ -95,8 +95,8 @@
           "price_on_request": false
         },
         {
-          "listing_id": "MS-CRAWL-0022",
-          "path": "/he/properties/MS-CRAWL-0022",
+          "listing_id": "MS-00756",
+          "path": "/he/properties/MS-00756",
           "title": "Дава под наем производствено помещение в Сандански",
           "location": "סנדנסקי",
           "property_type": "commercial",
@@ -105,8 +105,8 @@
           "price_on_request": false
         },
         {
-          "listing_id": "MS-CRAWL-0096",
-          "path": "/he/properties/MS-CRAWL-0096",
+          "listing_id": "MS-00758",
+          "path": "/he/properties/MS-00758",
           "title": "Индустриална сграда под наем",
           "location": "סנדנסקי",
           "property_type": "commercial",

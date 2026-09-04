@@ -14,7 +14,7 @@ function fixture() {
   return {
     id: "reply-lead-1",
     lead_id: "lead-1",
-    listing_reference: "MS-CRAWL-0001",
+    listing_reference: "MS-00815",
     reply_language: "ru",
     reviewer: "broker_ru",
     reviewed_at: "2026-07-18T10:00:00.000Z",

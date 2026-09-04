@@ -6,7 +6,7 @@ const leads = [
   {
     lead_id: "lead-escalated",
     lead_type: "foreign_buyer",
-    listing_reference: "MS-CRAWL-0001",
+    listing_reference: "MS-00815",
     original_language: "de",
     admin_locale: "en",
     assigned_broker: "broker_international",

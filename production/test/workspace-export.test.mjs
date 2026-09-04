@@ -56,7 +56,7 @@ const CONTACTS = [
   },
 ];
 const LISTINGS = [
-  { id: "MS-CRAWL-0001", collection: "listings", facts: { title: "Flat", price_eur: 50000 } },
+  { id: "MS-00815", collection: "listings", facts: { title: "Flat", price_eur: 50000 } },
   { id: "page-1", collection: "pages" },
 ];
 const AUDIT = [

@@ -42,10 +42,10 @@ test("production Node search rejects a selected legacy engine before network acc
             hits: [
               {
                 document: {
-                  id: "MS-CRAWL-0001:bg",
-                  source_listing_id: "MS-CRAWL-0001",
+                  id: "MS-00815:bg",
+                  source_listing_id: "MS-00815",
                   locale: "bg",
-                  locale_path: "/bg/imoti/MS-CRAWL-0001",
+                  locale_path: "/bg/imoti/MS-00815",
                   title: "Reviewed Sandanski listing",
                 },
               },
@@ -78,11 +78,11 @@ test("direct HTTP Postgres search preserves database totals and requested page s
             total: 23,
             hits: [
               {
-                id: "MS-CRAWL-0001:bg",
-                source_listing_id: "MS-CRAWL-0001",
-                listing_reference: "MS-CRAWL-0001",
+                id: "MS-00815:bg",
+                source_listing_id: "MS-00815",
+                listing_reference: "MS-00815",
                 locale: "bg",
-                locale_path: "/bg/imoti/MS-CRAWL-0001",
+                locale_path: "/bg/imoti/MS-00815",
                 title: "Database-updated direct HTTP title",
                 description: "Database-updated description",
                 location_label: "Database Sandanski",
@@ -131,7 +131,7 @@ test("direct HTTP Postgres search preserves database totals and requested page s
   assert.equal(response.body.search.pagination.page, 3);
   assert.equal(response.body.search.pagination.per_page, 7);
   assert.equal(response.body.search.pagination.total_pages, 4);
-  assert.deepEqual(response.body.cards.map((card) => card.id), ["MS-CRAWL-0001", "MS-DB-ONLY-HTTP-0001"]);
+  assert.deepEqual(response.body.cards.map((card) => card.id), ["MS-00815", "MS-DB-ONLY-HTTP-0001"]);
   assert.equal(response.body.cards[0].title, "Database-updated direct HTTP title");
   assert.equal(response.body.cards[0].location, "Database Sandanski");
   assert.equal(response.body.cards[0].price_eur, 123456);

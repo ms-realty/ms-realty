@@ -149,7 +149,7 @@ class SearchListingExtractionTests(unittest.TestCase):
         }
         reviews = {
             "places": {"reviewed": {"location_name": "Reviewed place"}},
-            "listing_overrides": {"MS-CRAWL-0001": "reviewed"},
+            "listing_overrides": {"MS-00815": "reviewed"},
             "legacy_defaults": {"Sofia": "sofia"},
         }
 
@@ -162,7 +162,7 @@ class SearchListingExtractionTests(unittest.TestCase):
 
             docs = build_search_indexes.load_listing_docs(artifact_dir, registry, reviews, {})
 
-        self.assertEqual([doc["id"] for doc in docs], ["MS-CRAWL-0001", "MS-CRAWL-0002"])
+        self.assertEqual([doc["id"] for doc in docs], ["MS-00815", "MS-00907"])
         self.assertEqual(docs[0]["title"], "Двустаен & обзаведен апартамент в София")
         self.assertEqual(docs[0]["bedrooms"], 1)
         self.assertEqual(docs[0]["location"], "Reviewed place")

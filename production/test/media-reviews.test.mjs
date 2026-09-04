@@ -16,7 +16,7 @@ import { loadCmsSeed } from "../lib/runtime.mjs";
 
 function fixture() {
   const seed = loadCmsSeed();
-  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0037");
+  const listing = seed.records.find((record) => record.id === "MS-00719");
   const asset = listing.media.find((item) => item.kind === "floor_plan");
   return { seed, listing, asset, assetId: mediaAssetId(asset) };
 }
@@ -26,19 +26,19 @@ test("human media review publishes a replacement floor plan without losing its s
   const review = createMediaReview(
     seed,
     {
-      listingId: "MS-CRAWL-0037",
+      listingId: "MS-00719",
       assetId,
       decision: "publish",
       kind: "floor_plan",
       alt: "Reviewed floor plan for the property",
-      replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0037-floor-plan.webp",
+      replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-00719-floor-plan.webp",
       reviewer: "media_editor",
       reviewConfirmed: true,
     },
     "2026-07-19T12:00:00Z",
   );
   const reviewedSeed = applyMediaReviews(seed, [review]);
-  const listing = reviewedSeed.records.find((record) => record.id === "MS-CRAWL-0037");
+  const listing = reviewedSeed.records.find((record) => record.id === "MS-00719");
   const reviewedAsset = listing.media.find((item) => item.asset_id === assetId);
   const library = publicMediaLibrary(listing.media);
 
@@ -46,9 +46,11 @@ test("human media review publishes a replacement floor plan without losing its s
   assert.equal(review.review_status, "approved_by_human");
   assert.equal(review.source_url, asset.source_url);
   assert.equal(reviewedAsset.source_url, asset.source_url);
-  assert.equal(reviewedAsset.asset_url, "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0037-floor-plan.webp");
+  assert.equal(reviewedAsset.asset_url, "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-00719-floor-plan.webp");
   assert.equal(reviewedAsset.media_reviewer, "media_editor");
-  assert.equal(listing.media_workflow.review_gated_assets, 0);
+  // The lot absorbed its Russian twin's media, so the twin's own floor plan is
+  // still waiting for a reviewer while this one is published.
+  assert.equal(listing.media_workflow.review_gated_assets, 1);
   assert.equal(library.floor_plans.length, 1);
   assert.equal(library.floor_plans[0].alt, "Reviewed floor plan for the property");
 });
@@ -59,7 +61,7 @@ test("media review can keep an imported candidate private and retry safely", () 
   const { seed, assetId } = fixture();
   const review = createMediaReview(seed, {
     id: "media-review-request-1",
-    listingId: "MS-CRAWL-0037",
+    listingId: "MS-00719",
     assetId,
     decision: "keep_private",
     kind: "floor_plan",
@@ -79,12 +81,12 @@ test("media review can keep an imported candidate private and retry safely", () 
 test("media publication rejects missing human confirmation, captions, and non-owned image URLs", () => {
   const { seed, assetId } = fixture();
   const base = {
-    listingId: "MS-CRAWL-0037",
+    listingId: "MS-00719",
     assetId,
     decision: "publish",
     kind: "floor_plan",
     reviewer: "media_editor",
-    replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0037-floor-plan.webp",
+    replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-00719-floor-plan.webp",
   };
 
   assert.throws(() => createMediaReview(seed, { ...base, alt: "Reviewed floor plan" }), /explicit human confirmation/);

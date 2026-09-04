@@ -201,46 +201,46 @@ const smoke = {
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   home: await dispatchHttp(app, { url: "/he/" }),
   homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
-  listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
-  listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
-  listingPrint: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?print=1" }),
+  listing: await dispatchHttp(app, { url: "/he/properties/MS-00815" }),
+  listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-00815?format=html" }),
+  listingPrint: await dispatchHttp(app, { url: "/he/properties/MS-00815?print=1" }),
   brokerContact: await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/broker-contacts",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      id: "broker-contact-MS-CRAWL-0001",
-      listingId: "MS-CRAWL-0001",
+      id: "broker-contact-MS-00815",
+      listingId: "MS-00815",
       broker: "broker_ru",
       phone: "+447700900001",
       reviewer: "owner",
-      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      sourceReference: "test://broker-contact/MS-00815",
       validationStatus: "broker_verified",
       approved: true,
     },
   }),
-  listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+  listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-00815" }),
   tourApproval: await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/tours/approve",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      id: "tour-approval-MS-CRAWL-0001",
-      listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      id: "tour-approval-MS-00815",
+      listingId: "MS-00815",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
       reviewer: "media_editor",
       reviewConfirmed: true,
     },
   }),
-  listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+  listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-00815" }),
   slugChange: await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/listings/slug",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      id: "slug-change-MS-CRAWL-0001",
-      listingId: "MS-CRAWL-0001",
+      id: "slug-change-MS-00815",
+      listingId: "MS-00815",
       locale: "he",
       oldPath: "/he/properties/old-sandanski-slug",
       editor: "editor_bg",
@@ -301,7 +301,7 @@ const smoke = {
     body: {
       leadType: "buyer",
       language: "he",
-      listingReference: "MS-CRAWL-0001",
+      listingReference: "MS-00815",
       contact: { name: "Noa Levi", whatsapp: "+359880000001" },
       contact_preference: "whatsapp",
       message: "Interested in this property.",
@@ -315,7 +315,7 @@ const smoke = {
       source: "website_viewing_request",
       leadType: "buyer",
       language: "he",
-      listingReference: "MS-CRAWL-0001",
+      listingReference: "MS-00815",
       contact: { name: "Noa Levi", phone: "+359880000002" },
       contact_preference: "phone",
       request_details: { viewing_date: "2026-07-06", viewing_time: "10:00" },
@@ -496,19 +496,19 @@ smoke.translationDraft = await dispatchHttp(app, {
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
     objectType: "listing",
-    objectId: "MS-CRAWL-0001",
+    objectId: "MS-00815",
     sourceLocale: "bg",
     targetLocale: "el",
     sourceContent: {
       title: "Reviewed listing title",
       description: "Reviewed listing description for Sandanski.",
     },
-    propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+    propertyFacts: { id: "MS-00815", location: "Sandanski" },
     draftOutput: {
-      title: "MS-CRAWL-0001 Sandanski el",
-      body: "MS-CRAWL-0001 Sandanski reviewed el translation draft",
-      seo_title: "MS-CRAWL-0001 Sandanski",
-      meta_description: "MS-CRAWL-0001 Sandanski reviewed el translation draft for approved MS Realty listing content.",
+      title: "MS-00815 Sandanski el",
+      body: "MS-00815 Sandanski reviewed el translation draft",
+      seo_title: "MS-00815 Sandanski",
+      meta_description: "MS-00815 Sandanski reviewed el translation draft for approved MS Realty listing content.",
       citations: [{ source: "cms", field: "title" }],
     },
   },
@@ -532,7 +532,7 @@ smoke.translationPublish = await dispatchHttp(app, {
   },
 });
 smoke.listingEditorHtml = await dispatchHttp(app, {
-  url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
+  url: "/admin/listings/edit?locale=bg&listingId=MS-00815",
   headers: { authorization: "Bearer local-admin-smoke" },
 });
 const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
@@ -545,13 +545,13 @@ smoke.listingEdit = await dispatchHttp(app, {
     "content-type": "application/x-www-form-urlencoded",
   },
   body: new URLSearchParams({
-    listingId: "MS-CRAWL-0001",
+    listingId: "MS-00815",
     description: "Updated approved source description.",
   }).toString(),
 });
 if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
 else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
-smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
+smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-00815" });
 smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
 smoke.adminLocales = {
   bg: compactAdminLocaleResponse(
@@ -597,9 +597,9 @@ smoke.ctaClick = await dispatchHttp(app, {
   url: "/api/events",
   body: {
     type: "cta_click",
-    path: "/he/properties/MS-CRAWL-0001",
+    path: "/he/properties/MS-00815",
     locale: "he",
-    listingReference: "MS-CRAWL-0001",
+    listingReference: "MS-00815",
     action: "sticky_inquiry",
   },
 });

@@ -24,8 +24,8 @@ const LIVE_ENV = {
   MS_REALTY_RUNTIME_DATA_AUTHORITY: "payload",
 };
 const principal = { id: "runtime_admin", roles: ["admin"], can_mutate: true, source: "test" };
-const APPROVED_TOUR_PANORAMA_URL = "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg";
-const APPROVED_TOUR_THUMBNAIL_URL = "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001-thumb.jpg";
+const APPROVED_TOUR_PANORAMA_URL = "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg";
+const APPROVED_TOUR_THUMBNAIL_URL = "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815-thumb.jpg";
 
 function tempAuthorityLedgerPaths(prefix) {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/${prefix}-`);
@@ -41,7 +41,7 @@ function withListingTour(seed, patch) {
   return {
     ...seed,
     records: seed.records.map((record) =>
-      record.collection === "listings" && record.id === "MS-CRAWL-0001"
+      record.collection === "listings" && record.id === "MS-00815"
         ? { ...record, tour: patch(record) }
         : record,
     ),
@@ -55,7 +55,7 @@ function pendingTourSeed(seed = loadCmsSeed()) {
     listing_id: record.id,
     panorama_url: APPROVED_TOUR_PANORAMA_URL,
     thumbnail_url: APPROVED_TOUR_THUMBNAIL_URL,
-    accessibility_caption: "Pending 360 panorama for MS-CRAWL-0001.",
+    accessibility_caption: "Pending 360 panorama for MS-00815.",
     fallback_gallery: galleryFallback(record.media || []),
     is_public: false,
     review_status: "review_required",
@@ -69,7 +69,7 @@ function approvedTourSeed(seed = loadCmsSeed()) {
     listing_id: record.id,
     panorama_url: APPROVED_TOUR_PANORAMA_URL,
     thumbnail_url: APPROVED_TOUR_THUMBNAIL_URL,
-    accessibility_caption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+    accessibility_caption: "Reviewed 360 panorama for MS-00815.",
     fallback_gallery: galleryFallback(record.media || []),
     is_public: true,
     review_status: "approved",
@@ -324,7 +324,7 @@ test("durable health performs one lightweight Payload query", async () => {
 test("a real refused Postgres origin stays alive and does not leak rejected promises", async () => {
   const origin = await startRefusedOrigin();
   try {
-    for (const pathname of ["/bg", "/bg/imoti/MS-CRAWL-0001", "/bg/tarsene"]) {
+    for (const pathname of ["/bg", "/bg/imoti/MS-00815", "/bg/tarsene"]) {
       const response = await fetch(`${origin.baseUrl}${pathname}`, { headers: { accept: "text/html" } });
       const html = await response.text();
       assert.equal(response.status, 503, pathname);
@@ -388,11 +388,11 @@ test("durable public listing routes keep mounted broker contacts, tour approvals
   const paths = tempAuthorityLedgerPaths("ms-realty-runtime-authority-public");
   appendBrokerContact(
     createBrokerContact({
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       broker: "Noa Levi",
       phone: "+359879696870",
       reviewer: "broker_editor",
-      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      sourceReference: "test://broker-contact/MS-00815",
       validationStatus: "broker_verified",
       approved: true,
     }),
@@ -400,12 +400,12 @@ test("durable public listing routes keep mounted broker contacts, tour approvals
   );
   appendTourApproval(
     createTourApproval(seed, {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       reviewer: "media_editor",
       reviewConfirmed: true,
       panoramaUrl: APPROVED_TOUR_PANORAMA_URL,
       thumbnailUrl: APPROVED_TOUR_THUMBNAIL_URL,
-      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
     }),
     { filePath: paths.tourApprovalLedgerPath },
   );
@@ -413,18 +413,18 @@ test("durable public listing routes keep mounted broker contacts, tour approvals
     loadLocaleRegistry(),
     seed,
     {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       locale: "he",
       oldPath: "/he/properties/ms-crawl-0001-legacy",
-      newPath: "/he/properties/MS-CRAWL-0001",
+      newPath: "/he/properties/MS-00815",
       editor: "route_editor",
     },
     { filePath: paths.slugHistoryPath, changedAt: "2026-08-29T00:00:00.000Z" },
   );
 
   const next = await renderAppRouteResponse({
-    pathname: "/he/properties/MS-CRAWL-0001",
-    url: "https://live.test/he/properties/MS-CRAWL-0001",
+    pathname: "/he/properties/MS-00815",
+    url: "https://live.test/he/properties/MS-00815",
     accept: "text/html",
     config: {
       ...appRouterConfigFromEnv(LIVE_ENV),
@@ -446,14 +446,14 @@ test("durable public listing routes keep mounted broker contacts, tour approvals
     tourApprovalLedgerPath: paths.tourApprovalLedgerPath,
     slugHistoryPath: paths.slugHistoryPath,
   });
-  const listing = await dispatchHttp(standalone, { url: "/he/properties/MS-CRAWL-0001?format=html" });
+  const listing = await dispatchHttp(standalone, { url: "/he/properties/MS-00815?format=html" });
   assert.equal(listing.status, 200);
   assert.match(listing.body, /data-review-status="approved_broker_contact"/);
   assert.match(listing.body, /data-photo-sphere-viewer="psv-listing-tour"/);
 
   const slugRedirect = await dispatchHttp(standalone, { url: "/he/properties/ms-crawl-0001-legacy" });
   assert.equal(slugRedirect.status, 301);
-  assert.equal(slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
+  assert.equal(slugRedirect.headers.location, "/he/properties/MS-00815");
 });
 
 test("durable launch readiness uses projected Payload tours instead of baked pending review rows", async () => {
@@ -528,7 +528,7 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(listingBody.listings.every((row) => row.translation_review_required === null), true);
 
   const editor = await renderAppAdminResponse(
-    new Request("https://live.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en"),
+    new Request("https://live.test/admin/listings/edit?listingId=MS-00815&locale=en"),
     { config },
   );
   const editorHtml = await editor.text();
@@ -644,7 +644,7 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(standaloneListings.body.publicationSchedules, null);
 
   const standaloneEditor = await dispatchHttp(standalone, {
-    url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en",
+    url: "/admin/listings/edit?listingId=MS-00815&locale=en",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   assert.equal(standaloneEditor.status, 200);

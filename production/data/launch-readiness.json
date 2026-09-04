@@ -11,15 +11,15 @@
   "warnings": [
     {
       "id": "structured_data.missing_area",
-      "count": 165
+      "count": 11
     },
     {
       "id": "structured_data.missing_bedrooms",
-      "count": 10
+      "count": 9
     },
     {
       "id": "structured_data.missing_public_images",
-      "count": 9
+      "count": 7
     },
     {
       "id": "listing_quality.missing_area",
@@ -27,7 +27,7 @@
     },
     {
       "id": "listing_quality.thin_public_gallery",
-      "count": 18
+      "count": 17
     }
   ],
   "gates": [
@@ -86,7 +86,7 @@
           "artifact_id": "20260817-deterministic-launch-freeze",
           "approval_id": "MSR-LAUNCH-FREEZE-1",
           "based_on_commit": "aea10e1d7a7b6d4ba1c7183ecbd54be40db5d720",
-          "source_sha256": "873f35430afddb7c35f62ba1038a30da114b5ec91d11a0005701c29932590e03",
+          "source_sha256": "ed38df26e0b1c1e84cf2e846b693c5efee00c441eeb69af35b04a1e81edb5329",
           "approved_homepage_redirects": 5,
           "approved_homepage_decisions": 15
         },
@@ -105,33 +105,35 @@
         "seller_pages": 7,
         "contact_pages": 7,
         "guide_pages": 5,
-        "entries": 197,
+        "search_facet_pages": 56,
+        "entries": 253,
         "byLocale": {
-          "bg": 122,
-          "en": 5,
-          "de": 3,
-          "nl": 3,
-          "ru": 58,
-          "el": 3,
-          "he": 3
+          "bg": 130,
+          "en": 13,
+          "de": 11,
+          "nl": 11,
+          "ru": 66,
+          "el": 11,
+          "he": 11
         },
         "public": {
-          "listings": 165,
+          "listings": 127,
           "home_pages": 7,
-          "listing_entries": 165,
-          "location_pages": 6,
+          "listing_entries": 127,
+          "location_pages": 4,
           "seller_pages": 7,
           "contact_pages": 7,
           "guide_pages": 5,
-          "entries": 197,
+          "search_facet_pages": 56,
+          "entries": 213,
           "byLocale": {
-            "bg": 122,
-            "en": 5,
-            "de": 3,
-            "nl": 3,
-            "ru": 58,
-            "el": 3,
-            "he": 3
+            "bg": 130,
+            "en": 13,
+            "de": 11,
+            "nl": 11,
+            "ru": 26,
+            "el": 11,
+            "he": 11
           }
         }
       }
@@ -142,21 +144,21 @@
       "message": "Schema can pass while content warnings remain separate.",
       "evidence": {
         "generated_at": "2026-07-05T00:00:00Z",
-        "listing_entries": 165,
+        "listing_entries": 127,
         "guide_entries": 5,
         "failing_entries": 0,
-        "entries_with_offer": 134,
+        "entries_with_offer": 103,
         "warnings": {
           "missing_location": 0,
           "missing_price": 0,
-          "missing_area": 165,
-          "missing_bedrooms": 10,
-          "missing_public_images": 9,
+          "missing_area": 11,
+          "missing_bedrooms": 9,
+          "missing_public_images": 7,
           "media_review_pending": 0
         },
         "by_locale": {
           "bg": 116,
-          "ru": 52,
+          "ru": 14,
           "en": 2
         }
       }
@@ -170,7 +172,7 @@
         "mode": "operator_publication_of_freeze_active",
         "path": "production/data/listing-publication-approval.json",
         "approval_id": "MSR-LISTING-PUBLICATION-1",
-        "freeze_sha256": "873f35430afddb7c35f62ba1038a30da114b5ec91d11a0005701c29932590e03",
+        "freeze_sha256": "ed38df26e0b1c1e84cf2e846b693c5efee00c441eeb69af35b04a1e81edb5329",
         "freeze_approval_id": "MSR-LAUNCH-FREEZE-1",
         "approved_by": "agency_owner",
         "approved_at": "2026-08-30T00:00:00.000+03:00",
@@ -407,11 +409,8 @@
         "analytics_export_status": "missing_export",
         "rollback_steps": 4,
         "machine_evidence": {
-          "status": "expired",
-          "path": "production/data/monitoring-rollback-report.json",
-          "age_ms": 510309166,
-          "evidence_age_ms": 510841632,
-          "max_age_ms": 86400000
+          "status": "missing",
+          "path": "production/data/monitoring-rollback-report.json"
         }
       },
       "next_actions": [
@@ -438,18 +437,122 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "invalid_report",
+        "status": "blocked_report",
+        "generated_at": "2026-07-06T00:00:00Z",
         "path": "production/data/payload-runtime-report.json",
-        "error": "Payload runtime report must include Payload config evidence",
-        "next_actions": [
-          "Regenerate the Payload runtime report with npm run payload:runtime.",
-          "Run npm run payload:preflight before launch:preflight."
+        "summary": {
+          "admin_route": "/admin",
+          "checks": 12,
+          "database": {
+            "status": "missing_env"
+          },
+          "identity_collection": "admins",
+          "missing_env": [
+            "PAYLOAD_SECRET",
+            "DATABASE_URL"
+          ],
+          "payload_admin_ui": "edge_hidden",
+          "payload_identity_rest": "edge_hidden",
+          "placeholder_env": [],
+          "weak_env": [],
+          "route_files": 6
+        },
+        "checks": [
+          {
+            "id": "payload_secret",
+            "status": "missing_env",
+            "env": "PAYLOAD_SECRET"
+          },
+          {
+            "id": "database_url",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "route:app/admin/route.js",
+            "status": "pass",
+            "file": "app/admin/route.js"
+          },
+          {
+            "id": "route:app/admin/login/route.js",
+            "status": "pass",
+            "file": "app/admin/login/route.js"
+          },
+          {
+            "id": "route:app/admin/logout/route.js",
+            "status": "pass",
+            "file": "app/admin/logout/route.js"
+          },
+          {
+            "id": "route:app/admin/team/route.js",
+            "status": "pass",
+            "file": "app/admin/team/route.js"
+          },
+          {
+            "id": "route:app/api/admin/team/route.js",
+            "status": "pass",
+            "file": "app/api/admin/team/route.js"
+          },
+          {
+            "id": "route:app/(payload)/api/[...slug]/route.js",
+            "status": "pass",
+            "file": "app/(payload)/api/[...slug]/route.js"
+          },
+          {
+            "id": "payload_edge_boundary",
+            "status": "pass",
+            "custom_admin_route": "/admin",
+            "payload_admin_ui": "edge_hidden",
+            "payload_graphql_encoded_paths": [
+              "/graph%71l",
+              "/graph%2571l",
+              "/graphql%2fquery",
+              "/graphql%252fquery",
+              "/graphql%2dplayground",
+              "/graphql%252dplayground%252f",
+              "/api%2fgraphql",
+              "/api%252fgraphql%252f"
+            ],
+            "payload_graphql_paths": [
+              "/graphql",
+              "/graphql-playground",
+              "/api/graphql"
+            ],
+            "payload_identity_rest": "edge_hidden"
+          },
+          {
+            "id": "payload_config_import",
+            "status": "pass",
+            "collections": 15,
+            "graphql_disabled": true,
+            "graphql_playground_disabled_in_production": true,
+            "identity_collection": "admins",
+            "internal_admin_route": "/payload-admin",
+            "session_max_age_seconds": 7200,
+            "sessions": "database_backed"
+          },
+          {
+            "id": "database_network_scope",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "database_tcp",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          }
         ],
         "freshness": {
           "id": "payload_runtime",
-          "status": "invalid",
-          "error": "generated_at is not a timestamp"
-        }
+          "status": "stale",
+          "age_ms": 4544180632,
+          "max_age_ms": 604800000
+        },
+        "next_actions": [
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
+          "Run npm run payload:preflight before launch:preflight."
+        ]
       },
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
@@ -462,7 +565,7 @@
       "message": "The workers.dev release has complete R2 coverage for every runtime-normalized media asset.",
       "evidence": {
         "status": "pass",
-        "path": "/tmp/msr-r2-media-coverage-preserved.json",
+        "path": "production/data/r2-media-coverage-report.json",
         "generated_at": "2026-08-27T14:16:20.632Z",
         "freshness": {
           "id": "r2_media_coverage",
@@ -571,9 +674,8 @@
       "status": "blocked",
       "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
       "evidence": {
-        "status": "invalid_report",
+        "status": "missing_report",
         "path": "production/data/production-recovery-report.json",
-        "error": "MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY is required to verify production recovery evidence",
         "freshness": {
           "id": "production_recovery",
           "status": "invalid",

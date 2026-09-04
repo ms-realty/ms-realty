@@ -2938,7 +2938,9 @@ function SearchBody({ page }) {
           h(
             "div",
             { className: "sr-results__head" },
-            h("h1", null, savedView ? labels.savedListings : page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+            // A facet page carries its own localized H1; every other search
+            // keeps deriving the heading from the page title.
+            h("h1", null, savedView ? labels.savedListings : page.body?.h1 || page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
             h(
               "p",
               {

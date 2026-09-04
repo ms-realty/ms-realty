@@ -17,7 +17,7 @@ test("listing verification report creates broker tasks from latest listing edits
     edits: [
       {
         id: "old-edit",
-        listing_id: "MS-CRAWL-0001",
+        listing_id: "MS-00815",
         edited_at: "2026-07-04T00:00:00Z",
         source_locale: "bg",
         patch: { description: "Old" },
@@ -27,7 +27,7 @@ test("listing verification report creates broker tasks from latest listing edits
       },
       {
         id: "latest-edit",
-        listing_id: "MS-CRAWL-0001",
+        listing_id: "MS-00815",
         edited_at: "2026-07-05T00:00:00Z",
         source_locale: "bg",
         patch: { price_eur: 123000 },
@@ -53,13 +53,13 @@ test("listing verification report creates broker tasks from latest listing edits
   assert.equal(report.summary.edited_listings, 2);
   assert.equal(report.summary.high_priority, 1);
   assert.equal(report.summary.stale_translation_tasks, 1);
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").latest_edit_id, "latest-edit");
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-00815").latest_edit_id, "latest-edit");
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-00815").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0116").verification_task.owner, UNASSIGNED_REVIEW_OWNER);
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.role, "broker");
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").verification_task.requires_assignment, true);
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.ready, false);
-  assert.ok(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").publication_readiness.blocking_fields.includes("location_id"));
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-00815").verification_task.role, "broker");
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-00815").verification_task.requires_assignment, true);
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-00815").publication_readiness.ready, false);
+  assert.ok(report.rows.find((row) => row.listing_id === "MS-00815").publication_readiness.blocking_fields.includes("location_id"));
 });
 
 test("listing verification resolves a configured real broker without inventing fixture identities", () => {
@@ -68,7 +68,7 @@ test("listing verification resolves a configured real broker without inventing f
     edits: [
       {
         id: "configured-edit",
-        listing_id: "MS-CRAWL-0001",
+        listing_id: "MS-00815",
         edited_at: "2026-07-05T00:00:00Z",
         source_locale: "bg",
         patch: { price_eur: 123000 },
@@ -94,7 +94,7 @@ test("later legacy description restorations retain the immediately preceding fac
     edits: [
       {
         id: "price-edit",
-        listing_id: "MS-CRAWL-0001",
+        listing_id: "MS-00815",
         edited_at: "2026-07-04T00:00:00Z",
         source_locale: "bg",
         patch: { price_eur: 123000 },
@@ -104,7 +104,7 @@ test("later legacy description restorations retain the immediately preceding fac
       },
       {
         id: "description-edit",
-        listing_id: "MS-CRAWL-0001",
+        listing_id: "MS-00815",
         edited_at: "2026-07-05T00:00:00Z",
         source_locale: "bg",
         patch: { description: "Reviewed source description." },
@@ -133,7 +133,7 @@ test("listing verification build honors mounted edit ledger and output path", ()
     editPath,
     `${JSON.stringify({
       id: "mounted-edit",
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       edited_at: "2026-07-05T00:00:00Z",
       source_locale: "bg",
       patch: { listing_status: "reserved" },

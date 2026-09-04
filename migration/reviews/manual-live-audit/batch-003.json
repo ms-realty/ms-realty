@@ -9,7 +9,7 @@
   "reviewer_kind": "codex_manual_source_review_not_broker_approval",
   "listings": [
     {
-      "id": "MS-CRAWL-0111",
+      "id": "MS-00444",
       "source_url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -24,12 +24,21 @@
         "availability_signal": "The live page presents the package for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "22 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["composite_business_and_real_estate_scope", "area_has_multiple_components", "unverified_financial_and_operational_claims"],
+      "issues": [
+        "composite_business_and_real_estate_scope",
+        "area_has_multiple_components",
+        "unverified_financial_and_operational_claims"
+      ],
       "required_action": "Keep unpublished until the broker and legal owner define the exact assets included, canonical area fields and support for the operating-business claims.",
-      "broker_confirm": ["current availability", "EUR 775,000 asking price", "which land, buildings, equipment, company rights and solar assets are included", "current accuracy and permitted use of financial and operational claims"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 775,000 asking price",
+        "which land, buildings, equipment, company rights and solar assets are included",
+        "current accuracy and permitted use of financial and operational claims"
+      ]
     },
     {
-      "id": "MS-CRAWL-0112",
+      "id": "MS-00896",
       "source_url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -44,12 +53,20 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "1 listing-specific asset observed and sampled; it returned HTTP 206 image/jpeg."
       },
-      "issues": ["single_property_photo"],
+      "issues": [
+        "single_property_photo"
+      ],
       "required_action": "Confirm the cadastral parcel and availability, then add adequate current property media before publication.",
-      "broker_confirm": ["current availability", "EUR 11,500 asking price", "14,411 sqm cadastral area and pasture status", "exact locality and parcel identifier", "rights to publish current media"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 11,500 asking price",
+        "14,411 sqm cadastral area and pasture status",
+        "exact locality and parcel identifier",
+        "rights to publish current media"
+      ]
     },
     {
-      "id": "MS-CRAWL-0113",
+      "id": "MS-00778",
       "source_url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -66,7 +83,13 @@
       },
       "issues": [],
       "required_action": "Use the observed source facts but keep publication gated until the broker confirms availability, price, deed area and maintenance terms.",
-      "broker_confirm": ["current availability", "EUR 250,000 asking price", "93 sqm deed or gross area basis", "current mandatory and optional maintenance fees", "included furniture and appliances"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 250,000 asking price",
+        "93 sqm deed or gross area basis",
+        "current mandatory and optional maintenance fees",
+        "included furniture and appliances"
+      ]
     },
     {
       "id": "MS-CRAWL-0114",
@@ -84,9 +107,19 @@
         "availability_signal": "The live page shows a negotiable sale offer and no explicit sold marker, but does not identify which units remain available.",
         "gallery_assets_observed_or_sampled": "10 listing-specific assets observed; 3 listing-photo URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["multi_unit_inventory_missing", "area_and_room_ranges_not_unit_specific", "price_not_unit_specific"],
+      "issues": [
+        "multi_unit_inventory_missing",
+        "area_and_room_ranges_not_unit_specific",
+        "price_not_unit_specific"
+      ],
       "required_action": "Replace the project-level ambiguity with a dated inventory confirmed by the broker, containing one row per available unit, exact price, area basis, rooms and media.",
-      "broker_confirm": ["which units are currently available", "price for each unit or valid price-on-request policy", "deed and gross area for each unit", "room and bedroom count per unit", "which photos belong to each unit"]
+      "broker_confirm": [
+        "which units are currently available",
+        "price for each unit or valid price-on-request policy",
+        "deed and gross area for each unit",
+        "room and bedroom count per unit",
+        "which photos belong to each unit"
+      ]
     },
     {
       "id": "MS-CRAWL-0115",
@@ -104,9 +137,18 @@
         "availability_signal": "The live page presents the apartment for rent and contains no explicit rented marker; current availability and rental period are not proven.",
         "gallery_assets_observed_or_sampled": "14 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["rent_price_cadence_not_stated"],
+      "issues": [
+        "rent_price_cadence_not_stated"
+      ],
       "required_action": "Confirm whether EUR 280 is monthly, the minimum term, deposits, utilities and current availability before publishing.",
-      "broker_confirm": ["current availability", "EUR 280 price cadence", "minimum rental term and deposit", "utilities and fees included", "67.39 sqm area basis", "garage and cellar inclusion"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 280 price cadence",
+        "minimum rental term and deposit",
+        "utilities and fees included",
+        "67.39 sqm area basis",
+        "garage and cellar inclusion"
+      ]
     },
     {
       "id": "MS-CRAWL-0116",
@@ -124,9 +166,20 @@
         "availability_signal": "The live page presents the main property and optional neighboring parcels for sale; no explicit sold marker is shown.",
         "gallery_assets_observed_or_sampled": "7 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_price_75000_differs_from_live_85000", "main_and_optional_parcels_not_clearly_priced", "land_and_building_area_scope_ambiguous"],
+      "issues": [
+        "canonical_price_75000_differs_from_live_85000",
+        "main_and_optional_parcels_not_clearly_priced",
+        "land_and_building_area_scope_ambiguous"
+      ],
       "required_action": "Hold publication until the broker selects the exact sale package, confirms EUR 85,000 or another price, and supplies separate land and building areas.",
-      "broker_confirm": ["current availability", "current asking price", "whether optional 13,014 sqm parcels are included", "20,740 sqm main cadastral area", "area and legal status of each building", "exact parcel identifiers"]
+      "broker_confirm": [
+        "current availability",
+        "current asking price",
+        "whether optional 13,014 sqm parcels are included",
+        "20,740 sqm main cadastral area",
+        "area and legal status of each building",
+        "exact parcel identifiers"
+      ]
     },
     {
       "id": "MS-CRAWL-0117",
@@ -146,10 +199,16 @@
       },
       "issues": [],
       "required_action": "Use the observed facts but keep publication gated until the broker confirms availability and whether the 56 sqm includes the attic.",
-      "broker_confirm": ["current availability", "EUR 60,000 asking price", "56 sqm area basis", "legal and finished status of the attic", "475 sqm cadastral parcel area"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 60,000 asking price",
+        "56 sqm area basis",
+        "legal and finished status of the attic",
+        "475 sqm cadastral parcel area"
+      ]
     },
     {
-      "id": "MS-CRAWL-0118",
+      "id": "MS-00935",
       "source_url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b5%d1%82%d1%80%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -166,7 +225,14 @@
       },
       "issues": [],
       "required_action": "Use two existing bedrooms, not the possible future rooms, and keep publication gated until broker confirmation.",
-      "broker_confirm": ["current availability", "EUR 45,000 asking price", "163 sqm area basis and attic inclusion", "two existing bedrooms", "600 sqm cadastral parcel area", "current condition of each floor"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 45,000 asking price",
+        "163 sqm area basis and attic inclusion",
+        "two existing bedrooms",
+        "600 sqm cadastral parcel area",
+        "current condition of each floor"
+      ]
     },
     {
       "id": "MS-CRAWL-0119",
@@ -184,12 +250,19 @@
         "availability_signal": "The live body explicitly marks the apartment ПРОДАНА (sold).",
         "gallery_assets_observed_or_sampled": "19 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["explicitly_sold", "must_not_publish_as_available"],
+      "issues": [
+        "explicitly_sold",
+        "must_not_publish_as_available"
+      ],
       "required_action": "Exclude from available inventory; retain only as a non-indexable sold archive if the owner wants historical content.",
-      "broker_confirm": ["sold status and completion date", "whether a sold archive may remain public", "whether this is the same physical unit as MS-CRAWL-0113"]
+      "broker_confirm": [
+        "sold status and completion date",
+        "whether a sold archive may remain public",
+        "whether this is the same physical unit as MS-00778"
+      ]
     },
     {
-      "id": "MS-CRAWL-0120",
+      "id": "MS-00382",
       "source_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -204,9 +277,20 @@
         "availability_signal": "The live page presents the property for sale and says it has operated since 2001; neither sale availability nor current business operation is proven.",
         "gallery_assets_observed_or_sampled": "23 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["current_business_operation_unverified", "accommodation_inventory_not_normalized"],
+      "issues": [
+        "current_business_operation_unverified",
+        "accommodation_inventory_not_normalized"
+      ],
       "required_action": "Confirm the legal property, current operating status, licensed capacity and exact room inventory before publishing commercial claims.",
-      "broker_confirm": ["current availability", "EUR 400,000 asking price", "650 sqm legal built area", "450 sqm parcel area", "current hotel and restaurant licensing", "current room and bed capacity", "equipment and furniture included"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 400,000 asking price",
+        "650 sqm legal built area",
+        "450 sqm parcel area",
+        "current hotel and restaurant licensing",
+        "current room and bed capacity",
+        "equipment and furniture included"
+      ]
     },
     {
       "id": "MS-CRAWL-0121",
@@ -224,9 +308,19 @@
         "availability_signal": "The live page presents the office for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "No listing-specific gallery assets were observed; only site-wide chrome images were present."
       },
-      "issues": ["no_property_gallery", "level_areas_sum_to_314_not_315_due_to_rounding_or_source_error"],
+      "issues": [
+        "no_property_gallery",
+        "level_areas_sum_to_314_not_315_due_to_rounding_or_source_error"
+      ],
       "required_action": "Obtain current property photos and confirm the legal total area and parcel share before publication.",
-      "broker_confirm": ["current availability", "EUR 128,000 asking price", "315 sqm legal area", "exact ideal share in the 450 sqm parcel", "parking right", "rights to publish new media"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 128,000 asking price",
+        "315 sqm legal area",
+        "exact ideal share in the 450 sqm parcel",
+        "parking right",
+        "rights to publish new media"
+      ]
     },
     {
       "id": "MS-CRAWL-0122",
@@ -244,9 +338,21 @@
         "availability_signal": "The live page presents the assets for sale and contains no explicit sold marker; package availability is not proven.",
         "gallery_assets_observed_or_sampled": "30 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["two_separately_priced_assets_in_one_listing", "canonical_scope_does_not_state_if_vineyard_is_included", "area_has_multiple_components"],
+      "issues": [
+        "two_separately_priced_assets_in_one_listing",
+        "canonical_scope_does_not_state_if_vineyard_is_included",
+        "area_has_multiple_components"
+      ],
       "required_action": "Split the house and vineyard into separate inventory items confirmed by the broker or explicitly define one package and its total price.",
-      "broker_confirm": ["current availability of the house", "current availability of the vineyard", "EUR 480,000 house and parcel price", "EUR 30,000 vineyard price", "whether assets may be bought separately", "439 sqm legal house area", "parcel identifiers and areas"]
+      "broker_confirm": [
+        "current availability of the house",
+        "current availability of the vineyard",
+        "EUR 480,000 house and parcel price",
+        "EUR 30,000 vineyard price",
+        "whether assets may be bought separately",
+        "439 sqm legal house area",
+        "parcel identifiers and areas"
+      ]
     },
     {
       "id": "MS-CRAWL-0123",
@@ -264,9 +370,19 @@
         "availability_signal": "The live page presents the property for sale and contains no explicit sold marker; current availability and use are not proven.",
         "gallery_assets_observed_or_sampled": "9 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["exact_settlement_missing", "current_industrial_use_unverified"],
+      "issues": [
+        "exact_settlement_missing",
+        "current_industrial_use_unverified"
+      ],
       "required_action": "Confirm the settlement, cadastral identifiers, permitted use and current occupancy before publication.",
-      "broker_confirm": ["current availability", "EUR 125,000 asking price", "exact settlement and parcel identifier", "417 sqm legal building area", "2,205 sqm parcel area", "current use, tenancy and permitted industrial use"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 125,000 asking price",
+        "exact settlement and parcel identifier",
+        "417 sqm legal building area",
+        "2,205 sqm parcel area",
+        "current use, tenancy and permitted industrial use"
+      ]
     },
     {
       "id": "MS-CRAWL-0124",
@@ -284,9 +400,19 @@
         "availability_signal": "The live page presents multiple houses for sale at a negotiable price, with no current unit inventory or sold marker.",
         "gallery_assets_observed_or_sampled": "21 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["multi_unit_inventory_missing", "singular_canonical_record_represents_multiple_houses", "area_is_unit_dependent"],
+      "issues": [
+        "multi_unit_inventory_missing",
+        "singular_canonical_record_represents_multiple_houses",
+        "area_is_unit_dependent"
+      ],
       "required_action": "Create one record per available house with exact identifier, price, deed area, parcel/parking rights and unit-specific media.",
-      "broker_confirm": ["which of houses 1, 2, 3 and 6 are available", "price per house", "exact deed area per house", "land, parking and common-area rights per house", "which photos belong to each house"]
+      "broker_confirm": [
+        "which of houses 1, 2, 3 and 6 are available",
+        "price per house",
+        "exact deed area per house",
+        "land, parking and common-area rights per house",
+        "which photos belong to each house"
+      ]
     },
     {
       "id": "MS-CRAWL-0125",
@@ -304,9 +430,19 @@
         "availability_signal": "The live page presents the house for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "13 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["exact_settlement_missing", "bedroom_count_not_determinable_from_all_rooms"],
+      "issues": [
+        "exact_settlement_missing",
+        "bedroom_count_not_determinable_from_all_rooms"
+      ],
       "required_action": "Confirm the settlement and current floor plan; keep bedroom count unknown until every room is classified.",
-      "broker_confirm": ["current availability", "EUR 225,000 asking price", "exact settlement", "313 sqm legal area", "760 sqm parcel area", "current number of bedrooms and bathrooms"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 225,000 asking price",
+        "exact settlement",
+        "313 sqm legal area",
+        "760 sqm parcel area",
+        "current number of bedrooms and bathrooms"
+      ]
     },
     {
       "id": "MS-CRAWL-0126",
@@ -324,9 +460,17 @@
         "availability_signal": "The live page presents the parcel or smaller subdivisions for sale; no explicit sold marker is shown.",
         "gallery_assets_observed_or_sampled": "3 listing-specific assets observed; all 3 current URLs sampled, returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["whole_parcel_vs_subdivision_offer_not_normalized"],
+      "issues": [
+        "whole_parcel_vs_subdivision_offer_not_normalized"
+      ],
       "required_action": "Confirm whether the canonical offer is the whole parcel at EUR 122,500 or subdivisions confirmed by the broker with separate identifiers and prices.",
-      "broker_confirm": ["current availability", "whole-parcel EUR 122,500 price", "current EUR 49 per sqm subdivision price", "minimum subdivision size and legal feasibility", "2,500 sqm cadastral area"]
+      "broker_confirm": [
+        "current availability",
+        "whole-parcel EUR 122,500 price",
+        "current EUR 49 per sqm subdivision price",
+        "minimum subdivision size and legal feasibility",
+        "2,500 sqm cadastral area"
+      ]
     },
     {
       "id": "MS-CRAWL-0127",
@@ -344,12 +488,20 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "4 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_location_missing", "source_uses_3_8_gka_wording_that_conflicts_with_38016_sqm_by_a_factor_of_ten"],
+      "issues": [
+        "canonical_location_missing",
+        "source_uses_3_8_gka_wording_that_conflicts_with_38016_sqm_by_a_factor_of_ten"
+      ],
       "required_action": "Confirm the cadastral area and map the exact Hotovo locality before publication.",
-      "broker_confirm": ["current availability", "EUR 50,000 asking price", "38,016 sqm cadastral area versus the 3.8 GKA prose", "exact parcel identifier and settlement/locality"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 50,000 asking price",
+        "38,016 sqm cadastral area versus the 3.8 GKA prose",
+        "exact parcel identifier and settlement/locality"
+      ]
     },
     {
-      "id": "MS-CRAWL-0128",
+      "id": "MS-00697",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -364,9 +516,18 @@
         "availability_signal": "The live page presents the vineyard for sale and contains no explicit sold marker; current availability and agricultural condition are not proven.",
         "gallery_assets_observed_or_sampled": "7 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_location_is_broader_than_source_precision", "vineyard_condition_claims_unverified"],
+      "issues": [
+        "canonical_location_is_broader_than_source_precision",
+        "vineyard_condition_claims_unverified"
+      ],
       "required_action": "Confirm the exact parcel locality and current agricultural condition before publication.",
-      "broker_confirm": ["current availability", "EUR 33,000 asking price", "10,000 sqm cadastral area", "exact parcel identifier and locality", "current vine count, variety and irrigation condition"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 33,000 asking price",
+        "10,000 sqm cadastral area",
+        "exact parcel identifier and locality",
+        "current vine count, variety and irrigation condition"
+      ]
     },
     {
       "id": "MS-CRAWL-0129",
@@ -386,7 +547,13 @@
       },
       "issues": [],
       "required_action": "Use the observed facts but keep publication gated until the broker confirms availability, price and legal areas.",
-      "broker_confirm": ["current availability", "EUR 79,900 asking price", "90 sqm legal house area", "350 sqm cadastral parcel area", "included furniture and appliances"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 79,900 asking price",
+        "90 sqm legal house area",
+        "350 sqm cadastral parcel area",
+        "included furniture and appliances"
+      ]
     },
     {
       "id": "MS-CRAWL-0130",
@@ -404,12 +571,24 @@
         "availability_signal": "The live page presents both houses for sale and contains no explicit sold marker; package and unit availability are not proven.",
         "gallery_assets_observed_or_sampled": "11 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["two_houses_in_one_record", "header_plot_245_conflicts_with_body_540", "header_building_514_conflicts_with_275_plus_260", "bedroom_count_is_per_house_not_package"],
+      "issues": [
+        "two_houses_in_one_record",
+        "header_plot_245_conflicts_with_body_540",
+        "header_building_514_conflicts_with_275_plus_260",
+        "bedroom_count_is_per_house_not_package"
+      ],
       "required_action": "Hold until the broker separates the houses or defines the exact package and resolves all area and bedroom conflicts against deeds.",
-      "broker_confirm": ["whether one or both houses are available", "whether EUR 300,000 is package or per-house price", "legal area of each house", "legal parcel area", "bedroom count per house", "separate cadastral identifiers"]
+      "broker_confirm": [
+        "whether one or both houses are available",
+        "whether EUR 300,000 is package or per-house price",
+        "legal area of each house",
+        "legal parcel area",
+        "bedroom count per house",
+        "separate cadastral identifiers"
+      ]
     },
     {
-      "id": "MS-CRAWL-0131",
+      "id": "MS-00280",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -424,9 +603,21 @@
         "availability_signal": "The live page presents the property rights for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "9 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["title_says_house_but_scope_is_house_floor_and_rights", "bedroom_count_not_stated", "legal_rights_package_requires_normalization"],
+      "issues": [
+        "title_says_house_but_scope_is_house_floor_and_rights",
+        "bedroom_count_not_stated",
+        "legal_rights_package_requires_normalization"
+      ],
       "required_action": "Retitle as a house-floor/right-share offer and confirm the deed objects, room use and land/right-to-build shares.",
-      "broker_confirm": ["current availability", "EUR 93,000 asking price", "84 sqm legal floor area", "146 sqm land ownership or ideal share", "basement area", "right-to-build terms", "current bedroom count"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 93,000 asking price",
+        "84 sqm legal floor area",
+        "146 sqm land ownership or ideal share",
+        "basement area",
+        "right-to-build terms",
+        "current bedroom count"
+      ]
     },
     {
       "id": "MS-CRAWL-0132",
@@ -444,9 +635,21 @@
         "availability_signal": "The live page presents the house for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "13 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_location_too_broad", "exact_settlement_missing", "bedroom_count_not_determinable_from_all_rooms"],
+      "issues": [
+        "canonical_location_too_broad",
+        "exact_settlement_missing",
+        "bedroom_count_not_determinable_from_all_rooms"
+      ],
       "required_action": "Confirm the exact settlement and floor plan; do not publish Sandanski city or a bedroom total until verified.",
-      "broker_confirm": ["current availability", "EUR 136,000 asking price", "exact settlement", "148 sqm legal area", "547 sqm cadastral parcel area", "bedroom count and permitted room uses", "furniture included"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 136,000 asking price",
+        "exact settlement",
+        "148 sqm legal area",
+        "547 sqm cadastral parcel area",
+        "bedroom count and permitted room uses",
+        "furniture included"
+      ]
     },
     {
       "id": "MS-CRAWL-0133",
@@ -464,9 +667,20 @@
         "availability_signal": "The live page presents the whole property for sale and contains no explicit sold marker; current package availability is not proven.",
         "gallery_assets_observed_or_sampled": "No listing-specific gallery assets were observed; only site-wide chrome images were present."
       },
-      "issues": ["three_legal_apartments_in_one_record", "no_property_gallery", "unit_room_and_area_inventory_incomplete"],
+      "issues": [
+        "three_legal_apartments_in_one_record",
+        "no_property_gallery",
+        "unit_room_and_area_inventory_incomplete"
+      ],
       "required_action": "Hold until the broker confirms whole-building versus unit sales, supplies all apartment facts and provides current property media.",
-      "broker_confirm": ["current availability of the whole property and each apartment", "EUR 594,000 package price", "legal area and identifier of each apartment", "garage and ancillary rights", "417 sqm parcel rights", "rights to publish new media"]
+      "broker_confirm": [
+        "current availability of the whole property and each apartment",
+        "EUR 594,000 package price",
+        "legal area and identifier of each apartment",
+        "garage and ancillary rights",
+        "417 sqm parcel rights",
+        "rights to publish new media"
+      ]
     },
     {
       "id": "MS-CRAWL-0134",
@@ -484,9 +698,17 @@
         "availability_signal": "The live body explicitly marks the apartment ПРОДАН (sold).",
         "gallery_assets_observed_or_sampled": "8 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["explicitly_sold", "must_not_publish_as_available", "area_basis_has_three_variants"],
+      "issues": [
+        "explicitly_sold",
+        "must_not_publish_as_available",
+        "area_basis_has_three_variants"
+      ],
       "required_action": "Exclude from available inventory; use only a non-indexable sold archive if approved, with one deed-backed area.",
-      "broker_confirm": ["sold status and completion date", "whether a sold archive may remain public", "legal/deed area among 67.57, 58 and approximately 68 sqm"]
+      "broker_confirm": [
+        "sold status and completion date",
+        "whether a sold archive may remain public",
+        "legal/deed area among 67.57, 58 and approximately 68 sqm"
+      ]
     },
     {
       "id": "MS-CRAWL-0135",
@@ -504,9 +726,18 @@
         "availability_signal": "The live page presents the studio for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "9 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["net_vs_total_area_not_normalized"],
+      "issues": [
+        "net_vs_total_area_not_normalized"
+      ],
       "required_action": "Store both net/deed and total area only after broker confirmation; do not collapse 24.26 and 30 sqm into one unlabeled value.",
-      "broker_confirm": ["current availability", "EUR 40,000 asking price", "24.26 sqm deed/net area", "30 sqm total area definition", "furniture and appliances included", "parking rental and maintenance fees"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 40,000 asking price",
+        "24.26 sqm deed/net area",
+        "30 sqm total area definition",
+        "furniture and appliances included",
+        "parking rental and maintenance fees"
+      ]
     },
     {
       "id": "MS-CRAWL-0136",
@@ -526,7 +757,13 @@
       },
       "issues": [],
       "required_action": "Use the observed land facts but keep publication gated until the broker confirms the old structure and utilities.",
-      "broker_confirm": ["current availability", "EUR 18,000 asking price", "658 sqm cadastral area", "legal status and area of the old structure", "current utility availability"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 18,000 asking price",
+        "658 sqm cadastral area",
+        "legal status and area of the old structure",
+        "current utility availability"
+      ]
     },
     {
       "id": "MS-CRAWL-0137",
@@ -544,9 +781,19 @@
         "availability_signal": "The live page presents the parcel for sale at a negotiable price and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "1 listing-specific asset observed and sampled; it returned HTTP 206 image/jpeg."
       },
-      "issues": ["single_property_photo", "planning_status_not_stated"],
+      "issues": [
+        "single_property_photo",
+        "planning_status_not_stated"
+      ],
       "required_action": "Confirm agricultural versus building status and add sufficient current media before publication.",
-      "broker_confirm": ["current availability", "current price-on-request policy", "1,386 sqm cadastral area", "land category and buildability", "exact parcel identifier", "rights to publish current media"]
+      "broker_confirm": [
+        "current availability",
+        "current price-on-request policy",
+        "1,386 sqm cadastral area",
+        "land category and buildability",
+        "exact parcel identifier",
+        "rights to publish current media"
+      ]
     },
     {
       "id": "MS-CRAWL-0138",
@@ -564,9 +811,21 @@
         "availability_signal": "The live page advertises project units from EUR 46,200 but provides no dated unit inventory or sold/reserved status.",
         "gallery_assets_observed_or_sampled": "5 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["multi_unit_inventory_missing", "starting_price_not_tied_to_unit", "area_range_not_unit_specific", "construction_completion_claim_requires_current_evidence"],
+      "issues": [
+        "multi_unit_inventory_missing",
+        "starting_price_not_tied_to_unit",
+        "area_range_not_unit_specific",
+        "construction_completion_claim_requires_current_evidence"
+      ],
       "required_action": "Hold until the developer/broker supplies a dated unit matrix, reservation status, per-unit prices and areas, construction stage evidence and unit media.",
-      "broker_confirm": ["currently available and reserved units", "price and payment plan per unit", "deed/gross area per unit", "room and bedroom count per unit", "current construction stage and legally supportable completion date", "garage and parking prices"]
+      "broker_confirm": [
+        "currently available and reserved units",
+        "price and payment plan per unit",
+        "deed/gross area per unit",
+        "room and bedroom count per unit",
+        "current construction stage and legally supportable completion date",
+        "garage and parking prices"
+      ]
     },
     {
       "id": "MS-CRAWL-0139",
@@ -584,9 +843,19 @@
         "availability_signal": "The live page presents the industrial base for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "5 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["exact_settlement_missing", "aggregate_2850_area_requires_deed_reconciliation"],
+      "issues": [
+        "exact_settlement_missing",
+        "aggregate_2850_area_requires_deed_reconciliation"
+      ],
       "required_action": "Confirm the exact settlement and reconcile the aggregate area with each deed/building component before publication.",
-      "broker_confirm": ["current availability", "EUR 345,000 asking price", "exact settlement and parcel identifier", "7,000 sqm cadastral area", "legal area and permitted use of every building", "utilities and occupancy"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 345,000 asking price",
+        "exact settlement and parcel identifier",
+        "7,000 sqm cadastral area",
+        "legal area and permitted use of every building",
+        "utilities and occupancy"
+      ]
     },
     {
       "id": "MS-CRAWL-0140",
@@ -604,12 +873,23 @@
         "availability_signal": "The live page presents the complex for sale at a negotiable price and contains no explicit sold marker; current availability and operating status are not proven.",
         "gallery_assets_observed_or_sampled": "29 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["area_breakdown_has_included_and_excluded_components", "current_hotel_completion_and_licensing_unverified"],
+      "issues": [
+        "area_breakdown_has_included_and_excluded_components",
+        "current_hotel_completion_and_licensing_unverified"
+      ],
       "required_action": "Confirm the legal gross area, completion stage, licensing, bed capacity and sale inclusions before publication.",
-      "broker_confirm": ["current availability", "current price-on-request terms", "2,771.09 sqm legal area and component basis", "completion and Act 16 status", "hotel and SPA licensing", "current bed and garage capacity", "equipment included"]
+      "broker_confirm": [
+        "current availability",
+        "current price-on-request terms",
+        "2,771.09 sqm legal area and component basis",
+        "completion and Act 16 status",
+        "hotel and SPA licensing",
+        "current bed and garage capacity",
+        "equipment included"
+      ]
     },
     {
-      "id": "MS-CRAWL-0141",
+      "id": "MS-00645",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -624,12 +904,21 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "5 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["title_and_canonical_say_Derbere_but_body_says_Debrene", "exact_location_unresolved"],
+      "issues": [
+        "title_and_canonical_say_Derbere_but_body_says_Debrene",
+        "exact_location_unresolved"
+      ],
       "required_action": "Hold until the broker verifies the cadastral settlement; do not publish either Derbere or Debrene based on this conflicting page.",
-      "broker_confirm": ["current availability", "EUR 14,000 asking price", "exact settlement and EKATTE", "parcel identifier and 2,000 sqm cadastral area", "utility connection distances"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 14,000 asking price",
+        "exact settlement and EKATTE",
+        "parcel identifier and 2,000 sqm cadastral area",
+        "utility connection distances"
+      ]
     },
     {
-      "id": "MS-CRAWL-0142",
+      "id": "MS-00920",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bb%d0%b8%d0%bb%d1%8f%d0%bd%d0%be%d0%b2%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -644,9 +933,18 @@
         "availability_signal": "The live page presents the land and old house for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "7 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["land_and_old_house_require_separate_area_fields", "old_structure_legal_and_safety_status_unknown"],
+      "issues": [
+        "land_and_old_house_require_separate_area_fields",
+        "old_structure_legal_and_safety_status_unknown"
+      ],
       "required_action": "Represent parcel and structure areas separately after cadastral and structural confirmation.",
-      "broker_confirm": ["current availability", "EUR 35,000 asking price", "1,180 sqm cadastral parcel area", "legal area and registration of the old house", "condition and habitability of the structure"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 35,000 asking price",
+        "1,180 sqm cadastral parcel area",
+        "legal area and registration of the old house",
+        "condition and habitability of the structure"
+      ]
     },
     {
       "id": "MS-CRAWL-0143",
@@ -664,9 +962,20 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "9 listing-specific assets observed; 3 listing-photo URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["exact_settlement_missing", "land_status_change_explicitly_incomplete", "canonical_Sandanski_location_not_source_precise"],
+      "issues": [
+        "exact_settlement_missing",
+        "land_status_change_explicitly_incomplete",
+        "canonical_Sandanski_location_not_source_precise"
+      ],
       "required_action": "Publish only as agricultural land after confirming the exact parcel and current planning status; do not imply completed rezoning.",
-      "broker_confirm": ["current availability", "EUR 15,000 asking price", "1,000 sqm cadastral area", "exact settlement and parcel identifier", "current agricultural category", "current status of any rezoning procedure"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 15,000 asking price",
+        "1,000 sqm cadastral area",
+        "exact settlement and parcel identifier",
+        "current agricultural category",
+        "current status of any rezoning procedure"
+      ]
     },
     {
       "id": "MS-CRAWL-0144",
@@ -684,12 +993,22 @@
         "availability_signal": "The live page presents the ideal share for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "3 listing-specific assets observed; all 3 current URLs sampled, returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["offer_is_ideal_share_not_standalone_parcel", "buildable_portion_and_access_rights_unverified"],
+      "issues": [
+        "offer_is_ideal_share_not_standalone_parcel",
+        "buildable_portion_and_access_rights_unverified"
+      ],
       "required_action": "Retitle and model this as an ideal-share sale, with deed share, access, buildability and co-owner rights confirmed.",
-      "broker_confirm": ["current availability", "EUR 16,900 asking price", "one-half legal share", "576 sqm total parcel and 288 sqm equivalent", "co-owner and access rights", "buildability beside the existing house"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 16,900 asking price",
+        "one-half legal share",
+        "576 sqm total parcel and 288 sqm equivalent",
+        "co-owner and access rights",
+        "buildability beside the existing house"
+      ]
     },
     {
-      "id": "MS-CRAWL-0145",
+      "id": "MS-00628",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-2-%d0%b3%d0%ba%d0%b0-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -704,12 +1023,22 @@
         "availability_signal": "The live body explicitly marks the parcel ПРОДАН (sold).",
         "gallery_assets_observed_or_sampled": "No listing-specific gallery assets were observed; only site-wide chrome images were present."
       },
-      "issues": ["explicitly_sold", "live_price_is_negotiable_but_canonical_is_25000", "no_property_gallery", "exact_location_missing"],
+      "issues": [
+        "explicitly_sold",
+        "live_price_is_negotiable_but_canonical_is_25000",
+        "no_property_gallery",
+        "exact_location_missing"
+      ],
       "required_action": "Exclude from available inventory; retain only as a non-indexable sold archive if approved.",
-      "broker_confirm": ["sold status and completion date", "whether a sold archive may remain public", "21,400 sqm cadastral area", "exact parcel locality"]
+      "broker_confirm": [
+        "sold status and completion date",
+        "whether a sold archive may remain public",
+        "21,400 sqm cadastral area",
+        "exact parcel locality"
+      ]
     },
     {
-      "id": "MS-CRAWL-0146",
+      "id": "MS-00340",
       "source_url": "https://makler-realty.ru/listing/%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd-%d1%81-%d0%be%d1%82%d0%b5%d0%bb%d0%b5%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -724,9 +1053,21 @@
         "availability_signal": "The live page presents the mixed completed/unfinished complex for sale; current availability, operation and construction status are not proven.",
         "gallery_assets_observed_or_sampled": "No listing-specific gallery assets were observed; only site-wide chrome images were present."
       },
-      "issues": ["operating_restaurant_and_unfinished_hotel_in_one_record", "no_property_gallery", "construction_and_licensing_status_unverified"],
+      "issues": [
+        "operating_restaurant_and_unfinished_hotel_in_one_record",
+        "no_property_gallery",
+        "construction_and_licensing_status_unverified"
+      ],
       "required_action": "Hold until legal areas, completion permits, operating licenses, included equipment and current media are supplied.",
-      "broker_confirm": ["current availability", "EUR 550,000 asking price", "360 sqm restaurant legal area", "1,780 sqm hotel legal area and completion stage", "1,220 sqm parcel area", "restaurant licensing and operation", "rights to publish new media"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 550,000 asking price",
+        "360 sqm restaurant legal area",
+        "1,780 sqm hotel legal area and completion stage",
+        "1,220 sqm parcel area",
+        "restaurant licensing and operation",
+        "rights to publish new media"
+      ]
     },
     {
       "id": "MS-CRAWL-0147",
@@ -744,9 +1085,17 @@
         "availability_signal": "The live page presents the apartment for rent and contains no explicit rented marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "14 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["h1_says_daily_rental_but_price_cadence_is_not_stated"],
+      "issues": [
+        "h1_says_daily_rental_but_price_cadence_is_not_stated"
+      ],
       "required_action": "Confirm whether EUR 350 is monthly or another cadence and separate long-term from short-term terms.",
-      "broker_confirm": ["current availability", "EUR 350 price cadence", "minimum term, deposit and utilities", "short-term nightly pricing if offered", "60 sqm area basis"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 350 price cadence",
+        "minimum term, deposit and utilities",
+        "short-term nightly pricing if offered",
+        "60 sqm area basis"
+      ]
     },
     {
       "id": "MS-CRAWL-0148",
@@ -764,9 +1113,19 @@
         "availability_signal": "The live body explicitly marks the house СДАН (rented).",
         "gallery_assets_observed_or_sampled": "13 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["explicitly_rented", "canonical_offer_type_sale_conflicts_with_live_rent", "canonical_price_330_conflicts_with_live_negotiable"],
+      "issues": [
+        "explicitly_rented",
+        "canonical_offer_type_sale_conflicts_with_live_rent",
+        "canonical_price_330_conflicts_with_live_negotiable"
+      ],
       "required_action": "Exclude from available inventory and correct the canonical offer type; use only a non-indexable rented archive if approved.",
-      "broker_confirm": ["current rented status and lease end date", "whether a rented archive may remain public", "future rental price and cadence if relisted", "90 sqm house area", "350 sqm parcel inclusion"]
+      "broker_confirm": [
+        "current rented status and lease end date",
+        "whether a rented archive may remain public",
+        "future rental price and cadence if relisted",
+        "90 sqm house area",
+        "350 sqm parcel inclusion"
+      ]
     },
     {
       "id": "MS-CRAWL-0149",
@@ -784,9 +1143,20 @@
         "availability_signal": "The live page presents multiple rental configurations and contains no explicit rented marker; configuration availability is not proven.",
         "gallery_assets_observed_or_sampled": "11 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_offer_type_sale_conflicts_with_live_rent", "header_440_is_only_one_configuration", "multiple_area_and_price_options_not_normalized"],
+      "issues": [
+        "canonical_offer_type_sale_conflicts_with_live_rent",
+        "header_440_is_only_one_configuration",
+        "multiple_area_and_price_options_not_normalized"
+      ],
       "required_action": "Hold until modeled as explicit rental options with available floor, area, EUR/sqm, VAT, cadence and whole-building terms.",
-      "broker_confirm": ["current availability of each floor", "220 sqm first-floor area and EUR 2 per sqm rate", "700 sqm second-floor area and EUR 1.5 per sqm rate", "whole-building price", "monthly cadence, VAT and deposit", "lift and utility condition"]
+      "broker_confirm": [
+        "current availability of each floor",
+        "220 sqm first-floor area and EUR 2 per sqm rate",
+        "700 sqm second-floor area and EUR 1.5 per sqm rate",
+        "whole-building price",
+        "monthly cadence, VAT and deposit",
+        "lift and utility condition"
+      ]
     },
     {
       "id": "MS-CRAWL-0150",
@@ -806,7 +1176,13 @@
       },
       "issues": [],
       "required_action": "Use the observed facts but keep publication gated until cadastral and availability confirmation.",
-      "broker_confirm": ["current availability", "EUR 9,000 asking price", "8,000 sqm cadastral area", "category-6 agricultural status", "exact parcel identifier and locality"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 9,000 asking price",
+        "8,000 sqm cadastral area",
+        "category-6 agricultural status",
+        "exact parcel identifier and locality"
+      ]
     },
     {
       "id": "MS-CRAWL-0151",
@@ -824,12 +1200,24 @@
         "availability_signal": "The live page presents the greenhouse/property for sale and contains no explicit sold marker; current availability and lease transferability are not proven.",
         "gallery_assets_observed_or_sampled": "4 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["header_plot_13000_conflicts_with_7000_owned_plus_4000_leased", "owned_and_leased_land_in_one_scope", "lease_transferability_unverified"],
+      "issues": [
+        "header_plot_13000_conflicts_with_7000_owned_plus_4000_leased",
+        "owned_and_leased_land_in_one_scope",
+        "lease_transferability_unverified"
+      ],
       "required_action": "Separate owned land, leased land and greenhouse areas and confirm whether the lease transfers with the sale.",
-      "broker_confirm": ["current availability", "EUR 52,000 asking price", "7,000 sqm owned cadastral area", "4,000 sqm leased area, remaining term and transferability", "source of the 13,000 sqm header figure", "1,100 sqm greenhouse legal area", "equipment included"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 52,000 asking price",
+        "7,000 sqm owned cadastral area",
+        "4,000 sqm leased area, remaining term and transferability",
+        "source of the 13,000 sqm header figure",
+        "1,100 sqm greenhouse legal area",
+        "equipment included"
+      ]
     },
     {
-      "id": "MS-CRAWL-0152",
+      "id": "MS-00296",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -846,7 +1234,14 @@
       },
       "issues": [],
       "required_action": "Use the parcel area as observed, while keeping planning claims gated until broker/cadastral confirmation.",
-      "broker_confirm": ["current availability", "EUR 14,000 asking price", "2,505 sqm cadastral area", "current 1,000 sqm buildable designation", "current 240 sqm footprint and 500 sqm total-build limits", "utility connection distances"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 14,000 asking price",
+        "2,505 sqm cadastral area",
+        "current 1,000 sqm buildable designation",
+        "current 240 sqm footprint and 500 sqm total-build limits",
+        "utility connection distances"
+      ]
     },
     {
       "id": "MS-CRAWL-0153",
@@ -866,7 +1261,14 @@
       },
       "issues": [],
       "required_action": "Use the observed source facts but keep publication gated until cadastral, planning and availability confirmation.",
-      "broker_confirm": ["current availability", "EUR 25,000 asking price", "734 sqm cadastral area", "current residential planning status", "parcel identifier", "current utility connections"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 25,000 asking price",
+        "734 sqm cadastral area",
+        "current residential planning status",
+        "parcel identifier",
+        "current utility connections"
+      ]
     },
     {
       "id": "MS-CRAWL-0154",
@@ -884,12 +1286,20 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "10 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_price_11000_differs_from_live_25000"],
+      "issues": [
+        "canonical_price_11000_differs_from_live_25000"
+      ],
       "required_action": "Hold until the broker resolves the material price drift and updates the canonical record with evidence.",
-      "broker_confirm": ["current availability", "current asking price between EUR 11,000 canonical and EUR 25,000 live", "677 sqm cadastral area", "parcel identifier", "current planning and utility status"]
+      "broker_confirm": [
+        "current availability",
+        "current asking price between EUR 11,000 canonical and EUR 25,000 live",
+        "677 sqm cadastral area",
+        "parcel identifier",
+        "current planning and utility status"
+      ]
     },
     {
-      "id": "MS-CRAWL-0155",
+      "id": "MS-00232",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -906,10 +1316,17 @@
       },
       "issues": [],
       "required_action": "Use the whole-parcel facts; treat subdivision as an unverified option and add more current media when available.",
-      "broker_confirm": ["current availability", "EUR 76,580 asking price", "2,735 sqm cadastral area", "exact Polenitsa locality", "current buildability and subdivision feasibility", "utility connections"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 76,580 asking price",
+        "2,735 sqm cadastral area",
+        "exact Polenitsa locality",
+        "current buildability and subdivision feasibility",
+        "utility connections"
+      ]
     },
     {
-      "id": "MS-CRAWL-0156",
+      "id": "MS-00362",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -926,10 +1343,17 @@
       },
       "issues": [],
       "required_action": "Use the observed source facts but keep publication gated until cadastral, planning, utility and availability confirmation.",
-      "broker_confirm": ["current availability", "EUR 16,000 asking price", "952 sqm cadastral area", "current building status", "electricity and water connection distances", "parcel identifier"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 16,000 asking price",
+        "952 sqm cadastral area",
+        "current building status",
+        "electricity and water connection distances",
+        "parcel identifier"
+      ]
     },
     {
-      "id": "MS-CRAWL-0157",
+      "id": "MS-00074",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -944,12 +1368,23 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability and planning potential are not proven.",
         "gallery_assets_observed_or_sampled": "1 listing-specific asset observed and sampled; it returned HTTP 206 image/jpeg."
       },
-      "issues": ["exact_parcel_location_missing", "development_potential_claim_unverified", "single_property_photo"],
+      "issues": [
+        "exact_parcel_location_missing",
+        "development_potential_claim_unverified",
+        "single_property_photo"
+      ],
       "required_action": "Confirm zoning, permitted parameters and exact parcel location before publishing hotel/development claims.",
-      "broker_confirm": ["current availability", "EUR 120,000 asking price", "3,417 sqm cadastral area", "exact parcel identifier and locality", "current zoning and more-than-4,200-sqm build potential", "utility connections"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 120,000 asking price",
+        "3,417 sqm cadastral area",
+        "exact parcel identifier and locality",
+        "current zoning and more-than-4,200-sqm build potential",
+        "utility connections"
+      ]
     },
     {
-      "id": "MS-CRAWL-0158",
+      "id": "MS-00046",
       "source_url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -964,9 +1399,18 @@
         "availability_signal": "The live page presents the parcel for sale and contains no explicit sold marker; current availability and permit validity are not proven.",
         "gallery_assets_observed_or_sampled": "5 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["project_and_building_permit_validity_unverified"],
+      "issues": [
+        "project_and_building_permit_validity_unverified"
+      ],
       "required_action": "Confirm the project and permit are current and transferable before advertising permitted construction parameters.",
-      "broker_confirm": ["current availability", "EUR 40,000 asking price", "944 sqm cadastral area", "current project and permit validity", "180 sqm footprint, 540 sqm total area and 10 m height parameters", "utility connections"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 40,000 asking price",
+        "944 sqm cadastral area",
+        "current project and permit validity",
+        "180 sqm footprint, 540 sqm total area and 10 m height parameters",
+        "utility connections"
+      ]
     },
     {
       "id": "MS-CRAWL-0159",
@@ -984,9 +1428,20 @@
         "availability_signal": "The live page presents the unit for sale and contains no explicit sold marker; current availability, permitted use and equipment are not proven.",
         "gallery_assets_observed_or_sampled": "15 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_location_missing", "medical_or_treatment_use_and_equipment_claims_unverified"],
+      "issues": [
+        "canonical_location_missing",
+        "medical_or_treatment_use_and_equipment_claims_unverified"
+      ],
       "required_action": "Map central Sandanski only after address confirmation and verify permitted use, licenses and included equipment before publication.",
-      "broker_confirm": ["current availability", "EUR 185,000 asking price", "164.5 sqm legal area", "exact address/location", "permitted commercial and treatment use", "licenses if any", "equipment included and operational"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 185,000 asking price",
+        "164.5 sqm legal area",
+        "exact address/location",
+        "permitted commercial and treatment use",
+        "licenses if any",
+        "equipment included and operational"
+      ]
     },
     {
       "id": "MS-CRAWL-0160",
@@ -1004,9 +1459,20 @@
         "availability_signal": "The live page presents the rights package for sale and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "6 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["house_floor_and_ideal_share_require_legal_normalization", "bedroom_count_not_stated", "421_sqm_share_wording_is_ambiguous"],
+      "issues": [
+        "house_floor_and_ideal_share_require_legal_normalization",
+        "bedroom_count_not_stated",
+        "421_sqm_share_wording_is_ambiguous"
+      ],
       "required_action": "Model the floor, basement, attic and land share as separate rights and keep bedrooms unknown until the plan is confirmed.",
-      "broker_confirm": ["current availability", "EUR 31,000 asking price", "90 sqm legal floor area", "basement and attic areas and rights", "whether 421 sqm is the two-thirds equivalent or total parcel", "room and bedroom layout"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 31,000 asking price",
+        "90 sqm legal floor area",
+        "basement and attic areas and rights",
+        "whether 421 sqm is the two-thirds equivalent or total parcel",
+        "room and bedroom layout"
+      ]
     },
     {
       "id": "MS-CRAWL-0161",
@@ -1024,9 +1490,18 @@
         "availability_signal": "The live page presents the rights package for sale at a negotiable price and contains no explicit sold marker; current availability is not proven.",
         "gallery_assets_observed_or_sampled": "4 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["land_component_and_right_to_build_require_legal_normalization"],
+      "issues": [
+        "land_component_and_right_to_build_require_legal_normalization"
+      ],
       "required_action": "Confirm deed scope, land share and right-to-build terms before publication.",
-      "broker_confirm": ["current availability", "current price-on-request terms", "73 sqm legal floor area", "two-bedroom layout", "meaning and title basis of the 77 sqm land component", "right-to-build terms"]
+      "broker_confirm": [
+        "current availability",
+        "current price-on-request terms",
+        "73 sqm legal floor area",
+        "two-bedroom layout",
+        "meaning and title basis of the 77 sqm land component",
+        "right-to-build terms"
+      ]
     },
     {
       "id": "MS-CRAWL-0162",
@@ -1044,12 +1519,22 @@
         "availability_signal": "The live page presents the apartment for rent and contains no explicit rented marker; current availability and term are not proven.",
         "gallery_assets_observed_or_sampled": "19 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["canonical_offer_type_sale_conflicts_with_live_rent", "price_cadence_and_short_term_terms_not_normalized"],
+      "issues": [
+        "canonical_offer_type_sale_conflicts_with_live_rent",
+        "price_cadence_and_short_term_terms_not_normalized"
+      ],
       "required_action": "Correct the canonical offer type to rent and confirm long-term cadence and separate short-term pricing before publication.",
-      "broker_confirm": ["current availability", "EUR 250 long-term price cadence", "minimum term and deposit", "short-term seasonal pricing", "utilities included", "65 sqm area basis"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 250 long-term price cadence",
+        "minimum term and deposit",
+        "short-term seasonal pricing",
+        "utilities included",
+        "65 sqm area basis"
+      ]
     },
     {
-      "id": "MS-CRAWL-0163",
+      "id": "MS-00696",
       "source_url": "https://makler-realty.ru/listing/arenda-dvuhkomnatnaia-kvartira-garazh-sandanski/",
       "checked_at": "2026-08-13T14:41:21Z",
       "http_status": 200,
@@ -1064,9 +1549,18 @@
         "availability_signal": "The live body explicitly marks the apartment СДАНА (rented).",
         "gallery_assets_observed_or_sampled": "14 listing-specific assets observed; 3 current URLs sampled, all returned HTTP 206 image/jpeg and had distinct sample hashes."
       },
-      "issues": ["explicitly_rented", "must_not_publish_as_available"],
+      "issues": [
+        "explicitly_rented",
+        "must_not_publish_as_available"
+      ],
       "required_action": "Exclude from available inventory; use only a non-indexable rented archive if approved.",
-      "broker_confirm": ["current rented status and lease end date", "whether a rented archive may remain public", "future EUR 350 price cadence if relisted", "90 sqm area basis", "garage inclusion"]
+      "broker_confirm": [
+        "current rented status and lease end date",
+        "whether a rented archive may remain public",
+        "future EUR 350 price cadence if relisted",
+        "90 sqm area basis",
+        "garage inclusion"
+      ]
     },
     {
       "id": "MS-CRAWL-0164",
@@ -1086,7 +1580,14 @@
       },
       "issues": [],
       "required_action": "Use 42 sqm as the source-stated legal area and do not import the 65-70 sqm Bulgarian comparison as a property fact.",
-      "broker_confirm": ["current availability", "EUR 139,000 asking price", "42 sqm legal/deed area", "two-bedroom layout", "included kitchen and finishes", "Greek property identifier and transaction authority"]
+      "broker_confirm": [
+        "current availability",
+        "EUR 139,000 asking price",
+        "42 sqm legal/deed area",
+        "two-bedroom layout",
+        "included kitchen and finishes",
+        "Greek property identifier and transaction authority"
+      ]
     },
     {
       "id": "MS-CRAWL-0165",
@@ -1104,9 +1605,18 @@
         "availability_signal": "Unknown; HTTP 404 is not proof that the property is sold or withdrawn.",
         "gallery_assets_observed_or_sampled": "Not sampled because the source page returned HTTP 404."
       },
-      "issues": ["source_404", "live_facts_unverifiable", "must_not_publish_from_stale_canonical_data"],
+      "issues": [
+        "source_404",
+        "live_facts_unverifiable",
+        "must_not_publish_from_stale_canonical_data"
+      ],
       "required_action": "Keep unpublished until the broker supplies a current authoritative source or explicitly approves a 410/withdrawn outcome.",
-      "broker_confirm": ["whether the property still exists in inventory", "current availability", "current source URL or withdrawal decision", "price, area, location, parcel identifier and media if relisted"]
+      "broker_confirm": [
+        "whether the property still exists in inventory",
+        "current availability",
+        "current source URL or withdrawal decision",
+        "price, area, location, parcel identifier and media if relisted"
+      ]
     }
   ]
 }

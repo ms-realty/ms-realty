@@ -16,7 +16,7 @@
   ],
   "listings": [
     {
-      "id": "MS-3000",
+      "id": "MS-00356",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 404,
@@ -31,7 +31,7 @@
         "availability_signal": "source page returned 404; no live availability signal",
         "gallery_assets_observed_or_sampled": {
           "listing_specific_assets_observed": 0,
-        "canonical_seed_public_gallery_assets": 5,
+          "canonical_seed_public_gallery_assets": 5,
           "sampled_count": 0,
           "sample_urls": [],
           "sample_http_statuses": [],
@@ -56,7 +56,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0001",
+      "id": "MS-00815",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -105,7 +105,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0002",
+      "id": "MS-00907",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -151,7 +151,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0003",
+      "id": "MS-00922",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -196,7 +196,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0004",
+      "id": "MS-00905",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -240,7 +240,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0005",
+      "id": "MS-00899",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -287,7 +287,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0006",
+      "id": "MS-00443",
       "source_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -328,7 +328,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0007",
+      "id": "MS-00911",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -374,7 +374,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0008",
+      "id": "MS-00662",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 404,
@@ -414,7 +414,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0009",
+      "id": "MS-00957",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -457,7 +457,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0010",
+      "id": "MS-01000",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -500,7 +500,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0011",
+      "id": "MS-00858",
       "source_url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -545,7 +545,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0012",
+      "id": "MS-00895",
       "source_url": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -589,7 +589,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0013",
+      "id": "MS-00567-1",
       "source_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -638,7 +638,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0014",
+      "id": "MS-00876",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -682,7 +682,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0015",
+      "id": "MS-00942",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -731,7 +731,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0016",
+      "id": "MS-00803",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -781,7 +781,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0017",
+      "id": "MS-00938",
       "source_url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -828,7 +828,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0018",
+      "id": "MS-00814",
       "source_url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -873,7 +873,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0019",
+      "id": "MS-00812",
       "source_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -923,7 +923,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0020",
+      "id": "MS-00890",
       "source_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -965,7 +965,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0021",
+      "id": "MS-00944",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1013,7 +1013,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0022",
+      "id": "MS-00756",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1062,7 +1062,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0023",
+      "id": "MS-00833",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1111,7 +1111,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0024",
+      "id": "MS-00101",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1157,7 +1157,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0025",
+      "id": "MS-00956",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1206,7 +1206,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0026",
+      "id": "MS-01001",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1255,7 +1255,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0027",
+      "id": "MS-01002",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 404,
@@ -1295,7 +1295,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0028",
+      "id": "MS-00924",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1345,7 +1345,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0029",
+      "id": "MS-00903",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1389,7 +1389,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0030",
+      "id": "MS-00943",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1436,7 +1436,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0031",
+      "id": "MS-00940",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1481,7 +1481,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0032",
+      "id": "MS-00932",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1529,7 +1529,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0033",
+      "id": "MS-00865",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1576,7 +1576,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0034",
+      "id": "MS-00963",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1622,7 +1622,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0035",
+      "id": "MS-00774",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1671,7 +1671,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0036",
+      "id": "MS-00897",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1716,7 +1716,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0037",
+      "id": "MS-00719",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1764,7 +1764,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0038",
+      "id": "MS-00873",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1816,7 +1816,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0039",
+      "id": "MS-00906",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1860,7 +1860,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0040",
+      "id": "MS-00555",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1902,7 +1902,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0041",
+      "id": "MS-00788",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1951,7 +1951,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0042",
+      "id": "MS-00811",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -1997,7 +1997,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0043",
+      "id": "MS-00987",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2042,7 +2042,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0044",
+      "id": "MS-00345",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2088,7 +2088,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0045",
+      "id": "MS-00908",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2136,7 +2136,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0046",
+      "id": "MS-00941",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2183,7 +2183,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0047",
+      "id": "MS-00927",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2228,7 +2228,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0048",
+      "id": "MS-00904",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2277,7 +2277,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0049",
+      "id": "MS-00931",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2320,7 +2320,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0050",
+      "id": "MS-00100",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2365,7 +2365,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0051",
+      "id": "MS-00816",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2417,7 +2417,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0052",
+      "id": "MS-00657",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2464,7 +2464,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0053",
+      "id": "MS-00766",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,
@@ -2513,7 +2513,7 @@
       ]
     },
     {
-      "id": "MS-CRAWL-0054",
+      "id": "MS-00432",
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/",
       "checked_at": "2026-08-13T14:41:08Z",
       "http_status": 200,

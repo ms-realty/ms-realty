@@ -170,6 +170,7 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.summary.seller_pages, 7);
   assert.equal(data.summary.contact_pages, 7);
   assert.equal(data.summary.guide_pages, 5);
+  assert.equal(data.summary.search_facet_pages, 56);
   assert.equal(
     data.summary.entries,
     data.summary.home_pages +
@@ -177,12 +178,15 @@ test("generated localized sitemap file is approved-translation gated when presen
       data.summary.location_pages +
       data.summary.seller_pages +
       data.summary.contact_pages +
-      data.summary.guide_pages,
+      data.summary.guide_pages +
+      data.summary.search_facet_pages,
   );
-  assert.equal(data.summary.byLocale.bg >= 118, true);
-  assert.equal(data.summary.byLocale.ru, 58);
-  assert.equal(data.summary.byLocale.el, 3);
-  assert.equal(data.summary.byLocale.he, 3);
+  // Every public locale carries its eight indexable search facets on top of the
+  // listing and static routes it already had.
+  assert.equal(data.summary.byLocale.bg >= 126, true);
+  assert.equal(data.summary.byLocale.ru, 66);
+  assert.equal(data.summary.byLocale.el, 11);
+  assert.equal(data.summary.byLocale.he, 11);
   assert.equal(data.summary.byLocale.fr, undefined);
   assert.equal(data.entries.some((entry) => entry.loc === "/he" && entry.type === "home"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/locations/sandanski" && entry.type === "location"), false);
@@ -195,6 +199,6 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/proverka-na-imot-sandanski" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/hotovo-obstinski-kontekst" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/petrich-obstinski-kontekst" && entry.type === "guide"), true);
-  assert.equal(data.entries.some((entry) => entry.loc === "/el/akinita/MS-CRAWL-0001"), false);
+  assert.equal(data.entries.some((entry) => entry.loc === "/el/akinita/MS-00815"), false);
   assert.equal(data.entries.some((entry) => entry.loc === "/el/topothesies/sandanski"), false);
 });

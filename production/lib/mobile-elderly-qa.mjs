@@ -41,8 +41,8 @@ export function buildMobileElderlyQaReport({
   registry = loadLocaleRegistry(),
   listings = loadListings(),
 } = {}) {
-  const listing = findListingById(listings, "MS-CRAWL-0001");
-  const galleryListing = findListingById(listings, "MS-CRAWL-0114");
+  const listing = findListingById(listings, "MS-00815");
+  const galleryListing = findListingById(listings, "MS-00191");
   const galleryQaListing = {
     ...galleryListing,
     media: ["191-1.jpg", "191-2-72x72.jpg", "191-3-72x72.jpg", "191-4-72x72.jpg", "191-5-72x72.jpg"].map((filename, index) =>

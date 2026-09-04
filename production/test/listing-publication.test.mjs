@@ -12,12 +12,12 @@ import { fromRoot } from "../lib/paths.mjs";
 
 test("listing publication report covers sitemap entries and internal-link suggestions", () => {
   const report = buildListingPublicationReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0001");
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-00815");
 
   assert.equal(assertListingPublicationReport(report), true);
   assert.equal(report.summary.listings, 165);
   assert.equal(report.summary.missing_sitemap_entries, 0);
-  assert.ok(row.sitemap_paths.includes("/bg/imoti/MS-CRAWL-0001"));
+  assert.ok(row.sitemap_paths.includes("/bg/imoti/MS-00815"));
   assert.ok(row.internal_link_suggestions.some((link) => link.kind === "homepage_feature"));
   assert.ok(row.internal_link_suggestions.some((link) => link.kind === "location_page"));
   assert.equal(row.publication_readiness.ready, false);
@@ -27,7 +27,7 @@ test("listing publication report covers sitemap entries and internal-link sugges
 
 test("new listing records inherit sitemap coverage and editor link suggestions", () => {
   const seed = loadCmsSeed();
-  const source = seed.records.find((record) => record.collection === "listings" && record.id === "MS-CRAWL-0001");
+  const source = seed.records.find((record) => record.collection === "listings" && record.id === "MS-00815");
   const newListing = {
     ...source,
     id: "MS-NEW-0001",
@@ -52,7 +52,7 @@ test("listing publication build honors mounted listing edits and output path", (
   const reportPath = `${dir}/listing-publication-report.json`;
   fs.writeFileSync(
     editPath,
-    `${JSON.stringify({ listing_id: "MS-CRAWL-0001", patch: { listing_status: "reserved" } })}\n`,
+    `${JSON.stringify({ listing_id: "MS-00815", patch: { listing_status: "reserved" } })}\n`,
   );
 
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-listing-publication-report.mjs")], {
@@ -69,7 +69,7 @@ test("listing publication build honors mounted listing edits and output path", (
   assert.ok(result.stdout.includes(reportPath));
   const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
   assert.equal(assertListingPublicationReport(report), true);
-  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").listing_status, "reserved");
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-00815").listing_status, "reserved");
 });
 
 test("generated listing publication report is valid when present", () => {
