@@ -68,6 +68,11 @@ export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "l
 export const DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT = fromRoot("production", "data", "live-service-preflight-report.json");
 export const DEFAULT_LOCAL_READINESS_MAX_AGE_MS = 15 * 60 * 1000;
 
+// The eight indexable search facets (six property families and two offer
+// types) on each of the seven public locales. The count is registry-driven,
+// so the sitemap must carry exactly this many search_facet entries.
+export const SEARCH_FACET_PAGES = 56;
+
 const LOCAL_PREVIEW_GATE_ID = "local_preview_only";
 const LOCAL_PREVIEW_GATE_NEXT_ACTIONS = [
   "Treat this Docker-only report as local verification, not production launch evidence.",
@@ -130,7 +135,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   localized_sitemap: [
     "Run npm run sitemap:build after approved locale routes are generated.",
-    "Review the generated localized sitemap for approved listing, location, seller, contact, and guide routes.",
+    "Review the generated localized sitemap for approved listing, location, seller, contact, guide, and search facet routes.",
   ],
   structured_data: [
     "Run npm run structured:data and fix any failing schema entries before launch.",
@@ -555,7 +560,8 @@ function assertPassLocalizedSitemapEvidence(report) {
     evidence.location_pages +
     evidence.seller_pages +
     evidence.contact_pages +
-    evidence.guide_pages;
+    evidence.guide_pages +
+    evidence.search_facet_pages;
   if (
     evidence.home_pages !== 7 ||
     evidence.listing_entries !== 165 ||
@@ -563,6 +569,7 @@ function assertPassLocalizedSitemapEvidence(report) {
     evidence.seller_pages !== 7 ||
     evidence.contact_pages !== 7 ||
     evidence.guide_pages !== 5 ||
+    evidence.search_facet_pages !== SEARCH_FACET_PAGES ||
     evidence.entries !== entries
   ) {
     throw new Error("Launch readiness localized sitemap requires complete approved route evidence");
@@ -574,7 +581,8 @@ function assertPassLocalizedSitemapEvidence(report) {
     publicEvidence.location_pages +
     publicEvidence.seller_pages +
     publicEvidence.contact_pages +
-    publicEvidence.guide_pages;
+    publicEvidence.guide_pages +
+    publicEvidence.search_facet_pages;
   if (
     !evidence.public ||
     publicEvidence.entries !== publicEntries ||
@@ -1490,7 +1498,8 @@ export function buildLaunchReadinessReport({
     sitemap.summary.location_pages +
     sitemap.summary.seller_pages +
     sitemap.summary.contact_pages +
-    sitemap.summary.guide_pages;
+    sitemap.summary.guide_pages +
+    sitemap.summary.search_facet_pages;
   const publicSitemap = sitemap.summary.public || null;
   const expectedPublicSitemapEntries = publicSitemap
     ? publicSitemap.home_pages +
@@ -1498,7 +1507,8 @@ export function buildLaunchReadinessReport({
       publicSitemap.location_pages +
       publicSitemap.seller_pages +
       publicSitemap.contact_pages +
-      publicSitemap.guide_pages
+      publicSitemap.guide_pages +
+      publicSitemap.search_facet_pages
     : null;
   const localizedSitemapReady =
     sitemap.summary.home_pages === 7 &&
@@ -1507,6 +1517,7 @@ export function buildLaunchReadinessReport({
     sitemap.summary.seller_pages === 7 &&
     sitemap.summary.contact_pages === 7 &&
     sitemap.summary.guide_pages === 5 &&
+    sitemap.summary.search_facet_pages === SEARCH_FACET_PAGES &&
     sitemap.summary.entries === expectedSitemapEntries &&
     // The public view is what the runtime publication gate actually serves;
     // an artifact without it (or with inconsistent counts) can advertise
