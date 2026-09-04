@@ -1,370 +1,100 @@
 import fs from "node:fs";
 import { sheet, icon } from "../shell.mjs";
-const W = (n) => new URL(`../${n}`, import.meta.url);
+import { ALLOWED_IMAGE_FORMATS } from "../../../../production/lib/image-sanitizer.mjs";
+import { DEFAULT_IMAGE_MAX_EDGE, DEFAULT_IMAGE_MAX_PIXELS } from "../../../../production/lib/image-optimizer.mjs";
 
 const CSS = `
-    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .doc-hd h1 { font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; }
-    .doc-hd p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:720px; }
-    .grp > h2 { font-size:13px; font-weight:600; color:var(--text-muted); margin:0 0 12px;
-      padding-bottom:8px; border-bottom:1px solid var(--border); }
-    .grp { margin-bottom:32px; }
-    .g3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:start; }
-    .g2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; }
-    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
-      box-shadow:var(--e-2); overflow:hidden; }
-    .card-hd { padding:12px 16px 0; }
-    .card-hd b { display:block; font-size:13px; font-weight:600; }
-    .card-hd span { display:block; font-size:11px; color:var(--text-muted); margin-top:4px; }
-    .card-bd { padding:12px 16px 16px; }
-    .drop { display:grid; place-items:center; gap:8px; padding:20px 16px; border-radius:var(--r-md);
-      border:1.5px dashed var(--border-control); background:var(--tile); text-align:center; }
-    .drop b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .drop span { font-size:11px; color:var(--text-muted); }
-    .drop--over { border-color:var(--ink-800); border-style:solid; background:var(--spring-50); }
-    .drop--err { border-color:var(--danger-600); background:var(--danger-50); }
-    .up { display:grid; grid-template-columns:32px minmax(0,1fr) auto; gap:12px; align-items:center;
-      padding:8px 0; border-bottom:1px solid var(--border); }
-    .up:last-child { border-bottom:0; }
-    .up .th { width:32px; height:26px; border-radius:var(--r-xs); background:var(--joint); display:grid;
-      place-items:center; color:var(--marble-500); }
-    .up b { font-size:13px; font-weight:600; display:block; overflow:hidden; text-overflow:ellipsis;
-      white-space:nowrap; }
-    .up em { font-style:normal; font-size:11px; color:var(--text-muted); }
-    .kbd { display:inline-grid; place-items:center; min-width:22px; height:21px; padding:0 8px;
-      border:1px solid var(--border-control); border-radius:var(--r-xs); background:var(--surface);
-      font:600 11px -apple-system,system-ui,sans-serif; color:var(--text-body); }
-    .krow { display:grid; grid-template-columns:132px minmax(0,1fr); gap:12px; align-items:center;
-      padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
-    .krow:last-child { border-bottom:0; }
-    .krow span.k { display:flex; gap:4px; }
-    .bp { display:grid; grid-template-columns:96px minmax(0,1fr); gap:12px; align-items:start;
-      padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
-    .bp:last-child { border-bottom:0; }
-    .bp b { font-family:var(--font-mono); font-size:11px; color:var(--text-strong); }
-    .tax { display:grid; grid-template-columns:150px minmax(0,1fr) minmax(0,1fr); gap:16px;
-      padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
-    .tax:last-child { border-bottom:0; }
-    .rtl-demo { border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; }
-    .rtl-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center;
-      padding:12px 12px; border-bottom:1px solid var(--border); font-size:13px; }
-    .rtl-row:last-child { border-bottom:0; }
-    .focusring { box-shadow:var(--ring); }
+  .st { display:grid; gap:32px; }
+  .st h1 { font-size:22px; font-weight:600; }
+  .st h2,.st h3 { font-size:16px; font-weight:600; }
+  .st-header { display:flex; justify-content:space-between; gap:24px; }
+  .st-header p { margin-top:8px; max-width:72ch; color:var(--text-muted); }
+  .st-section { display:grid; gap:16px; min-width:0; border-top:1px solid var(--joint); padding-top:20px; }
+  .st-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:start; }
+  .st-form { display:grid; gap:16px; min-width:0; padding:20px; background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); }
+  .st-form input,.st-form textarea,.st-form select { font:inherit; }
+  .st-form textarea,.st-form select { width:100%; }
+  .st-form textarea { padding:12px; resize:vertical; }
+  .st-check { display:flex; align-items:center; gap:12px; min-height:44px; }
+  .st-check input { width:20px; height:20px; accent-color:var(--ink-900); }
+  .st-actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .st .btn[disabled] { opacity:.5; cursor:not-allowed; }
+  .st-drop { display:grid; gap:12px; justify-items:start; padding:24px; border:1px dashed var(--border-control); border-radius:var(--r-panel); }
+  .st-drop input { font:inherit; max-width:100%; }
+  .st-queue { background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); padding:0 20px; min-width:0; }
+  .st-row { display:grid; grid-template-columns:minmax(0,1fr) 176px minmax(0,1fr) 128px; gap:20px; align-items:center; min-height:44px; border-bottom:1px solid var(--joint); }
+  .st-row:last-child { border:0; }
+  .st-row > :first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .st-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+  .st-state { display:grid; gap:12px; align-content:start; padding:16px 0; border-top:1px solid var(--joint); min-width:0; }
+  .st-state p { max-width:56ch; }
+  .st-state svg { color:var(--text-muted); }
+  .st .st-note { color:var(--text-muted); }
+  .st-field { display:grid; gap:8px; }
+  .st-rule { display:grid; grid-template-columns:176px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:12px 0; border-bottom:1px solid var(--joint); }
+  .st kbd { font:600 13px var(--font-sans); border:1px solid var(--border-control); border-radius:var(--r-edge); padding:4px 8px; }
+  .st .st-focus { box-shadow:var(--ring); }
+  .st-rtl { display:grid; gap:12px; padding:20px; background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); }
+  .st-rtl-row { display:flex; justify-content:space-between; align-items:center; gap:16px; min-height:44px; border-bottom:1px solid var(--joint); }
+  .st-long { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .st-state > .pill { justify-self:start; }
 `;
 
-/* ------------------------------------------------------- Media, every state */
-const MEDIA_BODY = `<div class="doc-hd">
-  <div><h1>Upload and edit — every state</h1>
-    <p>What a photo can do to you on a bad morning. Each refusal below is one the running code actually
-      raises, quoted from <span class="mono">image-sanitizer.mjs</span> and
-      <span class="mono">image-optimizer.mjs</span>, so the wording a broker reads matches the wording the
-      server produced.</p></div>
-  <span class="pill pill--ink"><i></i>18 states</span>
-</div>
+const uploadStates = [
+  ["Unsupported file", "This file is not an accepted photo format. Export an image in one of the formats shown above.", "Choose another file"],
+  ["Too many pixels", `This JPEG is 12000 × 9000, or 108 megapixels. The configured default is ${DEFAULT_IMAGE_MAX_PIXELS / 1e6} megapixels. Export it at a smaller size.`, "Choose a smaller image"],
+  ["Cannot decode", "The file claims to be a JPEG but cannot be read. Export it again from the original.", "Choose another file"],
+  ["AVIF metadata", "This AVIF contains Exif or XMP. Re-export without metadata, or use JPEG, PNG or WebP.", "Choose another file"],
+  ["Connection lost", "We could not confirm the last upload. Keep this page open and check the library before retrying.", "Check uploaded files"],
+  ["Possible duplicate", "Check the existing image before adding another copy. A repeated filename alone does not prove the bytes match.", "Open existing image"],
+  ["Unsaved edit", "Your crop and description have not been saved. Stay here to save or discard the changes.", "Stay on this page"],
+  ["Newer revision", "Another person changed this image. Review the current revision before submitting your edit again.", "Review revisions"],
+  ["Permission required", "You can draft alt text. An authorised human must review the image before publication.", "Open review details"],
+  ["Small crop", "This crop may be too small for the intended gallery. Review it at the size visitors will see.", "Review crop"],
+  ["Removal needs review", "Check the listing’s remaining media and public state before removing this image.", "Review removal"],
+  ["Removed from selection", "The image is no longer selected for this draft. Confirm the saved gallery before leaving.", "Open gallery"],
+];
+const MEDIA_BODY = `<main class="st">
+  <header class="st-header"><div><h1>Upload and media review</h1><p>An uploaded image still needs a human decision before it can appear on the public site.</p></div><span class="pill pill--ink">Illustrative states</span></header>
+  <section class="st-section"><h2>Upload first, approve separately</h2><div class="st-pair">
+    <div class="st-drop">${icon("upload",28)}<h3>Choose photos for this listing</h3><label for="st-files">Photo files</label><input id="st-files" type="file" multiple accept="${ALLOWED_IMAGE_FORMATS.map(f=>`image/${f}`).join(",")}"><p>${ALLOWED_IMAGE_FORMATS.map(f=>f.toUpperCase()).join(", ")}</p><p class="st-note">JPEG, PNG and WebP use a ${DEFAULT_IMAGE_MAX_PIXELS / 1e6}-megapixel default limit and a ${DEFAULT_IMAGE_MAX_EDGE}px maximum edge. Metadata-bearing AVIF files are refused; accepted AVIF is passed through.</p><p>After upload, review the image, its rights and its public description.</p></div>
+    <div class="st-form"><h3>Approve the reviewed image</h3><span class="wit wit--none">Human review pending</span><div class="st-field"><label for="st-media-reason">Review note <span aria-label="required">*</span></label><textarea class="in in--area" id="st-media-reason" required placeholder="Record the source, permission and privacy checks"></textarea></div><label class="st-check"><input type="checkbox" required><span>I, Mariya Ruseva, confirm these checks and this approval.</span></label><div class="st-actions"><button class="btn btn--accent" type="button" disabled>Confirm media approval</button><button class="btn btn--ghost" type="button">Keep pending</button></div><p class="st-note">The example remains pending until the note and confirmation are supplied.</p></div>
+  </div></section>
+  <section class="st-section"><h2>Show each file’s result</h2><div class="st-queue">
+    ${[["villa-katuntsi-05.jpg","Uploading","72% transferred","Cancel upload"],["villa-katuntsi-06.jpg","Processing","Checking stored image","View progress"],["villa-katuntsi-07.jpg","Pending review","Uploaded; not public","Open review"],["drone-pano.jpg","Refused","Image dimensions exceed the limit","Review error"]].map(([file,state,note,action])=>`<div class="st-row"><b>${file}</b><span>${state}</span><span class="st-note">${note}</span><button class="btn btn--sm" type="button">${action}</button></div>`).join("")}
+  </div><p class="st-note">A partial result names the successful and failed files. Do not turn a mixed result into a success toast.</p></section>
+  <section class="st-section"><h2>Refusals and recovery</h2><div class="st-grid">${uploadStates.map(([title,text,action])=>`<div class="st-state"><h3>${title}</h3><p>${text}</p><div><button class="btn" type="button">${action}</button></div></div>`).join("")}</div></section>
+  <section class="st-section"><h2>Empty, loading and long lists</h2><div class="st-grid">
+    <div class="st-state">${icon("image",28)}<h3>No photos yet</h3><p>Choose files above, or check for images already attached to the listing.</p><a href="#st-files">Choose files</a></div>
+    <div class="st-state">${icon("filter",28)}<h3>No matching images</h3><p>Review pending · missing description</p><div><button class="btn" type="button">Clear filters</button></div></div>
+    <div class="st-state"><h3>Loading more images</h3><p role="status">Loading the next page…</p><button class="btn" disabled aria-busy="true" type="button">Loading…</button><p>For a long list, keep search and pagination available.</p></div>
+  </div></section>
+  <section class="st-section"><h2>A long library</h2><div class="st-actions"><label for="st-library-search">Find an image</label><input class="in" id="st-library-search" type="search" placeholder="Filename or listing reference"><span>1–60 of 11,859 files</span><button class="btn" type="button" disabled>Previous</button><button class="btn" type="button">Next 60</button></div><p class="st-note">Illustrative pagination. Counts describe this example, not the live library.</p><div class="st-queue"><div class="st-row"><b>villa-katuntsi-04.jpg</b><span>Approved</span><span class="wit">Mariya Ruseva · 4 Sep 2026</span><button class="btn btn--sm" type="button">Open review</button></div></div></section>
+  <section class="st-section"><h2>Control states</h2><div class="st-actions"><button class="btn" type="button">Open image</button><button class="btn" style="background:var(--sunken)" type="button">Hover</button><button class="btn st-focus" type="button">Focus</button><button class="btn" type="button" disabled>Approval unavailable</button><span class="wit wit--none">Awaiting human review</span></div><p class="st-note">Approval, deletion and public state are never inferred from an upload completing.</p></section>
+</main>`;
 
-<div class="grp">
-  <h2>Getting a file in</h2>
-  <div class="g3">
-    <div class="card">
-      <div class="card-hd"><b>Idle</b><span>Says the limits before anyone hits one.</span></div>
-      <div class="card-bd"><div class="drop">${icon("upload", 20)}<b>Drop photos here, or choose files</b>
-        <span>JPEG, PNG, WebP or AVIF · up to 50 megapixels · location data removed on upload</span></div></div>
-    </div>
-    <div class="card">
-      <div class="card-hd"><b>Dragging over</b><span>The whole panel is the target, not a 40px strip.</span></div>
-      <div class="card-bd"><div class="drop drop--over">${icon("upload", 20)}
-        <b style="color:var(--spring-800)">Release to add 7 photos</b>
-        <span style="color:var(--spring-800)">They will be attached to MS-00191</span></div></div>
-    </div>
-    <div class="card">
-      <div class="card-hd"><b>Dragging the wrong thing</b><span>Refuses before the drop, not after.</span></div>
-      <div class="card-bd"><div class="drop drop--err">${icon("x", 20)}
-        <b style="color:var(--danger-600)">A PDF cannot go in the photo library</b>
-        <span style="color:var(--danger-600)">Attach it to the case instead</span></div></div>
-    </div>
-  </div>
-  <div class="g2" style="margin-top:16px">
-    <div class="card">
-      <div class="card-hd"><b>Uploading</b><span>Per file, cancellable, and the page stays usable.</span></div>
-      <div class="card-bd">
-        <div class="up"><span class="th">${icon("image", 14)}</span>
-          <span><b>villa-katuntsi-05.jpg</b><em>3.1 MB · resizing to 2560px</em>
-            <span class="prog" style="margin-top:4px"><i style="width:72%"></i></span></span>
-          <button class="btn btn--sm btn--ghost" type="button">${icon("x", 13)}</button></div>
-        <div class="up"><span class="th">${icon("image", 14)}</span>
-          <span><b>villa-katuntsi-06.jpg</b><em>2.4 MB · stripping metadata</em>
-            <span class="prog" style="margin-top:4px"><i style="width:38%"></i></span></span>
-          <button class="btn btn--sm btn--ghost" type="button">${icon("x", 13)}</button></div>
-        <div class="up"><span class="th">${icon("image", 14)}</span>
-          <span><b>villa-katuntsi-07.jpg</b><em>Waiting</em></span>
-          <button class="btn btn--sm btn--ghost" type="button">${icon("x", 13)}</button></div>
-        <div style="display:flex; align-items:center; gap:8px; margin-top:12px">
-          <button class="btn btn--sm" type="button">Cancel all</button>
-          <span style="margin-left:auto; font-size:11px" class="muted">2 of 7 done · about 40 seconds left</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-hd"><b>Finished, partly</b><span>Never a single number hiding a failure.</span></div>
-      <div class="card-bd">
-        <div class="note note--warn" style="margin-bottom:12px">${icon("alert", 15)}
-          <span><b>5 of 7 added.</b> Two were refused, for different reasons, and both files are still on your computer.</span></div>
-        <div class="up"><span class="th" style="background:var(--danger-50); color:var(--danger-600)">${icon("x", 14)}</span>
-          <span><b>drone-pano.jpg</b><em>12000 × 9000 is 108 megapixels; the limit is 50</em></span>
-          <button class="btn btn--sm" type="button">Resize and retry</button></div>
-        <div class="up"><span class="th" style="background:var(--danger-50); color:var(--danger-600)">${icon("x", 14)}</span>
-          <span><b>terrace.avif</b><em>Carries Exif or XMP that cannot be stripped in process</em></span>
-          <button class="btn btn--sm" type="button">How to fix</button></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Refusals the server actually raises</h2>
-  <div class="g3">
-    <div class="card"><div class="card-hd"><b>Too many pixels</b><span>ImageTooLargeError</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>This photo is 12000 × 9000, which is 108 megapixels. The limit is 50. Export it at half size and
-          it will be well above what any screen needs.</span></div></div></div>
-    <div class="card"><div class="card-hd"><b>Not an image we can serve</b><span>UnsupportedImageError</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>HEIC is what an iPhone saves by default and browsers will not show it. Set the camera to
-          "Most Compatible", or export the photo as JPEG.</span></div></div></div>
-    <div class="card"><div class="card-hd"><b>Claims one thing, is another</b><span>Decode failure</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>This file is named .jpg but could not be decoded as one. It may have been renamed, or truncated
-          part-way through a download.</span></div></div></div>
-  </div>
-  <div class="g3" style="margin-top:16px">
-    <div class="card"><div class="card-hd"><b>AVIF with metadata</b><span>Cannot be stripped in process</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>This AVIF carries Exif or XMP, which may include where the photo was taken, and it cannot be
-          removed here. Re-export it without metadata, or upload it as JPEG.</span></div></div></div>
-    <div class="card"><div class="card-hd"><b>Already here</b><span>Same checksum</span></div>
-      <div class="card-bd"><div class="note note--info">${icon("copy", 15)}
-        <span>This is byte-for-byte the photo already in position 3 of this listing. Add it anyway, or open the
-          one that is already there.</span></div>
-        <div style="display:flex; gap:8px; margin-top:8px"><button class="btn btn--sm" type="button">Open the existing one</button>
-          <button class="btn btn--sm btn--ghost" type="button">Add anyway</button></div></div></div>
-    <div class="card"><div class="card-hd"><b>The connection went</b><span>Resumable</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>4 of 7 uploaded before the connection dropped. The rest are held and will resume on their own —
-          you can leave this page.</span></div>
-        <button class="btn btn--sm" type="button" style="margin-top:8px">Retry now</button></div></div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>While editing</h2>
-  <div class="g3">
-    <div class="card"><div class="card-hd"><b>Unsaved changes</b><span>The only thing that blocks navigation.</span></div>
-      <div class="card-bd">
-        <div style="border:4px solid var(--border); border-radius:var(--r-md); overflow:hidden; box-shadow:var(--e-3)">
-          <div style="padding:12px 16px"><b style="font-family:var(--font-display); font-size:16px">Leave without saving?</b>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:8px">A crop, a focal point and one
-              redaction are not saved. The original is untouched either way.</p></div>
-          <div style="display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border); background:var(--sunken)">
-            <button class="btn btn--sm btn--primary" type="button">Save and leave</button>
-            <button class="btn btn--sm" type="button">Discard</button>
-            <button class="btn btn--sm btn--ghost" type="button">Stay</button></div>
-        </div></div></div>
-    <div class="card"><div class="card-hd"><b>Someone else got there first</b><span>Whole-record conflict.</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>Petar approved this photo two minutes ago, so your copy is out of date. Your crop is kept — you
-          can apply it on top of his version.</span></div>
-        <div style="display:flex; gap:8px; margin-top:8px"><button class="btn btn--sm btn--primary" type="button">See both</button>
-          <button class="btn btn--sm" type="button">Take his version</button></div></div></div>
-    <div class="card"><div class="card-hd"><b>Not your call</b><span>Names who can, not just that you cannot.</span></div>
-      <div class="card-bd"><div class="note note--info">${icon("lock", 15)}
-        <span>A translator can write alt text but not approve a photo for the public site. Mariya Ruseva and
-          Petar Dimitrov can.</span></div>
-        <button class="btn btn--sm" type="button" style="margin-top:8px">${icon("send", 12)}<span>Ask Mariya to approve</span></button></div></div>
-  </div>
-  <div class="g3" style="margin-top:16px">
-    <div class="card"><div class="card-hd"><b>Crop too small</b><span>Checked against what the page needs.</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>This crop is 780 × 520. A listing gallery serves 1200 wide, so it would be upscaled and look
-          soft. Crop wider, or accept it for the thumbnail only.</span></div></div></div>
-    <div class="card"><div class="card-hd"><b>Removal blocked</b><span>The rule that would break.</span></div>
-      <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>MS-00191 would drop to five photos, and a published listing needs six. Remove it and the
-          listing comes off the public site until another is added.</span></div>
-        <div style="display:flex; gap:8px; margin-top:8px"><button class="btn btn--sm btn--danger" type="button">Remove and unpublish</button>
-          <button class="btn btn--sm btn--ghost" type="button">Cancel</button></div></div></div>
-    <div class="card"><div class="card-hd"><b>Removed</b><span>Reversible for as long as the toast is up.</span></div>
-      <div class="card-bd"><div class="toast" style="display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; padding:12px 12px; border-radius:var(--r-md); background:var(--ink-900); color:#fff">
-        ${icon("trash", 17)}<span><b style="font-size:13px; display:block">villa-katuntsi-pool.jpg removed</b>
-        <span style="font-size:11px; color:rgba(255,255,255,.66)">Kept for 30 days before deletion</span></span>
-        <a href="#" style="color:#fff; font-size:13px; font-weight:600; text-decoration:underline">Undo</a></div></div></div>
-  </div>
-</div>
-
-<div class="grp" style="margin-bottom:0">
-  <h2>Nothing there, and too much there</h2>
-  <div class="g3">
-    <div class="card"><div class="card-bd"><div class="empty">${icon("image", 28)}<b>No photos on this listing yet</b>
-      <p>A listing needs six before it can be published. The legacy site had eleven for this address — they may
-        be in the unmatched pile.</p>
-      <div style="display:flex; gap:8px"><button class="btn btn--sm btn--primary" type="button">Upload</button>
-        <button class="btn btn--sm" type="button">Search unmatched</button></div></div></div></div>
-    <div class="card"><div class="card-bd"><div class="empty">${icon("filter", 28)}<b>No photo matches these filters</b>
-      <p>Held · missing alt text · attached to a Melnik listing. Dropping the location filter brings back 34.</p>
-      <button class="btn btn--sm" type="button">Clear the location filter</button></div></div></div>
-    <div class="card"><div class="card-bd">
-      <div class="note note--info" style="margin-bottom:12px">${icon("alert", 15)}
-        <span><b>11,859 files.</b> The grid loads 60 at a time as you scroll. Searching or filtering is faster
-          than scrolling to the bottom.</span></div>
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px">
-        ${[0,1,2,3,4,5,6,7].map(() => `<span class="skel" style="height:44px; border-radius:var(--r-sm)"></span>`).join("")}
-      </div></div></div>
-  </div>
-</div>`;
-fs.writeFileSync(W("MediaStates.dc.html"), sheet({ body: MEDIA_BODY, width: 1560, height: 1900, extraCss: CSS }));
-
-/* ---------------------------------------------------- Interaction system */
-const INT_BODY = `<div class="doc-hd">
-  <div><h1>Interaction rules</h1>
-    <p>The decisions that apply to every screen, written down once so they are not re-argued per feature:
-      when work saves, what a failure says, how the keyboard reaches everything, and what changes when the
-      language runs right to left.</p></div>
-  <span class="pill pill--ink"><i></i>Applies to all 30 screens</span>
-</div>
-
-<div class="grp">
-  <h2>Saving</h2>
-  <div class="g3">
-    <div class="card"><div class="card-hd"><b>Explicit save</b><span>Anything a customer or the public site will see.</span></div>
-      <div class="card-bd" style="font-size:13px; color:var(--text-body); display:grid; gap:8px">
-        <span>A reply, a translation, a listing fact, a page block, a contract. The button says what will
-          happen — <b>Approve and send</b>, not <b>OK</b> — and the screen keeps the draft if you leave.</span>
-        <div style="display:flex; gap:8px"><button class="btn btn--sm btn--primary" type="button">Approve and send</button>
-          <button class="btn btn--sm btn--ghost" type="button">Discard</button></div></div></div>
-    <div class="card"><div class="card-hd"><b>Autosave</b><span>Only where nobody outside can see it.</span></div>
-      <div class="card-bd" style="font-size:12px; color:var(--text-body); display:grid; gap:8px">
-        <span>Filters, saved views, column widths, a note to yourself, a draft in progress. Saved on a pause,
-          with a quiet marker — never a toast.</span>
-        <span class="muted" style="font-size:12px">${icon("check", 12)} Saved 09:41</span></div></div>
-    <div class="card"><div class="card-hd"><b>Optimistic, then honest</b><span>Applies to one-click state changes.</span></div>
-      <div class="card-bd" style="font-size:13px; color:var(--text-body); display:grid; gap:8px">
-        <span>Ticking a checklist item, snoozing a lead, assigning a broker: the row changes immediately. If
-          the write fails the row goes back and says so — it never silently stays changed.</span>
-        <div class="note note--warn">${icon("alert", 13)}<span>Could not snooze — the row is back as it was.</span></div></div></div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>When something fails</h2>
-  <div class="card"><div class="card-bd">
-    <div class="tax" style="font-weight:600; color:var(--text-muted); font-size:11px; border-bottom:1px solid var(--border)">
-      <span>Kind</span><span>What the person is told</span><span>What they are offered</span></div>
-    ${[
-      ["Their input is wrong", "Which field, and what would be right — under the field, not in a banner", "Focus moves to that field; nothing else is lost"],
-      ["A rule stops it", "The rule, in the agency's own words, and what it protects", "The action that satisfies the rule, or a way to override with a reason"],
-      ["Not permitted", "That it needs a different role, and who has it", "Ask that person, in one click"],
-      ["The service is down", "Which service, and what still works without it", "Retry, and a link to the workspace status"],
-      ["Someone else changed it", "What they changed and when", "See both, take theirs, or apply yours on top"],
-      ["Too slow", "That it is still running and can be left alone", "Carry on elsewhere; a notification when it lands"],
-      ["We do not know", "The request id, plainly, and that it was recorded", "Retry, and report it to the agency's developer"],
-    ].map(([a, b, c]) => `<div class="tax"><b style="font-size:13px">${a}</b><span>${b}</span><span class="muted">${c}</span></div>`).join("")}
-    <p style="font-size:13px; color:var(--text-muted); margin-top:12px">No screen shows a bare status code, and
-      nothing says "something went wrong". A message that cannot name the cause names the request id instead.</p>
-  </div></div>
-</div>
-
-<div class="grp">
-  <h2>Keyboard</h2>
-  <div class="g3">
-    <div class="card"><div class="card-hd"><b>Anywhere</b></div><div class="card-bd">
-      ${[[["⌘","K"],"Search everything"],[["G","T"],"Go to Today"],[["G","I"],"Go to the lead inbox"],[["N"],"New — the thing this screen makes"],[["?"],"This list"]]
-        .map(([k, d]) => `<div class="krow"><span class="k">${k.map((x) => `<span class="kbd">${x}</span>`).join("")}</span><span>${d}</span></div>`).join("")}
-    </div></div>
-    <div class="card"><div class="card-hd"><b>In a list</b></div><div class="card-bd">
-      ${[[["J","K"],"Next and previous row"],[["Enter"],"Open the row"],[["X"],"Select the row"],[["E"],"Archive"],[["S"],"Snooze"],[["⌘","Enter"],"The row's primary action"]]
-        .map(([k, d]) => `<div class="krow"><span class="k">${k.map((x) => `<span class="kbd">${x}</span>`).join("")}</span><span>${d}</span></div>`).join("")}
-    </div></div>
-    <div class="card"><div class="card-hd"><b>In the photo editor</b></div><div class="card-bd">
-      ${[[["C"],"Crop"],[["R"],"Rotate 90°"],[["F"],"Focal point"],[["⌘","Z"],"Undo"],[["Esc"],"Cancel the tool"],[["⌘","S"],"Save"]]
-        .map(([k, d]) => `<div class="krow"><span class="k">${k.map((x) => `<span class="kbd">${x}</span>`).join("")}</span><span>${d}</span></div>`).join("")}
-    </div></div>
-  </div>
-  <div class="g2" style="margin-top:16px">
-    <div class="card"><div class="card-hd"><b>Focus</b><span>Visible, and never trapped by accident.</span></div>
-      <div class="card-bd" style="display:grid; gap:12px">
-        <div style="display:flex; gap:12px; align-items:center">
-          <button class="btn btn--sm focusring" type="button">Focused</button>
-          <span class="in focusring" style="width:180px; height:32px">Focused field</span>
-          <span class="box focusring" data-on="1"></span>
-        </div>
-        <p style="font-size:13px; color:var(--text-body)">A 3px ring in the brand red on every focusable
-          thing, on top of whatever the element already shows. Tab order follows the reading order; a dialog
-          traps focus and returns it to the control that opened it; the skip link is the first stop on
-          every page.</p></div></div>
-    <div class="card"><div class="card-hd"><b>Motion</b><span>Fast, and optional.</span></div>
-      <div class="card-bd" style="display:grid; gap:8px; font-size:13px; color:var(--text-body)">
-        <div class="kvline" style="display:flex; justify-content:space-between"><span>Hover and state</span><b>140 ms ease-out</b></div>
-        <div class="kvline" style="display:flex; justify-content:space-between"><span>Entering the page</span><b>200 ms</b></div>
-        <div class="kvline" style="display:flex; justify-content:space-between"><span>Anything longer</span><b>Not used</b></div>
-        <p>No animation carries meaning on its own. Under
-          <span class="mono">prefers-reduced-motion</span> every transition is removed, not merely shortened,
-          and nothing cross-fades.</p></div></div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Reach and language</h2>
-  <div class="g2">
-    <div class="card"><div class="card-hd"><b>Widths</b><span>One product, not a cut-down phone version.</span></div>
-      <div class="card-bd">
-        <div class="bp"><b>≥ 1440</b><span>Rail, content and a right column. Tables show every column.</span></div>
-        <div class="bp"><b>1280–1439</b><span>The right column drops under the content. Rail unchanged.</span></div>
-        <div class="bp"><b>768–1279</b><span>Rail collapses to a drawer. Tables drop the columns marked optional and keep an inline summary.</span></div>
-        <div class="bp"><b>&lt; 768</b><span>Phone layout: a tab bar, cards instead of rows, 44px targets, the same actions.</span></div>
-        <div class="bp"><b>320 × 256</b><span>Still usable, per WCAG reflow — no two-directional scrolling anywhere.</span></div>
-        <div class="bp"><b>200% zoom</b><span>Nothing lost and nothing clipped; the grid reflows rather than scaling.</span></div>
-      </div></div>
-    <div class="card"><div class="card-hd"><b>Right to left</b><span>Hebrew is a full build, not a stylesheet flip.</span></div>
-      <div class="card-bd">
-        <div class="rtl-demo" dir="rtl">
-          <div class="rtl-row" style="background:var(--sunken)"><span class="pill pill--danger"><i></i>באיחור יומיים</span>
-            <b style="font-weight:600">מריה פטרובה</b><span class="av">MP</span></div>
-          <div class="rtl-row"><span class="mono" dir="ltr">MS-00815</span>
-            <span>דירת שני חדרים · סנדנסקי</span><span class="price" dir="ltr">€68,000</span></div>
-          <div class="rtl-row"><button class="btn btn--sm btn--primary" type="button">${icon("send", 13)}השב</button>
-            <span class="muted">התקבל 4 ביולי</span><span></span></div>
-        </div>
-        <p style="font-size:13px; color:var(--text-body); margin-top:12px">The rail moves right, chevrons and
-          the back arrow mirror, and progress runs right to left. References, prices and dates stay left to
-          right inside the mirrored line, because a reference read aloud on the phone must not reverse.</p>
-      </div></div>
-  </div>
-</div>
-
-<div class="grp" style="margin-bottom:0">
-  <h2>Density and long content</h2>
-  <div class="g3">
-    <div class="card"><div class="card-hd"><b>Two densities</b><span>Set per person, not per screen.</span></div>
-      <div class="card-bd" style="display:grid; gap:8px">
-        <div class="seg"><button type="button" data-on="1">Comfortable</button><button type="button">Compact</button></div>
-        <p style="font-size:12px; color:var(--text-body)">Compact takes 8px off every row and drops the
-          secondary line, showing about sixteen rows where comfortable shows twelve. Type size does not change,
-          so the accessibility floor holds in both.</p></div></div>
-    <div class="card"><div class="card-hd"><b>Long strings</b><span>The rule that stops mid-word breaks.</span></div>
-      <div class="card-bd" style="display:grid; gap:8px; font-size:13px">
-        <div style="display:flex; justify-content:space-between; gap:12px"><span class="muted">Person or place</span><span>Truncates with an ellipsis, full text on hover</span></div>
-        <div style="display:flex; justify-content:space-between; gap:12px"><span class="muted">Reference or id</span><span class="mono" style="text-align:right">Never breaks</span></div>
-        <div style="display:flex; justify-content:space-between; gap:12px"><span class="muted">Price or date</span><span>Never wraps</span></div>
-        <div style="display:flex; justify-content:space-between; gap:12px"><span class="muted">A sentence</span><span>Wraps, balanced</span></div>
-        <p class="muted" style="margin-top:4px">Bulgarian runs about a third longer than English, so no label is
-          sized to fit its English width.</p></div></div>
-    <div class="card"><div class="card-hd"><b>Screen readers</b><span>What is announced, and when.</span></div>
-      <div class="card-bd" style="display:grid; gap:8px; font-size:13px; color:var(--text-body)">
-        <div style="display:flex; gap:8px">${icon("check", 14)}<span>A saved change, a failed save and a finished upload are announced politely.</span></div>
-        <div style="display:flex; gap:8px">${icon("check", 14)}<span>A count that changes under you — "4 leads waiting" — is announced when it changes, not on every poll.</span></div>
-        <div style="display:flex; gap:8px">${icon("check", 14)}<span>Every status pill reads its word; the colour and the dot are extra, never the message.</span></div>
-        <div style="display:flex; gap:8px">${icon("check", 14)}<span>A photo without alt text says so, rather than reading its file name.</span></div>
-      </div></div>
-  </div>
-</div>`;
-fs.writeFileSync(W("Interaction.dc.html"), sheet({ body: INT_BODY, width: 1560, height: 1980, extraCss: CSS }));
-
+const errors = [
+  ["Invalid input", "Name the field and the correction.", "Move focus to the field; keep the other entries."],
+  ["Approval missing", "Name the required human decision.", "Open its reason and confirmation form."],
+  ["Not permitted", "State which role can perform the action.", "Show the review owner; do not offer an override."],
+  ["Service unavailable", "Say what could not be loaded or saved.", "Keep the form open and offer a retry."],
+  ["Conflicting change", "Show the current revision and its witness.", "Review both versions before another submission."],
+  ["Still processing", "Show the last confirmed state.", "Prevent duplicate submission; offer status inspection."],
+  ["Unknown failure", "Say that the outcome is unconfirmed.", "Show the request reference and a way to inspect the record."],
+];
+const INT_BODY = `<main class="st">
+  <header class="st-header"><div><h1>Interaction rules</h1><p>Keep the draft, the decision and the confirmed result distinct. These are design requirements; each production route needs its own runtime check.</p></div><span class="pill pill--ink">All workspace surfaces</span></header>
+  <section class="st-section"><h2>Before a consequential change</h2><div class="st-pair">
+    <div class="st-form"><h3>Snooze Maria’s enquiry</h3><div class="st-field"><label for="st-until">Return to the queue</label><input class="in" type="date" id="st-until" value="2026-09-05" required></div><div class="st-field"><label for="st-snooze-reason">Reason *</label><textarea class="in in--area" id="st-snooze-reason" required>The buyer asked us to call tomorrow.</textarea></div><label class="st-check"><input type="checkbox" checked required><span>I, Mariya Ruseva, confirm this date and reason.</span></label><span class="wit wit--none">Awaiting confirmation</span><div class="st-actions"><button class="btn btn--accent" type="button">Confirm snooze</button><button class="btn btn--ghost" type="button">Cancel</button></div></div>
+    <div class="st-state"><h3>Change the record after acceptance</h3><p>While the request is pending, keep the enquiry’s confirmed state visible. Show a waiting state on the submitting control.</p><button class="btn" type="button" disabled aria-busy="true">Recording snooze…</button><p>If it fails, say the snooze was not confirmed. Keep the reason available for review and retry.</p><div class="note note--warn">${icon("alert",18)}<span>Snooze not confirmed. Check the enquiry before retrying.</span></div><p>The same sequence governs assignment, media approval, document completion, consent withdrawal and condition waivers.</p></div>
+  </div></section>
+  <section class="st-section"><h2>Drafting does not grant authority</h2><div class="st-pair"><div class="st-state"><h3>Hermes prepares text</h3><p>Label drafts and keep their sources beside the editable text. A person reviews the actual content before accepting it.</p><span class="pill pill--ai">Hermes draft · not approved</span><span class="wit wit--none">Human review required</span></div><div class="st-state"><h3>Save and publish are separate</h3><p>Saving a draft cannot publish a page, send a reply or make a translation indexable. Price and redirect changes require their own human decision.</p><div class="st-actions"><button class="btn" type="button">Save draft</button><button class="btn" type="button">Open publication review</button></div></div></div></section>
+  <section class="st-section"><h2>Every failure has a next step</h2><div class="st-rule"><b>Situation</b><b>What the person sees</b><b>What happens next</b></div>${errors.map(([a,b,c])=>`<div class="st-rule"><b>${a}</b><span>${b}</span><span class="st-note">${c}</span></div>`).join("")}</section>
+  <section class="st-section"><h2>Keyboard and focus</h2><div class="st-pair"><div class="st-state"><h3>Use native control behaviour</h3><p><kbd>Tab</kbd> and <kbd>Shift + Tab</kbd> follow the reading order. <kbd>Enter</kbd> or <kbd>Space</kbd> activates the focused control.</p><div class="st-actions"><button class="btn st-focus" type="button">Focused button</button><label for="st-focus">Source note</label><input class="in" id="st-focus" placeholder="Not set" style="width:256px"></div><p>A shortcut must open the same confirmation form as its labelled action. It cannot bypass the human review.</p></div><div class="st-state"><h3>Dialogs own focus while open</h3><p>Move focus into the dialog, keep it there, and return it to the opener when the dialog closes. Warn before discarding unsaved input.</p><p>Use the spring focus ring. Respect reduced motion; the witness keeps its text and shape when its animation is removed.</p><p class="st-note">Only advertise shortcuts that the runtime implements.</p></div></div></section>
+  <section class="st-section"><h2>Reading order and long content</h2><div class="st-pair"><div class="st-state"><h3>Keep the decision reachable</h3><p>Desktop rows remain 44px. Phone controls have at least 44px targets. Longer labels may wrap; record names may truncate when the full name is available in the record.</p><p>Prices and references use tabular figures. Keep them intact and isolate their direction.</p><span class="st-long" lang="bg">Александрина Константинова Димитрова · Потвърдете информацията за имота</span><p class="st-note">Test the layout at 200% text size and 320px reflow. A fixed canvas frame is not proof of production responsiveness.</p></div><div class="st-rtl" dir="rtl" lang="he"><h3>פרטי הנכס</h3><div class="st-rtl-row"><span>מחיר</span><bdi dir="ltr">€1,245,000</bdi></div><div class="st-rtl-row"><span>מספר נכס</span><bdi dir="ltr">MS-00191</bdi></div><div class="st-rtl-row"><span>סנדנסקי</span><button class="btn" type="button">פרטים</button></div><p lang="en" dir="ltr">The public Hebrew layout mirrors navigation, icon placement and reading order. Figures retain their own direction.</p></div></div></section>
+  <section class="st-section"><h2>State coverage</h2><div class="st-actions"><span class="pill pill--ink">Default</span><button class="btn" style="background:var(--sunken)" type="button">Hover</button><button class="btn st-focus" type="button">Focus</button><button class="btn" type="button" disabled>Disabled</button><button class="btn" type="button" disabled aria-busy="true">Loading…</button></div><div class="st-grid"><div class="st-state"><h3>Empty</h3><p>No records yet. Explain how one arrives.</p></div><div class="st-state"><h3>Error</h3><p>Name the failed action and retain the editable input.</p></div><div class="st-state"><h3>Partial</h3><p>Show confirmed data and name the missing portion.</p></div><div class="st-state"><h3>Offline</h3><p>Stop changes that require a confirmed server response.</p></div><div class="st-state"><h3>Too much data</h3><p>Keep filtering and pagination in reach.</p></div><div class="st-state"><h3>Announced result</h3><p role="status">Draft saved. Publication review is still pending.</p><p>Announce changes when they occur, not on every refresh.</p></div></div></section>
+</main>`;
+for (const [name, body] of [["MediaStates", MEDIA_BODY], ["Interaction", INT_BODY]]) {
+  fs.writeFileSync(new URL(`../${name}.dc.html`, import.meta.url), sheet({ body, width:1560, height:0, pad:24, extraCss:CSS }));
+}
 console.log("MediaStates, Interaction");
