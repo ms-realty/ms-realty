@@ -102,7 +102,7 @@
       "id": "mobile_full_reviewed_gallery",
       "status": "pass",
       "evidence": {
-        "listing_id": "MS-CRAWL-0114",
+        "listing_id": "MS-00191",
         "reviewed_slides": 5,
         "fixture": "recovered_wordpress_originals"
       }

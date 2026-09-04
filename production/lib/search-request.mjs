@@ -69,7 +69,11 @@ const SEARCH_REQUEST_FIELDS = new Set([
 ]);
 const SEARCH_INTENT_FIELD_SET = new Set(SEARCH_INTENT_INPUT_FIELDS);
 const SERIALIZED_SEARCH_INTENT_FIELD_SET = new Set([...SEARCH_INTENT_INPUT_FIELDS, "mandatory_filters"]);
-const EXACT_REFERENCE = /\bMS-CRAWL-\d{4,}\b/iu;
+// A visitor types the reference a broker said out loud, which is the lot
+// number: MS-00815, or MS-00567-1 for a sub-lot. The crawl-era form still
+// resolves, because the thirty-eight merged listings kept it and because it
+// is what every printed page and old email carries.
+const EXACT_REFERENCE = /\bMS-(?:CRAWL-\d{4,}|\d{4,}(?:-\d{1,3})?)\b/iu;
 const UNSAFE_NL = /(?:<[^>]+>|\b(?:ignore|override|system|developer|prompt|instruction|tool|hermes|assistant|chat|publish|send)\b|https?:\/\/|javascript:)/iu;
 const PROPERTY_RULES = [
   ["apartment", /(?:\b(?:apartment|apartments)\b|апартамент(?:и)?)/iu],

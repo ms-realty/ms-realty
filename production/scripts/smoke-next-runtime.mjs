@@ -97,7 +97,7 @@ try {
   assert(home.headers.get("content-type")?.startsWith("text/html"), "Next localized home must render HTML");
   // The owner published the full catalog, so the home page now proves the
   // OPPOSITE of what it used to: approved listings must actually appear.
-  assert((await home.text()).includes('data-listing-id="MS-CRAWL-'), "Next localized home shows no published listing");
+  assert(/data-listing-id="MS-0\d{4}/u.test(await home.text()), "Next localized home shows no published listing");
 
   const listing = await fetch(`${baseUrl}/bg/imoti/MS-00815`);
   assert(listing.status === 200, "Next localized listing must preserve its approved URL");
