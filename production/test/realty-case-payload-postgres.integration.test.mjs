@@ -22,6 +22,7 @@ const payloadRuntime = path.join(root, "node_modules", "payload", "dist", "index
 const payloadAuthority = path.join(root, "production", "lib", "realty-case-payload-authority.mjs");
 const hermesOwnerCommand = path.join(root, "production", "lib", "hermes-owner-command.mjs");
 const privateContactVault = path.join(root, "production", "lib", "private-contact-vault.mjs");
+const operationsStore = path.join(root, "production", "lib", "operations-durable-store.mjs");
 const leadDurableStore = path.join(root, "production", "lib", "lead-durable-store.mjs");
 const httpRuntime = path.join(root, "production", "lib", "http.mjs");
 const durableLeadMigration = path.join(root, "migrations", "20260813_120000_durable_lead_side_effects.ts");
@@ -844,6 +845,7 @@ function exerciseHermesOwnerCommand(env) {
       };
       const options = {
         operator: { id: "payload-owner-it", roles: ["admin"], workspace_ids: [] },
+        workspaceId: process.env.MS_REALTY_WORKSPACE_ID,
         payload,
         secret: process.env.MS_REALTY_PROVIDER_TOKEN_KEY,
         provider: async () => {
@@ -884,6 +886,7 @@ function exerciseHermesOwnerCommand(env) {
       });
       assert.equal(stored.docs.length, 1);
       assert.equal(stored.docs[0].operator_id, "payload-owner-it");
+      assert.equal(stored.docs[0].workspace_id, process.env.MS_REALTY_WORKSPACE_ID);
       assert.equal(JSON.stringify(stored.docs[0]).includes(input.command), false);
       const opened = openPrivateContactEnvelope(stored.docs[0].receipt_envelope, {
         secret: process.env.MS_REALTY_PROVIDER_TOKEN_KEY,
@@ -905,6 +908,146 @@ function exerciseHermesOwnerCommand(env) {
   command(process.execPath, ["--input-type=module", "--eval", script], {
     env,
     label: "exercising Hermes owner command against Payload/Postgres",
+  });
+}
+
+function exerciseOperationsStore(env, hermesAuditPath, workspaceId) {
+  const script = `
+    import assert from "node:assert/strict";
+    import fs from "node:fs";
+    import { getPayload } from ${JSON.stringify(pathToFileURL(payloadRuntime).href)};
+    import payloadConfig from ${JSON.stringify(pathToFileURL(payloadConfig).href)};
+    import {
+      automationConfirmation,
+      createAutomationRule,
+      createTask,
+      readAutomationRun,
+      readHermesRunHistory,
+      readTask,
+      runAutomationRule,
+      updateAutomationRule,
+    } from ${JSON.stringify(pathToFileURL(operationsStore).href)};
+
+    const workspaceId = ${JSON.stringify(workspaceId)};
+    const hermesAuditPath = ${JSON.stringify(hermesAuditPath)};
+    const principal = { id: "operations-owner-it", roles: ["admin"], workspace_ids: [] };
+    let payload;
+    let exitCode = 0;
+    try {
+      payload = await getPayload({ config: await payloadConfig });
+      const taskInput = {
+        task_id: "operations-task-payload-it",
+        idempotency_key: "operations-task-payload-it-key",
+        title: "Review the source-backed listing",
+        source_type: "listing",
+        source_id: "MS-CRAWL-0001",
+        assignee_id: "operations-owner-it",
+        due_at: "2026-09-01T10:00:00.000Z",
+        priority: "high",
+      };
+      const created = await createTask({ payload, workspaceId, actor: principal.id, input: taskInput });
+      assert.equal(created.idempotent, false);
+      assert.equal(created.task.task_id, taskInput.task_id);
+      await payload.destroy();
+      // Payload caches the default instance globally even after destroy(). A
+      // distinct key gives this assertion a genuinely fresh connection while
+      // keeping the create/reload check inside one isolated child process.
+      payload = await getPayload({ config: await payloadConfig, key: "operations-reload" });
+      const reloaded = await readTask({ payload, workspaceId, taskId: taskInput.task_id });
+      assert.equal(reloaded.title, taskInput.title);
+      await assert.rejects(
+        createTask({
+          payload,
+          workspaceId,
+          actor: principal.id,
+          input: { ...taskInput, task_id: "operations-task-payload-conflict", title: "Different source work" },
+        }),
+        (error) => error.code === "idempotency_conflict" && error.status === 409,
+      );
+
+      const rule = await createAutomationRule({
+        payload,
+        workspaceId,
+        actor: principal.id,
+        principal,
+        input: {
+          rule_id: "operations-rule-payload-it",
+          idempotency_key: "operations-rule-payload-it-key",
+          name: "Approved listing schedule",
+          rule_type: "listing_publication_schedules",
+          schedule: "manual",
+        },
+      });
+      assert.equal(rule.rule.enabled, false);
+      await updateAutomationRule({
+        payload,
+        workspaceId,
+        actor: principal.id,
+        principal,
+        ruleId: rule.rule.rule_id,
+        input: { enabled: true, confirmation: automationConfirmation("enable", rule.rule.rule_id) },
+      });
+      const run = await runAutomationRule({
+        payload,
+        workspaceId,
+        actor: principal.id,
+        principal,
+        ruleId: rule.rule.rule_id,
+        input: {
+          run_id: "operations-run-payload-it",
+          idempotency_key: "operations-run-payload-it-key",
+          confirmation: automationConfirmation("run", rule.rule.rule_id),
+        },
+        runner: async () => ({ queued: 1, url: "https://must-not-persist.example" }),
+      });
+      assert.equal(run.run.status, "succeeded");
+      assert.equal(run.run.result_summary.queued, 1);
+      assert.equal(run.run.result_summary.url, undefined);
+      const runReadback = await readAutomationRun({ payload, workspaceId, runId: run.run.run_id });
+      assert.equal(runReadback.run.status, "succeeded");
+      assert.deepEqual(runReadback.failures, []);
+
+      fs.writeFileSync(hermesAuditPath, JSON.stringify({
+        recorded_at: "2026-09-01T11:00:00.000Z",
+        workspace_id: workspaceId,
+        task_id: "operations-hermes-payload-it",
+        object_type: "listing",
+        object_id: "MS-CRAWL-0001",
+        source_locale: "bg",
+        target_locale: "en",
+        status: "hermes_drafted",
+        provider_mode: "self_hosted",
+        source_hash: "a".repeat(64),
+        draft_hash: "b".repeat(64),
+        has_output: true,
+        public_indexable: false,
+        human_approved: false,
+        can_publish: false,
+        can_mark_indexable: false,
+        prompt: "never return this",
+      }) + "\\n");
+      const history = await readHermesRunHistory({ auditPath: hermesAuditPath, workspaceId });
+      assert.equal(history[0].run_id, "operations-hermes-payload-it");
+      assert.equal(history[0].can_publish, false);
+      assert.equal(Object.hasOwn(history[0], "prompt"), false);
+    } catch (error) {
+      console.error(error.stack || error);
+      exitCode = 1;
+    } finally {
+      if (payload) {
+        try {
+          await payload.destroy();
+        } catch (error) {
+          console.error(error.stack || error);
+          exitCode = 1;
+        }
+      }
+    }
+    process.exit(exitCode);
+  `;
+  command(process.execPath, ["--input-type=module", "--eval", script], {
+    env,
+    label: "exercising durable operations against Payload/Postgres",
   });
 }
 
@@ -945,6 +1088,7 @@ test(
       command(process.execPath, [payloadCli, "migrate"], { env, label: "running Payload migrations" });
       command(process.execPath, [payloadCli, "migrate:status"], { env, label: "checking Payload migration status" });
       exerciseHermesOwnerCommand(env);
+      exerciseOperationsStore(env, path.join(directory, "hermes-operations-audit.jsonl"), workspaceId);
       exerciseDurableLeadMigrationRoundTrip(env);
       exerciseDurableLeadStore(env);
       await exercisePayloadAuthority(env, authorityWorkspaceId);

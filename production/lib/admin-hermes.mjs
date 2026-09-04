@@ -67,6 +67,7 @@ export async function buildAdminHermesPayload({
   receiptSecret = "",
   providerConnectionPayload = null,
   readConnections = readProviderConnections,
+  workspaceId = null,
   commandResult = null,
   commandError = null,
   commandPrefill = "",
@@ -133,6 +134,7 @@ export async function buildAdminHermesPayload({
         rows: await readHermesOwnerReceipts({
           payload: receiptPayload,
           operatorId: operator.id,
+          workspaceId,
           secret: receiptSecret,
           limit: 5,
         }),

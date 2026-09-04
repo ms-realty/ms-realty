@@ -29,6 +29,8 @@ import * as migration_20260830_130000_listing_translation_workflow_status from '
 import * as migration_20260901_120000_durable_media_lifecycle from './20260901_120000_durable_media_lifecycle';
 import * as migration_20260901_130000_document_signatures from './20260901_130000_document_signatures';
 import * as migration_20260901_130000_provider_connection_workspace_scope from './20260901_130000_provider_connection_workspace_scope';
+import * as migration_20260901_140000_operations_workspace from './20260901_140000_operations_workspace';
+import * as migration_20260902_120000_hermes_owner_receipt_workspace_idempotency from './20260902_120000_hermes_owner_receipt_workspace_idempotency';
 
 export const migrations = [
   {
@@ -185,5 +187,15 @@ export const migrations = [
     up: migration_20260901_130000_provider_connection_workspace_scope.up,
     down: migration_20260901_130000_provider_connection_workspace_scope.down,
     name: '20260901_130000_provider_connection_workspace_scope',
+  },
+  {
+    up: migration_20260901_140000_operations_workspace.up,
+    down: migration_20260901_140000_operations_workspace.down,
+    name: '20260901_140000_operations_workspace',
+  },
+  {
+    up: migration_20260902_120000_hermes_owner_receipt_workspace_idempotency.up,
+    down: migration_20260902_120000_hermes_owner_receipt_workspace_idempotency.down,
+    name: '20260902_120000_hermes_owner_receipt_workspace_idempotency',
   },
 ];

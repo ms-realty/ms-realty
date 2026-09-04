@@ -5,16 +5,21 @@ import {
   HERMES_OWNER_RECEIPT_COLLECTION,
   HermesOwnerCommandError,
   readHermesOwnerReceipts,
-  runHermesOwnerCommand,
+  runHermesOwnerCommand as runHermesOwnerCommandWithoutWorkspace,
 } from "../lib/hermes-owner-command.mjs";
 import { createPrivateContactEnvelope, openPrivateContactEnvelope } from "../lib/private-contact-vault.mjs";
 
 const SECRET = "hermes-owner-command-test-secret-longer-than-thirty-two-characters";
 const STARTED_AT = "2026-08-28T12:00:00.000Z";
 const COMPLETED_AT = "2026-08-28T12:00:01.000Z";
+const TEST_WORKSPACE = "workspace-hermes-test";
 const operator = { id: "payload-owner", roles: ["admin"], workspace_ids: [] };
 
-function fakePayload(seed = []) {
+function runHermesOwnerCommand(input, options = {}) {
+  return runHermesOwnerCommandWithoutWorkspace(input, { workspaceId: TEST_WORKSPACE, ...options });
+}
+
+function fakePayload(seed = [], { receiptUniqueByWorkspace = false } = {}) {
   const docs = seed.map((doc, index) => ({ id: index + 1, ...doc }));
   return {
     docs,
@@ -23,15 +28,26 @@ function fakePayload(seed = []) {
       const provider = where?.provider?.equals;
       const key = where?.idempotency_key?.equals;
       const operatorId = where?.operator_id?.equals;
+      const workspaceId = where?.workspace_id?.equals || where?.and?.find((clause) => clause.workspace_id)?.workspace_id?.equals;
+      const scopedOperatorId = where?.and?.find((clause) => clause.operator_id)?.operator_id?.equals;
       if (provider) rows = rows.filter((doc) => doc.provider === provider);
       if (key) rows = rows.filter((doc) => doc.idempotency_key === key);
-      if (operatorId) rows = rows.filter((doc) => doc.operator_id === operatorId);
+      if (operatorId || scopedOperatorId) rows = rows.filter((doc) => doc.operator_id === (operatorId || scopedOperatorId));
+      if (workspaceId) rows = rows.filter((doc) => doc.workspace_id === workspaceId);
       rows.sort((left, right) => String(right.started_at).localeCompare(String(left.started_at)));
       return { docs: rows.slice(0, limit) };
     },
     async create({ data }) {
       assert.equal(data.status, "requested", "the durable fence exists before the model runs");
-      if (docs.some((doc) => doc.idempotency_key === data.idempotency_key)) throw new Error("duplicate");
+      if (
+        docs.some(
+          (doc) =>
+            doc.idempotency_key === data.idempotency_key &&
+            (!receiptUniqueByWorkspace || doc.workspace_id === data.workspace_id),
+        )
+      ) {
+        throw Object.assign(new Error("duplicate key value violates unique constraint"), { code: "23505" });
+      }
       const doc = { id: docs.length + 1, ...data };
       docs.push(doc);
       return doc;
@@ -126,6 +142,7 @@ function storedReceipt(
   return {
     idempotency_key: input.idempotencyKey,
     operator_id: operator.id,
+    workspace_id: TEST_WORKSPACE,
     status,
     command_digest: `sha256:${cryptoDigest(JSON.stringify({ command: input.command, locale: input.locale || "en", contextDigest }))}`,
     model: "injected",
@@ -292,6 +309,94 @@ test("Hermes owner command receipts cannot be replayed across operators", async 
     (error) => error instanceof HermesOwnerCommandError && error.code === "idempotency_conflict" && error.status === 409,
   );
   assert.equal(providerCalls, 0);
+});
+
+test("Hermes owner receipts are workspace-scoped and new commands persist their workspace", async () => {
+  const workspaceA = "workspace-hermes-a";
+  const workspaceB = "workspace-hermes-b";
+  const firstInput = command({ idempotencyKey: "hermes-owner-workspace-a" });
+  const secondInput = command({ idempotencyKey: "hermes-owner-workspace-b" });
+  const payload = fakePayload([
+    { ...storedReceipt(firstInput, { status: "planned", plan: safePlan() }), workspace_id: workspaceA },
+    { ...storedReceipt(secondInput, { status: "planned", plan: safePlan() }), workspace_id: workspaceB },
+  ]);
+  const scoped = await readHermesOwnerReceipts({ payload, operatorId: operator.id, workspaceId: workspaceA, secret: SECRET });
+  assert.deepEqual(scoped.map((receipt) => [receipt.idempotency_key, receipt.workspace_id]), [[firstInput.idempotencyKey, workspaceA]]);
+
+  const createdPayload = fakePayload();
+  await runHermesOwnerCommand(command({ idempotencyKey: "hermes-owner-workspace-new" }), {
+    operator,
+    workspaceId: workspaceB,
+    payload: createdPayload,
+    secret: SECRET,
+    provider: async () => safePlan(),
+    now: () => STARTED_AT,
+  });
+  assert.equal(createdPayload.docs[0].workspace_id, workspaceB);
+});
+
+test("Hermes receipt idempotency is scoped by workspace and global collisions are explicit", async () => {
+  const workspaceA = "workspace-hermes-collision-a";
+  const workspaceB = "workspace-hermes-collision-b";
+  const input = command({ idempotencyKey: "hermes-owner-cross-workspace-key" });
+  const run = (payload, workspaceId) =>
+    runHermesOwnerCommand(input, {
+      operator,
+      workspaceId,
+      payload,
+      secret: SECRET,
+      provider: async () => safePlan(),
+      now: () => COMPLETED_AT,
+    });
+
+  const legacyGlobalPayload = fakePayload();
+  await run(legacyGlobalPayload, workspaceA);
+  await assert.rejects(
+    run(legacyGlobalPayload, workspaceB),
+    (error) => error instanceof HermesOwnerCommandError && error.code === "idempotency_conflict" && error.status === 409,
+  );
+
+  const workspaceScopedPayload = fakePayload([], { receiptUniqueByWorkspace: true });
+  const first = await run(workspaceScopedPayload, workspaceA);
+  const second = await run(workspaceScopedPayload, workspaceB);
+  assert.equal(first.status, "planned");
+  assert.equal(second.status, "planned");
+  assert.deepEqual(
+    workspaceScopedPayload.docs.map((doc) => [doc.idempotency_key, doc.workspace_id]),
+    [
+      [input.idempotencyKey, workspaceA],
+      [input.idempotencyKey, workspaceB],
+    ],
+  );
+});
+
+test("Hermes owner commands refuse concurrent unscoped writes before fencing or provider work", async () => {
+  const payload = fakePayload();
+  let providerCalls = 0;
+  const options = {
+    operator,
+    payload,
+    secret: SECRET,
+    provider: async () => {
+      providerCalls += 1;
+      return safePlan();
+    },
+    now: () => COMPLETED_AT,
+  };
+  const outcomes = await Promise.allSettled([
+    runHermesOwnerCommandWithoutWorkspace(command({ idempotencyKey: "hermes-unscoped-race" }), options),
+    runHermesOwnerCommandWithoutWorkspace(command({ idempotencyKey: "hermes-unscoped-race" }), options),
+  ]);
+
+  assert.deepEqual(
+    outcomes.map((outcome) => [outcome.status, outcome.reason?.code, outcome.reason?.status]),
+    [
+      ["rejected", "hermes_workspace_required", 503],
+      ["rejected", "hermes_workspace_required", 503],
+    ],
+  );
+  assert.equal(providerCalls, 0);
+  assert.equal(payload.docs.length, 0);
 });
 
 test("failed receipts are terminal and return their stored failure", async () => {

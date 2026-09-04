@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 111,
-    "admin_methods": 130,
+    "admin_route_files": 121,
+    "admin_methods": 148,
     "admin_pages": 19,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 152,
-    "structurally_covered_workflows": 152,
+    "authorized_workflows": 170,
+    "structurally_covered_workflows": 170,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -269,6 +269,74 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/approved-content/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_automations",
+      "method": "GET",
+      "pathname": "/api/admin/automations",
+      "family": "operations",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_automations_by_ruleId",
+      "method": "GET",
+      "pathname": "/api/admin/automations/{ruleId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/[ruleId]/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_automations_runs",
+      "method": "GET",
+      "pathname": "/api/admin/automations/runs",
+      "family": "operations",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/runs/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_automations_runs_by_runId",
+      "method": "GET",
+      "pathname": "/api/admin/automations/runs/{runId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/runs/[runId]/route.js",
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
@@ -545,6 +613,40 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/hermes/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_hermes_runs",
+      "method": "GET",
+      "pathname": "/api/admin/hermes/runs",
+      "family": "hermes",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/hermes/runs/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_hermes_runs_by_runId",
+      "method": "GET",
+      "pathname": "/api/admin/hermes/runs/{runId}",
+      "family": "hermes",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/hermes/runs/[runId]/route.js",
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
@@ -1166,6 +1268,40 @@
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
+      "operation": "admin_get_tasks",
+      "method": "GET",
+      "pathname": "/api/admin/tasks",
+      "family": "operations",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_tasks_by_taskId",
+      "method": "GET",
+      "pathname": "/api/admin/tasks/{taskId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": true,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/[taskId]/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
       "operation": "admin_get_team",
       "method": "GET",
       "pathname": "/api/admin/team",
@@ -1286,6 +1422,62 @@
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
+      "operation": "admin_patch_automations_by_ruleId",
+      "method": "PATCH",
+      "pathname": "/api/admin/automations/{ruleId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/[ruleId]/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_patch_tasks_by_taskId",
+      "method": "PATCH",
+      "pathname": "/api/admin/tasks/{taskId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/[taskId]/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
       "operation": "admin_post_accounts",
       "method": "POST",
       "pathname": "/api/admin/accounts",
@@ -1339,6 +1531,90 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/accounts/link/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_automations",
+      "method": "POST",
+      "pathname": "/api/admin/automations",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_automations_by_ruleId",
+      "method": "POST",
+      "pathname": "/api/admin/automations/{ruleId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/[ruleId]/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_automations_by_ruleId_run",
+      "method": "POST",
+      "pathname": "/api/admin/automations/{ruleId}/run",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/[ruleId]/run/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
@@ -2985,6 +3261,90 @@
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
+      "operation": "admin_post_tasks",
+      "method": "POST",
+      "pathname": "/api/admin/tasks",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_tasks_by_taskId",
+      "method": "POST",
+      "pathname": "/api/admin/tasks/{taskId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/[taskId]/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_tasks_by_taskId_complete",
+      "method": "POST",
+      "pathname": "/api/admin/tasks/{taskId}/complete",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/[taskId]/complete/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
       "operation": "admin_post_team",
       "method": "POST",
       "pathname": "/api/admin/team",
@@ -3207,6 +3567,62 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/views/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_put_automations_by_ruleId",
+      "method": "PUT",
+      "pathname": "/api/admin/automations/{ruleId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/automations/[ruleId]/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_put_tasks_by_taskId",
+      "method": "PUT",
+      "pathname": "/api/admin/tasks/{taskId}",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/[taskId]/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     }
   ],

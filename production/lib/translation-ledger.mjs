@@ -15,8 +15,10 @@ export function auditPathFor(filePath, auditPath) {
 }
 
 function hermesAuditRow(task, recordedAt) {
+  const workspaceId = String(task.workspace_id || "").trim();
   return {
     recorded_at: recordedAt,
+    ...(workspaceId ? { workspace_id: workspaceId } : {}),
     task_id: task.id,
     object_type: task.object_type,
     object_id: task.object_id,
@@ -42,14 +44,16 @@ export function resetTranslationLedger(filePath = DEFAULT_TRANSLATION_LEDGER_PAT
 
 export function appendTranslationTask(
   task,
-  { filePath = DEFAULT_TRANSLATION_LEDGER_PATH, auditPath, recordedAt = "2026-07-05T00:00:00Z" } = {},
+  { filePath = DEFAULT_TRANSLATION_LEDGER_PATH, auditPath, recordedAt = "2026-07-05T00:00:00Z", workspaceId = process.env.MS_REALTY_WORKSPACE_ID } = {},
 ) {
+  const resolvedWorkspaceId = String(workspaceId || "").trim();
+  const persistedTask = resolvedWorkspaceId && !task.workspace_id ? { ...task, workspace_id: resolvedWorkspaceId } : task;
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(task)}\n`);
-  if (task.hermes) {
-    fs.appendFileSync(auditPathFor(filePath, auditPath), `${JSON.stringify(hermesAuditRow(task, recordedAt))}\n`);
+  fs.appendFileSync(filePath, `${JSON.stringify(persistedTask)}\n`);
+  if (persistedTask.hermes) {
+    fs.appendFileSync(auditPathFor(filePath, auditPath), `${JSON.stringify(hermesAuditRow(persistedTask, recordedAt))}\n`);
   }
-  return task;
+  return persistedTask;
 }
 
 export function readTranslationLedger(filePath = DEFAULT_TRANSLATION_LEDGER_PATH) {

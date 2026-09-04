@@ -18,8 +18,9 @@ export const HERMES_OWNER_RECEIPT_COLLECTION = {
     defaultColumns: ["operator_id", "status", "model", "started_at", "completed_at"],
   },
   fields: [
-    { name: "idempotency_key", type: "text", required: true, unique: true, index: true, maxLength: 128 },
+    { name: "idempotency_key", type: "text", required: true, maxLength: 128 },
     { name: "operator_id", type: "text", required: true, index: true, maxLength: 160 },
+    { name: "workspace_id", type: "text", index: true, maxLength: 160 },
     { name: "status", type: "text", required: true, index: true, maxLength: 24 },
     { name: "command_digest", type: "text", required: true, maxLength: 71 },
     { name: "model", type: "text", required: true, maxLength: 160 },
@@ -29,6 +30,9 @@ export const HERMES_OWNER_RECEIPT_COLLECTION = {
     { name: "failure_code", type: "text", maxLength: 64 },
     { name: "receipt_envelope", type: "json", required: true, admin: { hidden: true } },
   ],
+  // Replay lookup is workspace + key; operator ownership is checked before a
+  // stored plan is returned, so the database fence follows that same scope.
+  indexes: [{ fields: ["workspace_id", "idempotency_key"], unique: true }],
 };
 
 export const HERMES_OWNER_DESTINATIONS = Object.freeze([
@@ -60,6 +64,7 @@ const PROVIDER_NETWORK_ERROR_CODES = new Set(["ECONNABORTED", "ECONNREFUSED", "E
 
 const FAILURE_MESSAGES = Object.freeze({
   bad_request: "Tell Hermes what you want to prepare.",
+  hermes_workspace_required: "Hermes owner commands require a configured workspace before planning can continue.",
   hermes_receipt_unavailable: "Hermes cannot run until its durable receipt store is available.",
   hermes_context_unavailable: "Hermes cannot plan until authoritative business context is available.",
   hermes_command_contains_sensitive_data: "Hosted Hermes planning accepts only privacy-safe owner commands.",
@@ -78,6 +83,7 @@ const FAILURE_MESSAGES = Object.freeze({
 
 const FAILURE_STATUS = Object.freeze({
   bad_request: 400,
+  hermes_workspace_required: 503,
   hermes_receipt_unavailable: 503,
   hermes_context_unavailable: 503,
   hermes_command_contains_sensitive_data: 400,
@@ -443,17 +449,26 @@ async function runtimePayload(payload) {
   }
 }
 
-async function findReceipt(runtime, idempotencyKey) {
+async function findReceipt(runtime, idempotencyKey, { workspaceId = null } = {}) {
+  const where = workspaceId
+    ? { and: [{ idempotency_key: { equals: idempotencyKey } }, { workspace_id: { equals: workspaceId } }] }
+    : { idempotency_key: { equals: idempotencyKey } };
   const result = await runtime.find({
     collection: "hermes_owner_receipts",
     depth: 0,
     limit: 1,
     overrideAccess: true,
     pagination: false,
-    where: { idempotency_key: { equals: idempotencyKey } },
+    where,
   });
   if (!Array.isArray(result?.docs)) throw new Error("Payload Hermes receipt query did not return documents");
   return result.docs[0] || null;
+}
+
+function isUniqueViolation(cause) {
+  const code = String(cause?.code || "");
+  const message = String(cause?.message || "");
+  return code === "23505" || /duplicate|unique constraint|unique index/i.test(message);
 }
 
 function receiptEnvelope(idempotencyKey, command, evidence, plan, { secret, storedAt, locale, contextDigest } = {}) {
@@ -511,6 +526,7 @@ function safeReceipt(document, secret, { idempotent = false } = {}) {
   const plan = document.status === "planned" ? opened.plan : null;
   return {
     idempotency_key: String(document.idempotency_key),
+    ...(document.workspace_id ? { workspace_id: String(document.workspace_id) } : {}),
     status: String(document.status),
     model: String(document.model),
     started_at: document.started_at || null,
@@ -587,8 +603,11 @@ function requestedReceiptIsStale(document, now) {
   return nowAt - startedAt > HERMES_OWNER_RECEIPT_REQUEST_TTL_MS;
 }
 
-async function existingReceipt(runtime, document, input, secret, operatorId, { now } = {}) {
+async function existingReceipt(runtime, document, input, secret, operatorId, { now, workspaceId = null } = {}) {
   if (document.operator_id !== operatorId) {
+    throw new HermesOwnerCommandError("idempotency_conflict", { status: 409 });
+  }
+  if (workspaceId && String(document.workspace_id || "") !== workspaceId) {
     throw new HermesOwnerCommandError("idempotency_conflict", { status: 409 });
   }
   let opened;
@@ -622,7 +641,7 @@ async function existingReceipt(runtime, document, input, secret, operatorId, { n
     } catch (cause) {
       let raced;
       try {
-        raced = await findReceipt(runtime, input.idempotencyKey);
+        raced = await findReceipt(runtime, input.idempotencyKey, { workspaceId });
       } catch (readCause) {
         throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: readCause });
       }
@@ -641,8 +660,9 @@ async function existingReceipt(runtime, document, input, secret, operatorId, { n
   });
 }
 
-export async function readHermesOwnerReceipts({ payload = null, operatorId, secret, limit = 5 } = {}) {
+export async function readHermesOwnerReceipts({ payload = null, operatorId, workspaceId = null, secret, limit = 5 } = {}) {
   const operator = requiredText(operatorId, "operatorId", 160);
+  const workspace = workspaceId === null || workspaceId === undefined || workspaceId === "" ? null : requiredText(workspaceId, "workspaceId", 160);
   if (String(secret || "").length < 32) throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
   try {
     const runtime = await runtimePayload(payload);
@@ -653,7 +673,9 @@ export async function readHermesOwnerReceipts({ payload = null, operatorId, secr
       overrideAccess: true,
       pagination: false,
       sort: "-started_at",
-      where: { operator_id: { equals: operator } },
+      where: workspace
+        ? { and: [{ operator_id: { equals: operator } }, { workspace_id: { equals: workspace } }] }
+        : { operator_id: { equals: operator } },
     });
     if (!Array.isArray(result?.docs)) throw new Error("Payload Hermes receipt list did not return documents");
     return result.docs.map((document) => safeReceipt(document, secret));
@@ -667,6 +689,7 @@ export async function runHermesOwnerCommand(
   input,
   {
     operator,
+    workspaceId = null,
     payload = null,
     secret,
     env = process.env,
@@ -679,12 +702,14 @@ export async function runHermesOwnerCommand(
   } = {},
 ) {
   const normalized = normalizeInput(input);
+  const workspace = workspaceId === null || workspaceId === undefined || workspaceId === "" ? null : requiredText(workspaceId, "workspaceId", 160);
   const fixtureOperatorId = operator?.source === "shared_token" && env.NODE_ENV !== "production" ? "local-admin-smoke" : null;
   const operatorId = requiredText(operator?.id || fixtureOperatorId, "operatorId", 160);
   if (!Array.isArray(operator?.roles) || !operator.roles.includes("admin")) {
     throw new HermesOwnerCommandError("bad_request");
   }
   if (String(secret || "").length < 32) throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503 });
+  if (!workspace) throw new HermesOwnerCommandError("hermes_workspace_required", { status: 503 });
   const startedAt = isoTimestamp(typeof now === "function" ? now() : now);
   const normalizedBusiness = normalizeBusinessContext(businessContext, { required: requireBusinessContext });
   const contextDigest = normalizedBusiness ? businessContextDigest(normalizedBusiness) : "sha256:none";
@@ -693,12 +718,12 @@ export async function runHermesOwnerCommand(
   const runtime = await runtimePayload(payload);
   let existing;
   try {
-    existing = await findReceipt(runtime, normalized.idempotencyKey);
+    existing = await findReceipt(runtime, normalized.idempotencyKey, { workspaceId: workspace });
   } catch (cause) {
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }
   if (existing) {
-    return existingReceipt(runtime, existing, receiptIdentity, secret, operatorId, { now });
+    return existingReceipt(runtime, existing, receiptIdentity, secret, operatorId, { now, workspaceId: workspace });
   }
 
   const fallbackProvider = provider ? null : hermesProviderConfigFromEnv(env);
@@ -729,6 +754,7 @@ export async function runHermesOwnerCommand(
   const requested = {
     idempotency_key: normalized.idempotencyKey,
     operator_id: operatorId,
+    ...(workspace ? { workspace_id: workspace } : {}),
     status: "requested",
     command_digest: ownerReceiptDigest(normalized.command, normalized.locale, contextDigest),
     model,
@@ -753,10 +779,13 @@ export async function runHermesOwnerCommand(
     });
   } catch (cause) {
     try {
-      const raced = await findReceipt(runtime, normalized.idempotencyKey);
-      if (raced) return existingReceipt(runtime, raced, receiptIdentity, secret, operatorId, { now });
+      const raced = await findReceipt(runtime, normalized.idempotencyKey, { workspaceId: workspace });
+      if (raced) return existingReceipt(runtime, raced, receiptIdentity, secret, operatorId, { now, workspaceId: workspace });
     } catch {
       // The fixed store error below is the only response exposed to the owner.
+    }
+    if (isUniqueViolation(cause)) {
+      throw new HermesOwnerCommandError("idempotency_conflict", { status: 409, cause });
     }
     throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause });
   }
@@ -798,7 +827,7 @@ export async function runHermesOwnerCommand(
     } catch (storeCause) {
       let raced;
       try {
-        raced = await findReceipt(runtime, normalized.idempotencyKey);
+        raced = await findReceipt(runtime, normalized.idempotencyKey, { workspaceId: workspace });
       } catch (readCause) {
         throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: readCause });
       }
@@ -828,7 +857,7 @@ export async function runHermesOwnerCommand(
   } catch (cause) {
     let raced;
     try {
-      raced = await findReceipt(runtime, normalized.idempotencyKey);
+      raced = await findReceipt(runtime, normalized.idempotencyKey, { workspaceId: workspace });
     } catch (readCause) {
       throw new HermesOwnerCommandError("hermes_receipt_unavailable", { status: 503, cause: readCause });
     }

@@ -153,6 +153,7 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   const report = await runHermesDraftWorker({
     dispatch: { rows: [dispatchRow()] },
     provider: async () => validDraft(),
+    workspaceId: "workspace-hermes-worker",
     filePath: file,
     auditPath: audit,
     auditLogPath: auditLog,
@@ -185,8 +186,10 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(rows[0].status, "hermes_drafted");
   assert.equal(rows[0].public_indexable, false);
   assert.equal(rows[0].hermes.can_publish, false);
+  assert.equal(rows[0].workspace_id, "workspace-hermes-worker");
   assert.equal(rows[0].hermes.output.human_approved, false);
   assert.equal(readHermesAuditLedger(audit)[0].has_output, true);
+  assert.equal(readHermesAuditLedger(audit)[0].workspace_id, "workspace-hermes-worker");
   const auditRows = readAuditLog(auditLog);
   assert.equal(assertAuditLog(auditRows), true);
   assert.equal(auditRows[0].action, "hermes_model_call");
@@ -194,6 +197,7 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(auditRows[0].metadata.prompt_version, "translation_draft");
   assert.equal(auditRows[0].metadata.tool_call_parser, "hermes");
   assert.equal(auditRows[0].metadata.sensitive_data, true);
+  assert.equal(auditRows[0].metadata.workspace_id, "workspace-hermes-worker");
   assert.equal(JSON.stringify(auditRows).includes("Sandanski apartment"), false);
 });
 

@@ -25,6 +25,10 @@ export const REQUIRED_PAYLOAD_COLLECTIONS = [
   "listing_tours",
   "viewing_trip_requests",
   "workspace_settings",
+  "tasks",
+  "automation_rules",
+  "automation_runs",
+  "automation_run_failures",
   ...REALTY_CASE_PAYLOAD_COLLECTION_SLUGS,
 ];
 const REQUIRED_CHECK_IDS = [

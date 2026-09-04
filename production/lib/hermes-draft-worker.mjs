@@ -83,6 +83,7 @@ function draftPayloadFromMessage(message) {
 
 const HOSTED_ROW_FIELDS = new Set([
   "id",
+  "workspace_id",
   "status",
   "task_type",
   "object_type",
@@ -276,7 +277,8 @@ export function openAiCompatibleHermesProvider({
   };
 }
 
-export function taskFromHermesDraft(row, draft) {
+export function taskFromHermesDraft(row, draft, { workspaceId = row.workspace_id } = {}) {
+  const resolvedWorkspaceId = String(workspaceId || "").trim();
   const output = validateHermesTranslationDraft({
     draft: { ...draft, citations: row.citations },
     propertyFacts: row.prompt.propertyFacts || {},
@@ -284,6 +286,7 @@ export function taskFromHermesDraft(row, draft) {
   });
   return {
     id: row.id,
+    ...(resolvedWorkspaceId ? { workspace_id: resolvedWorkspaceId } : {}),
     object_type: row.object_type,
     object_id: row.object_id,
     source_locale: row.source_locale,
@@ -333,8 +336,9 @@ function agentRuntimeMetadata() {
   };
 }
 
-function recordHermesAuditLog({ row, auditLogPath, providerMetadata, result, error, recordedAt }) {
+function recordHermesAuditLog({ row, workspaceId = row.workspace_id, auditLogPath, providerMetadata, result, error, recordedAt }) {
   if (!auditLogPath) return null;
+  const resolvedWorkspaceId = String(workspaceId || "").trim();
   return appendAuditLog(
     createAuditLogEntry(
       {
@@ -345,6 +349,7 @@ function recordHermesAuditLog({ row, auditLogPath, providerMetadata, result, err
         locale: row.target_locale,
         status: result,
         metadata: {
+          ...(resolvedWorkspaceId ? { workspace_id: resolvedWorkspaceId } : {}),
           object_id: row.object_id,
           object_type: row.object_type,
           provider_mode: row.provider_mode,
@@ -369,6 +374,7 @@ function recordHermesAuditLog({ row, auditLogPath, providerMetadata, result, err
 export async function runHermesDraftWorker({
   dispatch = readHermesDraftDispatch(),
   provider = openAiCompatibleHermesProvider(),
+  workspaceId = process.env.MS_REALTY_WORKSPACE_ID || "",
   filePath = DEFAULT_TRANSLATION_LEDGER_PATH,
   auditPath,
   auditLogPath = DEFAULT_AUDIT_LOG_PATH,
@@ -387,14 +393,14 @@ export async function runHermesDraftWorker({
     try {
       assertProviderMayReceiveDispatch(row, providerMetadata);
       const draft = await provider(row);
-      const task = taskFromHermesDraft(row, draft);
+      const task = taskFromHermesDraft(row, draft, { workspaceId });
       appendTranslationTask(task, { filePath, auditPath, recordedAt });
       persisted.push({ id: task.id, target_locale: task.target_locale, status: task.status, public_indexable: false });
-      const auditLogRow = recordHermesAuditLog({ row, auditLogPath, providerMetadata, result: "persisted", recordedAt });
+      const auditLogRow = recordHermesAuditLog({ row, workspaceId, auditLogPath, providerMetadata, result: "persisted", recordedAt });
       if (auditLogRow) auditLogRows.push(auditLogRow);
     } catch (error) {
       rejected.push({ id: row.id, target_locale: row.target_locale, error: error.message });
-      const auditLogRow = recordHermesAuditLog({ row, auditLogPath, providerMetadata, result: "rejected", error, recordedAt });
+      const auditLogRow = recordHermesAuditLog({ row, workspaceId, auditLogPath, providerMetadata, result: "rejected", error, recordedAt });
       if (auditLogRow) auditLogRows.push(auditLogRow);
     }
   }

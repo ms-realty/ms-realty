@@ -1,4 +1,4 @@
-import { sql, type MigrateDownArgs, type MigrateUpArgs } from "@payloadcms/db-postgres";
+import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -6,6 +6,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "id" serial PRIMARY KEY NOT NULL,
       "idempotency_key" varchar NOT NULL,
       "operator_id" varchar NOT NULL,
+      "workspace_id" varchar,
       "status" varchar NOT NULL,
       "command_digest" varchar NOT NULL,
       "model" varchar NOT NULL,
@@ -18,10 +19,17 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS "hermes_owner_receipts_idempotency_key_idx"
-      ON "hermes_owner_receipts" USING btree ("idempotency_key");
+    ALTER TABLE "hermes_owner_receipts" ADD COLUMN IF NOT EXISTS "workspace_id" varchar;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS "hermes_owner_receipts_workspace_id_idempotency_key_idx"
+      ON "hermes_owner_receipts" USING btree ("workspace_id", "idempotency_key");
+    -- An older installation may still have the global key index. Create the
+    -- scoped index first so existing rows remain protected during migration.
+    DROP INDEX IF EXISTS "hermes_owner_receipts_idempotency_key_idx";
     CREATE INDEX IF NOT EXISTS "hermes_owner_receipts_operator_id_idx"
       ON "hermes_owner_receipts" USING btree ("operator_id");
+    CREATE INDEX IF NOT EXISTS "hermes_owner_receipts_workspace_id_idx"
+      ON "hermes_owner_receipts" USING btree ("workspace_id");
     CREATE INDEX IF NOT EXISTS "hermes_owner_receipts_status_idx"
       ON "hermes_owner_receipts" USING btree ("status");
     CREATE INDEX IF NOT EXISTS "hermes_owner_receipts_started_at_idx"
