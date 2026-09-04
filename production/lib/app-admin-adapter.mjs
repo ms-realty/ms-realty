@@ -395,7 +395,7 @@ import {
   createTourApproval,
   readTourApprovals,
 } from "./tours.mjs";
-import { crossOriginWriteRejection } from "./request-guard.mjs";
+import { adminLoginWriteRejection } from "./request-guard.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
 import {
   adminRuntimeDataDurableOnlyFromEnv,
@@ -4117,17 +4117,21 @@ async function importListingQualityRows(inputCsv, config, source = "listing_qual
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
-  const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
-  if (crossOrigin) return jsonResponse(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
   const authEnv = config.authEnv || process.env;
   const authHeader = request.headers.get("authorization") || "";
   const sessionToken = authHeader ? "" : adminTokenFromCookie(request.headers.get("cookie") || "");
+  const requestPath = new URL(request.url, "http://localhost").pathname;
+  const crossOrigin = adminLoginWriteRejection(request.method, request.headers, {
+    pathname: requestPath,
+    hasAdminCredential: Boolean(authHeader || sessionToken),
+    env: authEnv,
+  });
+  if (crossOrigin) return jsonResponse(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
   let payloadAdminAuthPromise;
   const payloadAdminAuth = () => {
     payloadAdminAuthPromise ||= configuredPayloadAdminAuth(config);
     return payloadAdminAuthPromise;
   };
-  const requestPath = new URL(request.url, "http://localhost").pathname;
   const htmlResponse = (payload) => renderAdminHtmlResponse(withOwnerProfile(withWorkspaceSettings(payload, config), config));
   // The door to the workbench is not reimplemented here. This adapter used to
   // carry its own copy of /admin/login, and that copy had quietly lost the
