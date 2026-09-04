@@ -53,10 +53,12 @@ const CSS = `
     .guide b { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--stone-900);
       line-height:1.3; }
     .guide p { font-size:14.5px; color:var(--text-body); line-height:1.55; }
-    .band { background:var(--ink-900); color:#fff; }
-    .band .pub-wrap { padding-top:52px; padding-bottom:52px; }
-    .band h2 { color:#fff; }
-    .band p { color:rgba(255,255,255,.76); }
+    /* The shared band is the public field. BASE colours its links and muted
+       text but not its headings, so the section carries those, scoped to
+       itself: tile on spring-800 is 10.8:1. */
+    .band--sell .pub-wrap { padding-top:48px; padding-bottom:48px; }
+    .band--sell h2 { color:var(--field-text); }
+    .band--sell p { color:var(--field-text); }
 `;
 
 const CARD = (price, title, place, ref, beds, area, when, tone, tag) => `        <article class="lcard">
@@ -194,11 +196,11 @@ ${CARD("54 500 €", "Реновирана селска къща с двор", "
     </div>
   </div></section>
 
-  <section class="band"><div class="pub-wrap">
+  <section class="band band--sell"><div class="pub-wrap">
     <div class="split">
       <div>
         <h2 class="h2">Продавате имот в Сандански?</h2>
-        <p class="lede" style="margin-top:14px; color:rgba(255,255,255,.78)">Безплатна оценка на място в рамките
+        <p class="lede" style="margin-top:16px">Безплатна оценка на място в рамките
           на два работни дни. Договор за посредничество с ясен срок и без скрити такси.</p>
       </div>
       <div style="display:flex; gap:12px; justify-content:flex-end">
