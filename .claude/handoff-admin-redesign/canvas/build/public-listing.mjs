@@ -77,7 +77,7 @@ const BODY = `${pubHeader("search")}
             <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:14px">
               <span class="trust">${icon("check", 15)}Фактите са сверени с документ</span>
               <span class="pill pill--sand"><i></i>Обновена днес</span>
-              <span class="mono" style="font-size:13.5px">MS-CRAWL-0114</span>
+              <span class="mono" style="font-size:13.5px">MS-00191</span>
             </div>
           </div>
           <div style="text-align:right">
@@ -190,9 +190,9 @@ const BODY = `${pubHeader("search")}
         <p class="meta" style="margin-top:6px">В Катунци и околността, до 220 000 €.</p></div>
         <a class="pbtn" href="#">Вижте всички ${icon("arrow", 16)}</a></div>
       <div class="simil">
-${[["139 000 €","Къща с двор и лозе","Катунци","MS-CRAWL-0044","3 спални","168 м²"],
-   ["96 000 €","Двуетажна къща след ремонт","Хотово","MS-CRAWL-0092","3 спални","142 м²"],
-   ["210 000 €","Нова къща с изглед към Пирин","Сандански","MS-CRAWL-0158","4 спални","232 м²"]]
+${[["139 000 €","Къща с двор и лозе","Катунци","MS-00345","3 спални","168 м²"],
+   ["96 000 €","Двуетажна къща след ремонт","Хотово","MS-00671","3 спални","142 м²"],
+   ["210 000 €","Нова къща с изглед към Пирин","Сандански","MS-00046","4 спални","232 м²"]]
   .map(([p, t, loc, ref, b, a]) => `        <article class="lcard">
           <div class="im"><span class="fav">${icon("star", 18)}</span></div>
           <div class="bd"><span class="lprice">${p}</span><h3>${t}</h3>

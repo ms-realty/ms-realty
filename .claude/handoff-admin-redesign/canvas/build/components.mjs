@@ -111,7 +111,7 @@ const BODY = `<div class="doc-hd">
         <span class="sb-badge sb-badge--warn">!</span>
         <span class="av">MR</span>
         <span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
-        <span class="mono">MS-CRAWL-0114</span>
+        <span class="mono">MS-00191</span>
       </div>
       <span class="lbl" style="margin-top:14px">progress</span>
       <div class="prog" style="width:180px"><i style="width:64%"></i></div>
@@ -230,7 +230,7 @@ const BODY = `<div class="doc-hd">
         <div class="modal-hd"><b>Archive 3 listings?</b><span class="muted">${icon("x", 16)}</span></div>
         <div class="modal-bd">They stop appearing in search and keep a preservation page at their existing URLs,
           so no legacy link breaks. You can restore them from the Archived filter.
-          <div class="note note--warn" style="margin-top:11px">${icon("alert", 14)}<span>One of the three, <span class="mono">MS-CRAWL-0114</span>, has a viewing booked for today.</span></div>
+          <div class="note note--warn" style="margin-top:11px">${icon("alert", 14)}<span>One of the three, <span class="mono">MS-00191</span>, has a viewing booked for today.</span></div>
         </div>
         <div class="modal-ft"><button class="btn btn--sm btn--danger" type="button">Archive 3</button>
           <button class="btn btn--sm btn--ghost" type="button">Cancel</button>
@@ -252,7 +252,7 @@ const BODY = `<div class="doc-hd">
         <div class="modal-hd"><b>Quick look — Anna Weber</b><span class="muted">${icon("x", 16)}</span></div>
         <div style="padding:14px 18px; display:grid; gap:10px">
           <div class="demo"><span class="pill pill--sea"><i></i>Buyer</span><span class="pill pill--warn"><i></i>Viewing today 15:00</span></div>
-          <p style="font-size:12.5px; color:var(--text-body)">Villa, Katuntsi · <span class="mono">MS-CRAWL-0114</span> · €185,000</p>
+          <p style="font-size:12.5px; color:var(--text-body)">Villa, Katuntsi · <span class="mono">MS-00191</span> · €185,000</p>
           <p style="font-size:12px; color:var(--text-muted)">Case CASE-0007 · preliminary contract · notary 8 Sep</p>
           <div class="demo"><button class="btn btn--sm btn--primary" type="button">Open the record</button>
             <button class="btn btn--sm" type="button">${icon("phone", 13)}</button>

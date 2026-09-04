@@ -335,24 +335,35 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .dr { display:grid; grid-template-columns:34px minmax(0,1fr) 136px 112px; gap:13px;
-      align-items:center; padding:11px 16px; border-bottom:1px solid var(--border); }
-    .dr:last-child { border-bottom:0; }
-    .dr:hover { background:var(--stone-50); }
-    .dr-ic { display:grid; place-items:center; width:34px; height:34px; border-radius:var(--r-md);
-      background:var(--stone-100); color:var(--stone-700); }
-    .dr-main { display:grid; gap:2px; min-width:0; }
-    .dr-main b { font-size:13.5px; font-weight:600; color:var(--text-strong); overflow:hidden;
+    .dc-doc { display:flex; align-items:center; gap:10px; min-width:0; }
+    .dc-doc svg { flex:0 0 auto; color:var(--text-muted); }
+    .dc-doc b { font-size:13px; font-weight:600; color:var(--text-strong); overflow:hidden;
       text-overflow:ellipsis; white-space:nowrap; }
-    .dr-main span { font-size:12px; color:var(--text-muted); }
-    .tmpl { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .tmpl:last-child { border-bottom:0; }
-    .tmpl b { font-size:13px; font-weight:600; display:block; }
-    .tmpl span { font-size:12px; color:var(--text-muted); }
-    .chk { display:grid; grid-template-columns:auto minmax(0,1fr) 118px 96px; gap:12px; align-items:center;
-      padding:10px 16px; border-bottom:1px solid var(--border); }
-    .chk:last-child { border-bottom:0; }
+    .dc-case { display:flex; align-items:baseline; gap:8px; min-width:0; }
+    .dc-case span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dc-act { display:flex; justify-content:flex-end; white-space:nowrap; }
+    .dc-cols { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; margin-top:20px; }
+    .dc-side { display:grid; gap:20px; }
+    .dc-prog { padding:12px 20px; border-bottom:1px solid var(--joint); }
+    .dc-chk { display:grid; grid-template-columns:16px minmax(0,1fr) 200px 88px; gap:14px; align-items:center;
+      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
+    .dc-chk:hover { background:var(--tile); }
+    .dc-label { font-weight:500; color:var(--text-strong); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dc-chk[data-done] .dc-label { color:var(--text-muted); text-decoration:line-through; font-weight:400; }
+    .dc-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 20px; padding:12px 20px 16px 50px;
+      background:var(--tile); border-bottom:1px solid var(--joint); }
+    .dc-confirm { display:flex; align-items:center; gap:10px; grid-column:1 / -1; }
+    .dc-formrow { display:flex; align-items:center; gap:12px; grid-column:1 / -1; }
+    .dc-tp { display:grid; grid-template-columns:18px minmax(0,1fr) auto; gap:12px; align-items:center;
+      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
+    .dc-tp:last-child { border-bottom:0; }
+    .dc-tp svg { color:var(--text-muted); }
+    .dc-may { display:flex; gap:10px; align-items:flex-start; min-height:var(--row); padding:12px 20px;
+      border-bottom:1px solid var(--joint); }
+    .dc-may:last-child { border-bottom:0; }
+    .dc-may svg { flex:0 0 auto; margin-top:1px; color:var(--success-600); }
+    .dc-may[data-no] { color:var(--danger-600); }
+    .dc-may[data-no] svg { color:var(--danger-600); }
 
   </style>
 </helmet>
@@ -414,158 +425,167 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <div class="ph">
         <div><h1>Documents</h1><p>What each case owes, what has been produced, and what is out for signature. Three items are late.</p></div>
         <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m7 13 5-5 5 5"/><path d="M4 3h16"/></svg><span>Upload</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New document</span></button>
+          <button class="btn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m7 13 5-5 5 5"/><path d="M4 3h16"/></svg><span>Upload</span></button>
+          <button class="btn btn--accent" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New document</span></button>
         </div>
       </div>
       <nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><span>All documents</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18c3-1 4-8 7-8s2 6 5 6 3-4 6-4"/><path d="M3 21h18"/></svg><span>Awaiting signature</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/></svg><span>Case checklists</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg><span>Templates</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="toolbar">
-              <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Document, case or client</span>
-              <button class="btn btn--sm" type="button">Any kind <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-              <button class="btn btn--sm" type="button">Any case <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-              <span style="margin-left:auto" class="mono">Newest first</span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg></span>
-              <span class="dr-main"><b>Preliminary purchase contract</b><span>CASE-0007 · Anna Weber · villa, Katuntsi</span>
-                <span style="font-size:11.5px" class="muted">1 of 2 signed · Mariya Ruseva · today 09:12</span></span>
-              <span><span class="pill pill--warn"><i></i>Out for signature</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button></span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-              <span class="dr-main"><b>Evidence pack summary</b><span>CASE-0007 · cadastre, register, energy certificate</span>
-                <span style="font-size:11.5px" class="muted">Hermes draft · needs review · Hermes · today 08:40</span></span>
-              <span><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Draft</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button></span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg></span>
-              <span class="dr-main"><b>Agency mandate</b><span>CASE-0011 · Elena Dimitrova · house, Sandanski</span>
-                <span style="font-size:11.5px" class="muted">Both parties · 18 Aug · Mariya Ruseva · 18 Aug</span></span>
-              <span><span class="pill pill--ok"><i></i>Signed</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm" type="button">Open</button></span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-              <span class="dr-main"><b>Proof of funds request</b><span>CASE-0007 · to Raiffeisen Bank</span>
-                <span style="font-size:11.5px" class="muted">No answer for 3 days · Mariya Ruseva · 29 Aug</span></span>
-              <span><span class="pill pill--sea"><i></i>Sent</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm" type="button">Open</button></span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg></span>
-              <span class="dr-main"><b>Tenancy agreement</b><span>CASE-0009 · Georgi Nikolov · 1-bed, centre</span>
-                <span style="font-size:11.5px" class="muted">Waiting on the landlord's terms · Petar Dimitrov · 28 Aug</span></span>
-              <span><span class="pill pill--sand"><i></i>Draft</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm" type="button">Open</button></span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-              <span class="dr-main"><b>Deposit terms note</b><span>CASE-0009 · two months, held by the agency</span>
-                <span style="font-size:11.5px" class="muted">Reviewed by the lawyer · Petar Dimitrov · 27 Aug</span></span>
-              <span><span class="pill pill--ok"><i></i>Approved</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm" type="button">Open</button></span>
-            </div>
-            <div class="dr">
-              <span class="dr-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-              <span class="dr-main"><b>Greek buyer tax-number application</b><span>CASE-0013 · Kostas Papadakis</span>
-                <span style="font-size:11.5px" class="muted">Hermes draft · needs review · Hermes · 26 Aug</span></span>
-              <span><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Draft</span></span>
-              <span style="display:flex; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button></span>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-hd"><h2>Case checklist — CASE-0007, buyer purchase</h2><span class="sub">4 of 7 complete</span></div>
-            <div style="padding:12px 16px 0"><div class="prog" style="height:6px; border-radius:99px; background:var(--stone-200); overflow:hidden"><i style="display:block; height:100%; width:57%; background:var(--success-500)"></i></div></div>
-            <div class="chk">
-              <span class="box" data-on="1"></span>
-              <span style="font-size:13px; color:var(--text-muted); text-decoration:line-through">Requirements and timeline confirmed</span>
-              <span style="font-size:12px" class="muted">Mariya · 11 Jul</span>
-              <span style="display:flex; justify-content:flex-end"><span class="muted" style="font-size:12px">Recorded</span></span>
-            </div>
-            <div class="chk">
-              <span class="box" data-on="1"></span>
-              <span style="font-size:13px; color:var(--text-muted); text-decoration:line-through">Identity details reviewed by the responsible professional</span>
-              <span style="font-size:12px" class="muted">Mariya · 14 Jul</span>
-              <span style="display:flex; justify-content:flex-end"><span class="muted" style="font-size:12px">Recorded</span></span>
-            </div>
-            <div class="chk">
-              <span class="box" data-on="1"></span>
-              <span style="font-size:13px; color:var(--text-muted); text-decoration:line-through">Independent legal due-diligence step confirmed</span>
-              <span style="font-size:12px" class="muted">Lawyer · 24 Jul</span>
-              <span style="display:flex; justify-content:flex-end"><span class="muted" style="font-size:12px">Recorded</span></span>
-            </div>
-            <div class="chk">
-              <span class="box" data-on="1"></span>
-              <span style="font-size:13px; color:var(--text-muted); text-decoration:line-through">Offer or reservation record reviewed</span>
-              <span style="font-size:12px" class="muted">Mariya · 4 Aug</span>
-              <span style="display:flex; justify-content:flex-end"><span class="muted" style="font-size:12px">Recorded</span></span>
-            </div>
-            <div class="chk">
-              <span class="box" style="border-color:var(--danger-600)"></span>
-              <span style="font-size:13px; font-weight:500; color:var(--text-strong)">Funding or proof-of-funds process reviewed</span>
-              <span style="font-size:12px" class="muted">Blocked on the bank since 29 Aug</span>
-              <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--primary" type="button">Chase</button></span>
-            </div>
-            <div class="chk">
-              <span class="box"></span>
-              <span style="font-size:13px; font-weight:500; color:var(--text-strong)">Contract review responsibility confirmed</span>
-              <span style="font-size:12px" class="muted">Due before 8 Sep</span>
-              <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm" type="button">Record</button></span>
-            </div>
-            <div class="chk">
-              <span class="box"></span>
-              <span style="font-size:13px; font-weight:500; color:var(--text-strong)">Closing and handover evidence recorded</span>
-              <span style="font-size:12px" class="muted">After the deed</span>
-              <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm" type="button">Record</button></span>
-            </div>
-            <div class="savebar"><span style="font-size:12px" class="muted">Completing an item needs a note or an internal reference, and a named human confirmation. Hermes cannot tick these.</span></div>
-          </section>
+      <section class="panel">
+        <div class="toolbar">
+          <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Document, case or client</span>
+          <button class="btn btn--sm" type="button">Any kind <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="btn btn--sm" type="button">Any case <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <span style="margin-left:auto" class="mono">Newest first</span>
         </div>
-
-        <div style="display:grid; gap:16px">
+        <table>
+          <thead><tr>
+            <th>Document</th><th style="width:270px">Case</th><th style="width:140px">Status</th>
+            <th style="width:180px">Now</th><th style="width:176px">Confirmed by</th><th style="width:96px"></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg><b>Preliminary purchase contract</b></span></td>
+              <td><span class="dc-case"><span>Anna Weber · villa, Katuntsi</span><span class="mono">CASE-0007</span></span></td>
+              <td><span class="pill pill--warn"><i></i>Out for signature</span></td>
+              <td><span class="muted">1 of 2 signed</span></td>
+              <td><span class="wit"><b>Mariya Ruseva</b>today 09:12</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm" type="button">Review</button></span></td>
+            </tr>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><b>Evidence pack summary</b></span></td>
+              <td><span class="dc-case"><span>cadastre, register, energy certificate</span><span class="mono">CASE-0007</span></span></td>
+              <td><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Draft</span></td>
+              <td><span class="muted">Hermes draft · needs review</span></td>
+              <td><span class="wit wit--none"><b>Hermes</b>today 08:40</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm" type="button">Review</button></span></td>
+            </tr>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg><b>Agency mandate</b></span></td>
+              <td><span class="dc-case"><span>Elena Dimitrova · house, Sandanski</span><span class="mono">CASE-0011</span></span></td>
+              <td><span class="pill pill--ok"><i></i>Signed</span></td>
+              <td><span class="muted">Both parties · 18 Aug</span></td>
+              <td><span class="wit"><b>Mariya Ruseva</b>18 Aug</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm btn--ghost" type="button">Open</button></span></td>
+            </tr>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><b>Proof of funds request</b></span></td>
+              <td><span class="dc-case"><span>to Raiffeisen Bank</span><span class="mono">CASE-0007</span></span></td>
+              <td><span class="pill pill--sea"><i></i>Sent</span></td>
+              <td><span class="muted">No answer for 3 days</span></td>
+              <td><span class="wit"><b>Mariya Ruseva</b>29 Aug</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm btn--ghost" type="button">Open</button></span></td>
+            </tr>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg><b>Tenancy agreement</b></span></td>
+              <td><span class="dc-case"><span>Georgi Nikolov · 1-bed, centre</span><span class="mono">CASE-0009</span></span></td>
+              <td><span class="pill pill--sand"><i></i>Draft</span></td>
+              <td><span class="muted">Waiting on the landlord's terms</span></td>
+              <td><span class="wit"><b>Petar Dimitrov</b>28 Aug</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm btn--ghost" type="button">Open</button></span></td>
+            </tr>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><b>Deposit terms note</b></span></td>
+              <td><span class="dc-case"><span>two months, held by the agency</span><span class="mono">CASE-0009</span></span></td>
+              <td><span class="pill pill--ok"><i></i>Approved</span></td>
+              <td><span class="muted">Reviewed by the lawyer</span></td>
+              <td><span class="wit"><b>Petar Dimitrov</b>27 Aug</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm btn--ghost" type="button">Open</button></span></td>
+            </tr>
+            <tr>
+              <td><span class="dc-doc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><b>Greek buyer tax-number application</b></span></td>
+              <td><span class="dc-case"><span>Kostas Papadakis</span><span class="mono">CASE-0013</span></span></td>
+              <td><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Draft</span></td>
+              <td><span class="muted">Hermes draft · needs review</span></td>
+              <td><span class="wit wit--none"><b>Hermes</b>26 Aug</span></td>
+              <td><span class="dc-act"><button class="btn btn--sm" type="button">Review</button></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <div class="dc-cols">
+        <section class="panel">
+          <div class="panel-hd"><h2>Checklist — Anna Weber · villa, Katuntsi</h2><span class="sub">CASE-0007 · buyer purchase · 4 of 7 complete</span></div>
+          <div class="dc-prog"><div class="prog"><i style="width:57%"></i></div></div>
+          <div class="dc-chk" data-done="1">
+            <span class="box" data-on="1"></span>
+            <span class="dc-label">Requirements and timeline confirmed</span>
+            <span class="wit"><b>Mariya Ruseva</b>11 Jul</span>
+            <span class="dc-act"><span class="muted">Recorded</span></span>
+          </div>
+          <div class="dc-chk" data-done="1">
+            <span class="box" data-on="1"></span>
+            <span class="dc-label">Identity details reviewed by the responsible professional</span>
+            <span class="wit"><b>Mariya Ruseva</b>14 Jul</span>
+            <span class="dc-act"><span class="muted">Recorded</span></span>
+          </div>
+          <div class="dc-chk" data-done="1">
+            <span class="box" data-on="1"></span>
+            <span class="dc-label">Independent legal due-diligence step confirmed</span>
+            <span class="wit"><b>Lawyer</b>24 Jul</span>
+            <span class="dc-act"><span class="muted">Recorded</span></span>
+          </div>
+          <div class="dc-chk" data-done="1">
+            <span class="box" data-on="1"></span>
+            <span class="dc-label">Offer or reservation record reviewed</span>
+            <span class="wit"><b>Mariya Ruseva</b>4 Aug</span>
+            <span class="dc-act"><span class="muted">Recorded</span></span>
+          </div>
+          <div class="dc-chk">
+            <span class="box" style="border-color:var(--danger-600)"></span>
+            <span class="dc-label">Funding or proof-of-funds process reviewed</span>
+            <span class="wit wit--none"><b>Bank</b>blocked since 29 Aug</span>
+            <span class="dc-act"><button class="btn btn--sm" type="button">Chase</button></span>
+          </div>
+          <div class="dc-chk">
+            <span class="box"></span>
+            <span class="dc-label">Contract review responsibility confirmed</span>
+            <span class="wit wit--none">Due before 8 Sep</span>
+            <span class="dc-act"><button class="btn btn--sm" type="button" data-focus="1">Record</button></span>
+          </div>
+            <div class="dc-form">
+              <div class="field"><label>Outcome <em>*</em></label><span class="in" style="justify-content:space-between">Complete <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
+              <div class="field"><label>Internal reference (optional)</label><span class="in"></span></div>
+              <div class="field full"><label>Review note <em>*</em></label><span class="in in--area"></span></div>
+              <label class="dc-confirm"><span class="box"></span><span>I confirm this outcome was reviewed and is not an automatic legal approval.</span></label>
+              <div class="dc-formrow"><button class="btn btn--sm" type="button">Save outcome</button><span class="hint">Recorded as Mariya Ruseva, with the time.</span></div>
+            </div>
+          <div class="dc-chk">
+            <span class="box"></span>
+            <span class="dc-label">Closing and handover evidence recorded</span>
+            <span class="wit wit--none">After the deed</span>
+            <span class="dc-act"><button class="btn btn--sm" type="button">Record</button></span>
+          </div>
+          <div class="savebar"><span class="muted">Completing an item needs a note or an internal reference, and a named human confirmation. Hermes cannot tick these.</span></div>
+        </section>
+        <div class="dc-side">
           <section class="panel">
-            <div class="panel-hd"><h2>Templates</h2><a href="#" style="font-size:12.5px; font-weight:600">Manage</a></div>
-            <div class="tmpl"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
-              <span><b>Preliminary purchase contract</b><span>BG · buyer purchase · lawyer-reviewed</span></span>
-              <button class="btn btn--sm" type="button">Use</button></div>
-            <div class="tmpl"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
-              <span><b>Agency mandate</b><span>BG · seller sale · 2 variants</span></span>
-              <button class="btn btn--sm" type="button">Use</button></div>
-            <div class="tmpl"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
-              <span><b>Tenancy agreement</b><span>BG · tenant and landlord</span></span>
-              <button class="btn btn--sm" type="button">Use</button></div>
-            <div class="tmpl"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
-              <span><b>Short-let management agreement</b><span>BG · includes ESTI reporting duties</span></span>
-              <button class="btn btn--sm" type="button">Use</button></div>
-            <div class="tmpl"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
-              <span><b>Greek purchase preliminary</b><span>GR · engineer certificate annex</span></span>
-              <button class="btn btn--sm" type="button">Use</button></div>
+            <div class="panel-hd"><h2>Templates</h2><a href="#">Manage</a></div>
+            <div class="dc-tp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+              <span class="t2"><b>Preliminary purchase contract</b><span>BG · buyer purchase · lawyer-reviewed</span></span>
+              <button class="btn btn--sm btn--ghost" type="button">Use</button></div>
+            <div class="dc-tp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+              <span class="t2"><b>Agency mandate</b><span>BG · seller sale · 2 variants</span></span>
+              <button class="btn btn--sm btn--ghost" type="button">Use</button></div>
+            <div class="dc-tp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+              <span class="t2"><b>Tenancy agreement</b><span>BG · tenant and landlord</span></span>
+              <button class="btn btn--sm btn--ghost" type="button">Use</button></div>
+            <div class="dc-tp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+              <span class="t2"><b>Short-let management agreement</b><span>BG · includes ESTI reporting duties</span></span>
+              <button class="btn btn--sm btn--ghost" type="button">Use</button></div>
+            <div class="dc-tp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>
+              <span class="t2"><b>Greek purchase preliminary</b><span>GR · engineer certificate annex</span></span>
+              <button class="btn btn--sm btn--ghost" type="button">Use</button></div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>What Hermes may do here</h2><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Drafts only</span></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:12.5px">
-              <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Fill a template from the case record and flag every field it could not source.</span></div>
-              <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Summarise an uploaded document and list what it is missing.</span></div>
-              <div style="display:flex; gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Draft the covering message that goes with it.</span></div>
-              <div style="display:flex; gap:9px; color:var(--danger-600)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span>Send, sign, or countersign anything. A person does that, and is named on it.</span></div>
-            </div>
+            <div class="dc-may"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Fill a template from the case record and flag every field it could not source.</span></div>
+            <div class="dc-may"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Summarise an uploaded document and list what it is missing.</span></div>
+            <div class="dc-may"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Draft the covering message that goes with it.</span></div>
+            <div class="dc-may" data-no="1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span>Send, sign, or countersign anything. A person does that, and is named on it.</span></div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Retention</h2></div>
-            <div class="sect" style="font-size:12.5px; color:var(--text-body)">
+            <div class="sect">
               Transaction documents are held for the statutory period and survive a consent withdrawal.
               Everything else follows the workspace retention window.
               <p style="margin-top:8px" class="muted">Next scheduled deletion: 14 documents on 1 October.</p>

@@ -324,41 +324,51 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .today-grid { display:grid; grid-template-columns:minmax(0,1fr) 336px; gap:20px; align-items:start; }
-    .queue-bar { display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--border);
-      background:var(--sunken); }
-    .task { display:grid; grid-template-columns:82px minmax(0,1fr) 132px 92px; align-items:center;
-      column-gap:14px; min-height:56px; padding:9px 16px; border-bottom:1px solid var(--border); }
+    /* The most urgent item sits alone under the title: its heading, its facts,
+       its witness and the one brick action on the screen. */
+    .now { display:grid; grid-template-columns:96px minmax(0,1fr) auto auto auto; align-items:center;
+      column-gap:14px; padding:12px 20px; }
+    .now h2 { font-size:16px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .now-meta { display:flex; align-items:center; gap:8px; margin-top:2px; font-size:13px; color:var(--text-muted);
+      white-space:nowrap; overflow:hidden; }
+    .now-meta span { overflow:hidden; text-overflow:ellipsis; }
+
+    /* The queue: one task per row, one line of identity, 44px on grout. */
+    .queue-bar { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 20px;
+      border-bottom:1px solid var(--joint); }
+    .task { display:grid; grid-template-columns:96px minmax(0,1fr) 164px 108px 84px; align-items:center;
+      column-gap:14px; min-height:var(--row); padding:0 20px; border-bottom:1px solid var(--joint); }
     .task:last-child { border-bottom:0; }
-    .task:hover { background:var(--stone-50); }
-    .task-kind { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--text-muted); }
-    .task-kind i { width:6px; height:6px; border-radius:999px; flex:0 0 auto; }
-    .task-main { display:grid; gap:2px; min-width:0; }
-    .task-main b { font-size:13.5px; font-weight:600; color:var(--text-strong); }
-    .task-meta { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted); min-width:0; }
-    .task-meta span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .task-when { display:grid; gap:2px; font-size:12px; }
-    .task-when b { font-size:12.5px; font-weight:600; }
+    .task:hover { background:var(--tile); }
+    .kind { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:var(--text-muted);
+      white-space:nowrap; }
+    .kind i { width:6px; height:6px; border-radius:var(--r-pill); flex:0 0 auto; }
+    .task-main { display:flex; align-items:baseline; gap:8px; min-width:0; overflow:hidden; white-space:nowrap; }
+    .task-main b { font-weight:600; color:var(--text-strong); flex:0 0 auto; }
+    .task-main em { font-style:normal; color:var(--text-muted); min-width:0; overflow:hidden; text-overflow:ellipsis; }
+    .task-wit { font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .when { font-size:13px; font-weight:600; color:var(--text-strong); white-space:nowrap; }
+    .when--late { color:var(--danger-600); }
+    .when--soon { color:var(--warning-700); }
     .task-act { display:flex; justify-content:flex-end; }
-    .rail { display:grid; gap:16px; }
-    .rail-row { display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; }
-    .rail-row:last-child { border-bottom:0; }
-    .rail-row:hover { background:var(--stone-50); }
-    .rail-row b { font-weight:500; color:var(--text-body); display:flex; align-items:center; gap:9px; }
-    .rail-n { font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--text-strong); }
+
+    /* What else is open: three flat panels of rows below the queue. */
+    .aside { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin-top:20px; align-items:start; }
+    .qrow { display:flex; align-items:center; gap:10px; min-height:var(--row); padding:0 20px;
+      border-bottom:1px solid var(--joint); font-size:13px; color:var(--text-body); }
+    .qrow:last-child { border-bottom:0; }
+    .qrow:hover { background:var(--tile); text-decoration:none; }
+    .qrow svg { color:var(--text-muted); flex:0 0 auto; }
+    .qrow span { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .qrow b { font-weight:600; color:var(--text-strong); }
     .conn { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px;
-      padding:10px 16px; border-bottom:1px solid var(--border); }
+      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
     .conn:last-child { border-bottom:0; }
-    .conn-name { display:grid; gap:1px; min-width:0; }
-    .conn-name b { font-size:12.5px; font-weight:600; color:var(--text-strong); }
-    .conn-name em { font-style:normal; font-size:11.5px; color:var(--text-muted); }
-    .tl { display:grid; gap:0; }
-    .today-row { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; padding:9px 16px;
-      border-bottom:1px solid var(--border); }
-    .today-row:last-child { border-bottom:0; }
-    .today-row p { font-size:12.5px; color:var(--text-body); }
-    .today-row em { display:block; margin-top:2px; font-style:normal; font-size:11.5px; color:var(--text-muted); }
+    .act { display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start;
+      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
+    .act:last-child { border-bottom:0; }
+    .act p { font-size:13px; }
+    .act em { display:block; font-style:normal; font-size:11px; color:var(--text-muted); }
 
   </style></head><body>
 <!--
@@ -426,147 +436,158 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <button type="button" data-on="1">Mine <em>12</em></button>
             <button type="button">Team <em>31</em></button>
           </div>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg><span>Filter</span></button>
+          <button class="btn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18"/><path d="M7 12h10"/><path d="M10 19h4"/></svg><span>Filter</span></button>
         </div>
       </div>
 
-      <div class="today-grid">
-        <section class="panel">
-          <div class="panel-hd">
-            <h2>Needs you now</h2>
-            <span class="sub">Ordered by reply deadline, then by viewing time.</span>
+      <section class="panel">
+        <div class="now">
+          <span class="kind"><i style="background:var(--danger-500)"></i>Enquiry</span>
+          <span style="min-width:0">
+            <h2>Maria Petrova · listing enquiry</h2>
+            <span class="now-meta"><span>MS-00815</span><span>·</span><span>2-bed apartment, Sandanski</span><span>·</span><span>WhatsApp</span><span>·</span><span>HE → EN</span></span>
+          </span>
+          <span class="wit wit--none">Escalated to manager</span>
+          <span class="when when--late">Overdue 2 d</span>
+          <button class="btn btn--accent" type="button">Reply</button>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:20px">
+        <div class="panel-hd">
+          <h2>Needs you now</h2>
+          <span class="sub">Ordered by reply deadline, then by viewing time.</span>
+        </div>
+        <div class="queue-bar">
+          <div class="seg">
+            <button type="button" data-on="1">All <em>12</em></button>
+            <button type="button">Overdue <em>5</em></button>
+            <button type="button">Replies <em>4</em></button>
+            <button type="button">Viewings <em>2</em></button>
+            <button type="button">Requests <em>1</em></button>
           </div>
-          <div class="queue-bar">
-            <div class="seg" style="background:transparent; padding:0">
-              <button type="button" data-on="1">All <em>12</em></button>
-              <button type="button">Overdue <em>5</em></button>
-              <button type="button">Replies <em>4</em></button>
-              <button type="button">Viewings <em>2</em></button>
-              <button type="button">Requests <em>1</em></button>
-            </div>
-            <span style="margin-left:auto" class="mono">4 unassigned</span>
-          </div>
-        <div class="task">
-          <span class="task-kind"><i style="background:var(--danger-500)"></i>Enquiry</span>
-          <span class="task-main"><b>Maria Petrova · listing enquiry</b><span class="task-meta"><span class="mono">MS-CRAWL-0001</span><span>·</span><span>2-bed apartment, Sandanski</span><span>·</span><span>WhatsApp · HE → EN</span></span></span>
-          <span class="task-when"><b style="color:var(--danger-600)">Overdue 2 d</b><span class="muted">Escalated to manager</span></span>
-          <span class="task-act"><button class="btn btn--sm btn--primary" type="button">Reply</button></span>
+          <span style="margin-left:auto" class="mono">4 unassigned</span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--danger-500)"></i>Callback</span>
-          <span class="task-main"><b>Ivan Georgiev · callback request</b><span class="task-meta"><span>Weekdays after 14:00</span><span>·</span><span>Bulgarian</span><span>·</span><span>+359 ••• 412</span></span></span>
-          <span class="task-when"><b style="color:var(--danger-600)">Overdue 2 d</b><span class="muted">Escalated to manager</span></span>
-          <span class="task-act"><button class="btn btn--sm btn--primary" type="button">Call</button></span>
+          <span class="kind"><i style="background:var(--danger-500)"></i>Callback</span>
+          <span class="task-main"><b>Ivan Georgiev · callback request</b><em>Weekdays after 14:00 · Bulgarian · +359 ••• 412</em></span>
+          <span class="wit wit--none">Escalated to manager</span>
+          <span class="when when--late">Overdue 2 d</span>
+          <span class="task-act"><button class="btn btn--sm" type="button">Call</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--danger-500)"></i>Valuation</span>
-          <span class="task-main"><b>Elena Dimitrova · seller valuation</b><span class="task-meta"><span>House, Sandanski</span><span>·</span><span>Source: website form</span></span></span>
-          <span class="task-when"><b style="color:var(--danger-600)">Overdue 1 d</b><span class="muted">Unassigned</span></span>
-          <span class="task-act"><button class="btn btn--sm" type="button">Assign</button></span>
+          <span class="kind"><i style="background:var(--danger-500)"></i>Valuation</span>
+          <span class="task-main"><b>Elena Dimitrova · seller valuation</b><em>House, Sandanski · Source: website form</em></span>
+          <span class="wit wit--none">Unassigned</span>
+          <span class="when when--late">Overdue 1 d</span>
+          <span class="task-act"><button class="btn btn--sm" type="button">Assign…</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--sun-600)"></i>Viewing</span>
-          <span class="task-main"><b>Anna Weber · viewing confirmation</b><span class="task-meta"><span class="mono">MS-CRAWL-0114</span><span>·</span><span>Villa, Katuntsi</span><span>·</span><span>with Petar</span></span></span>
-          <span class="task-when"><b style="color:var(--warning-600)">Today 15:00</b><span class="muted">Not confirmed</span></span>
+          <span class="kind"><i style="background:var(--warning-700)"></i>Viewing</span>
+          <span class="task-main"><b>Anna Weber · viewing confirmation</b><em>MS-00191 · Villa, Katuntsi · with Petar</em></span>
+          <span class="wit wit--none">Not confirmed</span>
+          <span class="when when--soon">Today 15:00</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Confirm</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--sun-600)"></i>Request</span>
-          <span class="task-main"><b>Language request · French</b><span class="task-meta"><span class="mono">/fr/</span><span>·</span><span>3 visitors this week</span><span>·</span><span>Open</span></span></span>
-          <span class="task-when"><b style="color:var(--warning-600)">Today</b><span class="muted">Decision due</span></span>
+          <span class="kind"><i style="background:var(--warning-700)"></i>Request</span>
+          <span class="task-main"><b>Language request · French</b><em>/fr/ · 3 visitors this week · Open</em></span>
+          <span class="wit wit--none">Decision due</span>
+          <span class="when when--soon">Today</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Decide</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--sea-600)"></i>Follow-up</span>
-          <span class="task-main"><b>Georgi Nikolov · post-viewing feedback</b><span class="task-meta"><span class="mono">MS-CRAWL-0044</span><span>·</span><span>Viewed 30 Aug</span><span>·</span><span>Renter</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">Today 17:00</b><span class="muted">Feedback call</span></span>
+          <span class="kind"><i style="background:var(--spring-700)"></i>Follow-up</span>
+          <span class="task-main"><b>Georgi Nikolov · post-viewing feedback</b><em>MS-00345 · Viewed 30 Aug · Renter</em></span>
+          <span class="task-wit">Feedback call</span>
+          <span class="when">Today 17:00</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Log</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--sea-600)"></i>Translation</span>
-          <span class="task-main"><b>7 listing descriptions await approval</b><span class="task-meta"><span>DE 3 · NL 2 · EL 2</span><span>·</span><span>Hermes drafted, human approval required</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">Today</b><span class="muted">Blocks indexing</span></span>
+          <span class="kind"><i style="background:var(--spring-700)"></i>Translation</span>
+          <span class="task-main"><b>7 listing descriptions await approval</b><em>DE 3 · NL 2 · EL 2 · Hermes drafted, human approval required</em></span>
+          <span class="task-wit">Blocks indexing</span>
+          <span class="when">Today</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Review</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--ink-500)"></i>Document</span>
-          <span class="task-main"><b>Weber · preliminary contract missing</b><span class="task-meta"><span>Transaction case CASE-0007</span><span>·</span><span>2 of 6 documents complete</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">Tomorrow</b><span class="muted">Notary 8 Sep</span></span>
+          <span class="kind"><i style="background:var(--ink-500)"></i>Document</span>
+          <span class="task-main"><b>Weber · preliminary contract missing</b><em>Transaction case CASE-0007 · 2 of 6 documents complete</em></span>
+          <span class="task-wit">Notary 8 Sep</span>
+          <span class="when">Tomorrow</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Open</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--ink-500)"></i>Enquiry</span>
-          <span class="task-main"><b>Dmitri Volkov · price enquiry</b><span class="task-meta"><span class="mono">MS-CRAWL-0087</span><span>·</span><span>Studio, Sandanski</span><span>·</span><span>Russian</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">Tomorrow 10:00</b><span class="muted">First reply due</span></span>
+          <span class="kind"><i style="background:var(--ink-500)"></i>Enquiry</span>
+          <span class="task-main"><b>Dmitri Volkov · price enquiry</b><em>MS-00791 · Studio, Sandanski · Russian</em></span>
+          <span class="wit wit--none">First reply due</span>
+          <span class="when">Tomorrow 10:00</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Reply</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--ink-500)"></i>Viewing</span>
-          <span class="task-main"><b>Petar Kolev · second viewing</b><span class="task-meta"><span class="mono">MS-CRAWL-0129</span><span>·</span><span>Plot, Levunovo</span><span>·</span><span>with the owner</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">Wed 11:00</b><span class="muted">Confirmed</span></span>
+          <span class="kind"><i style="background:var(--ink-500)"></i>Viewing</span>
+          <span class="task-main"><b>Petar Kolev · second viewing</b><em>MS-00872 · Plot, Levunovo · with the owner</em></span>
+          <span class="wit">Confirmed</span>
+          <span class="when">Wed 11:00</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Open</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--ink-500)"></i>Migration</span>
-          <span class="task-main"><b>38 legacy URLs still undecided</b><span class="task-meta"><span>makler-realty.ru</span><span>·</span><span>Each needs 200, 301 or 410</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">This week</b><span class="muted">Blocks launch gate</span></span>
+          <span class="kind"><i style="background:var(--ink-500)"></i>Migration</span>
+          <span class="task-main"><b>38 legacy URLs still undecided</b><em>makler-realty.ru · Each needs 200, 301 or 410</em></span>
+          <span class="task-wit">Blocks launch gate</span>
+          <span class="when">This week</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Review</button></span>
         </div>
         <div class="task">
-          <span class="task-kind"><i style="background:var(--ink-500)"></i>Consent</span>
-          <span class="task-main"><b>Volkov · marketing consent expiring</b><span class="task-meta"><span>Expires 14 Sep</span><span>·</span><span>Renew before the next campaign</span></span></span>
-          <span class="task-when"><b style="color:var(--text-muted)">This week</b><span class="muted">GDPR</span></span>
+          <span class="kind"><i style="background:var(--ink-500)"></i>Consent</span>
+          <span class="task-main"><b>Volkov · marketing consent expiring</b><em>Expires 14 Sep · Renew before the next campaign</em></span>
+          <span class="task-wit">GDPR</span>
+          <span class="when">This week</span>
           <span class="task-act"><button class="btn btn--sm" type="button">Open</button></span>
         </div>
+      </section>
+
+      <div class="aside">
+        <section class="panel">
+          <div class="panel-hd"><h2>Queues</h2><a href="#" style="font-weight:600">Reports</a></div>
+          <a class="qrow" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Lead inbox</span><b>4</b></a>
+          <a class="qrow" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h4v13H4z"/><path d="M10 3h4v9h-4z"/><path d="M16 3h4v17h-4z"/></svg><span>Open opportunities</span><b>2</b></a>
+          <a class="qrow" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg><span>Viewings this week</span><b>6</b></a>
+          <a class="qrow" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg><span>Translations to approve</span><b>7</b></a>
+          <a class="qrow" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Legacy URLs undecided</span><b>38</b></a>
         </section>
 
-        <div class="rail">
-          <section class="panel">
-            <div class="panel-hd"><h2>Queues</h2><a href="#" style="font-size:12.5px; font-weight:600">Reports</a></div>
-            <a class="rail-row" href="#"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Lead inbox</b><span class="rail-n">4</span></a>
-            <a class="rail-row" href="#"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h4v13H4z"/><path d="M10 3h4v9h-4z"/><path d="M16 3h4v17h-4z"/></svg>Open opportunities</b><span class="rail-n">2</span></a>
-            <a class="rail-row" href="#"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>Viewings this week</b><span class="rail-n">6</span></a>
-            <a class="rail-row" href="#"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>Translations to approve</b><span class="rail-n">7</span></a>
-            <a class="rail-row" href="#"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Legacy URLs undecided</b><span class="rail-n">38</span></a>
-          </section>
+        <section class="panel">
+          <div class="panel-hd"><h2>Connections</h2><a href="#" style="font-weight:600">Manage</a></div>
+          <div class="conn">
+            <span class="av" style="background:var(--success-50); color:var(--success-600)">PG</span>
+            <span class="t2"><b>Postgres · Payload CMS</b><span>Listings, leads, sessions</span></span>
+            <span class="pill pill--ok"><i></i>Live</span>
+          </div>
+          <div class="conn">
+            <span class="av" style="background:var(--warning-50); color:var(--warning-700)">GW</span>
+            <span class="t2"><b>Google Workspace</b><span>Reply delivery, viewing calendar</span></span>
+            <span class="pill pill--warn"><i></i>Reauthorise</span>
+          </div>
+          <div class="conn">
+            <span class="av">WA</span>
+            <span class="t2"><b>WhatsApp Business</b><span>Buyer replies · not connected</span></span>
+            <span class="pill pill--sand"><i></i>Set up</span>
+          </div>
+          <div class="conn">
+            <span class="av">HE</span>
+            <span class="t2"><b>Hermes agent</b><span>Drafting off · 2 secrets missing</span></span>
+            <span class="pill pill--sand"><i></i>Set up</span>
+          </div>
+        </section>
 
-          <section class="panel">
-            <div class="panel-hd">
-              <h2>Connections</h2>
-              <a href="#" style="font-size:12.5px; font-weight:600">Manage</a>
-            </div>
-            <div class="conn">
-              <span class="av" style="background:var(--success-50); color:var(--success-600)">PG</span>
-              <span class="conn-name"><b>Postgres · Payload CMS</b><em>Listings, leads, sessions</em></span>
-              <span class="pill pill--ok"><i></i>Live</span>
-            </div>
-            <div class="conn">
-              <span class="av" style="background:var(--warning-50); color:var(--warning-600)">GW</span>
-              <span class="conn-name"><b>Google Workspace</b><em>Reply delivery, viewing calendar</em></span>
-              <span class="pill pill--warn"><i></i>Reauthorise</span>
-            </div>
-            <div class="conn">
-              <span class="av" style="background:var(--stone-100); color:var(--stone-600)">WA</span>
-              <span class="conn-name"><b>WhatsApp Business</b><em>Buyer replies · not connected</em></span>
-              <span class="pill pill--sand"><i></i>Set up</span>
-            </div>
-            <div class="conn">
-              <span class="av" style="background:var(--stone-100); color:var(--stone-600)">HE</span>
-              <span class="conn-name"><b>Hermes agent</b><em>Drafting off · 2 secrets missing</em></span>
-              <span class="pill pill--sand"><i></i>Set up</span>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-hd"><h2>Recent activity</h2><a href="#" style="font-size:12.5px; font-weight:600">All</a></div>
-            <div class="tl">
-              <div class="today-row"><span class="av">MR</span><p>Approved the German description for <span class="mono">MS-CRAWL-0032</span><em>18 minutes ago</em></p></div>
-              <div class="today-row"><span class="av">PD</span><p>Sent a reply to Anna Weber<em>1 hour ago · reviewed by Mariya</em></p></div>
-              <div class="today-row"><span class="av">MR</span><p>Moved <span class="mono">MS-CRAWL-0087</span> to published<em>3 hours ago</em></p></div>
-              <div class="today-row"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted 3 translations for review<em>Yesterday · not published</em></p></div>
-            </div>
-          </section>
-        </div>
+        <section class="panel">
+          <div class="panel-hd"><h2>Recent activity</h2><a href="#" style="font-weight:600">All</a></div>
+          <div class="act"><span class="av">MR</span><p>Approved the German description for MS-00932<em>18 minutes ago</em></p></div>
+          <div class="act"><span class="av">PD</span><p>Sent a reply to Anna Weber<em>1 hour ago · reviewed by Mariya</em></p></div>
+          <div class="act"><span class="av">MR</span><p>Moved MS-00791 to published<em>3 hours ago</em></p></div>
+          <div class="act"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted 3 translations for review<em>Yesterday · not published</em></p></div>
+        </section>
       </div>
     </div>
   </div>

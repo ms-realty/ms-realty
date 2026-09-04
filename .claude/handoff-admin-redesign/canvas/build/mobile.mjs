@@ -88,7 +88,7 @@ const LEAD = `<div class="ph-app">
 
     <div class="ph-card">
       <dl class="ph-kv">
-        <div><dt>Property</dt><dd class="mono" style="font-size:12.5px">MS-CRAWL-0001</dd></div>
+        <div><dt>Property</dt><dd class="mono" style="font-size:12.5px">MS-00815</dd></div>
         <div><dt>Price</dt><dd class="price">€68,000</dd></div>
         <div><dt>Received</dt><dd>4 Jul, 03:00</dd></div>
         <div><dt>Broker</dt><dd class="muted" style="font-weight:500">Not set</dd></div>
@@ -102,7 +102,7 @@ const LEAD = `<div class="ph-app">
         <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px">
           <span class="pill pill--ai" style="padding:2px 7px">${icon("sparkles", 11)}Hermes draft</span>
         </div>
-        Hello Maria, thank you for your interest in the two-bedroom apartment in Sandanski (MS-CRAWL-0001,
+        Hello Maria, thank you for your interest in the two-bedroom apartment in Sandanski (MS-00815,
         €68,000). It is still available. I can show it on Thursday at 11:00 or Friday at 15:00 — which suits you?
       </div>
       <div class="ph-row">

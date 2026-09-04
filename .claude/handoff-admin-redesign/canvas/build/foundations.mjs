@@ -132,7 +132,7 @@ const TYPE = [
   ["UI / 12.5", "font-size:12.5px", "Table cells, secondary rows", "Sandanski · Apartment · €68,000"],
   ["UI / 12", "font-size:12px; color:var(--text-muted)", "Meta, hints, captions", "Escalated to manager 4 Jul, 04:00"],
   ["UI / 11.5 semi", "font-size:11.5px; font-weight:600", "Pills and chips", "Needs review"],
-  ["Mono / 11.5", "font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted)", "References, ids, env keys", "MS-CRAWL-0001 · HERMES_API_KEY"],
+  ["Mono / 11.5", "font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted)", "References, ids, env keys", "MS-00815 · HERMES_API_KEY"],
 ];
 
 // The bar chart and the specimen panel used to name different sets of nine. One
@@ -241,7 +241,7 @@ ${TYPE.map(([n, s, note, sample]) => `      <div class="type-row">
         <div style="display:flex; align-items:baseline; gap:16px; margin-top:9px">
           <span class="price" style="font-size:20px">€185,000</span>
           <span class="price" style="font-size:14px">€400 / month</span>
-          <span class="mono" style="font-size:13px">MS-CRAWL-0114</span>
+          <span class="mono" style="font-size:13px">MS-00191</span>
         </div>
         <p class="note-b">A price is a fact a buyer acts on, so it gets the display face and never wraps.
           A reference is a string someone reads out on the phone, so it gets mono and never breaks mid-token.</p>

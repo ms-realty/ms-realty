@@ -324,21 +324,34 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .step { display:grid; grid-template-columns:26px minmax(0,1fr) 168px 132px 104px; gap:13px; align-items:center;
-      padding:11px 18px; border-bottom:1px solid var(--border); }
-    .step:last-child { border-bottom:0; }
-    .step:hover { background:var(--stone-50); }
-    .step-n { display:grid; place-items:center; width:22px; height:22px; border-radius:var(--r-full);
-      background:var(--stone-200); color:var(--stone-700); font:600 10.5px var(--font-sans); }
-    .step-n[data-done] { background:var(--success-500); color:#fff; }
-    .step-n[data-on] { background:var(--ink-800); color:#fff; }
-    .step-n[data-block] { background:var(--danger-600); color:#fff; }
-    .step-n[data-na] { background:transparent; border:1px dashed var(--border-control); color:var(--text-muted); }
-    .step b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .step em { font-style:normal; font-size:11.5px; color:var(--text-muted); }
-    .phase-hd { display:flex; align-items:center; justify-content:space-between; padding:9px 18px;
-      background:var(--sunken); border-bottom:1px solid var(--border); }
-    .phase-hd b { font-size:11.5px; font-weight:600; color:var(--text-muted); }
+    .cd-facts .kv { border-bottom:0; grid-template-columns:1.3fr 1.5fr 1fr 1.2fr 1fr 1.1fr; }
+    .cd-facts .wit { margin-left:8px; }
+    .cd-cols { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; margin-top:20px; }
+    .cd-side { display:grid; gap:20px; }
+    .cd-phase { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:36px;
+      padding:0 20px; background:var(--tile); border-bottom:1px solid var(--joint); font-weight:600; color:var(--text-muted); }
+    .cd-step { display:grid; grid-template-columns:22px minmax(0,1fr) 200px 96px; gap:14px; align-items:center;
+      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
+    .cd-step:last-child { border-bottom:0; }
+    .cd-step:hover { background:var(--tile); }
+    .cd-n { display:grid; place-items:center; width:22px; height:22px; border-radius:var(--r-pill);
+      background:var(--tile-deep); color:var(--marble-700); font-size:11px; font-weight:600; }
+    .cd-n[data-done] { background:var(--success-500); color:#fff; }
+    .cd-n[data-on] { background:var(--ink-900); color:#fff; }
+    .cd-n[data-block] { background:var(--danger-600); color:#fff; }
+    .cd-n[data-na] { background:transparent; border:1px dashed var(--border-control); color:var(--text-muted); }
+    .cd-step[data-na] .t2 b { color:var(--text-muted); font-weight:400; }
+    .cd-who { display:flex; align-items:center; gap:8px; min-width:0; }
+    .cd-act { display:flex; justify-content:flex-end; white-space:nowrap; }
+    .cd-form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; align-items:end;
+      padding:12px 20px 16px 56px; background:var(--tile); border-bottom:1px solid var(--joint); }
+    .cd-form .hint { grid-column:1 / -1; }
+    .cd-actions { display:flex; gap:8px; margin-top:10px; white-space:nowrap; }
+    .cd-waive { display:grid; gap:12px; padding:12px 20px 16px; background:var(--tile); border-bottom:1px solid var(--joint); }
+    .cd-waive > b { font-size:13px; color:var(--text-strong); }
+    .cd-confirm { display:flex; align-items:center; gap:10px; }
+    .cd-formrow { display:flex; align-items:center; gap:12px; }
+    .cd-stat { display:grid; gap:8px; }
 
   </style></head><body>
 <!--
@@ -349,7 +362,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1000px">
+<div class="app" style="width:1440px; min-height:1180px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -396,158 +409,158 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="crumbs" style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); margin-bottom:10px">
-        <a href="#">Transaction cases</a> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg> <b style="color:var(--text-strong)">CASE-0007</b>
-      </div>
+      <div class="crumbs"><a href="#">Transaction cases</a><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><b>CASE-0007</b></div>
       <div class="ph">
         <div><h1>Anna Weber · villa, Katuntsi</h1>
           <p><span class="mono">CASE-0007</span> · Buyer purchase · Bulgaria · opened 11 July · notary booked for 8 September</p></div>
         <div class="ph-actions">
           <span class="pill pill--sand"><i></i>Manual mode</span>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>History</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg><span>Prepare documents</span></button>
+          <button class="btn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>History</span></button>
+          <button class="btn btn--accent" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/><path d="M8 17c1.5-3 3-3 4 0s2.5 3 4 0"/></svg><span>Prepare documents</span></button>
         </div>
       </div>
-      <dl class="kv" style="grid-template-columns:repeat(6,minmax(0,1fr)); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; margin-bottom:16px">
-        <div><dt>Property</dt><dd><span class="mono" style="font-size:12.5px">MS-CRAWL-0114</span></dd></div>
-        <div><dt>Price agreed</dt><dd><span class="price">€185,000</span></dd></div>
-        <div><dt>Buyer</dt><dd>Anna Weber</dd></div>
-        <div><dt>Seller</dt><dd>Katuntsi Estates OOD</dd></div>
-        <div><dt>Notary</dt><dd>8 Sep, 11:00</dd></div>
-        <div><dt>Responsible</dt><dd>Mariya Ruseva</dd></div>
-      </dl>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
+      <section class="panel cd-facts">
+        <dl class="kv">
+          <div><dt>Property</dt><dd>Villa, Katuntsi <span class="mono">MS-00191</span></dd></div>
+          <div><dt>Price agreed</dt><dd><span class="price">€185,000</span><span class="wit"><b>Mariya Ruseva</b>4 Aug</span></dd></div>
+          <div><dt>Buyer</dt><dd>Anna Weber</dd></div>
+          <div><dt>Seller</dt><dd>Katuntsi Estates OOD</dd></div>
+          <div><dt>Notary</dt><dd>8 Sep, 11:00</dd></div>
+          <div><dt>Responsible</dt><dd>Mariya Ruseva</dd></div>
+        </dl>
+      </section>
+      <div class="cd-cols">
         <section class="panel">
           <div class="panel-hd"><h2>Steps</h2><span class="sub">14 of 22 resolved · 1 blocked</span></div>
-          <div class="phase-hd"><b>Intake and onboarding</b><span class="pill pill--ok"><i></i>Complete</span></div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Client identified and mandate recorded</b><em>Anti-money-laundering screening passed</em></span>
-          <span><span class="pill pill--sand"><i></i>Mariya</span></span>
-          <span style="font-size:12px" class="muted">11 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Foreign-buyer land eligibility confirmed</b><em>EU national · apartment and building, no agricultural land</em></span>
-          <span><span class="pill pill--sand"><i></i>Lawyer</span></span>
-          <span style="font-size:12px" class="muted">14 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
-        </div>
-          <div class="phase-hd"><b>Evidence</b><span class="pill pill--ok"><i></i>Complete</span></div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Cadastral sketch and scheme</b><em>Agency of Geodesy, Cartography and Cadastre</em></span>
-          <span><span class="pill pill--sand"><i></i>Registry</span></span>
-          <span style="font-size:12px" class="muted">22 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Property register extract</b><em>No encumbrances recorded</em></span>
-          <span><span class="pill pill--sand"><i></i>Registry</span></span>
-          <span style="font-size:12px" class="muted">24 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Energy performance certificate</b><em>Class C, valid to 2033</em></span>
-          <span><span class="pill pill--sand"><i></i>Engineer</span></span>
-          <span style="font-size:12px" class="muted">29 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Draft summary of the evidence pack</b><em>Drafted by Hermes, checked and accepted by Mariya</em></span>
-          <span><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Hermes</span></span>
-          <span style="font-size:12px" class="muted">29 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Draft</button></span>
-        </div>
-          <div class="phase-hd"><b>Commercial and agreement</b><span class="pill pill--warn"><i></i>In progress</span></div>
-        <div class="step">
-          <span class="step-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b style="">Offer accepted and reservation recorded</b><em>€185,000 · reservation fee received 4 Aug</em></span>
-          <span><span class="pill pill--sand"><i></i>Mariya</span></span>
-          <span style="font-size:12px" class="muted">4 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-block="1">!</span>
-          <span style="min-width:0"><b style="">Proof of funds from the buyer's bank</b><em>Requested 29 August · no answer for 3 days</em></span>
-          <span><span class="pill pill--danger"><i></i>Bank</span></span>
-          <span style="font-size:12px" class="muted">Blocked</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--primary" type="button">Chase</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-on="1">undefined</span>
-          <span style="min-width:0"><b style="">Preliminary contract signed by both parties</b><em>Drafted from the agency template, waiting on the seller</em></span>
-          <span><span class="pill pill--warn"><i></i>Lawyer</span></span>
-          <span style="font-size:12px" class="muted">Due 4 Sep</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--primary" type="button">Open</button></span>
-        </div>
-        <div class="step">
-          <span class="step-n">10</span>
-          <span style="min-width:0"><b style="">Local acquisition tax calculated</b><em>Sandanski municipality rate applied to the deed value</em></span>
-          <span><span class="pill pill--sand"><i></i>Agency</span></span>
-          <span style="font-size:12px" class="muted">Before 8 Sep</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm" type="button">Start</button></span>
-        </div>
-          <div class="phase-hd"><b>Completion and aftercare</b><span class="pill pill--sand"><i></i>Not started</span></div>
-        <div class="step">
-          <span class="step-n">11</span>
-          <span style="min-width:0"><b style="">Notarial deed executed</b><em>Notary Ivanova · 8 September, 11:00</em></span>
-          <span><span class="pill pill--sand"><i></i>Notary</span></span>
-          <span style="font-size:12px" class="muted">8 Sep</span>
-          <span style="display:flex; justify-content:flex-end"><span class="muted" style="font-size:12px">Scheduled</span></span>
-        </div>
-        <div class="step">
-          <span class="step-n">12</span>
-          <span style="min-width:0"><b style="">Entry in the property register</b><em>Within seven days of the deed</em></span>
-          <span><span class="pill pill--sand"><i></i>Registry</span></span>
-          <span style="font-size:12px" class="muted">By 15 Sep</span>
-          <span style="display:flex; justify-content:flex-end"><span class="muted" style="font-size:12px">—</span></span>
-        </div>
-        <div class="step">
-          <span class="step-n" data-na="1">–</span>
-          <span style="min-width:0"><b style="color:var(--text-muted); font-weight:400">Short-let tourism register entry</b><em>Not applicable — the buyer will occupy the property</em></span>
-          <span><span class="pill pill--sand"><i></i>Not applicable</span></span>
-          <span style="font-size:12px" class="muted">Marked 11 Jul</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--ghost" type="button">Reopen</button></span>
-        </div>
+          <div class="cd-phase"><span>Intake and onboarding</span><span class="pill pill--ok"><i></i>Complete</span></div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Client identified and mandate recorded</b><span>Anti-money-laundering screening passed</span></span>
+            <span class="cd-who"><span class="wit"><b>Mariya Ruseva</b>11 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Foreign-buyer land eligibility confirmed</b><span>EU national · apartment and building, no agricultural land</span></span>
+            <span class="cd-who"><span class="wit"><b>Lawyer</b>14 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
+          </div>
+          <div class="cd-phase"><span>Evidence</span><span class="pill pill--ok"><i></i>Complete</span></div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Cadastral sketch and scheme</b><span>Agency of Geodesy, Cartography and Cadastre</span></span>
+            <span class="cd-who"><span class="wit"><b>Registry</b>22 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Property register extract</b><span>No encumbrances recorded</span></span>
+            <span class="cd-who"><span class="wit"><b>Registry</b>24 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Energy performance certificate</b><span>Class C, valid to 2033</span></span>
+            <span class="cd-who"><span class="wit"><b>Engineer</b>29 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Draft summary of the evidence pack</b><span>Drafted by Hermes, checked and accepted by Mariya</span></span>
+            <span class="cd-who"><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Hermes</span><span class="wit"><b>Mariya Ruseva</b>29 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Draft</button></span>
+          </div>
+          <div class="cd-phase"><span>Commercial and agreement</span><span class="pill pill--warn"><i></i>In progress</span></div>
+          <div class="cd-step">
+            <span class="cd-n" data-done="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="t2"><b>Offer accepted and reservation recorded</b><span>€185,000 · reservation fee received 4 Aug</span></span>
+            <span class="cd-who"><span class="wit"><b>Mariya Ruseva</b>4 Aug</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Evidence</button></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n" data-block="1">!</span>
+            <span class="t2"><b>Proof of funds from the buyer's bank</b><span>Requested 29 August · no answer for 3 days</span></span>
+            <span class="cd-who"><span class="wit wit--none"><b>Bank</b>blocked</span></span>
+            <span class="cd-act"><button class="btn btn--sm" type="button">Chase</button></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n" data-on="1">undefined</span>
+            <span class="t2"><b>Preliminary contract signed by both parties</b><span>Drafted from the agency template, waiting on the seller</span></span>
+            <span class="cd-who"><span class="wit wit--none"><b>Lawyer</b>due 4 Sep</span></span>
+            <span class="cd-act"><button class="btn btn--sm" type="button">Open</button></span>
+          </div>
+          <div class="cd-form">
+            <div class="field"><label>Evidence reference <em>*</em></label><span class="in in--empty">A reference to the signed contract</span></div>
+            <button class="btn btn--sm" type="button">Complete step</button>
+            <span class="hint">Closed as Mariya Ruseva, with the lawyer recorded as the evidence producer. Hermes cannot close a step on a manual case.</span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n">10</span>
+            <span class="t2"><b>Local acquisition tax calculated</b><span>Sandanski municipality rate applied to the deed value</span></span>
+            <span class="cd-who"><span class="wit wit--none"><b>Agency</b>before 8 Sep</span></span>
+            <span class="cd-act"><button class="btn btn--sm" type="button">Start</button></span>
+          </div>
+          <div class="cd-phase"><span>Completion and aftercare</span><span class="pill pill--sand"><i></i>Not started</span></div>
+          <div class="cd-step">
+            <span class="cd-n">11</span>
+            <span class="t2"><b>Notarial deed executed</b><span>Notary Ivanova · 8 September, 11:00</span></span>
+            <span class="cd-who"><span class="wit wit--none"><b>Notary</b>8 Sep</span></span>
+            <span class="cd-act"><span class="muted">Scheduled</span></span>
+          </div>
+          <div class="cd-step">
+            <span class="cd-n">12</span>
+            <span class="t2"><b>Entry in the property register</b><span>Within seven days of the deed</span></span>
+            <span class="cd-who"><span class="wit wit--none"><b>Registry</b>by 15 Sep</span></span>
+            <span class="cd-act"><span class="muted">—</span></span>
+          </div>
+          <div class="cd-step" data-na="1">
+            <span class="cd-n" data-na="1">–</span>
+            <span class="t2"><b>Short-let tourism register entry</b><span>Not applicable — the buyer will occupy the property</span></span>
+            <span class="cd-who"><span class="wit"><b>Marked not applicable</b>11 Jul</span></span>
+            <span class="cd-act"><button class="btn btn--sm btn--ghost" type="button">Reopen</button></span>
+          </div>
         </section>
-        <div style="display:grid; gap:16px">
+        <div class="cd-side">
           <section class="panel">
             <div class="panel-hd"><h2>Hermes on this case</h2><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Drafts only</span></div>
-            <div class="sect" style="display:grid; gap:10px">
-              <div class="note note--ai"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Hermes may draft the evidence summary, the client update and the document checklist. It cannot sign, send, or close a step.</span></div>
-              <div style="display:grid; gap:6px; font-size:12.5px">
-                <div style="display:flex; justify-content:space-between"><span>Drafts accepted</span><b>3</b></div>
-                <div style="display:flex; justify-content:space-between"><span>Drafts rejected</span><b>1</b></div>
-                <div style="display:flex; justify-content:space-between"><span>Steps closed by Hermes</span><b>0</b></div>
-              </div>
-              <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft the client update</span></button>
+            <div class="sect cd-stat">
+              <div class="note note--ai"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Hermes may draft the evidence summary, the client update and the document checklist. It cannot sign, send, or close a step.</span></div>
+              <div class="kvline"><span>Drafts accepted</span><b>3</b></div>
+              <div class="kvline"><span>Drafts rejected</span><b>1</b></div>
+              <div class="kvline"><span>Steps closed by Hermes</span><b>0</b></div>
+              <div><button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft the client update</span></button></div>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Conditions</h2><span class="sub">2 open</span></div>
-            <div class="sect" style="display:grid; gap:11px; font-size:12.5px">
-              <div style="display:grid; gap:3px"><b>Subject to mortgage approval</b>
-                <span class="muted">Deadline 5 September. If it lapses the reservation fee is returned.</span>
-                <div style="display:flex; gap:7px; margin-top:5px"><button class="btn btn--sm" type="button">Met</button>
-                <button class="btn btn--sm" type="button">Waived…</button><button class="btn btn--sm" type="button">Blocked…</button></div>
-                <span class="hint">There is no extend: a condition's actions are met, blocked, expired,
-                  waived or reopened, and reopening applies to a closed one. Waiving asks for the authority
-                  it rests on and a reason code.</span></div>
-              <div style="display:grid; gap:3px"><b>Subject to a clean register extract on the deed date</b>
-                <span class="muted">Re-checked automatically the morning of 8 September.</span></div>
+            <div class="sect">
+              <h3>Subject to mortgage approval<span class="wit wit--none">deadline 5 Sep</span></h3>
+              <p class="muted">Deadline 5 September. If it lapses the reservation fee is returned.</p>
+              <div class="cd-actions">
+                <button class="btn btn--sm" type="button">Met</button>
+                <button class="btn btn--sm" type="button" data-focus="1">Waived…</button>
+                <button class="btn btn--sm" type="button">Blocked…</button>
+              </div>
+            </div>
+            <div class="cd-waive">
+              <b>Waive the condition</b>
+              <div class="field"><label>Authority or instruction reference <em>*</em></label><span class="in in--empty">The mandate or written instruction it rests on</span></div>
+              <div class="field"><label>Reason code <em>*</em></label><span class="in"></span><span class="hint">Lower case: letters, digits, underscore, colon or hyphen.</span></div>
+              <label class="cd-confirm"><span class="box"></span><span>I confirm this waiver as Mariya Ruseva</span></label>
+              <div class="cd-formrow"><button class="btn btn--sm" type="button">Waive the condition</button><span class="hint">Recorded on the case with the authority and the reason.</span></div>
+            </div>
+            <div class="sect"><span class="hint">There is no extend: a condition's actions are met, blocked, expired, waived or reopened, and reopening applies to a closed one. Waiving asks for the authority it rests on and a reason code.</span></div>
+            <div class="sect">
+              <h3>Subject to a clean register extract on the deed date<span class="wit wit--none">re-check 8 Sep</span></h3>
+              <p class="muted">Re-checked automatically the morning of 8 September.</p>
             </div>
           </section>
           <section class="panel">
             <div class="panel-hd"><h2>Recent</h2></div>
             <div class="sect" style="padding-top:4px; padding-bottom:4px">
-              <div class="tl-row"><span class="av">MR</span><p>Marked the reservation received<em>4 Aug</em></p><span class="mono">14:02</span></div>
-              <div class="tl-row"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted the evidence summary<em>29 Jul · accepted</em></p><span class="mono">09:41</span></div>
-              <div class="tl-row"><span class="av">MR</span><p>Opened the case<em>11 Jul</em></p><span class="mono">16:20</span></div>
+              <div class="tl-row"><span class="av">MR</span><p>Marked the reservation received<em> · 4 Aug</em></p><span class="mono">14:02</span></div>
+              <div class="tl-row"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted the evidence summary<em> · 29 Jul · accepted</em></p><span class="mono">09:41</span></div>
+              <div class="tl-row"><span class="av">MR</span><p>Opened the case<em> · 11 Jul</em></p><span class="mono">16:20</span></div>
             </div>
           </section>
         </div>

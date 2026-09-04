@@ -43,14 +43,14 @@ const MED_CSS = `
 `;
 
 const TILES = [
-  ["villa-katuntsi-01.jpg", "MS-CRAWL-0114 · 2400×1600 · 412 KB", "Cover", "ink", "", ""],
-  ["villa-katuntsi-02.jpg", "MS-CRAWL-0114 · 2400×1600 · 388 KB", "", "", true],
-  ["villa-katuntsi-pool.jpg", "MS-CRAWL-0114 · no alt text", "Needs alt", "warn", "", ""],
-  ["sandanski-apt-01.jpg", "MS-CRAWL-0001 · 1800×1200 · 301 KB", "", "", "", ""],
-  ["sandanski-apt-02.jpg", "MS-CRAWL-0001 · note: a face is visible", "Needs review", "warn", "blur", ""],
-  ["studio-baths-01.jpg", "MS-CRAWL-0087 · 1600×1067 · 244 KB", "", "", "", ""],
-  ["plot-levunovo-01.jpg", "MS-CRAWL-0129 · note: a document is in frame", "Held", "danger", "blur", ""],
-  ["melnik-house-01.jpg", "MS-CRAWL-0032 · 2000×1333 · 356 KB", "", "", "", ""],
+  ["villa-katuntsi-01.jpg", "MS-00191 · 2400×1600 · 412 KB", "Cover", "ink", "", ""],
+  ["villa-katuntsi-02.jpg", "MS-00191 · 2400×1600 · 388 KB", "", "", true],
+  ["villa-katuntsi-pool.jpg", "MS-00191 · no alt text", "Needs alt", "warn", "", ""],
+  ["sandanski-apt-01.jpg", "MS-00815 · 1800×1200 · 301 KB", "", "", "", ""],
+  ["sandanski-apt-02.jpg", "MS-00815 · note: a face is visible", "Needs review", "warn", "blur", ""],
+  ["studio-baths-01.jpg", "MS-00791 · 1600×1067 · 244 KB", "", "", "", ""],
+  ["plot-levunovo-01.jpg", "MS-00872 · note: a document is in frame", "Held", "danger", "blur", ""],
+  ["melnik-house-01.jpg", "MS-00932 · 2000×1333 · 356 KB", "", "", "", ""],
   ["tour-villa-katuntsi.jpg", "360° tour · equirectangular", "Tour", "sea", "", ""],
   ["office-sandanski.jpg", "Contact page · 1600×900", "", "", "", ""],
   ["team-mariya.jpg", "Team profile · 800×800", "", "", "", ""],
@@ -220,7 +220,7 @@ const ED_BODY = `      <div class="crumbs">
       </div>
       <div class="ph">
         <div><h1>villa-katuntsi-pool.jpg</h1>
-          <p>Attached to <span class="mono">MS-CRAWL-0114</span> · uploaded 2 Aug by Mariya · 2400 × 1600 · 412 KB · JPEG</p></div>
+          <p>Attached to <span class="mono">MS-00191</span> · uploaded 2 Aug by Mariya · 2400 × 1600 · 412 KB · JPEG</p></div>
         <div class="ph-actions">
           <span class="pill pill--warn"><i></i>No alt text</span>
           <button class="btn" type="button">${icon("undo", 15)}<span>Revert to original</span></button>
@@ -304,7 +304,7 @@ const ED_BODY = `      <div class="crumbs">
 
           <div class="isect">
             <b>Placement</b>
-            <div class="kvline"><span>Listing</span><span class="mono">MS-CRAWL-0114</span></div>
+            <div class="kvline"><span>Listing</span><span class="mono">MS-00191</span></div>
             <div class="kvline"><span>Position in the gallery</span><b>3 of 14</b></div>
             <div style="display:flex; gap:7px; flex-wrap:wrap">
               <button class="btn btn--sm" type="button">${icon("star", 12)}<span>Set as cover</span></button>

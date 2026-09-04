@@ -76,9 +76,9 @@ const BODY = `      <div class="ph">
               <span class="inbox-find">${icon("search", 14)}Filter these 4</span>
               <button class="btn btn--sm" type="button">Newest${icon("down", 14)}</button>
             </div>
-${row({ on: true, name: "Maria Petrova", time: "2 d", sub: "Listing enquiry · MS-CRAWL-0001, Sandanski",
+${row({ on: true, name: "Maria Petrova", time: "2 d", sub: "Listing enquiry · MS-00815, Sandanski",
   tags: `<span class="pill pill--danger"><i></i>Escalated</span><span class="pill pill--sand">WhatsApp</span><span class="pill pill--sand">HE → EN</span>` })}
-${row({ name: "Anna Weber", time: "2 d", sub: "Viewing request · MS-CRAWL-0114, Katuntsi",
+${row({ name: "Anna Weber", time: "2 d", sub: "Viewing request · MS-00191, Katuntsi",
   tags: `<span class="pill pill--warn"><i></i>Reply due today</span><span class="pill pill--sand">Email</span>` })}
 ${row({ name: "Ivan Georgiev", time: "2 d", sub: "Callback · weekdays after 14:00",
   tags: `<span class="pill pill--danger"><i></i>Escalated</span><span class="pill pill--sand">Phone</span>` })}
@@ -111,7 +111,7 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
             <dl class="facts">
               <div class="fact"><dt>Reply deadline</dt><dd style="color:var(--danger-600)">Overdue 2 days</dd></div>
               <div class="fact"><dt>Received</dt><dd>4 Jul, 03:00</dd></div>
-              <div class="fact"><dt>Property</dt><dd><span class="mono" style="font-size:12.5px">MS-CRAWL-0001</span></dd></div>
+              <div class="fact"><dt>Property</dt><dd><span class="mono" style="font-size:12.5px">MS-00815</span></dd></div>
               <div class="fact"><dt>Assigned broker</dt><dd class="subtle">Not set</dd></div>
               <div class="fact"><dt>Matching inventory</dt><dd>5 properties</dd></div>
             </dl>
@@ -155,7 +155,7 @@ ${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, S
                 </div>
                 <div class="composer-body">
                   Hello Maria, thank you for your interest in the two-bedroom apartment in Sandanski
-                  (reference MS-CRAWL-0001, €68,000). It is still available. I can show it on Thursday
+                  (reference MS-00815, €68,000). It is still available. I can show it on Thursday
                   at 11:00 or Friday at 15:00 — which suits you better?
                 </div>
                 <div class="composer-foot">

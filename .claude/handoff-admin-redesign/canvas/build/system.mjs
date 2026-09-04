@@ -98,11 +98,11 @@ const ACT_BODY = `      <div class="ph">
           <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Record</th><th>What changed</th><th>Where from</th></tr></thead>
           <tbody>
 ${[
-  ["Today 09:41","Mariya Ruseva","human","translation_approved","MS-CRAWL-0032 · DE","Draft accepted as written, marked indexable","Sandanski office"],
+  ["Today 09:41","Mariya Ruseva","human","translation_approved","MS-00932 · DE","Draft accepted as written, marked indexable","Sandanski office"],
   ["Today 09:12","Mariya Ruseva","human","document_sent","CASE-0007 · preliminary contract","Sent to the seller for signature","Sandanski office"],
   ["Today 08:40","Hermes","agent","hermes_translation_draft","7 listings · DE, NL, EL","21 drafts stored unpublished, 2 lines refused","Agency hardware"],
   ["Today 08:02","Petar Dimitrov","human","reply_sent","Lead · Anna Weber","Reply approved by Mariya and delivered","Mobile"],
-  ["Yesterday 17:20","Mariya Ruseva","human","listing_published","MS-CRAWL-0087","Moved from needs review to published","Sandanski office"],
+  ["Yesterday 17:20","Mariya Ruseva","human","listing_published","MS-00791","Moved from needs review to published","Sandanski office"],
   ["Yesterday 16:55","System","system","consent_withdrawn","Dmitri Volkov","Removed from 2 alert audiences","Website"],
   ["Yesterday 11:04","Mariya Ruseva","human","connection_disconnected","Google Workspace","Token expired, delivery paused","Sandanski office"],
   ["28 Aug 09:00","System","system","automation_failed","Saved-search digest","Google delivery unavailable, nothing sent","Scheduler"],

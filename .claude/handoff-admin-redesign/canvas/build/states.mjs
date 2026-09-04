@@ -74,7 +74,7 @@ const MEDIA_BODY = `<div class="doc-hd">
       <div class="card-hd"><b>Dragging over</b><span>The whole panel is the target, not a 40px strip.</span></div>
       <div class="card-bd"><div class="drop drop--over">${icon("upload", 20)}
         <b style="color:var(--sea-700)">Release to add 7 photos</b>
-        <span style="color:var(--sea-700)">They will be attached to MS-CRAWL-0114</span></div></div>
+        <span style="color:var(--sea-700)">They will be attached to MS-00191</span></div></div>
     </div>
     <div class="card">
       <div class="card-hd"><b>Dragging the wrong thing</b><span>Refuses before the drop, not after.</span></div>
@@ -187,7 +187,7 @@ const MEDIA_BODY = `<div class="doc-hd">
           soft. Crop wider, or accept it for the thumbnail only.</span></div></div></div>
     <div class="card"><div class="card-hd"><b>Removal blocked</b><span>The rule that would break.</span></div>
       <div class="card-bd"><div class="note note--warn">${icon("alert", 15)}
-        <span>MS-CRAWL-0114 would drop to five photos, and a published listing needs six. Remove it and the
+        <span>MS-00191 would drop to five photos, and a published listing needs six. Remove it and the
           listing comes off the public site until another is added.</span></div>
         <div style="display:flex; gap:7px; margin-top:9px"><button class="btn btn--sm btn--danger" type="button">Remove and unpublish</button>
           <button class="btn btn--sm btn--ghost" type="button">Cancel</button></div></div></div>
@@ -327,7 +327,7 @@ const INT_BODY = `<div class="doc-hd">
         <div class="rtl-demo" dir="rtl">
           <div class="rtl-row" style="background:var(--sunken)"><span class="pill pill--danger"><i></i>באיחור יומיים</span>
             <b style="font-weight:600">מריה פטרובה</b><span class="av">MP</span></div>
-          <div class="rtl-row"><span class="mono" dir="ltr">MS-CRAWL-0001</span>
+          <div class="rtl-row"><span class="mono" dir="ltr">MS-00815</span>
             <span>דירת שני חדרים · סנדנסקי</span><span class="price" dir="ltr">€68,000</span></div>
           <div class="rtl-row"><button class="btn btn--sm btn--primary" type="button">${icon("send", 13)}השב</button>
             <span class="muted">התקבל 4 ביולי</span><span></span></div>

@@ -87,7 +87,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 3140,
+      "h": 3303,
       "page": "page-1"
     },
     {
@@ -96,7 +96,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 2082,
+      "h": 2178,
       "page": "page-1"
     },
     {
@@ -105,7 +105,7 @@
       "x": 3120,
       "y": 0,
       "w": 1560,
-      "h": 2088,
+      "h": 2093,
       "page": "page-1"
     },
     {
@@ -114,7 +114,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 1070,
+      "h": 1154,
       "page": "page-2"
     },
     {
@@ -123,7 +123,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1275,
+      "h": 1282,
       "page": "page-2"
     },
     {
@@ -132,14 +132,14 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-2"
     },
     {
       "file": "Viewings.dc.html",
       "title": "Viewings",
       "x": 0,
-      "y": 1445,
+      "y": 1452,
       "w": 1440,
       "h": 1004,
       "page": "page-2"
@@ -148,36 +148,36 @@
       "file": "Tasks.dc.html",
       "title": "Tasks",
       "x": 1560,
-      "y": 1445,
+      "y": 1452,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-2"
     },
     {
       "file": "Requests.dc.html",
       "title": "Requests from the website",
       "x": 3120,
-      "y": 1445,
+      "y": 1452,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-2"
     },
     {
       "file": "Contacts.dc.html",
       "title": "Contacts",
       "x": 0,
-      "y": 2619,
+      "y": 2626,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-2"
     },
     {
       "file": "Consent.dc.html",
       "title": "Consent",
       "x": 1560,
-      "y": 2619,
+      "y": 2626,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-2"
     },
     {
@@ -195,7 +195,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1424,
+      "h": 1649,
       "page": "page-3"
     },
     {
@@ -204,16 +204,16 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 1319,
+      "h": 1651,
       "page": "page-3"
     },
     {
       "file": "DocumentEditor.dc.html",
       "title": "Document composer and signature",
       "x": 0,
-      "y": 1594,
+      "y": 1821,
       "w": 1440,
-      "h": 1177,
+      "h": 1323,
       "page": "page-3"
     },
     {
@@ -231,7 +231,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1098,
+      "h": 1096,
       "page": "page-4"
     },
     {
@@ -240,23 +240,23 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-4"
     },
     {
       "file": "SitePages.dc.html",
       "title": "Website — pages",
       "x": 0,
-      "y": 1268,
+      "y": 1266,
       "w": 1440,
-      "h": 1039,
+      "h": 1003,
       "page": "page-4"
     },
     {
       "file": "PageEditor.dc.html",
       "title": "Page editor — blocks",
       "x": 1560,
-      "y": 1268,
+      "y": 1266,
       "w": 1440,
       "h": 1164,
       "page": "page-4"
@@ -265,7 +265,7 @@
       "file": "Media.dc.html",
       "title": "Media library",
       "x": 3120,
-      "y": 1268,
+      "y": 1266,
       "w": 1440,
       "h": 1264,
       "page": "page-4"
@@ -274,25 +274,25 @@
       "file": "MediaEditor.dc.html",
       "title": "Photo editor",
       "x": 0,
-      "y": 2702,
+      "y": 2700,
       "w": 1440,
-      "h": 1830,
+      "h": 1906,
       "page": "page-4"
     },
     {
       "file": "MediaStates.dc.html",
       "title": "Upload and edit — every state",
       "x": 1560,
-      "y": 2702,
+      "y": 2700,
       "w": 1560,
-      "h": 1972,
+      "h": 2028,
       "page": "page-4"
     },
     {
       "file": "SeoRedirects.dc.html",
       "title": "SEO and legacy redirects",
       "x": 3240,
-      "y": 2702,
+      "y": 2700,
       "w": 1440,
       "h": 984,
       "page": "page-4"
@@ -303,7 +303,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 1591,
+      "h": 1577,
       "page": "page-5"
     },
     {
@@ -328,7 +328,7 @@
       "file": "IntegrationCatalogue.dc.html",
       "title": "Integration catalogue",
       "x": 0,
-      "y": 1761,
+      "y": 1747,
       "w": 1440,
       "h": 1104,
       "page": "page-5"
@@ -337,9 +337,9 @@
       "file": "Automations.dc.html",
       "title": "Automations and webhooks",
       "x": 1560,
-      "y": 1761,
+      "y": 1747,
       "w": 1440,
-      "h": 1285,
+      "h": 1284,
       "page": "page-5"
     },
     {
@@ -357,7 +357,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 958,
+      "h": 973,
       "page": "page-6"
     },
     {
@@ -375,7 +375,7 @@
       "x": 0,
       "y": 1274,
       "w": 1440,
-      "h": 924,
+      "h": 928,
       "page": "page-6"
     },
     {
@@ -384,7 +384,7 @@
       "x": 1560,
       "y": 1274,
       "w": 1440,
-      "h": 1167,
+      "h": 1149,
       "page": "page-6"
     },
     {
@@ -420,34 +420,34 @@
       "x": 3360,
       "y": 0,
       "w": 1560,
-      "h": 2238,
+      "h": 2349,
       "page": "page-7"
     },
     {
       "file": "Mobile.dc.html",
       "title": "Phone — Today",
       "x": 0,
-      "y": 2408,
+      "y": 2519,
       "w": 390,
-      "h": 868,
+      "h": 1106,
       "page": "page-7"
     },
     {
       "file": "MobileLead.dc.html",
       "title": "Phone — lead and reply",
       "x": 510,
-      "y": 2408,
+      "y": 2519,
       "w": 390,
-      "h": 889,
+      "h": 886,
       "page": "page-7"
     },
     {
       "file": "MobileCase.dc.html",
       "title": "Phone — case",
       "x": 1020,
-      "y": 2408,
+      "y": 2519,
       "w": 390,
-      "h": 934,
+      "h": 930,
       "page": "page-7"
     }
   ],

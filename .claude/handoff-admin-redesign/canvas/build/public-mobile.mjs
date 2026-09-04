@@ -128,7 +128,7 @@ const LISTING = `<div class="m">
     </div>
     <div style="display:flex; flex-wrap:wrap; gap:8px">
       <span class="trust">${icon("check", 15)}Проверени факти</span>
-      <span class="mono" style="font-size:13px">MS-CRAWL-0114</span>
+      <span class="mono" style="font-size:13px">MS-00191</span>
     </div>
     <dl class="mkv">
       <div><dt>Застроена площ</dt><dd>214 м²</dd></div>
@@ -163,7 +163,7 @@ const HE = `<div class="m">
     </div>
     <div style="display:flex; flex-wrap:wrap; gap:8px">
       <span class="trust">${icon("check", 15)}נתונים מאומתים</span>
-      <span class="mono" style="font-size:13px" dir="ltr">MS-CRAWL-0114</span>
+      <span class="mono" style="font-size:13px" dir="ltr">MS-00191</span>
     </div>
     <dl class="mkv">
       <div><dt>שטח בנוי</dt><dd dir="ltr" style="text-align:right">214 m²</dd></div>

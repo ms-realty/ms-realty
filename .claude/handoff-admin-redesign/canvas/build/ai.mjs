@@ -155,7 +155,7 @@ const RUN_BODY = `      <div class="crumbs" style="display:flex; align-items:cen
             <span class="av" style="background:var(--success-50); color:var(--success-600)">${icon("check", 13)}</span>
             <span><b>Copied the property facts verbatim</b>
               <em>Price, area, bedrooms, location, reference and source URL are moved, never re-expressed</em>
-              <div class="quote">MS-CRAWL-0032 · €54,500 · 96 m² · 3 bedrooms · Katuntsi · makler-realty.com/obj/0032.html</div></span>
+              <div class="quote">MS-00932 · €54,500 · 96 m² · 3 bedrooms · Katuntsi · makler-realty.com/obj/0032.html</div></span>
             <span class="mono">09:04:19</span><span class="muted" style="font-size:12px">1.1 s</span>
           </div>
           <div class="runstep">

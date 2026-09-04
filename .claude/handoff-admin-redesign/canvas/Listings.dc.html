@@ -335,21 +335,27 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .bulk { display:flex; align-items:center; gap:10px; padding:9px 14px; background:var(--sea-50);
-      border-bottom:1px solid var(--sea-100); font-size:12.5px; color:var(--sea-700); font-weight:600; }
-    .t-title { display:grid; gap:1px; min-width:0; }
-    .t-title b { font-size:13px; font-weight:600; color:var(--text-strong);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .t-title span { font-size:11.5px; color:var(--text-muted); }
-    .thumb { width:44px; height:34px; border-radius:6px; background:var(--stone-200); flex:0 0 auto;
-      display:grid; place-items:center; color:var(--stone-500); }
-    .locs { display:flex; gap:3px; }
-    .loc { display:grid; place-items:center; min-width:22px; height:17px; padding:0 4px; border-radius:4px;
-      background:var(--stone-200); color:var(--stone-700); font-size:9.5px; font-weight:700; letter-spacing:.03em; }
-    .loc--off { background:transparent; border:1px dashed var(--border-control); color:var(--text-subtle); font-weight:600; }
-    .bar { width:56px; height:5px; border-radius:999px; background:var(--stone-200); overflow:hidden; }
-    .bar i { display:block; height:100%; border-radius:999px; }
-    .cell-q { display:flex; align-items:center; gap:8px; }
+    .bulk { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 14px;
+      background:var(--tile-deep); border-bottom:1px solid var(--joint); font-size:13px; font-weight:600;
+      color:var(--text-strong); }
+    .bulk a { margin-left:auto; font-weight:600; }
+    .ident { display:flex; align-items:center; gap:8px; min-width:0; }
+    .ident b { min-width:0; font-weight:600; color:var(--text-strong); overflow:hidden; text-overflow:ellipsis;
+      white-space:nowrap; }
+    .state { display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .lcs { display:flex; align-items:center; gap:3px; white-space:nowrap; }
+    .lc { display:inline-grid; place-items:center; min-width:24px; height:20px; padding:0 5px;
+      border-radius:var(--r-edge); background:var(--tile-deep); color:var(--marble-700); font-size:11px;
+      font-weight:600; }
+    /* Completeness: the fill has to be read against its own track, so every
+       fill clears 3:1 on --tile-shadow (success 3.76, warning 4.23, marble-600 4.32). */
+    .bar { display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+    .bar .t { display:block; width:56px; height:6px; border-radius:var(--r-pill); background:var(--tile-shadow);
+      overflow:hidden; }
+    .bar .t i { display:block; height:100%; border-radius:var(--r-pill); }
+    td .box { display:block; }
+    tbody tr[data-selected] td { background:var(--tile); }
+    .go { display:inline-flex; color:var(--text-muted); }
 
   </style>
 </helmet>
@@ -420,165 +426,163 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <button type="button">Needs review <em>43</em></button>
             <button type="button">Archived <em>38</em></button>
           </div>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New listing</span></button>
+          <button class="btn btn--accent" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New listing</span></button>
         </div>
       </div>
 
       <section class="panel">
         <div class="toolbar">
-          <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Reference, title or location</span>
-          <button class="btn btn--sm" type="button">Sandanski<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any type<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any price<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <span class="find"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Reference, title or location</span>
+          <button class="btn btn--sm" type="button">Sandanski<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="btn btn--sm" type="button">Any type<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="btn btn--sm" type="button">Any price<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <button class="btn btn--sm btn--ghost" type="button">Clear</button>
           <span style="margin-left:auto" class="mono">Sorted by last updated</span>
         </div>
         <div class="bulk">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
           <span>3 selected</span>
           <button class="btn btn--sm" type="button">Assign broker</button>
           <button class="btn btn--sm" type="button">Request translation</button>
           <button class="btn btn--sm" type="button">Send for approval</button>
           <button class="btn btn--sm" type="button">Archive</button>
-          <a href="#" style="margin-left:auto; font-weight:600">Clear selection</a>
+          <a href="#">Clear selection</a>
         </div>
         <table>
           <thead>
             <tr>
-              <th></th><th></th><th>Property</th><th>Location</th><th>Type</th><th>Price</th>
-              <th>Status</th><th>Languages</th><th>Completeness</th><th>Updated</th><th></th>
+              <th style="width:36px; padding-right:0"></th>
+              <th>Property</th>
+              <th style="width:104px">Location</th>
+              <th style="width:104px">Type</th>
+              <th style="width:112px">Price</th>
+              <th style="width:176px">Status</th>
+              <th style="width:176px">Languages</th>
+              <th style="width:124px">Completeness</th>
+              <th style="width:104px">Updated</th>
+              <th style="width:36px; padding-left:0"></th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Two-bedroom apartment with a south terrace</b><span class="mono">MS-CRAWL-0001</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>Two-bedroom apartment with a south terrace</b><span class="mono">MS-00815</span></span></td>
               <td class="muted">Sandanski</td>
               <td class="muted">Apartment</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€68,000</span></td>
-              <td><span class="pill pill--ok"><i></i>Published</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="loc">EN</span><span class="loc">RU</span><span class="muted" style="font-size:11.5px">+4</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:92%; background:var(--success-500)"></i></span><span class="muted">92%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€68,000</span></td>
+              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>MR</b></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">RU</span><span class="muted">+4</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:92%; background:var(--success-500)"></i></span><span class="muted">92%</span></span></td>
               <td class="muted" style="white-space:nowrap">18 min ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Renovated village house with a garden</b><span class="mono">MS-CRAWL-0032</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>Renovated village house with a garden</b><span class="mono">MS-00932</span></span></td>
               <td class="muted">Katuntsi</td>
               <td class="muted">House</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€54,500</span></td>
-              <td><span class="pill pill--ok"><i></i>Published</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="loc">EN</span><span class="loc">DE</span><span class="loc">RU</span><span class="muted" style="font-size:11.5px">+3</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:88%; background:var(--success-500)"></i></span><span class="muted">88%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€54,500</span></td>
+              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>PD</b></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">DE</span><span class="lc">RU</span><span class="muted">+3</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:88%; background:var(--success-500)"></i></span><span class="muted">88%</span></span></td>
               <td class="muted" style="white-space:nowrap">2 hours ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
-            <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Studio near the mineral baths</b><span class="mono">MS-CRAWL-0087</span></span></td>
+            <tr data-selected="1">
+              <td style="width:36px; padding-right:0"><span class="box" data-on="1"></span></td>
+              <td><span class="ident"><b>Studio near the mineral baths</b><span class="mono">MS-00791</span></span></td>
               <td class="muted">Sandanski</td>
               <td class="muted">Studio</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€31,900</span></td>
-              <td><span class="pill pill--warn"><i></i>Needs review</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="loc">RU</span><span class="muted" style="font-size:11.5px">+5</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:61%; background:var(--sun-600)"></i></span><span class="muted">61%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€31,900</span></td>
+              <td><span class="state"><span class="pill pill--warn"><i></i>Needs review</span><span class="wit wit--none"></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="lc">RU</span><span class="muted">+5</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:61%; background:var(--warning-700)"></i></span><span class="muted">61%</span></span></td>
               <td class="muted" style="white-space:nowrap">3 hours ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Villa with a pool and mountain views</b><span class="mono">MS-CRAWL-0114</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>Villa with a pool and mountain views</b><span class="mono">MS-00191</span></span></td>
               <td class="muted">Katuntsi</td>
               <td class="muted">Villa</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€185,000</span></td>
-              <td><span class="pill pill--ok"><i></i>Published</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="loc">EN</span><span class="loc">DE</span><span class="loc">NL</span><span class="loc">RU</span><span class="muted" style="font-size:11.5px">+2</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:95%; background:var(--success-500)"></i></span><span class="muted">95%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€185,000</span></td>
+              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>MR</b></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">DE</span><span class="lc">NL</span><span class="lc">RU</span><span class="muted">+2</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:95%; background:var(--success-500)"></i></span><span class="muted">95%</span></span></td>
               <td class="muted" style="white-space:nowrap">Yesterday</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
-            <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Building plot with road access</b><span class="mono">MS-CRAWL-0129</span></span></td>
+            <tr data-selected="1">
+              <td style="width:36px; padding-right:0"><span class="box" data-on="1"></span></td>
+              <td><span class="ident"><b>Building plot with road access</b><span class="mono">MS-00872</span></span></td>
               <td class="muted">Levunovo</td>
               <td class="muted">Plot</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€28,000</span></td>
-              <td><span class="pill pill--warn"><i></i>Needs review</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="muted" style="font-size:11.5px">+6</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:44%; background:var(--sun-600)"></i></span><span class="muted">44%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€28,000</span></td>
+              <td><span class="state"><span class="pill pill--warn"><i></i>Needs review</span><span class="wit wit--none"></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:44%; background:var(--warning-700)"></i></span><span class="muted">44%</span></span></td>
               <td class="muted" style="white-space:nowrap">Yesterday</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>One-bedroom flat in the town centre</b><span class="mono">MS-CRAWL-0044</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>One-bedroom flat in the town centre</b><span class="mono">MS-00345</span></span></td>
               <td class="muted">Sandanski</td>
               <td class="muted">Apartment</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€400 / month</span></td>
-              <td><span class="pill pill--ok"><i></i>Published</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="loc">EN</span><span class="loc">RU</span><span class="muted" style="font-size:11.5px">+4</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:79%; background:var(--success-500)"></i></span><span class="muted">79%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€400 / month</span></td>
+              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>PD</b></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">RU</span><span class="muted">+4</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:79%; background:var(--success-500)"></i></span><span class="muted">79%</span></span></td>
               <td class="muted" style="white-space:nowrap">2 days ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Commercial unit on the main street</b><span class="mono">MS-CRAWL-0158</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>Commercial unit on the main street</b><span class="mono">MS-00046</span></span></td>
               <td class="muted">Sandanski</td>
               <td class="muted">Commercial</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€120,000</span></td>
-              <td><span class="pill pill--sand"><i></i>Draft</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="muted" style="font-size:11.5px">+6</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:33%; background:var(--stone-400)"></i></span><span class="muted">33%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€120,000</span></td>
+              <td><span class="state"><span class="pill pill--sand"><i></i>Draft</span><span class="wit wit--none"></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:33%; background:var(--marble-600)"></i></span><span class="muted">33%</span></span></td>
               <td class="muted" style="white-space:nowrap">3 days ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Three-bedroom house, source unavailable</b><span class="mono">MS-CRAWL-0163</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>Three-bedroom house, source unavailable</b><span class="mono">MS-00696</span></span></td>
               <td class="muted">Melnik</td>
               <td class="muted">House</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">Price withdrawn</span></td>
-              <td><span class="pill pill--sand"><i></i>Archived</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="muted" style="font-size:11.5px">+6</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:21%; background:var(--stone-400)"></i></span><span class="muted">21%</span></span></td>
+              <td style="white-space:nowrap"><span class="muted">Price withdrawn</span></td>
+              <td><span class="state"><span class="pill pill--sand"><i></i>Archived</span><span class="wit wit--none"></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:21%; background:var(--marble-600)"></i></span><span class="muted">21%</span></span></td>
               <td class="muted" style="white-space:nowrap">5 days ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
-            <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Apartment with a covered parking space</b><span class="mono">MS-CRAWL-0071</span></span></td>
+            <tr data-selected="1">
+              <td style="width:36px; padding-right:0"><span class="box" data-on="1"></span></td>
+              <td><span class="ident"><b>Apartment with a covered parking space</b><span class="mono">MS-00499</span></span></td>
               <td class="muted">Sandanski</td>
               <td class="muted">Apartment</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€72,400</span></td>
-              <td><span class="pill pill--warn"><i></i>Needs review</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="loc">EN</span><span class="muted" style="font-size:11.5px">+5</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:58%; background:var(--sun-600)"></i></span><span class="muted">58%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€72,400</span></td>
+              <td><span class="state"><span class="pill pill--warn"><i></i>Needs review</span><span class="wit wit--none"></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="muted">+5</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:58%; background:var(--warning-700)"></i></span><span class="muted">58%</span></span></td>
               <td class="muted" style="white-space:nowrap">6 days ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
             <tr>
-              <td style="width:34px"><span class="box" style="margin:0"></span></td>
-              <td style="width:56px"><span class="thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg></span></td>
-              <td><span class="t-title"><b>Rural house for restoration</b><span class="mono">MS-CRAWL-0092</span></span></td>
+              <td style="width:36px; padding-right:0"><span class="box"></span></td>
+              <td><span class="ident"><b>Rural house for restoration</b><span class="mono">MS-00671</span></span></td>
               <td class="muted">Lehovo</td>
               <td class="muted">House</td>
-              <td style="white-space:nowrap"><span class="price" style="font-size:13px">€19,500</span></td>
-              <td><span class="pill pill--sand"><i></i>Draft</span></td>
-              <td><span class="locs"><span class="loc">BG</span><span class="muted" style="font-size:11.5px">+6</span></span></td>
-              <td><span class="cell-q"><span class="bar"><i style="width:40%; background:var(--stone-400)"></i></span><span class="muted">40%</span></span></td>
+              <td style="white-space:nowrap"><span class="price">€19,500</span></td>
+              <td><span class="state"><span class="pill pill--sand"><i></i>Draft</span><span class="wit wit--none"></span></span></td>
+              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
+              <td><span class="bar"><span class="t"><i style="width:40%; background:var(--marble-600)"></i></span><span class="muted">40%</span></span></td>
               <td class="muted" style="white-space:nowrap">1 week ago</td>
-              <td style="width:36px; text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
+              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
             </tr>
           </tbody>
         </table>

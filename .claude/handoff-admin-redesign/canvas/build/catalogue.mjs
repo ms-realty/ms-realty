@@ -22,11 +22,11 @@ const LE_CSS = `
     .trow:last-child { border-bottom:0; }
 `;
 const LE_BODY = `      <div class="crumbs" style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-muted); margin-bottom:10px">
-        <a href="#">Listings</a> ${icon("chevron", 13)} <b style="color:var(--text-strong)">MS-CRAWL-0114</b>
+        <a href="#">Listings</a> ${icon("chevron", 13)} <b style="color:var(--text-strong)">MS-00191</b>
       </div>
       <div class="ph">
         <div><h1>Villa with a pool and mountain views</h1>
-          <p><span class="mono">MS-CRAWL-0114</span> · Katuntsi · €185,000 · imported from makler-realty.com, last edited today by Mariya</p></div>
+          <p><span class="mono">MS-00191</span> · Katuntsi · €185,000 · imported from makler-realty.com, last edited today by Mariya</p></div>
         <div class="ph-actions">
           <span class="pill pill--ok"><i></i>Published</span>
           <button class="btn" type="button">${icon("eye", 15)}<span>View public page</span></button>
@@ -40,7 +40,7 @@ const LE_BODY = `      <div class="crumbs" style="display:flex; align-items:cent
             <a href="#">Media <span class="muted">14</span></a><a href="#">Tour</a><a href="#">Translations <span class="muted">5</span></a><a href="#">Publication</a></nav>
           <div class="fbox">
 ${[
-  ["Reference","MS-CRAWL-0114","v","From the source listing"],
+  ["Reference","MS-00191","v","From the source listing"],
   ["Property type","Villa","c","Mapped from the legacy taxonomy"],
   ["Deal","For sale","v",""],
   ["Price","€185,000","v","Matches the source page"],
@@ -134,12 +134,12 @@ const TR_BODY = `      <div class="ph">
           <div class="toolbar"><span class="find" style="width:auto; flex:1 1 auto">${icon("search", 14)}Listing or page</span>
             <button class="btn btn--sm" type="button">DE ${icon("down", 13)}</button></div>
 ${[
-  ["Renovated village house","MS-CRAWL-0032 · DE", true],
-  ["Studio near the mineral baths","MS-CRAWL-0087 · DE", false],
-  ["Apartment with parking","MS-CRAWL-0071 · DE", false],
+  ["Renovated village house","MS-00932 · DE", true],
+  ["Studio near the mineral baths","MS-00791 · DE", false],
+  ["Apartment with parking","MS-00499 · DE", false],
   ["Melnik location page","/lokacii/melnik · NL", false],
   ["Katuntsi location page","/lokacii/katuntsi · NL", false],
-  ["Villa with a pool","MS-CRAWL-0114 · EL", false],
+  ["Villa with a pool","MS-00191 · EL", false],
   ["Purchase fees guide","/rakovodstva/taksi · EL", false],
 ].map(([t, m, on]) => `          <div class="qrow"${on ? ' style="background:var(--surface); box-shadow:inset 3px 0 0 var(--brick-500)"' : ""}>
             <span class="av" style="background:var(--brick-50); color:var(--brick-700)">${icon("sparkles", 13)}</span>
@@ -151,7 +151,7 @@ ${[
         <section class="panel">
           <div class="panel-hd">
             <div><h2>Renovated village house with a garden</h2>
-              <p class="sub"><span class="mono">MS-CRAWL-0032</span> · Bulgarian → German · drafted by Hermes 31 Aug 09:05</p></div>
+              <p class="sub"><span class="mono">MS-00932</span> · Bulgarian → German · drafted by Hermes 31 Aug 09:05</p></div>
             <div style="display:flex; gap:8px">
               <button class="btn btn--sm" type="button">Edit the German</button>
               <button class="btn btn--sm btn--primary" type="button">Approve</button>
@@ -165,7 +165,7 @@ ${[
                 <span class="fact-lock">96 кв. м</span> жилищна площ,
                 <span class="fact-lock">три спални</span> и собствен двор.
                 Цена: <span class="fact-lock">54 500 EUR</span>. Референция:
-                <span class="fact-lock">MS-CRAWL-0032</span>.</p>
+                <span class="fact-lock">MS-00932</span>.</p>
               <p style="margin-top:11px; font-size:11.5px" class="muted">Editing the source invalidates every
                 translation drawn from it. The source hash is stored with each draft.</p>
             </div>
@@ -175,7 +175,7 @@ ${[
                 <span class="fact-lock">96 m²</span> Wohnfläche,
                 <span class="fact-lock">drei Schlafzimmer</span> und einen eigenen Garten.
                 Preis: <span class="fact-lock">54.500 EUR</span>. Referenz:
-                <span class="fact-lock">MS-CRAWL-0032</span>.</p>
+                <span class="fact-lock">MS-00932</span>.</p>
               <div style="margin-top:12px; display:grid; gap:7px; font-size:12px">
                 <div style="display:flex; gap:9px; color:var(--success-600)">${icon("check", 14)}<span>Every fact matches the source, field by field.</span></div>
                 <div style="display:flex; gap:9px; color:var(--success-600)">${icon("check", 14)}<span>No claim was added that the Bulgarian does not make.</span></div>

@@ -68,7 +68,7 @@ const VIEW_BODY = `      <div class="ph">
               <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px">
                 <b style="font-size:13px">Anna Weber · today 15:00</b><span class="pill pill--warn"><i></i>Unconfirmed</span>
               </div>
-              <p style="font-size:12.5px; color:var(--text-muted)">Villa, Katuntsi · <span class="mono">MS-CRAWL-0114</span> · with Petar</p>
+              <p style="font-size:12.5px; color:var(--text-muted)">Villa, Katuntsi · <span class="mono">MS-00191</span> · with Petar</p>
               <div style="display:flex; gap:8px; margin-top:10px">
                 <button class="btn btn--sm btn--primary" type="button">Confirm</button>
                 <button class="btn btn--sm" type="button">Propose another time</button>
@@ -145,7 +145,7 @@ ${task({ title: "Decide on the French language request", meta: `<span>3 visitors
         <div class="day"><span>This week</span><span>1</span></div>
 ${task({ title: "Ask Nikolay Stoyanov for a review", meta: `<span>Sale completed 22 August</span>`, ctx: "Deal · won", when: "Friday", who: "MR" })}
         <div class="day"><span>Done today</span><span>2</span></div>
-${task({ done: true, title: "Approve the German description for MS-CRAWL-0032", meta: `<span>Published to the public site</span>`, ctx: "Translations", when: "18 min ago", who: "MR" })}
+${task({ done: true, title: "Approve the German description for MS-00932", meta: `<span>Published to the public site</span>`, ctx: "Translations", when: "18 min ago", who: "MR" })}
 ${task({ done: true, title: "Reply to Anna Weber", meta: `<span>Sent by Petar, reviewed by Mariya</span>`, ctx: "Lead", when: "1 hour ago", who: "PD" })}
       </section>`;
 fs.writeFileSync(W("Tasks.dc.html"), page({ active: "tasks", body: TASK_BODY, extraCss: TASK_CSS, height: 900 }));
@@ -207,7 +207,7 @@ const REQ_BODY = `      <div class="ph">
               <td><span class="pill pill--ok"><i></i>Planned for October</span></td><td>Mariya Ruseva</td><td class="muted">28 Aug</td></tr>
             <tr><td><span class="pill pill--sand">Valuation</span></td><td>House in Hotovo</td>
               <td><span class="pill pill--ok"><i></i>Broker assigned</span></td><td>Petar Dimitrov</td><td class="muted">27 Aug</td></tr>
-            <tr><td><span class="pill pill--sand">Listing report</span></td><td>Photo does not match the description on <span class="mono">MS-CRAWL-0071</span></td>
+            <tr><td><span class="pill pill--sand">Listing report</span></td><td>Photo does not match the description on <span class="mono">MS-00499</span></td>
               <td><span class="pill pill--warn"><i></i>Media re-review</span></td><td>Mariya Ruseva</td><td class="muted">26 Aug</td></tr>
           </tbody>
         </table>
