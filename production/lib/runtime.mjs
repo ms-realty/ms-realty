@@ -57,6 +57,12 @@ export function listingFromCmsRecord(record, approvedTour = null, property = nul
   const propertyVerification = property?.fact_verification || [];
   return {
     id: record.id,
+    lot_number: record.lot_number ?? null,
+    lot_suffix: record.lot_suffix ?? null,
+    migration_id: record.migration_id ?? null,
+    legacy_lot_id: record.legacy_lot_id ?? null,
+    legacy_urls: Array.isArray(record.legacy_urls) ? record.legacy_urls : [],
+    merged_into: record.merged_into ?? null,
     url: record.source_url,
     canonical: record.seo.canonical,
     domain: record.source_domain,

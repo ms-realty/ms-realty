@@ -215,6 +215,13 @@ function desiredListingsBase(seed, localeIds) {
     id: record.id,
     data: {
       id: record.id,
+      lot_number: record.lot_number,
+      lot_suffix: record.lot_suffix ?? null,
+      migration_id: record.migration_id,
+      legacy_lot_id: record.legacy_lot_id ?? null,
+      legacy_post_id: record.legacy_post_id ?? null,
+      legacy_urls: clone(record.legacy_urls || []),
+      merged_into: record.merged_into ?? null,
       cms_status: "source_imported_review_required",
       source_locale: requiredMapValue(localeIds, record.source_locale, "Listing source locale"),
       source_domain: record.source_domain,
@@ -710,6 +717,16 @@ function projectedListingRecord(document, snapshot) {
   const tourDocument = snapshot.listing_tours.byId.get(relationId(document.tour)) || snapshot.listing_tours.byListingId.get(document.id) || null;
   return {
     id: document.id,
+    lot_number: document.lot_number ?? null,
+    lot_suffix: document.lot_suffix ?? null,
+    migration_id: document.migration_id ?? null,
+    legacy_lot_id: document.legacy_lot_id ?? null,
+    legacy_post_id: document.legacy_post_id ?? null,
+    legacy_urls: (Array.isArray(document.legacy_urls) ? document.legacy_urls : []).map((entry) => ({
+      domain: String(entry?.domain || ""),
+      url: String(entry?.url || ""),
+    })),
+    merged_into: document.merged_into ?? null,
     collection: "listings",
     cms_status: document.cms_status,
     source_locale: localeCode(document.source_locale, snapshot),

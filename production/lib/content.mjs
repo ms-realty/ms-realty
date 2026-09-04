@@ -219,6 +219,11 @@ export function listingToPublicViewModel(listing) {
   const snapshot = listingSourceSnapshot(listing);
   return {
     id: listing.id,
+    lot_number: listing.lot_number ?? null,
+    lot_suffix: listing.lot_suffix ?? null,
+    migration_id: listing.migration_id ?? null,
+    legacy_lot_id: listing.legacy_lot_id ?? null,
+    merged_into: listing.merged_into ?? null,
     source_url: listing.url,
     source_domain: listing.domain,
     source_locale: listing.locale,
