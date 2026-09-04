@@ -69,3 +69,35 @@ test("a release is not finished until the whole public site answers", () => {
     "the site probe must gate the release, not report after it",
   );
 });
+
+test("every public route selects its origin from the forwarded host", () => {
+  // /en/search, /ru/search and /he/search published
+  // https://ms-realty.ms-realty-bg.workers.dev as their own canonical link and
+  // og:url on the live canonical domain, while /bg/tarsene and /de/suche were
+  // correct. Only the locales whose search segment is literally "search" reach
+  // app/[locale]/search/route.js, and that one file forwarded no host, so
+  // publicOriginForHost fell back to the operational origin. Three of seven
+  // languages were telling Google the wrong home for every search page.
+  const appRoot = path.join(ROOT, "app");
+  // Render helpers that resolve a public origin from the request host. Admin
+  // and API handlers take the whole Request and are not in this contract.
+  const hostAware = /renderApp(?:Route|SearchRoute|SiteRoot|Sitemap|Robots)Response/;
+
+  const walk = (dir) =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const target = path.join(dir, entry.name);
+      return entry.isDirectory() ? walk(target) : entry.name === "route.js" ? [target] : [];
+    });
+
+  const offenders = walk(appRoot)
+    .filter((file) => hostAware.test(fs.readFileSync(file, "utf8")))
+    .filter((file) => !fs.readFileSync(file, "utf8").includes("x-forwarded-host"));
+
+  assert.deepEqual(
+    offenders.map((file) => path.relative(ROOT, file)),
+    [],
+    "a public route that renders without the forwarded host publishes the operational origin",
+  );
+  // The contract is worth nothing if it matches no files.
+  assert.ok(walk(appRoot).filter((file) => hostAware.test(fs.readFileSync(file, "utf8"))).length >= 6);
+});
