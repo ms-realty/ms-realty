@@ -682,14 +682,14 @@
   },
   "MS-CRAWL-0087": {
     "action": "assign",
-    "confidence": "medium",
+    "confidence": "high",
     "evidence": {
       "total_area_phrase": "Big plot of land 20 740 sq.m., buildings 720"
     },
     "facts": {
       "land_area_sqm": 20740.0
     },
-    "reason": "wtf_area=20740 is the plot area. wtf_total_area=720 contradicts wtf_area and the description does not support it; withheld."
+    "reason": "wtf_area=20740 is the plot area, and the description says so: a plot of 20 740 sq m with 720 sq m of buildings. The 720 is a real building area, but the plot family carries no field for one, so it is withheld rather than written to the plot."
   },
   "MS-CRAWL-0089": {
     "action": "assign",
@@ -882,15 +882,12 @@
     "reason": "wtf_area=88 is the area the legacy page published for the building."
   },
   "MS-CRAWL-0108": {
-    "action": "assign",
-    "confidence": "medium",
+    "action": "skip",
+    "confidence": "high",
+    "reason": "wtf_area=520 is the building's total area: the description says the two-storey building's built-up area is 260 sq m and its total area 520. The apartment family carries no gross floor field, and 260 is stated in prose rather than in a legacy area key, so neither number is restored. The lot id is shared with another record; the lot identity is tracked in legacy-lot-id-overrides.json.",
     "evidence": {
       "area_phrase": "ункт/. Вилата е строена през 90-те години. Сградата е двуетажна, масивна, застроената и площ е 260 кв.м., а обща площ е 520"
-    },
-    "facts": {
-      "built_area_sqm": 520.0
-    },
-    "reason": "wtf_area=520 is the area the legacy page published for the building. The lot id is shared with another record; each record keeps the area its own legacy post stated. The lot identity itself is tracked in legacy-lot-id-overrides.json."
+    }
   },
   "MS-CRAWL-0109": {
     "action": "assign",
@@ -946,12 +943,12 @@
   },
   "MS-CRAWL-0116": {
     "action": "assign",
-    "confidence": "medium",
+    "confidence": "high",
     "evidence": {},
     "facts": {
       "land_area_sqm": 20740.0
     },
-    "reason": "wtf_area=20740 is the plot area. wtf_total_area=720 contradicts wtf_area and the description does not support it; withheld."
+    "reason": "wtf_area=20740 is the plot area, and the description says so: a plot of 20 740 sq m with 720 sq m of buildings. The 720 is a real building area, but the plot family carries no field for one, so it is withheld rather than written to the plot."
   },
   "MS-CRAWL-0117": {
     "action": "assign",
@@ -1143,14 +1140,14 @@
   },
   "MS-CRAWL-0142": {
     "action": "assign",
-    "confidence": "medium",
+    "confidence": "high",
+    "reason": "wtf_total_area=1180 is the plot area the legacy page published: the description says the plot measures 1180 sq m. wtf_area=60 is unlabelled and is not the plot, so it is withheld; the plot family carries no field for a building area.",
+    "facts": {
+      "land_area_sqm": 1180.0
+    },
     "evidence": {
       "total_area_phrase": "жен на холме, на окраине деревни, благодаря чему с участка открывается невероятная панорама. Площадь участка составляет 1180"
-    },
-    "facts": {
-      "land_area_sqm": 60.0
-    },
-    "reason": "wtf_area=60 is the plot area. wtf_total_area=1180 contradicts wtf_area and the description does not support it; withheld."
+    }
   },
   "MS-CRAWL-0146": {
     "action": "assign",

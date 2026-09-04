@@ -23,9 +23,15 @@ import { latestTranslationTasks, readTranslationLedger } from "../lib/translatio
 //
 //   { "MS-CRAWL-0007": {
 //       "action": "assign",                 // or "skip"
-//       "target_field": "usable_area_sqm",  // which of the family's area fields
-//       "area_sqm": 59.21,                  // omit to take the extractor's value
-//       "reviewer": "…", "reason": "…" } }
+//       "facts": { "usable_area_sqm": 59.21 },
+//       "evidence": { "area_phrase": "…" }, "reason": "…" } }
+//
+// A decision states the numbers it releases, because the field the legacy meta
+// key maps to is the judgement being made. A house whose post published both the
+// building and the plot releases two of them; neither is the other's fallback.
+// The older single-field form is still read:
+//
+//   { "target_field": "usable_area_sqm", "area_sqm": 59.21 }
 //
 // The edit lands as `entered_pending_review`, the state the fact model uses for
 // a figure the source stated and no broker has confirmed. The public page
@@ -49,28 +55,47 @@ function areaValue(value) {
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
-/** The field and value to write, or null when this row still needs a human. */
+function oneFact(field, value) {
+  const name = String(field || "").trim();
+  const sqm = areaValue(value);
+  return name && sqm !== null ? { [name]: sqm } : null;
+}
+
+// One unusable number holds the whole row: half a decision is not the decision
+// that was reviewed.
+function statedFacts(facts) {
+  if (!facts || typeof facts !== "object" || Array.isArray(facts)) return null;
+  const resolved = {};
+  for (const [field, value] of Object.entries(facts)) {
+    const fact = oneFact(field, value);
+    if (!fact) return null;
+    Object.assign(resolved, fact);
+  }
+  return Object.keys(resolved).length > 0 ? resolved : null;
+}
+
+/** The facts to write, or null when this row still needs a human. */
 export function resolveAreaProposal(record, override) {
   if (override?.action === "skip") return null;
   if (override?.action === "assign") {
-    const field = String(override.target_field || record.target_field || "").trim();
-    const value = areaValue(override.area_sqm ?? record.proposed_sqm);
-    return field && value !== null ? { field, value, decided_by: "override" } : null;
+    const facts =
+      statedFacts(override.facts) || oneFact(override.target_field || record.target_field, override.area_sqm ?? record.proposed_sqm);
+    return facts ? { facts, decided_by: "override" } : null;
   }
   if (override) return null;
   if (record.status !== "ready" || !record.target_field) return null;
-  const value = areaValue(record.proposed_sqm);
-  return value === null ? null : { field: record.target_field, value, decided_by: "extractor" };
+  const facts = oneFact(record.target_field, record.proposed_sqm);
+  return facts ? { facts, decided_by: "extractor" } : null;
 }
 
-function run({ apply }) {
-  const areaMap = readJson(AREA_MAP_PATH, null);
+export function run({ apply, mapPath = AREA_MAP_PATH, overridesPath = OVERRIDES_PATH, ledgerFilePath = ledgerPath }) {
+  const areaMap = readJson(mapPath, null);
   if (!areaMap) {
-    throw new Error(`Missing ${AREA_MAP_PATH}. Run migration/extract_legacy_areas.py first.`);
+    throw new Error(`Missing ${mapPath}. Run migration/extract_legacy_areas.py first.`);
   }
-  const overrides = readJson(OVERRIDES_PATH, {});
+  const overrides = readJson(overridesPath, {});
   const translationTasks = latestTranslationTasks(readTranslationLedger());
-  const seed = applyListingEdits(loadCmsSeed(), readListingEdits(ledgerPath));
+  const seed = applyListingEdits(loadCmsSeed(), readListingEdits(ledgerFilePath));
 
   const planned = [];
   const skipped = [];
@@ -86,20 +111,32 @@ function run({ apply }) {
         id: `legacy-area-${record.new_reference}`,
         listingId: record.new_reference,
         editor: EDITOR,
-        propertyPatch: { [proposal.field]: proposal.value },
+        propertyPatch: proposal.facts,
       },
       translationTasks,
       RESTORED_AT,
     );
+    const stated = Object.entries(proposal.facts)
+      .map(([field, value]) => `${field}=${value}`)
+      .join(", ");
+    // A decision may take the plot from one legacy key and the building from the
+    // other, so the note quotes both keys rather than the one the extractor
+    // happened to prefer. A reviewer can then see which number became which fact.
+    const source = [
+      record.area.raw == null ? null : `wtf_area='${record.area.raw}'`,
+      record.total_area.raw == null ? null : `wtf_total_area='${record.total_area.raw}'`,
+    ]
+      .filter(Boolean)
+      .join(", ");
     planned.push({
       edit: {
         ...edit,
         review_source: "legacy_wordpress_postmeta",
         review_notes:
-          `${proposal.field}=${proposal.value} recovered from ${record.source_meta_key}='${record.area.raw ?? record.total_area.raw}' ` +
-          `on ${record.legacy_domain} post ${record.legacy_post_id}; field chosen by ${proposal.decided_by}.`,
+          `${stated} recovered from ${source} ` +
+          `on ${record.legacy_domain} post ${record.legacy_post_id}; fields chosen by ${proposal.decided_by}.`,
       },
-      summary: `${record.new_reference} ${proposal.field}=${proposal.value} (${proposal.decided_by})`,
+      summary: `${record.new_reference} ${stated} (${proposal.decided_by})`,
     });
   }
 
@@ -115,7 +152,7 @@ function run({ apply }) {
   let applied = 0;
   let alreadyApplied = 0;
   for (const row of planned) {
-    const persisted = appendListingEdit(row.edit, ledgerPath ? { filePath: ledgerPath } : {});
+    const persisted = appendListingEdit(row.edit, ledgerFilePath ? { filePath: ledgerFilePath } : {});
     if (persisted.idempotent) alreadyApplied += 1;
     else applied += 1;
   }
