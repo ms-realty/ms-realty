@@ -436,6 +436,17 @@ jobs:
           MS_REALTY_PRODUCTION_URL: https://makler-realty.com
         run: node production/scripts/probe-production-journeys.mjs
 
+      # The journey probe proves production is alive in eight checks. This
+      # proves the site is usable: every public page type in every public
+      # locale, the SEO files on the real domain, one legacy URL of each
+      # approved decision class, and the operator surface reachable but closed.
+      # A release that renders home while Greek search 500s or an approved 301
+      # breaks does not reach the agency's customers.
+      - name: Verify the whole public site on the canonical domain
+        env:
+          MS_REALTY_PUBLIC_URL: https://makler-realty.com
+        run: node production/scripts/probe-canonical-site.mjs
+
       - name: Roll back failed deployment
         if: failure() && needs.deploy_origin.outputs.previous_release != ''
         run: |

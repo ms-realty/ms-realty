@@ -28,6 +28,12 @@ const dockerignore = fs.readFileSync(fromRoot(".dockerignore"), "utf8");
 const dockerfile = fs.readFileSync(fromRoot("Dockerfile"), "utf8");
 const httpSmokeSource = fs.readFileSync(fromRoot("production", "scripts", "build-http-smoke.mjs"), "utf8");
 const wranglerConfig = fs.readFileSync(fromRoot("wrangler.jsonc"), "utf8");
+const healthCheckWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "health-check.yml"), "utf8");
+const drillWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "monitoring-drill.yml"), "utf8");
+const drillScheduleWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "monitoring-drill-schedule.yml"), "utf8");
+const reclaimWorkflow = fs.readFileSync(fromRoot(".github", "workflows", "reclaim-public-routes.yml"), "utf8");
+const probeSource = fs.readFileSync(fromRoot("production", "scripts", "probe-production-journeys.mjs"), "utf8");
+const publicOriginSource = fs.readFileSync(fromRoot("production", "lib", "public-origin.mjs"), "utf8");
 const CONTAINER_RUNTIME_BINDINGS = [
   "MS_REALTY_ADMIN_CREDENTIALS_JSON",
   "MS_REALTY_ADMIN_TOKEN",
@@ -334,6 +340,76 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(rollbackBlock, /d\.launch_ready !== ready/);
   assert.match(rollbackBlock, /JSON\.stringify\(actual\) !== JSON\.stringify\(blockers\)/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
+});
+
+test("the production Worker owns every canonical public route", () => {
+  // On 2026-09-03 a second Worker was deployed onto this zone holding the site
+  // root and all seven locale prefixes. Every public page on makler-realty.com
+  // answered 503 "under construction" with noindex for a day, and neither the
+  // deploy pipeline nor the hourly probe noticed, because both watched only
+  // workers.dev. Declaring the routes here means a deploy re-asserts ownership,
+  // and losing one is a failing test rather than a silent outage.
+  const config = JSON.parse(wranglerConfig.replace(/^\s*\/\/.*$/gm, ""));
+  const patterns = config.routes.map(({ pattern }) => pattern);
+
+  for (const host of ["makler-realty.com", "www.makler-realty.com"]) {
+    assert.ok(patterns.includes(`${host}/`), `${host} site root must route to this Worker`);
+    for (const locale of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
+      assert.ok(patterns.includes(`${host}/${locale}*`), `${host} ${locale} pages must route to this Worker`);
+    }
+  }
+  assert.equal(patterns.length, 16, "no route beyond the canonical site root and its seven locales");
+  for (const route of config.routes) assert.equal(route.zone_name, "makler-realty.com");
+
+  // makler-realty.ru stays off this Worker until publicOriginForHost answers
+  // for it: claiming that traffic first would publish workers.dev URLs into
+  // Russian canonical, hreflang and Open Graph tags.
+  assert.ok(!patterns.some((pattern) => pattern.includes("makler-realty.ru")));
+  assert.doesNotMatch(publicOriginSource, /makler-realty\.ru/);
+
+  // The operational origin stays reachable for the admin and the probes.
+  assert.equal(config.workers_dev, true);
+});
+
+test("a stranded launch gate cannot silently strand every deploy", () => {
+  // monitoring_rollback expires 24 hours after its drill, and the deploy job
+  // requires launch_ready before it finishes. Without a scheduled drill, any
+  // release a day later verifies against an expired gate and rolls itself back
+  // — which is exactly how #172 ended up merged but never deployed.
+  assert.match(drillScheduleWorkflow, /cron: "23 3 \* \* \*"/);
+  assert.match(drillScheduleWorkflow, /gh workflow run monitoring-drill\.yml/);
+  assert.match(drillScheduleWorkflow, /-f confirm_alert_drill=true/);
+  // The drill must target the release that is actually serving, at both layers,
+  // and only if that release is on main.
+  assert.match(drillScheduleWorkflow, /edge !== origin/);
+  assert.match(drillScheduleWorkflow, /git merge-base --is-ancestor "\$release_sha" origin\/main/);
+  // It dispatches the same workflow a person runs; no launch contract is widened.
+  assert.match(drillWorkflow, /workflow_dispatch:/);
+  assert.doesNotMatch(drillWorkflow, /^\s+schedule:/m);
+});
+
+test("the hourly probe watches the domain that carries the search equity", () => {
+  assert.match(healthCheckWorkflow, /MS_REALTY_PRODUCTION_URL: https:\/\/makler-realty\.com/);
+  assert.match(healthCheckWorkflow, /MS_REALTY_PRODUCTION_URL: https:\/\/ms-realty\.ms-realty-bg\.workers\.dev/);
+  // Both probes pin their host in the step itself, so a copied step cannot
+  // quietly point production monitoring somewhere else.
+  assert.equal(healthCheckWorkflow.match(/test "\$MS_REALTY_PRODUCTION_URL" =/g)?.length, 2);
+  // The canonical probe asserts the indexing contract the workers.dev one cannot.
+  assert.match(probeSource, /canonical public host must remain indexable/);
+});
+
+test("reclaiming a public route never deletes another Worker", () => {
+  assert.match(reclaimWorkflow, /workers\/routes/);
+  assert.match(reclaimWorkflow, /--request DELETE/);
+  // Detaching a route is opt-in and typed; the default run only reports.
+  assert.match(reclaimWorkflow, /inputs\.detach_foreign_routes != ''/);
+  assert.match(reclaimWorkflow, /test "\$DETACH_WORKER" != "\$PRODUCTION_WORKER"/);
+  // A Worker script is never removed, and the untrusted input never reaches a
+  // shell through interpolation.
+  assert.doesNotMatch(reclaimWorkflow, /wrangler delete|scripts\/\$\{/);
+  assert.doesNotMatch(reclaimWorkflow, /\$\{\{ inputs\.detach_foreign_routes \}\}[^\n]*run:/);
+  // Reclaiming is only real once the canonical journeys pass on the real domain.
+  assert.match(reclaimWorkflow, /probe-production-journeys\.mjs/);
 });
 
 test("health marker is baked into the Container image, not forwarded by the Worker", () => {

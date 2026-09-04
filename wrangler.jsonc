@@ -10,6 +10,38 @@
   // Other workers.dev deployments are isolated drills and are marked noindex
   // by the Worker hostname guard; no custom-domain route is required.
   "workers_dev": true,
+
+  // The public site is served from the canonical domain, and this Worker is the
+  // only thing that may answer for it. Cloudflare routes the most specific
+  // match, so these exact patterns beat any zone-wide wildcard and every deploy
+  // re-asserts ownership: a second Worker can only take a public URL by being
+  // deployed with a more specific route, which is a visible act rather than an
+  // accident. The site root plus the seven locale prefixes is the whole public
+  // site (locales/registry.json url_strategy = locale_prefix); /admin, /api,
+  // media and the SEO files travel on the same Worker anyway.
+  //
+  // makler-realty.ru is deliberately absent: the app does not yet publish that
+  // host's canonical origin, so claiming its traffic would publish workers.dev
+  // URLs into Russian hreflang and Open Graph. It joins once public-origin.mjs
+  // answers for it.
+  "routes": [
+    { "pattern": "makler-realty.com/", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/bg*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/en*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/de*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/nl*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/ru*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/el*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/he*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/bg*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/en*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/de*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/nl*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/ru*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/el*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/he*", "zone_name": "makler-realty.com" }
+  ],
   "vars": {
     "MS_REALTY_EVENT_DURABLE_STORE_ENABLED": "true",
     "MS_REALTY_LEAD_DURABLE_STORE_ENABLED": "true",
