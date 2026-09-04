@@ -1,0 +1,129 @@
+name: Reclaim the public routes
+
+# A second Worker on the zone can take every public URL away from the site, and
+# the hourly journey probe only watched workers.dev, so nobody was told. This
+# reports who owns each canonical public route, and — only when asked in typed
+# words — detaches the routes held by another Worker so the next `ms-realty`
+# deploy can claim them.
+#
+# It never deletes a Worker: the displaced Worker keeps its script and can be
+# re-pointed by deploying it again with routes of its own.
+
+on:
+  workflow_dispatch:
+    inputs:
+      detach_foreign_routes:
+        description: >-
+          Type the name of the Worker whose canonical .com routes should be
+          detached, or leave empty to only report ownership.
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  routes:
+    name: Report and reclaim canonical public routes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DETACH_WORKER: ${{ inputs.detach_foreign_routes }}
+      PRODUCTION_WORKER: ms-realty
+      PUBLIC_ZONE: makler-realty.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require deployment authority
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+
+      - name: Resolve the public zone
+        id: zone
+        run: |
+          response="$(curl --fail --silent --show-error --max-time 20 \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones?name=${PUBLIC_ZONE}")"
+          zone_id="$(node -e 'const d=JSON.parse(process.argv[1]); const id=d.success && d.result?.[0]?.id; if (!/^[0-9a-f]{32}$/i.test(String(id))) { console.error(JSON.stringify(d.errors || d).slice(0, 400)); process.exit(1); } process.stdout.write(id)' "$response")"
+          echo "id=$zone_id" >> "$GITHUB_OUTPUT"
+
+      - name: Report who owns each canonical public route
+        id: report
+        env:
+          ZONE_ID: ${{ steps.zone.outputs.id }}
+        run: |
+          curl --fail --silent --show-error --max-time 20 \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes" \
+            --output routes.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const declared = JSON.parse(
+            fs.readFileSync("wrangler.jsonc", "utf8").replace(/^\s*\/\/.*$/gm, ""),
+          ).routes.map(({ pattern }) => pattern);
+          const payload = JSON.parse(fs.readFileSync("routes.json", "utf8"));
+          if (!payload.success) throw new Error("Cloudflare refused the route listing");
+          const live = new Map(payload.result.map((route) => [route.pattern, route]));
+          const rows = declared.map((pattern) => ({
+            pattern,
+            owner: live.get(pattern)?.script ?? null,
+            id: live.get(pattern)?.id ?? null,
+          }));
+          for (const row of rows) {
+            console.log(`${row.owner ?? "(unclaimed)"}\t${row.pattern}`);
+          }
+          const foreign = rows.filter((row) => row.owner && row.owner !== process.env.PRODUCTION_WORKER);
+          fs.writeFileSync("foreign-routes.json", `${JSON.stringify(foreign, null, 2)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `foreign_count=${foreign.length}\n`);
+          fs.appendFileSync(
+            process.env.GITHUB_STEP_SUMMARY,
+            [
+              "| Owner | Route |",
+              "| --- | --- |",
+              ...rows.map((row) => `| ${row.owner ?? "_(unclaimed)_"} | \`${row.pattern}\` |`),
+              "",
+            ].join("\n"),
+          );
+          NODE
+
+      - name: Detach the named Worker from the canonical public routes
+        if: ${{ inputs.detach_foreign_routes != '' }}
+        env:
+          ZONE_ID: ${{ steps.zone.outputs.id }}
+        run: |
+          test "$DETACH_WORKER" != "$PRODUCTION_WORKER"
+          mapfile -t targets < <(node -e '
+            const rows = JSON.parse(require("node:fs").readFileSync("foreign-routes.json", "utf8"));
+            const named = rows.filter(({ owner }) => owner === process.env.DETACH_WORKER);
+            if (!named.length) { console.error("No canonical public route is held by " + process.env.DETACH_WORKER); process.exit(1); }
+            for (const { id, pattern } of named) process.stdout.write(`${id} ${pattern}\n`);
+          ')
+          for target in "${targets[@]}"; do
+            route_id="${target%% *}"
+            pattern="${target#* }"
+            echo "Detaching $pattern from $DETACH_WORKER"
+            curl --fail --silent --show-error --max-time 20 --request DELETE \
+              --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes/${route_id}" \
+              --output /dev/null
+          done
+
+      - name: Confirm the canonical site answers from the production Worker
+        if: ${{ inputs.detach_foreign_routes != '' }}
+        env:
+          MS_REALTY_PRODUCTION_URL: https://makler-realty.com
+        run: |
+          for attempt in $(seq 1 30); do
+            if node production/scripts/probe-production-journeys.mjs > canonical-journey.json; then
+              cat canonical-journey.json
+              exit 0
+            fi
+            cat canonical-journey.json || true
+            echo "Canonical journey attempt $attempt/30 did not pass; retrying."
+            sleep 10
+          done
+          exit 1
