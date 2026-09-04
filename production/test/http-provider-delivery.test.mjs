@@ -37,7 +37,7 @@ function payloadAdminAuth() {
   };
 }
 
-function fixture(t, { contact = {}, listingReference = "MS-CRAWL-0001", reply = null } = {}) {
+function fixture(t, { contact = {}, listingReference = "MS-00815", reply = null } = {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-http-provider-delivery-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const jsonl = (name, rows = []) => {
@@ -76,7 +76,7 @@ function approvedReply(overrides = {}) {
   return {
     id: "reply-standalone-provider-lead",
     lead_id: "standalone-provider-lead",
-    listing_reference: "MS-CRAWL-0001",
+    listing_reference: "MS-00815",
     original_language: "bg",
     reply_language: "bg",
     reviewed_reply: "Approved reply from the outbox.",

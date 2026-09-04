@@ -38,7 +38,7 @@ Object.assign(process.env, {
 
 const registry = loadLocaleRegistry();
 const listings = loadListings();
-const listing = findListingById(listings, "MS-CRAWL-0001");
+const listing = findListingById(listings, "MS-00815");
 
 function publishedTranslation(locale, copy) {
   const approvedAt = "2026-08-30T08:00:00.000Z";
@@ -132,7 +132,7 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
       id: "print",
       label: "הדפסה/PDF",
       kind: "print",
-      url: "/he/properties/MS-CRAWL-0001?print=1",
+      url: "/he/properties/MS-00815?print=1",
       pdf_status: "browser_print_ready",
     },
   );
@@ -214,13 +214,13 @@ test("listing language navigation keeps users on the same listing in every publi
   assert.deepEqual(
     page.chrome.languages.map(({ code, href }) => ({ code, href })),
     [
-      { code: "bg", href: "/bg/imoti/MS-CRAWL-0001" },
-      { code: "en", href: "/en/properties/MS-CRAWL-0001" },
-      { code: "de", href: "/de/immobilien/MS-CRAWL-0001" },
-      { code: "nl", href: "/nl/vastgoed/MS-CRAWL-0001" },
-      { code: "ru", href: "/ru/properties/MS-CRAWL-0001" },
-      { code: "el", href: "/el/akinita/MS-CRAWL-0001" },
-      { code: "he", href: "/he/properties/MS-CRAWL-0001" },
+      { code: "bg", href: "/bg/imoti/MS-00815" },
+      { code: "en", href: "/en/properties/MS-00815" },
+      { code: "de", href: "/de/immobilien/MS-00815" },
+      { code: "nl", href: "/nl/vastgoed/MS-00815" },
+      { code: "ru", href: "/ru/properties/MS-00815" },
+      { code: "el", href: "/el/akinita/MS-00815" },
+      { code: "he", href: "/he/properties/MS-00815" },
     ],
   );
 });
@@ -341,14 +341,14 @@ test("approved Supersplat tours link to the self-hosted viewer without loading t
   page.body.media.tour = {
     available: true,
     provider: "supersplat-viewer",
-    viewer_url: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001/index.html",
+    viewer_url: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815/index.html",
     accessibility_caption: "Reviewed 3D tour of the property.",
     fallback_gallery: [page.body.media.gallery[0]],
   };
   const html = renderReactPublicBody(page);
 
   assert.match(html, /data-tour-provider="supersplat-viewer"/);
-  assert.match(html, /href="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/tours\/MS-CRAWL-0001\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
+  assert.match(html, /href="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/tours\/MS-00815\/index\.html" target="_blank" rel="noopener" data-supersplat-viewer-link="true"/);
   assert.match(html, /data-tour-gallery-fallback="true"/);
   assert.match(html, /href="#listing-gallery"/);
   assert.doesNotMatch(html, /data-photo-sphere-viewer=/);
@@ -365,7 +365,7 @@ test("approved broker contact data enables direct listing contact links", () => 
       broker: "broker_ru",
       phone: "+447700900001",
       reviewer: "owner",
-      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      sourceReference: "test://broker-contact/MS-00815",
       validationStatus: "broker_verified",
       approved: true,
     }),
@@ -403,7 +403,7 @@ test("listing SEO includes approved hreflang and excludes unavailable draft loca
 test("reviewed listing facts, privacy, verification, and SEO reach the public listing", () => {
   const seed = applyListingEdits(loadCmsSeed(), [
     {
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       editor: "listing_editor",
       edited_at: "2026-07-19T11:31:00Z",
       patch: {
@@ -416,7 +416,7 @@ test("reviewed listing facts, privacy, verification, and SEO reach the public li
         publish_approved: true,
         seo_title: "Reviewed commercial property in Sandanski",
         seo_description: "Reviewed source-language description for search engines.",
-        seo_canonical: "/bg/imoti/MS-CRAWL-0001",
+        seo_canonical: "/bg/imoti/MS-00815",
         seo_og_title: "Commercial property in Sandanski",
         seo_og_description: "Reviewed commercial property listing.",
         seo_robots: "index,follow",
@@ -424,11 +424,11 @@ test("reviewed listing facts, privacy, verification, and SEO reach the public li
       },
     },
   ]);
-  const record = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const record = seed.records.find((candidate) => candidate.id === "MS-00815");
   const page = renderListingPage({ registry, listing: listingFromCmsRecord(record), localeCode: "bg" });
   const html = renderReactPublicBody(page);
 
-  assert.equal(page.canonical, "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(page.canonical, "/bg/imoti/MS-00815");
   assert.equal(page.metadata.title, "Reviewed commercial property in Sandanski");
   assert.equal(page.metadata.og_title, "Commercial property in Sandanski");
   assert.equal(page.body.facts.floor, 2);
@@ -450,13 +450,13 @@ test("reviewed listing facts, privacy, verification, and SEO reach the public li
 test("unreviewed source-language SEO never replaces public metadata", () => {
   const seed = applyListingEdits(loadCmsSeed(), [
     {
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       editor: "seo_editor",
       edited_at: "2026-07-19T11:31:00Z",
       patch: { seo_title: "Unreviewed SEO draft", seo_review_confirmed: false },
     },
   ]);
-  const record = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const record = seed.records.find((candidate) => candidate.id === "MS-00815");
   const runtimeListing = listingFromCmsRecord(record);
   const page = renderListingPage({ registry, listing: runtimeListing, localeCode: "bg" });
 
@@ -521,8 +521,8 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.ok(search.cards.some((card) => card.thumbnail));
   assert.equal(search.cards.every((card) => !card.thumbnail || card.thumbnail.url.includes("/wp-content/uploads/")), true);
   assert.equal(search.cards.every((card) => !card.thumbnail || card.thumbnail.alt), true);
-  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
-  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "reviewed_translation");
+  assert.equal(search.cards.find((card) => card.id === "MS-00815").translation_display, "reviewed_translation");
+  assert.equal(search.cards.find((card) => card.id === "MS-00815").review_badge, "reviewed_translation");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale" && card.content_locale === "bg"));
   assert.match(renderReactPublicBody(search), /data-content-language="bg"/);
@@ -822,7 +822,7 @@ test("municipality search exposes reviewed Bulgarian municipality scope at every
       return source?.country_code === "BG" && source?.geography_id && source?.municipality === "Sandanski";
     }),
   );
-  assert.equal(sandanski.cards.some((card) => card.id === "MS-CRAWL-0021"), false);
+  assert.equal(sandanski.cards.some((card) => card.id === "MS-00944"), false);
   assert.deepEqual(sandanski.search.controls.active_filter_chips, [{ key: "municipality", value: "Sandanski", active: true }]);
   assert.match(html, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"/);
   assert.match(html, /name="region_id"/);
@@ -845,7 +845,7 @@ test("district search exposes official Bulgarian administrative areas without in
       return source?.country_code === "BG" && source?.district === "Blagoevgrad";
     }),
   );
-  assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-CRAWL-0072"), false);
+  assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-00930"), false);
   assert.deepEqual(blagoevgrad.search.controls.active_filter_chips, [{ key: "district", value: "Blagoevgrad", active: true }]);
   // The option value stays the official area id; the visible label is the
   // reader's own exonym, so a Russian page never offers a Latin district name.
@@ -949,7 +949,7 @@ test("search paginates without duplicating cards and applies reviewed area facet
 });
 
 test("property-card photo counts use reviewed singular and plural labels", () => {
-  const onePhotoListing = findListingById(listings, "MS-CRAWL-0012");
+  const onePhotoListing = findListingById(listings, "MS-00895");
   const englishHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "en" }));
   const bulgarianHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "bg" }));
 
@@ -1034,7 +1034,7 @@ test("location page keeps reviewed inventory indexable and serves source fallbac
   assert.equal(he.dir, "rtl");
   assert.equal(he.indexable, true);
   assert.equal(he.cards.length, 1);
-  assert.equal(he.cards[0].id, "MS-CRAWL-0001");
+  assert.equal(he.cards[0].id, "MS-00815");
   assert.equal(he.cards[0].translation_indexable, true);
   assert.match(he.cards[0].thumbnail.url, /\/wp-content\/uploads\//);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
@@ -1054,17 +1054,17 @@ test("location page keeps reviewed inventory indexable and serves source fallbac
 });
 
 test("reviewed settlement search is exact and curated location pages exclude held or foreign inventory", () => {
-  const polenitsa = findListingById(listings, "MS-CRAWL-0033");
-  const greek = findListingById(listings, "MS-CRAWL-0072");
+  const polenitsa = findListingById(listings, "MS-00865");
+  const greek = findListingById(listings, "MS-00930");
   const held = findListingById(listings, "MS-CRAWL-0143");
   const search = renderSearchPage({ registry, listings, localeCode: "bg", filters: { location: "Поленица" }, pageSize: null });
   const sandanski = renderLocationPage({ registry, listings: [polenitsa, greek, held], localeCode: "bg", location: "Sandanski" });
 
-  assert.ok(search.cards.some((card) => card.id === "MS-CRAWL-0033"));
+  assert.ok(search.cards.some((card) => card.id === "MS-00865"));
   assert.ok(search.cards.every((card) => card.location === "Поленица"));
   assert.equal(sandanski.status, 200);
   assert.equal(sandanski.body.listing_count, 1);
-  assert.deepEqual(sandanski.cards.map((card) => card.id), ["MS-CRAWL-0033"]);
+  assert.deepEqual(sandanski.cards.map((card) => card.id), ["MS-00865"]);
 });
 
 test("Bulgarian locations expose only their approved source-bound context", () => {

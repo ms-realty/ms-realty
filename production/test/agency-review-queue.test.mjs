@@ -97,7 +97,7 @@ test("production-review admin renders localized mobile queue labels and unverifi
   assert.doesNotMatch(html, /Agency decision queue|Legacy URL decisions/);
 
   const listings = await renderAppAdminResponse(
-    new Request("http://local/api/admin/listings?locale=bg&q=MS-CRAWL-0001", { headers }),
+    new Request("http://local/api/admin/listings?locale=bg&q=MS-00815", { headers }),
     { config },
   );
   const payload = await listings.json();

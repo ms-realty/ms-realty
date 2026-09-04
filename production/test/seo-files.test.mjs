@@ -21,7 +21,7 @@ test("SEO files expose only approved localized sitemap routes", () => {
 
   assert.equal(assertSeoFiles({ sitemapXml, robotsTxt, sitemap }), true);
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/he<\/loc>/);
-  const listingUrlPattern = /https:\/\/makler-realty\.com\/[a-z]{2}\/[^</]+\/MS-CRAWL-/;
+  const listingUrlPattern = /https:\/\/makler-realty\.com\/[a-z]{2}\/[^</]+\/MS-0\d{4}/;
   if (sitemap.summary.public.listing_entries > 0) {
     assert.match(sitemapXml, listingUrlPattern);
   } else {
@@ -44,9 +44,9 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
   });
   const sitemap = buildRuntimeLocalizedSitemap(registry, loadCmsSeed(), [
     {
-      id: "translation-listing-MS-CRAWL-0001-es",
+      id: "translation-listing-MS-00815-es",
       object_type: "listing",
-      object_id: "MS-CRAWL-0001",
+      object_id: "MS-00815",
       target_locale: "es",
       status: "published",
       human_approved: true,
@@ -59,7 +59,7 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
   assert.equal(sitemap.summary.contact_pages, 8);
   assert.equal(sitemap.summary.guide_pages, 5);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es" && entry.type === "home"), true);
-  assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/propiedades/MS-CRAWL-0001"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/propiedades/MS-00815"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/locations/sandanski" && entry.type === "location"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/sell" && entry.type === "seller"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/contact" && entry.type === "contact"), true);
@@ -68,13 +68,13 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
 test("runtime sitemap keeps sold listings but not sold-only location pages", () => {
   const seed = applyListingEdits(loadCmsSeed(), [
     {
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       patch: { location: "Sold Only Runtime City", listing_status: "sold" },
     },
   ]);
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), seed);
 
-  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/imoti/MS-CRAWL-0001"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/imoti/MS-00815"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc.endsWith("/locations/sold-only-runtime-city")), false);
 });
 
@@ -90,7 +90,7 @@ test("runtime sitemap exposes only official reviewed location scopes", () => {
 test("runtime sitemap excludes stale translation routes", () => {
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed(), readTranslationLedger());
 
-  assert.equal(sitemap.entries.some((entry) => entry.loc === "/el/akinita/MS-CRAWL-0001"), false);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/el/akinita/MS-00815"), false);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/el/topothesies/sandanski"), false);
 });
 

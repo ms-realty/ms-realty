@@ -18,7 +18,7 @@ test("audit log stores bounded admin mutation metadata without private content",
         action: "listing_edited",
         actor: "content_editor",
         objectType: "listing",
-        objectId: "MS-CRAWL-0001",
+        objectId: "MS-00815",
         locale: "bg",
         metadata: {
           changed_fields: ["title", "description"],
@@ -39,11 +39,11 @@ test("audit log stores bounded admin mutation metadata without private content",
 
 test("audit log rejects unknown actions and raw private fields", () => {
   assert.throws(
-    () => createAuditLogEntry({ action: "delete_everything", objectType: "listing", objectId: "MS-CRAWL-0001" }),
+    () => createAuditLogEntry({ action: "delete_everything", objectType: "listing", objectId: "MS-00815" }),
     /Unknown audit action/,
   );
   assert.throws(
-    () => createAuditLogEntry({ action: "listing_edited", objectType: "", objectId: "MS-CRAWL-0001" }),
+    () => createAuditLogEntry({ action: "listing_edited", objectType: "", objectId: "MS-00815" }),
     /Audit object type and id are required/,
   );
   assert.throws(

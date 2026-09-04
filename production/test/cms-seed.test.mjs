@@ -10,6 +10,7 @@ import {
   enrichmentTaskForListing,
   loadMediaInventory,
   searchOutboxEventForListing,
+  EXPECTED_SEED_MEDIA_ROWS,
 } from "../lib/cms-seed.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { assertPayloadCollections, buildPayloadCollections } from "../lib/payload-collections.mjs";
@@ -25,17 +26,17 @@ const mediaRows = loadMediaInventory();
 test("CMS seed composes listing, migration, route, translation, and media data", () => {
   const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
   const summary = assertCmsSeed(seed);
-  const fixtureListing = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const fixtureListing = seed.records.find((record) => record.id === "MS-00815");
   const fixtureSourceListing = listings.find((listing) => listing.id === fixtureListing.id);
-  const polenitsaListing = seed.records.find((record) => record.id === "MS-CRAWL-0033");
-  const greekListing = seed.records.find((record) => record.id === "MS-CRAWL-0072");
+  const polenitsaListing = seed.records.find((record) => record.id === "MS-00865");
+  const greekListing = seed.records.find((record) => record.id === "MS-00930");
   const ruListing = seed.records.find((record) => record.source_locale === "ru");
 
   assert.equal(summary.listings, 165);
   assert.equal(summary.properties, 165);
   assert.ok(summary.locations > 0);
   assert.equal(summary.enrichmentTasks, 165);
-  assert.equal(summary.mediaAssets, 4978);
+  assert.equal(summary.mediaAssets, EXPECTED_SEED_MEDIA_ROWS);
   assert.ok(summary.publicGalleryAssets > 0);
   assert.ok(summary.mediaReviewGatedAssets > 0);
   assert.equal(summary.videoCandidates, 0);
@@ -47,7 +48,7 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.translations.some((translation) => translation.locale === "fr"), false);
   assert.equal(fixtureListing.routing.deployable, false);
   assert.equal(fixtureListing.routing.review_required, true);
-  assert.equal(fixtureListing.property, "property-MS-CRAWL-0001");
+  assert.equal(fixtureListing.property, "property-MS-00815");
   assert.equal(fixtureListing.location, "location:sandanski");
   assert.equal(fixtureListing.translations.every((translation) => translation.listing === fixtureListing.id), true);
   assert.equal(fixtureListing.translations.every((translation) => translation.translation_state === translation.status), true);
@@ -118,7 +119,7 @@ test("CMS seed composes listing, migration, route, translation, and media data",
 });
 
 test("CMS seed persists the catalog projected translation row without weakening publication gates", () => {
-  const sourceListing = listings.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const sourceListing = listings.find((candidate) => candidate.id === "MS-00815");
   const source = listingSourceSnapshot(sourceListing);
   const copy = {
     title: "Approved English listing title",
@@ -280,7 +281,7 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   assert.equal(summary.records.properties, 165);
   assert.ok(summary.records.locations > 0);
   assert.equal(summary.records.listing_translations, 165);
-  assert.equal(summary.records.media_assets, 4978);
+  assert.equal(summary.records.media_assets, EXPECTED_SEED_MEDIA_ROWS);
   assert.equal(summary.records.listing_tours, 165);
   assert.equal(summary.records.listing_enrichment_tasks, 165);
   assert.equal(summary.records.search_outbox, 0);
@@ -396,13 +397,13 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
 });
 
 test("backfill tasks and search outbox events are deterministic and exclude private listing content", () => {
-  const first = enrichmentTaskForListing({ listingId: "MS-CRAWL-0001", propertyId: "property-MS-CRAWL-0001", factFields: ["bedrooms_count"] });
-  const replay = enrichmentTaskForListing({ listingId: "MS-CRAWL-0001", propertyId: "property-MS-CRAWL-0001", factFields: ["bedrooms_count"] });
+  const first = enrichmentTaskForListing({ listingId: "MS-00815", propertyId: "property-MS-00815", factFields: ["bedrooms_count"] });
+  const replay = enrichmentTaskForListing({ listingId: "MS-00815", propertyId: "property-MS-00815", factFields: ["bedrooms_count"] });
   assert.equal(first.idempotency_key, replay.idempotency_key);
 
   const event = searchOutboxEventForListing(
     {
-      id: "MS-CRAWL-0001",
+      id: "MS-00815",
       description: "source copy must not be queued",
       source_url: "https://private.example/listing",
       internal_latitude: 41.5,
@@ -412,7 +413,7 @@ test("backfill tasks and search outbox events are deterministic and exclude priv
   );
   assert.deepEqual(event.payload, {
     schema_version: 1,
-    listing_id: "MS-CRAWL-0001",
+    listing_id: "MS-00815",
     change_token: "2026-07-30T12:00:00.000Z",
   });
   assert.equal(JSON.stringify(event.payload).includes("private"), false);

@@ -7,7 +7,7 @@ const registry = loadLocaleRegistry();
 
 function propertyFixture() {
   const seed = loadCmsSeed();
-  const record = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const record = seed.records.find((candidate) => candidate.id === "MS-00815");
   const property = seed.properties.find((candidate) => candidate.id === record.property);
   record.facts = { ...record.facts, property_type: "land", bedrooms: 9 };
   property.property_family = "apartment";

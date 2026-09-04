@@ -48,10 +48,10 @@ test("API search preserves Postgres totals, pagination, and structured municipal
       total: 999,
       hits: [
         {
-          id: "MS-CRAWL-0033:bg",
-          source_listing_id: "MS-CRAWL-0033",
+          id: "MS-00865:bg",
+          source_listing_id: "MS-00865",
           locale: "bg",
-          locale_path: "/bg/imoti/MS-CRAWL-0033",
+          locale_path: "/bg/imoti/MS-00865",
           title: "Reviewed listing",
         },
       ],
@@ -207,7 +207,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
             intent: "inquiry",
             leadType: "buyer",
             language: "he",
-            listingReference: "MS-CRAWL-0001",
+            listingReference: "MS-00815",
             contact: { name: "Noa Levi", whatsapp: "+359880000000" },
             contact_preference: "whatsapp",
             message: "Interested in this property.",
@@ -217,7 +217,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const leadBody = await lead.json();
       assert.equal(lead.status, 201);
       assert.equal(lead.headers.get("cache-control"), "no-store");
-      assert.equal(leadBody.lead.listingReference, "MS-CRAWL-0001");
+      assert.equal(leadBody.lead.listingReference, "MS-00815");
       assert.equal(leadBody.lead.intent, "inquiry");
       assert.equal(leadBody.ledger.intent, "inquiry");
 
@@ -247,7 +247,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
         new Request("https://example.test/api/events", {
           method: "POST",
           headers: { "content-type": "application/x-www-form-urlencoded", origin: "https://example.test" },
-          body: new URLSearchParams({ type: "cta_click", path: "/he/properties/MS-CRAWL-0001", locale: "he", action: "call" }),
+          body: new URLSearchParams({ type: "cta_click", path: "/he/properties/MS-00815", locale: "he", action: "call" }),
         }),
       );
       assert.equal(event.status, 201);

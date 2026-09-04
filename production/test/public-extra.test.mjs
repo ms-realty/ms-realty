@@ -36,7 +36,7 @@ const seed = loadCmsSeed();
 const css = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public-extra.css"), "utf8");
 const PUBLIC_LOCALES = ["bg", "en", "de", "nl", "ru", "el", "he"];
 // Four active crawl listings that differ on price, bedrooms and location.
-const COMPARE_IDS = ["MS-CRAWL-0007", "MS-CRAWL-0016", "MS-CRAWL-0012", "MS-CRAWL-0013"];
+const COMPARE_IDS = ["MS-00911", "MS-00803", "MS-00895", "MS-00567-1"];
 
 function compare(localeCode, ids = COMPARE_IDS) {
   return renderComparePage({
@@ -102,7 +102,7 @@ test("the App Router manifest maps the three routes to the catch-all content rou
 /* ---------------------------------------------------------------- compare */
 
 test("the comparison renders one column per saved id, capped at four", () => {
-  const page = compare("en", [...COMPARE_IDS, "MS-CRAWL-0010"]);
+  const page = compare("en", [...COMPARE_IDS, "MS-01000"]);
   assert.equal(page.kind, "compare");
   assert.equal(page.body.max_columns, 4);
   assert.equal(page.body.columns.length, 4);
@@ -140,22 +140,22 @@ test("rows where every column matches collapse behind a disclosure that needs no
 });
 
 test("a single column has nothing to collapse", () => {
-  const page = compare("en", ["MS-CRAWL-0007"]);
+  const page = compare("en", ["MS-00911"]);
   assert.equal(page.body.columns.length, 1);
   assert.equal(page.body.identical_count, 0);
   assert.equal(page.body.rows.every((row) => row.identical === false), true);
 });
 
 test("removing a column is a plain link, and an unknown id is counted, never rendered", () => {
-  const page = compare("en", ["MS-CRAWL-0007", "MS-CRAWL-0016", "MS-CRAWL-NOPE"]);
+  const page = compare("en", ["MS-00911", "MS-00803", "MS-CRAWL-NOPE"]);
   assert.equal(page.body.columns.length, 2);
   assert.equal(page.body.unavailable_count, 1);
   const html = renderReactPublicBody(page);
   assert.match(html, /data-compare-unavailable="true"/);
   assert.doesNotMatch(html, /data-compare-unavailable="true"[^>]*hidden/);
   // Without JavaScript the remove control still drops that column.
-  assert.match(html, /href="\/en\/compare\?ids=MS-CRAWL-0016" data-compare-remove="MS-CRAWL-0007"/);
-  assert.match(html, /href="\/en\/compare\?ids=MS-CRAWL-0007" data-compare-remove="MS-CRAWL-0016"/);
+  assert.match(html, /href="\/en\/compare\?ids=MS-00803" data-compare-remove="MS-00911"/);
+  assert.match(html, /href="\/en\/compare\?ids=MS-00911" data-compare-remove="MS-00803"/);
 });
 
 test("with no ids the page ships the saved-listings fallback rather than an empty table", () => {
@@ -200,27 +200,27 @@ test("the comparison scrolls inside its own container and keeps every control st
 /* -------------------------------------------------------- listing extras */
 
 test("the listing carries an explicit brochure action naming the reference", () => {
-  const listing = listings.find((entry) => entry.id === "MS-CRAWL-0016");
+  const listing = listings.find((entry) => entry.id === "MS-00803");
   const page = renderListingPage({ registry, listing, localeCode: "en" });
   const brochure = page.body.extras.brochure;
-  assert.equal(brochure.url, "/en/properties/MS-CRAWL-0016?print=1");
-  assert.equal(brochure.reference, "MS-CRAWL-0016");
+  assert.equal(brochure.url, "/en/properties/MS-00803?print=1");
+  assert.equal(brochure.reference, "MS-00803");
   assert.equal(brochure.pdf_status, "browser_print_ready");
 
   const html = renderReactPublicBody(page);
   assert.match(html, /data-listing-brochure="true"/);
   assert.match(html, /data-listing-action="save_pdf"[^>]*data-listing-brochure-action="true"/);
-  assert.match(html, /href="\/en\/properties\/MS-CRAWL-0016\?print=1"/);
-  assert.match(html, /data-listing-brochure-reference="true">MS-CRAWL-0016</);
+  assert.match(html, /href="\/en\/properties\/MS-00803\?print=1"/);
+  assert.match(html, /data-listing-brochure-reference="true">MS-00803</);
   // The print view itself is untouched and still renders without the design
   // system stylesheet.
   const print = renderHtmlPage(page, { print: true });
   assert.match(print, /data-print-status="browser-pdf-ready"/);
-  assert.match(print, /MS-CRAWL-0016/);
+  assert.match(print, /MS-00803/);
 });
 
 test("the cost disclosure renders the approved fee table and refuses a total while a line is missing", () => {
-  const listing = listings.find((entry) => entry.id === "MS-CRAWL-0016");
+  const listing = listings.find((entry) => entry.id === "MS-00803");
   const page = renderListingPage({ registry, listing, localeCode: "en" });
   const estimator = page.body.cost_estimator;
   assert.equal(estimator.available, false);

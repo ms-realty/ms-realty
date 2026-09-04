@@ -48,8 +48,8 @@ test("fact review queue is derived from the public source-stated projection", ()
   assert.deepEqual(manager.factReview.summary, queue.summary);
   const html = renderReactAdminBody(manager);
   assert.match(html, /data-fact-review-queue="true"/);
-  assert.match(html, /data-fact-review-listing="MS-CRAWL-0003"/);
-  assert.match(html, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0003&amp;locale=bg#listing-facts"/);
+  assert.match(html, /data-fact-review-listing="MS-00922"/);
+  assert.match(html, /href="\/admin\/listings\/edit\?listingId=MS-00922&amp;locale=bg#listing-facts"/);
   const duplicateReview = buildListingDuplicateReview(seed);
   const expectedDuplicatePairs = DUPLICATE_REVIEW_PAIRS.filter((pair) => pair.listing_ids.every((listingId) => seed.records.some((record) => record.id === listingId)));
   assert.equal(duplicateReview.rows.length, expectedDuplicatePairs.length);
@@ -61,14 +61,14 @@ test("fact review queue is derived from the public source-stated projection", ()
   assert.ok(duplicateReview.rows.every((pair) => pair.record_a.role === "record_a" && pair.record_b.role === "record_b"));
   assert.ok(duplicateReview.rows.every((pair) => ["confirmed", "candidate"].includes(pair.status)));
   const excludedCoincidences = [
-    ["MS-CRAWL-0081", "MS-CRAWL-0118"],
-    ["MS-CRAWL-0013", "MS-CRAWL-0142"],
-    ["MS-CRAWL-0068", "MS-CRAWL-0156"],
+    ["MS-00286", "MS-00935"],
+    ["MS-00567-1", "MS-00920"],
+    ["MS-00720", "MS-00362"],
   ];
   for (const excluded of excludedCoincidences) {
     assert.equal(duplicateReview.rows.some((pair) => excluded.every((listingId) => [pair.record_a.listing_id, pair.record_b.listing_id].includes(listingId))), false);
   }
-  const confirmedPair = duplicateReview.rows.find((pair) => pair.pair_id === "MS-CRAWL-0083--MS-CRAWL-0159");
+  const confirmedPair = duplicateReview.rows.find((pair) => pair.pair_id === "MS-00891--MS-CRAWL-0159");
   assert.equal(confirmedPair.status, "confirmed");
   assert.equal(confirmedPair.record_a.price_eur, 155000);
   assert.equal(confirmedPair.record_b.price_eur, 185000);
@@ -79,14 +79,14 @@ test("fact review queue is derived from the public source-stated projection", ()
     assert.ok(card.source_url);
   }
   assert.match(html, /data-duplicate-review="true"/);
-  assert.match(html, /data-duplicate-review-pair="MS-CRAWL-0083--MS-CRAWL-0159"/);
+  assert.match(html, /data-duplicate-review-pair="MS-00891--MS-CRAWL-0159"/);
   assert.match(html, /data-duplicate-pair-status="confirmed"/);
-  assert.match(html, /data-duplicate-side="record_a"[^>]*data-duplicate-listing="MS-CRAWL-0083"/);
+  assert.match(html, /data-duplicate-side="record_a"[^>]*data-duplicate-listing="MS-00891"/);
   assert.match(html, /data-duplicate-side="record_b"[^>]*data-duplicate-listing="MS-CRAWL-0159"/);
   assert.match(html, /Record A|Запис A/);
   assert.match(html, /Candidate pair|Кандидатна двойка/);
   assert.match(html, /data-duplicate-review-summary="true"/);
-  assert.match(html, /data-area-evidence="duplicate-MS-CRAWL-0083"/);
+  assert.match(html, /data-area-evidence="duplicate-MS-00891"/);
   assert.match(html, /Open source|Отвори източника/);
   assert.match(html, /href="\/admin\/listings\?locale=bg#listing-publication-schedule"/);
   const areaReview = buildListingAreaReview(seed);
@@ -139,7 +139,7 @@ test("existing listing editor confirmation persists broker verification and remo
     editedAt: "2026-08-27T10:00:00.000Z",
   };
   const form = new URLSearchParams();
-  form.append("listingId", "MS-CRAWL-0003");
+  form.append("listingId", "MS-00922");
   form.append("editor", "editor_bg");
   form.append("bedrooms", "2");
   form.append("confirmedFacts", "bedrooms");
@@ -156,13 +156,13 @@ test("existing listing editor confirmation persists broker verification and remo
   assert.deepEqual(body.verified_fact_fields, ["bedrooms"]);
   assert.deepEqual(body.changed_fields, ["bedrooms_count"]);
 
-  const property = runtime.currentRows().properties.find((row) => row.id === "property-MS-CRAWL-0003");
+  const property = runtime.currentRows().properties.find((row) => row.id === "property-MS-00922");
   assert.equal(property.facts.bedrooms_count, 2);
   assert.equal(property.fact_verification.find((row) => row.field === "bedrooms_count").state, "broker_verified");
   assert.deepEqual(publicPropertyProjection(property).source_stated_facts, []);
 
-  const currentListing = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0003");
-  const sourceListing = seed.records.find((row) => row.id === "MS-CRAWL-0003");
+  const currentListing = runtime.currentRows().listings.find((row) => row.id === "MS-00922");
+  const sourceListing = seed.records.find((row) => row.id === "MS-00922");
   const publicListing = listingFromCmsRecord(
     { ...sourceListing, facts: currentListing.facts, seo: currentListing.seo, workflow: currentListing.workflow },
     null,
@@ -180,7 +180,7 @@ test("existing listing editor confirmation persists broker verification and remo
     registry,
     "bg",
     { ...seed, properties: runtime.currentRows().properties, records: seed.records },
-    "MS-CRAWL-0003",
+    "MS-00922",
     [],
     [],
   );
@@ -192,7 +192,7 @@ test("existing listing editor confirmation persists broker verification and remo
 
 test("fact review promotion keeps a grouped floor value on its matching canonical field", async () => {
   const seed = loadCmsSeed();
-  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0003");
+  const listing = seed.records.find((record) => record.id === "MS-00922");
   const property = seed.properties.find((candidate) => candidate.id === listing.property);
   property.facts.floor_number = 2;
   property.facts.total_floors = 4;
@@ -218,7 +218,7 @@ test("fact review promotion keeps a grouped floor value on its matching canonica
 
 test("fact review exposes a pending total-floor value when the floor number is already verified", async () => {
   const seed = loadCmsSeed();
-  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0003");
+  const listing = seed.records.find((record) => record.id === "MS-00922");
   const property = seed.properties.find((candidate) => candidate.id === listing.property);
   property.facts.floor_number = 2;
   property.facts.total_floors = 4;

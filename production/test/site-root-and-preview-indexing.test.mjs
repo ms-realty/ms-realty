@@ -111,8 +111,8 @@ test("the canonical host owns public metadata without trusting arbitrary Host va
   assert.doesNotMatch(head, /ms-realty\.ms-realty-bg\.workers\.dev/);
 
   const listing = renderAppRouteResponse({
-    pathname: "/bg/imoti/MS-CRAWL-0001",
-    url: "http://app:3000/bg/imoti/MS-CRAWL-0001",
+    pathname: "/bg/imoti/MS-00815",
+    url: "http://app:3000/bg/imoti/MS-00815",
     host: "makler-realty.com",
     accept: "text/html",
   });

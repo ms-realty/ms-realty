@@ -69,7 +69,7 @@ test("saved search stores criteria and creates alert task", () => {
           contact_preference: "whatsapp",
           alertConsent: true,
           owner: "caller-supplied-owner-must-be-ignored",
-          priceSnapshot: { "MS-CRAWL-0001": 120000, ignored: "not-a-number" },
+          priceSnapshot: { "MS-00815": 120000, ignored: "not-a-number" },
         },
         { matchCount: 12, savedAt: "2026-07-04T00:07:00Z" },
       ),
@@ -89,7 +89,7 @@ test("saved search stores criteria and creates alert task", () => {
   assert.equal(rows[0].contact_ref, rows[0].id);
   assert.match(rows[0].alert_task.id, /^alert-[0-9a-f-]{36}$/);
   assert.equal(rows[0].contact_preference, "whatsapp");
-  assert.deepEqual(rows[0].price_snapshot, { "MS-CRAWL-0001": 120000 });
+  assert.deepEqual(rows[0].price_snapshot, { "MS-00815": 120000 });
   assert.equal(rows[0].alert_task.status, "open");
   assert.equal(rows[0].alert_task.owner, "unassigned");
   assert.equal(rows[0].search_intent.schema_version, 1);

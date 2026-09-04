@@ -11,7 +11,7 @@ test("custom listing editor renders locally and draft writes fail closed without
   const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
   process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   const appRoute = await renderAppAdminResponse(
-    new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
+    new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-00815", { headers: auth }),
   );
   assert.equal(appRoute.status, 200);
   assert.equal(appRoute.headers.get("cache-control"), "no-store");
@@ -21,7 +21,7 @@ test("custom listing editor renders locally and draft writes fail closed without
     new Request("https://example.test/api/admin/listings/edit", {
       method: "POST",
       headers: { ...auth, "content-type": "application/json" },
-      body: JSON.stringify({ listingId: "MS-CRAWL-0001", patch: { title: "not written here" } }),
+      body: JSON.stringify({ listingId: "MS-00815", patch: { title: "not written here" } }),
     }),
   );
   assert.equal(appApi.status, 503);
@@ -32,7 +32,7 @@ test("custom listing editor renders locally and draft writes fail closed without
 
   const app = createHttpApp();
   const httpRoute = await dispatchHttp(app, {
-    url: "/admin/listings/edit?listingId=MS-CRAWL-0001",
+    url: "/admin/listings/edit?listingId=MS-00815",
     headers: auth,
   });
   assert.equal(httpRoute.status, 200);
@@ -42,7 +42,7 @@ test("custom listing editor renders locally and draft writes fail closed without
     method: "POST",
     url: "/api/admin/listings/edit",
     headers: { ...auth, "content-type": "application/json" },
-    body: { listingId: "MS-CRAWL-0001", patch: { title: "not written here" } },
+    body: { listingId: "MS-00815", patch: { title: "not written here" } },
   });
   assert.equal(httpApi.status, 503);
   assert.equal(httpApi.body.kind, "payload_draft_unavailable");
@@ -65,21 +65,21 @@ test("custom listing editor writes durable draft changes through the shared serv
     new Request("https://example.test/api/admin/listings/edit", {
       method: "POST",
       headers: { ...auth, "content-type": "application/json" },
-      body: JSON.stringify({ listingId: "MS-CRAWL-0001", patch: { title: "Payload-backed title" } }),
+      body: JSON.stringify({ listingId: "MS-00815", patch: { title: "Payload-backed title" } }),
     }),
     { config: { payloadListingRuntime: runtime.payload, adminPrincipal: { id: "editor_bg", roles: ["editor"], can_mutate: true } } },
   );
   const body = await appApi.json();
   assert.equal(appApi.status, 201);
   assert.equal(body.kind, "listing_draft_saved");
-  assert.equal(body.editor_url, "/admin/listings/edit?listingId=MS-CRAWL-0001");
+  assert.equal(body.editor_url, "/admin/listings/edit?listingId=MS-00815");
   assert.equal(body.publication_approval_changed, false);
-  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.title, "Payload-backed title");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.title, "Payload-backed title");
 });
 
 test("custom listing editor preserves explicit empty-string form clears for durable drafts", async () => {
   const seed = loadCmsSeed();
-  const listing = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const listing = seed.records.find((record) => record.id === "MS-00815");
   listing.seo.canonical_override = "/bg/custom-canonical";
   const runtime = createPayloadDraftRuntime(seed);
   const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
@@ -90,7 +90,7 @@ test("custom listing editor preserves explicit empty-string form clears for dura
     url: "/api/admin/listings/edit",
     headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       seo_canonical: "",
     }).toString(),
   });
@@ -98,7 +98,7 @@ test("custom listing editor preserves explicit empty-string form clears for dura
   else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
   assert.equal(response.status, 201);
   assert.equal(response.body.kind, "listing_draft_saved");
-  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").seo.canonical_override, "");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").seo.canonical_override, "");
 });
 
 test("durable listing edits surface stale translations in both dedicated queue runtimes", async () => {
@@ -114,7 +114,7 @@ test("durable listing edits surface stale translations in both dedicated queue r
     new Request("https://example.test/api/admin/listings/edit", {
       method: "POST",
       headers: { ...auth, "content-type": "application/json" },
-      body: JSON.stringify({ listingId: "MS-CRAWL-0001", patch: { title: "Queue-visible draft title" } }),
+      body: JSON.stringify({ listingId: "MS-00815", patch: { title: "Queue-visible draft title" } }),
     }),
     { config },
   );
@@ -122,7 +122,7 @@ test("durable listing edits surface stale translations in both dedicated queue r
 
   const localeById = new Map(runtime.currentRows().locales.map((locale) => [String(locale.id), locale.code]));
   const durableTranslations = runtime.currentRows().listing_translations.filter(
-    (row) => String(row.listing) === "MS-CRAWL-0001" && localeById.get(String(row.locale)) !== "bg",
+    (row) => String(row.listing) === "MS-00815" && localeById.get(String(row.locale)) !== "bg",
   );
   assert.deepEqual(durableTranslations.map((row) => localeById.get(String(row.locale))).sort(), targetLocales);
   assert.equal(
@@ -136,7 +136,7 @@ test("durable listing edits surface stale translations in both dedicated queue r
   for (const targetLocale of targetLocales) {
     const appQueue = await renderAppAdminResponse(
       new Request(
-        `https://example.test/api/admin/translations?locale=bg&targetLocale=${targetLocale}&q=MS-CRAWL-0001`,
+        `https://example.test/api/admin/translations?locale=bg&targetLocale=${targetLocale}&q=MS-00815`,
         { headers: auth },
       ),
       { config },
@@ -144,18 +144,18 @@ test("durable listing edits surface stale translations in both dedicated queue r
     const appQueueBody = await appQueue.json();
     assert.equal(appQueue.status, 200);
     assert.equal(appQueueBody.translationTasks.length, 1);
-    assert.equal(appQueueBody.translationTasks[0].listing_id, "MS-CRAWL-0001");
+    assert.equal(appQueueBody.translationTasks[0].listing_id, "MS-00815");
     assert.equal(appQueueBody.translationTasks[0].target_locale, targetLocale);
     assert.equal(appQueueBody.translationTasks[0].current_status, "stale");
     assert.equal(appQueueBody.translationTasks[0].task_type, "stale_review_required");
 
     const httpQueue = await dispatchHttp(app, {
-      url: `/api/admin/translations?locale=bg&targetLocale=${targetLocale}&q=MS-CRAWL-0001`,
+      url: `/api/admin/translations?locale=bg&targetLocale=${targetLocale}&q=MS-00815`,
       headers: auth,
     });
     assert.equal(httpQueue.status, 200);
     assert.equal(httpQueue.body.translationTasks.length, 1);
-    assert.equal(httpQueue.body.translationTasks[0].listing_id, "MS-CRAWL-0001");
+    assert.equal(httpQueue.body.translationTasks[0].listing_id, "MS-00815");
     assert.equal(httpQueue.body.translationTasks[0].target_locale, targetLocale);
     assert.equal(httpQueue.body.translationTasks[0].current_status, "stale");
     assert.equal(httpQueue.body.translationTasks[0].task_type, "stale_review_required");

@@ -3259,7 +3259,7 @@ function sortListingsForPublicSearch(listings, sort) {
 }
 
 const HOME_MEDIA_PROPERTY_TYPES = new Set(["apartment", "house", "villa", "multi_unit"]);
-const EDITORIAL_HERO_LISTING_IDS = ["MS-CRAWL-0074", "MS-CRAWL-0038", "MS-CRAWL-0003"];
+const EDITORIAL_HERO_LISTING_IDS = ["MS-00939", "MS-00873", "MS-00922"];
 
 function isEditorialHeroAsset(media) {
   return Boolean(media?.url) && !/DJI_0696|907-dron/i.test(media.url);

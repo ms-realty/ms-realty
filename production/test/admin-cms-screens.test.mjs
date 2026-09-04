@@ -48,10 +48,10 @@ test("listing manager leads with the shell the CRM screens use and no dead list 
   assert.match(page.body, /<details class="adm-workbench-disclosure" data-area-review-missing="0"/);
   assert.doesNotMatch(page.body, /<details open class="adm-workbench-disclosure" data-(?:fact|duplicate|area)-review/);
   // The queue itself keeps its contracts.
-  assert.match(page.body, /data-listing-manager-row="MS-CRAWL-0001"/);
+  assert.match(page.body, /data-listing-manager-row="MS-00815"/);
   assert.match(page.body, /data-listing-bulk-bar="true" data-selection="empty"/);
   assert.match(page.body, /data-listing-mobile-summary="true"/);
-  assert.match(page.body, /data-listing-mobile-more="MS-CRAWL-0001"/);
+  assert.match(page.body, /data-listing-mobile-more="MS-00815"/);
   assert.match(cmsCss, /\.adm-listing-mobile-summary \{ display: none; \}/);
   assert.match(cmsCss, /\.adm-listing-mobile-more__facts \{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
   assert.match(adminCss, /@media \(max-width: 719px\)[\s\S]*?\.adm-listing-mobile-summary \{ display: grid;/);
@@ -66,14 +66,14 @@ test("a counted status filter marks the selected option and links without JavaSc
 });
 
 test("every active listing filter renders a chip that drops only itself", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings?locale=en&q=MS-CRAWL-0001&status=unverified", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings?locale=en&q=MS-00815&status=unverified", headers: auth });
   assert.equal(page.status, 200);
   const chips = [...page.body.matchAll(/<a class="adm-filter-chip adm-filter-chip--removable" href="([^"]+)" data-remove-filter="([^"]+)"/g)];
   assert.equal(chips.length, 2);
   const byName = Object.fromEntries(chips.map(([, href, name]) => [name, href]));
   assert.match(byName.q, /status=unverified/);
   assert.doesNotMatch(byName.q, /[?&]q=/);
-  assert.match(byName.status, /q=ms-crawl-0001/i);
+  assert.match(byName.status, /q=ms-00815/i);
   assert.doesNotMatch(byName.status, /status=/);
 });
 
@@ -87,14 +87,14 @@ test("an empty listing queue explains itself and offers the one control that cha
 });
 
 test("translation review groups its rows by listing so one title is not repeated per locale", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/translations?locale=en&q=MS-CRAWL-0001", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/translations?locale=en&q=MS-00815", headers: auth });
   assert.equal(page.status, 200);
   assert.match(page.body, /<table class="crm-tbl adm-translation-table">/);
-  assert.match(page.body, /<tbody data-translation-group="MS-CRAWL-0001" data-translation-group-size="\d+">/);
+  assert.match(page.body, /<tbody data-translation-group="MS-00815" data-translation-group-size="\d+">/);
   // The first row of a group carries the identity, the rest a quiet reference.
   assert.match(page.body, /data-translation-group-start="true"/);
   assert.match(page.body, /class="adm-translation-continued"/);
-  assert.match(page.body, /data-translation-editor-row="translation-MS-CRAWL-0001-en"/);
+  assert.match(page.body, /data-translation-editor-row="translation-MS-00815-en"/);
   assert.match(page.body, /<td colSpan="5"><details class="adm-reply adm-translation-editor" data-translation-editor-workspace="true">/);
   assert.match(page.body, /data-translation-overview="true"/);
   assert.match(page.body, /class="adm-human-translation__context"/);
@@ -139,11 +139,11 @@ test("an empty translation queue says nothing is waiting rather than showing a b
 });
 
 test("the listing editor names the listing, hides the operator field and carries every save state", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
   assert.equal(page.status, 200);
   // The topbar names the screen; the heading names the listing.
   assert.match(page.body, /<h1>Автор|<h1>[^<]{10,}<\/h1>/);
-  assert.match(page.body, /<p>Property editor · makler-realty\.com · bg · MS-CRAWL-0001<\/p>/);
+  assert.match(page.body, /<p>Property editor · makler-realty\.com · bg · MS-00815<\/p>/);
   assert.match(page.body, /data-summary-kind="listing-editor"/);
   for (const card of ["cms-status", "publish-approval", "translations", "media"]) {
     assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
@@ -167,7 +167,7 @@ test("the listing editor names the listing, hides the operator field and carries
 });
 
 test("shared admin status tokens keep dark surfaces legible and owner identity nameable", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
   const ownerIdentity = page.body.match(/<a class="adm-owner-identity"[\s\S]*?<\/a>/)?.[0];
   assert.ok(ownerIdentity, "the owner identity is rendered as a link");
   assert.doesNotMatch(ownerIdentity, /aria-label=/, "visible owner identity text supplies the accessible name");
@@ -197,13 +197,13 @@ test("shared admin status tokens keep dark surfaces legible and owner identity n
 });
 
 test("the editor lists one state per locale, and a stale task wins over the published state", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
   const locales = [...page.body.matchAll(/data-translation-locale="([a-z]{2})"/g)].map(([, code]) => code);
   assert.deepEqual(locales, [...new Set(locales)], "no locale is listed twice");
 });
 
 test("media assets preview and fail out loud", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
   assert.match(page.body, /data-media-preview-state="loading"/);
   assert.match(page.body, /data-media-preview-frame="true"/);
   assert.match(page.body, /class="adm-media-asset__preview-loading"/);
@@ -223,7 +223,7 @@ test("media assets preview and fail out loud", async () => {
 });
 
 test("a listing without an approved tour says so before the publishing form", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
   assert.match(page.body, /class="adm-tour-state" data-tour-empty="(true|configured)"/);
   assert.match(page.body, /No approved 360 tour/);
   assert.match(page.body, /data-tour-editor-form="true"/);

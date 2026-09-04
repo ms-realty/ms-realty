@@ -112,7 +112,7 @@ test("SearchIntent rejects incompatible filters and retains mandatory server-sid
     property_families: ["plot"],
     land_area_min: 1000,
     land_area_max: 3000,
-    exact_reference: "MS-CRAWL-0001",
+    exact_reference: "MS-00815",
   });
   assert.equal(intent.schema_version, 1);
   assert.equal(intent.mandatory_filters.translation_human_approved, true);
@@ -141,7 +141,7 @@ test("SearchIntent rejects incompatible filters and retains mandatory server-sid
     floor_max: "",
     storeys_min: "",
     storeys_max: "",
-    exact_reference: "MS-CRAWL-0001",
+    exact_reference: "MS-00815",
   });
 });
 

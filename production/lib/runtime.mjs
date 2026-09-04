@@ -486,22 +486,22 @@ export function submitRuntimeLead(registry, seed, input) {
 }
 
 export function buildRuntimeSmoke(registry, seed) {
-  const listing = listingRecords(seed).find((record) => record.id === "MS-CRAWL-0001");
+  const listing = listingRecords(seed).find((record) => record.id === "MS-00815");
   const ruListing = listingRecords(seed).find((record) => record.source_locale === "ru");
   const runtimeListing = listingFromCmsRecord(listing, null, propertyForRecord(seed, listing));
   const soldSeed = applyListingEdits(seed, [{ listing_id: listing.id, patch: { listing_status: "sold" } }]);
 
   return {
     fixture_id: "runtime-smoke-20260704",
-    listing_he: renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"),
-    listing_en_fallback: renderRuntimePath(registry, seed, "/en/properties/MS-CRAWL-0001"),
+    listing_he: renderRuntimePath(registry, seed, "/he/properties/MS-00815"),
+    listing_en_fallback: renderRuntimePath(registry, seed, "/en/properties/MS-00815"),
     listing_ru: renderRuntimePath(registry, seed, ruListing.routing.target_path),
     home_he: renderRuntimePath(registry, seed, "/he/"),
     seller_he: renderRuntimePath(registry, seed, "/he/sell"),
     contact_he: renderRuntimePath(registry, seed, "/he/contact"),
     guide_en: renderRuntimePath(registry, seed, "/en/guides/foreign-buyers"),
     location_he: renderRuntimePath(registry, seed, "/he/locations/sandanski"),
-    sold_listing_he: renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001"),
+    sold_listing_he: renderRuntimePath(registry, soldSeed, "/he/properties/MS-00815"),
     sold_search_he: searchRuntimeListings(registry, soldSeed, { localeCode: "he", query: "Sandanski" }),
     sold_location_he: renderRuntimePath(registry, soldSeed, "/he/locations/sandanski"),
     fallback_fr: renderRuntimePath(registry, seed, "/fr/"),
@@ -628,8 +628,8 @@ export function assertRuntimeSmoke(smoke) {
     throw new Error("Runtime sold listing must stay live with related active listings");
   }
   if (
-    smoke.sold_search_he.cards.some((card) => card.id === "MS-CRAWL-0001") ||
-    smoke.sold_location_he.cards.some((card) => card.id === "MS-CRAWL-0001")
+    smoke.sold_search_he.cards.some((card) => card.id === "MS-00815") ||
+    smoke.sold_location_he.cards.some((card) => card.id === "MS-00815")
   ) {
     throw new Error("Runtime sold listing must be removed from active search and location inventory");
   }

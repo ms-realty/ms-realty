@@ -231,11 +231,11 @@ test("the public adapter offers a listing broker's free slots and never books", 
   );
   assert.equal(readBrokerAvailability(at("broker-availability.jsonl")).length, 1);
 
-  const slots = await get("/api/viewing-slots?listing=MS-CRAWL-0033&locale=en", config);
+  const slots = await get("/api/viewing-slots?listing=MS-00865&locale=en", config);
   const body = await slots.json();
   assert.equal(slots.status, 200);
   assert.equal(body.kind, "viewing_slots");
-  assert.equal(body.listing_reference, "MS-CRAWL-0033");
+  assert.equal(body.listing_reference, "MS-00865");
   assert.equal(body.locale, "en");
   // Software never commits the agency to a time.
   assert.equal(body.confirmation, "human_required");

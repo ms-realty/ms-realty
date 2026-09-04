@@ -39,8 +39,8 @@ test("App Router manifest maps sitemap entries plus no-store search routes", () 
         {
           type: "listing",
           locale: "he",
-          loc: "/he/properties/MS-CRAWL-0001",
-          hreflang: [{ hreflang: "he", href: "/he/properties/MS-CRAWL-0001" }],
+          loc: "/he/properties/MS-00815",
+          hreflang: [{ hreflang: "he", href: "/he/properties/MS-00815" }],
         },
         {
           type: "guide",
@@ -57,12 +57,12 @@ test("App Router manifest maps sitemap entries plus no-store search routes", () 
   assert.equal(manifest.summary.sitemap_indexable_routes, 3);
   assert.equal(manifest.summary.utility_routes, 7);
   assert.equal(manifest.routes.find((route) => route.path === "/he").dir, "rtl");
-  assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").params.listingId, "MS-CRAWL-0001");
+  assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-00815").params.listingId, "MS-00815");
   assert.equal(manifest.routes.find((route) => route.path === "/en/guides/foreign-buyers").renderer, "renderGuidePage");
   assert.equal(manifest.routes.find((route) => route.path === "/en/guides/foreign-buyers").params.guidePath, "guides/foreign-buyers");
   assert.equal(manifest.routes.find((route) => route.path === "/he/search").cache, "no-store");
   assert.equal(manifest.routes.find((route) => route.path === "/he/search").sitemap_indexable, false);
-  assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").app_module, "app/[locale]/[...slug]/route");
+  assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-00815").app_module, "app/[locale]/[...slug]/route");
 });
 
 test("generated App Router manifest is valid when present", () => {
@@ -149,15 +149,15 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /data-ms-realty-public-client/);
   assert.doesNotMatch(search.html, /function submitHermesChat/);
 
-  const bgListing = renderAppRoute({ pathname: "/bg/imoti/MS-CRAWL-0001", url: "https://example.test/bg/imoti/MS-CRAWL-0001", config: approvedConfig });
+  const bgListing = renderAppRoute({ pathname: "/bg/imoti/MS-00815", url: "https://example.test/bg/imoti/MS-00815", config: approvedConfig });
   assert.equal(bgListing.status, 200);
   assert.match(bgListing.html, /Комплекс за дългосрочен наем/);
   assert.doesNotMatch(bgListing.html, /Updated approved source description\./);
 
-  const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001", config: approvedConfig });
+  const listing = renderAppRoute({ pathname: "/he/properties/MS-00815", url: "https://example.test/he/properties/MS-00815", config: approvedConfig });
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
-  assert.match(listing.html, /MS-CRAWL-0001/);
+  assert.match(listing.html, /MS-00815/);
   assert.match(listing.html, /data-react-public-ui="listing"/);
   assert.match(listing.html, /data-listing-tools="true"/);
   assert.match(listing.html, /data-listing-content-grid="true"/);
@@ -174,8 +174,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.doesNotMatch(listing.html, /href="(?:tel:(?!\+359879696870")|https:\/\/wa\.me\/(?!359879696870)|viber:)/);
 
   const listingFallback = renderAppRoute({
-    pathname: "/en/properties/MS-CRAWL-0001",
-    url: "https://example.test/en/properties/MS-CRAWL-0001",
+    pathname: "/en/properties/MS-00815",
+    url: "https://example.test/en/properties/MS-00815",
     config: approvedConfig,
   });
   assert.equal(listingFallback.status, 200);
@@ -186,8 +186,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listingFallback.html, /<meta name="robots" content="noindex,follow">/);
 
   const listingPrint = renderAppRoute({
-    pathname: "/he/properties/MS-CRAWL-0001",
-    url: "https://example.test/he/properties/MS-CRAWL-0001?print=1",
+    pathname: "/he/properties/MS-00815",
+    url: "https://example.test/he/properties/MS-00815?print=1",
     config: approvedConfig,
   });
   assert.equal(listingPrint.status, 200);
@@ -253,7 +253,7 @@ test("dedicated localized search renderer preserves configured engine hits", asy
       meilisearch: {},
       fetchImpl: async () => new Response(JSON.stringify({
         found: 1,
-        hits: [{ document: { id: "MS-CRAWL-0001:bg", source_listing_id: "MS-CRAWL-0001", locale: "bg" } }],
+        hits: [{ document: { id: "MS-00815:bg", source_listing_id: "MS-00815", locale: "bg" } }],
       }), { status: 200, headers: { "content-type": "application/json" } }),
     },
   };
@@ -265,8 +265,8 @@ test("dedicated localized search renderer preserves configured engine hits", asy
 
   assert.equal(search.status, 200);
   assert.equal(search.rendered.search.backend.engine, "typesense");
-  assert.deepEqual(search.rendered.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
-  assert.match(search.html, /MS-CRAWL-0001/);
+  assert.deepEqual(search.rendered.cards.map((card) => card.id), ["MS-00815"]);
+  assert.match(search.html, /MS-00815/);
 });
 
 test("localized Next catch-all delegates configured search paths to the fail-closed search adapter", async () => {
@@ -312,7 +312,7 @@ test("App Router adapter honors mounted public listing edit ledger", () => {
   fs.writeFileSync(
     editPath,
     `${JSON.stringify({
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       editor: "content_editor",
       patch: { title: "Operator edited Sandanski listing", h1: "Operator edited Sandanski listing" },
       source_hash_after: "mounted-edit",
@@ -320,8 +320,8 @@ test("App Router adapter honors mounted public listing edit ledger", () => {
     })}\n`,
   );
   const listing = renderAppRoute({
-    pathname: "/bg/imoti/MS-CRAWL-0001",
-    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    pathname: "/bg/imoti/MS-00815",
+    url: "https://example.test/bg/imoti/MS-00815",
     config: { ...approvedConfig, listingEditLedgerPath: editPath },
   });
 
@@ -359,10 +359,10 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   assert.equal(blockedListingRoutes.length, 0);
   assert.equal(approvedPublicListingIds.size, 165);
   assert.match(sitemap.body, /<loc>https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/he<\/loc>/);
-  assert.match(sitemap.body, /\/bg\/imoti\/MS-CRAWL-0001/);
-  assert.doesNotMatch(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
+  assert.match(sitemap.body, /\/bg\/imoti\/MS-00815/);
+  assert.doesNotMatch(sitemap.body, /\/he\/properties\/MS-00815/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);
-  assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-CRAWL-0001/);
+  assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-00815/);
   assert.doesNotMatch(sitemap.body, /\/fr\//);
 
   const robots = renderAppRobots();
@@ -394,7 +394,7 @@ test("App Router serves reviewed legacy URLs as direct domain-aware redirects", 
         {
           old_url: "https://makler-realty.com/listing/reviewed-legacy/",
           status: 301,
-          target_path: "/bg/imoti/MS-CRAWL-0001",
+          target_path: "/bg/imoti/MS-00815",
         },
       ],
     })}\n`,
@@ -421,7 +421,7 @@ test("App Router serves reviewed legacy URLs as direct domain-aware redirects", 
   });
 
   assert.equal(response.status, 301);
-  assert.equal(response.headers.get("location"), "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(response.headers.get("location"), "/bg/imoti/MS-00815");
   assert.equal(wrongDomain.status, 404);
   assert.equal(canonicalHome.status, 308);
   assert.equal(canonicalHome.headers.get("location"), "/he?from=legacy-link");
@@ -458,7 +458,7 @@ test("reviewed legacy redirects take priority over an archive capture", () => {
   const pathname = `/archive/${entry.archive_id}`;
   fs.writeFileSync(
     deployableRedirectOutputPath,
-    `${JSON.stringify({ decisions: [{ old_url: `https://makler-realty.com${pathname}`, status: 301, target_path: "/bg/imoti/MS-CRAWL-0001" }] })}\n`,
+    `${JSON.stringify({ decisions: [{ old_url: `https://makler-realty.com${pathname}`, status: 301, target_path: "/bg/imoti/MS-00815" }] })}\n`,
   );
 
   const response = renderAppRouteResponse({
@@ -469,5 +469,5 @@ test("reviewed legacy redirects take priority over an archive capture", () => {
   });
 
   assert.equal(response.status, 301);
-  assert.equal(response.headers.get("location"), "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(response.headers.get("location"), "/bg/imoti/MS-00815");
 });

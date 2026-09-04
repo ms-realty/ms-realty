@@ -119,7 +119,7 @@ test("an AVIF that carries Exif or XMP is refused instead of stored", () => {
 
 test("multipart bodies are split into exact bytes and named fields", () => {
   const { body, contentType } = multipartBody([
-    { name: "listingId", value: "MS-CRAWL-0001" },
+    { name: "listingId", value: "MS-00815" },
     { name: "photo", filename: "a.jpg", contentType: "image/jpeg", value: tinyJpeg() },
     { name: "photo", filename: "b.png", contentType: "image/png", value: tinyPng() },
   ]);
@@ -127,7 +127,7 @@ test("multipart bodies are split into exact bytes and named fields", () => {
   assert.equal(multipartBoundary("application/json"), null);
 
   const form = multipartForm(body, contentType);
-  assert.deepEqual(form.fields, { listingId: "MS-CRAWL-0001" });
+  assert.deepEqual(form.fields, { listingId: "MS-00815" });
   assert.equal(form.files.length, 2);
   assert.deepEqual(form.files[0].bytes, tinyJpeg());
   assert.deepEqual(form.files[1].bytes, tinyPng());
@@ -140,10 +140,10 @@ test("multipart bodies are split into exact bytes and named fields", () => {
 test("an upload request can also arrive as JSON with base64 data", () => {
   const request = {
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ listingId: "MS-CRAWL-0001", dataBase64: tinyJpeg().toString("base64") }),
+    body: JSON.stringify({ listingId: "MS-00815", dataBase64: tinyJpeg().toString("base64") }),
   };
   const parsed = parseMediaUploadRequest(request);
-  assert.equal(parsed.fields.listingId, "MS-CRAWL-0001");
+  assert.equal(parsed.fields.listingId, "MS-00815");
   assert.equal(parsed.files.length, 1);
   assert.deepEqual(parsed.files[0].bytes, tinyJpeg());
   assert.equal(parsed.form, false);
@@ -171,7 +171,7 @@ test("the per-request cap can never exceed the transport body limit", () => {
 test("an oversized file is refused before any bytes are stored", async () => {
   const limits = mediaUploadLimitsFromEnv({ MS_REALTY_MEDIA_UPLOAD_MAX_FILE_BYTES: "256" }, { maxBodyBytes: 4096 });
   await assert.rejects(
-    () => prepareMediaUpload({ bytes: tinyJpeg(), filename: "big.jpg" }, { scope: "listing", subjectId: "MS-CRAWL-0001", limits }),
+    () => prepareMediaUpload({ bytes: tinyJpeg(), filename: "big.jpg" }, { scope: "listing", subjectId: "MS-00815", limits }),
     (error) => error.status === 413 && error.code === "file_too_large",
   );
 });
@@ -187,7 +187,7 @@ test("the stored filename is a content hash and cannot be steered by the caller"
 
   const stagedKey = mediaUploadKey({
     scope: "listing",
-    subjectId: "MS-CRAWL-0001",
+    subjectId: "MS-00815",
     assetId: "media-0123456789abcdef0123",
     hash,
     ext: "jpg",
@@ -195,7 +195,7 @@ test("the stored filename is a content hash and cannot be steered by the caller"
   });
   assert.equal(
     stagedKey,
-    `ms-realty.ms-realty-bg.workers.dev/wp-content/private/listings/MS-CRAWL-0001/media-0123456789abcdef0123/ms-${"a".repeat(32)}.jpg`,
+    `ms-realty.ms-realty-bg.workers.dev/wp-content/private/listings/MS-00815/media-0123456789abcdef0123/ms-${"a".repeat(32)}.jpg`,
   );
   assert.equal(mediaUploadPublicUrl(stagedKey), null);
 
@@ -300,7 +300,7 @@ test("an uploaded asset is written unreviewed, is idempotent, and joins the list
   const file = path.join(scratch("upload-ledger"), "media-uploads.jsonl");
   resetMediaUploads(file);
   const seed = loadCmsSeed();
-  const record = assertUploadListing(seed, "MS-CRAWL-0001");
+  const record = assertUploadListing(seed, "MS-00815");
   const replacementTarget = mediaAssetId(record.media.find((item) => item.is_public));
   assert.equal(assertReplacementAsset(record, replacementTarget), replacementTarget);
   assert.equal(assertReplacementAsset(record, ""), null);
@@ -332,7 +332,7 @@ test("an uploaded asset is written unreviewed, is idempotent, and joins the list
   assert.equal(assertMediaUploads(readMediaUploads(file)), true);
 
   const projected = applyMediaUploads(seed, readMediaUploads(file));
-  const listing = projected.records.find((row) => row.id === "MS-CRAWL-0001");
+  const listing = projected.records.find((row) => row.id === "MS-00815");
   const asset = listing.media.find((item) => item.asset_id === first.asset_id);
   assert.ok(asset, "the uploaded asset must appear in the listing media array");
   assert.equal(asset.is_public, false);
@@ -343,13 +343,13 @@ test("an uploaded asset is written unreviewed, is idempotent, and joins the list
   // An upload must not take an already published listing off the site: the
   // publication gate keeps its original value and the pending review is its own
   // counter.
-  const original = seed.records.find((row) => row.id === 'MS-CRAWL-0001');
+  const original = seed.records.find((row) => row.id === 'MS-00815');
   assert.equal(listing.media_workflow.review_gated_assets, original.media_workflow.review_gated_assets);
   assert.equal(listing.media_workflow.pending_upload_reviews, 1);
   assert.equal(listing.media_workflow.total_assets, original.media_workflow.total_assets + 1);
 
   // Other listings are untouched.
-  const other = projected.records.find((row) => row.collection === "listings" && row.id !== "MS-CRAWL-0001");
+  const other = projected.records.find((row) => row.collection === "listings" && row.id !== "MS-00815");
   assert.equal((other.media || []).some((item) => item.asset_id === first.asset_id), false);
 });
 

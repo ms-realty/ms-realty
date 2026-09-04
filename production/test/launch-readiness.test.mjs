@@ -804,18 +804,18 @@ function runScript(script, env) {
 
 async function withLiveServiceServer(fn) {
   const hit = {
-    id: "MS-CRAWL-0001:bg",
-    source_listing_id: "MS-CRAWL-0001",
+    id: "MS-00815:bg",
+    source_listing_id: "MS-00815",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    locale_path: "/bg/imoti/MS-00815",
     title: "Reviewed listing",
   };
   const draft = {
-    title: "MS-CRAWL-0001 Sandanski commercial rent",
-    body: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    seo_title: "MS-CRAWL-0001 Sandanski commercial rent",
-    meta_description: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    citations: [{ source: "cms_seed", object_id: "MS-CRAWL-0001" }],
+    title: "MS-00815 Sandanski commercial rent",
+    body: "MS-00815 Sandanski commercial rent draft",
+    seo_title: "MS-00815 Sandanski commercial rent",
+    meta_description: "MS-00815 Sandanski commercial rent draft",
+    citations: [{ source: "cms_seed", object_id: "MS-00815" }],
   };
   const server = http.createServer((request, response) => {
     request.resume();

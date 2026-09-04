@@ -19,29 +19,29 @@ export const DEFAULT_LIVE_LISTING_AUDIT_PATH = fromRoot("production", "data", "l
 // editor and publication controls.
 export const DUPLICATE_REVIEW_PAIRS = Object.freeze([
   Object.freeze({
-    pair_id: "MS-CRAWL-0083--MS-CRAWL-0159",
+    pair_id: "MS-00891--MS-CRAWL-0159",
     status: "confirmed",
-    listing_ids: Object.freeze(["MS-CRAWL-0083", "MS-CRAWL-0159"]),
+    listing_ids: Object.freeze(["MS-00891", "MS-CRAWL-0159"]),
   }),
   Object.freeze({
-    pair_id: "MS-CRAWL-0065--MS-CRAWL-0135",
+    pair_id: "MS-00937--MS-CRAWL-0135",
     status: "confirmed",
-    listing_ids: Object.freeze(["MS-CRAWL-0065", "MS-CRAWL-0135"]),
+    listing_ids: Object.freeze(["MS-00937", "MS-CRAWL-0135"]),
   }),
   ...[
-    ["MS-CRAWL-0087", "MS-CRAWL-0116"],
-    ["MS-CRAWL-0038", "MS-CRAWL-0122"],
-    ["MS-CRAWL-0026", "MS-CRAWL-0125"],
-    ["MS-CRAWL-0088", "MS-CRAWL-0126"],
-    ["MS-CRAWL-0092", "MS-CRAWL-0130"],
-    ["MS-CRAWL-0034", "MS-CRAWL-0131"],
-    ["MS-CRAWL-0023", "MS-CRAWL-0132"],
-    ["MS-CRAWL-0049", "MS-CRAWL-0133"],
-    ["MS-CRAWL-0098", "MS-CRAWL-0139"],
-    ["MS-CRAWL-0069", "MS-CRAWL-0150"],
-    ["MS-CRAWL-0035", "MS-CRAWL-0160"],
-    ["MS-CRAWL-0066", "MS-CRAWL-0164"],
-    ["MS-3000", "MS-CRAWL-0165"],
+    ["MS-00791", "MS-CRAWL-0116"],
+    ["MS-00873", "MS-CRAWL-0122"],
+    ["MS-01001", "MS-CRAWL-0125"],
+    ["MS-00734", "MS-CRAWL-0126"],
+    ["MS-00671", "MS-CRAWL-0130"],
+    ["MS-00963", "MS-00280"],
+    ["MS-00833", "MS-CRAWL-0132"],
+    ["MS-00931", "MS-CRAWL-0133"],
+    ["MS-00750", "MS-CRAWL-0139"],
+    ["MS-00744", "MS-CRAWL-0150"],
+    ["MS-00774", "MS-CRAWL-0160"],
+    ["MS-00893", "MS-CRAWL-0164"],
+    ["MS-00356", "MS-CRAWL-0165"],
   ].map(([recordA, recordB]) =>
     Object.freeze({
       pair_id: `${recordA}--${recordB}`,
@@ -51,10 +51,10 @@ export const DUPLICATE_REVIEW_PAIRS = Object.freeze([
     }),
   ),
   Object.freeze({
-    pair_id: "MS-CRAWL-0095--MS-CRAWL-0123",
+    pair_id: "MS-00699--MS-CRAWL-0123",
     status: "candidate",
     candidate_source: "audit_only",
-    listing_ids: Object.freeze(["MS-CRAWL-0095", "MS-CRAWL-0123"]),
+    listing_ids: Object.freeze(["MS-00699", "MS-CRAWL-0123"]),
   }),
 ]);
 export const DUPLICATE_REVIEW_LISTING_IDS = Object.freeze(

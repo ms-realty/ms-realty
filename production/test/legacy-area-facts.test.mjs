@@ -9,14 +9,14 @@ import { resolveAreaProposal, run } from "../scripts/apply-legacy-area-facts.mjs
 // the legacy area map may become listing edits without a human, and what a
 // reviewed decision is allowed to say.
 const readyPlot = {
-  new_reference: "MS-CRAWL-0036",
+  new_reference: "MS-00897",
   status: "ready",
   target_field: "land_area_sqm",
   proposed_sqm: 4047,
   review_reasons: [],
 };
 const heldApartment = {
-  new_reference: "MS-CRAWL-0007",
+  new_reference: "MS-00911",
   status: "review",
   target_field: null,
   proposed_sqm: 59.21,
@@ -46,7 +46,7 @@ test("a reviewer decision states the facts it releases", () => {
 test("a house whose legacy post published both areas releases both", () => {
   assert.deepEqual(
     resolveAreaProposal(
-      { ...heldApartment, new_reference: "MS-CRAWL-0015" },
+      { ...heldApartment, new_reference: "MS-00942" },
       { action: "assign", facts: { built_area_sqm: 110, land_area_sqm: 350 } },
     ),
     { facts: { built_area_sqm: 110, land_area_sqm: 350 }, decided_by: "override" },
@@ -105,7 +105,7 @@ const AREA_MAP = {
   records: [
     { ...readyPlot, property_family: "plot", legacy_domain: "makler-realty.com", legacy_post_id: 11, source_meta_key: "wtf_area", area: { raw: "4047" }, total_area: { raw: null } },
     {
-      new_reference: "MS-CRAWL-0015",
+      new_reference: "MS-00942",
       status: "review",
       target_field: null,
       proposed_sqm: 110,
@@ -121,8 +121,8 @@ const AREA_MAP = {
   ],
 };
 const OVERRIDES = {
-  "MS-CRAWL-0015": { action: "assign", confidence: "high", reason: "both areas are labelled", facts: { built_area_sqm: 110, land_area_sqm: 350 } },
-  "MS-CRAWL-0007": { action: "skip", confidence: "high", reason: "the range spans several units" },
+  "MS-00942": { action: "assign", confidence: "high", reason: "both areas are labelled", facts: { built_area_sqm: 110, land_area_sqm: 350 } },
+  "MS-00911": { action: "skip", confidence: "high", reason: "the range spans several units" },
 };
 
 function scratch() {
@@ -165,9 +165,9 @@ test("applying writes one pending-review edit per decision, and repeats without 
       .map((line) => JSON.parse(line));
     assert.deepEqual(
       rows.map((row) => row.id),
-      ["legacy-area-MS-CRAWL-0036", "legacy-area-MS-CRAWL-0015"],
+      ["legacy-area-MS-00897", "legacy-area-MS-00942"],
     );
-    const house = rows.find((row) => row.id === "legacy-area-MS-CRAWL-0015");
+    const house = rows.find((row) => row.id === "legacy-area-MS-00942");
     assert.deepEqual(house.property_patch, { built_area_sqm: 110, land_area_sqm: 350 });
     assert.equal(house.review_source, "legacy_wordpress_postmeta");
     assert.match(house.review_notes, /wtf_area='110', wtf_total_area='350'/);

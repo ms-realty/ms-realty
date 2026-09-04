@@ -195,6 +195,6 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/proverka-na-imot-sandanski" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/hotovo-obstinski-kontekst" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/petrich-obstinski-kontekst" && entry.type === "guide"), true);
-  assert.equal(data.entries.some((entry) => entry.loc === "/el/akinita/MS-CRAWL-0001"), false);
+  assert.equal(data.entries.some((entry) => entry.loc === "/el/akinita/MS-00815"), false);
   assert.equal(data.entries.some((entry) => entry.loc === "/el/topothesies/sandanski"), false);
 });

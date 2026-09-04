@@ -42,12 +42,12 @@ function isolatedEligibleHermesDispatch() {
     translationCoverage: {
       rows: [
         {
-          listing_id: "MS-CRAWL-0001",
+          listing_id: "MS-00815",
           target_locale: "he",
           task_type: "hermes_draft_required",
           provider_mode: "hermes_draft",
-          admin_path: "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=he",
-          task: { id: "translation-MS-CRAWL-0001-he" },
+          admin_path: "/admin/translations?objectType=listing&objectId=MS-00815&locale=he",
+          task: { id: "translation-MS-00815-he" },
         },
       ],
     },
@@ -78,7 +78,7 @@ function fixture({ durableListingWrites = false } = {}) {
     received_at: "2026-07-29T10:00:00.000Z",
     source: "website_listing_detail",
     lead_type: "buyer",
-    listing_reference: "MS-CRAWL-0001",
+    listing_reference: "MS-00815",
     original_language: "en",
     admin_locale: "en",
     message_original: "Please contact me about this property.",
@@ -235,12 +235,12 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
   const listings = await callTool(
     config,
     "ms_realty_admin_read",
-    { operation: "admin_get_listings", query: { locale: "en", q: "MS-CRAWL-0001" } },
+    { operation: "admin_get_listings", query: { locale: "en", q: "MS-00815" } },
     auth,
   );
   assert.equal(listings.operation, "admin_get_listings");
   assert.equal(listings.http_status, 200);
-  assert.equal(listings.result.listings[0].id, "MS-CRAWL-0001");
+  assert.equal(listings.result.listings[0].id, "MS-00815");
 
   const unconfirmed = await mcpCall(
     config,
@@ -252,7 +252,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
         name: "ms_realty_admin_write",
         arguments: {
           operation: "admin_post_listings_status",
-          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+          input: { listingIds: ["MS-00815"], targetStatus: "reserved" },
           confirmation: "CONFIRM_MS_REALTY_ADMIN_OPERATION",
         },
       },
@@ -260,7 +260,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     auth,
   );
   assert.equal(unconfirmed.payload.result.isError, true);
-  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.listing_status, "reserved");
 
   const challenge = await callTool(
     config,
@@ -268,7 +268,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     {
       challenge_for: {
         operation: "admin_post_listings_status",
-        input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+        input: { listingIds: ["MS-00815"], targetStatus: "reserved" },
       },
     },
     auth,
@@ -284,7 +284,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
         name: "ms_realty_admin_write",
         arguments: {
           operation: "admin_post_listings_status",
-          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "sold" },
+          input: { listingIds: ["MS-00815"], targetStatus: "sold" },
           confirmation: challenge.challenge.token,
         },
       },
@@ -292,7 +292,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     auth,
   );
   assert.equal(mismatchedInput.payload.result.isError, true);
-  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "sold");
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.listing_status, "sold");
   config.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
     { id: "mcp_editor", token: EDITOR_TOKEN, roles: ["editor"] },
     { id: "mcp_editor_other", token: "mcp-editor-other-token-0123456789abcdef", roles: ["editor"] },
@@ -309,7 +309,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
         name: "ms_realty_admin_write",
         arguments: {
           operation: "admin_post_listings_status",
-          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+          input: { listingIds: ["MS-00815"], targetStatus: "reserved" },
           confirmation: challenge.challenge.token,
         },
       },
@@ -317,7 +317,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     { authorization: "Bearer mcp-editor-other-token-0123456789abcdef" },
   );
   assert.equal(crossSessionReplay.payload.result.isError, true);
-  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+  assert.notEqual(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.listing_status, "reserved");
   const [hermesTask] = await callTool(config, "ms_realty_hermes", { operation: "hermes_next_tasks", limit: 1 }, auth);
   const hermesPrompt = JSON.parse(hermesTask.messages.at(-1).content);
   const factLine = Object.values(hermesPrompt.propertyFacts).filter(Boolean).join(" ");
@@ -417,14 +417,14 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
     "ms_realty_admin_write",
     {
       operation: "admin_post_listings_status",
-      input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+      input: { listingIds: ["MS-00815"], targetStatus: "reserved" },
       confirmation: challenge.challenge.token,
     },
     auth,
   );
   assert.equal(status.operation, "admin_post_listings_status");
   assert.equal(status.result.kind, "bulk_listing_status_update");
-  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.listing_status, "reserved");
   const replay = await mcpCall(
     config,
     {
@@ -435,7 +435,7 @@ test("owner/operator MCP dispatch is allowlisted, role-scoped, confirmed, and ad
         name: "ms_realty_admin_write",
         arguments: {
           operation: "admin_post_listings_status",
-          input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" },
+          input: { listingIds: ["MS-00815"], targetStatus: "reserved" },
           confirmation: challenge.challenge.token,
         },
       },
@@ -466,8 +466,8 @@ test("MCP returns only public listing data and rejects untrusted origins", async
   assert.equal(search.listings.length, 1);
   assert.equal("actions" in search.listings[0], false);
 
-  const listing = await callTool(config, "get_public_listing", { listing_id: "MS-CRAWL-0001", locale: "bg" });
-  assert.equal(listing.id, "MS-CRAWL-0001");
+  const listing = await callTool(config, "get_public_listing", { listing_id: "MS-00815", locale: "bg" });
+  assert.equal(listing.id, "MS-00815");
   assert.equal(listing.media.gallery.length > 0, true);
   assert.equal(JSON.stringify(listing).includes("site_chrome"), false);
 
@@ -562,14 +562,14 @@ test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing
     config,
     "admin_post_listings_edit",
     {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       patch: { description: "OIDC-attributed staff edit for human publication review." },
     },
     auth,
   );
   assert.equal(edit.operation, "admin_post_listings_edit");
   assert.equal(edit.result.kind, "listing_draft_saved");
-  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.description, "OIDC-attributed staff edit for human publication review.");
+  assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.description, "OIDC-attributed staff edit for human publication review.");
   assert.equal(durableListingAudits[0].actor, "staff_editor");
   assert.equal(durableListingAudits[0].receipt, "listing.workflow.last_edit_event");
 

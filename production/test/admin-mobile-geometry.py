@@ -23,7 +23,7 @@ def main():
         context.route("**/*", add_local_auth)
         page = context.new_page()
         response = page.goto(
-            f"{BASE_URL}/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en",
+            f"{BASE_URL}/admin/listings/edit?listingId=MS-00815&locale=en",
             wait_until="networkidle",
             timeout=30_000,
         )

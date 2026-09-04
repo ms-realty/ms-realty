@@ -21,7 +21,7 @@ import { durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 Object.assign(process.env, durableLeadStoreFixtureEnv());
 const registry = loadLocaleRegistry();
 const listings = loadListings();
-const listing = findListingById(listings, "MS-CRAWL-0001");
+const listing = findListingById(listings, "MS-00815");
 const seed = loadCmsSeed();
 
 test("HTML renderer honors reviewed Open Graph listing fields", () => {
@@ -66,10 +66,10 @@ test("print brochure prefers full-resolution WordPress media without repeating t
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
-  const runtimeListingHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"));
+  const runtimeListingHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-00815"));
   const listingPrintPage = renderListingPage({ registry, listing, localeCode: "he" });
   const listingPrintHtml = renderHtmlPage(listingPrintPage, { print: true });
-  const runtimeListingPrintHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"), { print: true });
+  const runtimeListingPrintHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-00815"), { print: true });
   const approvedListingHtml = renderHtmlPage(
     renderListingPage({
       registry,
@@ -80,7 +80,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
         broker: "broker_ru",
         phone: "+447700900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001",
+        sourceReference: "test://broker-contact/MS-00815",
         validationStatus: "broker_verified",
         approved: true,
       }),
@@ -96,7 +96,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
         broker: "broker_ru",
         phone: "+447700900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001/print",
+        sourceReference: "test://broker-contact/MS-00815/print",
         validationStatus: "broker_verified",
         approved: true,
       }),
@@ -147,7 +147,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-listing-action="back_to_results"/);
   assert.match(listingHtml, /href="\/he\/search"/);
   assert.match(listingHtml, /data-listing-action="print"/);
-  assert.match(listingHtml, /data-client-save-listing="MS-CRAWL-0001"/);
+  assert.match(listingHtml, /data-client-save-listing="MS-00815"/);
   assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/media\/makler-realty\.com\/wp-content\/uploads\//);
   assert.match(listingHtml, /<meta name="robots" content="noindex,follow">/);
   assert.doesNotMatch(listingHtml, /hreflang=/);
@@ -216,7 +216,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /<button(?=[^>]*data-view-mode="list")(?=[^>]*aria-pressed="true")[^>]*>/);
   assert.match(searchHtml, /<button[^>]*data-view-mode="map"[^>]*>/);
   assert.doesNotMatch(searchHtml, /verified inventory/);
-  assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
+  assert.match(searchHtml, /data-client-save-listing="MS-0\d{4}/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
   assert.match(locationHtml, /<h1>נכסים ב-סנדנסקי<\/h1>/);

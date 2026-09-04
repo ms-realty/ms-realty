@@ -148,7 +148,7 @@ test("a location page carries approved area copy and marks the absence where the
 
 test("a listing page carries the cost estimator contract without a total it cannot support", async () => {
   const app = createHttpApp({ registry: loadLocaleRegistry(), ...approvedPublicSeedFixtureOptions() });
-  const listing = await dispatchHttp(app, { method: "GET", url: "/bg/imoti/MS-CRAWL-0001" });
+  const listing = await dispatchHttp(app, { method: "GET", url: "/bg/imoti/MS-00815" });
 
   assert.equal(listing.status, 200);
   const estimator = listing.body.body.cost_estimator;

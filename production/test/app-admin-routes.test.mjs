@@ -607,20 +607,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(typeof leadPipelineOutcomeRoute.POST, "function");
 
       const listingManager = await listingManagerRoute.GET(
-        new Request("https://example.test/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
+        new Request("https://example.test/admin/listings?locale=ru&q=MS-00815", { headers: auth }),
       );
       const listingManagerHtml = await listingManager.text();
       assert.equal(listingManager.status, 200);
       assert.equal(listingManager.headers.get("cache-control"), "no-store");
       assert.match(listingManagerHtml, /data-kind="admin-listing-manager"/);
-      assert.match(listingManagerHtml, /data-listing-manager-row="MS-CRAWL-0001"/);
+      assert.match(listingManagerHtml, /data-listing-manager-row="MS-00815"/);
       assert.match(listingManagerHtml, /data-listing-filter-summary="true"/);
       assert.match(listingManagerHtml, /data-listing-bulk-bar="true"/);
       assert.match(listingManagerHtml, /Поиск по номеру/);
-      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
+      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=ru"/);
       assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
       const listingManagerJson = await listingManagerJsonRoute.GET(
-        new Request("https://example.test/api/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
+        new Request("https://example.test/api/admin/listings?locale=ru&q=MS-00815", { headers: auth }),
       );
       const listingManagerJsonBody = await listingManagerJson.json();
       assert.equal(listingManagerJson.status, 200);
@@ -628,7 +628,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(listingManagerJsonBody.summary.total > 100);
       assert.equal(listingManagerJsonBody.summary.visible, 1);
       assert.ok(listingManagerJsonBody.summary.translationReviewRequired > 0);
-      assert.equal(listingManagerJsonBody.listings[0].id, "MS-CRAWL-0001");
+      assert.equal(listingManagerJsonBody.listings[0].id, "MS-00815");
       assert.equal(listingManagerJsonBody.listings[0].listing_status, "unverified");
       assert.ok(listingManagerJsonBody.listings[0].translation_review_required > 0);
 
@@ -652,20 +652,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.doesNotMatch(singularPhotoHtml, />1 public photos<\/small>/);
 
       const translationQueue = await translationQueueRoute.GET(
-        new Request("https://example.test/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
+        new Request("https://example.test/admin/translations?locale=ru&targetLocale=en&q=MS-00815", { headers: auth }),
       );
       const translationQueueHtml = await translationQueue.text();
       assert.equal(translationQueue.status, 200);
       assert.equal(translationQueue.headers.get("cache-control"), "no-store");
       assert.match(translationQueueHtml, /data-kind="admin-translation-queue"/);
       assert.match(translationQueueHtml, /data-human-approval-required="true"/);
-      assert.match(translationQueueHtml, /data-translation-task-row="translation-MS-CRAWL-0001-en"/);
+      assert.match(translationQueueHtml, /data-translation-task-row="translation-MS-00815-en"/);
       assert.match(translationQueueHtml, /data-translation-workflow-form="human"/);
       assert.match(translationQueueHtml, /data-label="Проверить перевод"/);
       assert.doesNotMatch(translationQueueHtml, /REVIEW TRANSLATION/);
       assert.match(translationQueueHtml, /name="propertyFactsJson"/);
       const translationQueueJson = await translationQueueJsonRoute.GET(
-        new Request("https://example.test/api/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
+        new Request("https://example.test/api/admin/translations?locale=ru&targetLocale=en&q=MS-00815", { headers: auth }),
       );
       const translationQueueJsonBody = await translationQueueJson.json();
       assert.equal(translationQueueJson.status, 200);
@@ -675,7 +675,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(translationQueueJsonBody.translationTasks[0].provider_mode, "human");
 
       const russianEditor = await listingEditorRoute.GET(
-        new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
+        new Request("https://example.test/admin/listings/edit?listingId=MS-00815&locale=ru", { headers: auth }),
       );
       assert.equal(russianEditor.status, 200);
       const russianEditorHtml = await russianEditor.text();
@@ -686,9 +686,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(russianEditorHtml, /data-editor-dirty-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-clean-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-readiness-rail="true"/);
-      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=bg"/);
-      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
-      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=bg"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=ru"/);
+      assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815"/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
@@ -1463,7 +1463,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const listingQualityCsv = await listingQualityWorkbook.text();
       assert.equal(listingQualityWorkbook.status, 200);
       assert.equal(listingQualityWorkbook.headers.get("content-type"), "text/csv; charset=utf-8");
-      assert.match(listingQualityCsv, /MS-CRAWL-0006/);
+      assert.match(listingQualityCsv, /MS-00443/);
       assert.match(listingQualityCsv, /thin_public_gallery/);
 
       const listingQualityReviewDraft = await listingQualityReviewDraftRoute.GET(
@@ -1515,15 +1515,15 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             targetLocale: "en",
             sourceLocale: "bg",
             objectType: "listing",
-            objectId: "MS-CRAWL-0001",
+            objectId: "MS-00815",
             sourceTitle: "Reviewed source listing",
             sourceDescription: "Reviewed source description",
-            propertyFactsJson: JSON.stringify({ id: "MS-CRAWL-0001", location: "Sandanski" }),
+            propertyFactsJson: JSON.stringify({ id: "MS-00815", location: "Sandanski" }),
             reviewer: "editor_en",
-            translatedTitle: "MS-CRAWL-0001 Sandanski reviewed English listing",
-            translatedBody: "MS-CRAWL-0001 Sandanski reviewed English description",
-            translatedSeoTitle: "MS-CRAWL-0001 Sandanski",
-            translatedMetaDescription: "MS-CRAWL-0001 Sandanski reviewed English listing content.",
+            translatedTitle: "MS-00815 Sandanski reviewed English listing",
+            translatedBody: "MS-00815 Sandanski reviewed English description",
+            translatedSeoTitle: "MS-00815 Sandanski",
+            translatedMetaDescription: "MS-00815 Sandanski reviewed English listing content.",
           }),
         }),
       );
@@ -1546,7 +1546,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(humanApprovedBody.human_approved, true);
 
       const publishQueue = await translationQueueRoute.GET(
-        new Request("https://example.test/admin/translations?locale=en&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
+        new Request("https://example.test/admin/translations?locale=en&targetLocale=en&q=MS-00815", { headers: auth }),
       );
       const publishQueueHtml = await publishQueue.text();
       assert.match(publishQueueHtml, /data-translation-status="approved"/);
@@ -1572,17 +1572,17 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           body: JSON.stringify({
             targetLocale: "es",
             objectType: "listing",
-            objectId: "MS-CRAWL-0001",
+            objectId: "MS-00815",
             sourceContent: {
               title: "Reviewed Sandanski apartment",
               description: "Reviewed source text for a Sandanski property.",
             },
-            propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski", price: "100000 EUR" },
+            propertyFacts: { id: "MS-00815", location: "Sandanski", price: "100000 EUR" },
             draftOutput: {
-              title: "MS-CRAWL-0001 Sandanski 100000 EUR",
-              body: "MS-CRAWL-0001 Sandanski 100000 EUR reviewed Spanish translation draft",
-              seo_title: "MS-CRAWL-0001 Sandanski",
-              meta_description: "MS-CRAWL-0001 Sandanski 100000 EUR reviewed Spanish translation draft for approved content.",
+              title: "MS-00815 Sandanski 100000 EUR",
+              body: "MS-00815 Sandanski 100000 EUR reviewed Spanish translation draft",
+              seo_title: "MS-00815 Sandanski",
+              meta_description: "MS-00815 Sandanski 100000 EUR reviewed Spanish translation draft for approved content.",
               citations: [{ source: "cms", field: "title" }],
             },
           }),
@@ -1659,11 +1659,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             broker: "broker_ru",
             phone: "+447700900001",
             reviewer: "owner",
-            sourceReference: "test://broker-contact/MS-CRAWL-0001",
+            sourceReference: "test://broker-contact/MS-00815",
             validationStatus: "broker_verified",
             approved: true,
           }),
@@ -1675,12 +1675,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(brokerContactBody.channels.phone, "tel:+447700900001");
 
       const editor = await listingEditorRoute.GET(
-        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
+        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-00815", { headers: auth }),
       );
       assert.equal(editor.status, 200);
       assert.match(await editor.text(), /data-admin-mutation-form="listing"/);
       const reviewableAsset = loadCmsSeed().records
-        .find((record) => record.collection === "listings" && record.id === "MS-CRAWL-0001")
+        .find((record) => record.collection === "listings" && record.id === "MS-00815")
         .media.find((asset) => asset.kind === "photo");
       assert.ok(reviewableAsset, "listing must retain a reviewable source asset");
 
@@ -1689,12 +1689,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             assetId: mediaAssetId(reviewableAsset),
             decision: "publish",
             kind: "floor_plan",
-            alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
-            replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0001-floor-plan.webp",
+            alt: "Human-reviewed floor plan for MS-00815.",
+            replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-00815-floor-plan.webp",
             reviewer: "media_editor",
             reviewConfirmed: "on",
           }),
@@ -1712,7 +1712,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             title: "Updated title for Next admin",
             floor: "2",
             total_floors: "5",
@@ -1722,7 +1722,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             availability_verified_at: "2026-07-19T11:30",
             seo_title: "Reviewed SEO title",
             seo_description: "Reviewed SEO description for the source-language listing.",
-            seo_canonical: "/bg/imoti/MS-CRAWL-0001",
+            seo_canonical: "/bg/imoti/MS-00815",
             seo_og_title: "Reviewed Open Graph title",
             seo_og_description: "Reviewed Open Graph description.",
             seo_robots: "index,follow",
@@ -1740,7 +1740,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             locale: "he",
             oldPath: "/he/properties/old-sandanski-slug",
             editor: "seo_editor",
@@ -1751,16 +1751,16 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(slugChange.status, 201);
       assert.equal(slugChangeBody.status, 301);
       assert.equal(slugChangeBody.old_path, "/he/properties/old-sandanski-slug");
-      assert.equal(slugChangeBody.new_path, "/he/properties/MS-CRAWL-0001");
+      assert.equal(slugChangeBody.new_path, "/he/properties/MS-00815");
 
       const tourApproval = await tourApprovalRoute.POST(
         new Request("https://example.test/api/admin/tours/approve", {
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            listingId: "MS-CRAWL-0001",
-            panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-            thumbnailUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001-thumb.jpg",
+            listingId: "MS-00815",
+            panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+            thumbnailUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815-thumb.jpg",
             accessibilityCaption: "Reviewed 360 tour of the property.",
             reviewer: "media_reviewer",
             reviewConfirmed: "on",
@@ -1778,9 +1778,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             provider: "supersplat-viewer",
-            viewerUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001/index.html",
+            viewerUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815/index.html",
             accessibilityCaption: "Reviewed interactive 3D tour of the property.",
             reviewer: "media_reviewer",
             reviewConfirmed: "on",
@@ -1790,7 +1790,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const splatTourApprovalBody = await splatTourApproval.json();
       assert.equal(splatTourApproval.status, 201);
       assert.equal(splatTourApprovalBody.provider, "supersplat-viewer");
-      assert.equal(splatTourApprovalBody.viewer_url, "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001/index.html");
+      assert.equal(splatTourApprovalBody.viewer_url, "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815/index.html");
       assert.equal(splatTourApprovalBody.panorama_url, null);
       assert.equal(splatTourApprovalBody.is_public, true);
       const operationsLead = await publicLeadRoute.POST(
@@ -1816,7 +1816,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
             leadId: operationsLeadId,
-            listingReference: "MS-CRAWL-0001",
+            listingReference: "MS-00815",
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
           }),
@@ -1959,7 +1959,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(calendar.status, 200);
       assert.equal(calendar.headers.get("content-type"), "text/calendar; charset=utf-8");
       assert.match(calendarBody, /BEGIN:VCALENDAR/);
-      assert.match(calendarBody, /MS Realty viewing MS-CRAWL-0001/);
+      assert.match(calendarBody, /MS Realty viewing MS-00815/);
 
       const deal = await dealCloseRoute.POST(
         new Request("https://example.test/api/admin/deals/close", {
@@ -1967,7 +1967,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
             leadId: operationsLeadId,
-            listingReference: "MS-CRAWL-0001",
+            listingReference: "MS-00815",
             broker: "broker_ru",
           }),
         }),
@@ -2135,7 +2135,7 @@ test("Next admin listing-quality import persists complete review for mounted lis
     `${JSON.stringify({
       edited_at: "2026-07-07T08:30:00Z",
       id: "listing-edit-mounted-missing-description",
-      listing_id: "MS-CRAWL-0003",
+      listing_id: "MS-00922",
       editor: "editor_bg",
       source_locale: "bg",
       patch: { description: "" },
@@ -2167,7 +2167,7 @@ test("Next admin listing-quality import persists complete review for mounted lis
       const reviewCsv = completeListingQualityReviewCsv(workbookCsv);
 
       assert.equal(workbook.status, 200);
-      assert.match(workbookCsv, /^MS-CRAWL-0003,/m);
+      assert.match(workbookCsv, /^MS-00922,/m);
       assert.match(workbookCsv, /missing_description/);
 
       const imported = await listingQualityImportRoute.POST(
@@ -2194,7 +2194,7 @@ test("Next admin listing-quality import persists complete review for mounted lis
       assert.equal(importedBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
       assert.equal(importedBody.report.blockers.includes("listing_quality_review"), false);
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
-      assert.equal(importedBody.edits.some((row) => row.edit.listing_id === "MS-CRAWL-0003"), true);
+      assert.equal(importedBody.edits.some((row) => row.edit.listing_id === "MS-00922"), true);
       assert.equal(readiness.status, 200);
       assert.equal(readinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
       assert.equal(readinessBody.blockers.includes("listing_quality_review"), false);
@@ -2212,7 +2212,7 @@ test("Next admin adapter drafts Hermes replies without queueing broker send", as
     leadLedgerPath,
     `${JSON.stringify({
       lead_id: "next-reply-draft-lead",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "el",
       message_original: "Interested in this property.",
       contact_preference: "email",
@@ -2230,7 +2230,7 @@ test("Next admin adapter drafts Hermes replies without queueing broker send", as
       hermesReplyProvider: async (prompt) => {
         prompts.push(prompt);
         return {
-          text: "MS-CRAWL-0001 Sandanski reply draft for broker review.",
+          text: "MS-00815 Sandanski reply draft for broker review.",
           language: prompt.language,
           citations: [{ source: "listing", field: "id" }],
         };
@@ -2329,7 +2329,7 @@ test("Next admin replies bind the named production operator before queueing", as
     leadLedgerPath,
     `${JSON.stringify({
       lead_id: "next-operator-reply-lead",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "ru",
       message_original: "Please contact me about this listing.",
       contact: { email: "buyer@example.com" },
@@ -2551,10 +2551,10 @@ test("Next admin public approvals bind reviewers and require confirmation", asyn
     };
     const contact = {
       id: "next-credentialed-broker-contact",
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       broker: "broker_bg",
       phone: "+359880123456",
-      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      sourceReference: "test://broker-contact/MS-00815",
       validationStatus: "broker_verified",
       approved: true,
     };
@@ -2584,9 +2584,9 @@ test("Next admin public approvals bind reviewers and require confirmation", asyn
     );
     const tour = {
       id: "next-credentialed-tour-approval",
-      listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      listingId: "MS-00815",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
       reviewConfirmed: true,
     };
     const spoofedTour = await renderAppAdminResponse(

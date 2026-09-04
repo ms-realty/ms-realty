@@ -512,7 +512,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     hermesReplyProvider: async (prompt) => {
       hermesReplyPrompts.push(prompt);
       return {
-        text: "MS-CRAWL-0001 Sandanski reply draft for broker review.",
+        text: "MS-00815 Sandanski reply draft for broker review.",
         language: prompt.language,
         citations: [{ source: "listing", field: "id" }],
       };
@@ -526,7 +526,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       body: {
         leadType: "buyer",
         language: "he",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Noa Levi", whatsapp: "+359880000001" },
         contact_preference: "whatsapp",
         message: "Interested in this property.",
@@ -540,7 +540,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         source: "website_viewing_request",
         leadType: "buyer",
         language: "he",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Noa Levi", phone: "+359880000001" },
         contact_preference: "phone",
         request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
@@ -586,47 +586,47 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
     home: await dispatchHttp(app, { url: "/he/" }),
     homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
-    listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
-    listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
-    listingPrint: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?print=1" }),
+    listing: await dispatchHttp(app, { url: "/he/properties/MS-00815" }),
+    listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-00815?format=html" }),
+    listingPrint: await dispatchHttp(app, { url: "/he/properties/MS-00815?print=1" }),
     brokerContact: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/broker-contacts",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
         id: "broker-contact-test",
-        listingId: "MS-CRAWL-0001",
+        listingId: "MS-00815",
         broker: "broker_ru",
         phone: "+447700900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001",
+        sourceReference: "test://broker-contact/MS-00815",
         validationStatus: "broker_verified",
         approved: true,
       },
     }),
-    listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+    listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-00815" }),
     tourApproval: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/tours/approve",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
         id: "tour-approval-test",
-        listingId: "MS-CRAWL-0001",
-        panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-        accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+        listingId: "MS-00815",
+        panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+        accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
         reviewer: "media_editor",
         reviewConfirmed: true,
       },
     }),
-    listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
-    listingHtmlAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
+    listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-00815" }),
+    listingHtmlAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-00815?format=html" }),
     slugChange: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/listings/slug",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
         id: "slug-change-http-test",
-        listingId: "MS-CRAWL-0001",
+        listingId: "MS-00815",
         locale: "he",
         oldPath: "/he/properties/old-sandanski-slug",
         editor: "editor_bg",
@@ -636,7 +636,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       method: "POST",
       url: "/api/admin/listings/slug",
       body: {
-        listingId: "MS-CRAWL-0001",
+        listingId: "MS-00815",
         locale: "he",
         oldPath: "/he/properties/no-auth-old-slug",
         editor: "editor_bg",
@@ -700,7 +700,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       body: {
         leadId,
         language: "he",
-        listingFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+        listingFacts: { id: "MS-00815", location: "Sandanski" },
       },
     }),
     replyDraftUnauthorized: await dispatchHttp(app, {
@@ -835,15 +835,15 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
       objectType: "listing",
-      objectId: "MS-CRAWL-0001",
+      objectId: "MS-00815",
       sourceLocale: "bg",
       targetLocale: "el",
       sourceContent: {
         title: "Reviewed listing title",
         description: "Reviewed listing description for Sandanski.",
       },
-      propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
-      draftOutput: hermesDraftOutput({ id: "MS-CRAWL-0001", location: "Sandanski" }, "el"),
+      propertyFacts: { id: "MS-00815", location: "Sandanski" },
+      draftOutput: hermesDraftOutput({ id: "MS-00815", location: "Sandanski" }, "el"),
     },
   });
   smoke.translationApprove = await dispatchHttp(app, {
@@ -865,7 +865,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     },
   });
   smoke.listingEditorHtml = await dispatchHttp(app, {
-    url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
+    url: "/admin/listings/edit?locale=bg&listingId=MS-00815",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
@@ -878,13 +878,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       "content-type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       description: "Updated approved source description.",
     }).toString(),
   });
   if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
   else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
-  smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
+  smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-00815" });
   smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
   smoke.adminLocales = {
     bg: await dispatchHttp(app, {
@@ -921,9 +921,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/events",
     body: {
       type: "cta_click",
-      path: "/he/properties/MS-CRAWL-0001",
+      path: "/he/properties/MS-00815",
       locale: "he",
-      listingReference: "MS-CRAWL-0001",
+      listingReference: "MS-00815",
       action: "sticky_inquiry",
     },
   });
@@ -944,7 +944,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   const reviewedAsset = publicSeed.records
-    .find((record) => record.id === "MS-CRAWL-0001")
+    .find((record) => record.id === "MS-00815")
     .media.find((item) => item.asset_url === smoke.listing.body.body.media.gallery[0].url);
   assert.ok(reviewedAsset, "public gallery asset must remain linked to its source-backed CMS media row");
   const reviewedAssetId = mediaAssetId(reviewedAsset);
@@ -953,18 +953,18 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/media/reviews",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       assetId: reviewedAssetId,
       decision: "publish",
       kind: "floor_plan",
-      alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
-      replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-CRAWL-0001-floor-plan.webp",
+      alt: "Human-reviewed floor plan for MS-00815.",
+      replacementUrl: "https://ms-realty.ms-realty-bg.workers.dev/wp-content/uploads/2026/08/MS-00815-floor-plan.webp",
       reviewer: "media_editor",
       reviewConfirmed: true,
     },
   });
-  smoke.listingAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" });
-  smoke.listingHtmlAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" });
+  smoke.listingAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-00815" });
+  smoke.listingHtmlAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-00815?format=html" });
   smoke.leadAssignment = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/leads/assign",
@@ -1136,18 +1136,18 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
   assert.match(smoke.listingHtmlAfterTourApproval.body, /data-photo-sphere-viewer="psv-listing-tour"/);
-  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/tours\/MS-CRAWL-0001\.jpg"/);
+  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/tours\/MS-00815\.jpg"/);
   assert.equal(smoke.mediaReview.status, 201);
   assert.equal(smoke.mediaReview.body.review_status, "approved_by_human");
   assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans.length, 1);
   assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans[0].reviewer, undefined);
   assert.match(smoke.listingHtmlAfterMediaReview.body, /data-floor-plan-gallery="true"/);
-  assert.match(smoke.listingHtmlAfterMediaReview.body, /MS-CRAWL-0001-floor-plan\.webp/);
+  assert.match(smoke.listingHtmlAfterMediaReview.body, /MS-00815-floor-plan\.webp/);
   assert.equal(smoke.leadAssignment.status, 201);
   assert.equal(smoke.leadAssignment.body.previous_broker_id, null);
   assert.equal(smoke.adminAfterLeadAssignment.body.leads.find((lead) => lead.lead_id === leadId).assigned_broker, "broker_ru");
-  assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
-  assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
+  assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-00815");
+  assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-00815");
   assert.equal(smoke.slugChangeUnauthorized.status, 401);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(readLeadContacts(leadContactVaultPath, leadContactKey).size, 4);
@@ -2436,7 +2436,7 @@ test("HTTP sitemap ignores editor-only location mutations without removing revie
   fs.appendFileSync(
     listingEditLedgerPath,
     `${JSON.stringify({
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       editor: "seo_editor",
       patch: { location: "Runtime Only City" },
       source_hash_after: "runtime-only-city",
@@ -2550,15 +2550,15 @@ test("HTTP admin can publish an approved translation for a newly added public lo
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
       objectType: "listing",
-      objectId: "MS-CRAWL-0001",
+      objectId: "MS-00815",
       sourceLocale: "bg",
       targetLocale: "es",
       sourceContent: {
         title: "Reviewed listing title",
         description: "Reviewed listing description for Sandanski.",
       },
-      propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
-      draftOutput: hermesDraftOutput({ id: "MS-CRAWL-0001", location: "Sandanski" }, "es"),
+      propertyFacts: { id: "MS-00815", location: "Sandanski" },
+      draftOutput: hermesDraftOutput({ id: "MS-00815", location: "Sandanski" }, "es"),
     },
   });
   const approve = await dispatchHttp(app, {
@@ -2579,10 +2579,10 @@ test("HTTP admin can publish an approved translation for a newly added public lo
       taskId: approve.body.id,
     },
   });
-  const page = await dispatchHttp(app, { url: "/es/propiedades/MS-CRAWL-0001" });
+  const page = await dispatchHttp(app, { url: "/es/propiedades/MS-00815" });
   const sitemap = await dispatchHttp(app, { url: "/sitemap.xml" });
   const search = await dispatchHttp(app, { url: "/api/search?locale=es&q=Sandanski" });
-  const card = search.body.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const card = search.body.cards.find((candidate) => candidate.id === "MS-00815");
 
   assert.equal(draft.status, 201);
   assert.equal(approve.status, 201);
@@ -2591,9 +2591,9 @@ test("HTTP admin can publish an approved translation for a newly added public lo
   assert.equal(page.body.locale, "es");
   assert.equal(page.body.indexable, true);
   assert.equal(page.body.hreflang.some((link) => link.hreflang === "es"), true);
-  assert.match(sitemap.body, /\/es\/propiedades\/MS-CRAWL-0001/);
+  assert.match(sitemap.body, /\/es\/propiedades\/MS-00815/);
   assert.equal(search.body.path, "/es/buscar");
-  assert.equal(card.path, "/es/propiedades/MS-CRAWL-0001");
+  assert.equal(card.path, "/es/propiedades/MS-00815");
   assert.equal(card.translation_display, "reviewed_translation");
   assert.equal(card.translation_indexable, true);
 });
@@ -2797,10 +2797,10 @@ test("HTTP public approval handlers bind reviewers and require confirmation", as
     const headers = { authorization: "Bearer media-editor-production-token-0123456789" };
     const contact = {
       id: "credentialed-broker-contact",
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       broker: "broker_bg",
       phone: "+359880123456",
-      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      sourceReference: "test://broker-contact/MS-00815",
       validationStatus: "broker_verified",
       approved: true,
     };
@@ -2824,9 +2824,9 @@ test("HTTP public approval handlers bind reviewers and require confirmation", as
     });
     const tour = {
       id: "credentialed-tour-approval",
-      listingId: "MS-CRAWL-0001",
-      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      listingId: "MS-00815",
+      panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
       reviewConfirmed: true,
     };
     const spoofedTour = await dispatchHttp(app, {
