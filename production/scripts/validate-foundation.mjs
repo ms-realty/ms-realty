@@ -331,7 +331,15 @@ if (
 ) {
   throw new Error("Sitemap XML must include approved Hebrew/guide routes and exclude French");
 }
-const sitemapXmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname).sort();
+// A search facet entry is a path plus one query parameter, so comparing
+// pathnames alone would collapse the eight facets of a locale onto its search
+// route and read as eight missing entries.
+const sitemapXmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+  .map(([, loc]) => {
+    const url = new URL(loc);
+    return `${url.pathname}${url.search}`;
+  })
+  .sort();
 const sitemapPublicPaths = sitemap.entries
   .filter((entry) => entry.public !== false)
   .map((entry) => entry.loc)

@@ -1065,4 +1065,620 @@
     <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/guides/petrich-obstinski-kontekst" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/guides/petrich-obstinski-kontekst" />
   </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=apartment" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=apartment" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=house" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=house" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=plot" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=plot" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=agricultural_land" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=agricultural_land" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=commercial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=commercial" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?property_family=hotel" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?property_family=hotel" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=sale" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=sale" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
+  <url>
+    <loc>https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ms-realty.ms-realty-bg.workers.dev/en/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://ms-realty.ms-realty-bg.workers.dev/de/suche?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://ms-realty.ms-realty-bg.workers.dev/nl/zoeken?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ms-realty.ms-realty-bg.workers.dev/ru/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://ms-realty.ms-realty-bg.workers.dev/el/anazitisi?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ms-realty.ms-realty-bg.workers.dev/he/search?offer_type=rent" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ms-realty.ms-realty-bg.workers.dev/bg/tarsene?offer_type=rent" />
+  </url>
 </urlset>
