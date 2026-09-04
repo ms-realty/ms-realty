@@ -19,6 +19,11 @@ import unicodedata
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
+try:
+    from search.legacy_identity import ListingIdentity, ListingIdentityError
+except ImportError:  # invoked as a script, with search/ as the import root
+    from legacy_identity import ListingIdentity, ListingIdentityError
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT = ROOT / "migration" / "artifacts" / "20260704-211155"
@@ -338,12 +343,31 @@ def infer_bedrooms(text: str) -> int | None:
     return None
 
 
-def extract_reference(url: str, fallback: int) -> str:
+def crawl_era_reference(url: str, fallback: int) -> str:
+    """The reference the crawl era minter gave this row; kept only as migration_id.
+
+    The slug guess is what produced MS-3000 from a plot area in a slug. It is no
+    longer an id: the lot number comes from the identity inputs, and this value
+    only records which crawl era URL the listing was served under.
+    """
     slug = unquote(urlparse(url).path.rstrip("/").split("/")[-1])
     ref_match = re.search(r"(?:^|[-_])(\d{3,7})(?:$|[-_])", slug)
     if ref_match:
         return f"MS-{ref_match.group(1)}"
     return f"MS-CRAWL-{fallback:04d}"
+
+
+def assert_listing_identity_coverage(docs: list[dict[str, object]], identity: ListingIdentity) -> None:
+    """Every assigned identity is minted exactly once; a twin id or an orphan is fatal."""
+    seen: dict[str, str] = {}
+    for doc in docs:
+        listing_id = str(doc["id"])
+        if listing_id in seen:
+            raise ListingIdentityError(f"Listing id {listing_id} is minted twice ({seen[listing_id]} and {doc['url']})")
+        seen[listing_id] = str(doc["url"])
+    missing = sorted(str(row["migration_id"]) for row in identity.rows if str(row["id"]) not in seen)
+    if missing:
+        raise ListingIdentityError("Identity rows without a crawl row: " + ", ".join(missing))
 
 
 def translation_indexable(status: str, human_approved: bool, locale: str, registry: dict[str, object]) -> bool:
@@ -367,7 +391,9 @@ def source_index_doc(doc: dict[str, object], registry: dict[str, object]) -> dic
     human_approved = status == "published"
     listing_id = str(doc["id"])
     return {
-        **doc,
+        # The old URLs are routing facts, not search facts; the flat identity
+        # fields (lot number, migration id, legacy lot id) stay for exact match.
+        **{key: value for key, value in doc.items() if key != "legacy_urls"},
         "id": f"{listing_id}:{locale}",
         "source_listing_id": listing_id,
         "search_document_type": "source",
@@ -484,11 +510,16 @@ def load_listing_docs(
     registry: dict[str, object],
     reviews: dict[str, object],
     geography_areas: dict[str, dict[str, object]],
+    identity: ListingIdentity | None = None,
 ) -> list[dict[str, object]]:
     metadata_path = artifact_dir / "metadata-inventory.csv"
     if not metadata_path.exists():
         raise FileNotFoundError(f"Missing metadata export: {metadata_path}")
 
+    # The id is the agency's lot number, looked up by crawl URL in the identity
+    # inputs. A row without a recorded decision stops the build here rather
+    # than minting a guess.
+    identity = identity or ListingIdentity.load()
     csv.field_size_limit(sys.maxsize)
     thumbnails = load_listing_thumbnails(artifact_dir)
     docs: list[dict[str, object]] = []
@@ -515,9 +546,18 @@ def load_listing_docs(
             locale = infer_language(domain, url, registry)
             locale_is_indexable = locale in indexable_locales
             thumbnail = thumbnails.get(url, {})
+            crawl_reference = crawl_era_reference(url, len(docs) + 1)
+            identity_row = identity.resolve(url, crawl_reference)
 
             document = {
-                    "id": extract_reference(url, len(docs) + 1),
+                    "id": str(identity_row["id"]),
+                    "lot_number": identity_row["lot_number"],
+                    "lot_suffix": identity_row["lot_suffix"],
+                    "migration_id": str(identity_row["migration_id"]),
+                    "legacy_lot_id": identity_row["legacy_lot_id"],
+                    "legacy_post_id": identity_row["legacy_post_id"],
+                    "legacy_urls": [dict(entry) for entry in identity_row["legacy_urls"]],
+                    "merged_into": identity_row["merged_into"],
                     "url": url,
                     "canonical": textish(row.get("canonical")),
                     "domain": domain,
@@ -558,6 +598,7 @@ def load_listing_docs(
             )
             docs.append(document)
 
+    assert_listing_identity_coverage(docs, identity)
     return docs
 
 
@@ -578,6 +619,12 @@ def write_typesense_schema(path: Path) -> None:
             {"name": "id", "type": "string"},
             {"name": "source_listing_id", "type": "string", "facet": True},
             {"name": "listing_reference", "type": "string", "facet": True},
+            {"name": "lot_number", "type": "int32", "facet": True},
+            {"name": "lot_suffix", "type": "string", "optional": True},
+            {"name": "migration_id", "type": "string", "facet": True},
+            {"name": "legacy_lot_id", "type": "string", "facet": True, "optional": True},
+            {"name": "legacy_post_id", "type": "string", "optional": True},
+            {"name": "merged_into", "type": "string", "facet": True, "optional": True},
             {"name": "search_document_type", "type": "string", "facet": True},
             {"name": "publication_state", "type": "string", "facet": True},
             {"name": "listing_status", "type": "string", "facet": True, "optional": True},
@@ -662,10 +709,14 @@ def write_typesense_schema(path: Path) -> None:
 
 def write_meili_settings(path: Path) -> None:
     settings = {
-        "searchableAttributes": ["title", "description", "h1", "search_text", "location", "location_label", "location_native", "municipality", "district", "region", "listing_reference"],
+        "searchableAttributes": ["title", "description", "h1", "search_text", "location", "location_label", "location_native", "municipality", "district", "region", "listing_reference", "migration_id", "legacy_lot_id"],
         "filterableAttributes": [
             "source_listing_id",
             "listing_reference",
+            "lot_number",
+            "migration_id",
+            "legacy_lot_id",
+            "merged_into",
             "search_document_type",
             "publication_state",
             "listing_status",
