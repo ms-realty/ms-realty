@@ -466,7 +466,7 @@
       "x": 0,
       "y": -250,
       "w": 900,
-      "text": "MS Realty operator workspace — the whole system.\n\nBuilt on the agency's own design system: Commissioner, Source Serif 4 and IBM Plex Mono, an Ink-900 rail over a Stone-50 canvas, a 244px rail, a 64px topbar, 8 and 14px radii, and the Brick red held back for one call to action.\n\nThree token values are new. Each was forced by a measured WCAG 2.2 AA failure, not by taste — the numbers are on the Foundations board."
+      "text": "MS Realty — the whole system, rebuilt in a world that belongs to Sandanski.\n\nOne idea runs through every screen: every fact carries its witness. Who verified it and when sits beside the number, the publish state, the translation, the redirect. The filled square is a signed seal; the outlined one is a fact nobody has confirmed.\n\nThe world is the town's thermal bath house: glazed tile for the ground, grout lines for every rule, warm marble for the words, deep spring water as the public field, and the logo's brick held to one action per screen. Three radii (2, 6, pill), two elevations (rest, float), one type ratio, a 44px row that is also the touch target. Commissioner for every word; Sofia Sans Semi Condensed where the public site speaks up. No serif headline, no cream paper, no dark rail, no card shadows — those are the looks every generated interface lands on."
     },
     {
       "id": "note-work",
@@ -482,7 +482,7 @@
       "x": 0,
       "y": -230,
       "w": 900,
-      "text": "The richest model in the repository was also the least visible: six case types across eight phases, Bulgarian and Greek step lists, evidence attributed to a notary, registry, bank, lawyer or client, and a manual or autonomous execution mode per case.\n\nDocuments are designed ahead of the code. Today the backend records checklist outcomes only — there is no document to create, version, send or sign."
+      "text": "The richest model in the repository was also the least visible: six case types across eight phases, Bulgarian and Greek step lists, evidence attributed to a notary, registry, bank, lawyer or client, and a manual or autonomous execution mode per case.\n\nDocuments are real now: a document object with immutable revisions and signature requests, and bytes that go to the private object store, where the size and digest a row quotes are computed from what was actually stored."
     },
     {
       "id": "note-cms",
@@ -506,7 +506,7 @@
       "x": 0,
       "y": -250,
       "w": 900,
-      "text": "The last board checks every screen against the repository: 118 admin routes, 8 CMS collections, 7 public page types. Twenty surfaces are already backed, four are partial, and four need backend that does not exist yet — named, sized and separated from the rest."
+      "text": "The last board checks every screen against the repository: every admin route, every CMS collection, every public page type. Surfaces that are backed, partial and unbacked are named, sized and separated from the rest — the numbers are on the board, not in this note, so they cannot drift."
     }
   ],
   "pages": [

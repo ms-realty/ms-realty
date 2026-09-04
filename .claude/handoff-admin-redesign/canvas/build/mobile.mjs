@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { BASE, icon } from "../shell.mjs";
+import { BASE, FONT_LINKS, icon } from "../shell.mjs";
 const W = (n) => new URL(`../${n}`, import.meta.url);
 
 const M_CSS = `
@@ -61,6 +61,7 @@ const wrap = (body) => `<!doctype html>
 <body>
 <x-dc>
 <helmet>
+${FONT_LINKS}
   <style>${BASE}${M_CSS}
   </style>
 </helmet>

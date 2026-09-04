@@ -341,6 +341,11 @@ export const BASE = `${TOKENS}
     .subtle { color:var(--text-muted); }
 `;
 
+// Every artboard requests its faces the same way; generators that build their
+// own helmet (phone frames, public pages) interpolate this too.
+export const FONT_LINKS = `  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">`;
+
 export const HELMET_BASE = BASE;
 
 export function page({ title, active, body, health, healthText, width = 1440, height = 980, extraCss = "" }) {
@@ -353,8 +358,7 @@ export function page({ title, active, body, health, healthText, width = 1440, he
 <body>
 <x-dc>
 <helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
+${FONT_LINKS}
   <style>${BASE}${extraCss}
   </style>
 </helmet>
@@ -392,8 +396,7 @@ export function sheet({ body, width = 1440, height = 1200, extraCss = "", pad = 
 <body>
 <x-dc>
 <helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
+${FONT_LINKS}
   <style>${BASE}${extraCss}
   </style>
 </helmet>

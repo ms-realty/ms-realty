@@ -1,4 +1,4 @@
-import { BASE, icon } from "./shell.mjs";
+import { BASE, FONT_LINKS, icon } from "./shell.mjs";
 export { icon } from "./shell.mjs";
 
 // The public site shares the token layer with the workspace and diverges above it:
@@ -138,6 +138,7 @@ export function pubPage({ body, extraCss = "", width = 1440, height = 1200, dir 
 <body>
 <x-dc>
 <helmet>
+${FONT_LINKS}
   <style>${BASE}${PUB_CSS}${extraCss}
   </style>
 </helmet>

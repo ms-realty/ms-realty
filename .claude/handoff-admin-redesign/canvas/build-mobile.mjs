@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { HELMET_BASE, icon } from "./shell.mjs";
+import { FONT_LINKS, HELMET_BASE, icon } from "./shell.mjs";
 
 const CSS = `
     .ph-app { width:390px; min-height:844px; background:var(--canvas); display:flex; flex-direction:column; }
@@ -48,6 +48,7 @@ const HTML = `<!doctype html>
 <body>
 <x-dc>
 <helmet>
+${FONT_LINKS}
   <style>${HELMET_BASE}${CSS}
   </style>
 </helmet>
