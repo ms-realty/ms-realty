@@ -89,8 +89,8 @@ test("required fields carry a decorative accent marker and inline alerts default
   assert.match(adminAdapterCss, /\.adm-reply\[open\] > summary::after/);
 });
 
-test("critical next actions tint the active surface instead of forcing a light-only palette", () => {
-  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*background:\s*color-mix\(in srgb, var\(--brick-600\) 12%, var\(--surface\)\)/);
+test("critical next actions carry urgency in their metadata on the active surface", () => {
+  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*background:\s*var\(--surface\)/);
   assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-next-actions__meta time\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--brick-600\) 45%, var\(--text-strong\)\)/);
   assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-task-list__reference\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--text-muted\) 55%, var\(--text-strong\)\)/);
 });

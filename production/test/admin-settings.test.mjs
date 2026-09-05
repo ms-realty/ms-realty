@@ -627,6 +627,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(empty.body, /data-hermes-open="today"/);
     assert.match(empty.body, /name="prompt"/);
     assert.match(empty.body, /<form class="adm-today-briefing__hermes" method="get" action="\/admin\/hermes" data-hermes-entry="today">/);
+    assert.match(empty.body, /<details class="adm-today-assist"><summary>[\s\S]*?<\/summary><form class="adm-today-briefing__hermes"/);
     assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
     assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
@@ -686,7 +687,7 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
-    assert.equal((populated.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the ranked task is the only page-primary action");
+    assert.equal((populated.body.match(/class="mk-btn mk-btn--accent(?:\s|\")/g) || []).length, 1, "the ranked task is the only brick action");
     assert.match(populated.body, /name="prompt"[\s\S]*?Prepare a safe plan for today's priority task:/);
     assert.doesNotMatch(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
