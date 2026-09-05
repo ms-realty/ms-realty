@@ -193,6 +193,11 @@ test("the list tools strip and the snooze control are wired to their routes", as
   assert.match(inbox.body, /data-lead-snooze-control="[^"]+"/);
   assert.match(inbox.body, /action="\/api\/admin\/leads\/snooze"/);
   assert.match(inbox.body, /data-admin-mutation-form="lead-snooze"/);
+  const snooze = inbox.body.match(/<form[^>]*action="\/api\/admin\/leads\/snooze"[\s\S]*?<\/form>/)?.[0];
+  assert.ok(snooze);
+  assert.match(snooze, /name="actor" required/);
+  assert.match(snooze, /type="checkbox" name="humanConfirmed" required/);
+  assert.match(snooze, /I confirm this change to the enquiry/);
   assert.match(inbox.body, /type="datetime-local" name="until"/);
   assert.match(inbox.body, /Snoozing moves the reply and escalation clocks by the same window/);
   assert.match(ADMIN_APP_JS, /function initLeadBulkForm\(\)/);

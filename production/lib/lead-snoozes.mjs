@@ -89,6 +89,7 @@ export function createLeadSnooze(leads, rows, input, recordedAt = new Date().toI
   if (Date.parse(until) - Date.parse(recorded) > MAX_SNOOZE_DAYS * 24 * 60 * 60 * 1000) {
     throw new Error(`until must be within ${MAX_SNOOZE_DAYS} days`);
   }
+  if (![true, "true", "on", "1"].includes(input.humanConfirmed ?? input.human_confirmed)) throw new Error("Snooze requires explicit human confirmation");
   const open = latestSnoozeFor(rows || [], lead.lead_id);
   if (open) {
     // A retried submission of the same deferral is the same deferral, not a
@@ -116,6 +117,7 @@ export function createLeadUnsnooze(leads, rows, input, recordedAt = new Date().t
   const reason = boundedText(input.reason, "Snooze reason", MAX_REASON_LENGTH);
   const open = latestSnoozeFor(rows || [], lead.lead_id);
   if (!open) throw new Error("Lead has no open snooze to restore");
+  if (![true, "true", "on", "1"].includes(input.humanConfirmed ?? input.human_confirmed)) throw new Error("Un-snooze requires explicit human confirmation");
   return {
     id: null,
     lead_id: lead.lead_id,

@@ -353,6 +353,7 @@ const ADMIN_UI_COPY = {
     snoozeLive: "Отлагането измества таймера за отговор и ескалацията с точно същия период. Връщането възстановява първоначалния срок.",
     snoozeUntil: "Отложи до",
     snoozeReason: "Причина",
+    snoozeConfirm: "Потвърждавам тази промяна в срока за отговор на запитването.",
     snoozeSaving: "Записваме отлагането…",
     snoozeSaved: "Запитването е отложено. Опреснете, за да видите новия срок.",
     snoozeFailed: "Отлагането не беше записано.",
@@ -1130,6 +1131,7 @@ const ADMIN_UI_COPY = {
     snoozeLive: "Откладывание сдвигает таймер ответа и эскалацию ровно на тот же период. Возврат восстанавливает исходный срок.",
     snoozeUntil: "Отложить до",
     snoozeReason: "Причина",
+    snoozeConfirm: "Подтверждаю это изменение срока ответа на заявку.",
     snoozeSaving: "Записываем откладывание…",
     snoozeSaved: "Заявка отложена. Обновите, чтобы увидеть новый срок.",
     snoozeFailed: "Откладывание не записано.",
@@ -1907,6 +1909,7 @@ const ADMIN_UI_COPY = {
     snoozeLive: "Snoozing moves the reply and escalation clocks by the same window. Un-snoozing restores the original clock.",
     snoozeUntil: "Snooze until",
     snoozeReason: "Reason",
+    snoozeConfirm: "I confirm this change to the enquiry’s response deadline.",
     snoozeSaving: "Recording the snooze…",
     snoozeSaved: "Enquiry snoozed. Refresh to see the new clock.",
     snoozeFailed: "Could not snooze this enquiry.",
@@ -7162,6 +7165,10 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
   const snooze = leadSla?.snooze || null;
   const active = snooze?.status === "active";
   if (!writable) return null;
+  const confirmation = h("div", null,
+    h("label", null, ui.reviewer, h("input", { name: "actor", required: true, maxLength: 80, defaultValue: currentOperatorId(page), readOnly: Boolean(page.workspace?.operator_id) })),
+    h("label", { className: "adm-check" }, h("input", { type: "checkbox", name: "humanConfirmed", required: true }), h("span", null, ui.snoozeConfirm)),
+  );
   return h(
     "details",
     { className: "adm-lead-snooze", "data-lead-snooze-control": lead.lead_id, "data-snooze-state": active ? "active" : "open" },
@@ -7188,6 +7195,7 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
           },
           h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
           h("label", null, ui.snoozeReason, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+          confirmation,
           h("p", { className: "adm-hint" }, ui.snoozeLive),
           h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
           h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h("span", null, ui.unsnooze)),
@@ -7206,6 +7214,7 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
           h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
           h("label", null, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until", required: true })),
           h("label", null, ui.snoozeReason, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+          confirmation,
           h("p", { className: "adm-hint" }, ui.snoozeLive),
           h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
           h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h("span", null, ui.snooze)),
