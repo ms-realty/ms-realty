@@ -22,3 +22,83 @@
 @media (max-width: 720px) {
   [data-react-public-ui] h1 { font-size: var(--display-sm); }
 }
+
+/* The home search and its photograph share a field, not an overlay. */
+[data-react-public-ui="home"] .hp-hero {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--space-12);
+  min-height: 0;
+  padding: var(--space-12) max(var(--space-6), calc((100% - 1280px) / 2));
+  background: var(--field);
+  color: var(--field-text);
+}
+[data-react-public-ui="home"] .hp-hero__in {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+[data-react-public-ui="home"] .hp-hero__bg {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 480px;
+  border-radius: var(--radius-image);
+}
+[data-react-public-ui="home"] .hp-hero__bg::before { content: none; }
+[data-react-public-ui="home"] .hp-hero__copy { margin-bottom: var(--space-8); }
+[data-react-public-ui="home"] .hp-hero h1 { max-width: 18ch; color: var(--field-text); }
+[data-react-public-ui="home"] .hp-hero p { font-size: var(--text-base); color: var(--field-muted); }
+[data-react-public-ui="home"] .hp-search__intent {
+  border-color: var(--spring-200);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+[data-react-public-ui="home"] .hp-search__tab span { min-height: 44px; padding-inline: var(--space-4); }
+[data-react-public-ui="home"] .hp-search__tab:has(input:checked) span { background: var(--tile-glaze); color: var(--spring-900); box-shadow: none; }
+html:has(main[data-react-public-ui="home"]) .hp-search__card { background: transparent; box-shadow: none; }
+[data-react-public-ui="home"] .hp-search__bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); padding: 0; }
+[data-react-public-ui="home"] .hp-search__seg { padding: 0; border: 0; gap: var(--space-2); }
+[data-react-public-ui="home"] .hp-search__seg:hover,
+[data-react-public-ui="home"] .hp-search__seg:focus-within { background: transparent; }
+[data-react-public-ui="home"] .hp-search__seg--location { grid-column: 1 / -1; }
+[data-react-public-ui="home"] .hp-search__seg-icon,
+[data-react-public-ui="home"] .hp-search__seg + .hp-search__seg::before { display: none; }
+[data-react-public-ui="home"] .hp-search__field { gap: var(--space-2); }
+[data-react-public-ui="home"] .hp-search__label { color: var(--field-muted); font-size: var(--text-sm); text-transform: none; letter-spacing: normal; }
+[data-react-public-ui="home"] .hp-search__seg input.hp-search__input,
+[data-react-public-ui="home"] .hp-search__select select.hp-search__input {
+  min-height: 44px;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--spring-200);
+  border-radius: var(--radius-input);
+  background: var(--tile-glaze);
+  color: var(--stone-900);
+}
+[data-react-public-ui="home"] .hp-search__select select.hp-search__input { padding-inline-end: var(--space-8); }
+[data-react-public-ui="home"] .hp-search__chevron { inset-inline-end: var(--space-3); z-index: 2; color: var(--stone-600); }
+[data-react-public-ui="home"] .hp-search__seg input::placeholder { color: var(--stone-600); }
+[data-react-public-ui="home"] .hp-search__seg input:focus-visible,
+[data-react-public-ui="home"] .hp-search__select select:focus-visible,
+[data-react-public-ui="home"] .hp-search__tab:has(input:focus-visible) span,
+[data-react-public-ui="home"] .hp-search__more-summary:focus-visible { outline: 2px solid var(--tile-glaze); outline-offset: 3px; box-shadow: none; }
+[data-react-public-ui="home"] .hp-search__go { grid-column: 1 / -1; width: max-content; min-height: 44px; height: auto; margin: 0; padding: var(--space-3) var(--space-6); }
+[data-react-public-ui="home"] .hp-search__more { margin-top: var(--space-4); border-color: var(--spring-200); }
+[data-react-public-ui="home"] .hp-search__more-summary { min-height: 44px; padding-inline: 0; color: var(--field-text); }
+[data-react-public-ui="home"] .hp-search__more-grid { padding-inline: 0; }
+[data-react-public-ui="home"] .hp-search__more-field label { color: var(--field-muted); }
+[data-react-public-ui="home"] .hp-search__more-actions .mk-btn { color: var(--field-text); }
+[data-react-public-ui="home"] .hp-resort,
+[data-react-public-ui="home"] .hp-resort:hover { box-shadow: none; transform: none; border: 1px solid var(--border); }
+.site-hd .site-hd__call { background: var(--surface); color: var(--text-strong); border: 1px solid var(--border-strong); }
+.site-hd .site-hd__call:hover { background: var(--surface-hover); }
+@media (max-width: 900px) {
+  [data-react-public-ui="home"] .hp-hero { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); padding: var(--space-8) var(--space-5); }
+  [data-react-public-ui="home"] .hp-hero__bg { grid-column: 1; grid-row: 2; min-height: 0; aspect-ratio: 4 / 3; }
+  [data-react-public-ui="home"] .hp-hero h1 { max-width: 100%; }
+}
