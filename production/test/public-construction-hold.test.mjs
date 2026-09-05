@@ -1,17 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { publicHoldRoutePlan, PUBLIC_HOLD_PATTERNS, HOLD_WORKER } from "../scripts/restore-public-hold.mjs";
+import { publicHoldRoutePlan, PUBLIC_HOLD_PATTERNS, SERVICE_ASSET_PATTERNS, HOLD_WORKER } from "../scripts/restore-public-hold.mjs";
 import { probePublicHold } from "../scripts/probe-public-hold.mjs";
 
 const routes = () => PUBLIC_HOLD_PATTERNS.map((pattern, i) => ({ id: `route-${i}`, pattern, script: "ms-realty" }));
 
-test("holding plan changes only the sixteen public routes and refuses unknown ownership", () => {
-  const input = routes().concat([{ id: "admin", pattern: "makler-realty.com/*", script: "ms-realty" }]);
+test("holding plan covers unprefixed public paths and preserves vendor assets before switching the wildcard", () => {
+  const input = routes().concat([{ id: "unrelated", pattern: "api.makler-realty.com/*", script: "ms-realty" }]);
   const plan = publicHoldRoutePlan(input);
-  assert.equal(plan.length, 16);
-  assert.ok(plan.every((route) => route.script === HOLD_WORKER && route.id !== "admin"));
-  assert.ok(publicHoldRoutePlan(input.map((route) => ({ ...route, script: HOLD_WORKER }))).every((route) => route.previous === HOLD_WORKER));
+  assert.equal(plan.length, 20);
+  assert.deepEqual(plan.slice(0, 2).map(({ pattern, script, id }) => ({ pattern, script, id })), SERVICE_ASSET_PATTERNS.map((pattern) => ({ pattern, script: "ms-realty", id: null })));
+  assert.ok(plan.slice(2).every((route) => route.script === HOLD_WORKER && route.id !== "unrelated"));
+  const applied = plan.map((route, i) => ({ ...route, id: `applied-${i}` }));
+  assert.ok(publicHoldRoutePlan(applied).every((route) => route.previous === route.script));
   assert.throws(() => publicHoldRoutePlan(input.slice(1)), /Expected one/);
   assert.throws(() => publicHoldRoutePlan(input.map((route) => ({ ...route, script: "another-worker" }))), /Unexpected owner/);
 });
@@ -19,7 +21,7 @@ test("holding plan changes only the sixteen public routes and refuses unknown ow
 test("holding probe requires actual holding responses, not healthy public pages", async () => {
   const holding = () => new Response('<section data-locale="bg">', { status: 503, headers: { "x-robots-tag": "noindex, nofollow", "retry-after": "3600" } });
   const report = await probePublicHold(holding);
-  assert.equal(report.checks.length, 20);
+  assert.equal(report.checks.length, 48);
   await assert.rejects(probePublicHold(() => new Response("catalogue", { status: 200 })), /hold is incomplete/);
 });
 

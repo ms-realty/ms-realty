@@ -1,9 +1,9 @@
 import { pathToFileURL } from "node:url";
 
 export async function probePublicHold(fetchImpl = fetch) {
-  const urls = ["makler-realty.com", "www.makler-realty.com"].flatMap((host) =>
-    ["/", ...["bg", "en", "de", "nl", "ru", "el", "he"].map((locale) => `/${locale}`), "/bg/imoti/MS-CRAWL-0001"].map((path) => `https://${host}${path}`),
-  ).concat(["https://makler-realty.ru/", "https://www.makler-realty.ru/"]);
+  const urls = ["makler-realty.com", "www.makler-realty.com", "makler-realty.ru", "www.makler-realty.ru"].flatMap((host) =>
+    ["/", ...["bg", "en", "de", "nl", "ru", "el", "he"].map((locale) => `/${locale}`), "/bg/imoti/MS-CRAWL-0001", "/portfolio/", "/administrator", "/unknown-public-page"].map((path) => `https://${host}${path}`),
+  );
   const checks = await Promise.all(urls.map(async (url) => {
     const response = await fetchImpl(url, { redirect: "follow", signal: AbortSignal.timeout(20000) });
     const text = await response.text();
