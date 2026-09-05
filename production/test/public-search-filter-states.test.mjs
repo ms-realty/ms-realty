@@ -30,6 +30,7 @@ test("a reversed price range answers with the search page, not a JSON error", as
 
   // The page names the pair of boxes that disagree, in the visitor's language.
   assert.match(body, /data-search-filter-notice="range"/);
+  assert.equal((body.match(/data-search-more-filters="true" open/g) || []).length, 2);
   assert.match(body, /Цена \(EUR\): Минимумът е по-голям от максимума/);
 
   // Both boxes keep what was typed, so the correction is one keystroke away,

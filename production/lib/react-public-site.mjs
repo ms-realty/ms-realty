@@ -2413,8 +2413,8 @@ function SearchBody({ page }) {
   const contact = chrome.contact || {};
   const filtersLabel = chrome.copy.filters || labels.activeFilters;
   const offerLabel = labels.factLabels?.offer_type || "Offer";
-  const secondaryFilterKeys = ["country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
-  const secondaryFiltersActive = Boolean(String(page.search.query || "").trim()) || secondaryFilterKeys.some((key) => filters[key]);
+  const secondaryFilterKeys = ["property_subtype", "price_min", "price_max", "bedrooms_min", "premises_min", "hotel_rooms_min", "area_min", "area_max", "country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
+  const secondaryFiltersActive = Boolean(filterNotice || String(page.search.query || "").trim()) || secondaryFilterKeys.some((key) => filters[key]);
   const mobileSearchContext = String(
     page.search.query ||
       filters.location ||
@@ -2654,20 +2654,6 @@ function SearchBody({ page }) {
       filterSelect(idPrefix, "property_family", labels.propertyType, filterOptions.property_families || filterOptions.property_types || [], (value) =>
         localizedListingValue(page.locale, "property_type", value),
       ),
-      applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
-        ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
-        : null,
-      rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
-      applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
-      applicableFilterFields.has("premises_min")
-        ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
-        : null,
-      applicableFilterFields.has("hotel_rooms_min")
-        ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
-        : null,
-      applicableFilterFields.has("area_min")
-        ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
-        : null,
       h(
         "details",
         { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },
@@ -2681,6 +2667,20 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-more__body" },
+          applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
+            ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
+            : null,
+          rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
+          applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
+          applicableFilterFields.has("premises_min")
+            ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
+            : null,
+          applicableFilterFields.has("hotel_rooms_min")
+            ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
+            : null,
+          applicableFilterFields.has("area_min")
+            ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
+            : null,
           h(
             "div",
             { className: "sr-fg sr-fg--keyword" },
@@ -2724,7 +2724,7 @@ function SearchBody({ page }) {
       h(
         "div",
         { className: "sr-filter-actions" },
-        h(Btn, { type: "submit", variant: "primary", full: true }, labels.applyFilters),
+        h(Btn, { type: "submit", variant: "accent", full: true }, labels.applyFilters),
         activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
       ),
     );
@@ -2847,7 +2847,6 @@ function SearchBody({ page }) {
       ),
       h("div", { className: "sr-save-disclosure__body" }, saveSearchForm(idPrefix)),
     );
-  const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix), guidedSearch(idPrefix)];
   const toolbarForm = () => {
     const hiddenFields = [];
     if (page.search.query) hiddenFields.push(["q", page.search.query]);
@@ -2909,14 +2908,27 @@ function SearchBody({ page }) {
       "data-guided-search-success": !savedView && page.search.total_matches > 0 ? "true" : "false",
       "data-saved-listings-view": savedView ? "true" : undefined,
     },
-    h(
-      "div",
-      { className: `sr-body${savedView ? " sr-body--saved" : ""}` },
-      savedView
-        ? null
-        : h(
+    savedView ? null : h(
+      "section",
+      { className: "sr-hero" },
+      h("div", { className: "sr-hero__copy" },
+        h("h1", null, page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+        noticeLabels.length
+          ? h(
+              "p",
+              {
+                id: noticeId,
+                className: "sr-notice",
+                role: "alert",
+                "data-search-filter-notice": filterNotice.reason,
+              },
+              h(Icon, { name: "triangle-alert", size: 18 }),
+              h("span", null, `${noticeLabels.join(" · ")}: ${filterNotice.reason === "range" ? labels.filterRangeInvalid : labels.filterValueInvalid}`),
+            )
+          : null,
+        h(
             "details",
-            { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
+            { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount, open: filterNotice ? true : undefined },
             h(
               "summary",
               { className: "sr-mobile-filters__summary", "aria-controls": mobileFilterPanelId },
@@ -2939,17 +2951,23 @@ function SearchBody({ page }) {
             h(
               "div",
               { id: mobileFilterPanelId, className: "sr-mobile-filters__panel" },
-              h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
+              h("div", { className: "sr-mobile-filters__sheet-body" }, filterForm("sr-mobile")),
             ),
           ),
-      savedView
-        ? null
-        : h(
+        h(
             "aside",
             { className: "sr-filters sr-filters--desktop", "aria-label": filtersLabel },
-            h("h3", null, filtersLabel),
-            ...filterForms("sr"),
+            filterForm("sr"),
           ),
+      ),
+      h("picture", { className: "sr-hero__photo" },
+        h("source", { type: "image/avif", srcSet: HERO_GALLERY_SLIDES[0].avif, sizes: "(max-width: 1080px) 100vw, 50vw" }),
+        h("img", { src: HERO_GALLERY_SLIDES[0].src, alt: "", width: HERO_GALLERY_SLIDES[0].width, height: HERO_GALLERY_SLIDES[0].height, fetchPriority: "high", decoding: "async" }),
+      ),
+    ),
+    h(
+      "div",
+      { className: `sr-body${savedView ? " sr-body--saved" : ""}` },
       h(
         "section",
         { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": page.search.view || "list" },
@@ -2959,7 +2977,7 @@ function SearchBody({ page }) {
           h(
             "div",
             { className: "sr-results__head" },
-            h("h1", null, savedView ? labels.savedListings : page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+            h(savedView ? "h1" : "h2", null, savedView ? labels.savedListings : labels.searchResults),
             h(
               "p",
               {
@@ -2999,19 +3017,6 @@ function SearchBody({ page }) {
               : null
             : toolbarForm(),
         ),
-        noticeLabels.length
-          ? h(
-              "p",
-              {
-                id: noticeId,
-                className: "sr-notice",
-                role: "alert",
-                "data-search-filter-notice": filterNotice.reason,
-              },
-              h(Icon, { name: "triangle-alert", size: 18 }),
-              h("span", null, `${noticeLabels.join(" · ")}: ${filterNotice.reason === "range" ? labels.filterRangeInvalid : labels.filterValueInvalid}`),
-            )
-          : null,
         savedView
           ? null
           : h(
@@ -3128,6 +3133,7 @@ function SearchBody({ page }) {
                 : h("span"),
             )
           : null,
+        savedView ? null : h("div", { className: "sr-followup" }, saveSearchDisclosure("sr"), guidedSearch("sr")),
       ),
     ),
   );
