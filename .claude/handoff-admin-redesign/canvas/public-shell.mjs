@@ -1,152 +1,98 @@
-import { BASE, FONT_LINKS, icon } from "./shell.mjs";
-export { icon } from "./shell.mjs";
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { BASE, FONT_LINKS } from './shell.mjs';
+export { icon } from './shell.mjs';
 
-// The public site shares the token layer with the workspace and diverges above it:
-// larger body type for older readers in bright sun, generous rhythm, images first.
+const fixtures = JSON.parse(fs.readFileSync(new URL('../../../production/data/public-fixtures.json', import.meta.url), 'utf8'));
+export const sourceListing = fixtures.listing_bg.body;
+export const publicContact = fixtures.listing_bg.chrome.contact;
+export const publicLanguages = fixtures.listing_bg.chrome.languages;
+assert.equal(sourceListing.facts.id, fixtures.source_listing_id);
+assert.equal(new Set(publicLanguages.map(l => l.code)).size, 7);
+export const html = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const sourcePrice = sourceListing.facts.price_eur == null ? 'Price on request' : new Intl.NumberFormat('en-GB', {style:'currency',currency:'EUR',maximumFractionDigits:0}).format(sourceListing.facts.price_eur);
+
 export const PUB_CSS = `
-    .pub { width:1440px; background:var(--surface); color:var(--text-body); font-size:16px; }
-    .pub a { color:var(--ink-800); }
-    .pub-top { border-bottom:1px solid var(--border); background:var(--surface); }
-    .pub-bar { display:flex; align-items:center; gap:22px; max-width:1240px; margin:0 auto; padding:0 32px;
-      height:76px; }
-    .pub-bar img { display:block; height:38px; width:auto; }
-    .pub-nav { display:flex; align-items:center; gap:24px; margin-left:14px; }
-    .pub-nav a { font-size:15px; font-weight:600; color:var(--text-body); }
-    .pub-nav a:hover { color:var(--marble-900); }
-    .pub-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
-    .lang { display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 13px;
-      border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
-      font-size:14px; font-weight:600; color:var(--text-body); }
-    .callbtn { display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 17px; border-radius:var(--r-md);
-      background:var(--brick-600); color:#fff; font-size:14.5px; font-weight:600; }
-    .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
-    .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px;
-      padding:0 20px; border-radius:var(--r-md); border:1px solid var(--border-control);
-      background:var(--surface); color:var(--marble-900); font-size:15px; font-weight:600; cursor:pointer; }
-    .pbtn--brand { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
-    .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
-    /* .pub a is (0,1,1) and beat the (0,1,0) button classes, so a brand button
-       rendered ink-on-ink. The anchor forms of the buttons carry their own colour. */
-    .pub a.pbtn { color:var(--marble-900); }
-    .pub a.pbtn--brand, .pub a.pbtn--accent { color:#fff; }
-    .pub a.callbtn { color:#fff; }
-    .pbtn--lg { min-height:54px; padding:0 26px; font-size:16px; }
-    .pin { display:flex; align-items:center; height:52px; padding:0 15px; border:1px solid var(--border-control);
-      border-radius:var(--r-md); background:var(--surface); font-size:15px; color:var(--text-body); }
-    .h1 { font-family:var(--font-display); font-size:46px; font-weight:600; letter-spacing:-.025em;
-      line-height:1.1; color:var(--marble-900); }
-    .h2 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em;
-      line-height:1.2; color:var(--marble-900); }
-    .h3 { font-family:var(--font-display); font-size:21px; font-weight:600; letter-spacing:-.01em;
-      color:var(--marble-900); }
-    .lede { font-size:18px; line-height:1.55; color:var(--text-body); }
-    .meta { font-size:14px; color:var(--text-muted); }
-    .sec { padding:56px 0; }
-    .sec--tight { padding:40px 0; }
-    .sec-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
-    .lcard { border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; background:var(--surface);
-      box-shadow:var(--e-1); }
-    .lcard .im { height:196px; position:relative;
-      background:linear-gradient(160deg,#6f6350 0%,#9b8a6b 42%,#c4b394 74%,#8d7c5e 100%); }
-    .lcard .im::after { content:''; position:absolute; inset:0;
-      background:radial-gradient(110% 80% at 28% 22%, rgba(255,255,255,.2), transparent 58%),
-        radial-gradient(90% 70% at 80% 84%, rgba(20,19,14,.3), transparent 60%),
-        repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
-    .lcard .tag { position:absolute; top:12px; left:12px; z-index:1; }
-    .lcard .fav { position:absolute; top:12px; right:12px; z-index:1; display:grid; place-items:center;
-      width:38px; height:38px; border-radius:var(--r-full); background:rgba(255,255,255,.94); color:var(--ink-800); }
-    .lcard .bd { padding:16px 18px 18px; display:grid; gap:9px; }
-    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--marble-900);
-      letter-spacing:-.015em; }
-    .lcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
-    .lfacts { display:flex; flex-wrap:wrap; gap:14px; font-size:14px; color:var(--text-muted); }
-    .lfacts span { display:inline-flex; align-items:center; gap:6px; }
-    .lfoot { display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding-top:11px; border-top:1px solid var(--border); font-size:13px; color:var(--text-muted); }
-    .trust { display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:var(--r-full);
-      background:var(--success-50); color:var(--success-600); font-size:13px; font-weight:600; }
-    .pub-foot { background:var(--ink-900); color:rgba(255,255,255,.72); padding:48px 0 34px; margin-top:8px; }
-    .pub-foot .cols { display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; }
-    .pub-foot h4 { color:#fff; font-family:var(--font-sans); font-size:14px; font-weight:600; margin-bottom:12px; }
-    .pub-foot a, .pub-foot p { color:rgba(255,255,255,.72); font-size:14.5px; line-height:1.9; display:block; }
-    .pub-foot a:hover { color:#fff; }
-    .pub-foot .base { display:flex; align-items:center; gap:18px; margin-top:34px; padding-top:20px;
-      border-top:1px solid rgba(255,255,255,.14); font-size:13.5px; color:rgba(255,255,255,.5); flex-wrap:wrap; }
+  .pub { background:var(--tile); color:var(--text-body); font:16px/1.5 var(--font-sans); font-variant-numeric:tabular-nums; }
+  .pub a { color:var(--spring-700); text-underline-offset:4px; }
+  .pub :is(a,button,input,select,textarea):focus-visible { outline:2px solid var(--spring-700); outline-offset:4px; }
+  .pub .band :is(a,button,input,select,textarea):focus-visible { outline-color:var(--field-text); }
+  .pub button:disabled { opacity:.5; cursor:not-allowed; }
+  .pub .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
+  .pub .pub-top { border-bottom:1px solid var(--joint); background:var(--tile-glaze); }
+  .pub .pub-bar { display:flex; align-items:center; gap:24px; min-height:96px; }
+  .pub .pub-bar img { width:96px; height:auto; display:block; }
+  .pub .pub-nav { display:flex; gap:24px; align-items:center; }
+  .pub .pub-nav a { color:var(--text-body); font-size:16px; }
+  .pub .pub-nav [aria-current] { text-decoration:underline; font-weight:600; }
+  .pub .pub-language { margin-inline-start:auto; display:flex; align-items:center; gap:12px; }
+  .pub .pub-language select { width:160px; }
+  .pub .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:8px 20px; border:1px solid var(--border-control); border-radius:var(--r-edge); background:var(--tile-glaze); color:var(--text-strong); font:600 16px/1.3 var(--font-sans); text-decoration:none; cursor:pointer; }
+  .pub .pbtn:hover { background:var(--tile-deep); }
+  .pub .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:var(--tile-glaze); }
+  .pub .pbtn--accent:hover { background:var(--brick-700); border-color:var(--brick-700); }
+  .pub .pbtn--ghost { background:transparent; }
+  .pub .band .pbtn--accent { border-color:var(--field-text); }
+  .pub .band .pbtn--ghost { color:var(--field-text); border-color:var(--field-muted); }
+  .pub .band .pbtn--ghost:hover { background:var(--spring-900); }
+  .pub .band { padding:48px 0; }
+  .pub .band :is(h1,h2,p,label) { color:var(--field-text); }
+  .pub .band .meta { color:var(--field-muted); }
+  .pub .band a:not(.pbtn) { color:var(--field-text); }
+  .pub .band .wit--none { color:var(--field-text); }
+  .pub .display { font-size:47px; font-weight:800; }
+  .pub h2 { font-size:27px; line-height:1.3; color:var(--text-strong); }
+  .pub h3 { font-size:19px; line-height:1.4; color:var(--text-strong); }
+  .pub .pub-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:32px; align-items:start; }
+  .pub .pub-hero { align-items:center; gap:48px; }
+  .pub .pub-stack { display:grid; gap:20px; min-width:0; align-content:start; }
+  .pub .pub-actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .pub .pub-section { padding:48px 0; border-bottom:1px solid var(--joint); }
+  .pub .pub-section-hd { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:24px; }
+  .pub .photo { min-height:256px; display:grid; place-items:center; padding:32px; text-align:center; background:var(--tile-deep); color:var(--text-body); border:1px solid var(--joint); border-radius:var(--r-panel); font-size:13px; }
+  .pub .photo--hero { min-height:384px; }
+  .pub .meta { font-size:13px; color:var(--text-muted); }
+  .pub .pub-field { display:grid; gap:8px; min-width:0; }
+  .pub .pub-field label { font-size:16px; font-weight:600; }
+  .pub :is(input:not([type=checkbox]):not([type=radio]),select,textarea) { display:block; min-width:0; width:100%; min-height:48px; padding:12px 16px; background:var(--tile-glaze); border:1px solid var(--border-control); border-radius:var(--r-edge); color:var(--text-body); font:16px/1.5 var(--font-sans); }
+  .pub textarea { min-height:128px; resize:vertical; }
+  .pub .pub-check { display:flex; align-items:start; gap:12px; }
+  .pub .pub-check input { width:20px; height:20px; margin-top:4px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .pub .pub-form { padding:24px; border:1px solid var(--joint); background:var(--tile-glaze); border-radius:var(--r-panel); display:grid; gap:20px; }
+  .pub .band .pub-form :is(h2,p,label) { color:var(--text-body); }
+  .pub .band .pub-form a:not(.pbtn) { color:var(--spring-700); }
+  .pub .band .pub-form :focus-visible { outline-color:var(--spring-700); }
+  .pub .pub-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+  .pub .pub-card { min-width:0; border-top:1px solid var(--joint); display:grid; gap:16px; padding-top:20px; }
+  .pub .pub-card .photo { min-height:192px; }
+  .pub .pub-card h3 { overflow-wrap:anywhere; }
+  .pub .pub-price { font:600 27px/1.3 var(--font-sans); color:var(--text-strong); font-variant-numeric:tabular-nums; }
+  .pub .pub-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; }
+  .pub .pub-facts > div { padding:16px 0; border-bottom:1px solid var(--joint); }
+  .pub .pub-facts dt { font-size:13px; color:var(--text-muted); }
+  .pub .pub-facts dd { margin:4px 0 0; font-weight:600; overflow-wrap:anywhere; }
+  .pub .pub-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 32px; }
+  .pub .pub-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; align-content:start; }
+  .pub .pub-state .pbtn { justify-self:start; }
+  .pub .pub-foot { padding:48px 0; background:var(--tile-deep); border-top:1px solid var(--joint); }
+  .pub .pub-foot .pub-grid { grid-template-columns:2fr 1fr 1fr; }
+  .pub .pub-foot a { display:inline-block; min-height:44px; }
+  .pub .pub-note { border-inline-start:4px solid var(--spring-700); padding-inline-start:20px; }
+  .pub .pub-form-error { color:var(--danger-600); }
 `;
 
-export function pubHeader(active = "") {
-  const link = (t, id) => `<a href="#"${id === active ? ' style="color:var(--brick-700)"' : ""}>${t}</a>`;
-  return `<header class="pub-top">
-    <div class="pub-bar">
-      <img src="ms-realty-logo.png" alt="MS Realty" width="74" height="38" />
-      <nav class="pub-nav">
-        ${link("Имоти", "search")}
-        ${link("Локации", "loc")}
-        ${link("Продайте имот", "sell")}
-        ${link("Ръководства", "guide")}
-        ${link("Контакти", "contact")}
-      </nav>
-      <div class="pub-right">
-        <span class="lang">${icon("globe", 16)}БГ ${icon("down", 15)}</span>
-        <a class="callbtn" href="#">${icon("phone", 16)}0888 12 34 56</a>
-      </div>
-    </div>
-  </header>`;
+export function pubHeader(active = '') {
+  return `<header class="pub-top"><div class="pub-wrap pub-bar"><a href="PublicHome.html" aria-label="MS Realty home"><img src="ms-realty-logo.png" alt="MS Realty"></a><nav class="pub-nav" aria-label="Main navigation">${[['Properties','search','PublicSearch'],['Locations','loc','PublicLocation'],['Sell a property','sell','PublicSeller'],['Contact','contact','PublicContact']].map(([label,id,target])=>`<a href="${target}.html"${active===id?' aria-current="page"':''}>${label}</a>`).join('')}</nav><div class="pub-language"><label for="public-language">Language</label><select id="public-language">${publicLanguages.map(l=>`<option value="${l.code}"${l.code==='en'?' selected':''}>${html(l.label)}</option>`).join('')}</select></div></div></header>`;
 }
-
 export function pubFooter() {
-  return `<footer class="pub-foot">
-    <div class="pub-wrap">
-      <div class="cols">
-        <div>
-          <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="74" height="38" style="display:block; height:38px; width:auto; margin-bottom:14px" />
-          <p style="max-width:290px">Семейна агенция за недвижими имоти в Сандански. Работим с имоти в
-            Сандански, Мелник, Катунци и региона от 2011 година.</p>
-          <p style="margin-top:12px">ул. Македония 22, Сандански<br>0888 12 34 56</p>
-        </div>
-        <div><h4>Имоти</h4>
-          <a href="#">Апартаменти</a><a href="#">Къщи</a><a href="#">Парцели</a>
-          <a href="#">Под наем</a><a href="#">Бизнес имоти</a></div>
-        <div><h4>Локации</h4>
-          <a href="#">Сандански</a><a href="#">Мелник</a><a href="#">Катунци</a>
-          <a href="#">Левуново</a><a href="#">Хотово</a></div>
-        <div><h4>Агенцията</h4>
-          <a href="#">За нас</a><a href="#">Продайте имот</a><a href="#">Ръководства</a>
-          <a href="#">Контакти</a><a href="#">Поверителност</a></div>
-      </div>
-      <div class="base">
-        <span>© 2026 MS Realty</span><span>·</span>
-        <a href="#">Условия за ползване</a><span>·</span>
-        <a href="#">Поверителност</a><span>·</span>
-        <a href="#">Бисквитки</a>
-        <span style="margin-left:auto; display:flex; gap:12px">
-          <a href="#">БГ</a><a href="#">EN</a><a href="#">DE</a><a href="#">NL</a>
-          <a href="#">RU</a><a href="#">EL</a><a href="#">עב</a></span>
-      </div>
-    </div>
-  </footer>`;
+  return `<footer class="pub-foot"><div class="pub-wrap pub-grid"><div class="pub-stack"><h2>MS Realty</h2><p>Property enquiries in Sandanski and the region.</p><p class="meta">Design preview · listing and contact examples come from saved repository fixtures. Current availability and approvals need live confirmation.</p></div><nav aria-label="Explore"><h3>Explore</h3><a href="PublicSearch.html">Find a property</a><br><a href="PublicLocation.html">Sandanski</a><br><a href="PublicSeller.html">Sell a property</a></nav><nav aria-label="Contact and privacy"><h3>Your enquiry</h3><a href="PublicContact.html">Contact the agency</a><br><a href="PublicContact.html#privacy">How we use your details</a><p class="meta">Bulgarian is the source language. Public translations need human approval.</p></nav></div></footer>`;
 }
-
-export function pubPage({ body, extraCss = "", width = 1440, height = 1200, dir = "ltr" }) {
-  return `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-${FONT_LINKS}
-  <style>${BASE}${PUB_CSS}${extraCss}
-  </style>
-</helmet>
-<div class="pub" style="width:${width}px; min-height:${height}px"${dir === "rtl" ? ' dir="rtl"' : ""}>
-${body}
-</div>
-</x-dc>
-</body>
-</html>
-`;
+export function pubStates(rows) {
+  return `<section class="pub-section"><div class="pub-wrap pub-stack"><h2>Other states</h2><p class="meta">Design examples · these controls do not send requests.</p><div class="pub-states">${rows.map(([title,body,action,disabled=false])=>`<section class="pub-state"><h3>${title}</h3><p>${body}</p>${action?`<button class="pbtn" type="button"${disabled?' disabled':''}>${action}</button>`:''}</section>`).join('')}</div></div></section>`;
+}
+export function pubListingCard() {
+  return `<article class="pub-card"><div class="photo">[PHOTOGRAPH — listing exterior, to be supplied]</div><p class="pub-price">${sourcePrice}</p><span class="wit wit--none">Availability not verified</span><h3 lang="bg">${html(sourceListing.h1)}</h3><p><span lang="bg">${html(sourceListing.facts.location)}</span> · ${html(sourceListing.facts.id)}</p><p class="meta">Bulgarian source title · saved listing fixture</p><a class="pbtn" href="PublicListing.html">Read the listing</a></article>`;
+}
+export function pubPage({body, extraCss='',width=1440,height=0,dir='ltr',lang='en'}) {
+  return `<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><script src="./support.js"></script></head><body><x-dc><helmet>${FONT_LINKS}<style>${BASE}${PUB_CSS}${extraCss}</style></helmet><div class="pub" lang="${lang}" dir="${dir}" style="width:${width}px;min-height:${height}px">${body}</div></x-dc></body></html>`;
 }

@@ -1,7 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
-  <style>
+<!doctype html><html lang="en"><head><meta charset="utf-8">  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap"><style>
     :root {
       /* Tile — the ground. Glazed white with a warm-grey glaze; cooler than paper. */
       --tile:#F6F5F1; --tile-glaze:#FFFFFF; --tile-deep:#ECEAE4; --tile-shadow:#E2DFD7;
@@ -327,357 +325,76 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .pub { width:1440px; background:var(--surface); color:var(--text-body); font-size:16px; }
-    .pub a { color:var(--ink-800); }
-    .pub-top { border-bottom:1px solid var(--border); background:var(--surface); }
-    .pub-bar { display:flex; align-items:center; gap:22px; max-width:1240px; margin:0 auto; padding:0 32px;
-      height:76px; }
-    .pub-bar img { display:block; height:38px; width:auto; }
-    .pub-nav { display:flex; align-items:center; gap:24px; margin-left:14px; }
-    .pub-nav a { font-size:15px; font-weight:600; color:var(--text-body); }
-    .pub-nav a:hover { color:var(--marble-900); }
-    .pub-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
-    .lang { display:inline-flex; align-items:center; gap:7px; height:42px; padding:0 13px;
-      border:1px solid var(--border-control); border-radius:var(--r-md); background:var(--surface);
-      font-size:14px; font-weight:600; color:var(--text-body); }
-    .callbtn { display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 17px; border-radius:var(--r-md);
-      background:var(--brick-600); color:#fff; font-size:14.5px; font-weight:600; }
-    .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
-    .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px;
-      padding:0 20px; border-radius:var(--r-md); border:1px solid var(--border-control);
-      background:var(--surface); color:var(--marble-900); font-size:15px; font-weight:600; cursor:pointer; }
-    .pbtn--brand { background:var(--ink-800); border-color:var(--ink-800); color:#fff; }
-    .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
-    /* .pub a is (0,1,1) and beat the (0,1,0) button classes, so a brand button
-       rendered ink-on-ink. The anchor forms of the buttons carry their own colour. */
-    .pub a.pbtn { color:var(--marble-900); }
-    .pub a.pbtn--brand, .pub a.pbtn--accent { color:#fff; }
-    .pub a.callbtn { color:#fff; }
-    .pbtn--lg { min-height:54px; padding:0 26px; font-size:16px; }
-    .pin { display:flex; align-items:center; height:52px; padding:0 15px; border:1px solid var(--border-control);
-      border-radius:var(--r-md); background:var(--surface); font-size:15px; color:var(--text-body); }
-    .h1 { font-family:var(--font-display); font-size:46px; font-weight:600; letter-spacing:-.025em;
-      line-height:1.1; color:var(--marble-900); }
-    .h2 { font-family:var(--font-display); font-size:30px; font-weight:600; letter-spacing:-.02em;
-      line-height:1.2; color:var(--marble-900); }
-    .h3 { font-family:var(--font-display); font-size:21px; font-weight:600; letter-spacing:-.01em;
-      color:var(--marble-900); }
-    .lede { font-size:18px; line-height:1.55; color:var(--text-body); }
-    .meta { font-size:14px; color:var(--text-muted); }
-    .sec { padding:56px 0; }
-    .sec--tight { padding:40px 0; }
-    .sec-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
-    .lcard { border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; background:var(--surface);
-      box-shadow:var(--e-1); }
-    .lcard .im { height:196px; position:relative;
-      background:linear-gradient(160deg,#6f6350 0%,#9b8a6b 42%,#c4b394 74%,#8d7c5e 100%); }
-    .lcard .im::after { content:''; position:absolute; inset:0;
-      background:radial-gradient(110% 80% at 28% 22%, rgba(255,255,255,.2), transparent 58%),
-        radial-gradient(90% 70% at 80% 84%, rgba(20,19,14,.3), transparent 60%),
-        repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 15px); }
-    .lcard .tag { position:absolute; top:12px; left:12px; z-index:1; }
-    .lcard .fav { position:absolute; top:12px; right:12px; z-index:1; display:grid; place-items:center;
-      width:38px; height:38px; border-radius:var(--r-full); background:rgba(255,255,255,.94); color:var(--ink-800); }
-    .lcard .bd { padding:16px 18px 18px; display:grid; gap:9px; }
-    .lprice { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--marble-900);
-      letter-spacing:-.015em; }
-    .lcard h3 { font-size:16px; font-weight:600; color:var(--marble-900); line-height:1.35; }
-    .lfacts { display:flex; flex-wrap:wrap; gap:14px; font-size:14px; color:var(--text-muted); }
-    .lfacts span { display:inline-flex; align-items:center; gap:6px; }
-    .lfoot { display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding-top:11px; border-top:1px solid var(--border); font-size:13px; color:var(--text-muted); }
-    .trust { display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:var(--r-full);
-      background:var(--success-50); color:var(--success-600); font-size:13px; font-weight:600; }
-    .pub-foot { background:var(--ink-900); color:rgba(255,255,255,.72); padding:48px 0 34px; margin-top:8px; }
-    .pub-foot .cols { display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; }
-    .pub-foot h4 { color:#fff; font-family:var(--font-sans); font-size:14px; font-weight:600; margin-bottom:12px; }
-    .pub-foot a, .pub-foot p { color:rgba(255,255,255,.72); font-size:14.5px; line-height:1.9; display:block; }
-    .pub-foot a:hover { color:#fff; }
-    .pub-foot .base { display:flex; align-items:center; gap:18px; margin-top:34px; padding-top:20px;
-      border-top:1px solid rgba(255,255,255,.14); font-size:13.5px; color:rgba(255,255,255,.5); flex-wrap:wrap; }
-
-    .hero { position:relative; padding:0 0 0; background:var(--tile-deep); }
-    .hero-in { max-width:1240px; margin:0 auto; padding:48px 32px 48px; display:grid;
-      grid-template-columns:1.02fr .98fr; gap:48px; align-items:center; }
-    .hero-im { height:392px; border-radius:var(--r-lg); position:relative; overflow:hidden;
-      background:linear-gradient(150deg,#5f5544 0%,#8d7c5e 38%,#c4b394 70%,#7d6f56 100%); }
-    .hero-im::after { content:''; position:absolute; inset:0;
-      background:radial-gradient(110% 80% at 26% 20%, rgba(255,255,255,.22), transparent 56%),
-        radial-gradient(90% 70% at 82% 86%, rgba(20,19,14,.34), transparent 60%); }
-    .hero-badge { position:absolute; left:18px; bottom:18px; z-index:1; display:flex; align-items:center; gap:12px;
-      padding:12px 16px; border-radius:var(--r-md); background:rgba(255,255,255,.94); }
-    .searchbox { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
-      box-shadow:var(--e-2); padding:8px; display:grid; gap:8px; }
-    .searchrow { display:grid; grid-template-columns:1.5fr 1fr 1fr auto; gap:8px; }
-    .sfield { display:grid; gap:4px; padding:8px 12px; border-radius:var(--r-md); background:var(--tile);
-      min-width:0; }
-    .sfield label { font-size:13px; font-weight:600; color:var(--text-muted); }
-    .sfield span { font-size:16px; font-weight:600; color:var(--marble-900); display:flex;
-      align-items:center; justify-content:space-between; gap:8px; }
-    .quick { display:flex; flex-wrap:wrap; gap:8px; }
-    .quick a { display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 16px;
-      border:1px solid var(--border); border-radius:var(--r-full); background:var(--surface);
-      font-size:13px; font-weight:600; color:var(--text-body); }
-    .strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; border-top:1px solid var(--border);
-      border-bottom:1px solid var(--border); background:var(--surface); }
-    .strip > div { padding:24px 24px; border-right:1px solid var(--border); }
-    .strip > div:last-child { border-right:0; }
-    .strip b { display:block; font-family:var(--font-display); font-size:27px; font-weight:600;
-      letter-spacing:-.02em; color:var(--marble-900); }
-    .strip span { display:block; margin-top:4px; font-size:13px; color:var(--text-muted); }
-    .split { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
-    .steps { display:grid; gap:20px; }
-    .step { display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px; align-items:start; }
-    .step .n { display:grid; place-items:center; width:36px; height:36px; border-radius:var(--r-full);
-      background:var(--ink-800); color:#fff; font-family:var(--font-display); font-size:16px; font-weight:600; }
-    .step b { display:block; font-size:16px; font-weight:600; color:var(--marble-900); margin-bottom:4px; }
-    .step p { font-size:16px; color:var(--text-body); line-height:1.55; }
-    .locs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
-    .loc { position:relative; height:184px; border-radius:var(--r-lg); overflow:hidden;
-      background:linear-gradient(160deg,#6b5f4c 0%,#96866a 46%,#bda98a 100%); display:grid; align-content:end;
-      padding:16px; }
-    .loc::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 34%,rgba(20,19,14,.66)); }
-    .loc b, .loc span { position:relative; z-index:1; color:#fff; }
-    .loc b { font-family:var(--font-display); font-size:19px; font-weight:600; }
-    .loc span { font-size:13px; color:rgba(255,255,255,.82); }
-    .guides { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
-    .guide { border:1px solid var(--border); border-radius:var(--r-lg); padding:24px; background:var(--surface);
-      display:grid; gap:12px; align-content:start; }
-    .guide b { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--marble-900);
-      line-height:1.3; }
-    .guide p { font-size:16px; color:var(--text-body); line-height:1.55; }
-    /* The shared band is the public field. BASE colours its links and muted
-       text but not its headings, so the section carries those, scoped to
-       itself: tile on spring-800 is 10.8:1. */
-    .band--sell .pub-wrap { padding-top:48px; padding-bottom:48px; }
-    .band--sell h2 { color:var(--field-text); }
-    .band--sell p { color:var(--field-text); }
-
-  </style>
-</head><body>
-<div class="pub" style="width:1440px; min-height:2660px">
-<header class="pub-top">
-    <div class="pub-bar">
-      <img src="ms-realty-logo.png" alt="MS Realty" width="74" height="38" />
-      <nav class="pub-nav">
-        <a href="#">Имоти</a>
-        <a href="#">Локации</a>
-        <a href="#">Продайте имот</a>
-        <a href="#">Ръководства</a>
-        <a href="#">Контакти</a>
-      </nav>
-      <div class="pub-right">
-        <span class="lang"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg>БГ <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
-        <a class="callbtn" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>0888 12 34 56</a>
-      </div>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="hero-in">
-      <div>
-        <h1 class="h1">Имоти в Сандански и региона,<br>с проверени факти.</h1>
-        <p class="lede" style="margin-top:16px; max-width:520px">165 обяви от 2011 година насам. Всяка цена,
-          площ и локация е сверена с документ, преди да излезе тук.</p>
-
-        <div class="searchbox" style="margin-top:24px">
-          <div class="searchrow">
-            <span class="sfield"><label for="h1f">Къде</label><span id="h1f">Сандански <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></span>
-            <span class="sfield"><label for="h2f">Вид</label><span id="h2f">Апартамент <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></span>
-            <span class="sfield"><label for="h3f">До цена</label><span id="h3f">100 000 € <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></span>
-            <button class="pbtn pbtn--accent pbtn--lg" type="button" style="min-width:132px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Търсене</button>
-          </div>
-        </div>
-        <div class="quick" style="margin-top:16px">
-          <a href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>Апартаменти до 70 000 €</a>
-          <a href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>Къщи в Мелник</a>
-          <a href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 9-9"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg>Под наем</a>
-          <a href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Парцели</a>
-        </div>
-      </div>
-      <div class="hero-im">
-        <div class="hero-badge">
-          <span class="trust"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Проверена обява</span>
-          <span style="font-size:13px; color:var(--text-body)">Вила в Катунци · 185 000 €</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="strip">
-    <div><b>165</b><span>обяви в каталога</span></div>
-    <div><b>7</b><span>езика, с човешки превод</span></div>
-    <div><b>15 г.</b><span>работа в региона</span></div>
-    <div><b>до 4 ч.</b><span>отговор в работен ден</span></div>
-  </div>
-
-  <section class="sec"><div class="pub-wrap">
-    <div class="sec-hd">
-      <div><h2 class="h2">Нови обяви</h2>
-        <p class="meta" style="margin-top:8px">Публикувани през последните 14 дни, всичките с одобрени снимки.</p></div>
-      <a class="pbtn" href="#">Всички 165 обяви <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
-    </div>
-    <div class="cards">
-        <article class="lcard">
-          <div class="im">
-            <span class="tag pill pill--ok"><i></i>Нова</span>
-            <span class="fav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></span>
-          </div>
-          <div class="bd">
-            <span class="lprice">185 000 €</span>
-            <h3>Вила с басейн и изглед към планината</h3>
-            <div class="lfacts">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>Катунци</span>
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>4 спални</span>
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>214 м²</span>
-            </div>
-            <div class="lfoot"><span class="mono">MS-00191</span><span>Обновена днес</span></div>
-          </div>
-        </article>
-        <article class="lcard">
-          <div class="im">
-            <span class="tag pill pill--sea"><i></i>Гледана 34 пъти</span>
-            <span class="fav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></span>
-          </div>
-          <div class="bd">
-            <span class="lprice">68 000 €</span>
-            <h3>Двустаен апартамент с южна тераса</h3>
-            <div class="lfacts">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>Сандански</span>
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>2 спални</span>
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>72 м²</span>
-            </div>
-            <div class="lfoot"><span class="mono">MS-00815</span><span>Обновена преди 2 дни</span></div>
-          </div>
-        </article>
-        <article class="lcard">
-          <div class="im">
-            <span class="tag pill pill--warn"><i></i>Намалена</span>
-            <span class="fav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></span>
-          </div>
-          <div class="bd">
-            <span class="lprice">54 500 €</span>
-            <h3>Реновирана селска къща с двор</h3>
-            <div class="lfacts">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>Катунци</span>
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>3 спални</span>
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>96 м²</span>
-            </div>
-            <div class="lfoot"><span class="mono">MS-00932</span><span>Обновена преди 3 дни</span></div>
-          </div>
-        </article>
-    </div>
-  </div></section>
-
-  <section class="sec--tight" style="background:var(--tile); border-top:1px solid var(--border); border-bottom:1px solid var(--border)">
-    <div class="pub-wrap">
-      <div class="split">
-        <div>
-          <h2 class="h2">Купувате от чужбина?</h2>
-          <p class="lede" style="margin-top:16px">Говорим български, руски и английски, а обявите ни излизат
-            на седем езика. Обясняваме процеса, документите и разходите преди да платите каквото и да е.</p>
-          <div style="display:flex; gap:12px; margin-top:20px">
-            <a class="pbtn pbtn--brand" href="#">Как се купува имот в България</a>
-            <a class="pbtn" href="#">Такси и данъци</a>
-          </div>
-          <p class="meta" style="margin-top:16px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg> Правната информация е прегледана от адвокат
-            и носи дата на последна проверка.</p>
-        </div>
-        <div class="steps">
-          <div class="step"><span class="n">1</span><span><b>Избирате имот</b>
-            <p>Търсите по локация, вид и бюджет. Всяка обява показва референция и кога е обновена последно.</p></span></div>
-          <div class="step"><span class="n">2</span><span><b>Организираме оглед</b>
-            <p>На място или на видео, ако сте в чужбина. Предлагаме реални часове от календара на брокера.</p></span></div>
-          <div class="step"><span class="n">3</span><span><b>Водим сделката до нотариуса</b>
-            <p>Скица, данъчна оценка, предварителен договор, нотариален акт и вписване. Знаете къде сме на всяка стъпка.</p></span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec"><div class="pub-wrap">
-    <div class="sec-hd">
-      <div><h2 class="h2">Локации</h2>
-        <p class="meta" style="margin-top:8px">Сандански е балнеоложки град в подножието на Пирин, на 20 км от границата с Гърция.</p></div>
-      <a class="pbtn" href="#">Всички локации <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
-    </div>
-    <div class="locs">
-      <div class="loc"><b>Сандански</b><span>71 обяви · от 19 500 €</span></div>
-      <div class="loc"><b>Мелник</b><span>18 обяви · от 24 000 €</span></div>
-      <div class="loc"><b>Катунци</b><span>22 обяви · от 31 000 €</span></div>
-      <div class="loc"><b>Левуново</b><span>9 обяви · от 12 000 €</span></div>
-    </div>
-  </div></section>
-
-  <section class="sec--tight"><div class="pub-wrap">
-    <div class="sec-hd"><div><h2 class="h2">Ръководства</h2>
-      <p class="meta" style="margin-top:8px">Написани за конкретния случай, а не преписани отнякъде.</p></div></div>
-    <div class="guides">
-      <div class="guide">
-        <b>Може ли чужденец да купи земя в България?</b>
-        <p>Кратката версия: сграда — да; земя — зависи от гражданството и от вида на имота. Обясняваме кой
-          вариант важи за вас и какво се проверява предварително.</p>
-        <span class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg> Прегледано от адвокат · 29 юли 2026</span>
-      </div>
-      <div class="guide">
-        <b>Какви са разходите при покупка</b>
-        <p>Местен данък, нотариална такса, вписване, преводач и хонорар на агенцията — с реален пример за
-          имот от 68 000 €.</p>
-        <span class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg> Прегледано от адвокат · 12 юни 2026</span>
-      </div>
-      <div class="guide">
-        <b>Какво е ESTI и кога ви касае</b>
-        <p>Ако ще отдавате имота за кратък престой, има регистрация и отчитане на гостите. Кой го прави и
-          какво струва.</p>
-        <span class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Обновено на 3 август 2026</span>
-      </div>
-    </div>
-  </div></section>
-
-  <section class="band band--sell"><div class="pub-wrap">
-    <div class="split">
-      <div>
-        <h2 class="h2">Продавате имот в Сандански?</h2>
-        <p class="lede" style="margin-top:16px">Безплатна оценка на място в рамките
-          на два работни дни. Договор за посредничество с ясен срок и без скрити такси.</p>
-      </div>
-      <div style="display:flex; gap:12px; justify-content:flex-end">
-        <a class="pbtn pbtn--accent pbtn--lg" href="#">Заявете оценка</a>
-        <a class="pbtn pbtn--lg" href="#" style="background:transparent; border-color:rgba(255,255,255,.3); color:#fff">Как работим</a>
-      </div>
-    </div>
-  </div></section>
-
-<footer class="pub-foot">
-    <div class="pub-wrap">
-      <div class="cols">
-        <div>
-          <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="74" height="38" style="display:block; height:38px; width:auto; margin-bottom:14px" />
-          <p style="max-width:290px">Семейна агенция за недвижими имоти в Сандански. Работим с имоти в
-            Сандански, Мелник, Катунци и региона от 2011 година.</p>
-          <p style="margin-top:12px">ул. Македония 22, Сандански<br>0888 12 34 56</p>
-        </div>
-        <div><h4>Имоти</h4>
-          <a href="#">Апартаменти</a><a href="#">Къщи</a><a href="#">Парцели</a>
-          <a href="#">Под наем</a><a href="#">Бизнес имоти</a></div>
-        <div><h4>Локации</h4>
-          <a href="#">Сандански</a><a href="#">Мелник</a><a href="#">Катунци</a>
-          <a href="#">Левуново</a><a href="#">Хотово</a></div>
-        <div><h4>Агенцията</h4>
-          <a href="#">За нас</a><a href="#">Продайте имот</a><a href="#">Ръководства</a>
-          <a href="#">Контакти</a><a href="#">Поверителност</a></div>
-      </div>
-      <div class="base">
-        <span>© 2026 MS Realty</span><span>·</span>
-        <a href="#">Условия за ползване</a><span>·</span>
-        <a href="#">Поверителност</a><span>·</span>
-        <a href="#">Бисквитки</a>
-        <span style="margin-left:auto; display:flex; gap:12px">
-          <a href="#">БГ</a><a href="#">EN</a><a href="#">DE</a><a href="#">NL</a>
-          <a href="#">RU</a><a href="#">EL</a><a href="#">עב</a></span>
-      </div>
-    </div>
-  </footer>
-</div>
-</body></html>
+  .pub { background:var(--tile); color:var(--text-body); font:16px/1.5 var(--font-sans); font-variant-numeric:tabular-nums; }
+  .pub a { color:var(--spring-700); text-underline-offset:4px; }
+  .pub :is(a,button,input,select,textarea):focus-visible { outline:2px solid var(--spring-700); outline-offset:4px; }
+  .pub .band :is(a,button,input,select,textarea):focus-visible { outline-color:var(--field-text); }
+  .pub button:disabled { opacity:.5; cursor:not-allowed; }
+  .pub .pub-wrap { max-width:1240px; margin:0 auto; padding:0 32px; }
+  .pub .pub-top { border-bottom:1px solid var(--joint); background:var(--tile-glaze); }
+  .pub .pub-bar { display:flex; align-items:center; gap:24px; min-height:96px; }
+  .pub .pub-bar img { width:96px; height:auto; display:block; }
+  .pub .pub-nav { display:flex; gap:24px; align-items:center; }
+  .pub .pub-nav a { color:var(--text-body); font-size:16px; }
+  .pub .pub-nav [aria-current] { text-decoration:underline; font-weight:600; }
+  .pub .pub-language { margin-inline-start:auto; display:flex; align-items:center; gap:12px; }
+  .pub .pub-language select { width:160px; }
+  .pub .pbtn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:8px 20px; border:1px solid var(--border-control); border-radius:var(--r-edge); background:var(--tile-glaze); color:var(--text-strong); font:600 16px/1.3 var(--font-sans); text-decoration:none; cursor:pointer; }
+  .pub .pbtn:hover { background:var(--tile-deep); }
+  .pub .pbtn--accent { background:var(--brick-600); border-color:var(--brick-600); color:var(--tile-glaze); }
+  .pub .pbtn--accent:hover { background:var(--brick-700); border-color:var(--brick-700); }
+  .pub .pbtn--ghost { background:transparent; }
+  .pub .band .pbtn--accent { border-color:var(--field-text); }
+  .pub .band .pbtn--ghost { color:var(--field-text); border-color:var(--field-muted); }
+  .pub .band .pbtn--ghost:hover { background:var(--spring-900); }
+  .pub .band { padding:48px 0; }
+  .pub .band :is(h1,h2,p,label) { color:var(--field-text); }
+  .pub .band .meta { color:var(--field-muted); }
+  .pub .band a:not(.pbtn) { color:var(--field-text); }
+  .pub .band .wit--none { color:var(--field-text); }
+  .pub .display { font-size:47px; font-weight:800; }
+  .pub h2 { font-size:27px; line-height:1.3; color:var(--text-strong); }
+  .pub h3 { font-size:19px; line-height:1.4; color:var(--text-strong); }
+  .pub .pub-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:32px; align-items:start; }
+  .pub .pub-hero { align-items:center; gap:48px; }
+  .pub .pub-stack { display:grid; gap:20px; min-width:0; align-content:start; }
+  .pub .pub-actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .pub .pub-section { padding:48px 0; border-bottom:1px solid var(--joint); }
+  .pub .pub-section-hd { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:24px; }
+  .pub .photo { min-height:256px; display:grid; place-items:center; padding:32px; text-align:center; background:var(--tile-deep); color:var(--text-body); border:1px solid var(--joint); border-radius:var(--r-panel); font-size:13px; }
+  .pub .photo--hero { min-height:384px; }
+  .pub .meta { font-size:13px; color:var(--text-muted); }
+  .pub .pub-field { display:grid; gap:8px; min-width:0; }
+  .pub .pub-field label { font-size:16px; font-weight:600; }
+  .pub :is(input:not([type=checkbox]):not([type=radio]),select,textarea) { display:block; min-width:0; width:100%; min-height:48px; padding:12px 16px; background:var(--tile-glaze); border:1px solid var(--border-control); border-radius:var(--r-edge); color:var(--text-body); font:16px/1.5 var(--font-sans); }
+  .pub textarea { min-height:128px; resize:vertical; }
+  .pub .pub-check { display:flex; align-items:start; gap:12px; }
+  .pub .pub-check input { width:20px; height:20px; margin-top:4px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .pub .pub-form { padding:24px; border:1px solid var(--joint); background:var(--tile-glaze); border-radius:var(--r-panel); display:grid; gap:20px; }
+  .pub .band .pub-form :is(h2,p,label) { color:var(--text-body); }
+  .pub .band .pub-form a:not(.pbtn) { color:var(--spring-700); }
+  .pub .band .pub-form :focus-visible { outline-color:var(--spring-700); }
+  .pub .pub-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+  .pub .pub-card { min-width:0; border-top:1px solid var(--joint); display:grid; gap:16px; padding-top:20px; }
+  .pub .pub-card .photo { min-height:192px; }
+  .pub .pub-card h3 { overflow-wrap:anywhere; }
+  .pub .pub-price { font:600 27px/1.3 var(--font-sans); color:var(--text-strong); font-variant-numeric:tabular-nums; }
+  .pub .pub-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; }
+  .pub .pub-facts > div { padding:16px 0; border-bottom:1px solid var(--joint); }
+  .pub .pub-facts dt { font-size:13px; color:var(--text-muted); }
+  .pub .pub-facts dd { margin:4px 0 0; font-weight:600; overflow-wrap:anywhere; }
+  .pub .pub-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 32px; }
+  .pub .pub-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; align-content:start; }
+  .pub .pub-state .pbtn { justify-self:start; }
+  .pub .pub-foot { padding:48px 0; background:var(--tile-deep); border-top:1px solid var(--joint); }
+  .pub .pub-foot .pub-grid { grid-template-columns:2fr 1fr 1fr; }
+  .pub .pub-foot a { display:inline-block; min-height:44px; }
+  .pub .pub-note { border-inline-start:4px solid var(--spring-700); padding-inline-start:20px; }
+  .pub .pub-form-error { color:var(--danger-600); }
+</style></head><body><div class="pub" lang="en" dir="ltr" style="width:1440px;min-height:0px"><header class="pub-top"><div class="pub-wrap pub-bar"><a href="PublicHome.html" aria-label="MS Realty home"><img src="ms-realty-logo.png" alt="MS Realty"></a><nav class="pub-nav" aria-label="Main navigation"><a href="PublicSearch.html">Properties</a><a href="PublicLocation.html">Locations</a><a href="PublicSeller.html">Sell a property</a><a href="PublicContact.html">Contact</a></nav><div class="pub-language"><label for="public-language">Language</label><select id="public-language"><option value="bg">Български</option><option value="en" selected>English</option><option value="de">Deutsch</option><option value="nl">Nederlands</option><option value="ru">Русский</option><option value="el">Ελληνικά</option><option value="he">עברית</option></select></div></div></header>
+<main>
+<section class="band"><div class="pub-wrap pub-grid pub-hero"><div class="pub-stack"><h1 class="display" style="font-size:56px">Find your place in Sandanski.</h1><p>Choose an area and property type, then review the facts behind each listing.</p><form class="pub-stack"><div class="pub-field"><label for="home-place">Where would you like to look?</label><input id="home-place" type="search" value="Sandanski"></div><div class="pub-grid"><div class="pub-field"><label for="home-type">Property type</label><select id="home-type"><option>Any property</option><option>Apartment</option><option>House</option><option>Land</option><option>Commercial</option></select></div><div class="pub-field"><label for="home-offer">Sale or rent</label><select id="home-offer"><option>For sale</option><option>For rent</option></select></div></div><div><a class="pbtn pbtn--accent" href="PublicSearch.html">Find properties</a></div></form></div><div class="photo photo--hero">[PHOTOGRAPH — Sandanski town park, to be supplied]</div></div></section>
+<section class="pub-section"><div class="pub-wrap"><div class="pub-section-hd"><div class="pub-stack"><h2>Start with the facts</h2><p>A saved listing example shows what is known and what still needs confirmation.</p></div><a class="pbtn" href="PublicSearch.html">Browse properties</a></div><div class="pub-grid"><article class="pub-card"><div class="photo">[PHOTOGRAPH — listing exterior, to be supplied]</div><p class="pub-price">Price on request</p><span class="wit wit--none">Availability not verified</span><h3 lang="bg">Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!</h3><p><span lang="bg">Сандански</span> · MS-CRAWL-0001</p><p class="meta">Bulgarian source title · saved listing fixture</p><a class="pbtn" href="PublicListing.html">Read the listing</a></article><div class="pub-stack"><h3>Know what the price means</h3><p>A missing amount is shown as “Price on request”. It is never turned into €0 or an estimate.</p><h3>See the source</h3><p>The listing keeps its Bulgarian source text and reference. Missing area, location detail or approval has its own state.</p><h3>Ask before arranging a viewing</h3><p>Send the listing reference with your question. A request is not a confirmed appointment.</p><span class="wit wit--none">This example has no availability witness</span></div></div></div></section>
+<section class="pub-section"><div class="pub-wrap pub-grid"><div class="pub-stack"><h2>Explore Sandanski</h2><p>Get to know the inland spa town at the foot of Pirin and decide which details matter for your search.</p><a class="pbtn" href="PublicLocation.html">Read about the area</a></div><div class="pub-stack"><h2>Thinking of selling?</h2><p>Tell us about your property and how to reach you. Discuss the service, timing and fees before agreeing to proceed.</p><a class="pbtn" href="PublicSeller.html">Describe your property</a></div></div></section>
+<section class="pub-section"><div class="pub-wrap pub-stack"><h2>Other states</h2><p class="meta">Design examples · these controls do not send requests.</p><div class="pub-states"><section class="pub-state"><h3>No properties to show</h3><p>Try a wider area or another property type.</p><button class="pbtn" type="button">Change your search</button></section><section class="pub-state"><h3>Properties are loading</h3><p>Your search choices remain visible.</p><button class="pbtn" type="button" disabled>Loading properties…</button></section><section class="pub-state"><h3>The catalogue is unavailable</h3><p>No current availability can be confirmed.</p><button class="pbtn" type="button">Try again</button></section><section class="pub-state"><h3>Some details are missing</h3><p>Open the listing to see which facts need confirmation.</p><button class="pbtn" type="button">Read the listing</button></section><section class="pub-state"><h3>More results than fit here</h3><p>Use filters and pagination to narrow the list.</p><button class="pbtn" type="button">Open search filters</button></section><section class="pub-state"><h3>Connection lost</h3><p>Previously shown properties may have changed. Refresh before relying on their availability.</p><button class="pbtn" type="button" disabled>Refresh unavailable</button></section></div></div></section>
+</main><footer class="pub-foot"><div class="pub-wrap pub-grid"><div class="pub-stack"><h2>MS Realty</h2><p>Property enquiries in Sandanski and the region.</p><p class="meta">Design preview · listing and contact examples come from saved repository fixtures. Current availability and approvals need live confirmation.</p></div><nav aria-label="Explore"><h3>Explore</h3><a href="PublicSearch.html">Find a property</a><br><a href="PublicLocation.html">Sandanski</a><br><a href="PublicSeller.html">Sell a property</a></nav><nav aria-label="Contact and privacy"><h3>Your enquiry</h3><a href="PublicContact.html">Contact the agency</a><br><a href="PublicContact.html#privacy">How we use your details</a><p class="meta">Bulgarian is the source language. Public translations need human approval.</p></nav></div></footer></div></body></html>
