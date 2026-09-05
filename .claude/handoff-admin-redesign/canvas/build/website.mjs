@@ -1,281 +1,59 @@
-import fs from "node:fs";
-import { page, icon, subnav } from "../shell.mjs";
-const W = (n) => new URL(`../${n}`, import.meta.url);
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { page } from '../shell.mjs';
+import { html, publicLanguages } from '../public-shell.mjs';
+import { loadLocaleRegistry } from '../../../../production/lib/locales.mjs';
+import { sellerPath, contactPath, searchPath, locationPath } from '../../../../production/lib/seo.mjs';
+import { readApprovedCmsContent } from '../../../../production/lib/approved-content.mjs';
 
-const SITE_NAV = (on) => subnav([
-  ["Pages", "tree", on === "pages"], ["Area guides", "map", on === "guides"], ["News", "file", on === "news"],
-  ["Navigation", "list", on === "nav"], ["Forms", "form", on === "forms"], ["Media", "image", on === "media"],
-  ["SEO and redirects", "route", on === "seo"],
-]);
-
-const LOC = ["BG","EN","DE","NL","RU","EL","HE"];
-function locBar(states) {
-  return `<span style="display:flex; gap:4px">${LOC.map((c, i) => {
-    const s = states[i];
-    const style = s === 2 ? "background:var(--success-50); color:var(--success-600)"
-      : s === 1 ? "background:var(--warning-50); color:var(--warning-700)"
-      : "background:transparent; border:1px dashed var(--border-control); color:var(--text-muted)";
-    return `<span style="display:grid; place-items:center; min-width:23px; height:18px; padding:0 4px; border-radius:var(--r-xs); font:700 11px var(--font-sans); ${style}">${c}</span>`;
-  }).join("")}</span>`;
-}
-
-/* -------------------------------------------------------------- Site pages */
-const PG_CSS = `
-    .tr { display:grid; grid-template-columns:minmax(0,1fr) 250px 190px 150px 112px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .tr:last-child { border-bottom:0; }
-    .tr--hd { padding:8px 16px; background:var(--tile); font-size:11px; font-weight:600;
-      letter-spacing:.02em; color:var(--text-muted); }
-    .tr--hd:hover { background:var(--tile); }
-    .tr:hover { background:var(--tile); }
-    .tr-name { display:flex; align-items:center; gap:8px; min-width:0; }
-    .tr-name b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .tr-name span.p { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); }
-    .ind { display:inline-block; }
-    .newnote { display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; padding:12px 16px;
-      background:var(--spring-50); border-bottom:1px solid var(--spring-100); color:var(--spring-800); font-size:13px; }
+const registry=loadLocaleRegistry();
+const report=JSON.parse(fs.readFileSync(new URL('../../../../production/data/launch-readiness.json',import.meta.url),'utf8'));
+const redirects=report.gates.find(g=>g.id==='redirect_reviews');
+const guide=readApprovedCmsContent().documents.find(d=>d.type==='guide'&&d.locale==='bg');
+const routes=[['Home','/bg','Home'],['Property search',searchPath(registry,'bg'),'Search'],['Sell with us',sellerPath(registry,'bg'),'Seller'],['Contact',contactPath(registry,'bg'),'Contact'],['Sandanski',locationPath(registry,'bg','Sandanski'),'Location'],...(guide?[[guide.title,guide.path,'Guide']]:[])];
+assert.equal(new Set(routes.map(r=>r[1])).size,routes.length);
+assert.equal(redirects.evidence.resolved_legacy_urls+redirects.evidence.unresolved_legacy_urls,redirects.evidence.total_legacy_urls);
+const CSS=`
+  .web { display:grid; gap:20px; }
+  .web .ph { margin:0; }
+  .web h2 { font-size:16px; }
+  .web-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .web-cols,.web-form,.web-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .web-wide { grid-column:1/-1; }
+  .web .in { width:100%; font:inherit; color:var(--text-body); }
+  .web textarea.in { min-height:144px; resize:vertical; }
+  .web :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .web button:disabled { opacity:.5; cursor:not-allowed; }
+  .web-check { display:flex; align-items:start; gap:12px; }
+  .web-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .web-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 112px 200px 64px; align-items:center; gap:16px; height:44px; padding:0 20px; border-top:1px solid var(--joint); }
+  .web-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .web-row:hover { background:var(--tile); }
+  .web-facts { display:grid; grid-template-columns:180px minmax(0,1fr); gap:12px; margin:0; }
+  .web-facts dt { color:var(--text-muted); }
+  .web-facts dd { margin:0; overflow-wrap:anywhere; }
+  .web-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; }
+  .web-state .btn,.web-section > .btn { justify-self:start; }
+  .web-copy { min-height:144px; display:grid; align-content:center; gap:16px; border-top:1px solid var(--joint); border-bottom:1px solid var(--joint); padding:20px 0; }
 `;
-const PG_BODY = `      <div class="ph">
-        <div><h1>Website</h1><p>Every page the public site serves, in all seven languages. Bulgarian is the source; nothing is indexed in another language until a person approves it.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button">${icon("eye", 15)}<span>Preview the site</span></button>
-          <button class="btn btn--primary" type="button">${icon("plus", 15)}<span>New page</span></button>
-        </div>
-      </div>
-      ${SITE_NAV("pages")}
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find">${icon("search", 14)}Page title or path</span>
-          <button class="btn btn--sm" type="button">Any type ${icon("down", 13)}</button>
-          <button class="btn btn--sm" type="button">Any language ${icon("down", 13)}</button>
-          <button class="btn btn--sm" type="button">Needs approval ${icon("down", 13)}</button>
-          <span style="margin-left:auto" class="mono">39 pages · 204 localised routes</span>
-        </div>
-        <div class="newnote">${icon("alert", 16)}
-          <span><b>Home, search, seller and contact are still template copy.</b> Their text lives in the
-            renderer rather than in this CMS, so editing them here is the change this section exists to make.
-            The listing catalogue and the guides already round-trip.</span></div>
-        <div class="tr tr--hd"><span>Page</span><span>Languages</span><span>Type</span><span>Updated</span><span>State</span></div>
-${[
-  [0,"Home","/{locale}","home",[2,2,2,2,2,1,1],"Landing","Mariya · 12 Aug","Published","ok"],
-  [0,"Property search","/{locale}/tarsene","search",[2,2,2,2,2,1,0],"Search","Mariya · 12 Aug","Published","ok"],
-  [0,"Sell with us","/{locale}/prodai","seller",[2,2,2,1,2,0,0],"Landing","Petar · 3 Aug","Published","ok"],
-  [0,"Contact","/{locale}/kontakt","contact",[2,2,2,2,2,2,2],"Contact","Mariya · 28 Aug","Published","ok"],
-  [0,"Locations","/{locale}/lokacii","location",[2,2,2,1,2,0,0],"Index","Mariya · 19 Aug","Published","ok"],
-  [1,"Sandanski","/{locale}/lokacii/sandanski","location",[2,2,2,1,2,0,0],"Location","Mariya · 19 Aug","Published","ok"],
-  [1,"Melnik","/{locale}/lokacii/melnik","location",[2,2,1,0,2,0,0],"Location","Hermes draft","2 awaiting approval","warn"],
-  [1,"Katuntsi","/{locale}/lokacii/katuntsi","location",[2,1,0,0,1,0,0],"Location","Hermes draft","3 awaiting approval","warn"],
-  [0,"Buying in Bulgaria as a foreigner","/{locale}/rakovodstva/chuzhdenci","guide",[2,2,2,2,2,0,0],"Guide","Lawyer-reviewed · 29 Jul","Published","ok"],
-  [0,"Purchase fees and taxes","/{locale}/rakovodstva/taksi","guide",[2,2,1,0,2,0,0],"Guide","Needs a legal re-read","Held","warn"],
-  [0,"Privacy notice","/{locale}/poveritelnost","legal",[2,2,2,2,2,2,2],"Legal","Lawyer · 14 Jun","Published","ok"],
-  [0,"Terms of use","/{locale}/usloviya","legal",[2,2,2,2,2,2,2],"Legal","Lawyer · 14 Jun","Published","ok"],
-].map(([depth, name, path, kind, locs, type, updated, state, tone]) => `        <div class="tr">
-          <span class="tr-name"><span class="ind" style="width:${depth * 18}px"></span>${icon(depth ? "file" : kind === "guide" ? "map" : kind === "legal" ? "shield" : "globe", 16)}
-            <span style="min-width:0"><b>${name}</b> <span class="p">${path}</span></span></span>
-          <span>${locBar(locs)}</span>
-          <span style="font-size:13px" class="muted">${type}</span>
-          <span style="font-size:13px" class="muted">${updated}</span>
-          <span><span class="pill pill--${tone}"><i></i>${state}</span></span>
-        </div>`).join("\n")}
-        <div class="foot"><span>Legend: solid = approved and indexed · amber = drafted, not approved · dashed = not translated</span>
-          <button class="btn btn--sm" type="button">Show all 39</button></div>
-      </section>`;
-fs.writeFileSync(W("SitePages.dc.html"), page({ active: "website", body: PG_BODY, extraCss: PG_CSS, height: 960 }));
-
-/* ------------------------------------------------------------- Page editor */
-const PE_CSS = `
-    .blocks { display:grid; gap:12px; padding:16px; background:var(--tile-deep); }
-    .blk { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; }
-    .blk-hd { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border);
-      background:var(--tile); }
-    .blk-hd b { font-size:11px; font-weight:600; color:var(--text-muted); flex:1 1 auto; }
-    .blk-bd { padding:16px 16px; }
-    .blk-bd h3 { font-family:var(--font-display); font-size:22px; font-weight:600; letter-spacing:-.015em; }
-    .blk-bd p { font-size:13px; color:var(--text-body); margin-top:8px; }
-    .drag { color:var(--text-muted); cursor:grab; }
-    .add { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px;
-      border:1px dashed var(--border-control); border-radius:var(--r-md); color:var(--text-muted);
-      font-size:13px; font-weight:600; background:var(--surface); }
-    .cards3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-    .cards3 div { border:1px solid var(--border); border-radius:var(--r-sm); padding:12px; font-size:13px; }
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .locrow { display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:12px; align-items:center;
-      padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
-    .locrow:last-child { border-bottom:0; }
-`;
-const PE_BODY = `      <div class="crumbs" style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:12px">
-        <a href="#">Website</a> ${icon("chevron", 13)} <a href="#">Pages</a> ${icon("chevron", 13)}
-        <b style="color:var(--text-strong)">Sell with us</b>
-      </div>
-      <div class="ph">
-        <div><h1>Sell with us</h1><p><span class="mono">/bg/prodai</span> · source language Bulgarian · last published 3 August by Petar</p></div>
-        <div class="ph-actions">
-          <button class="btn btn--sm" type="button">BG ${icon("down", 13)}</button>
-          <button class="btn" type="button">${icon("eye", 15)}<span>Preview</span></button>
-          <button class="btn" type="button">${icon("history", 15)}<span>Versions</span></button>
-          <button class="btn btn--primary" type="button">Publish</button>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 348px; gap:20px; align-items:start">
-        <section class="panel">
-          <nav class="tabs" style="padding:0 16px"><a href="#" data-on="1">Content</a><a href="#">SEO</a><a href="#">Settings</a><a href="#">History</a></nav>
-          <div class="blocks">
-            <div class="blk">
-              <div class="blk-hd">${icon("grid", 14)}<b>Hero</b><span class="pill pill--sand">Required</span><span class="drag">${icon("list", 14)}</span></div>
-              <div class="blk-bd">
-                <h3>Продайте имота си в Сандански с брокер, който вдига телефона</h3>
-                <p>Безплатна оценка на място в рамките на два работни дни. Договор за посредничество без
-                  скрити такси и с ясен срок.</p>
-                <div style="display:flex; gap:8px; margin-top:12px">
-                  <span class="btn btn--sm btn--accent">Заявете оценка</span>
-                  <span class="btn btn--sm">Вижте как работим</span>
-                </div>
-              </div>
-            </div>
-            <div class="blk">
-              <div class="blk-hd">${icon("layers", 14)}<b>Three steps</b><span class="drag">${icon("list", 14)}</span></div>
-              <div class="blk-bd"><div class="cards3">
-                <div><b>1. Оценка</b><p style="margin-top:4px; font-size:11px; color:var(--text-muted)">Идваме на място, снимаме и даваме реалистична цена.</p></div>
-                <div><b>2. Подготовка</b><p style="margin-top:4px; font-size:11px; color:var(--text-muted)">Проверяваме документите и подготвяме обявата на пет езика.</p></div>
-                <div><b>3. Сделка</b><p style="margin-top:4px; font-size:11px; color:var(--text-muted)">Организираме огледите и водим сделката до нотариуса.</p></div>
-              </div></div>
-            </div>
-            <div class="blk">
-              <div class="blk-hd">${icon("form", 14)}<b>Valuation form</b><span class="pill pill--sea"><i></i>Creates a seller lead</span><span class="drag">${icon("list", 14)}</span></div>
-              <div class="blk-bd" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px">
-                <span class="in in--empty">Име</span><span class="in in--empty">Телефон</span>
-                <span class="in in--empty" style="grid-column:1/-1">Адрес на имота</span>
-                <span style="grid-column:1/-1; font-size:11px; color:var(--text-muted)">Consent checkbox and privacy link are added automatically and cannot be removed.</span>
-              </div>
-            </div>
-            <div class="blk">
-              <div class="blk-hd">${icon("building", 14)}<b>Recently sold</b><span class="pill pill--sand">Pulls from the catalogue</span><span class="drag">${icon("list", 14)}</span></div>
-              <div class="blk-bd"><p style="font-size:13px; color:var(--text-muted)">Shows the last four
-                completed sales with an approved public record. Nothing to configure — it follows the catalogue.</p></div>
-            </div>
-            <div class="add">${icon("plus", 15)}Add a block</div>
-          </div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Languages</h2><span class="sub">5 of 7</span></div>
-            <div class="side-sect" style="padding-top:4px; padding-bottom:8px">
-              ${[
-                ["BG","Source","ok","Published"],
-                ["EN","Human, approved","ok","Published"],
-                ["DE","Human, approved","ok","Published"],
-                ["NL","Hermes draft","ai","Needs approval"],
-                ["RU","Human, approved","ok","Published"],
-                ["EL","Not translated","sand","—"],
-                ["HE","Not translated","sand","—"],
-              ].map(([c, s, tone, state]) => `<div class="locrow">
-                <span style="display:grid; place-items:center; height:19px; border-radius:var(--r-xs); background:var(--joint); color:var(--marble-700); font:700 11px var(--font-sans)">${c}</span>
-                <span><b style="font-weight:600">${s}</b></span>
-                <span class="pill pill--${tone}">${tone === "ai" ? icon("sparkles", 11) : "<i></i>"}${state}</span></div>`).join("")}
-            </div>
-            <div class="savebar"><button class="btn btn--sm" type="button">${icon("sparkles", 13)}<span>Draft the missing two</span></button></div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Search appearance</h2></div>
-            <div class="side-sect">
-              <p style="font-size:13px; color:var(--spring-800); font-family:var(--font-mono)">ms-realty.bg › prodai</p>
-              <p style="font-size:16px; color:#1a0dab; margin-top:4px">Продажба на имот в Сандански — MS Realty</p>
-              <p style="font-size:12px; color:var(--text-muted); margin-top:4px">Безплатна оценка на място за два
-                работни дни. Договор без скрити такси. Семейна агенция в Сандански от 2011 г.</p>
-              <div style="display:flex; gap:8px; margin-top:8px">
-                <span class="pill pill--ok"><i></i>Title 52 of 60</span><span class="pill pill--ok"><i></i>Description 148 of 160</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Before publishing</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; gap:8px">${icon("check", 15)}<span>The Dutch draft is unapproved and will not be indexed.</span></div>
-              <div style="display:flex; gap:8px">${icon("check", 15)}<span>No claim on this page requires a legal review.</span></div>
-              <div style="display:flex; gap:8px">${icon("check", 15)}<span>The path has not changed, so no redirect is needed.</span></div>
-            </div>
-          </section>
-        </div>
-      </div>`;
-fs.writeFileSync(W("PageEditor.dc.html"), page({ active: "website", body: PE_BODY, extraCss: PE_CSS, height: 1140 }));
-
-/* Media now lives in build/media.mjs — it owns the library, the editor and the
-   states, and this file must not write Media.dc.html a second time. */
-
-/* -------------------------------------------------------- SEO + redirects */
-const SEO_BODY = `      <div class="ph">
-        <div><h1>SEO and redirects</h1><p>Thirteen years of indexed URLs are the asset. Every legacy address needs one deliberate outcome before launch — 38 are still undecided.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button">${icon("download", 15)}<span>Export approvals</span></button>
-          <button class="btn btn--primary" type="button">${icon("route", 15)}<span>Build redirect file</span></button>
-        </div>
-      </div>
-      ${SITE_NAV("seo")}
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar">
-            <span class="find">${icon("search", 14)}Legacy URL</span>
-            <div class="seg" style="background:transparent; padding:0">
-              <button type="button" data-on="1">Undecided <em>38</em></button>
-              <button type="button">Keep 200 <em>171</em></button>
-              <button type="button">Redirect 301 <em>224</em></button>
-              <button type="button">Gone 410 <em>24</em></button>
-            </div>
-            <span style="margin-left:auto" class="mono">457 total</span>
-          </div>
-          <table>
-            <thead><tr><th>Legacy URL</th><th>What it was</th><th>Evidence</th><th>Proposed</th><th>Decision</th></tr></thead>
-            <tbody>
-${[
-  ["makler-realty.ru/obj/4412.html","Listing · sold 2019","Crawl + archive","301 → /ru/imoti/sandanski","Hermes proposal"],
-  ["makler-realty.com/obj/2210.html","Listing · source unavailable","Crawl only","410 gone","Hermes proposal"],
-  ["makler-realty.ru/news/2014/03/","News index · 11 posts","Crawl + archive","410 gone","Needs a person"],
-  ["makler-realty.com/uslugi.html","Services page","Crawl + archive","301 → /bg/prodai","Hermes proposal"],
-  ["makler-realty.ru/kontakty.html","Contact","Crawl + archive","301 → /ru/kontakt","Hermes proposal"],
-  ["makler-realty.com/obj/0114.html","Listing · still active","Crawl + catalogue","200 keep · preservation page","Needs a person"],
-].map(([url, was, ev, prop, who]) => `              <tr>
-                <td><span class="mono" style="white-space:normal">${url}</span></td>
-                <td class="muted">${was}</td>
-                <td class="muted">${ev}</td>
-                <td><b style="font-size:13px">${prop}</b><span style="display:block; font-size:11px" class="muted">${who}</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>`).join("\n")}
-            </tbody>
-          </table>
-          <div class="savebar"><span style="font-size:13px" class="muted">A redirect file is only built from approved decisions. An unapproved proposal never reaches production.</span></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Launch gate</h2><span class="pill pill--warn"><i></i>Blocked</span></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>URLs with a decision</span><b>419 of 457</b></div>
-              <div class="prog" style="height:6px; border-radius:var(--r-pill); background:var(--joint); overflow:hidden"><i style="display:block; height:100%; width:92%; background:var(--success-500)"></i></div>
-              <div class="note note--warn" style="margin-top:4px">${icon("alert", 14)}<span>Launch stays blocked until all 457 have a terminal outcome.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Search evidence</h2><a href="#" style="font-size:13px; font-weight:600">Import</a></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>Google Search Console</span><span class="pill pill--warn"><i></i>Not verified</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Yandex Webmaster</span><span class="pill pill--warn"><i></i>Not verified</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Sitemap submitted</span><span class="pill pill--sand"><i></i>After cutover</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Crawl parity report</span><span class="pill pill--ok"><i></i>Passing</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Structured data</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>RealEstateListing</span><span class="pill pill--ok"><i></i>84 valid</span></div>
-              <div style="display:flex; justify-content:space-between"><span>RealEstateAgent</span><span class="pill pill--ok"><i></i>Valid</span></div>
-              <div style="display:flex; justify-content:space-between"><span>BreadcrumbList</span><span class="pill pill--ok"><i></i>Valid</span></div>
-              <div style="display:flex; justify-content:space-between"><span>FAQPage on guides</span><span class="pill pill--warn"><i></i>2 with unapproved answers</span></div>
-            </div>
-          </section>
-        </div>
-      </div>`;
-fs.writeFileSync(W("SeoRedirects.dc.html"), page({ active: "website", body: SEO_BODY, height: 960 }));
-
-console.log("SitePages, PageEditor, SeoRedirects");
+const button=(label,primary=false,disabled=false)=>`<button type="button" class="btn${primary?' btn--accent':''}"${disabled?' disabled':''}>${label}</button>`;
+const field=(id,label,type='text',value='')=>`<div class="field"><label for="${id}">${label}</label><input class="in" id="${id}" type="${type}" value="${html(value)}"></div>`;
+const note=(id,label)=>`<div class="field web-wide"><label for="${id}">${label}</label><textarea class="in" id="${id}" dir="auto"></textarea></div>`;
+const select=(id,label,values)=>`<div class="field"><label for="${id}">${label}</label><select class="in" id="${id}">${values.map(([value,name])=>`<option value="${value}">${name}</option>`).join('')}</select></div>`;
+const witness=text=>`<span class="wit wit--none">${text}</span>`;
+const section=(title,body)=>`<section class="panel"><div class="panel-hd"><h2>${title}</h2></div><div class="web-section">${body}</div></section>`;
+const confirm=text=>`<label class="web-check"><input type="checkbox"><span>I, Mariya, ${text}</span></label>`;
+const states=`<div class="web-states">${[
+  ['No matching pages','Keep the selected language and filters visible. A filtered view is not a complete route inventory.','Change filters'],
+  ['Content is loading','Keep the selected page identity while its content and review history load.','Loading…',true],
+  ['Save or validation failed','Retain the text and review note. The previous published version remains the reference.','Review entered values'],
+  ['Some evidence is missing','A page can exist while language approval, media or an external search report is unavailable.','Review missing evidence'],
+  ['Many pages or decisions','Keep one identity per row and retain the current page position.','Next page'],
+  ['Version changed','Compare the latest version before applying an edit or approval based on older content.','Publish old version',true],
+].map(([title,text,action,disabled])=>`<section class="web-state"><h2>${title}</h2><p>${text}</p>${button(action,false,disabled)}</section>`).join('')}</div>`;
+const header=(title,text)=>`<div class="ph"><div><h1>${title}</h1><p>${text}</p></div></div>`;
+const PAGES=header('Website pages','Keep the page, source language and publication evidence together.')+section('Find a page',`<div class="web-form">${field('page-find','Page title or path','search')}${select('page-language','Language',publicLanguages.map(l=>[l.code,l.label||l.code.toUpperCase()]))}</div><p>Selected route examples from the local source. This is not a current publication or CMS inventory.</p><a class="btn btn--accent" href="PageEditor.html">Prepare a page draft</a>`)+`<section class="panel"><div class="panel-hd"><h2>Bulgarian route examples</h2><span>${routes.length} examples</span></div>${routes.map(([title,path,type])=>`<div class="web-row"><b title="${html(title)}">${html(title)}</b><span title="${html(path)}"><bdi dir="ltr">${html(path)}</bdi></span><span>${type}</span>${witness('Live review not loaded')}<a href="PageEditor.html">Review</a></div>`).join('')}</section>`+`<div class="web-cols">${section('Editing and publication',`<p>A route can be served from a template or approved content. Its presence in this list does not establish that it can already be edited here.</p><p>The page editor is the intended review flow. Source integration and authenticated save/readback remain separate work.</p>${witness('CMS save not verified')}`)}${section('Language review',`<p>Bulgarian is the source language. A translated page needs human approval for its current wording before it can become indexable.</p><p>Keep legal, tax and process claims tied to their reviewed sources. Do not manufacture a review date or reviewer.</p><a href="Translations.html">Review language evidence</a>`)}</div>`+states;
+const EDITOR=header('Prepare a page draft','Write the source text, check the preview and record why it should change.')+`<p class="muted">Design preview · no CMS page version is loaded or saved.</p>`+`<div class="web-cols">${section('Bulgarian source draft',`${field('page-title','Page title')}${note('page-copy','Source text')}${field('page-action','Main action label')}${field('page-action-path','Main action destination')}${note('page-sources','Sources supporting factual claims')}${note('page-reason','Reason for this version')}${button('Save draft',true)}<p class="hint">Do not include an unsupported price, response time, fee, business history or legal claim. Drafting does not publish the page.</p>`)}${section('Preview and review',`<div class="web-copy"><h2>Draft preview</h2><p>No wording has been entered. The preview should use the selected page layout and language direction.</p></div>${witness('Source review missing')}${confirm('have checked the current wording, its sources and its intended audience.')}${button('Record source review',false,true)}<p class="hint">Review is unavailable until a current draft is loaded. The saved version needs its own reviewer and date.</p>`)}</div>`+`<div class="web-cols">${section('Search appearance',`${field('page-seo-title','Search title')}${note('page-seo-description','Search description')}<p>The page path and canonical destination are not assigned in this example. A path change must go through the legacy URL review.</p><a href="SeoRedirects.html">Review URL evidence</a>`)}${section('Before publication',`${witness('Publication evidence missing')}<p>Check the current source version, media rights, language approval and any claim-specific review. Inspect desktop and phone previews.</p>${button('Review publication',false,true)}<p>No page is published, translation indexed or form destination changed by this preview.</p>`)}</div>`+states;
+const SEO=header('SEO and redirects','Preserve each legacy URL’s reviewed outcome and verify its current behaviour.')+`<p class="muted">Saved launch report: <bdi dir="ltr">${html(report.generated_at)}</bdi>. Historical evidence; not a fresh production check.</p>`+`<div class="web-cols">${section('Saved redirect decisions',`<dl class="web-facts"><dt>Legacy URLs</dt><dd>${redirects.evidence.total_legacy_urls}</dd><dt>Resolved</dt><dd>${redirects.evidence.resolved_legacy_urls}</dd><dt>Unresolved</dt><dd>${redirects.evidence.unresolved_legacy_urls}</dd><dt>Retain 200</dt><dd>${redirects.evidence.decision_statuses['200']}</dd><dt>Redirect 301</dt><dd>${redirects.evidence.decision_statuses['301']}</dd><dt>Approved 410</dt><dd>${redirects.evidence.decision_statuses['410']}</dd></dl><p>The sealed preservation contract carries specific approved exceptions. This editor cannot invent new homepage or search fallbacks.</p>${witness('Live crawl not checked')}`)}${section('Find the exact old URL',`${field('legacy-url','Legacy URL','url')}${select('legacy-domain','Source domain',[['makler-realty.com','makler-realty.com'],['makler-realty.ru','makler-realty.ru']])}${button('Load reviewed decision',true)}<p>Load the known crawl record, its existing decision and the equivalent content before proposing a change.</p>${witness('No URL selected')}`)}</div>`+section('Review a proposed change',`<form class="web-form">${select('route-decision','Outcome',[['redirect_301','Redirect 301 to equivalent content'],['retain_200','Retain 200 with equivalent content'],['approved_410','Approved 410, no equivalent content']])}${field('route-target','Equivalent internal path (200 or 301 only)')}${note('route-reason','Evidence and reason for the decision')}${confirm('have checked the original URL, the proposed outcome and its supporting evidence.')}${button('Record decision',false,true)}</form><p>Unavailable until a known old URL is loaded. A 410 decision has no target; 200 and 301 decisions require verified equivalent content. Recording a decision and deploying it are separate actions.</p>`)+`<div class="web-cols">${section('Release boundary',`<p>PR #182 remains draft and unmerged. The listing-reference change must not enter this redesign release through an incidental merge.</p><p>The saved report still lists ${report.blockers.length} launch blockers: ${report.blockers.map(x=>html(x.replaceAll('_',' '))).join(', ')}.</p><a href="LaunchReadiness.html">Review launch evidence</a>`)}${section('External search evidence',`${witness('Fresh reports not loaded')}<p>Check current Search Console, Yandex Webmaster, backlinks, sitemap and crawl reports against the deployed version.</p><p>A generated redirect file or successful local test is not evidence that the live URL returns its intended outcome.</p>`)}</div>`+states;
+for(const [name,body] of [['SitePages',PAGES],['PageEditor',EDITOR],['SeoRedirects',SEO]]){assert.equal((body.match(/btn--accent/g)||[]).length,1);fs.writeFileSync(new URL(`../${name}.dc.html`,import.meta.url),page({active:'website',body:`<div class="web">${body}</div>`,extraCss:CSS,height:0,healthText:'Saved source preview'}));}
+console.log('SitePages, PageEditor, SeoRedirects');

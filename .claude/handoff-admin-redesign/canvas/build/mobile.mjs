@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { BASE, FONT_LINKS, icon } from '../shell.mjs';
+import { planOpenRealtyCase } from '../../../../production/lib/realty-cases.mjs';
+const caseStep=planOpenRealtyCase({id:'CASE-0007',caseType:'buyer_purchase',jurisdiction:'BG',assetKind:'residential',clientRef:'client-example',executionMode:'manual',actor:'mariya-example',executorKind:'human',mandate:{ref:'mandate-example',grantedByRef:'client-example',signedAt:'2026-09-01T09:00:00Z',signedEvidenceRef:'evidence-example',capabilities:['case:*']}},{recordedAt:'2026-09-05T09:00:00Z'}).case.steps[0];
+assert(caseStep.evidence_producers.length);
 
 const CSS = `
   .wm { width:390px; min-height:844px; display:flex; flex-direction:column; background:var(--canvas); }
@@ -66,7 +69,7 @@ const LEAD = section('The enquiry',`<h3 lang="bg">Екатерина Конст�
   + states('enquiry','The draft and review note remain entered. No review or delivery is confirmed.');
 
 const CASE = section('Anna Weber · example case',`<p>Buyer purchase · Bulgaria · manual case.</p><dl class="wm-facts"><dt>Reference</dt><dd><bdi dir="ltr">CASE-0007</bdi></dd><dt>Property facts</dt><dd>Not loaded</dd><dt>Responsible</dt><dd>Mariya · example</dd><dt>Evidence</dt><dd>Review pending</dd></dl><p>No transaction value, notary appointment or legal clearance is asserted.</p>`)
-  + section('Review the current step',`<h3>Evidence pack review · example</h3>${witness('No completion recorded')}${field('step-ref','Internal evidence reference')}${field('producer-ref','Evidence producer reference')}${note('step-note','Review note')}${confirm('have checked the evidence and confirm this step.')}${button('Complete step',true)}<p class="hint">The source requires evidence from an accepted producer and resolved earlier phases. A reference alone does not certify legal sufficiency.</p>`)
+  + section('Review the current step',`<h3>${esc(caseStep.label)} · example</h3>${witness('No completion recorded')}${field('step-ref','Internal evidence reference')}${field('evidence-type','Evidence type')}<div class="field"><label for="evidence-producer">Evidence producer</label><select class="in" id="evidence-producer">${caseStep.evidence_producers.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('')}</select></div>${field('evidence-issued','Evidence issued at (optional)','datetime-local')}${note('step-note','Review note')}${confirm('have checked the evidence and confirm this step.')}${button('Complete step',true)}<p class="hint">The source requires evidence from an accepted producer and resolved earlier phases. A reference alone does not certify legal sufficiency.</p>`)
   + section('Waive a condition',`<h3>Mortgage approval · example condition</h3>${witness('No waiver recorded')}${field('authority','Authority or written instruction reference')}${field('waive-code','Reason code','text','client_instruction')}${note('waive-note','Reason for this decision')}${confirm('confirm this waiver and the authority it rests on.')}${button('Waive condition')}<p class="hint">A waiver records a human decision. It does not establish finance approval or a refund entitlement. The source retains earlier events.</p>`)
   + states('case','The evidence references and note remain entered. No step or condition change is confirmed.');
 

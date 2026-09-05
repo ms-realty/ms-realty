@@ -335,37 +335,28 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .drop { display:grid; place-items:center; gap:8px; margin:16px; padding:24px; border-radius:var(--r-md);
-      border:1.5px dashed var(--border-control); background:var(--tile); text-align:center; }
-    .drop b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .drop span { font-size:13px; color:var(--text-muted); }
-    .gal { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; padding:0 16px 16px; }
-    .tile { border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; background:var(--surface);
-      position:relative; }
-    .tile .im { height:104px; display:grid; place-items:center; background:var(--joint); color:var(--marble-500);
-      position:relative; }
-    /* Actions appear on hover; the tile shows three, and the rest live in the editor.
-       Five buttons in a 150px tile was a scrollbar pretending to be a toolbar. */
-    .tile .ov { position:absolute; inset:auto 0 0 0; display:flex; gap:4px; padding:8px; justify-content:center;
-      background:linear-gradient(transparent,rgba(24,24,24,.78)); opacity:0; transition:opacity .14s ease-out; }
-    .tile:hover .ov, .tile[data-hover] .ov { opacity:1; }
-    .tile .ov button { display:grid; place-items:center; width:28px; height:28px; border-radius:var(--r-sm);
-      border:0; background:rgba(255,255,255,.94); color:var(--ink-800); cursor:pointer; }
-    .tile .sel { position:absolute; top:7px; left:7px; width:17px; height:17px; border-radius:var(--r-xs);
-      border:1.5px solid rgba(255,255,255,.9); background:rgba(24,24,24,.35); }
-    .tile .sel[data-on] { background:var(--ink-800); border-color:var(--ink-800);
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E");
-      background-size:12px 12px; background-position:center; background-repeat:no-repeat; }
-    .tile .flag { position:absolute; top:6px; right:6px; }
-    .tile .mt { padding:8px 8px; display:grid; gap:4px; }
-    .tile .mt b { font-size:11px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .tile .mt span { font-size:11px; color:var(--text-muted); }
-    .bulk { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--spring-50);
-      border-bottom:1px solid var(--spring-100); font-size:13px; font-weight:600; color:var(--spring-800);
-      flex-wrap:wrap; }
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
+  .med { display:grid; gap:20px; }
+  .med .ph { margin:0; }
+  .med h2 { font-size:16px; }
+  .med-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .med-cols,.med-form,.med-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .med-wide { grid-column:1/-1; }
+  .med .in { width:100%; font:inherit; color:var(--text-body); }
+  .med textarea.in { min-height:96px; resize:vertical; }
+  .med :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .med button:disabled { opacity:.5; cursor:not-allowed; }
+  .med-check { display:flex; align-items:start; gap:12px; }
+  .med-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .med-photo { min-height:240px; display:grid; place-content:center; justify-items:center; gap:16px; padding:24px; background:var(--tile); border:1px solid var(--joint); color:var(--text-muted); text-align:center; }
+  .med-photo p { max-width:320px; }
+  .med-row { display:grid; grid-template-columns:minmax(0,1fr) 180px 200px 80px; gap:16px; align-items:center; height:44px; border-top:1px solid var(--joint); padding:0 20px; }
+  .med-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .med-row:hover { background:var(--tile); }
+  .med-facts { display:grid; grid-template-columns:128px minmax(0,1fr); gap:12px; margin:0; }
+  .med-facts dt { color:var(--text-muted); }
+  .med-facts dd { margin:0; overflow-wrap:anywhere; }
+  .med-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; }
+  .med-state .btn,.med-section > .btn { justify-self:start; }
 
   </style>
 </helmet>
@@ -377,7 +368,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1240px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -419,234 +410,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Saved fixture preview</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Media</h1><p>11,859 files mirrored from the legacy sites into R2. A photo reaches the public site only after a person has checked what is in it.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Download selection</span></button>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Review queue (46)</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m7 13 5-5 5 5"/><path d="M4 3h16"/></svg><span>Upload</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6"/><path d="M4 4v16"/><path d="M4 12h6"/><path d="M4 20h6"/><rect x="10" y="1.5" width="10" height="5" rx="1"/><rect x="10" y="9.5" width="10" height="5" rx="1"/><rect x="10" y="17.5" width="10" height="5" rx="1"/></svg><span>Pages</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg><span>Area guides</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><span>News</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Navigation</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h5"/></svg><span>Forms</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span>Media</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>SEO and redirects</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar">
-            <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>File name, listing or caption</span>
-            <button class="btn btn--sm" type="button">Needs review <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <button class="btn btn--sm" type="button">Any listing <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <button class="btn btn--sm" type="button">Missing alt text <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <button class="btn btn--sm btn--ghost" type="button">Clear</button>
-            <span style="margin-left:auto; display:flex; gap:8px">
-              <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-              <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button></span>
-          </div>
-          <div class="bulk">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>3 selected</span>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Review 3 together…</span></button>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Hold</span></button>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft alt text</span></button>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg><span>Attach to a listing</span></button>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v13"/><path d="m4 7 3-3 3 3"/><path d="M17 20V7"/><path d="m20 17-3 3-3-3"/></svg><span>Replace</span></button>
-            <button class="btn btn--sm" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Download</span></button>
-            <button class="btn btn--sm btn--danger" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg><span>Remove</span></button>
-            <a href="#" style="margin-left:auto; font-weight:600">Clear selection</a>
-          </div>
-          <div class="drop">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m7 13 5-5 5 5"/><path d="M4 3h16"/></svg>
-            <b>Drop photos here, or choose files</b>
-            <span>JPEG, PNG, WebP or AVIF · up to 50 megapixels · location data is removed on upload</span>
-          </div>
-          <div class="gal">
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel" data-on="1"></span>
-                <span class="flag pill pill--ink" style="padding:4px 8px; font-size:11px">Cover</span>
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>villa-katuntsi-01.jpg</b><span>MS-00191 · 2400×1600 · 412 KB</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                
-                <span class="ov" style="opacity:1">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>villa-katuntsi-02.jpg</b><span>MS-00191 · 2400×1600 · 388 KB</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                <span class="flag pill pill--warn" style="padding:4px 8px; font-size:11px">Needs alt</span>
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>villa-katuntsi-pool.jpg</b><span>MS-00191 · no alt text</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>sandanski-apt-01.jpg</b><span>MS-00815 · 1800×1200 · 301 KB</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                <span class="flag pill pill--warn" style="padding:4px 8px; font-size:11px">Needs review</span>
-                <span class="ov" style="opacity:1">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>sandanski-apt-02.jpg</b><span>MS-00815 · note: a face is visible</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>studio-baths-01.jpg</b><span>MS-00791 · 1600×1067 · 244 KB</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                <span class="flag pill pill--danger" style="padding:4px 8px; font-size:11px">Held</span>
-                <span class="ov" style="opacity:1">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>plot-levunovo-01.jpg</b><span>MS-00872 · note: a document is in frame</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>melnik-house-01.jpg</b><span>MS-00932 · 2000×1333 · 356 KB</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                <span class="flag pill pill--sea" style="padding:4px 8px; font-size:11px">Tour</span>
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>tour-villa-katuntsi.jpg</b><span>360° tour · equirectangular</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>office-sandanski.jpg</b><span>Contact page · 1600×900</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>team-mariya.jpg</b><span>Team profile · 800×800</span></div>
-            </div>
-            <div class="tile">
-              <div class="im"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg>
-                <span class="sel"></span>
-                <span class="flag pill pill--sand" style="padding:4px 8px; font-size:11px">Unmatched</span>
-                <span class="ov">
-                  <button type="button" title="Open the editor"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg></button>
-                  <button type="button" title="Set as cover"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.6 5.8 6.4.7-4.8 4.3 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.5l6.4-.7z"/></svg></button>
-                  <button type="button" title="More"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></button>
-                </span>
-              </div>
-              <div class="mt"><b>legacy-unnamed-4412.jpg</b><span>Not attached to anything</span></div>
-            </div>
-          </div>
-          <div class="foot"><span>Showing 12 of 11,859 · 46 awaiting review · 312 without alt text</span>
-            <span style="display:flex; gap:8px">
-              <button class="btn btn--sm" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft alt text for 312</span></button>
-              <button class="btn btn--sm" type="button">Next</button></span></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Review queue</h2><span class="sub">46</span></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div class="kvline"><span>Awaiting a human review</span><b>46</b></div>
-              <div class="kvline"><span>Without alt text</span><b>312</b></div>
-              <div class="kvline"><span>Gallery too thin to publish</span><b>18</b></div>
-              <div class="kvline"><span>Tour awaiting review</span><b>3</b></div>
-              <button class="btn btn--sm btn--primary" type="button" style="margin-top:4px">Start reviewing</button>
-              <span class="hint">These four are what listing-quality computes: media_review_pending,
-                missing_alt_text, thin_public_gallery, tour_review_pending. Nothing here detects a face,
-                a number plate or a watermark — a person does, and records it as a note.</span>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>What happens on upload</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>EXIF, XMP and IPTC are stripped in process, so a seller's home coordinates never reach storage.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span>Resized to a 2560px long edge at quality 82, and a 640px thumbnail is written beside it.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg><span>Stored as JPEG, PNG or WebP, whichever is smaller for that photo.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Nothing is public until a person approves it.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Storage</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px">
-              <div class="kvline"><span>Files in R2</span><b>11,859</b></div>
-              <div class="kvline"><span>Originals kept</span><b>4,978</b></div>
-              <div class="kvline"><span>Total</span><b>38.4 GB</b></div>
-              <div class="kvline"><span>Unreferenced</span><b>15 · 41 MB</b></div>
-              <button class="btn btn--sm" type="button" style="margin-top:4px">Review the unreferenced</button>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="med"><div class="ph"><div><h1>Media</h1><p>Find the right asset, inspect it, then record its intended use.</p></div></div><p class="muted">Saved fixture · image bytes and live media reviews are not loaded.</p><section class="panel"><div class="panel-hd"><h2>Find media</h2></div><div class="med-section"><div class="med-form"><div class="field"><label for="media-find">File name or listing reference</label><input class="in" id="media-find" type="search" value=""></div><div class="field"><label for="media-kind">Asset kind</label><select class="in" id="media-kind"><option value="all">All kinds</option><option value="photo">Photo</option><option value="floor_plan">Floor plan</option><option value="video">Video</option></select></div></div><p>One gallery entry in the saved listing fixture. This is not a storage inventory.</p><a class="btn btn--accent" href="MediaEditor.html">Review selected asset</a></div></section><section class="panel"><div class="med-row"><b>815-2-680x451.jpg</b><span>MS-CRAWL-0001</span><span class="wit wit--none">Review not loaded</span><a href="MediaEditor.html">Review</a></div></section><div class="med-cols"><section class="panel"><div class="panel-hd"><h2>Selected asset</h2></div><div class="med-section"><div class="med-photo" role="img" aria-label="Photo placeholder; image not loaded"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><b>Photo placeholder</b><p>No image bytes are loaded in this design. Inspect the actual asset before reviewing it.</p></div><dl class="med-facts"><dt>Listing</dt><dd><bdi dir="ltr">MS-CRAWL-0001</bdi></dd><dt>File name</dt><dd>815-2-680x451.jpg</dd><dt>Source URL</dt><dd><bdi dir="ltr">https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg</bdi></dd><dt>Review witness</dt><dd><span class="wit wit--none">No named review loaded</span></dd></dl></div></section><section class="panel"><div class="panel-hd"><h2>Upload to a listing</h2></div><div class="med-section"><p>Choose the listing before selecting files. Uploading does not approve publication.</p><div class="field"><label for="upload-listing">Listing reference</label><input class="in" id="upload-listing" type="text" value="MS-CRAWL-0001"></div><div class="field"><label for="upload-kind">Upload kind</label><select class="in" id="upload-kind"><option value="photo">Photo</option><option value="floor_plan">Floor plan</option></select></div><div class="field"><label for="upload-files">Photos or floor plans</label><input class="in" id="upload-files" type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif"></div><p class="hint">Source defaults: up to 8 files, 8 MiB each and 10 MiB per request. The runtime may impose lower limits. Files must pass image validation.</p><span class="wit wit--none">No upload receipt</span><button type="button" class="btn">Upload for review</button><p class="hint">Photos submitted with a public enquiry stay with that enquiry. They do not enter a listing gallery through this form.</p></div></section></div><div class="med-states"><section class="med-state"><h2>No matching assets</h2><p>Keep the listing and filters visible. A filtered empty view is not proof that storage is empty.</p><button type="button" class="btn">Change filters</button></section><section class="med-state"><h2>Image is loading</h2><p>Keep the file identity visible and wait for the actual image before reviewing it.</p><button type="button" class="btn" disabled>Loading…</button></section><section class="med-state"><h2>Upload or review failed</h2><p>Retain the selected listing and note. Do not label the file as saved or approved.</p><button type="button" class="btn">Review entered values</button></section><section class="med-state"><h2>Metadata without image bytes</h2><p>A file name, URL or thumbnail does not prove that the original is accessible.</p><button type="button" class="btn">Review missing image</button></section><section class="med-state"><h2>Many assets</h2><p>Keep the selected asset and page position. Inspect each asset before making its decision.</p><button type="button" class="btn">Next page</button></section><section class="med-state"><h2>Saved review, delivery unknown</h2><p>Read back the original decision and public asset before repeating an action.</p><button type="button" class="btn" disabled>Publish again</button></section></div></div>
     </div>
   </div>
 </div>

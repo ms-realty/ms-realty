@@ -249,7 +249,7 @@
       "x": 0,
       "y": 2260,
       "w": 1440,
-      "h": 1003,
+      "h": 1428,
       "page": "page-4"
     },
     {
@@ -258,7 +258,7 @@
       "x": 1560,
       "y": 2260,
       "w": 1440,
-      "h": 1164,
+      "h": 2078,
       "page": "page-4"
     },
     {
@@ -267,23 +267,23 @@
       "x": 3120,
       "y": 2260,
       "w": 1440,
-      "h": 1264,
+      "h": 1517,
       "page": "page-4"
     },
     {
       "file": "MediaEditor.dc.html",
       "title": "Photo editor",
       "x": 0,
-      "y": 3694,
+      "y": 4508,
       "w": 1440,
-      "h": 1906,
+      "h": 1731,
       "page": "page-4"
     },
     {
       "file": "MediaStates.dc.html",
       "title": "Upload and edit — every state",
       "x": 1560,
-      "y": 3694,
+      "y": 4508,
       "w": 1560,
       "h": 2334,
       "page": "page-4"
@@ -292,9 +292,9 @@
       "file": "SeoRedirects.dc.html",
       "title": "SEO and legacy redirects",
       "x": 3240,
-      "y": 3694,
+      "y": 4508,
       "w": 1440,
-      "h": 984,
+      "h": 1720,
       "page": "page-4"
     },
     {
@@ -447,7 +447,7 @@
       "x": 1020,
       "y": 2532,
       "w": 390,
-      "h": 2771,
+      "h": 2941,
       "page": "page-7"
     }
   ],

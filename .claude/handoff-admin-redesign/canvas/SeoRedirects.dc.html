@@ -335,6 +335,28 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
+  .web { display:grid; gap:20px; }
+  .web .ph { margin:0; }
+  .web h2 { font-size:16px; }
+  .web-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .web-cols,.web-form,.web-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .web-wide { grid-column:1/-1; }
+  .web .in { width:100%; font:inherit; color:var(--text-body); }
+  .web textarea.in { min-height:144px; resize:vertical; }
+  .web :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .web button:disabled { opacity:.5; cursor:not-allowed; }
+  .web-check { display:flex; align-items:start; gap:12px; }
+  .web-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .web-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 112px 200px 64px; align-items:center; gap:16px; height:44px; padding:0 20px; border-top:1px solid var(--joint); }
+  .web-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .web-row:hover { background:var(--tile); }
+  .web-facts { display:grid; grid-template-columns:180px minmax(0,1fr); gap:12px; margin:0; }
+  .web-facts dt { color:var(--text-muted); }
+  .web-facts dd { margin:0; overflow-wrap:anywhere; }
+  .web-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; }
+  .web-state .btn,.web-section > .btn { justify-self:start; }
+  .web-copy { min-height:144px; display:grid; align-content:center; gap:16px; border-top:1px solid var(--joint); border-bottom:1px solid var(--joint); padding:20px 0; }
+
   </style>
 </helmet>
 <!--
@@ -345,7 +367,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:960px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -387,121 +409,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Saved source preview</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>SEO and redirects</h1><p>Thirteen years of indexed URLs are the asset. Every legacy address needs one deliberate outcome before launch — 38 are still undecided.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Export approvals</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Build redirect file</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6"/><path d="M4 4v16"/><path d="M4 12h6"/><path d="M4 20h6"/><rect x="10" y="1.5" width="10" height="5" rx="1"/><rect x="10" y="9.5" width="10" height="5" rx="1"/><rect x="10" y="17.5" width="10" height="5" rx="1"/></svg><span>Pages</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg><span>Area guides</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><span>News</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Navigation</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h5"/></svg><span>Forms</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg><span>Media</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>SEO and redirects</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar">
-            <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Legacy URL</span>
-            <div class="seg" style="background:transparent; padding:0">
-              <button type="button" data-on="1">Undecided <em>38</em></button>
-              <button type="button">Keep 200 <em>171</em></button>
-              <button type="button">Redirect 301 <em>224</em></button>
-              <button type="button">Gone 410 <em>24</em></button>
-            </div>
-            <span style="margin-left:auto" class="mono">457 total</span>
-          </div>
-          <table>
-            <thead><tr><th>Legacy URL</th><th>What it was</th><th>Evidence</th><th>Proposed</th><th>Decision</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><span class="mono" style="white-space:normal">makler-realty.ru/obj/4412.html</span></td>
-                <td class="muted">Listing · sold 2019</td>
-                <td class="muted">Crawl + archive</td>
-                <td><b style="font-size:13px">301 → /ru/imoti/sandanski</b><span style="display:block; font-size:11px" class="muted">Hermes proposal</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>
-              <tr>
-                <td><span class="mono" style="white-space:normal">makler-realty.com/obj/2210.html</span></td>
-                <td class="muted">Listing · source unavailable</td>
-                <td class="muted">Crawl only</td>
-                <td><b style="font-size:13px">410 gone</b><span style="display:block; font-size:11px" class="muted">Hermes proposal</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>
-              <tr>
-                <td><span class="mono" style="white-space:normal">makler-realty.ru/news/2014/03/</span></td>
-                <td class="muted">News index · 11 posts</td>
-                <td class="muted">Crawl + archive</td>
-                <td><b style="font-size:13px">410 gone</b><span style="display:block; font-size:11px" class="muted">Needs a person</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>
-              <tr>
-                <td><span class="mono" style="white-space:normal">makler-realty.com/uslugi.html</span></td>
-                <td class="muted">Services page</td>
-                <td class="muted">Crawl + archive</td>
-                <td><b style="font-size:13px">301 → /bg/prodai</b><span style="display:block; font-size:11px" class="muted">Hermes proposal</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>
-              <tr>
-                <td><span class="mono" style="white-space:normal">makler-realty.ru/kontakty.html</span></td>
-                <td class="muted">Contact</td>
-                <td class="muted">Crawl + archive</td>
-                <td><b style="font-size:13px">301 → /ru/kontakt</b><span style="display:block; font-size:11px" class="muted">Hermes proposal</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>
-              <tr>
-                <td><span class="mono" style="white-space:normal">makler-realty.com/obj/0114.html</span></td>
-                <td class="muted">Listing · still active</td>
-                <td class="muted">Crawl + catalogue</td>
-                <td><b style="font-size:13px">200 keep · preservation page</b><span style="display:block; font-size:11px" class="muted">Needs a person</span></td>
-                <td style="text-align:right"><span style="display:flex; gap:8px; justify-content:flex-end">
-                  <button class="btn btn--sm btn--primary" type="button">Approve</button>
-                  <button class="btn btn--sm" type="button">Change</button></span></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="savebar"><span style="font-size:13px" class="muted">A redirect file is only built from approved decisions. An unapproved proposal never reaches production.</span></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Launch gate</h2><span class="pill pill--warn"><i></i>Blocked</span></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>URLs with a decision</span><b>419 of 457</b></div>
-              <div class="prog" style="height:6px; border-radius:var(--r-pill); background:var(--joint); overflow:hidden"><i style="display:block; height:100%; width:92%; background:var(--success-500)"></i></div>
-              <div class="note note--warn" style="margin-top:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Launch stays blocked until all 457 have a terminal outcome.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Search evidence</h2><a href="#" style="font-size:13px; font-weight:600">Import</a></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>Google Search Console</span><span class="pill pill--warn"><i></i>Not verified</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Yandex Webmaster</span><span class="pill pill--warn"><i></i>Not verified</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Sitemap submitted</span><span class="pill pill--sand"><i></i>After cutover</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Crawl parity report</span><span class="pill pill--ok"><i></i>Passing</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Structured data</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>RealEstateListing</span><span class="pill pill--ok"><i></i>84 valid</span></div>
-              <div style="display:flex; justify-content:space-between"><span>RealEstateAgent</span><span class="pill pill--ok"><i></i>Valid</span></div>
-              <div style="display:flex; justify-content:space-between"><span>BreadcrumbList</span><span class="pill pill--ok"><i></i>Valid</span></div>
-              <div style="display:flex; justify-content:space-between"><span>FAQPage on guides</span><span class="pill pill--warn"><i></i>2 with unapproved answers</span></div>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="web"><div class="ph"><div><h1>SEO and redirects</h1><p>Preserve each legacy URL’s reviewed outcome and verify its current behaviour.</p></div></div><p class="muted">Saved launch report: <bdi dir="ltr">2026-08-27T14:16:20.632Z</bdi>. Historical evidence; not a fresh production check.</p><div class="web-cols"><section class="panel"><div class="panel-hd"><h2>Saved redirect decisions</h2></div><div class="web-section"><dl class="web-facts"><dt>Legacy URLs</dt><dd>457</dd><dt>Resolved</dt><dd>457</dd><dt>Unresolved</dt><dd>0</dd><dt>Retain 200</dt><dd>10</dd><dt>Redirect 301</dt><dd>179</dd><dt>Approved 410</dt><dd>268</dd></dl><p>The sealed preservation contract carries specific approved exceptions. This editor cannot invent new homepage or search fallbacks.</p><span class="wit wit--none">Live crawl not checked</span></div></section><section class="panel"><div class="panel-hd"><h2>Find the exact old URL</h2></div><div class="web-section"><div class="field"><label for="legacy-url">Legacy URL</label><input class="in" id="legacy-url" type="url" value=""></div><div class="field"><label for="legacy-domain">Source domain</label><select class="in" id="legacy-domain"><option value="makler-realty.com">makler-realty.com</option><option value="makler-realty.ru">makler-realty.ru</option></select></div><button type="button" class="btn btn--accent">Load reviewed decision</button><p>Load the known crawl record, its existing decision and the equivalent content before proposing a change.</p><span class="wit wit--none">No URL selected</span></div></section></div><section class="panel"><div class="panel-hd"><h2>Review a proposed change</h2></div><div class="web-section"><form class="web-form"><div class="field"><label for="route-decision">Outcome</label><select class="in" id="route-decision"><option value="redirect_301">Redirect 301 to equivalent content</option><option value="retain_200">Retain 200 with equivalent content</option><option value="approved_410">Approved 410, no equivalent content</option></select></div><div class="field"><label for="route-target">Equivalent internal path (200 or 301 only)</label><input class="in" id="route-target" type="text" value=""></div><div class="field web-wide"><label for="route-reason">Evidence and reason for the decision</label><textarea class="in" id="route-reason" dir="auto"></textarea></div><label class="web-check"><input type="checkbox"><span>I, Mariya, have checked the original URL, the proposed outcome and its supporting evidence.</span></label><button type="button" class="btn" disabled>Record decision</button></form><p>Unavailable until a known old URL is loaded. A 410 decision has no target; 200 and 301 decisions require verified equivalent content. Recording a decision and deploying it are separate actions.</p></div></section><div class="web-cols"><section class="panel"><div class="panel-hd"><h2>Release boundary</h2></div><div class="web-section"><p>PR #182 remains draft and unmerged. The listing-reference change must not enter this redesign release through an incidental merge.</p><p>The saved report still lists 4 launch blockers: live services, monitoring rollback, payload runtime, production recovery.</p><a href="LaunchReadiness.html">Review launch evidence</a></div></section><section class="panel"><div class="panel-hd"><h2>External search evidence</h2></div><div class="web-section"><span class="wit wit--none">Fresh reports not loaded</span><p>Check current Search Console, Yandex Webmaster, backlinks, sitemap and crawl reports against the deployed version.</p><p>A generated redirect file or successful local test is not evidence that the live URL returns its intended outcome.</p></div></section></div><div class="web-states"><section class="web-state"><h2>No matching pages</h2><p>Keep the selected language and filters visible. A filtered view is not a complete route inventory.</p><button type="button" class="btn">Change filters</button></section><section class="web-state"><h2>Content is loading</h2><p>Keep the selected page identity while its content and review history load.</p><button type="button" class="btn" disabled>Loading…</button></section><section class="web-state"><h2>Save or validation failed</h2><p>Retain the text and review note. The previous published version remains the reference.</p><button type="button" class="btn">Review entered values</button></section><section class="web-state"><h2>Some evidence is missing</h2><p>A page can exist while language approval, media or an external search report is unavailable.</p><button type="button" class="btn">Review missing evidence</button></section><section class="web-state"><h2>Many pages or decisions</h2><p>Keep one identity per row and retain the current page position.</p><button type="button" class="btn">Next page</button></section><section class="web-state"><h2>Version changed</h2><p>Compare the latest version before applying an edit or approval based on older content.</p><button type="button" class="btn" disabled>Publish old version</button></section></div></div>
     </div>
   </div>
 </div>
