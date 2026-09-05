@@ -1,0 +1,24 @@
+/* Canvas typography, applied to the existing public routes. */
+[data-react-public-ui] h1,
+[data-react-public-ui] h2 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+}
+[data-react-public-ui] h1 { font-size: var(--display-lg); line-height: 1.05; }
+[data-react-public-ui] h2 { font-size: 2rem; line-height: 1.2; }
+[data-react-public-ui] .ld-price,
+[data-react-public-ui] .mk-pcard__price,
+[data-react-public-ui] .ct-ctx__price,
+[data-react-public-ui] .t-mono {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+[data-react-public-ui] .t-eyebrow,
+[data-react-public-ui] dt,
+[data-react-public-ui] th {
+  text-transform: none;
+  letter-spacing: normal;
+}
+@media (max-width: 720px) {
+  [data-react-public-ui] h1 { font-size: var(--display-sm); }
+}
