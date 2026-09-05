@@ -30,6 +30,27 @@ test("generated search analytics report is valid when present", () => {
   assert.equal(assertSearchAnalyticsReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
 });
 
+test("invalid numeric search events remain visible without breaking reports or counting as empty results", () => {
+  const events = [
+    { price_min: "abc" },
+    { price_min: "200000", price_max: "100000" },
+    {},
+  ].map((filters) => createEvent({ type: "search", path: "/api/search", locale: "bg", query: "zzzz-no-results", filters }));
+  const report = buildSearchAnalyticsReport({ registry, seed, events });
+  assert.equal(assertSearchAnalyticsReport(report), true);
+  assert.equal(report.summary.search_events, 3);
+  assert.equal(report.summary.invalid_search_events, 2);
+  assert.equal(report.summary.zero_result_events, 1);
+  assert.equal(report.summary.zero_result_queries.length, 1);
+  assert.deepEqual(report.rows[0].filters, { price_min: "abc" });
+  assert.equal(report.rows[0].result_count, null);
+  assert.deepEqual(report.rows[1].invalid_filter_fields, ["price_min", "price_max"]);
+  const malformed = structuredClone(report);
+  delete malformed.rows[0].invalid_filter_fields;
+  assert.throws(() => assertSearchAnalyticsReport(malformed), /Search analytics rows/);
+  assert.throws(() => buildSearchAnalyticsReport({ registry, seed: null, events: [events[2]] }), TypeError);
+});
+
 test("checked-in privacy-safe event fixtures can build a non-empty search analytics report", () => {
   const report = buildSearchAnalyticsReport({
     registry,

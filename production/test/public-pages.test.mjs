@@ -140,7 +140,8 @@ test("contact page lists the single Sandanski office as an object, channels, and
   assert.match(html, /name="contact.phone" type="tel" required/);
   assert.match(html, /name="request_details.callback_time"/);
   assert.match(html, /website_contact_callback/);
-  assert.match(html, /class="mk-btn mk-btn--accent mk-btn--lg" href="tel:\+359879696870"/);
+  assert.match(html, /class="mk-btn mk-btn--accent[^\"]*" href="#contact-form"/);
+  assert.match(html, /class="mk-btn mk-btn--secondary mk-btn--lg" href="tel:\+359879696870"/);
   assert.doesNotMatch(html, /ct-office__ph/);
   const he = renderContactPage({ registry, localeCode: "he", leadWritesDisabled: false });
   assert.equal(he.body.offices[0].name, "סנדנסקי");

@@ -3570,6 +3570,90 @@ ${THEME_SWITCH_JS}
         });
     });
   }
+  // One behaviour for every field-level Hermes draft. The button knows its
+  // endpoint, the box it fills and the bar that names the source; nothing here
+  // is listing-specific, so the next assisted field needs no new code.
+  function initHermesAssist() {
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-hermes-assist]") : null;
+      if (!button || button.disabled) return;
+      event.preventDefault();
+      var target = document.getElementById(button.getAttribute("data-hermes-assist-target") || "");
+      var bar = document.getElementById(button.getAttribute("data-hermes-assist-bar") || "");
+      if (!target) return;
+      var host = button.closest("[data-hermes-assist-for]");
+      var original = button.innerHTML;
+      var pending = button.getAttribute("data-hermes-assist-pending") || "Drafting…";
+      var failure = button.getAttribute("data-hermes-assist-failure") || "Could not draft this.";
+      var unavailable = button.getAttribute("data-hermes-assist-unavailable") || failure;
+      button.disabled = true;
+      button.setAttribute("data-busy", "true");
+      button.textContent = pending;
+      fetch(button.getAttribute("data-hermes-assist-endpoint"), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        // Every assisted value posts what its own endpoint needs. The button
+        // carries that as one payload attribute, so a second kind of draft is
+        // a markup change rather than a second copy of this behaviour.
+        body: JSON.stringify(
+          Object.assign(
+            {
+              listingId: button.getAttribute("data-hermes-assist-listing"),
+              field: button.getAttribute("data-hermes-assist-field"),
+              locale: button.getAttribute("data-hermes-assist-locale"),
+              sourceText: target.value || "",
+            },
+            JSON.parse(button.getAttribute("data-hermes-assist-payload") || "{}"),
+          ),
+        ),
+      })
+        .then(function (response) {
+          return response.json().then(function (payload) {
+            if (!response.ok) throw new Error(payload && payload.message ? payload.message : failure);
+            return payload;
+          });
+        })
+        .then(function (draft) {
+          // A draft that claims it may act on its own is not a draft. Refuse it
+          // rather than putting it in front of a broker as if it were reviewed.
+          // Listing copy says human_approval_required; a reply says
+          // broker_approval_required. Neither may claim it can go out.
+          var approvalRequired = draft.human_approval_required === true || draft.broker_approval_required === true;
+          if (!draft.text || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
+            throw new Error("invalid Hermes draft response");
+          }
+          target.value = draft.text;
+          target.dispatchEvent(new Event("input", { bubbles: true }));
+          if (host) host.setAttribute("data-hermes-drafted", "true");
+          // On the field itself as well, so the styling rule can sit beside the
+          // bare-field rule it has to outrank rather than fight it from a
+          // component selector that always loses.
+          target.setAttribute("data-hermes-drafted", "true");
+          if (bar) bar.hidden = false;
+          // Some values are edited inside a disclosure. Filling one the reader
+          // cannot see is the same as not filling it.
+          var reveal = button.getAttribute("data-hermes-assist-reveal");
+          var panel = reveal ? document.getElementById(reveal) : target.closest("details");
+          if (panel && panel.tagName === "DETAILS") panel.open = true;
+          button.innerHTML = original;
+        })
+        .catch(function (error) {
+          var missing = /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY|not configured/i.test(String((error && error.message) || ""));
+          button.innerHTML = original;
+          if (host) host.setAttribute("data-hermes-error", missing ? unavailable : (error && error.message) || failure);
+          if (bar) {
+            bar.hidden = false;
+            bar.setAttribute("data-hermes-drafted-state", "error");
+            bar.textContent = missing ? unavailable : (error && error.message) || failure;
+          }
+        })
+        .then(function () {
+          button.removeAttribute("data-busy");
+          button.disabled = false;
+        });
+    });
+  }
   function initReplyForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -4222,6 +4306,18 @@ ${THEME_SWITCH_JS}
     });
     return pairs.sort().join("&");
   }
+  function initSettingsSectionLinks() {
+    var open = function () {
+      var id = (window.location.hash || "").replace(/^#/, "");
+      if (!id) return;
+      var section = document.getElementById(id);
+      if (section && section.tagName === "DETAILS") section.open = true;
+    };
+    if (!document.querySelector("[data-settings-index-row]")) return;
+    window.addEventListener("hashchange", open);
+    open();
+  }
+
   function initWorkspaceSettingsForms() {
     var forms = document.querySelectorAll("[data-workspace-settings-form]");
     for (var i = 0; i < forms.length; i += 1) {
@@ -4770,6 +4866,7 @@ ${THEME_SWITCH_JS}
     initMediaUploadForm(mediaUploadForms[mediaUploadIndex]);
   }
   initWorkspaceOnboarding();
+  initSettingsSectionLinks();
   initWorkspaceSettingsForms();
   initLeadBulkForm();
   initSavedViews();
@@ -4780,6 +4877,7 @@ ${THEME_SWITCH_JS}
   initTranslationWorkflowForms();
   initReplyDeliveryForms();
   initReplyForms();
+  initHermesAssist();
   initCommunicationTemplates();
   initAdminListFilters();
   initPipelineBoard();

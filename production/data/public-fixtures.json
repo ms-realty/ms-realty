@@ -905,7 +905,8 @@
           },
           "applicable_filter_fields": [
             "bedrooms_min"
-          ]
+          ],
+          "widen_ranges": []
         }
       },
       "seller": {
@@ -4680,7 +4681,8 @@
         },
         "applicable_filter_fields": [
           "bedrooms_min"
-        ]
+        ],
+        "widen_ranges": []
       },
       "fallback": {
         "enabled": true,
@@ -7059,6 +7061,12 @@
         "viewingsWorkspace": "Просмотры и последующие действия",
         "viewingsDescription": "Расписание просмотров, последующие задачи и календарь брокеров.",
         "translationQueue": "Переводы на проверку",
+        "localeRollout": "Языки сайта",
+        "mediaLibrary": "Медиа",
+        "documentRecords": "Досье",
+        "documentRecordsDescription": "Каждый документ, его версия и кто ещё должен его подписать.",
+        "mediaLibraryDescription": "Каждое фото, план и тур в каталоге и чего ждёт каждый из них.",
+        "localeRolloutDescription": "Каждый язык сайта, что он покрывает и что берёт на себя агентство, добавляя или убирая язык.",
         "translationQueueDescription": "Очередь ручной проверки отсутствующих, черновых и устаревших переводов.",
         "leadInbox": "Входящие заявки",
         "leadInboxDescription": "Входящие заявки CRM с ответами, проверенными брокером.",
@@ -7093,6 +7101,8 @@
         "owners": "Ответственные",
         "latestEnquiry": "Последняя заявка",
         "documentsWorkspace": "Документы и процесс",
+        "tasksWorkspace": "Задачи",
+        "tasksDescription": "Одна упорядоченная рабочая очередь. Работа, которую закрывает другой экран, ведет туда, а не отмечается здесь.",
         "documentsDescription": "Проверяемые чек-листы без хранения файлов или автоматического юридического одобрения.",
         "consentsWorkspace": "Согласия и предпочтения",
         "consentsDescription": "Текущее состояние последующего контакта и уведомлений без показа персональных данных.",
@@ -7487,6 +7497,10 @@
               "label": "Сегодня"
             },
             {
+              "id": "tasks",
+              "label": "Задачи"
+            },
+            {
               "id": "viewings",
               "label": "Просмотры и последующие действия"
             },
@@ -7686,6 +7700,12 @@
         "viewingsWorkspace": "Viewings and follow-ups",
         "viewingsDescription": "Viewing schedule, follow-up tasks, and broker calendar.",
         "translationQueue": "Translation review",
+        "localeRollout": "Website languages",
+        "mediaLibrary": "Media",
+        "documentRecords": "Document records",
+        "documentRecordsDescription": "Every document the workspace holds, the version it is on, and who still has to sign it.",
+        "mediaLibraryDescription": "Every photo, floor plan and tour in the catalogue, and what each one is waiting for.",
+        "localeRolloutDescription": "Every website language, what it covers, and what adding or removing one commits the agency to.",
         "translationQueueDescription": "Human review queue for missing, drafted, and stale listing translations.",
         "leadInbox": "Lead inbox",
         "leadInboxDescription": "CRM lead inbox with broker-reviewed replies.",
@@ -7720,6 +7740,8 @@
         "owners": "Owners",
         "latestEnquiry": "Latest enquiry",
         "documentsWorkspace": "Documents and process",
+        "tasksWorkspace": "Tasks",
+        "tasksDescription": "One ordered work queue. Work another screen closes links there instead of being ticked here.",
         "documentsDescription": "Reviewable process checklists without storing files or inferring legal approval.",
         "consentsWorkspace": "Consent and preferences",
         "consentsDescription": "Current follow-up and notification state without exposing personal contact values.",
@@ -8112,6 +8134,10 @@
             {
               "id": "today",
               "label": "Today"
+            },
+            {
+              "id": "tasks",
+              "label": "Tasks"
             },
             {
               "id": "viewings",

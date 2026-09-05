@@ -83,8 +83,12 @@ function currentRuntimeTargetContext() {
 function verifiedPublicTarget(targetPath) {
   const { registry, seed } = currentRuntimeTargetContext();
   const resolved = resolveRuntimePath(registry, seed, targetPath);
-  if (!resolved || ["not_found", "home", "language_fallback"].includes(resolved.type)) {
-    throw new Error("Route decision targetPath must resolve to published, non-home public content");
+  // "No homepage or search fallback" is the workspace's rule for a redirect
+  // target: a visitor following an old link lands on the equivalent page or
+  // nowhere, never on a generic entry point. The sealed launch contract may
+  // carry the approver's explicit exceptions; this path may not mint new ones.
+  if (!resolved || ["not_found", "home", "language_fallback", "search"].includes(resolved.type)) {
+    throw new Error("Route decision targetPath must resolve to published, non-home, non-search public content");
   }
   return resolved;
 }
@@ -482,6 +486,34 @@ export function buildDeployableRedirects(routeMap, approvals) {
       reviewer: decision.reviewer,
       approved_at: decision.approved_at,
     }));
+}
+
+// What the review screen owes the operator is the truth about what is still
+// undecided. Two things decide a legacy URL: a row in the workspace ledger,
+// and the sealed launch-freeze contract the runtime actually serves from. The
+// screen used to count only the first, and reported 292 URLs as pending that
+// had been approved and sealed weeks earlier. Both runtimes read this one
+// function so they cannot disagree about it.
+export function buildLegacyRouteReviewState(routeMap, approvals, contractDecisions = []) {
+  const workspace = buildLegacyRouteDecisions(routeMap, approvals);
+  const workspaceByUrl = new Map(workspace.map((row) => [row.old_url, row]));
+  const contractByUrl = new Map(
+    contractDecisions
+      .filter((row) => row?.old_url && row.approval_state === "approved" && row.deployable === true)
+      .map((row) => [row.old_url, row]),
+  );
+  const sourceReviewRequired = routeMap.filter((route) => route.review_required);
+  const pending = sourceReviewRequired.filter((route) => !workspaceByUrl.has(route.old_url) && !contractByUrl.has(route.old_url));
+  const contractOnly = sourceReviewRequired.filter((route) => !workspaceByUrl.has(route.old_url) && contractByUrl.has(route.old_url));
+  return {
+    sourceReviewRequired,
+    pending,
+    contractOnly,
+    workspaceDecisions: workspace,
+    workspaceDecidedUrls: new Set(workspaceByUrl.keys()),
+    contractDecidedUrls: new Set(contractByUrl.keys()),
+    contractApprovalIds: [...new Set([...contractByUrl.values()].map((row) => row.approval_id).filter(Boolean))],
+  };
 }
 
 export function buildPendingRedirectApprovalWorkbook(routeMap, approvals) {

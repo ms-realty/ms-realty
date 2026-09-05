@@ -626,6 +626,9 @@ test("search result count is announced separately from the page heading", () => 
   const html = renderReactPublicBody(renderSearchPage({ registry, listings, localeCode: "en" }));
 
   assert.match(html, /<h1>Property search<\/h1>/);
+  assert.equal((html.match(/<h1>/g) || []).length, 1);
+  assert.ok(html.indexOf('class="sr-hero"') < html.indexOf('class="sr-body"'));
+  assert.equal((html.match(/data-save-search-form=/g) || []).length, 1);
   assert.match(html, /class="sr-results__count" role="status" aria-live="polite">\d+ matches<\/p>/);
   assert.doesNotMatch(html, /<h1>Property search \| MS Realty<small>/);
   assert.match(html, /data-mobile-search-filters="true"/);
@@ -635,13 +638,13 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /class="sr-mobile-filters__copy"><strong class="sr-mobile-filters__label">Search/);
   assert.match(html, /class="sr-mobile-filters__control" aria-hidden="true"/);
   assert.doesNotMatch(html, /data-mobile-filter-close=/);
-  assert.match(html, /data-save-search-disclosure="sr-mobile"/);
+  assert.match(html, /data-save-search-disclosure="sr"/);
   assert.match(html, /data-success-message="Search saved\. We will alert you when new properties match\."/);
   assert.match(html, /id="sr-mobile-filter-form"[^>]*data-search-filter-form="true"/);
   assert.match(html, /class="sr-mobile-filters__sheet-body"/);
   assert.doesNotMatch(html, /class="sr-mobile-filters__sheet-foot/);
   assert.doesNotMatch(html, /data-mobile-filter-preview-status=/);
-  assert.match(html, /id="sr-mobile-filter-form"[\s\S]*?<button[^>]*class="mk-btn mk-btn--primary[^"]*"[^>]*type="submit"/);
+  assert.match(html, /id="sr-mobile-filter-form"[\s\S]*?<button[^>]*class="mk-btn mk-btn--accent[^"]*"[^>]*type="submit"/);
   const mobileFilterForm = html.slice(html.indexOf('id="sr-mobile-filter-form"'), html.indexOf("</form>", html.indexOf('id="sr-mobile-filter-form"')));
   assert.match(mobileFilterForm, /name="country_code"/);
   assert.match(mobileFilterForm, /name="region_id"/);
@@ -687,7 +690,7 @@ test("search exposes reviewed crawlable suggestions and localized recent-search 
     english,
     /<a class="sr-guided__link" href="\/en\/search\?property_family=apartment" data-guided-search-suggestion="property_family" data-guided-search-value="apartment">Apartment<\/a>/,
   );
-  assert.match(english, /data-recent-searches="true" aria-labelledby="sr-mobile-recent-searches-title" hidden/);
+  assert.match(english, /data-recent-searches="true" aria-labelledby="sr-recent-searches-title" hidden/);
   assert.match(english, /data-recent-search-list="true"/);
   assert.match(english, /data-clear-recent-searches="true" aria-label="Clear">Clear<\/button>/);
   assert.doesNotMatch(english, /data-guided-search-suggestion="(?:location|property_family)"[^>]*href="[^"]*\?q=/);
@@ -880,7 +883,7 @@ test("the save-search form is withdrawn when its endpoint cannot accept a search
   assert.doesNotMatch(withdrawn, /action="\/api\/saved-searches"/);
   assert.doesNotMatch(withdrawn, /name="alertConsent"/);
   assert.match(withdrawn, /data-save-search-unavailable="sr"/);
-  assert.match(withdrawn, /data-save-search-unavailable="sr-mobile"/);
+  assert.equal((withdrawn.match(/data-save-search-unavailable=/g) || []).length, 1);
   assert.match(withdrawn, /Формата е временно недостъпна/);
   assert.match(withdrawn, /href="tel:\+359879696870"/);
 

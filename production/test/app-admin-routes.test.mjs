@@ -455,9 +455,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-original-language="he"/);
       assert.match(inboxHtml, /data-private-contact="true"/);
       assert.match(inboxHtml, /https:\/\/wa\.me\/359880000001/);
-      assert.match(inboxHtml, /action="\/api\/admin\/replies\/draft"/);
-      assert.match(inboxHtml, /data-hermes-draft-request="true"/);
-      assert.match(inboxHtml, /data-reply-draft-unavailable="Hermes не настроен в этой среде\./);
+      // The draft is a control that calls the endpoint, not a form posting to
+      // it, so the endpoint is asserted where the control names it.
+      assert.match(inboxHtml, /data-hermes-assist-endpoint="\/api\/admin\/replies\/draft"/);
+      assert.match(inboxHtml, /data-hermes-assist-field="reply"/);
+      // The unavailable message reaches the operator in the admin locale they
+      // asked for, which is what the old attribute was standing for.
+      assert.match(inboxHtml, /data-hermes-assist-unavailable="Hermes не настроен в этой среде\./);
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
       assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
       assert.match(inboxHtml, /name="hermesDraftText"/);
@@ -1118,16 +1122,22 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.dashboard.media_reconciliation.media_rows, 11859);
       assert.equal(migrationReviewBody.routeMap.total, 457);
       assert.equal(migrationReviewBody.routeMap.sourceReviewRequired, 457);
-      assert.equal(migrationReviewBody.routeMap.reviewRequired, 457);
+      // This harness starts with an empty workspace ledger. It used to assert
+      // 457 pending, which pinned the screen ignoring the sealed launch
+      // contract the runtime serves from. Nothing is pending: every legacy
+      // URL is decided somewhere, and the screen says where.
+      assert.equal(migrationReviewBody.routeMap.reviewRequired, 0);
       assert.equal(migrationReviewBody.routeMap.mappedListings, 165);
       assert.equal(migrationReviewBody.routeMap.terminalDecisionsReviewed, 0);
+      assert.equal(migrationReviewBody.routeMap.contractDecided, 457);
+      assert.deepEqual(migrationReviewBody.routeMap.contractApprovalIds, ["MSR-LAUNCH-FREEZE-1"]);
       assert.deepEqual(migrationReviewBody.routeMap.pendingPagination, {
         page: 1,
         pageSize: 10,
-        totalPages: 46,
-        totalRows: 457,
+        totalPages: 1,
+        totalRows: 0,
       });
-      assert.equal(migrationReviewBody.routeMap.pendingSample.length, 10);
+      assert.equal(migrationReviewBody.routeMap.pendingSample.length, 0);
       assert.ok(migrationReviewBody.routeMap.targetOptions.some((option) => option.path === "/bg/kontakt"));
       assert.ok(migrationReviewBody.routeMap.targetOptions.every((option) => !["home", "search", "listing"].includes(option.type)));
       assert.equal(migrationReviewBody.agencyReviewQueue.deployment_mode, "production_review");
@@ -1214,7 +1224,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-agency-review-queue="true"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-agency-review-status="open"'), true);
       assert.match(migrationReviewHtmlBody, /Опашка за решения на агенцията/);
-      assert.match(migrationReviewHtmlBody, /data-agency-review-lane="legacy_routes"/);
+      // Nothing is pending, so there is no legacy-routes lane: the queue used
+      // to carry 457 phantom tasks for URLs the sealed contract had decided.
+      // The other lanes still render, which keeps the lane markup proven.
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-agency-review-lane="legacy_routes"/);
+      assert.match(migrationReviewHtmlBody, /data-agency-review-lane="listing_quality"/);
       assert.match(migrationReviewHtmlBody, /data-label="Защитна граница"/);
       assert.doesNotMatch(migrationReviewHtmlBody, /Agency decision queue|Legacy URL decisions/);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
@@ -1223,17 +1237,23 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, />Търсене<input type="search"/);
       assert.match(migrationReviewHtmlBody, /работещи услуги/);
       assert.match(migrationReviewHtmlBody, /наблюдение и връщане към предишна версия/);
-      assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
+      assert.match(migrationReviewHtmlBody, /data-pending-route-count="0"/);
       assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
-      assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
-      assert.match(migrationReviewHtmlBody, /data-source-evidence="true"/);
-      assert.match(migrationReviewHtmlBody, /data-source-title="Недвижими имоти в Сандански \| MS Realty"/);
-      assert.match(migrationReviewHtmlBody, /href="https:\/\/makler-realty\.com" target="_blank" rel="noreferrer"/);
-      assert.match(migrationReviewHtmlBody, /map_or_rebuild_content_page/);
-      assert.match(migrationReviewHtmlBody, /data-route-decision-form="true"/);
-      assert.match(migrationReviewHtmlBody, /name="decision" required data-route-decision-select="true"/);
-      assert.match(migrationReviewHtmlBody, /list="legacy-route-targets" data-route-decision-target="true"/);
-      assert.match(migrationReviewHtmlBody, /data-route-decision-target-preview="true"/);
+      assert.match(migrationReviewHtmlBody, /data-contract-route-count="457"/);
+      // The provenance pill names the approval so a reader can find the seal.
+      assert.match(migrationReviewHtmlBody, /data-contract-route-progress="true"[^>]*title="MSR-LAUNCH-FREEZE-1"/);
+      // No pending row, so no pending-row form and no per-row evidence block:
+      // a screen that drew a decision form for an already-sealed URL would be
+      // inviting a second, conflicting decision.
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
+      // A decision form is drawn per pending row. With every URL sealed there
+      // is none: a form here would invite a second, conflicting decision.
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-route-decision-form="true"/);
+      // The decision select, target input and target preview are per-row
+      // controls of that form, so they are absent for the same reason.
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-route-decision-select="true"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-route-decision-target="true"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-route-decision-target-preview="true"/);
       assert.match(migrationReviewHtmlBody, /data-route-target-options="true"/);
       assert.match(migrationReviewHtmlBody, /data-launch-evidence-disclosure="true"/);
       assert.match(migrationReviewHtmlBody, /data-admin-runtime-evidence-form="live-service-provisioning"/);
@@ -1246,10 +1266,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-quality-tools-disclosure="true"/);
       assert.equal(migrationReviewHtmlBody.includes('<details class="adm-route-decision__disclosure" open>'), false);
       assert.match(migrationReviewHtmlBody, /value="\/bg\/kontakt" label="BG · contact"/);
-      assert.match(migrationReviewHtmlBody, /value="redirect_301"/);
-      assert.match(migrationReviewHtmlBody, /value="retain_200"/);
-      assert.match(migrationReviewHtmlBody, /value="approved_410"/);
-      assert.match(migrationReviewHtmlBody, /routePage=2/);
+      // The three decision options belong to the per-row select, and page 2
+      // exists only when there are rows to page. Neither is drawn when every
+      // legacy URL is already decided. The target datalist above is
+      // page-level and still renders, so the vocabulary of targets is proven.
+      assert.doesNotMatch(migrationReviewHtmlBody, /value="redirect_301"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /value="retain_200"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /value="approved_410"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /routePage=2/);
       assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);
       assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);
       assert.match(migrationReviewHtmlBody, /data-launch-readiness-export-endpoint="\/api\/admin\/launch-readiness\/export"/);
@@ -1267,10 +1291,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         type: "taxonomy",
         domain: "makler-realty.ru",
       });
-      assert.ok(filteredMigrationReviewBody.routeMap.pendingPagination.totalRows > 0);
-      assert.ok(filteredMigrationReviewBody.routeMap.pendingPagination.totalRows < migrationReviewBody.routeMap.reviewRequired);
-      assert.ok(filteredMigrationReviewBody.routeMap.pendingSample.every((row) => row.url_type === "taxonomy"));
-      assert.ok(filteredMigrationReviewBody.routeMap.pendingSample.every((row) => row.source_domain === "makler-realty.ru"));
+      // With nothing pending the filter has nothing to narrow; the filter
+      // itself is proven on real rows in migration-review-filter.test.mjs.
+      assert.equal(filteredMigrationReviewBody.routeMap.pendingPagination.totalRows, 0);
+      assert.deepEqual(filteredMigrationReviewBody.routeMap.pendingSample, []);
 
       const filteredMigrationReviewHtml = await migrationReviewHtmlRoute.GET(
         new Request(
@@ -1280,9 +1304,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       );
       const filteredMigrationReviewHtmlBody = await filteredMigrationReviewHtml.text();
       assert.match(filteredMigrationReviewHtmlBody, /data-route-filters="true"/);
-      assert.match(filteredMigrationReviewHtmlBody, /data-filtered-route-count="[1-9][0-9]*"/);
-      assert.match(filteredMigrationReviewHtmlBody, /routeType=taxonomy/);
-      assert.match(filteredMigrationReviewHtmlBody, /routeDomain=makler-realty.ru/);
+      // Filters still echo back, but they narrow an empty pending set.
+      assert.match(filteredMigrationReviewHtmlBody, /data-filtered-route-count="0"/);
+      // The active filter is reflected in the controls themselves, even though
+      // it narrows an empty set: the select's vocabulary is every reviewable
+      // route, not the rows that happen to be pending.
+      assert.match(filteredMigrationReviewHtmlBody, /<option value="taxonomy" selected/);
+      assert.match(filteredMigrationReviewHtmlBody, /<option value="makler-realty\.ru" selected/);
 
       const seoEvidence = await seoEvidenceRoute.GET(new Request("https://example.test/api/admin/seo-evidence", { headers: auth }));
       const seoEvidenceBody = await seoEvidence.json();
@@ -1422,9 +1450,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       );
       const migrationReviewAfterDecisionBody = await migrationReviewAfterDecision.json();
       assert.equal(migrationReviewAfterDecisionBody.routeMap.sourceReviewRequired, 457);
-      assert.equal(migrationReviewAfterDecisionBody.routeMap.reviewRequired, 456);
+      // A workspace decision moves one URL from "sealed contract" to "reviewed
+      // here"; it never creates or removes a pending URL.
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.reviewRequired, 0);
       assert.equal(migrationReviewAfterDecisionBody.routeMap.terminalDecisionsReviewed, 1);
-      assert.equal(migrationReviewAfterDecisionBody.routeMap.pendingPagination.totalRows, 456);
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.contractDecided, 456);
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.pendingPagination.totalRows, 0);
 
       const redirectImport = await redirectApprovalsImportRoute.POST(
         new Request("https://example.test/api/admin/redirect-approvals/import", {

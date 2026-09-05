@@ -677,6 +677,7 @@ function projectedMedia(document) {
     source: document.source || null,
     media_reviewer: document.reviewer || null,
     media_reviewed_at: document.reviewed_at || null,
+    media_review_note: document.review_history?.at(-1)?.review_note || null,
     thumbnail_url: document.rendition?.storage_key
       ? `/api/admin/media/uploads/${assetId}?rendition=${encodeURIComponent(document.rendition.kind || "thumb")}`
       : null,

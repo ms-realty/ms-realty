@@ -1051,6 +1051,14 @@ function formatEuro(value, localeCode = "en") {
   }
 }
 
+function SandanskiPhotograph({ className, localeCode }) {
+  const photo = HERO_GALLERY_SLIDES[0];
+  return h("picture", { className },
+    h("source", { type: "image/avif", srcSet: photo.avif, sizes: "(max-width: 1080px) 100vw, 50vw" }),
+    h("img", { src: photo.src, alt: localizedLocationValue(localeCode, "Sandanski"), width: photo.width, height: photo.height, fetchPriority: "high", decoding: "async" }),
+  );
+}
+
 function pricePresetOptions({ values, localeCode, labels, suffix = "", selected = "" }) {
   return [
     h("option", { key: "any", value: "" }, labels.any),
@@ -2389,13 +2397,32 @@ function SearchBody({ page }) {
   const reviewedPropertyFamilies = [...new Set(filterOptions.property_families || filterOptions.property_types || [])].filter(Boolean).slice(0, 6);
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const applicableFilterFields = new Set(controls.applicable_filter_fields || []);
+  // A reversed or non-numeric range reaches this page with the offending values
+  // already stripped from the query, so the results are honest. The boxes keep
+  // what was typed and say so, because a buyer who has just written two numbers
+  // needs to correct one of them, not start the search again.
+  const filterNotice = page.search.filter_notice || null;
+  const noticeFields = new Set(filterNotice?.fields || []);
+  const noticeId = "sr-filter-notice";
+  const filterFieldLabel = (name) =>
+    ({
+      price: `${labels.price} (EUR)`,
+      area: labels.area,
+      land_area: labels.factLabels?.land_area_sqm,
+      bedrooms: labels.factLabels?.bedrooms,
+      premises: labels.factLabels?.premises,
+      hotel_rooms: labels.factLabels?.hotel_rooms,
+      floor: labels.factLabels?.floor,
+      storeys: labels.factLabels?.storeys,
+    })[String(name).replace(/_(min|max)$/u, "")] || null;
+  const noticeLabels = [...new Set((filterNotice?.fields || []).map(filterFieldLabel).filter(Boolean))];
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
   const contact = chrome.contact || {};
   const filtersLabel = chrome.copy.filters || labels.activeFilters;
   const offerLabel = labels.factLabels?.offer_type || "Offer";
-  const secondaryFilterKeys = ["country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
-  const secondaryFiltersActive = Boolean(String(page.search.query || "").trim()) || secondaryFilterKeys.some((key) => filters[key]);
+  const secondaryFilterKeys = ["property_subtype", "price_min", "price_max", "bedrooms_min", "premises_min", "hotel_rooms_min", "area_min", "area_max", "country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
+  const secondaryFiltersActive = Boolean(filterNotice || String(page.search.query || "").trim()) || secondaryFilterKeys.some((key) => filters[key]);
   const mobileSearchContext = String(
     page.search.query ||
       filters.location ||
@@ -2432,6 +2459,18 @@ function SearchBody({ page }) {
         h(Icon, { name: "chevron-down", size: 16, className: "sr-select__chevron" }),
       ),
     );
+  const numberInput = (idPrefix, name, { step = "1", inputMode = "numeric" } = {}) =>
+    h("input", {
+      id: `${idPrefix}-${name}`,
+      name,
+      type: "number",
+      min: "0",
+      step,
+      inputMode,
+      defaultValue: filters[name] || (noticeFields.has(name) ? filterNotice.values?.[name] || "" : ""),
+      "aria-invalid": noticeFields.has(name) ? "true" : undefined,
+      "aria-describedby": noticeFields.has(name) ? noticeId : undefined,
+    });
   const rangePair = (idPrefix, legend, minName, maxName, { step = "1", inputMode = "numeric", className = "" } = {}) =>
     h(
       "fieldset",
@@ -2440,18 +2479,8 @@ function SearchBody({ page }) {
       h(
         "div",
         { className: "sr-fg__pair" },
-        h(
-          "label",
-          { htmlFor: `${idPrefix}-${minName}` },
-          h("span", null, labels.min),
-          h("input", { id: `${idPrefix}-${minName}`, name: minName, type: "number", min: "0", step, inputMode, defaultValue: filters[minName] || "" }),
-        ),
-        h(
-          "label",
-          { htmlFor: `${idPrefix}-${maxName}` },
-          h("span", null, labels.max),
-          h("input", { id: `${idPrefix}-${maxName}`, name: maxName, type: "number", min: "0", step, inputMode, defaultValue: filters[maxName] || "" }),
-        ),
+        h("label", { htmlFor: `${idPrefix}-${minName}` }, h("span", null, labels.min), numberInput(idPrefix, minName, { step, inputMode })),
+        h("label", { htmlFor: `${idPrefix}-${maxName}` }, h("span", null, labels.max), numberInput(idPrefix, maxName, { step, inputMode })),
       ),
     );
   const geographyField = (idPrefix) => {
@@ -2633,20 +2662,6 @@ function SearchBody({ page }) {
       filterSelect(idPrefix, "property_family", labels.propertyType, filterOptions.property_families || filterOptions.property_types || [], (value) =>
         localizedListingValue(page.locale, "property_type", value),
       ),
-      applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
-        ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
-        : null,
-      rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
-      applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
-      applicableFilterFields.has("premises_min")
-        ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
-        : null,
-      applicableFilterFields.has("hotel_rooms_min")
-        ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
-        : null,
-      applicableFilterFields.has("area_min")
-        ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
-        : null,
       h(
         "details",
         { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },
@@ -2660,6 +2675,20 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-more__body" },
+          applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
+            ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
+            : null,
+          rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
+          applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
+          applicableFilterFields.has("premises_min")
+            ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
+            : null,
+          applicableFilterFields.has("hotel_rooms_min")
+            ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
+            : null,
+          applicableFilterFields.has("area_min")
+            ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
+            : null,
           h(
             "div",
             { className: "sr-fg sr-fg--keyword" },
@@ -2703,7 +2732,7 @@ function SearchBody({ page }) {
       h(
         "div",
         { className: "sr-filter-actions" },
-        h(Btn, { type: "submit", variant: "primary", full: true }, labels.applyFilters),
+        h(Btn, { type: "submit", variant: "accent", full: true }, labels.applyFilters),
         activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
       ),
     );
@@ -2826,7 +2855,6 @@ function SearchBody({ page }) {
       ),
       h("div", { className: "sr-save-disclosure__body" }, saveSearchForm(idPrefix)),
     );
-  const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix), guidedSearch(idPrefix)];
   const toolbarForm = () => {
     const hiddenFields = [];
     if (page.search.query) hiddenFields.push(["q", page.search.query]);
@@ -2888,14 +2916,27 @@ function SearchBody({ page }) {
       "data-guided-search-success": !savedView && page.search.total_matches > 0 ? "true" : "false",
       "data-saved-listings-view": savedView ? "true" : undefined,
     },
-    h(
-      "div",
-      { className: `sr-body${savedView ? " sr-body--saved" : ""}` },
-      savedView
-        ? null
-        : h(
+    savedView ? null : h(
+      "section",
+      { className: "sr-hero" },
+      h("div", { className: "sr-hero__copy" },
+        h("h1", null, page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+        noticeLabels.length
+          ? h(
+              "p",
+              {
+                id: noticeId,
+                className: "sr-notice",
+                role: "alert",
+                "data-search-filter-notice": filterNotice.reason,
+              },
+              h(Icon, { name: "triangle-alert", size: 18 }),
+              h("span", null, `${noticeLabels.join(" · ")}: ${filterNotice.reason === "range" ? labels.filterRangeInvalid : labels.filterValueInvalid}`),
+            )
+          : null,
+        h(
             "details",
-            { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
+            { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount, open: filterNotice ? true : undefined },
             h(
               "summary",
               { className: "sr-mobile-filters__summary", "aria-controls": mobileFilterPanelId },
@@ -2918,17 +2959,20 @@ function SearchBody({ page }) {
             h(
               "div",
               { id: mobileFilterPanelId, className: "sr-mobile-filters__panel" },
-              h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
+              h("div", { className: "sr-mobile-filters__sheet-body" }, filterForm("sr-mobile")),
             ),
           ),
-      savedView
-        ? null
-        : h(
+        h(
             "aside",
             { className: "sr-filters sr-filters--desktop", "aria-label": filtersLabel },
-            h("h3", null, filtersLabel),
-            ...filterForms("sr"),
+            filterForm("sr"),
           ),
+      ),
+      h(SandanskiPhotograph, { className: "sr-hero__photo", localeCode: page.locale }),
+    ),
+    h(
+      "div",
+      { className: `sr-body${savedView ? " sr-body--saved" : ""}` },
       h(
         "section",
         { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": page.search.view || "list" },
@@ -2938,7 +2982,7 @@ function SearchBody({ page }) {
           h(
             "div",
             { className: "sr-results__head" },
-            h("h1", null, savedView ? labels.savedListings : page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+            h(savedView ? "h1" : "h2", null, savedView ? labels.savedListings : labels.searchResults),
             h(
               "p",
               {
@@ -3021,6 +3065,28 @@ function SearchBody({ page }) {
               h("span", { className: "sr-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "search", size: 28 })),
               h("h2", null, labels.searchResults),
               h("p", null, `${page.search.total_matches} ${labels.matches}`),
+              (controls.widen_ranges || []).length
+                ? h(
+                    "div",
+                    { className: "sr-empty__widen", "data-search-widen": "true" },
+                    h("p", null, labels.widenHint),
+                    h(
+                      "ul",
+                      null,
+                      ...controls.widen_ranges.map((suggestion) =>
+                        h(
+                          "li",
+                          { key: suggestion.fields[0] },
+                          h(
+                            "a",
+                            { href: searchHref(page, null, 1, Object.fromEntries(suggestion.fields.map((field) => [field, ""]))) },
+                            `${filterFieldLabel(suggestion.fields[0]) || labels.search}: ${suggestion.matches} ${labels.matches}`,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
               h(
                 "div",
                 { className: "sr-empty__actions" },
@@ -3072,6 +3138,7 @@ function SearchBody({ page }) {
                 : h("span"),
             )
           : null,
+        savedView ? null : h("div", { className: "sr-followup" }, saveSearchDisclosure("sr"), guidedSearch("sr")),
       ),
     ),
   );
@@ -3107,13 +3174,14 @@ function LocationBody({ page }) {
     },
     h(
       "header",
-      { className: "loc-head" },
+      { className: `loc-head${page.body.location === "Sandanski" ? " loc-head--photo" : ""}` },
       h(
         "div",
         { className: "loc-head__in" },
         h("h1", null, page.body.h1),
         h("p", { className: "loc-head__count", "data-location-count": page.body.listing_count }, `${page.body.listing_count} ${labels.reviewedListings}`),
         page.body.intro ? h("p", { className: "loc-head__intro" }, page.body.intro) : null,
+        h(Btn, { tag: "a", variant: "accent", href: "#location-listings" }, labels.browseAllListings),
         context
           ? h(
               "div",
@@ -3137,10 +3205,11 @@ function LocationBody({ page }) {
             )
           : null,
       ),
+      page.body.location === "Sandanski" ? h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }) : null,
     ),
     h(
       "section",
-      { className: "loc-sec", "aria-label": labels.locationListings },
+      { id: "location-listings", className: "loc-sec", "aria-label": labels.locationListings },
       h(
         "div",
         { className: "loc-sec__head" },
@@ -3406,11 +3475,9 @@ function ListingBody({ page }) {
   const floorPlans = page.body.media.floor_plans || [];
   const videos = page.body.media.videos || [];
   const galleryCount = page.body.media.gallery_count || gallery.length;
-  // Desktop shows the main photo plus a 2x2 thumbnail block; phones reuse the
-  // same DOM as a swipe carousel, so every reviewed photo stays in the markup
-  // instead of trapping buyers in a five-image teaser.
+  // One lead photograph on desktop; phones reuse the full gallery as a swipe
+  // carousel. Every reviewed image remains available in the photo viewer.
   const gallerySlides = gallery.length ? gallery : [null];
-  const galleryLayout = gallerySlides.length >= 5 ? "quad" : gallerySlides.length >= 3 ? "trio" : gallerySlides.length === 2 ? "pair" : "single";
   const channels = page.body.actions.direct_contact.channels || [];
   const brokerChannels = channels.filter((channel) => channel.enabled);
   // Without a per-listing approved broker contact the panel falls back to the
@@ -3433,6 +3500,14 @@ function ListingBody({ page }) {
   const sourceLanguageLabel = contentLocale !== page.locale ? contentLocale.toUpperCase() : null;
   const verifiedAt = page.body.verification?.availability_verified_at || null;
   const verificationDate = listingVerificationDate(verifiedAt, page.locale);
+  const verifiedBy = String(page.body.verification?.availability_verified_by || "").trim();
+  const hasAvailabilityWitness = Boolean(verificationDate && verifiedBy);
+  const availabilityWitness = h(
+    "p",
+    { className: "ld-witness", "data-availability-witness": hasAvailabilityWitness ? "signed" : "missing" },
+    h("span", null, `${labels.availability}: ${hasAvailabilityWitness ? verifiedBy : labels.reviewRequired}`),
+    hasAvailabilityWitness ? h("time", { dateTime: verifiedAt }, verificationDate) : null,
+  );
   // Publication approval says the listing may be shown; it says nothing about
   // whether anybody checked its figures. Claiming reviewed facts beside a
   // table that carries source-stated ones is the contradiction this page used
@@ -3604,7 +3679,7 @@ function ListingBody({ page }) {
 
   const galleryShell = h(
     "div",
-    { className: "ld-gallery-shell", "data-gallery-layout": galleryLayout },
+    { className: "ld-gallery-shell", "data-gallery-layout": "single" },
     h(
       "div",
       {
@@ -3689,6 +3764,7 @@ function ListingBody({ page }) {
           ),
         )
       : null,
+    tools,
   );
 
   const photoViewer = gallery.length
@@ -3973,9 +4049,8 @@ function ListingBody({ page }) {
       "div",
       { className: "ld" },
       h("div", { className: "ld-topbar" }, crumbs, backLink("-desktop")),
-      header,
+      h("div", { className: "ld-hero" }, h("div", { className: "ld-hero__copy" }, header, availabilityWitness, primaryActions), galleryShell),
       factsBar,
-      galleryShell,
       photoViewer,
       h(
         "section",
@@ -4106,7 +4181,7 @@ function ListingBody({ page }) {
         h(
           "aside",
           { className: "ld-aside", "aria-label": labels.contactBroker, "data-listing-contact-panel": "true" },
-          h("div", { className: "ld-panel" }, priceBlock({ "data-listing-price": "true" }, { compact: true }), primaryActions, officeBlock, trustBlock, tools),
+          h("div", { className: "ld-panel" }, priceBlock({ "data-listing-price": "true" }, { compact: true }), officeBlock, trustBlock),
         ),
       ),
     ),
@@ -4244,9 +4319,11 @@ function SellerBody({ page }) {
     h(
       "section",
       { className: "page-head sell-head", "aria-label": labels.sellerValuation, "data-seller-valuation-flow": "broker_callback" },
+      h("div", { className: "public-band__copy" },
       h("h1", null, page.body.h1),
       h("p", null, page.body.intro),
       h("p", { className: "sell-promise", "data-seller-promise": "true" }, h(Icon, { name: "shield-check", size: 18 }), h("span", null, labels.sellerPromise)),
+      valuation ? h(Btn, { tag: "a", variant: "accent", href: "#seller-enquiry" }, labels.propertyDetails) : channels ? phoneAction(channels.phone, "accent") : null,
       // Without a submittable form there is no flow to track, so the progress
       // indicator would promise a stepper the visitor cannot use.
       valuation
@@ -4263,11 +4340,14 @@ function SellerBody({ page }) {
             ),
           )
         : null,
+      ),
+      h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }),
     ),
     valuation
       ? h(
           "form",
           {
+            id: "seller-enquiry",
             className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-form",
             method: valuation.method || "POST",
             action: valuation.endpoint,
@@ -4373,7 +4453,7 @@ function SellerBody({ page }) {
               "div",
               { className: "sell-form__actions" },
               h(Btn, { type: "button", variant: "secondary", size: "lg", iconStart: "arrow-left", "data-seller-back": "true", hidden: true }, labels.previous),
-              h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
+              h(Btn, { type: "submit", variant: "secondary", size: "lg", iconStart: "send" }, valuation.label),
             ),
           ),
         )
@@ -4382,7 +4462,7 @@ function SellerBody({ page }) {
           { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
           h("h2", { className: "ct-form__title" }, labels.sellerValuation),
           h("p", null, page.body.form_unavailable),
-          channels ? phoneAction(channels.phone, "accent") : null,
+          channels ? phoneAction(channels.phone, "secondary") : null,
         ),
     // The one photo-upload path on the page. It cannot live inside the intake
     // form - forms do not nest, and a seller who already holds a reference must
@@ -4555,7 +4635,13 @@ function ContactBody({ page }) {
   const main = h(
     "main",
     { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
-    h("div", { className: "page-head ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
+    h("div", { className: "page-head ct-page__head" },
+      h("div", { className: "public-band__copy" },
+        h("h1", null, page.body.h1), h("p", null, page.body.intro),
+        callback ? h(Btn, { tag: "a", variant: "accent", href: "#contact-form" }, labels.contactFormTitle) : channels ? phoneAction(channels.phone, "accent") : null,
+      ),
+      h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }),
+    ),
     h(
       "div",
       { className: "ct-page__cols" },
@@ -4570,7 +4656,7 @@ function ContactBody({ page }) {
               h(
                 "div",
                 { className: "channel-row" },
-                h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
+                h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
                 channels.whatsapp ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.whatsapp.href }, channels.whatsapp.label) : null,
                 channels.viber ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.viber.href }, channels.viber.label) : null,
                 channels.email ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: channels.email.href }, channels.email.label) : null,
@@ -4620,6 +4706,7 @@ function ContactBody({ page }) {
         ? h(
             "form",
             {
+              id: "contact-form",
               className: "mk-card mk-card--elevated mk-card--pad-lg ct-form ct-form--contact",
               method: callback.method || "POST",
               action: callback.endpoint,
@@ -4664,7 +4751,7 @@ function ContactBody({ page }) {
             { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
             h("h2", { className: "ct-form__title" }, labels.contactFormTitle),
             h("p", null, page.body.form_unavailable),
-            channels ? phoneAction(channels.phone, "accent") : null,
+            channels ? phoneAction(channels.phone, "secondary") : null,
           ),
     ),
   );

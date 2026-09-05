@@ -9,6 +9,9 @@ export class PublicSearchInputError extends Error {
     super(message, options);
     this.name = "PublicSearchInputError";
     this.status = 400;
+    // Carried up from the intent so the search page can name the boxes the
+    // visitor has to correct instead of showing them a wrapped message.
+    this.fields = options?.cause?.fields ? [...options.cause.fields] : [];
   }
 }
 

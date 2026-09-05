@@ -16,7 +16,7 @@
       "fallback_locale": "en",
       "public_indexable": false,
       "status": "needs_locale_approval",
-      "admin_path": "/admin/locales?locale=fr",
+      "admin_path": "/admin/locales?language=fr",
       "task": {
         "id": "activate-locale-fr",
         "owner": "translator_fr",

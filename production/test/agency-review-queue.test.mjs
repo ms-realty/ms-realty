@@ -92,7 +92,10 @@ test("production-review admin renders localized mobile queue labels and unverifi
 
   assert.equal(review.status, 200);
   assert.match(html, /Опашка за решения на агенцията/);
-  assert.match(html, /data-agency-review-lane="legacy_routes"/);
+  // No legacy-routes lane: every legacy URL is decided, 165 in the workspace
+  // and 292 in the sealed contract. The queue used to list 292 phantom tasks.
+  assert.doesNotMatch(html, /data-agency-review-lane="legacy_routes"/);
+  assert.match(html, /data-agency-review-lane="listing_quality"/);
   assert.match(html, /data-label="Защитна граница"/);
   assert.doesNotMatch(html, /Agency decision queue|Legacy URL decisions/);
 

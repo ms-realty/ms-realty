@@ -372,7 +372,7 @@ export async function applyLeadBulkOperation({ ledgers, journey, input, principa
   const results = [];
   for (const leadId of leadIds) {
     try {
-      const itemInput = { ...input, leadId, leadIds: undefined, lead_ids: undefined };
+      const itemInput = { ...input, humanConfirmed: true, leadId, leadIds: undefined, lead_ids: undefined };
       const shared = { ledgers, input: itemInput, principal, recordedAt, brokerProfiles, audit };
       const outcome =
         action === "assign"

@@ -436,6 +436,49 @@ function pagedRows(rows, requestedPage, pageSize = 12) {
   };
 }
 
+// A broker filtering a catalogue types figures rather than picking from a
+// menu of them, so a bound that cannot be honoured has to be reported rather
+// than silently applied or silently dropped: the box keeps what was typed and
+// the page says why the rows below ignore it.
+function boundFilter(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return { raw: "", value: null, invalid: false };
+  const number = Number(raw);
+  if (!Number.isFinite(number) || number < 0) return { raw, value: null, invalid: true };
+  return { raw, value: number, invalid: false };
+}
+
+function rangeFilter(field, minInput, maxInput) {
+  const min = boundFilter(minInput);
+  const max = boundFilter(maxInput);
+  const reversed = min.value !== null && max.value !== null && min.value > max.value;
+  const errors = [];
+  if (min.invalid) errors.push({ field: `${field}Min`, reason: "value" });
+  if (max.invalid) errors.push({ field: `${field}Max`, reason: "value" });
+  if (reversed) errors.push({ field, reason: "range" });
+  return {
+    min: min.raw,
+    max: max.raw,
+    // A reversed pair honours neither bound: applying one of them would answer
+    // a question the broker did not ask.
+    lower: reversed ? null : min.value,
+    upper: reversed ? null : max.value,
+    errors,
+  };
+}
+
+function withinRange(value, range) {
+  if (range.lower === null && range.upper === null) return true;
+  // Number(null) and Number("") are both 0, so a listing with no recorded
+  // figure would satisfy a "from 0" bound and appear as if it answered it.
+  if (value === null || value === undefined || value === "") return false;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return false;
+  if (range.lower !== null && number < range.lower) return false;
+  if (range.upper !== null && number > range.upper) return false;
+  return true;
+}
+
 export function renderAdminListingManagerPayload(
   registry,
   requestedLocale,
@@ -446,6 +489,10 @@ export function renderAdminListingManagerPayload(
     status = "",
     sourceLocale = "",
     propertyFamily = "",
+    priceMin = "",
+    priceMax = "",
+    areaMin = "",
+    areaMax = "",
     page = 1,
     generatedAt = new Date().toISOString(),
     operatorId = null,
@@ -471,6 +518,8 @@ export function renderAdminListingManagerPayload(
   const normalizedStatus = String(status).trim();
   const normalizedSourceLocale = String(sourceLocale).trim();
   const normalizedFamily = String(propertyFamily).trim();
+  const priceRange = rangeFilter("price", priceMin, priceMax);
+  const areaRange = rangeFilter("area", areaMin, areaMax);
   const propertiesById = new Map((seed.properties || []).map((property) => [property.id, property]));
   const allRows = seed.records
     .filter((record) => record.collection === "listings")
@@ -497,6 +546,7 @@ export function renderAdminListingManagerPayload(
         listing_status: facts.listing_status || "unverified",
         cms_status: record.cms_status || "source_imported_review_required",
         price_eur: facts.price_eur ?? null,
+        area_sqm: facts.area_sqm ?? property?.facts?.primary_area_sqm ?? null,
         price_on_request: facts.price_on_request === true,
         public_gallery_assets: publicMediaLibrary(record.media || []).gallery_count,
         metadata_gaps: metadataGaps,
@@ -510,6 +560,8 @@ export function renderAdminListingManagerPayload(
     if (normalizedStatus && row.listing_status !== normalizedStatus && row.cms_status !== normalizedStatus) return false;
     if (normalizedSourceLocale && row.source_locale !== normalizedSourceLocale) return false;
     if (normalizedFamily && row.property_family !== normalizedFamily) return false;
+    if (!withinRange(row.price_eur, priceRange)) return false;
+    if (!withinRange(row.area_sqm, areaRange)) return false;
     if (!normalizedQuery) return true;
     return [row.id, row.title, row.location, row.source_domain].some((value) =>
       String(value || "").toLocaleLowerCase().includes(normalizedQuery),
@@ -538,11 +590,34 @@ export function renderAdminListingManagerPayload(
     },
     workspace: workspaceWithOperator(workspace, operatorId),
     listings: paged.rows,
-    filters: { q: normalizedQuery, status: normalizedStatus, sourceLocale: normalizedSourceLocale, propertyFamily: normalizedFamily },
+    filters: {
+      q: normalizedQuery,
+      status: normalizedStatus,
+      sourceLocale: normalizedSourceLocale,
+      propertyFamily: normalizedFamily,
+      priceMin: priceRange.min,
+      priceMax: priceRange.max,
+      areaMin: areaRange.min,
+      areaMax: areaRange.max,
+    },
+    filterErrors: [...priceRange.errors, ...areaRange.errors],
     filterOptions: {
       statuses: [...new Set(allRows.flatMap((row) => [row.listing_status, row.cms_status]))].filter(Boolean).sort(),
       sourceLocales: [...new Set(allRows.map((row) => row.source_locale))].filter(Boolean).sort(),
       propertyFamilies: [...CANONICAL_PROPERTY_FAMILIES],
+      // A bound on a figure the catalogue does not carry can only ever return
+      // an empty page, which reads as "no such listing exists" rather than "we
+      // have not recorded that yet". The control is offered only when some
+      // listing answers it.
+      // Number(null) is 0, so the emptiness check has to reject the blank
+      // before it converts; otherwise every unrecorded figure reads as zero
+      // and the control is offered for a fact the catalogue never carries.
+      rangeFields: ["price", "area"].filter((field) =>
+        allRows.some((row) => {
+          const value = field === "price" ? row.price_eur : row.area_sqm;
+          return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
+        }),
+      ),
     },
     pagination: paged.pagination,
     publicationSchedules,
@@ -864,6 +939,28 @@ export function renderAdminDocumentChecklistPayload(registry, requestedLocale, c
     workspace: workspaceWithOperator(workspace, operator),
     documentChecklistQueue: checklistQueue,
     summary: checklistQueue.summary,
+  };
+}
+
+export function renderAdminTaskQueuePayload(registry, requestedLocale, taskQueue, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_task_queue",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/tasks",
+    canonical: "/admin/tasks",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.tasksWorkspace || "Tasks"} | MS Realty`,
+      description: workspace.copy.tasksDescription || "One ordered work queue.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    taskQueue,
+    summary: taskQueue.summary,
   };
 }
 

@@ -119,6 +119,7 @@ import {
   renderAdminRealtyCasesPayload,
   renderAdminRuntimeUnavailablePayload,
   renderAdminApprovedContentPayload,
+  renderAdminTaskQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import {
@@ -127,6 +128,7 @@ import {
   buildDocumentChecklistQueue,
   readDocumentChecklistOutcomes,
 } from "./document-checklists.mjs";
+import { DEFAULT_TASK_LEDGER_PATH, appendTaskAction, buildTaskQueue, openTask, readTaskEvents } from "./tasks.mjs";
 import {
   DocumentStoreUnavailableError,
   createDocument,
@@ -269,7 +271,8 @@ import {
   readMediaReviews,
 } from "./media-reviews.mjs";
 // B4 media upload
-import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, readMediaUploads } from "./media-uploads.mjs";
+import { DEFAULT_MEDIA_UPLOAD_LEDGER_PATH, applyMediaUploads, mediaUploadLimitsFromEnv, parseMediaUploadRequest, readMediaUploads } from "./media-uploads.mjs";
+import { storeDocumentBytes } from "./document-storage.mjs";
 import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
 import {
   listMediaUploadsDurably,
@@ -311,6 +314,10 @@ import {
 } from "./listing-quality.mjs";
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
+import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
+import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
+import { renderAdminDocumentRecordsPayload } from "./document-records.mjs";
+import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
@@ -370,6 +377,7 @@ import {
   appendRedirectApproval,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
+  buildLegacyRouteReviewState,
   buildPendingRedirectApprovalWorkbook,
   buildRedirectApprovalWorkbook,
   importRedirectApprovalsCsv,
@@ -516,6 +524,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     ...realtyCasePayloadAuthorityConfigFromEnv(env),
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
+    taskLedgerPath: env.MS_REALTY_TASK_LEDGER_PATH || DEFAULT_TASK_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     eventDurableStore: eventDurableStoreConfigFromEnv(env),
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -2163,6 +2172,10 @@ async function listingManagerPayload(registry, url, config) {
     status: url.searchParams.get("status") || "",
     sourceLocale: url.searchParams.get("sourceLocale") || "",
     propertyFamily: url.searchParams.get("propertyFamily") || "",
+    priceMin: url.searchParams.get("priceMin") || "",
+    priceMax: url.searchParams.get("priceMax") || "",
+    areaMin: url.searchParams.get("areaMin") || "",
+    areaMax: url.searchParams.get("areaMax") || "",
     factRow: url.searchParams.get("factRow") || "",
     factQuery: url.searchParams.get("factQ") || "",
     page: url.searchParams.get("page") || 1,
@@ -2513,10 +2526,15 @@ async function authoritativePreflightReports(config) {
 function migrationReviewPayload(registry, url, config) {
   const routes = routeMapRows();
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
-  const decisions = currentLegacyRouteDecisions(config);
-  const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
-  const sourceReviewRequired = routes.filter((route) => route.review_required);
-  const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const reviewState = buildLegacyRouteReviewState(
+    routes,
+    readRedirectApprovals(config.redirectApprovalPath),
+    approvedRouteArtifact(config).decisions,
+  );
+  const decisions = reviewState.workspaceDecisions;
+  const decidedOldUrls = reviewState.workspaceDecidedUrls;
+  const sourceReviewRequired = reviewState.sourceReviewRequired;
+  const reviewRequired = reviewState.pending;
   const reviewSelection = filterMigrationReviewRoutes(
     attachMigrationReviewEvidence(reviewRequired, loadMigrationRecords()),
     {
@@ -2524,6 +2542,7 @@ function migrationReviewPayload(registry, url, config) {
       type: url.searchParams.get("routeType"),
       domain: url.searchParams.get("routeDomain"),
     },
+    { vocabulary: reviewState.sourceReviewRequired },
   );
   // Match the HTTP workbench's short, phone-friendly human review batches.
   const routePageSize = 10;
@@ -2569,6 +2588,8 @@ function migrationReviewPayload(registry, url, config) {
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
       terminalDecisionsReviewed: decisions.length,
+      contractDecided: reviewState.contractOnly.length,
+      contractApprovalIds: reviewState.contractApprovalIds,
       pendingSample: pendingRoutesWithEvidence,
       filters: reviewSelection.filters,
       filterOptions: reviewSelection.filterOptions,
@@ -2631,6 +2652,72 @@ function migrationReviewPayload(registry, url, config) {
     deployablePreview: currentDeployableRedirects(config),
     terminalDecisionPreview: decisions,
   };
+}
+
+async function documentRecordsPayload(registry, url, config) {
+  // Same shape as the node origin: an absent store is a state, not a 503.
+  const principal = config.adminPrincipal;
+  const payload = config.payloadListingRuntime || null;
+  let documents = [];
+  let signatureRequests = [];
+  let unavailable = null;
+  try {
+    documents = await readDocuments({ payload, principal });
+    signatureRequests = await readSignatureRequests({ payload, principal });
+  } catch (error) {
+    if (error instanceof DocumentStoreUnavailableError || error?.code === "document_store_unavailable") {
+      unavailable = { code: "document_store_unavailable", message: error.message };
+    } else if (error?.status === 403) {
+      unavailable = { code: "workspace_access_denied", message: error.message };
+    } else {
+      throw error;
+    }
+  }
+  return renderAdminDocumentRecordsPayload(registry, url.searchParams.get("locale") || "en", {
+    documents,
+    signatureRequests,
+    unavailable,
+    query: url.searchParams.get("q") || "",
+    status: url.searchParams.get("status") || "",
+    documentType: url.searchParams.get("documentType") || "",
+    caseId: url.searchParams.get("caseId") || "",
+    awaiting: url.searchParams.get("awaiting") || false,
+    operatorId: config.adminPrincipal || null,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
+}
+
+async function mediaLibraryPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    payload: config.payloadListingRuntime || null,
+    env: config.authEnv || process.env,
+    requirePayload: config.runtimeDataDurableOnly,
+  });
+  return renderAdminMediaLibraryPayload(registry, url.searchParams.get("locale") || "en", {
+    seed,
+    query: url.searchParams.get("q") || "",
+    issue: url.searchParams.get("issue") || "",
+    listing: url.searchParams.get("listing") || "",
+    kind: url.searchParams.get("kind") || "",
+    page: url.searchParams.get("page") || 1,
+    operatorId: config.adminPrincipal || null,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
+}
+
+async function localeRolloutPayload(registry, url, config) {
+  const seed = await projectListingDraftSeed(currentSeed(config), {
+    payload: config.payloadListingRuntime || null,
+    env: config.authEnv || process.env,
+    requirePayload: config.runtimeDataDurableOnly,
+  });
+  return renderAdminLocaleRolloutPayload(registry, url.searchParams.get("locale") || "en", {
+    seed,
+    translationTasks: config.runtimeDataDurableOnly ? [] : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    operatorId: config.adminPrincipal || null,
+    focus: url.searchParams.get("language") || "",
+  });
 }
 
 function localePayload(registry, url) {
@@ -3627,6 +3714,48 @@ async function appendAccountContactLinkEntry(input, config) {
       },
       config,
       result.recorded_at,
+    );
+  }
+  return result;
+}
+
+async function taskQueuePayload(registry, url, config) {
+  const today = await todayPayload(registry, url, config);
+  return renderAdminTaskQueuePayload(
+    registry,
+    adminLocaleParam(url),
+    buildTaskQueue({
+      page: today,
+      events: readTaskEvents(config.taskLedgerPath),
+      now: config.reviewedAt || new Date().toISOString(),
+    }),
+    config.adminPrincipal,
+  );
+}
+
+function appendTaskEntry(input, config, { opening }) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const recordedAt = config.reviewedAt || new Date().toISOString();
+  const result = opening
+    ? openTask(attributed, { filePath: config.taskLedgerPath, recordedAt })
+    : appendTaskAction(attributed, { filePath: config.taskLedgerPath, recordedAt });
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: opening ? "task_opened" : "task_updated",
+        actor: result.event.actor,
+        objectType: "task",
+        objectId: result.task.task_id,
+        metadata: {
+          action: result.event.action,
+          task_type: result.task.kind,
+          status: result.task.status,
+          owner: result.task.owner,
+          has_reference: Boolean(result.event.reference),
+        },
+      },
+      config,
+      result.event.recorded_at,
     );
   }
   return result;
@@ -4977,6 +5106,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       );
       return url.pathname === "/admin/today" ? htmlResponse(payload) : jsonResponse(200, payload);
     }
+    if (request.method === "GET" && ["/admin/tasks", "/api/admin/tasks"].includes(url.pathname)) {
+      const payload = await taskQueuePayload(registry, url, config);
+      return url.pathname === "/admin/tasks" ? htmlResponse(payload) : jsonResponse(200, payload);
+    }
+    if (request.method === "POST" && ["/api/admin/tasks", "/api/admin/tasks/action"].includes(url.pathname)) {
+      const result = appendTaskEntry(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config,
+        { opening: url.pathname === "/api/admin/tasks" },
+      );
+      return jsonResponse(result.idempotent ? 200 : 201, { kind: "task", ...result });
+    }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));
@@ -5006,6 +5147,37 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             }),
           });
         }
+        const documentStorage = () =>
+          config.mediaUploadStorage || createMediaUploadStorage(config.mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+        if (request.method === "POST" && url.pathname === "/api/admin/documents/bytes") {
+          if (!config.adminPrincipal?.id) {
+            return jsonResponse(403, { kind: "operator_identity_required", message: "Document bytes require a named authenticated operator" });
+          }
+          const upload = parseMediaUploadRequest(
+            { headers: { "content-type": request.headers.get("content-type") || "" }, bodyBytes: Buffer.from(await request.arrayBuffer()) },
+            { limits: mediaUploadLimitsFromEnv(), fileField: "document" },
+          );
+          const file = upload.files[0];
+          if (!file) return jsonResponse(400, { kind: "document_bytes_required", message: "Attach the document as the \"document\" file field" });
+          const stored = await storeDocumentBytes({
+            storage: documentStorage(),
+            workspaceId: upload.fields.workspace_id || upload.fields.workspaceId || url.searchParams.get("workspace_id") || "",
+            bytes: file.bytes,
+            mimeType: file.contentType || upload.fields.mime_type || upload.fields.mimeType,
+          });
+          recordAudit(
+            {
+              action: "document_bytes_stored",
+              actor: config.adminPrincipal?.id || "admin",
+              objectType: "document_bytes",
+              objectId: stored.content_digest,
+              metadata: { byte_size: stored.byte_size, mime_type: stored.mime_type },
+            },
+            config,
+            recordedAt,
+          );
+          return jsonResponse(201, { kind: "document_bytes", ...stored });
+        }
         if (request.method === "POST" && url.pathname === "/api/admin/documents") {
           const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
           const result = await createDocument({
@@ -5013,6 +5185,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
             principal: config.adminPrincipal,
             input,
             recordedAt,
+            storage: documentStorage(),
           });
           if (!result.idempotent) {
             recordAudit({
@@ -5057,6 +5230,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
               documentId,
               input: parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
               recordedAt,
+              storage: documentStorage(),
             });
             if (!result.idempotent) {
               recordAudit({
@@ -5251,6 +5425,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
       return jsonResponse(200, migrationReviewPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/documents/records") {
+      return htmlResponse(await documentRecordsPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/media") {
+      return htmlResponse(await mediaLibraryPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/locales") {
+      return htmlResponse(await localeRolloutPayload(registry, url, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       return jsonResponse(200, localePayload(registry, url));
@@ -5683,6 +5866,16 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/copy/draft") {
+      return jsonResponse(
+        201,
+        await createHermesListingCopyDraft(currentSeed(config), parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), {
+          auditLogPath: config.auditLogPath,
+          provider: config.hermesListingCopyProvider || undefined,
+          recordedAt: config.reviewedAt || config.editedAt,
+        }),
+      );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       try {

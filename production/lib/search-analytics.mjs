@@ -4,6 +4,7 @@ import { readEventLedger } from "./events.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "./runtime.mjs";
+import { SearchFilterError } from "./search-intent.mjs";
 
 export const DEFAULT_SEARCH_ANALYTICS_REPORT = fromRoot("production", "data", "search-analytics-report.json");
 
@@ -24,20 +25,25 @@ function topCounts(rows, keyFn) {
 }
 
 function searchEventRow(registry, seed, event) {
-  const search = searchRuntimeListings(registry, seed, {
-    localeCode: event.locale,
-    query: event.query || "",
-    filters: event.filters || {},
-    translationTasks: [],
-  });
-  return {
+  const row = {
     path: event.path,
     locale: event.locale,
     query: event.query || "",
     filters: event.filters || {},
     filter_key: filterKey(event.filters),
-    result_count: Number(search.search?.total_matches || 0),
   };
+  try {
+    const search = searchRuntimeListings(registry, seed, {
+      localeCode: event.locale,
+      query: row.query,
+      filters: row.filters,
+      translationTasks: [],
+    });
+    return { ...row, result_count: Number(search.search?.total_matches || 0) };
+  } catch (error) {
+    if (!(error instanceof SearchFilterError)) throw error;
+    return { ...row, result_count: null, invalid_filter_fields: error.fields };
+  }
 }
 
 export function buildSearchAnalyticsReport({
@@ -54,6 +60,7 @@ export function buildSearchAnalyticsReport({
     generated_at: generatedAt,
     summary: {
       search_events: rows.length,
+      invalid_search_events: rows.filter((row) => row.result_count === null).length,
       zero_result_events: zeroResultRows.length,
       filtered_search_events: filteredRows.length,
       locales: topCounts(rows, (row) => row.locale),
@@ -76,8 +83,13 @@ export function assertSearchAnalyticsReport(report) {
   if (report.summary.filtered_search_events !== report.rows.filter((row) => row.filter_key !== "none").length) {
     throw new Error("Search analytics filter summary must match rows");
   }
+  if ((report.summary.invalid_search_events ?? 0) !== report.rows.filter((row) => row.result_count === null).length) {
+    throw new Error("Search analytics invalid-event summary must match rows");
+  }
   for (const row of report.rows) {
-    if (!row.path?.startsWith("/") || !row.locale || row.result_count < 0) {
+    const hasResult = Number.isInteger(row.result_count) && row.result_count >= 0;
+    const invalidFilter = row.result_count === null && Array.isArray(row.invalid_filter_fields) && row.invalid_filter_fields.length > 0;
+    if (!row.path?.startsWith("/") || !row.locale || (!hasResult && !invalidFilter)) {
       throw new Error("Search analytics rows must preserve local route, locale, and non-negative result count");
     }
   }

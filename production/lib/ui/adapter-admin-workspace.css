@@ -1,0 +1,74 @@
+/* Shared Operate foundations. The existing dark palette keeps its aliases. */
+.crm-app {
+  --canvas: var(--tile);
+  --border: var(--joint);
+  --border-strong: var(--stone-500);
+  --surface-hover: var(--tile-deep);
+  --adm-panel: var(--tile);
+  --adm-sidebar-group: var(--text-muted);
+  --adm-owner-primary: var(--text-strong);
+  --adm-owner-secondary: var(--text-muted);
+  --text-base: 0.8125rem;
+  --text-md: 0.8125rem;
+  --text-lg: 1rem;
+  --text-xl: 1rem;
+  --text-2xl: 1.375rem;
+  --text-3xl: 1.375rem;
+  font-size: var(--text-sm);
+}
+.crm-app .crm-sb { background: var(--canvas); color: var(--text-body); border: 0; border-inline-end: 1px solid var(--border); }
+.crm-app .crm-nav { min-height: 44px; padding: var(--space-2) var(--space-3); gap: var(--space-2); color: var(--text-body); font-size: var(--text-sm); line-height: 1.25; }
+.crm-app .crm-nav:hover,
+.crm-app .crm-nav--on { background: var(--surface-hover); color: var(--text-strong); }
+.crm-app .crm-nav--on::before { width: 2px; border-radius: var(--radius-xs); background: var(--accent); }
+.crm-app .crm-nav--on svg { color: var(--accent); }
+.crm-app .crm-sb__group { letter-spacing: normal; }
+.crm-app .crm-sb__me { margin: var(--space-3); padding: var(--space-2); background: var(--surface); border: 1px solid var(--border); }
+.crm-app .adm-owner-identity { color: var(--text-body); }
+.crm-app .adm-owner-identity:hover { background: var(--surface-hover); }
+.crm-app .adm-owner-identity__avatar { background: var(--surface-sunken); color: var(--text-strong); border-color: var(--border-strong); }
+.crm-app .crm-top { backdrop-filter: none; }
+.crm-app .crm-top__title { font-family: var(--font-sans); font-size: var(--text-sm); letter-spacing: normal; }
+.crm-app .crm-top__eyebrow { text-transform: none; letter-spacing: normal; font-size: var(--text-sm); }
+.crm-app main[data-react-admin-ui] .crm-ph h1 { font-size: 22px; line-height: 1.25; }
+.crm-app main[data-react-admin-ui] h2,
+.crm-app main[data-react-admin-ui] h3 { font-size: 16px; }
+.crm-app .crm-tbl th { text-transform: none; letter-spacing: normal; font-size: var(--text-sm); }
+.crm-app .t-mono,
+.crm-app .adm-task-list__reference { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+.crm-app .adm-summary-card { box-shadow: none; }
+.crm-app .mk-btn:not(:focus-visible) { box-shadow: none; }
+.crm-app .mk-btn--sm,
+.crm-app .mk-btn--md,
+.crm-app main select:not([multiple]):not([size]) { min-height: 44px; height: auto; }
+.crm-app .crm-sb__brand [data-admin-logo="dark"] { display: none; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .crm-sb__brand [data-admin-logo="light"] { display: none; }
+  html:not([data-theme="light"]) .crm-sb__brand [data-admin-logo="dark"] { display: block; }
+}
+html[data-theme="dark"] .crm-sb__brand [data-admin-logo="light"] { display: none; }
+html[data-theme="dark"] .crm-sb__brand [data-admin-logo="dark"] { display: block; }
+@media (min-width: 1280px) {
+  .crm-app [data-today-briefing] { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .crm-app [data-today-briefing] > .crm-panel__hd,
+  .crm-app .adm-today-briefing__source { grid-column: 1 / -1; }
+  .crm-app .adm-today-briefing__facts { padding-block: var(--space-4); }
+  .crm-app .adm-today-briefing__action { padding: var(--space-4) var(--space-5); }
+  .crm-app .adm-today-briefing__action .mk-btn { min-height: 44px; padding-inline: var(--space-4); }
+  .crm-app .adm-next-actions > li { min-height: 44px; padding-block: 0; gap: var(--space-4); }
+  .crm-app .adm-next-actions__body { grid-template-columns: 128px minmax(0, 1.2fr) minmax(0, 1fr) 180px; align-items: center; gap: var(--space-3); }
+  .crm-app .adm-next-actions__meta { display: contents; }
+  .crm-app .adm-next-actions__meta .crm-pill { grid-column: 1; grid-row: 1; justify-self: start; max-width: 100%; overflow: hidden; white-space: nowrap; }
+  .crm-app .adm-next-actions__body > strong { grid-column: 2; grid-row: 1; }
+  .crm-app .adm-next-actions__body > small { grid-column: 3; grid-row: 1; }
+  .crm-app .adm-next-actions__meta time { grid-column: 4; grid-row: 1; font-size: 11px; }
+  .crm-app .adm-next-actions__body > strong,
+  .crm-app .adm-next-actions__body > small,
+  .crm-app .adm-next-actions__meta time { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .crm-app .adm-next-actions__action .mk-btn { min-height: 36px; height: 36px; }
+}
+@media (max-width: 767px) {
+  .crm-app main input:not([type="checkbox"]):not([type="radio"]),
+  .crm-app main select,
+  .crm-app main textarea { font-size: 16px; }
+}

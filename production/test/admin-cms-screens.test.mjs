@@ -255,7 +255,11 @@ test("activity history names its object figure and its empty log", async () => {
 });
 
 test("migration review turns each legacy URL into one dense row with a named affordance", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/migration/review?locale=en", headers: auth });
+  // Every legacy URL is decided in the sealed launch contract, so the real
+  // app draws no pending rows. This test is about how a pending row looks, so
+  // it runs against an empty route contract, where every URL is still pending.
+  const pendingApp = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z", redirects: [] });
+  const page = await dispatchHttp(pendingApp, { url: "/admin/migration/review?locale=en", headers: auth });
   assert.equal(page.status, 200);
   assert.match(page.body, /<span class="adm-route-decision__cta">Decision<\/span>/);
   assert.match(cmsCss, /\.adm-route-decision__header \{[^}]*flex-direction: row;[^}]*flex-wrap: nowrap;/);

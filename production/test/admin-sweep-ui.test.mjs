@@ -89,8 +89,8 @@ test("required fields carry a decorative accent marker and inline alerts default
   assert.match(adminAdapterCss, /\.adm-reply\[open\] > summary::after/);
 });
 
-test("critical next actions tint the active surface instead of forcing a light-only palette", () => {
-  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*background:\s*color-mix\(in srgb, var\(--brick-600\) 12%, var\(--surface\)\)/);
+test("critical next actions carry urgency in their metadata on the active surface", () => {
+  assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*background:\s*var\(--surface\)/);
   assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-next-actions__meta time\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--brick-600\) 45%, var\(--text-strong\)\)/);
   assert.match(adminSettingsCss, /data-next-action-priority="critical"[^}]*\.adm-task-list__reference\s*\{[^}]*color:\s*color-mix\(in srgb, var\(--text-muted\) 55%, var\(--text-strong\)\)/);
 });
@@ -152,7 +152,13 @@ test("technical Hermes and assistant setup content is collapsed without JavaScri
 });
 
 test("390px mobile contracts keep one dominant action per owner screen", () => {
-  assert.match(adminSettingsCss, /\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*40px;[^}]*justify-content:\s*center/);
+  // This used to pin `width: 100%` on the base rule, which made a phone
+  // contract a global one: the same action rendered 1091px wide in a 1181px
+  // desktop column. The contract is that the action is dominant ON A PHONE, so
+  // assert it in both directions -- full width under a breakpoint, and not
+  // above it.
+  assert.match(adminSettingsCss, /\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*auto;[^}]*min-height:\s*40px;[^}]*justify-content:\s*center/);
+  assert.match(adminSettingsCss, /@media \(max-width: 767px\)[\s\S]*?\.adm-today-briefing__action \.mk-btn\s*\{[^}]*width:\s*100%/);
   assert.match(adminSettingsCss, /\.adm-onboarding__copy > a\s*\{[^}]*min-height:\s*24px/);
   assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-today-briefing__action \.mk-btn,[\s\S]*?min-height:\s*44px/);
   assert.match(adminSettingsCss, /@media \(max-width: 390px\)[\s\S]*?\.adm-next-actions__action \.mk-btn[\s\S]*?width:\s*100%/);

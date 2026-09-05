@@ -5,7 +5,8 @@ import { isFixtureBrokerId } from "./listing-verification.mjs";
 import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
-import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
+import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
+import { deriveLeadQueueState, deriveSourceTasks, sortTasks } from "./tasks.mjs";
 
 function adminCopy(page) {
   return page.workspace?.copy || {};
@@ -14,6 +15,16 @@ function adminCopy(page) {
 function label(copy, key, fallback) {
   return copy[key] || fallback;
 }
+
+// Destinations whose name lives in the workspace copy rather than in the owner
+// console's module list.
+const RAIL_LABEL_KEYS = Object.freeze({
+  migration_review: { key: "migrationReview", fallback: "Migration review" },
+  locale_rollout: { key: "localeRollout", fallback: "Website languages" },
+  media_library: { key: "mediaLibrary", fallback: "Media" },
+  document_records: { key: "documentRecords", fallback: "Document records" },
+  tasks: { key: "tasksWorkspace", fallback: "Tasks" },
+});
 
 function pageCan(page, capability) {
   const capabilities = page.workspace?.operator_capabilities;
@@ -158,6 +169,7 @@ const ADMIN_UI_COPY = {
       local_preview_only: "само локален преглед",
     },
     reviewedDecisions: "Прегледани решения",
+    contractDecisions: "Одобрени в запечатания договор за пускане",
     pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
     pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници, никога начална страница или общо търсене.",
     sourceEvidence: "Данни от стария сайт",
@@ -221,6 +233,68 @@ const ADMIN_UI_COPY = {
     listing: "Обява",
     location: "Локация",
     propertyFamily: "Тип имот",
+    documentTitle: "Документ",
+    documentType: "Вид",
+    documentVersion: "Версия",
+    documentVersionValue: "в. {n}",
+    documentSigners: "Подписи",
+    documentSigner: "Подписващ",
+    documentSignersWaiting: "{count} чакат",
+    documentNoOpenSigners: "Няма чакащи",
+    documentAwaitingSignature: "Чакат подпис",
+    documentSignatureQueue: "Заявки за подпис",
+    documentSearchHint: "Заглавие, номер или дело",
+    documentRecordsEmpty: "Няма документи по този филтър.",
+    documentNoSignatures: "Няма заявки за подпис.",
+    documentStoreUnavailable: "Хранилището на документите не е достъпно в тази среда.",
+    mediaAsset: "Файл",
+    mediaIssue: "Чака за",
+    mediaSearchHint: "Обява, локация или alt текст",
+    mediaLibraryLead: "{assets} файла в {listings} обяви. Снимка стига до сайта само след като човек е погледнал какво е на нея.",
+    mediaLibraryEmpty: "Няма файлове по този филтър.",
+    mediaNoSource: "Няма източник",
+    mediaUnreviewable: "{count} файла нямат адрес на източника и не могат да бъдат прегледани.",
+    mediaWhatCounts: "Какво брои опашката",
+    mediaTaxonomyNote: "Четирите състояния идват от listing-quality: чака преглед, без alt текст, твърде малка публична галерия, обиколка за преглед. Нищо тук не разпознава лице, номер или воден знак — това го намира човек и го записва като бележка.",
+    mediaIssues: { media_review_pending: "Чака преглед", missing_alt_text: "Без alt текст", thin_public_gallery: "Малка галерия", tour_review_pending: "Обиколка за преглед" },
+    hermesUnavailableBroker: "Hermes не е свързан за това работно пространство. Използвайте одобрен шаблон или напишете отговора сами; собственикът може да го свърже.",
+    hermesUnavailableOwner: "Hermes не е настроен в тази среда.",
+    assistDraft: "Чернова",
+    assistPending: "Hermes пише чернова…",
+    assistFailed: "Hermes не успя да напише чернова.",
+    assistUnavailable: "Hermes не е настроен в тази среда. Напишете текста сами.",
+    assistDrafted: "Чернова от Hermes по {source}. Нищо не се публикува, докато вие не я одобрите.",
+    assistSourceListingFacts: "одобрените факти на обявата",
+    assistSourceLead: "запитването и фактите на обявата",
+    localeRolloutLead: "{live} от {total} езика са публикувани. Езикът се отваря чак когато човек одобри превода.",
+    localeLanguages: "Езици",
+    localeLanguage: "Език",
+    localeState: "Състояние",
+    localeListings: "Обяви",
+    localePages: "Ръководства",
+    localeFallback: "Резервен език",
+    localeReviewer: "Проверява",
+    localeSourceOfRecord: "Език източник",
+    localeGuidesDrafted: "{count} чакат одобрение",
+    localeStates: { source: "Език източник", live: "Публикуван", enabled_not_indexed: "Публичен, но неиндексиран", requested: "Заявен", off: "Изключен" },
+    localeAddTitle: "Добавяне на език",
+    localeAddCommitment: "Новият език започва изключен. За да бъде индексирана дори една страница на него, човек трябва да одобри превода на всичките {listings} обяви и {pages} ръководства и да ги поддържа актуални.",
+    localeAlreadyRequested: "{language} е заявен {count} пъти от посетители на сайта.",
+    localeCode: "Код",
+    localeNativeName: "Име на самия език",
+    localeDirection: "Посока на писане",
+    localeAddAction: "Добави език",
+    localeAdded: "Езикът е добавен изключен.",
+    localeAddFailed: "Езикът не беше добавен.",
+    localeRemoveTitle: "Премахване на език",
+    localeRemoveConsequence: "Тези езици вече имат индексирани адреси: {locales}. Премахването на език не е редакция на регистъра — всеки негов адрес се нуждае от собствено решение 301 или 410, иначе се губи търсещият трафик, който миграцията пази.",
+    localeRemoveRoute: "Решенията за адресите се вземат в",
+    priceRange: "Цена (EUR)",
+    areaRange: "Площ (m²)",
+    rangeMin: "Мин.",
+    rangeMax: "Макс.",
+    rangeReversed: "Минимумът е по-голям от максимума, затова редовете по-долу пренебрегват този филтър.",
+    rangeNotNumeric: "Приемаме само число, затова редовете по-долу пренебрегват тази стойност.",
     publicPhoto: "Публична снимка",
     publicPhotos: "Публични снимки",
     selectListings: "Избери обяви",
@@ -279,6 +353,7 @@ const ADMIN_UI_COPY = {
     snoozeLive: "Отлагането измества таймера за отговор и ескалацията с точно същия период. Връщането възстановява първоначалния срок.",
     snoozeUntil: "Отложи до",
     snoozeReason: "Причина",
+    snoozeConfirm: "Потвърждавам тази промяна в срока за отговор на запитването.",
     snoozeSaving: "Записваме отлагането…",
     snoozeSaved: "Запитването е отложено. Опреснете, за да видите новия срок.",
     snoozeFailed: "Отлагането не беше записано.",
@@ -726,13 +801,37 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Нищо в този изглед.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност", integrity: "Цялост на данните" },
+        kinds: { lead: "Запитване", viewing: "След оглед", seller: "Оценка за продавач", request: "Заявка от сайта", pipeline: "Възможност", integrity: "Цялост на данните", authored: "Собствена задача" },
         actions: { reply: "Отвори и отговори", review: "Прегледай и отговори", requeue: "Поправи изпращането", sendQueued: "Изпрати чакащия отговор", followUp: "Запиши последващо действие", feedback: "Поискай обратна връзка", sellerStep: "Запиши стъпка за продавача", outcome: "Запиши резултат", opportunity: "Отвори възможността", inspectTracking: "Провери отчета" },
         trackingTitle: "Запитванията от сайта не съвпадат с CRM",
         trackingMissing: "CRM запитвания без събитие за изпращане: {count}.",
         trackingOrphaned: "Отчетени изпращания, които липсват в постоянния CRM: {count}.",
         trackingUnavailable: "Събитията от сайта не могат да бъдат проверени.",
         priorities: { critical: "Критично", urgent: "Спешно", normal: "Нормално" },
+      },
+      tasks: {
+        title: "Задачи",
+        description: "Една подредена работна опашка от всички оперативни списъци.",
+        delegated: "Приключва се на своя екран",
+        delegatedNote: "Тази работа се води от друг екран. Отметка тук би записала, че е свършена, без да е свършена.",
+        openThere: "Отвори там",
+        ownWork: "Собствени задачи",
+        completable: "Може да се отметне тук: {count}",
+        addTitle: "Създай задача",
+        owner: "Отговорник",
+        taskType: "Тип",
+        subject: "Свързан обект",
+        due: "Срок",
+        evidence: "Бележка или вътрешна референция",
+        evidenceNote: "Приключването изисква бележка или вътрешна референция и потвърждение от посочен човек.",
+        confirm: "Потвърждавам, че работата е свършена",
+        complete: "Приключи",
+        dismiss: "Отхвърли",
+        dismissReason: "Причина за отхвърляне",
+        snooze: "Отложи до",
+        reassign: "Преназначи на",
+        empty: "Няма чакаща работа.",
+        ownEmpty: "Няма собствени задачи.",
       },
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", location_verified_at: "Локацията е проверена на", price_verified_at: "Цената е проверена на", price_on_request_verified_at: "Цена при запитване е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
@@ -848,6 +947,7 @@ const ADMIN_UI_COPY = {
       local_preview_only: "только локальный просмотр",
     },
     reviewedDecisions: "Проверенные решения",
+    contractDecisions: "Утверждены в запечатанном контракте запуска",
     pendingLegacyDecisions: "Ожидающие решения по старым URL",
     pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница, а не главная и не общий поиск.",
     sourceEvidence: "Данные со старого сайта",
@@ -911,6 +1011,68 @@ const ADMIN_UI_COPY = {
     listing: "Объект",
     location: "Локация",
     propertyFamily: "Тип объекта",
+    documentTitle: "Документ",
+    documentType: "Вид",
+    documentVersion: "Версия",
+    documentVersionValue: "в. {n}",
+    documentSigners: "Подписи",
+    documentSigner: "Подписант",
+    documentSignersWaiting: "{count} ждут",
+    documentNoOpenSigners: "Никто не ждёт",
+    documentAwaitingSignature: "Ждут подписи",
+    documentSignatureQueue: "Заявки на подпись",
+    documentSearchHint: "Название, номер или дело",
+    documentRecordsEmpty: "По этому фильтру документов нет.",
+    documentNoSignatures: "Заявок на подпись нет.",
+    documentStoreUnavailable: "Хранилище документов недоступно в этой среде.",
+    mediaAsset: "Файл",
+    mediaIssue: "Ждёт",
+    mediaSearchHint: "Объект, локация или alt-текст",
+    mediaLibraryLead: "{assets} файлов в {listings} объектах. Фото попадает на сайт только после того, как человек посмотрел, что на нём.",
+    mediaLibraryEmpty: "По этому фильтру файлов нет.",
+    mediaNoSource: "Нет источника",
+    mediaUnreviewable: "У {count} файлов нет адреса источника — их нельзя проверить.",
+    mediaWhatCounts: "Что считает очередь",
+    mediaTaxonomyNote: "Четыре состояния приходят из listing-quality: ждёт проверки, без alt-текста, слишком маленькая публичная галерея, тур на проверку. Ничто здесь не распознаёт лицо, номер или водяной знак — это находит человек и записывает заметкой.",
+    mediaIssues: { media_review_pending: "Ждёт проверки", missing_alt_text: "Без alt-текста", thin_public_gallery: "Маленькая галерея", tour_review_pending: "Тур на проверку" },
+    hermesUnavailableBroker: "Hermes не подключён для этого рабочего пространства. Используйте одобренный шаблон или напишите ответ сами; подключить может владелец.",
+    hermesUnavailableOwner: "Hermes не настроен в этой среде.",
+    assistDraft: "Черновик",
+    assistPending: "Hermes пишет черновик…",
+    assistFailed: "Hermes не смог написать черновик.",
+    assistUnavailable: "Hermes не настроен в этой среде. Напишите текст сами.",
+    assistDrafted: "Черновик Hermes по {source}. Ничего не публикуется, пока вы не одобрите.",
+    assistSourceListingFacts: "одобренным фактам объекта",
+    assistSourceLead: "запросу и фактам объекта",
+    localeRolloutLead: "{live} из {total} языков опубликованы. Язык открывается только после того, как человек одобрил перевод.",
+    localeLanguages: "Языки",
+    localeLanguage: "Язык",
+    localeState: "Состояние",
+    localeListings: "Объекты",
+    localePages: "Руководства",
+    localeFallback: "Запасной язык",
+    localeReviewer: "Проверяет",
+    localeSourceOfRecord: "Язык-источник",
+    localeGuidesDrafted: "{count} ждут одобрения",
+    localeStates: { source: "Язык-источник", live: "Опубликован", enabled_not_indexed: "Публичный, но не индексируется", requested: "Запрошен", off: "Выключен" },
+    localeAddTitle: "Добавить язык",
+    localeAddCommitment: "Новый язык начинается выключенным. Чтобы на нём проиндексировалась хотя бы одна страница, человек должен одобрить перевод всех {listings} объектов и {pages} руководств и поддерживать их актуальными.",
+    localeAlreadyRequested: "{language} запрошен посетителями сайта {count} раз.",
+    localeCode: "Код",
+    localeNativeName: "Название на самом языке",
+    localeDirection: "Направление письма",
+    localeAddAction: "Добавить язык",
+    localeAdded: "Язык добавлен выключенным.",
+    localeAddFailed: "Язык не добавлен.",
+    localeRemoveTitle: "Удаление языка",
+    localeRemoveConsequence: "У этих языков уже проиндексированы адреса: {locales}. Удаление языка — не правка реестра: каждому его адресу нужно собственное решение 301 или 410, иначе теряется поисковый трафик, который бережёт миграция.",
+    localeRemoveRoute: "Решения по адресам принимаются в",
+    priceRange: "Цена (EUR)",
+    areaRange: "Площадь (m²)",
+    rangeMin: "Мин.",
+    rangeMax: "Макс.",
+    rangeReversed: "Минимум больше максимума, поэтому строки ниже игнорируют этот фильтр.",
+    rangeNotNumeric: "Здесь принимается только число, поэтому строки ниже игнорируют это значение.",
     publicPhoto: "Публичное фото",
     publicPhotos: "Публичные фото",
     selectListings: "Выбрать объекты",
@@ -969,6 +1131,7 @@ const ADMIN_UI_COPY = {
     snoozeLive: "Откладывание сдвигает таймер ответа и эскалацию ровно на тот же период. Возврат восстанавливает исходный срок.",
     snoozeUntil: "Отложить до",
     snoozeReason: "Причина",
+    snoozeConfirm: "Подтверждаю это изменение срока ответа на заявку.",
     snoozeSaving: "Записываем откладывание…",
     snoozeSaved: "Заявка отложена. Обновите, чтобы увидеть новый срок.",
     snoozeFailed: "Откладывание не записано.",
@@ -1416,13 +1579,37 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "В этом виде ничего нет.",
         due: "Срок",
         overdue: "Просрочено",
-        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность", integrity: "Целостность данных" },
+        kinds: { lead: "Заявка", viewing: "После просмотра", seller: "Оценка для продавца", request: "Запрос с сайта", pipeline: "Возможность", integrity: "Целостность данных", authored: "Своя задача" },
         actions: { reply: "Открыть и ответить", review: "Проверить и ответить", requeue: "Исправить отправку", sendQueued: "Отправить ответ из очереди", followUp: "Записать действие", feedback: "Запросить отзыв", sellerStep: "Записать шаг продавца", outcome: "Записать результат", opportunity: "Открыть возможность", inspectTracking: "Проверить отчёт" },
         trackingTitle: "Заявки с сайта не совпадают с CRM",
         trackingMissing: "Заявки CRM без события отправки: {count}.",
         trackingOrphaned: "Отмеченные отправки, отсутствующие в постоянной CRM: {count}.",
         trackingUnavailable: "События сайта сейчас нельзя проверить.",
         priorities: { critical: "Критично", urgent: "Срочно", normal: "Обычно" },
+      },
+      tasks: {
+        title: "Задачи",
+        description: "Одна упорядоченная рабочая очередь из всех оперативных списков.",
+        delegated: "Закрывается на своем экране",
+        delegatedNote: "Эту работу ведет другой экран. Отметка здесь записала бы, что она сделана, хотя она не сделана.",
+        openThere: "Открыть там",
+        ownWork: "Свои задачи",
+        completable: "Можно отметить здесь: {count}",
+        addTitle: "Создать задачу",
+        owner: "Ответственный",
+        taskType: "Тип",
+        subject: "Связанный объект",
+        due: "Срок",
+        evidence: "Заметка или внутренняя ссылка",
+        evidenceNote: "Закрытие требует заметки или внутренней ссылки и подтверждения названного человека.",
+        confirm: "Подтверждаю, что работа выполнена",
+        complete: "Закрыть",
+        dismiss: "Отклонить",
+        dismissReason: "Причина отклонения",
+        snooze: "Отложить до",
+        reassign: "Переназначить на",
+        empty: "Нет ожидающей работы.",
+        ownEmpty: "Своих задач нет.",
       },
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", location_verified_at: "Локация проверена", price_verified_at: "Цена проверена", price_on_request_verified_at: "Цена по запросу проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
@@ -1538,6 +1725,7 @@ const ADMIN_UI_COPY = {
       local_preview_only: "local preview only",
     },
     reviewedDecisions: "Reviewed decisions",
+    contractDecisions: "Approved in the sealed launch contract",
     pendingLegacyDecisions: "Pending legacy URL decisions",
     pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages, never a homepage or generic search fallback.",
     sourceEvidence: "Legacy source evidence",
@@ -1601,6 +1789,68 @@ const ADMIN_UI_COPY = {
     listing: "Listing",
     location: "Location",
     propertyFamily: "Property type",
+    documentTitle: "Document",
+    documentType: "Kind",
+    documentVersion: "Version",
+    documentVersionValue: "v{n}",
+    documentSigners: "Signatures",
+    documentSigner: "Signer",
+    documentSignersWaiting: "{count} waiting",
+    documentNoOpenSigners: "None waiting",
+    documentAwaitingSignature: "Awaiting signature",
+    documentSignatureQueue: "Signature requests",
+    documentSearchHint: "Title, reference or case",
+    documentRecordsEmpty: "No documents match this filter.",
+    documentNoSignatures: "No signature requests.",
+    documentStoreUnavailable: "The document store is not available in this environment.",
+    mediaAsset: "Asset",
+    mediaIssue: "Waiting for",
+    mediaSearchHint: "Listing, location or alt text",
+    mediaLibraryLead: "{assets} files across {listings} listings. A photo reaches the public site only after a person has looked at what is in it.",
+    mediaLibraryEmpty: "No files match this filter.",
+    mediaNoSource: "No source",
+    mediaUnreviewable: "{count} files carry no source URL and cannot be reviewed.",
+    mediaWhatCounts: "What the queue counts",
+    mediaTaxonomyNote: "The four states come from listing-quality: awaiting review, missing alt text, a public gallery too thin to publish, and a tour awaiting review. Nothing here detects a face, a number plate or a watermark — a person finds those and records them as a note.",
+    mediaIssues: { media_review_pending: "Awaiting review", missing_alt_text: "No alt text", thin_public_gallery: "Thin gallery", tour_review_pending: "Tour awaiting review" },
+    hermesUnavailableBroker: "Hermes is not connected for this workspace. Use an approved template or write the reply yourself; the workspace owner can connect it.",
+    hermesUnavailableOwner: "Hermes is not configured in this environment.",
+    assistDraft: "Draft",
+    assistPending: "Hermes is drafting…",
+    assistFailed: "Hermes could not draft this.",
+    assistUnavailable: "Hermes is not configured in this environment. Write the text yourself.",
+    assistDrafted: "Hermes draft from {source}. Nothing is published until you approve it.",
+    assistSourceListingFacts: "the listing\u2019s approved facts",
+    assistSourceLead: "the enquiry and the listing\u2019s facts",
+    localeRolloutLead: "{live} of {total} languages are live. A language opens only once a human has approved the translation.",
+    localeLanguages: "Languages",
+    localeLanguage: "Language",
+    localeState: "State",
+    localeListings: "Listings",
+    localePages: "Guides",
+    localeFallback: "Falls back to",
+    localeReviewer: "Reviewer",
+    localeSourceOfRecord: "Source of record",
+    localeGuidesDrafted: "{count} awaiting approval",
+    localeStates: { source: "Source of record", live: "Live", enabled_not_indexed: "Public, not indexed", requested: "Requested", off: "Off" },
+    localeAddTitle: "Add a language",
+    localeAddCommitment: "A new language starts off. Before one page in it may be indexed, a human has to approve a translation of all {listings} listings and {pages} guides, and keep them current.",
+    localeAlreadyRequested: "{language} has been requested {count} times by website visitors.",
+    localeCode: "Code",
+    localeNativeName: "Name in that language",
+    localeDirection: "Writing direction",
+    localeAddAction: "Add language",
+    localeAdded: "Language added, switched off.",
+    localeAddFailed: "Could not add the language.",
+    localeRemoveTitle: "Removing a language",
+    localeRemoveConsequence: "These languages already have indexed URLs: {locales}. Removing one is not a registry edit — every URL it owns needs its own 301 or 410 decision, or the search equity the migration protects is lost.",
+    localeRemoveRoute: "URL decisions are made in",
+    priceRange: "Price (EUR)",
+    areaRange: "Area (m²)",
+    rangeMin: "Min",
+    rangeMax: "Max",
+    rangeReversed: "The minimum is above the maximum, so the rows below ignore that filter.",
+    rangeNotNumeric: "Only a number works here, so the rows below ignore that value.",
     publicPhoto: "Public photo",
     publicPhotos: "Public photos",
     selectListings: "Select listings",
@@ -1659,6 +1909,7 @@ const ADMIN_UI_COPY = {
     snoozeLive: "Snoozing moves the reply and escalation clocks by the same window. Un-snoozing restores the original clock.",
     snoozeUntil: "Snooze until",
     snoozeReason: "Reason",
+    snoozeConfirm: "I confirm this change to the enquiry’s response deadline.",
     snoozeSaving: "Recording the snooze…",
     snoozeSaved: "Enquiry snoozed. Refresh to see the new clock.",
     snoozeFailed: "Could not snooze this enquiry.",
@@ -2106,13 +2357,37 @@ const ADMIN_UI_COPY = {
         emptyFiltered: "Nothing in this view.",
         due: "Due",
         overdue: "Overdue",
-        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity", integrity: "Data integrity" },
+        kinds: { lead: "Enquiry", viewing: "Viewing follow-up", seller: "Seller valuation", request: "Website request", pipeline: "Opportunity", integrity: "Data integrity", authored: "Own task" },
         actions: { reply: "Open and reply", review: "Review and reply", requeue: "Fix delivery", sendQueued: "Send queued reply", followUp: "Record follow-up", feedback: "Request feedback", sellerStep: "Record seller step", outcome: "Record outcome", opportunity: "Open opportunity", inspectTracking: "Inspect report" },
         trackingTitle: "Website submissions do not match CRM",
         trackingMissing: "Durable CRM leads without a submission event: {count}.",
         trackingOrphaned: "Tracked submissions absent from durable CRM: {count}.",
         trackingUnavailable: "Website submission events cannot be verified.",
         priorities: { critical: "Critical", urgent: "Urgent", normal: "Normal" },
+      },
+      tasks: {
+        title: "Tasks",
+        description: "One ordered work queue across every operating list.",
+        delegated: "Closed on its own screen",
+        delegatedNote: "This work is owned by another screen. A tick here would record that it was done without doing it.",
+        openThere: "Open there",
+        ownWork: "Own tasks",
+        completable: "Completable here: {count}",
+        addTitle: "Raise a task",
+        owner: "Owner",
+        taskType: "Type",
+        subject: "Related object",
+        due: "Due",
+        evidence: "Note or internal reference",
+        evidenceNote: "Completing requires a note or internal reference and a named human who confirmed it.",
+        confirm: "I confirm this work was done",
+        complete: "Complete",
+        dismiss: "Dismiss",
+        dismissReason: "Dismissal reason",
+        snooze: "Snooze until",
+        reassign: "Reassign to",
+        empty: "No outstanding work.",
+        ownEmpty: "No own tasks.",
       },
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", location_verified_at: "Location verified at", price_verified_at: "Price verified at", price_on_request_verified_at: "Price on request verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
@@ -2656,7 +2931,6 @@ const OWNER_CONSOLE_COPY = {
   bg: {
     groups: { today: "Днес", crm: "Работа", cms: "Имоти и съдържание", hermes: "Hermes", workspace: "Система" },
     routes: { today: "Днес", leads: "Запитвания", listings: "Имоти", translations: "Преводи", hermes: "Hermes", integrations: "Интеграции", connections: "Връзки", settings: "Настройки", team: "Екип", activity: "Дневник" },
-    navMore: "Още в {group}",
     profile: {
       title: "Профил на собственика",
       open: "Отвори профила и настройките",
@@ -2670,6 +2944,7 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Всички работни пространства",
       scopedAccess: "Ограничен достъп до {count} работни пространства",
       scopeUnavailable: "Тази среда не е предоставила обхвата на работните пространства",
+      scopeUnknown: "Не е записан",
       editName: "Име в работното пространство",
       saveName: "Запази името",
       saving: "Запазване…",
@@ -2776,7 +3051,6 @@ const OWNER_CONSOLE_COPY = {
   ru: {
     groups: { today: "Сегодня", crm: "Работа", cms: "Объекты и контент", hermes: "Hermes", workspace: "Система" },
     routes: { today: "Сегодня", leads: "Заявки", listings: "Объекты", translations: "Переводы", hermes: "Hermes", integrations: "Интеграции", connections: "Подключения", settings: "Настройки", team: "Команда", activity: "Журнал" },
-    navMore: "Ещё в группе {group}",
     profile: {
       title: "Профиль владельца",
       open: "Открыть профиль и настройки",
@@ -2790,6 +3064,7 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "Все рабочие пространства",
       scopedAccess: "Доступ к {count} рабочим пространствам",
       scopeUnavailable: "Эта среда не передала доступ к рабочим пространствам",
+      scopeUnknown: "Не записан",
       editName: "Имя в рабочем пространстве",
       saveName: "Сохранить имя",
       saving: "Сохранение…",
@@ -2896,7 +3171,6 @@ const OWNER_CONSOLE_COPY = {
   en: {
     groups: { today: "Today", crm: "Work", cms: "Properties & Content", hermes: "Hermes", workspace: "System" },
     routes: { today: "Today", leads: "Leads", listings: "Listings", translations: "Translations", hermes: "Hermes", integrations: "Integrations", connections: "Connections", settings: "Settings", team: "Team", activity: "Audit log" },
-    navMore: "More in {group}",
     profile: {
       title: "Owner profile",
       open: "Open profile and settings",
@@ -2910,6 +3184,7 @@ const OWNER_CONSOLE_COPY = {
       fullAccess: "All workspaces",
       scopedAccess: "Access to {count} workspaces",
       scopeUnavailable: "Workspace scope was not provided by this runtime",
+      scopeUnknown: "Not recorded",
       editName: "Workspace name",
       saveName: "Save name",
       saving: "Saving…",
@@ -3092,7 +3367,14 @@ function adminNavigationGroups(page) {
     if (owner.routes[item.id]) return owner.routes[item.id];
     if (item.id === "realty_cases") return caseCopy(page).title;
     if (item.id === "approved_content") return workbenchCopy(page).approvedContent.title;
-    if (item.id === "migration_review") return label(copy, "migrationReview", "Migration review");
+    // screenLabel only knows the ids the owner console module list enumerates,
+    // and returns the id itself for anything else — so the rail printed
+    // "locale_rollout", then "media_library", then "document_records" at a
+    // broker, in all three languages, once each time a destination was added.
+    // One table, so the next destination fails obviously here rather than
+    // quietly there.
+    const copyKey = RAIL_LABEL_KEYS[item.id];
+    if (copyKey) return label(copy, copyKey.key, copyKey.fallback);
     return screenLabel(item.group, item.id, item.id);
   };
   const routeBadge = (item) => {
@@ -3160,44 +3442,19 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
   );
 }
 
+// The rail is flat. Every destination the operator can reach is one link at
+// one depth, because the previous shape hid ten of nineteen routes behind three
+// "More in ..." disclosures -- Pipeline, Viewings, Contacts, Requests and
+// Reports were all two clicks and a guess away from a screen that exists to
+// lead with the next action. Grouping still carries the meaning; the disclosure
+// only carried the hiding.
 function navigationDestination(destination, page, { mobile = false } = {}) {
-  const moreLabel = ownerConsoleCopy(page).navMore.replace("{group}", destination.label);
-  const nested = destination.children?.length
-    ? mobile
-      ? h(
-          "details",
-          {
-            className: "adm-mobile-nav__more",
-            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
-            "data-admin-nav-drilldown": destination.id,
-          },
-          h("summary", { className: "adm-mobile-nav__more-summary" }, moreLabel),
-          h(
-            "div",
-            { className: "adm-mobile-nav__nested" },
-            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
-          ),
-        )
-      : h(
-          "details",
-          {
-            className: "crm-sb__more",
-            open: destination.children.some((item) => page.kind === item.kind) ? true : undefined,
-            "data-admin-nav-drilldown": destination.id,
-          },
-          h("summary", { className: "crm-sb__more-summary" }, moreLabel),
-          h(
-            "div",
-            { className: "crm-sb__nested" },
-            ...destination.children.map((item) => navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
-          ),
-        )
-    : null;
   return h(
     "div",
     { key: `${mobile ? "mobile-" : ""}destination-${destination.id}`, className: mobile ? "adm-mobile-nav__destination" : "crm-sb__destination" },
     navigationLink(destination.route, page, { mobile, primary: true, key: `${mobile ? "mobile-" : ""}primary-${destination.id}` }),
-    nested,
+    ...(destination.children || []).map((item) =>
+      navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
   );
 }
 
@@ -3221,7 +3478,8 @@ function Sidebar({ page }) {
       h(
         "a",
         { href: adminHref(adminHomeForPage(page), page), "aria-label": "MS Realty" },
-        h("img", { src: LOGO_URL_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL, alt: "MS Realty", "data-admin-logo": "light", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL_REVERSED, alt: "MS Realty", "data-admin-logo": "dark", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
       ),
     ),
     h(
@@ -3377,32 +3635,6 @@ function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }
   ];
 }
 
-function leadQueueState(page) {
-  const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
-  const deliveryByLeadId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.lead_id, row]));
-  const repliedLeadIds = new Set(
-    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
-  );
-  const priority = (lead) => {
-    const delivery = deliveryByLeadId.get(lead.lead_id);
-    if (repliedLeadIds.has(lead.lead_id)) return 5;
-    if (delivery?.status === "failed") return 0;
-    const status = leadSlaById.get(lead.lead_id)?.status || "pending";
-    if (status === "manager_escalation_required") return 1;
-    if (delivery?.status === "queued") return 2;
-    if (status === "reminder_required") return 3;
-    return 4;
-  };
-  return {
-    leadSlaById,
-    deliveryByLeadId,
-    repliedLeadIds,
-    pending: [...(page.leads || [])]
-      .filter((lead) => !repliedLeadIds.has(lead.lead_id))
-      .sort((left, right) => priority(left) - priority(right)),
-  };
-}
-
 function queueTone(status) {
   if (status === "ok") return "success";
   if (status?.includes("escalation")) return "brick";
@@ -3415,138 +3647,99 @@ const NEXT_ACTION_PRIORITY_RANK = { critical: 0, urgent: 1, normal: 2 };
 // the same payload the queue previews below use, so nothing is invented here.
 function todayNextActions(page, copy, ui, queue, inboxHref) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const rows = [];
-  const trackingStatus = page.website_funnel?.lead_tracking_status;
-  const trackingGap = Number(page.website_funnel?.lead_tracking_gap || 0);
-  if (trackingStatus === "mismatch" || trackingStatus === "unavailable") {
-    rows.push({
-      key: "integrity:website-leads",
-      kind: "integrity",
-      tags: "requests",
-      priority: "critical",
-      dueAt: null,
-      overdue: true,
-      title: na.trackingTitle,
-      context:
-        trackingStatus === "unavailable"
-          ? na.trackingUnavailable
-          : (trackingGap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(trackingGap))),
-      reference: "website-lead-tracking",
-      href: `${adminHref("/admin/reports", page)}#website-funnel`,
-      action: na.actions.inspectTracking,
-    });
-  }
-  for (const lead of queue.pending) {
-    const sla = queue.leadSlaById.get(lead.lead_id);
-    const delivery = queue.deliveryByLeadId.get(lead.lead_id);
-    const slaStatus = sla?.status || "pending";
-    let priority = "normal";
-    let action = na.actions.reply;
-    let dueAt = sla?.sla_due_at || null;
-    if (delivery?.status === "failed") {
-      priority = "critical";
-      action = na.actions.requeue;
-    } else if (slaStatus === "manager_escalation_required") {
-      priority = "critical";
-      action = na.actions.review;
-      dueAt = sla?.manager_escalation_due_at || dueAt;
-    } else if (delivery?.status === "queued") {
-      priority = "urgent";
-      action = na.actions.sendQueued;
-    } else if (slaStatus === "reminder_required") {
-      priority = "urgent";
+  // The selection is the task queue's; Today only puts words on it. Reading
+  // the queues here again is exactly how the two screens would drift.
+  const decorate = (task) => {
+    const row = task.source_row || {};
+    const base = {
+      key: task.task_id,
+      kind: task.kind,
+      tags: task.tags,
+      priority: task.priority,
+      dueAt: task.due_at,
+      overdue: task.overdue,
+      reference: task.subject_ref,
+    };
+    if (task.kind === "integrity") {
+      const gap = task.source.tracking_gap;
+      return {
+        ...base,
+        title: na.trackingTitle,
+        context:
+          task.source.tracking_status === "unavailable"
+            ? na.trackingUnavailable
+            : (gap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(gap))),
+        href: `${adminHref("/admin/reports", page)}#website-funnel`,
+        action: na.actions.inspectTracking,
+      };
     }
-    rows.push({
-      key: `lead:${lead.lead_id}`,
-      kind: "lead",
-      tags: "enquiries",
-      priority,
-      dueAt,
-      overdue: priority !== "normal",
-      title: [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source),
-      context: statusText(ui, delivery?.status === "failed" ? "failed" : slaStatus),
-      reference: lead.lead_id,
-      href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}`,
-      action,
-    });
-  }
-  for (const row of page.viewingFollowUpQueue?.rows || []) {
-    if (row.task_status && row.task_status !== "open") continue;
-    rows.push({
-      key: `viewing:${row.viewing_id}:${row.task}`,
-      tags: "follow-ups",
-      kind: "viewing",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.due_at || null,
-      overdue: row.overdue === true,
-      title: row.listing_reference || (row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
-      context: `${row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")} · ${statusText(ui, row.viewing_status)}`,
-      reference: row.viewing_id,
-      href: adminHref("/admin/viewings", page),
-      action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
-    });
-  }
-  for (const row of page.sellerPipelineQueue?.rows || []) {
-    if (row.task_status && row.task_status !== "open") continue;
-    rows.push({
-      key: `seller:${row.seller_pipeline_id}:${row.task}`,
-      tags: "follow-ups",
-      kind: "seller",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.due_at || null,
-      overdue: row.overdue === true,
-      title: row.property?.location || na.actions.sellerStep,
-      context: statusText(ui, row.stage),
-      reference: row.seller_pipeline_id,
-      href: adminHref("/admin/viewings", page),
-      action: na.actions.sellerStep,
-    });
-  }
-  for (const row of page.publicRequestQueue?.rows || []) {
-    if (row.status && !["open", "contacted"].includes(row.status)) continue;
-    const requestType =
-      row.request_type === "saved_search"
-        ? label(copy, "savedSearchRequest", "Saved search")
-        : label(copy, "languageRequest", "Language request");
-    const requestLocale = row.requested_locale || row.locale;
-    rows.push({
-      key: `request:${row.request_type}:${row.request_id}`,
-      tags: "requests",
-      kind: "request",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.next_follow_up_at || null,
-      overdue: row.overdue === true,
-      title: publicRequestCriteria(row) || row.requested_path || requestType,
-      context: [requestType, requestLocale ? String(requestLocale).toUpperCase() : null, row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null, statusText(ui, row.status)]
-        .filter(Boolean)
-        .join(" · "),
-      reference: row.request_id,
-      href: adminHref("/admin/requests", page),
-      action: na.actions.outcome,
-    });
-  }
-  for (const row of page.leadPipelineQueue?.rows || []) {
-    if (row.status && row.status !== "open") continue;
-    rows.push({
-      key: `pipeline:${row.lead_id}`,
-      tags: "opportunities",
-      kind: "pipeline",
-      priority: row.overdue ? "urgent" : "normal",
-      dueAt: row.next_follow_up_at || null,
-      overdue: row.overdue === true,
+    if (task.kind === "lead") {
+      const { sla_status: slaStatus, delivery_status: deliveryStatus } = task.source;
+      const action =
+        deliveryStatus === "failed"
+          ? na.actions.requeue
+          : slaStatus === "manager_escalation_required"
+            ? na.actions.review
+            : deliveryStatus === "queued"
+              ? na.actions.sendQueued
+              : na.actions.reply;
+      return {
+        ...base,
+        title: [row.listing_reference, row.property?.location].filter(Boolean).join(" · ") || valueText(ui, row.source),
+        context: statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus),
+        href: `${inboxHref}#lead-${encodeURIComponent(row.lead_id)}`,
+        action,
+      };
+    }
+    if (task.kind === "viewing") {
+      const kindLabel = row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up");
+      return {
+        ...base,
+        title: row.listing_reference || kindLabel,
+        context: `${kindLabel} · ${statusText(ui, row.viewing_status)}`,
+        href: adminHref("/admin/viewings", page),
+        action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
+      };
+    }
+    if (task.kind === "seller") {
+      return {
+        ...base,
+        title: row.property?.location || na.actions.sellerStep,
+        context: statusText(ui, row.stage),
+        href: adminHref("/admin/viewings", page),
+        action: na.actions.sellerStep,
+      };
+    }
+    if (task.kind === "request") {
+      const requestType =
+        row.request_type === "saved_search"
+          ? label(copy, "savedSearchRequest", "Saved search")
+          : label(copy, "languageRequest", "Language request");
+      const requestLocale = row.requested_locale || row.locale;
+      return {
+        ...base,
+        title: publicRequestCriteria(row) || row.requested_path || requestType,
+        context: [
+          requestType,
+          requestLocale ? String(requestLocale).toUpperCase() : null,
+          row.request_type === "saved_search" && row.alert_frequency ? statusText(ui, row.alert_frequency) : null,
+          statusText(ui, row.status),
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        href: adminHref("/admin/requests", page),
+        action: na.actions.outcome,
+      };
+    }
+    return {
+      ...base,
       title: `${statusText(ui, row.lead_type)} · ${statusText(ui, row.stage)}`,
       context: row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
-      reference: row.lead_id,
       href: adminHref("/admin/pipeline", page),
       action: na.actions.opportunity,
-    });
-  }
-  return rows.sort((left, right) => {
-    if (left.overdue !== right.overdue) return left.overdue ? -1 : 1;
-    const rank = NEXT_ACTION_PRIORITY_RANK[left.priority] - NEXT_ACTION_PRIORITY_RANK[right.priority];
-    if (rank !== 0) return rank;
-    return Date.parse(left.dueAt || "9999-12-31") - Date.parse(right.dueAt || "9999-12-31");
-  });
+    };
+  };
+  return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map(decorate);
 }
 
 function TodayBriefingPanel({ page, rows, total }) {
@@ -3570,7 +3763,6 @@ function TodayBriefingPanel({ page, rows, total }) {
       "data-today-priority-count": String(rows.length),
       "data-today-priority-total": String(total),
     },
-    h("p", { className: "adm-today-briefing__intro" }, copy.description),
     h(
       "dl",
       { className: "adm-today-briefing__facts" },
@@ -3599,35 +3791,39 @@ function TodayBriefingPanel({ page, rows, total }) {
           { className: "adm-today-briefing__action" },
           h(
             "a",
-            { className: "mk-btn mk-btn--primary", href: first.href, "data-today-primary-open": first.kind },
+            { className: "mk-btn mk-btn--accent", href: first.href, "data-today-primary-open": first.kind },
             h("span", null, first.action),
-            h(Icon, { name: "arrow-right", size: 15 }),
+            h(Icon, { name: "arrow-right", size: 18 }),
           ),
         )
       : null,
     h("p", { className: "adm-today-briefing__source" }, copy.source),
     h(
-      "form",
-      { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
-      h("h3", null, hermes.title),
-      h("p", { className: "adm-hermes-entry__description" }, hermes.description),
-      h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
-      h("label", { htmlFor: "today-hermes-prompt" }, hermesCopy.commandLabel),
-      h("textarea", {
-        id: "today-hermes-prompt",
-        name: "prompt",
-        rows: 2,
-        maxLength: 2000,
-        required: true,
-        defaultValue: prompt,
-        placeholder: hermesCopy.commandPlaceholder,
-        autoComplete: "off",
-      }),
+      "details",
+      { className: "adm-today-assist" },
+      h("summary", null, h(Icon, { name: "sparkles", size: 18 }), h("span", null, hermes.title)),
       h(
-        "button",
-        { className: "mk-btn mk-btn--secondary mk-btn--sm", type: "submit", "data-hermes-open": "today" },
-        h(Icon, { name: "sparkles", size: 15 }),
-        h("span", null, hermesCopy.preparePlan),
+        "form",
+        { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
+        h("p", { className: "adm-hermes-entry__description" }, hermes.description),
+        h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
+        h("label", { htmlFor: "today-hermes-prompt" }, hermesCopy.commandLabel),
+        h("textarea", {
+          id: "today-hermes-prompt",
+          name: "prompt",
+          rows: 2,
+          maxLength: 2000,
+          required: true,
+          defaultValue: prompt,
+          placeholder: hermesCopy.commandPlaceholder,
+          autoComplete: "off",
+        }),
+        h(
+          "button",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", type: "submit", "data-hermes-open": "today" },
+          h(Icon, { name: "sparkles", size: 18 }),
+          h("span", null, hermesCopy.preparePlan),
+        ),
       ),
     ),
   );
@@ -3678,8 +3874,8 @@ function NextActionsPanel({ page, rows, total }) {
                       )
                     : null,
                 ),
-                h("strong", null, row.title),
-                h("small", { className: "adm-lead-context" }, row.context),
+                h("strong", { title: row.title }, row.title),
+                h("small", { className: "adm-lead-context", title: row.context }, row.context),
               ),
               h(
                 "div",
@@ -3879,7 +4075,7 @@ function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const settingsCopy = workbenchCopy(page).workspaceSettings;
-  const queue = leadQueueState(page);
+  const queue = deriveLeadQueueState(page);
   const title = label(copy, "today", "Today");
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
@@ -3889,14 +4085,9 @@ function TodayBody({ page }) {
     page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
   const openSellerTasks =
     page.sellerPipelineQueue?.summary?.open || (page.sellerPipelineQueue?.rows || []).filter((row) => !row.task_status || row.task_status === "open").length;
-  const overdueTasks = [
-    ...(page.viewingFollowUpQueue?.rows || []).filter((row) => row.overdue === true && (!row.task_status || row.task_status === "open")),
-    ...(page.sellerPipelineQueue?.rows || []).filter((row) => row.overdue === true && (!row.task_status || row.task_status === "open")),
-    ...(page.publicRequestQueue?.rows || []).filter(
-      (row) => row.overdue === true && (!row.status || row.status === "open" || row.status === "contacted"),
-    ),
-    ...(page.leadPipelineQueue?.rows || []).filter((row) => row.overdue === true && (!row.status || row.status === "open")),
-  ].length;
+  // The same four queues the readiness rail counts, read through the queue
+  // derivation rather than a third hand-rolled copy of its open filters.
+  const overdueTasks = nextActions.filter((row) => row.overdue && ["viewing", "seller", "request", "pipeline"].includes(row.kind)).length;
   return adminShell(page, {
     title,
     titleAsHeading: true,
@@ -5552,7 +5743,13 @@ function RealtyCaseConditionCard({ page, condition, caseIsActive }) {
     h(
       "header",
       { className: "adm-pipeline-card__header" },
-      h("div", null, h("h2", null, condition.id), h("small", null, `${condition.case_id} · ${valueText(workbenchCopy(page), condition.type)}`)),
+      h(
+        "div",
+        null,
+        h("h2", null, valueText(workbenchCopy(page), condition.type)),
+        h("small", null, condition.case_id),
+        h("code", { className: "crm-mono adm-id-caption" }, condition.id),
+      ),
       h(StatusPill, { tone: conditionTone(condition) }, statusText(workbenchCopy(page), condition.status)),
     ),
     h(
@@ -5773,12 +5970,13 @@ function RealtyCaseCard({ page, caseRecord }) {
       h(
         "div",
         null,
-        h("h2", null, caseRecord.id),
+        h("h2", null, [caseRecord.client_ref, caseRecord.property_ref].filter(Boolean).join(" · ") || caseRecord.id),
         h(
           "small",
           null,
           `${caseVocabulary(copy, "jurisdictions", caseRecord.jurisdiction)} · ${caseVocabulary(copy, "caseTypes", caseRecord.case_type)} · ${caseVocabulary(copy, "assetKinds", caseRecord.asset_kind)}`,
         ),
+        h("code", { className: "crm-mono adm-id-caption" }, caseRecord.id),
       ),
       h(StatusPill, { tone: modeTone }, caseRecord.execution_mode === "autonomous" ? copy.autonomous : copy.manual),
     ),
@@ -6967,6 +7165,10 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
   const snooze = leadSla?.snooze || null;
   const active = snooze?.status === "active";
   if (!writable) return null;
+  const confirmation = h("div", null,
+    h("label", null, ui.reviewer, h("input", { name: "actor", required: true, maxLength: 80, defaultValue: currentOperatorId(page), readOnly: Boolean(page.workspace?.operator_id) })),
+    h("label", { className: "adm-check" }, h("input", { type: "checkbox", name: "humanConfirmed", required: true }), h("span", null, ui.snoozeConfirm)),
+  );
   return h(
     "details",
     { className: "adm-lead-snooze", "data-lead-snooze-control": lead.lead_id, "data-snooze-state": active ? "active" : "open" },
@@ -6993,6 +7195,7 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
           },
           h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
           h("label", null, ui.snoozeReason, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+          confirmation,
           h("p", { className: "adm-hint" }, ui.snoozeLive),
           h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
           h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h("span", null, ui.unsnooze)),
@@ -7011,6 +7214,7 @@ function LeadSnoozeControl({ page, lead, leadSla, ui, locale }) {
           h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
           h("label", null, ui.snoozeUntil, h("input", { type: "datetime-local", name: "until", required: true })),
           h("label", null, ui.snoozeReason, h("textarea", { name: "reason", rows: 2, required: true, maxLength: 500 })),
+          confirmation,
           h("p", { className: "adm-hint" }, ui.snoozeLive),
           h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
           h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h("span", null, ui.snooze)),
@@ -7029,9 +7233,14 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   // Hermes availability comes from configuration on the payload, never from a
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
-  const hermesReason =
-    page.hermes?.reason ||
-    label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.");
+  // hermes-availability builds a reason that names the missing environment
+  // variables. That is the right sentence for whoever can set them, and the
+  // wrong one for a broker with a lead open: HERMES_API_KEY is not something
+  // they can do anything about. The env detail goes to the operator who can
+  // act on it; everyone else is told who to ask.
+  const hermesReason = pageCan(page, "settings:manage")
+    ? page.hermes?.reason || ui.hermesUnavailableOwner
+    : ui.hermesUnavailableBroker;
   return h(
     "article",
     {
@@ -7134,45 +7343,47 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
       h(
         "div",
         { className: "adm-reply-cell__row" },
+        // The same control the listing editor carries, on the value a broker
+        // rewrites most: it fills the reply the approval form already holds,
+        // opens that form so the draft is read before it is queued, and says
+        // where the words came from.
         h(
-          "form",
+          "div",
           {
-            method: "post",
-            action: "/api/admin/replies/draft",
-            className: "adm-draft-form",
-            "data-hermes-draft-request": "true",
-            "data-hermes-draft-endpoint": "/api/admin/replies/draft",
-            "data-original-language": lead.original_language,
-            "data-reply-draft-pending": label(copy, "replyDraftPending", "Preparing broker-only draft…"),
-            "data-reply-draft-success": label(copy, "replyDraftReady", "Draft ready for broker review."),
-            "data-reply-draft-failure": label(copy, "replyDraftFailed", "Could not prepare a broker draft."),
-            "data-reply-draft-unavailable": label(
-              copy,
-              "replyDraftUnavailable",
-              "Hermes is not configured in this environment. Use an approved template or write the reply manually.",
-            ),
+            className: "adm-field adm-field--assisted adm-draft-form",
+            "data-hermes-assist-for": `reply-${lead.lead_id}`,
             hidden: page.leadSourceDurable || undefined,
           },
-          h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
-          h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
           h(
-            "button",
-            {
-              type: "submit",
-              className: "mk-btn mk-btn--secondary mk-btn--sm",
-              // Derived from configuration, so the button is honest on first
-              // paint instead of learning it after a failed request.
-              disabled: hermesAvailable ? undefined : true,
-              "aria-describedby": hermesAvailable ? undefined : `hermes-note-${lead.lead_id}`,
-              title: hermesAvailable ? undefined : hermesReason,
-            },
-            h(Icon, { name: "sparkles", size: 16 }),
+            "div",
+            { className: "adm-lblrow" },
             h("span", null, label(copy, "draftWithHermes", "Draft with Hermes")),
+            hermesAssistButton(ui, {
+              assist: {
+                endpoint: "/api/admin/replies/draft",
+                listingId: null,
+                locale: lead.original_language,
+                source: ui.assistSourceLead,
+                available: hermesAvailable,
+                unavailableReason: hermesAvailable ? null : hermesReason,
+              },
+              hermesField: "reply",
+              targetId: `reply-draft-${lead.lead_id}`,
+              barId: `reply-draft-${lead.lead_id}-drafted`,
+              payload: { leadId: lead.lead_id, language: lead.original_language },
+              reveal: `reply-approval-${lead.lead_id}`,
+              describedBy: hermesAvailable ? undefined : `hermes-note-${lead.lead_id}`,
+            }),
           ),
+          hermesDraftedBar(ui, {
+            assist: { source: ui.assistSourceLead },
+            barId: `reply-draft-${lead.lead_id}-drafted`,
+            field: `reply-${lead.lead_id}`,
+          }),
         ),
         h(
           "details",
-          { className: "adm-reply", hidden: page.leadSourceDurable || undefined },
+          { id: `reply-approval-${lead.lead_id}`, className: "adm-reply", hidden: page.leadSourceDurable || undefined },
           h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "send", size: 16 }), h("span", null, label(copy, "queueReply", "Queue reply"))),
           h(
             "form",
@@ -7197,7 +7408,12 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
               h("input", { type: "checkbox", name: "showOriginal" }),
               ` ${label(copy, "showOriginal", "Show original")}`,
             ),
-            h("label", null, label(copy, "hermesDraftText", "Hermes draft text"), h("textarea", { name: "hermesDraftText" })),
+            h(
+              "label",
+              { htmlFor: `reply-draft-${lead.lead_id}` },
+              label(copy, "hermesDraftText", "Hermes draft text"),
+              h("textarea", { id: `reply-draft-${lead.lead_id}`, name: "hermesDraftText" }),
+            ),
             h(
               "label",
               null,
@@ -7228,7 +7444,10 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
           ...(hermesAvailable ? {} : { "data-hermes-reason": page.hermes?.reason_key || "not_configured" }),
         },
         h(Icon, { name: "info", size: 15 }),
-        h("span", null, hermesAvailable ? label(copy, "replyDraftUnavailable", "Hermes is not configured in this environment. Use an approved template or write the reply manually.") : hermesReason),
+        h("span", null, hermesReason),
+        pageCan(page, "settings:manage")
+          ? h("a", { href: adminHref("/admin/connect", page) }, label(copy, "connections", "Integrations"))
+          : null,
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
     ),
@@ -8085,12 +8304,58 @@ function ListingManagerBody({ page }) {
     const search = remaining.map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join("&");
     return adminHref(`/admin/listings${search ? `?${search}` : ""}`, page);
   };
+  // A typed bound that could not be honoured keeps its box filled and is named
+  // here, so the broker corrects the figure rather than wondering why the row
+  // count did not move.
+  const filterErrors = page.filterErrors || [];
+  const rangeFields = page.filterOptions.rangeFields || [];
+  const invalidFields = new Set(
+    filterErrors.flatMap((error) => (error.reason === "range" ? [`${error.field}Min`, `${error.field}Max`] : [error.field])),
+  );
+  const rangeNoticeId = "adm-listing-range-notice";
+  const rangeLabel = (field) => (field === "price" ? ui.priceRange : ui.areaRange);
+  const boundChip = (name, field, bound) =>
+    page.filters[name] && !invalidFields.has(name)
+      ? { name, text: `${rangeLabel(field)} ${bound}: ${page.filters[name]}` }
+      : null;
   const activeFilters = [
     page.filters.q ? { name: "q", text: `${label(copy, "searchListings", "Search listings")}: ${page.filters.q}` } : null,
     page.filters.status ? { name: "status", text: `${label(copy, "qualityStatus", "Status")}: ${statusText(ui, page.filters.status)}` } : null,
     page.filters.propertyFamily ? { name: "propertyFamily", text: `${ui.propertyFamily}: ${statusText(ui, page.filters.propertyFamily)}` } : null,
     page.filters.sourceLocale ? { name: "sourceLocale", text: `${label(copy, "language", "Language")}: ${String(page.filters.sourceLocale).toUpperCase()}` } : null,
+    boundChip("priceMin", "price", ui.rangeMin),
+    boundChip("priceMax", "price", ui.rangeMax),
+    boundChip("areaMin", "area", ui.rangeMin),
+    boundChip("areaMax", "area", ui.rangeMax),
   ].filter(Boolean);
+  const rangeField = (field, { step = "1", inputMode = "numeric" } = {}) =>
+    h(
+      "fieldset",
+      { className: "adm-filterbar__range" },
+      h("legend", null, rangeLabel(field)),
+      h(
+        "div",
+        { className: "adm-filterbar__pair" },
+        ...["Min", "Max"].map((bound) => {
+          const name = `${field}${bound}`;
+          return h(
+            "label",
+            { key: name },
+            h("span", null, bound === "Min" ? ui.rangeMin : ui.rangeMax),
+            h("input", {
+              name,
+              type: "number",
+              min: "0",
+              step,
+              inputMode,
+              defaultValue: page.filters[name] || "",
+              "aria-invalid": invalidFields.has(name) ? "true" : undefined,
+              "aria-describedby": invalidFields.has(name) ? rangeNoticeId : undefined,
+            }),
+          );
+        }),
+      ),
+    );
   const title = label(copy, "listingManager", "Listings");
   const hasFilters = activeFilters.length > 0;
   const statusOptions = page.filterOptions.statuses || [];
@@ -8276,6 +8541,22 @@ function ListingManagerBody({ page }) {
           label(copy, "language", "Language"),
           h("select", { name: "sourceLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.sourceLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.sourceLocale === value }, value.toUpperCase()))),
         ),
+        rangeFields.includes("price") ? rangeField("price") : null,
+        rangeFields.includes("area") ? rangeField("area", { step: "any", inputMode: "decimal" }) : null,
+        filterErrors.length
+          ? h(
+              "p",
+              { id: rangeNoticeId, className: "adm-filterbar__notice", role: "alert", "data-listing-filter-error": filterErrors[0].reason },
+              h(Icon, { name: "triangle-alert", size: 16 }),
+              h(
+                "span",
+                null,
+                `${[...new Set(filterErrors.map((error) => rangeLabel(error.field.replace(/(Min|Max)$/u, ""))))].join(" · ")}: ${
+                  filterErrors.some((error) => error.reason === "range") ? ui.rangeReversed : ui.rangeNotNumeric
+                }`,
+              ),
+            )
+          : null,
         h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),
@@ -8434,6 +8715,644 @@ function ListingManagerBody({ page }) {
       canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/listings/publication-schedules")
         ? h(PublicationSchedulePanel, { page })
         : null,
+    ],
+  });
+}
+
+// Adding a language is a commitment, not a switch, and removing one is a
+// per-URL decision rather than a registry edit. Both are stated on the screen
+// because neither endpoint enforces them: POST /api/admin/locales will happily
+// create a locale, and nothing at all removes one.
+// Every media asset in the catalogue, in one place. The counts are links: a
+// figure a broker cannot open is a figure they cannot act on, and the four the
+// queue groups by are the four listing-quality actually computes. Nothing here
+// detects a face, a plate or a watermark, because nothing in the codebase does.
+// The durable document authority shipped nine routes and no screen. This is
+// the screen: every document, the version it is on, and who still has to sign
+// it. Counts are links into the rows behind them, and the store being absent is
+// a state the page renders rather than an error it throws.
+function TaskRow({ page, row, copy, na }) {
+  const kindLabel = row.origin === "authored" ? na.kinds.authored : na.kinds[row.kind];
+  const delegated = row.completion.mode === "delegated";
+  return h(
+    "li",
+    {
+      key: row.task_id,
+      "data-task": row.task_id,
+      "data-task-origin": row.origin,
+      "data-task-kind": row.kind,
+      "data-task-priority": row.priority,
+      "data-task-completion": row.completion.mode,
+      "data-overdue": row.overdue ? "true" : "false",
+    },
+    h(
+      "div",
+      { className: "adm-next-actions__body" },
+      h(
+        "div",
+        { className: "adm-next-actions__meta" },
+        h(StatusPill, { tone: row.priority === "critical" ? "brick" : row.priority === "urgent" ? "sun" : "sea" }, kindLabel),
+        row.due_at
+          ? h(
+              "time",
+              { dateTime: row.due_at, title: row.due_at },
+              `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.due_at, page.workspace?.locale)}`,
+            )
+          : null,
+      ),
+      h("strong", null, row.subject_ref || kindLabel),
+      row.origin === "authored" && row.note ? h("small", { className: "adm-lead-context" }, row.note) : null,
+      delegated ? h("small", { className: "adm-lead-context" }, copy.delegated) : null,
+    ),
+    h(
+      "div",
+      { className: "adm-next-actions__action" },
+      // The distinction the entity exists for, drawn: delegated work links to
+      // the screen that owns it and carries no control that could close it.
+      delegated
+        ? h(
+            "a",
+            { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.completion.route, page) },
+            h("span", null, copy.openThere),
+          )
+        : h(TaskCompletionForm, { page, row, copy }),
+    ),
+  );
+}
+
+function TaskCompletionForm({ page, row, copy }) {
+  const id = `task-${row.task_id}`;
+  return h(
+    "form",
+    { method: "post", action: "/api/admin/tasks/action", className: "adm-task-complete", "data-task-form": row.task_id },
+    h("input", { type: "hidden", name: "taskId", value: row.task_id }),
+    h("input", { type: "hidden", name: "action", value: "task_completed" }),
+    h("label", { htmlFor: `${id}-note` }, copy.evidence),
+    h("input", { id: `${id}-note`, name: "note", type: "text", maxLength: 1000 }),
+    h(
+      "label",
+      { className: "adm-check", htmlFor: `${id}-confirm` },
+      h("input", { id: `${id}-confirm`, name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
+      h("span", null, copy.confirm),
+    ),
+    h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.complete),
+  );
+}
+
+function TasksBody({ page }) {
+  const ui = workbenchCopy(page);
+  const copy = ui.workspaceSettings.tasks;
+  const na = ui.workspaceSettings.nextActions;
+  const queue = page.taskQueue;
+  const summary = page.summary;
+  return adminShell(page, {
+    title: copy.title,
+    mainAttrs: {
+      "data-kind": "admin-tasks",
+      "data-react-admin-ui": "tasks",
+      "data-admin-workbench": "crm",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+      "data-task-total": String(summary.total),
+      "data-task-completable": String(summary.completable),
+    },
+    children: [
+      h(PageHeader, { title: copy.title, subtitle: copy.description }),
+      h(
+        SummaryStrip,
+        {
+          cards: [
+            { key: "total", label: copy.title, value: String(summary.total) },
+            { key: "overdue", label: na.overdue, value: String(summary.overdue) },
+            { key: "own", label: copy.ownWork, value: String(summary.authored) },
+            { key: "completable", label: copy.completable.replace("{count}", ""), value: String(summary.completable) },
+          ],
+        },
+      ),
+      h(
+        Panel,
+        { title: copy.title, "data-task-queue": "true" },
+        // Said once, at the top, rather than repeated on every delegated row.
+        h("p", { className: "adm-next-actions__intro", "data-task-delegated-note": "true" }, copy.delegatedNote),
+        queue.rows.length
+          ? h("ol", { className: "adm-next-actions" }, ...queue.rows.map((row) => h(TaskRow, { page, row, copy, na })))
+          : h("p", { className: "adm-empty", "data-task-empty": "true" }, copy.empty),
+      ),
+      h(
+        Panel,
+        { title: copy.addTitle, "data-task-open": "true" },
+        h("p", { className: "adm-next-actions__intro" }, copy.evidenceNote),
+        h(
+          "form",
+          { method: "post", action: "/api/admin/tasks", className: "adm-task-open" },
+          h("label", { htmlFor: "task-new-id" }, copy.subject),
+          h("input", { id: "task-new-id", name: "taskId", type: "text", required: true, maxLength: 160 }),
+          h("label", { htmlFor: "task-new-type" }, copy.taskType),
+          h("input", { id: "task-new-type", name: "taskType", type: "text", required: true, maxLength: 120 }),
+          h("label", { htmlFor: "task-new-owner" }, copy.owner),
+          h("input", { id: "task-new-owner", name: "owner", type: "text", required: true, maxLength: 160 }),
+          h("label", { htmlFor: "task-new-due" }, copy.due),
+          h("input", { id: "task-new-due", name: "dueAt", type: "datetime-local" }),
+          h("label", { htmlFor: "task-new-note" }, copy.evidence),
+          h("input", { id: "task-new-note", name: "note", type: "text", maxLength: 1000 }),
+          h(
+            "label",
+            { className: "adm-check", htmlFor: "task-new-confirm" },
+            h("input", { id: "task-new-confirm", name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
+            h("span", null, copy.confirm),
+          ),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.addTitle),
+        ),
+      ),
+    ],
+  });
+}
+
+function DocumentRecordsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "documentRecords", "Documents");
+  const filters = page.filters || {};
+  const summary = page.summary;
+  const href = (params) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) if (value) search.set(key, String(value));
+    const query = search.toString();
+    return adminHref(query ? `/admin/documents/records?${query}` : "/admin/documents/records", page);
+  };
+  const tabs = [
+    { value: "", label: label(copy, "all", "All"), count: summary.total, href: href({}), selected: !filters.status && !filters.awaiting },
+    {
+      value: "awaiting",
+      label: ui.documentAwaitingSignature,
+      count: summary.awaiting_signature,
+      href: href({ awaiting: "1" }),
+      selected: Boolean(filters.awaiting),
+    },
+    { value: "active", label: statusText(ui, "active"), count: summary.active, href: href({ status: "active" }), selected: filters.status === "active" },
+    { value: "void", label: statusText(ui, "void"), count: summary.void, href: href({ status: "void" }), selected: filters.status === "void" },
+  ];
+  const columns = [
+    ui.documentTitle,
+    ui.documentType,
+    label(copy, "qualityStatus", "Status"),
+    ui.documentVersion,
+    ui.documentSigners,
+    label(copy, "realtyCases", "Case"),
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-document-records",
+      "data-react-admin-ui": "document-records",
+      "data-admin-workbench": "crm",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/documents", page) },
+          h(Icon, { name: "list-checks", size: 16 }),
+          h("span", null, label(copy, "documents", "Documents and process")),
+        ),
+      ),
+      h(DataAvailabilityNotice, { page }),
+      h(PageToolbar, null, h(CmsFilterLinks, { scope: "documents", label: label(copy, "qualityStatus", "Status"), options: tabs })),
+      h(
+        "form",
+        { method: "get", action: "/admin/documents/records", className: "adm-filterbar", role: "search", "data-document-filters": "true" },
+        filterLocaleInput(page),
+        h("label", null, label(copy, "searchListings", "Search"), h("input", { type: "search", name: "q", defaultValue: filters.q || "", placeholder: ui.documentSearchHint })),
+        h(
+          "label",
+          null,
+          ui.documentType,
+          h(
+            "select",
+            { name: "documentType" },
+            h("option", { value: "" }, label(copy, "all", "All")),
+            ...(page.filterOptions.documentTypes || []).map((value) =>
+              h("option", { key: value, value, selected: filters.documentType === value ? true : undefined }, valueText(ui, value)),
+            ),
+          ),
+        ),
+        h("label", null, label(copy, "realtyCases", "Case"), h("input", { name: "caseId", defaultValue: filters.caseId || "" })),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: href({}) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      h(
+        Panel,
+        { title: `${label(copy, "results", "Results")} · ${page.documents.length}`, "data-document-records": "true" },
+        page.documents.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl", "data-document-table": "true" },
+                h("thead", null, h("tr", null, ...columns.map((column) => h("th", { key: column, scope: "col" }, column)))),
+                h(
+                  "tbody",
+                  null,
+                  ...page.documents.map((row) =>
+                    h(
+                      "tr",
+                      { key: row.document_id, "data-document-row": row.document_id, "data-document-status": row.status },
+                      h(
+                        "th",
+                        { scope: "row" },
+                        h("div", { className: "adm-lead-identity" }, h("bdi", null, row.title || row.document_id), h("code", { className: "crm-mono" }, row.document_id)),
+                      ),
+                      h("td", null, valueText(ui, row.document_type)),
+                      h("td", null, h(StatusPill, { tone: row.status === "active" ? "sea" : "stone" }, statusText(ui, row.status))),
+                      // The version is the product's whole claim to an
+                      // auditable file, so it is a figure and not a checkmark.
+                      h("td", { "data-document-revision": String(row.current_revision_number) }, fillTemplate(ui.documentVersionValue, { n: row.current_revision_number })),
+                      h(
+                        "td",
+                        null,
+                        row.open_signature_requests
+                          ? h(StatusPill, { tone: "sun", "data-document-open-signatures": String(row.open_signature_requests) }, fillTemplate(ui.documentSignersWaiting, { count: row.open_signature_requests }))
+                          : h("span", { className: "crm-tbl__muted" }, ui.documentNoOpenSigners),
+                      ),
+                      h("td", null, row.case_id ? h("code", { className: "crm-mono" }, row.case_id) : h("span", { className: "crm-tbl__muted" }, ui.notSet)),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "file-text", "data-document-records-empty": "true" },
+              page.dataAvailability ? ui.documentStoreUnavailable : ui.documentRecordsEmpty,
+            ),
+      ),
+      h(
+        Panel,
+        { title: ui.documentSignatureQueue, "data-signature-queue": "true" },
+        page.signatureRequests.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl", "data-signature-table": "true" },
+                h(
+                  "thead",
+                  null,
+                  h("tr", null, ...[ui.documentTitle, ui.documentSigner, label(copy, "qualityStatus", "Status"), ui.documentVersion].map((column) => h("th", { key: column, scope: "col" }, column))),
+                ),
+                h(
+                  "tbody",
+                  null,
+                  ...page.signatureRequests.map((request) =>
+                    h(
+                      "tr",
+                      { key: request.request_id, "data-signature-row": request.request_id, "data-signature-status": request.status },
+                      h("th", { scope: "row" }, h("code", { className: "crm-mono" }, request.document_id)),
+                      h("td", null, h("bdi", null, request.signer_role || request.signer_ref)),
+                      h("td", null, h(StatusPill, { tone: request.status === "signed" ? "sea" : request.status === "provider_pending" ? "sun" : "stone" }, statusText(ui, request.status))),
+                      h("td", null, fillTemplate(ui.documentVersionValue, { n: request.revision_number })),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "file-check", "data-signature-queue-empty": "true" },
+              page.dataAvailability ? ui.documentStoreUnavailable : ui.documentNoSignatures,
+            ),
+      ),
+    ],
+  });
+}
+
+function MediaLibraryBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "mediaLibrary", "Media");
+  const filters = page.filters || {};
+  const summary = page.summary;
+  const issueHref = (issue) => adminHref(issue ? `/admin/media?issue=${encodeURIComponent(issue)}` : "/admin/media", page);
+  const issueRow = (issue, count) => ({
+    value: issue,
+    label: ui.mediaIssues?.[issue] || valueText(ui, issue),
+    count,
+    href: issueHref(issue),
+    selected: filters.issue === issue,
+  });
+  const issueOptions = [
+    { value: "", label: label(copy, "all", "All"), count: summary.total, href: issueHref(""), selected: !filters.issue },
+    issueRow("media_review_pending", summary.media_review_pending),
+    issueRow("missing_alt_text", summary.missing_alt_text),
+    issueRow("thin_public_gallery", summary.thin_public_gallery),
+  ];
+  const columns = [
+    ui.mediaAsset || "Asset",
+    ui.listing,
+    ui.mediaKind,
+    ui.mediaAlt,
+    label(copy, "qualityStatus", "Status"),
+    label(copy, "reviewMedia", "Review"),
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-media-library",
+      "data-react-admin-ui": "media-library",
+      "data-admin-workbench": "cms",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: fillTemplate(ui.mediaLibraryLead, { assets: summary.total, listings: summary.listings }) },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) },
+          h(Icon, { name: "building-2", size: 16 }),
+          h("span", null, label(copy, "listingManager", "Listings")),
+        ),
+      ),
+      h(PageToolbar, null, h(CmsFilterLinks, { scope: "media", label: ui.mediaIssue || "Waiting for", options: issueOptions })),
+      h(
+        "form",
+        { method: "get", action: "/admin/media", className: "adm-filterbar", role: "search", "data-media-filters": "true" },
+        filterLocaleInput(page),
+        h("input", { type: "hidden", name: "issue", value: filters.issue || "" }),
+        h(
+          "label",
+          null,
+          label(copy, "searchListings", "Search"),
+          h("input", { type: "search", name: "q", defaultValue: filters.q || "", placeholder: ui.mediaSearchHint }),
+        ),
+        h(
+          "label",
+          null,
+          ui.mediaKind,
+          h(
+            "select",
+            { name: "kind" },
+            h("option", { value: "" }, label(copy, "all", "All")),
+            ...(page.filterOptions.kinds || []).map((kind) =>
+              h("option", { key: kind, value: kind, selected: filters.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
+            ),
+          ),
+        ),
+        h("label", null, ui.listing, h("input", { name: "listing", defaultValue: filters.listing || "", placeholder: "MS-CRAWL-0001" })),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/media", page) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      summary.unreviewable
+        ? h(
+            "p",
+            { className: "adm-planned-note", "data-media-unreviewable": String(summary.unreviewable) },
+            h(Icon, { name: "triangle-alert", size: 15 }),
+            h("span", null, fillTemplate(ui.mediaUnreviewable, { count: summary.unreviewable })),
+          )
+        : null,
+      h(
+        Panel,
+        { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-media-library": "true" },
+        page.assets.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl", "data-media-table": "true" },
+                h("thead", null, h("tr", null, ...columns.map((column) => h("th", { key: column, scope: "col" }, column)))),
+                h(
+                  "tbody",
+                  null,
+                  ...page.assets.map((asset) =>
+                    h(
+                      "tr",
+                      { key: `${asset.listing_id}-${asset.asset_id || asset.url}`, "data-media-row": asset.asset_id || "", "data-media-public": String(asset.is_public) },
+                      h(
+                        "th",
+                        { scope: "row" },
+                        h(
+                          "div",
+                          { className: "adm-lead-identity" },
+                          h("bdi", null, asset.listing_title),
+                          h("small", { className: "adm-lead-context" }, [asset.location, `${asset.width || "?"}×${asset.height || "?"}`].filter(Boolean).join(" · ")),
+                        ),
+                      ),
+                      h("td", null, h("code", { className: "crm-mono" }, asset.listing_id)),
+                      h("td", null, fieldText(ui, `media_kind_${asset.kind}`)),
+                      h(
+                        "td",
+                        null,
+                        asset.has_alt
+                          ? h("bdi", null, asset.alt.length > 60 ? `${asset.alt.slice(0, 60)}…` : asset.alt)
+                          : h(StatusPill, { tone: "sun", "data-media-missing-alt": "true" }, ui.mediaIssues?.missing_alt_text || "No alt text"),
+                      ),
+                      h(
+                        "td",
+                        null,
+                        h(StatusPill, { tone: asset.is_public ? "sea" : asset.needs_review ? "sun" : "ink" }, statusText(ui, asset.review_status)),
+                      ),
+                      h(
+                        "td",
+                        null,
+                        asset.reviewable
+                          ? h("a", { href: adminHref(asset.editor_path, page), "data-media-review-link": asset.asset_id }, label(copy, "reviewMedia", "Review"))
+                          : h("span", { className: "crm-tbl__muted" }, ui.mediaNoSource),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "camera", "data-media-empty": "true" },
+              ui.mediaLibraryEmpty,
+              h("a", { className: "adm-empty__action", href: adminHref("/admin/media", page) }, label(copy, "resetFilters", "Reset filters")),
+            ),
+        page.pagination.totalPages > 1
+          ? h(
+              "nav",
+              { className: "adm-pagination", "aria-label": label(copy, "results", "Results"), "data-media-pagination": "true" },
+              page.pagination.page > 1
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: mediaPageHref(page, page.pagination.page - 1) }, label(copy, "previous", "Previous"))
+                : h("span"),
+              h("span", { className: "adm-pagination__status" }, `${page.pagination.page} / ${page.pagination.totalPages}`),
+              page.pagination.page < page.pagination.totalPages
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: mediaPageHref(page, page.pagination.page + 1) }, label(copy, "next", "Next"))
+                : h("span"),
+            )
+          : null,
+      ),
+      h(
+        Panel,
+        { title: ui.mediaWhatCounts || "What the queue counts", "data-media-taxonomy": "true" },
+        h("p", { className: "adm-planned-note" }, ui.mediaTaxonomyNote),
+      ),
+    ],
+  });
+}
+
+function mediaPageHref(page, target) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(page.filters || {})) if (value) params.set(key, String(value));
+  if (target > 1) params.set("page", String(target));
+  const query = params.toString();
+  return adminHref(query ? `/admin/media?${query}` : "/admin/media", page);
+}
+
+function LocaleRolloutBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "localeRollout", "Website languages");
+  const canManage = pageCan(page, "settings:manage");
+  const tone = { source: "ink", live: "sea", enabled_not_indexed: "sun", requested: "sun", off: "stone" };
+  const stateLabel = (state) => ui.localeStates?.[state] || valueText(ui, state);
+  const columns = [
+    ui.localeLanguage || "Language",
+    ui.localeState || "State",
+    ui.localeListings || "Listings",
+    ui.localePages || "Guides",
+    ui.localeFallback || "Falls back to",
+    ui.localeReviewer || "Reviewer",
+  ];
+  const coverage = (done, total) => `${done} / ${total}`;
+  const focusRow = page.locales.find((row) => row.code === page.focus) || null;
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-locale-rollout",
+      "data-react-admin-ui": "locale-rollout",
+      "data-admin-workbench": "cms",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: fillTemplate(ui.localeRolloutLead, { live: page.summary.live, total: page.summary.total }) },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) },
+          h(Icon, { name: "languages", size: 16 }),
+          h("span", null, label(copy, "translationQueue", "Translation review")),
+        ),
+      ),
+      h(
+        Panel,
+        { title: `${ui.localeLanguages || "Languages"} · ${page.summary.total}`, "data-locale-rollout": "true" },
+        h(
+          "div",
+          { className: "adm-scroll-x" },
+          h(
+            "table",
+            { className: "crm-tbl" },
+            h("thead", null, h("tr", null, ...columns.map((column) => h("th", { key: column, scope: "col" }, column)))),
+            h(
+              "tbody",
+              null,
+              ...page.locales.map((row) =>
+                h(
+                  "tr",
+                  { key: row.code, "data-locale-row": row.code, "data-locale-state": row.state },
+                  h(
+                    "th",
+                    { scope: "row" },
+                    h("bdi", null, row.native_name),
+                    h("span", { className: "crm-lang" }, row.code.toUpperCase()),
+                    row.direction === "rtl" ? h("span", { className: "crm-lang" }, "RTL") : null,
+                  ),
+                  h("td", null, h(StatusPill, { tone: tone[row.state] || "ink" }, stateLabel(row.state))),
+                  // The count is the way into the work behind it: a figure a
+                  // broker cannot open is a figure they cannot act on.
+                  h(
+                    "td",
+                    null,
+                    row.is_source
+                      ? h("span", { "data-locale-listings": row.code }, coverage(row.listings.done, row.listings.total))
+                      : h("a", { href: adminHref(row.translation_path, page), "data-locale-listings": row.code }, coverage(row.listings.done, row.listings.total)),
+                  ),
+                  h("td", { "data-locale-pages": row.code }, row.pages.drafted
+                    ? `${coverage(row.pages.done, row.pages.total)} · ${fillTemplate(ui.localeGuidesDrafted, { count: row.pages.drafted })}`
+                    : coverage(row.pages.done, row.pages.total)),
+                  h("td", null, row.fallback_locale ? row.fallback_locale.toUpperCase() : "—"),
+                  h("td", null, row.reviewer_role),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      h(
+        Panel,
+        { title: ui.localeAddTitle || "Add a language", "data-locale-add": "true" },
+        h("p", { className: "adm-planned-note" }, fillTemplate(ui.localeAddCommitment, { listings: page.commitments.add.listings, pages: page.commitments.add.pages })),
+        focusRow && focusRow.state === "requested"
+          ? h(
+              "p",
+              { className: "adm-planned-note", "data-locale-requested": focusRow.code },
+              fillTemplate(ui.localeAlreadyRequested, { language: focusRow.native_name, count: focusRow.requested_count }),
+            )
+          : null,
+        canManage
+          ? h(
+              "form",
+              {
+                method: "post",
+                action: "/api/admin/locales",
+                className: "adm-filterbar",
+                "data-locale-form": "true",
+                "data-admin-mutation-form": "locale",
+                "data-success-message": ui.localeAdded,
+                "data-failure-message": ui.localeAddFailed,
+              },
+              h("input", { type: "hidden", name: "reviewer", value: currentOperatorId(page, "locale_editor") }),
+              // A new language starts closed. It opens only once a human has
+              // approved a translation of every published listing, which is
+              // the translation queue's job, not this form's.
+              h("input", { type: "hidden", name: "public_enabled", value: "false" }),
+              h("input", { type: "hidden", name: "indexable", value: "false" }),
+              h("label", null, ui.localeCode || "Code", h("input", { name: "code", required: true, defaultValue: focusRow && focusRow.state === "requested" ? focusRow.code : "", placeholder: "fr" })),
+              h("label", null, ui.localeNativeName || "Name in that language", h("input", { name: "native_name", required: true, defaultValue: focusRow && focusRow.state === "requested" ? focusRow.native_name : "" })),
+              h(
+                "label",
+                null,
+                ui.localeFallback || "Falls back to",
+                h("select", { name: "fallback_locale" }, ...page.locales.filter((row) => row.indexable).map((row) => h("option", { key: row.code, value: row.code }, row.code.toUpperCase()))),
+              ),
+              h(
+                "label",
+                null,
+                ui.localeDirection || "Direction",
+                h("select", { name: "direction" }, h("option", { value: "ltr" }, "LTR"), h("option", { value: "rtl" }, "RTL")),
+              ),
+              h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "plus", size: 16 }), ui.localeAddAction || "Add language"),
+            )
+          : h("p", { className: "adm-planned-note" }, ui.readOnlyAccess),
+      ),
+      h(
+        Panel,
+        { title: ui.localeRemoveTitle || "Removing a language", "data-locale-remove": "true" },
+        h(
+          "p",
+          { className: "adm-planned-note", "data-locale-remove-consequence": "true" },
+          fillTemplate(ui.localeRemoveConsequence, { locales: page.commitments.remove.indexed_locales.map((code) => code.toUpperCase()).join(", ") }),
+        ),
+        h(
+          "p",
+          { className: "adm-planned-note" },
+          ui.localeRemoveRoute,
+          " ",
+          h("a", { href: adminHref("/admin/migration/review", page) }, label(copy, "migrationReview", "Migration review")),
+        ),
+      ),
     ],
   });
 }
@@ -8724,8 +9643,8 @@ function editorSelect(field, value, disabled, options) {
   );
 }
 
-function editorInputFor(ui, field, value, disabled = false) {
-  const shared = { name: field, defaultValue: value, disabled, "data-editor-field": field };
+function editorInputFor(ui, field, value, disabled = false, id = undefined) {
+  const shared = { name: field, defaultValue: value, disabled, "data-editor-field": field, ...(id ? { id } : {}) };
   if (["description", "seo_description", "seo_og_description"].includes(field)) return h("textarea", { ...shared, rows: field === "description" ? 6 : 3 });
   if (["price_eur", "area_sqm", "land_area_sqm"].includes(field)) return h("input", { ...shared, type: "number", min: "0", step: "any", inputMode: "decimal" });
   if (["bedrooms", "floor", "total_floors"].includes(field)) return h("input", { ...shared, type: "number", min: "0", step: "1", inputMode: "numeric" });
@@ -8759,14 +9678,95 @@ function editorInputFor(ui, field, value, disabled = false) {
   return h("input", shared);
 }
 
-function editorField(copy, ui, field, value, disabled = false) {
-  return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
+// The editable values Hermes can draft, and the Hermes copy field each one
+// maps to. The affordance is identical wherever it appears; what differs is the
+// source it draws from, which the drafted bar names.
+const LISTING_ASSIST_FIELDS = Object.freeze({
+  description: "description",
+  seo_title: "seo_title",
+  seo_description: "meta_description",
+});
+
+function editorField(copy, ui, field, value, disabled = false, assist = null) {
+  if (!assist) return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
+  return assistedEditorField(copy, ui, field, value, disabled, assist);
 }
 
-function editorFieldWithReview(copy, ui, field, value, disabled = false, factReview = null) {
+// One draft, one approval boundary, one shape. The button never writes anything
+// public: it fills the box the broker is already looking at and says where the
+// words came from, and the value is saved by the same form as any other edit.
+// The button and the bar, so any editable value can carry the same control
+// rather than each screen growing its own.
+function hermesAssistButton(ui, { assist, hermesField, targetId, barId, disabled = false, payload = null, reveal = null, describedBy = null }) {
+  return h(
+    "button",
+    {
+      type: "button",
+      className: "adm-assist",
+      disabled: disabled || !assist.available || undefined,
+      title: assist.available ? undefined : assist.unavailableReason || undefined,
+      "aria-describedby": describedBy || undefined,
+      ...(payload ? { "data-hermes-assist-payload": JSON.stringify(payload) } : {}),
+      ...(reveal ? { "data-hermes-assist-reveal": reveal } : {}),
+      "data-hermes-assist": "true",
+      "data-hermes-assist-endpoint": assist.endpoint,
+      "data-hermes-assist-field": hermesField,
+      "data-hermes-assist-listing": assist.listingId,
+      "data-hermes-assist-locale": assist.locale,
+      "data-hermes-assist-target": targetId,
+      "data-hermes-assist-bar": barId,
+      "data-hermes-assist-pending": ui.assistPending,
+      "data-hermes-assist-failure": ui.assistFailed,
+      "data-hermes-assist-unavailable": ui.assistUnavailable,
+    },
+    h(Icon, { name: "sparkles", size: 14 }),
+    h("span", null, ui.assistDraft),
+  );
+}
+
+function hermesDraftedBar(ui, { assist, barId, field }) {
+  return h(
+    "p",
+    { id: barId, className: "adm-drafted-bar", role: "status", "data-hermes-drafted-bar": field, hidden: true },
+    h(Icon, { name: "sparkles", size: 14 }),
+    h("span", null, fillTemplate(ui.assistDrafted, { source: assist.source })),
+  );
+}
+
+function assistedEditorField(copy, ui, field, value, disabled, assist, extra = []) {
+  const inputId = `editor-${field}`;
+  const barId = `${inputId}-drafted`;
+  return h(
+    "div",
+    // Named differently from the button's data-hermes-assist-field on purpose:
+    // the button carries the Hermes copy field, this carries the editor field,
+    // and one closest() lookup has to be able to tell them apart.
+    { key: field, className: "adm-field adm-field--assisted", "data-hermes-assist-for": field },
+    h(
+      "div",
+      { className: "adm-lblrow" },
+      h("label", { htmlFor: inputId }, fieldText(ui, field)),
+      hermesAssistButton(ui, { assist, hermesField: LISTING_ASSIST_FIELDS[field], targetId: inputId, barId, disabled }),
+    ),
+    editorInputFor(ui, field, value, disabled, inputId),
+    hermesDraftedBar(ui, { assist, barId, field }),
+    ...extra,
+  );
+}
+
+function editorFieldWithReview(copy, ui, field, value, disabled = false, factReview = null, assist = null) {
   const reviewRows = (factReview?.rows || []).filter((row) => row.editor_field === field);
-  if (!reviewRows.length) return editorField(copy, ui, field, value, disabled);
+  if (!reviewRows.length) return editorField(copy, ui, field, value, disabled, assist);
   const reviewCopy = factReview.copy || {};
+  const confirmations = reviewRows.map((row) =>
+    h(
+      "span",
+      { key: `${field}-${row.row}`, className: "adm-fact-review-confirm" },
+      h("input", { type: "checkbox", name: "confirmedFacts", value: field, disabled, "data-fact-review-confirm": row.row }),
+      ` ${reviewCopy.confirm || "I confirm this value"}`,
+    ),
+  );
+  if (assist) return assistedEditorField(copy, ui, field, value, disabled, assist, confirmations);
   return h(
     "label",
     { key: field },
@@ -8789,17 +9789,19 @@ function editorFieldWithReview(copy, ui, field, value, disabled = false, factRev
   );
 }
 
-function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, factReview = null) {
+function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, factReview = null, assist = null) {
   if (!fields.length) return null;
   return h(
     "fieldset",
     { className: "adm-form__group" },
     h("legend", null, title),
-    ...fields.map((field) => editorFieldWithReview(copy, ui, field, facts[field] ?? "", disabled, factReview)),
+    ...fields.map((field) =>
+      editorFieldWithReview(copy, ui, field, facts[field] ?? "", disabled, factReview, assist && LISTING_ASSIST_FIELDS[field] ? assist : null),
+    ),
   );
 }
 
-function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null } = {}) {
+function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null, assist = null } = {}) {
   if (!fields.length) return null;
   return h(
     "details",
@@ -8810,7 +9812,7 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
       h("span", null, title),
       h("small", null, `${fields.length}`),
     ),
-    editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview),
+    editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview, assist),
   );
 }
 
@@ -8865,6 +9867,16 @@ function ListingEditorBody({ page }) {
   const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
+  // One descriptor, so the button is the same control on every field it
+  // appears on and every field names the same source and the same boundary.
+  const hermesAssist = {
+    endpoint: "/api/admin/listings/copy/draft",
+    listingId: page.listing.id,
+    locale: page.listing.source_locale || page.workspace.locale,
+    source: ui.assistSourceListingFacts,
+    available: pageCan(page, "content:write") && page.hermes_available !== false,
+    unavailableReason: page.hermes_unavailable_reason || null,
+  };
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
   const workflowFields = page.editableFields.filter((field) => ["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field));
@@ -8983,14 +9995,14 @@ function ListingEditorBody({ page }) {
               page.factReview?.rows?.length
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview }),
+              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }),
               editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
               editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
               h(
                 "section",
                 { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo" }),
+                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
               ),
               canEditContent
                 ? [
@@ -9252,6 +10264,9 @@ function ListingEditorBody({ page }) {
                         h("span", { className: "adm-media-asset__preview-empty" }, ui.mediaPreviewUnavailable),
                         h("span", { className: "adm-media-asset__preview-video" }, ui.mediaPreviewVideo),
                       ),
+                      item.media_review_note
+                        ? h("p", { className: "adm-note", "data-media-review-note": item.asset_id }, `${ui.reason}: ${item.media_review_note}`)
+                        : null,
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
@@ -9342,10 +10357,30 @@ function ListingEditorBody({ page }) {
                                     ),
                                   ),
                                 ),
-                                h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
+                                // Alt text is the value that blocks publication when it is
+                                // empty, and the one a broker is least likely to write. Same
+                                // control, same boundary, drawn from the same approved facts.
+                                h(
+                                  "div",
+                                  { className: "adm-field adm-field--assisted", "data-hermes-assist-for": `alt-${item.asset_id}` },
+                                  h(
+                                    "div",
+                                    { className: "adm-lblrow" },
+                                    h("label", { htmlFor: `media-alt-${item.asset_id}` }, ui.mediaAlt),
+                                    hermesAssistButton(ui, {
+                                      assist: hermesAssist,
+                                      hermesField: "alt_text",
+                                      targetId: `media-alt-${item.asset_id}`,
+                                      barId: `media-alt-${item.asset_id}-drafted`,
+                                    }),
+                                  ),
+                                  h("textarea", { id: `media-alt-${item.asset_id}`, name: "alt", rows: 2, defaultValue: item.alt || "" }),
+                                  hermesDraftedBar(ui, { assist: hermesAssist, barId: `media-alt-${item.asset_id}-drafted`, field: `alt-${item.asset_id}` }),
+                                ),
                                 item.kind === "video"
                                   ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
                                   : null,
+                                h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
                                 h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
                                 h(
                                   "label",
@@ -10422,15 +11457,36 @@ function MigrationReviewBody({ page }) {
             h("span", { "data-pending-route-value": "true" }, page.routeMap.reviewRequired),
           ),
           action: h(
-            StatusPill,
-            { tone: "success", "data-reviewed-route-progress": "true" },
-            `${ui.reviewedDecisions}: `,
-            h("span", { "data-reviewed-route-value": "true" }, page.routeMap.terminalDecisionsReviewed),
+            "span",
+            { className: "adm-inline-pills" },
+            h(
+              StatusPill,
+              { tone: "success", "data-reviewed-route-progress": "true" },
+              `${ui.reviewedDecisions}: `,
+              h("span", { "data-reviewed-route-value": "true" }, page.routeMap.terminalDecisionsReviewed),
+            ),
+            // The sealed contract decides URLs the workspace ledger never saw.
+            // Counting only the ledger told the operator 292 URLs were pending
+            // that had been approved and sealed; this pill says where the rest
+            // were decided, and by which approval.
+            page.routeMap.contractDecided
+              ? h(
+                  StatusPill,
+                  {
+                    tone: "sea",
+                    "data-contract-route-progress": "true",
+                    title: (page.routeMap.contractApprovalIds || []).join(", "),
+                  },
+                  `${ui.contractDecisions}: `,
+                  h("span", { "data-contract-route-value": "true" }, page.routeMap.contractDecided),
+                )
+              : null,
           ),
           "aria-label": ui.pendingLegacyDecisions,
           "data-pending-route-count": page.routeMap.reviewRequired,
           "data-filtered-route-count": page.routeMap.pendingPagination.totalRows,
           "data-reviewed-route-count": page.routeMap.terminalDecisionsReviewed,
+          "data-contract-route-count": page.routeMap.contractDecided || 0,
         },
         h("p", { className: "adm-note" }, ui.pendingLegacyHint),
         h(
@@ -11302,14 +12358,26 @@ function operatorIdForPage(page) {
   return String(page?.workspace?.operator_id || "").trim();
 }
 
-function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
+// "Workspace scope was not provided by this runtime" was being printed as the
+// value of a field labelled Access, in a workspace where the reader is a
+// broker. A field's value says what is true of the person; why the workspace
+// cannot say it is a note about the workspace, and belongs beside the field
+// rather than inside it.
+function ownerWorkspaceAccess(page, copy = ownerConsoleCopy(page).profile) {
   const profile = page.owner_profile || {};
   const roles = operatorRolesForPage(page);
   const hasWorkspaceScope = Array.isArray(profile.workspace_ids);
   const workspaceIds = hasWorkspaceScope ? profile.workspace_ids : [];
-  if (profile.full_workspace_access || (roles.includes("admin") && hasWorkspaceScope && workspaceIds.length === 0)) return copy.fullAccess;
-  if (roles.includes("admin") && !hasWorkspaceScope && operatorIdForPage(page)) return copy.fullAccess;
-  return hasWorkspaceScope ? fillTemplate(copy.scopedAccess, { count: workspaceIds.length }) : copy.scopeUnavailable;
+  if (profile.full_workspace_access || (roles.includes("admin") && hasWorkspaceScope && workspaceIds.length === 0)) {
+    return { value: copy.fullAccess, known: true };
+  }
+  if (roles.includes("admin") && !hasWorkspaceScope && operatorIdForPage(page)) return { value: copy.fullAccess, known: true };
+  if (hasWorkspaceScope) return { value: fillTemplate(copy.scopedAccess, { count: workspaceIds.length }), known: true };
+  return { value: copy.scopeUnknown, known: false, reason: copy.scopeUnavailable };
+}
+
+function ownerWorkspaceScope(page, copy = ownerConsoleCopy(page).profile) {
+  return ownerWorkspaceAccess(page, copy).value;
 }
 
 function ownerRoleLabel(page, copy = ownerConsoleCopy(page).profile) {
@@ -11320,7 +12388,8 @@ function ownerRoleLabel(page, copy = ownerConsoleCopy(page).profile) {
 function OwnerProfileSection({ page }) {
   const profile = page.owner_profile || {};
   const copy = ownerConsoleCopy(page).profile;
-  const scope = ownerWorkspaceScope(page, copy);
+  const access = ownerWorkspaceAccess(page, copy);
+  const scope = access.value;
   const role = ownerRoleLabel(page, copy);
   const profileNotice = page.profile_notice === "updated" ? copy.saved : page.profile_notice === "error" ? copy.saveFailed : "";
   const fields = [
@@ -11336,13 +12405,21 @@ function OwnerProfileSection({ page }) {
     h(
       "div",
       { className: "crm-panel__hd adm-owner-profile__heading" },
-      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, scope].filter(Boolean).join(" · "))),
+      h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, access.known ? scope : null].filter(Boolean).join(" · "))),
     ),
     h(
       "dl",
       { className: "adm-owner-profile__details" },
       ...fields.map(([term, value]) => h("div", { key: term }, h("dt", null, term), h("dd", null, h("bdi", null, value)))),
     ),
+    access.known
+      ? null
+      : h(
+          "p",
+          { className: "adm-planned-note", "data-owner-scope-unknown": "true" },
+          h(Icon, { name: "info", size: 15 }),
+          h("span", null, access.reason),
+        ),
     profile.editable
       ? h(
           "form",
@@ -12492,7 +13569,8 @@ function SettingsBody({ page }) {
   const ui = workbenchCopy(page);
   const settings = settingsCopy(page);
   const owner = ownerConsoleCopy(page);
-  const ownerScope = ownerWorkspaceScope(page, owner.profile);
+  const ownerAccess = ownerWorkspaceAccess(page, owner.profile);
+  const ownerScope = ownerAccess.value;
   const options = page.settingsOptions || { admin_locales: ["bg", "ru", "en"], timezones: [], date_formats: [], broker_groups: [] };
   const brokers = page.brokerProfiles || [];
   const title = settings.title;
@@ -12926,6 +14004,19 @@ function SettingsBody({ page }) {
                 checked: publicSite.flag("saved_search_alerts_enabled"),
                 disabled,
               }),
+              // The website's languages are not a workspace setting: adding one
+              // commits the agency to translating every published listing, so
+              // it is decided on its own screen. Settings points at it.
+              h(
+                "p",
+                { key: "languages", className: "adm-planned-note", "data-settings-locale-link": "true" },
+                h(
+                  "a",
+                  { href: adminHref("/admin/locales", page) },
+                  h(Icon, { name: "globe", size: 15 }),
+                  h("span", null, label(copy, "localeRollout", "Website languages")),
+                ),
+              ),
             ],
           }),
           page.workspace_security?.two_factor ? h(SettingsSecuritySection, { page, icon: "shield-check" }) : null,
@@ -12964,6 +14055,10 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_operations_reports") return renderStaticElement(h(OperationsReportsBody, { page }));
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
+  if (page.kind === "admin_locale_rollout") return renderStaticElement(h(LocaleRolloutBody, { page }));
+  if (page.kind === "admin_media_library") return renderStaticElement(h(MediaLibraryBody, { page }));
+  if (page.kind === "admin_document_records") return renderStaticElement(h(DocumentRecordsBody, { page }));
+  if (page.kind === "admin_task_queue") return renderStaticElement(h(TasksBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
