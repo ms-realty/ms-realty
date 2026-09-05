@@ -327,14 +327,25 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .set-grid { display:grid; grid-template-columns:212px minmax(0,1fr); gap:24px; align-items:start; }
-    .set-nav { display:grid; gap:4px; position:sticky; top:0; }
-    .set-nav a { display:flex; align-items:center; gap:8px; min-height:34px; padding:8px 12px;
-      border-radius:var(--r-panel); font-size:13px; font-weight:500; color:var(--text-body); }
-    .set-nav a:hover { background:var(--tile-deep); }
-    .set-nav a[data-on] { background:var(--ink-800); color:#fff; }
-    .set-nav a[data-on] svg { color:#fff; }
-    .set-nav p { margin:12px 12px 4px; font-size:11px; font-weight:600; color:var(--text-subtle); }
+  .ws { display:grid; gap:20px; }
+  .ws .ph { margin:0; }
+  .ws-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .ws-form { display:grid; gap:16px; padding:20px; border-top:1px solid var(--joint); min-width:0; }
+  .ws-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; }
+  .ws :is(input,select,textarea).in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .ws textarea.in { min-height:96px; resize:vertical; }
+  .ws :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .ws button:disabled { opacity:.5; cursor:not-allowed; }
+  .ws-check { display:flex; align-items:flex-start; gap:12px; }
+  .ws-check input { flex:0 0 auto; width:16px; height:16px; accent-color:var(--spring-700); }
+  .ws-facts { display:grid; grid-template-columns:132px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .ws-facts dt { color:var(--text-muted); }
+  .ws-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .ws-actions { display:flex; gap:12px; align-items:center; }
+  .ws-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .ws-state { display:grid; align-content:start; gap:12px; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .ws-state h2 { font-size:16px; }
+  .ws-state .btn { justify-self:start; }
 
   </style>
 </head><body>
@@ -346,7 +357,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1080px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -388,110 +399,53 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div>
-          <h1>Settings</h1>
-          <p>Every change here is recorded in the activity log with your name on it.</p>
-        </div>
-        <div class="ph-actions">
-          <span class="pill pill--sand"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Last changed 3 days ago by Mariya</span>
-        </div>
-      </div>
-
-      <div class="set-grid">
-        <nav class="set-nav">
-          <a href="#" data-on="1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg><span>Agency profile</span></a>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Leads and reply targets</span></a>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M21 18H3l1.5-2.5V11a7.5 7.5 0 0 1 15 0v4.5z"/></svg><span>Notifications</span></a>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h4v13H4z"/><path d="M10 3h4v9h-4z"/><path d="M16 3h4v17h-4z"/></svg><span>Workspace defaults</span></a>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg><span>Public site and locales</span></a>
-          <p>Account</p>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="8" r="4"/></svg><span>Team and roles</span></a>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Security</span></a>
-          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><span>Data and exports</span></a>
-        </nav>
-
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd">
-              <div><h2>Agency profile</h2><p class="sub">How the agency introduces itself and which channels replies come from.</p></div>
-              <span class="pill pill--warn"><i></i>2 required fields empty</span>
-            </div>
-            <div class="fields">
-              <div class="field">
-                <label for="f1">Agency name <em>*</em></label>
-                <span class="in" id="f1">MS Realty</span>
-              </div>
-              <div class="field">
-                <label for="f2">Phone customers see <em>*</em></label>
-                <span class="in in--empty" id="f2">Not set — shown on every listing page</span>
-              </div>
-              <div class="field">
-                <label for="f3">Reply-from email <em>*</em></label>
-                <span class="in in--empty" id="f3">Not set — replies cannot be delivered</span>
-              </div>
-              <div class="field">
-                <label for="f4">WhatsApp number</label>
-                <span class="in in--empty" id="f4">Connect WhatsApp Business first</span>
-                <span class="hint">Filled automatically once the channel is connected.</span>
-              </div>
-              <div class="field full">
-                <label for="f5">Offices</label>
-                <span class="in in--area" id="f5">Sandanski, ul. Makedonia 22</span>
-                <span class="hint">One office per line. Each becomes a contact card on the public site.</span>
-              </div>
-            </div>
-            <div class="savebar">
-              <button class="btn btn--sm btn--primary" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Save changes</span></button>
-              <button class="btn btn--sm btn--ghost" type="button">Discard</button>
-              <span style="margin-left:auto; font-size:13px" class="muted">Saved changes are visible on the public site within a minute.</span>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-hd">
-              <div><h2>Reply targets</h2><p class="sub">When a lead becomes overdue and who is told.</p></div>
-            </div>
-            <div class="fields">
-              <div class="field">
-                <label for="f6">First reply due within</label>
-                <span class="in" id="f6">4 hours</span>
-              </div>
-              <div class="field">
-                <label for="f7">Escalate to the manager after</label>
-                <span class="in" id="f7">24 hours</span>
-              </div>
-            </div>
-            <div class="sw">
-              <span class="toggle" data-on="1"><i></i></span>
-              <span><b>Require a named approval before any reply is sent</b>
-                <span>Hermes drafts stay internal until a person approves them. Turning this off is recorded.</span></span>
-              <span class="pill pill--ok"><i></i>Recommended</span>
-            </div>
-            <div class="sw">
-              <span class="toggle" data-on="1"><i></i></span>
-              <span><b>Warn before a listing is published without approved translations</b>
-                <span>Applies to DE, NL, RU, EL and HE.</span></span>
-              <span class="pill pill--ok"><i></i>Recommended</span>
-            </div>
-            <div class="sw">
-              <span class="toggle"><i></i></span>
-              <span><b>Let brokers reassign their own leads</b>
-                <span>Off means only the owner and managers can reassign.</span></span>
-              <span></span>
-            </div>
-            <div class="savebar">
-              <button class="btn btn--sm btn--primary" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Save changes</span></button>
-              <button class="btn btn--sm btn--ghost" type="button">Discard</button>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="ws">
+  <div class="ph"><div><h1>Settings</h1><p>Review and save one section at a time. The saved revision names the person who changed it.</p></div></div>
+  <nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M20.3 14.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9.8 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 8.8a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.8a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.04A1.7 1.7 0 0 0 21.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03z"/></svg><span>Workspace</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="8" r="4"/></svg><span>Team and roles</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Security</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Data and exports</span></a></nav>
+  <p class="muted">Design preview · schema defaults and illustrative edit states. No live workspace settings have been loaded.</p>
+  <div class="ws-grid">
+    <section class="panel"><div class="panel-hd"><h2>Agency profile</h2><span class="wit wit--none">Changes not saved</span></div><form class="ws-form">
+      <div class="ws-fields"><div class="field"><label for="agency-name">Agency name</label><input class="in" id="agency-name" value="MS Realty" maxlength="120" required></div><div class="field"><label for="agency-phone">Public phone</label><input class="in" id="agency-phone" type="tel" placeholder="Not supplied"></div><div class="field"><label for="agency-email">Agency email</label><input class="in" id="agency-email" type="email" placeholder="Not supplied"></div><div class="field"><label for="agency-whatsapp">WhatsApp number</label><input class="in" id="agency-whatsapp" type="tel" placeholder="Not supplied"></div><div class="field"><label for="agency-viber">Viber number</label><input class="in" id="agency-viber" type="tel" placeholder="Not supplied"></div></div>
+      <div class="field"><label for="agency-offices">Offices</label><textarea class="in in--area" id="agency-offices" aria-describedby="offices-help">Sandanski</textarea><p class="hint" id="offices-help">One office per line, up to 10. Use the agency’s approved contact details.</p></div>
+      <div class="ws-actions"><button class="btn btn--accent" type="button">Save agency profile</button><button class="btn" type="button">Discard edits</button></div>
+    </form></section>
+    <section class="panel"><div class="panel-hd"><h2>What saving means</h2></div><div class="ws-form">
+      <p>The response must identify the section and its saved revision. Until that response arrives, the edits are unconfirmed.</p><p>Contact fields do not connect a messaging account. Delivery access is reviewed in Connections.</p>
+      <dl class="ws-facts"><dt>Example receipt</dt><dd>Agency profile · revision 3</dd><dt>Changed by</dt><dd><span class="wit">Mariya · 1 Sep, 09:10 · example</span></dd><dt>Changed fields</dt><dd>Agency name and offices</dd></dl>
+      <p class="hint">This receipt is illustrative. A saved setting is not a verified public deployment.</p>
+    </div></section>
+  </div>
+  <section class="panel"><div class="panel-hd"><h2>Lead reply targets</h2><span class="sub">Defaults from the settings schema</span></div><form class="ws-form">
+    <div class="ws-fields"><div class="field"><label for="reply-minutes">First reply target, minutes</label><input class="in" id="reply-minutes" type="number" min="5" max="1440" step="1" value="15"></div><div class="field"><label for="escalation-minutes">Manager escalation, minutes</label><input class="in" id="escalation-minutes" type="number" min="5" max="10080" step="1" value="60" aria-describedby="escalation-help"><p class="hint" id="escalation-help">Escalation must be later than the first reply target.</p></div></div>
+    <p>Defaults are 15 minutes for the first reply and 60 minutes for manager escalation. Changing a deadline does not answer the lead.</p>
+    <button class="btn" type="button">Save reply targets</button>
+  </form></section>
+  <div class="ws-grid">
+    <section class="panel"><div class="panel-hd"><h2>Workspace defaults</h2></div><form class="ws-form"><div class="ws-fields">
+      <div class="field"><label for="workspace-language">Default workspace language</label><select class="in" id="workspace-language"><option value="bg">Български</option><option value="ru">Русский</option><option value="en" selected>English</option></select></div>
+      <div class="field"><label for="workspace-timezone">Timezone</label><select class="in" id="workspace-timezone"><option selected>Europe/Sofia</option><option>Europe/Athens</option><option>Europe/Bucharest</option><option>Europe/Berlin</option><option>Europe/Amsterdam</option><option>Europe/London</option><option>Europe/Moscow</option><option>Asia/Jerusalem</option><option>UTC</option></select></div>
+      <div class="field"><label for="workspace-dates">Date format</label><select class="in" id="workspace-dates"><option selected>Use language format</option><option>dd.mm.yyyy</option><option>dd/mm/yyyy</option><option>yyyy-mm-dd</option></select></div>
+    </div><button class="btn" type="button">Save workspace defaults</button></form></section>
+    <section class="panel"><div class="panel-hd"><h2>Approval boundaries</h2></div><div class="ws-form"><p>Hermes prepares drafts. Customer replies require human review.</p><p>Bulgarian remains the public source locale. Each public translation needs human approval before indexing.</p><p>These boundaries cannot be switched off in workspace settings.</p><button class="btn" type="button">Open approval queues</button></div></section>
+  </div>
+  <div class="ws-grid">
+    <section class="panel"><div class="panel-hd"><h2>Notifications</h2></div><form class="ws-form"><label class="ws-check"><input type="checkbox"><span>Enable the daily digest</span></label><div class="field"><label for="digest-recipients">Digest recipients</label><textarea class="in in--area" id="digest-recipients" placeholder="Work email addresses, one per line" aria-describedby="digest-help"></textarea><p class="hint" id="digest-help">Up to 10 recipients. An enabled digest needs at least one valid address.</p></div><label class="ws-check"><input type="checkbox"><span>Enable instant new-lead alerts</span></label><button class="btn" type="button">Save notification preferences</button></form></section>
+    <section class="panel"><div class="panel-hd"><h2>Public site defaults</h2></div><form class="ws-form"><div class="field"><label for="featured-count">Featured listing count</label><input class="in" id="featured-count" type="number" min="0" max="24" value="6"></div><label class="ws-check"><input type="checkbox" checked><span>Show “Price on request” where applicable</span></label><label class="ws-check"><input type="checkbox" checked><span>Enable saved-search alerts</span></label><p class="hint">These settings do not verify prices, approve translations or authorise a delivery.</p><button class="btn" type="button">Save public site defaults</button></form></section>
+  </div>
+  <div class="ws-states" aria-label="Additional settings states">
+    <section class="ws-state"><h2>No saved profile yet</h2><p><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg> Defaults can fill the form, but have no saved witness. Review the agency’s details before saving.</p><button class="btn" type="button">Review agency profile</button></section>
+    <section class="ws-state"><h2>Save in progress</h2><p role="status">Waiting for the saved revision. Keep the entered values visible.</p><button class="btn" type="button" disabled>Saving profile…</button></section>
+    <section class="ws-state"><h2>Escalation time is invalid</h2><p class="hint--error" role="alert">Manager escalation must come after the first reply target. Other values remain unchanged.</p><button class="btn" type="button">Review reply targets</button></section>
+    <section class="ws-state"><h2>One section saved</h2><p>The agency profile has a confirmed receipt. Unsaved notification edits remain separate.</p><span class="wit wit--none">Notification edits not saved</span></section>
+    <section class="ws-state"><h2>Too many offices</h2><p>Keep the entered list visible and identify the 10-office limit. Never silently discard extra addresses.</p><button class="btn" type="button">Review office list</button></section>
+    <section class="ws-state"><h2>Settings service unavailable</h2><p>The save is not confirmed. Reconnect and reload the saved revision before deciding whether to retry.</p><button class="btn" type="button" disabled>Save changes</button></section>
+  </div>
+</div>
     </div>
   </div>
 </div>

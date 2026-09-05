@@ -1,274 +1,98 @@
 import fs from "node:fs";
+import assert from "node:assert/strict";
 import { page, sheet, icon, subnav } from "../shell.mjs";
-const W = (n) => new URL(`../${n}`, import.meta.url);
-
-const SYS_CSS = `
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .bars { display:grid; gap:8px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:16px 20px; }
-    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
-      color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:4px; font-size:11px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gate:last-child { border-bottom:0; }
-    .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
+import { PAYLOAD_ADMIN_ROLES } from "../../../../production/lib/payload-admin-auth.mjs";
+import { adminCapabilities } from "../../../../production/lib/admin-auth.mjs";
+import { ADMIN_LOGIN_LOCALES } from "../../../../production/lib/admin-login.mjs";
+const W=name=>new URL(`../${name}`,import.meta.url);
+const escape=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const readiness=JSON.parse(fs.readFileSync(new URL("../../../../production/data/launch-readiness.json",import.meta.url),"utf8"));
+const gateNames={crawl_inventory:"Legacy crawl inventory",redirect_reviews:"Legacy URL decisions",localized_sitemap:"Localised sitemap",structured_data:"Structured data",listing_quality_review:"Listing publication review",runtime_smoke:"Local runtime smoke",live_services:"Live search and Hermes evidence",monitoring_rollback:"Monitoring and rollback",production_app_layer:"Production application layer",payload_runtime:"Payload runtime",r2_media_coverage:"Media coverage",production_recovery:"Backup and recovery"};
+for(const gate of readiness.gates) assert(gateNames[gate.id],`Describe readiness gate ${gate.id}`);
+const blocked=readiness.gates.filter(g=>g.status!=="pass");
+assert.equal(blocked.length,readiness.blockers.length);
+const CSS=`
+  .sy { display:grid; gap:20px; }
+  .sy .ph { margin:0; }
+  .sy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .sy-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .sy-section h2,.sy-state h2 { font-size:16px; }
+  .sy-section > .btn { justify-self:start; }
+  .sy-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 200px 104px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .sy-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sy-row:hover { background:var(--tile); }
+  .sy-row .btn { justify-self:end; }
+  .sy-heading { font-weight:600; background:var(--tile-deep); }
+  .sy .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .sy textarea.in { min-height:96px; resize:vertical; }
+  .sy :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .sy button:disabled { opacity:.5; cursor:not-allowed; }
+  .sy-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .sy-facts dt { color:var(--text-muted); }
+  .sy-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .sy-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .sy-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .sy-state .btn { justify-self:start; }
+  .sy-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .sy-toolbar .field { flex:1; }
+  .sy-check { display:flex; align-items:flex-start; gap:12px; }
+  .sy-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .sy-chart { display:grid; gap:12px; }
+  .sy-bar { display:grid; grid-template-columns:180px minmax(0,1fr) 48px; gap:16px; align-items:center; }
+  .sy-track { height:8px; background:var(--joint); }
+  .sy-track i { display:block; height:100%; background:var(--spring-700); }
+  .sy-value { font-size:16px; font-weight:600; text-align:end; }
+  .sy-login { display:grid; grid-template-columns:minmax(0,1fr) 480px; gap:64px; padding:64px; align-items:center; background:var(--tile); }
+  .sy-login h1 { font:600 22px var(--font-sans); }
+  .sy-brand { display:grid; gap:24px; align-content:start; }
+  .sy-brand img { width:118px; height:auto; background:var(--spring-900); padding:12px; border-radius:var(--r-panel); }
+  .sy-languages { display:flex; gap:12px; }
+  .sy-languages [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+  .sy-auth { padding:24px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--tile-glaze); display:grid; gap:16px; }
+  .sy-auth .btn { justify-content:center; }
+  .sy-auth-extra { margin:0 64px 48px; }
 `;
-
-/* ------------------------------------------------------------------- Insight */
-const REP_BODY = `      <div class="ph">
-        <div><h1>Insight</h1><p>August, compared with July. Numbers come from the lead, viewing and deal ledgers — nothing is estimated.</p></div>
-        <div class="ph-actions">
-          <button class="btn btn--sm" type="button">August 2026 ${icon("down", 13)}</button>
-          <button class="btn" type="button">${icon("download", 15)}<span>Export</span></button>
-        </div>
-      </div>
-      ${subnav([["Reports", "chart", true], ["Activity log", "list"], ["Launch readiness", "flag"], ["Runtime", "target"]])}
-      <section class="panel">
-        <dl class="kpi">
-          <div><dt>Enquiries received</dt><dd>63</dd><small style="color:var(--success-600)">+11 on July</small></div>
-          <div><dt>Answered inside the target</dt><dd>78%</dd><small style="color:var(--danger-600)">−6 points · target is 90</small></div>
-          <div><dt>Viewings held</dt><dd>24</dd><small style="color:var(--success-600)">+3</small></div>
-          <div><dt>Deals closed</dt><dd>2</dd><small class="muted">€284,000 · one still in notary</small></div>
-        </dl>
-      </section>
-      <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:16px; align-items:start">
-        <section class="panel">
-          <div class="panel-hd"><h2>Where enquiries came from</h2><span class="sub">63 in August</span></div>
-          <div class="bars">
-${[["Website enquiry form",26],["WhatsApp",14],["Phone",11],["Legacy .ru pages",7],["Facebook",3],["Walk-in",2]].map(([n, v]) => [n, v, "var(--spring-700)"])
-  .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 26) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">Seven enquiries still arrive on legacy
-            Russian pages, which is the strongest argument for keeping every one of those URLs alive.</span></div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Reply speed against the target</h2><span class="sub">Target: first reply in 4 hours</span></div>
-          <div class="bars">
-${[["Under 1 hour",21,"var(--success-500)"],["1 to 4 hours",28,"var(--success-500)"],["4 to 24 hours",9,"var(--warning-700)"],["Over 24 hours",5,"var(--danger-500)"]]
-  .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 28) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">The five over 24 hours were all
-            Hebrew or Greek and all arrived at the weekend. That is a staffing question, not a tooling one.</span></div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Catalogue health</h2></div>
-          <div class="bars">
-${[["Published and complete",84,"var(--success-500)"],["Published, facts thin",19,"var(--warning-700)"],["Needs review",43,"var(--warning-700)"],["Archived",38,"var(--marble-600)"]]
-  .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 84) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Hermes contribution</h2><span class="pill pill--ai">${icon("sparkles", 11)}Drafts only</span></div>
-          <div class="bars">
-${[["Accepted as written",96,"var(--success-500)"],["Accepted after edits",34,"var(--spring-700)"],["Rejected",18,"var(--marble-600)"],["Refused by a guardrail",7,"var(--danger-500)"]]
-  .map(([n, v, c]) => `            <div class="bar"><span>${n}</span><span class="t"><i style="width:${(v / 96) * 100}%; background:${c}"></i></span><b style="text-align:right">${v}</b></div>`).join("\n")}
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">Roughly nine hours of translation and
-            drafting time in August, all of it reviewed by a person before anyone outside saw it.</span></div>
-        </section>
-      </div>`;
-fs.writeFileSync(W("Reports.dc.html"), page({ active: "insight", body: REP_BODY, extraCss: SYS_CSS, height: 1020 }));
-
-/* ------------------------------------------------------------------ Activity */
-const ACT_BODY = `      <div class="ph">
-        <div><h1>Activity log</h1><p>Append-only. Every mutation names a person or an agent, and an action that is not registered cannot be written at all.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button">${icon("download", 15)}<span>Export</span></button>
-        </div>
-      </div>
-      ${subnav([["Reports", "chart"], ["Activity log", "list", true], ["Launch readiness", "flag"], ["Runtime", "target"]])}
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find">${icon("search", 14)}Action, record or person</span>
-          <button class="btn btn--sm" type="button">Anyone ${icon("down", 13)}</button>
-          <button class="btn btn--sm" type="button">Any action ${icon("down", 13)}</button>
-          <button class="btn btn--sm" type="button">Last 7 days ${icon("down", 13)}</button>
-          <span style="margin-left:auto" class="mono">4,182 entries · retained 24 months</span>
-        </div>
-        <table>
-          <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Record</th><th>What changed</th><th>Where from</th></tr></thead>
-          <tbody>
-${[
-  ["Today 09:41","Mariya Ruseva","human","translation_approved","MS-00932 · DE","Draft accepted as written, marked indexable","Sandanski office"],
-  ["Today 09:12","Mariya Ruseva","human","document_sent","CASE-0007 · preliminary contract","Sent to the seller for signature","Sandanski office"],
-  ["Today 08:40","Hermes","agent","hermes_translation_draft","7 listings · DE, NL, EL","21 drafts stored unpublished, 2 lines refused","Agency hardware"],
-  ["Today 08:02","Petar Dimitrov","human","reply_sent","Lead · Anna Weber","Reply approved by Mariya and delivered","Mobile"],
-  ["Yesterday 17:20","Mariya Ruseva","human","listing_published","MS-00791","Moved from needs review to published","Sandanski office"],
-  ["Yesterday 16:55","System","system","consent_withdrawn","Dmitri Volkov","Removed from 2 alert audiences","Website"],
-  ["Yesterday 11:04","Mariya Ruseva","human","connection_disconnected","Google Workspace","Token expired, delivery paused","Sandanski office"],
-  ["28 Aug 09:00","System","system","automation_failed","Saved-search digest","Google delivery unavailable, nothing sent","Scheduler"],
-].map(([when, who, kind, action, record, what, where]) => `            <tr>
-              <td class="mono">${when}</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av"${kind === "agent" ? ' style="background:var(--brick-50); color:var(--brick-700)"' : kind === "system" ? ' style="background:var(--spring-50); color:var(--spring-800)"' : ""}>${who.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()}</span>${who}</span></td>
-              <td><span class="mono">${action}</span></td>
-              <td>${record}</td>
-              <td class="muted">${what}</td>
-              <td class="muted">${where}</td>
-            </tr>`).join("\n")}
-          </tbody>
-        </table>
-        <div class="foot"><span>Showing 8 of 4,182</span>
-          <span style="display:flex; gap:8px"><button class="btn btn--sm" type="button">Previous</button><button class="btn btn--sm" type="button">Next</button></span></div>
-      </section>
-      <div class="note note--info" style="margin-top:16px">${icon("lock", 15)}
-        <span>An entry cannot be edited or deleted from the workspace, and a new kind of action has to be
-          registered in code before it can appear here at all — an unregistered action fails the write.</span></div>`;
-fs.writeFileSync(W("Activity.dc.html"), page({ active: "insight", body: ACT_BODY, extraCss: SYS_CSS, height: 900 }));
-
-/* ----------------------------------------------------------------- Readiness */
-const LR_BODY = `      <div class="ph">
-        <div><h1>Launch readiness</h1><p>Thirteen gates between here and serving both canonical domains. Three are blocked, and none of them can be waved through from this screen.</p></div>
-        <div class="ph-actions">
-          <span class="pill pill--warn"><i></i>10 of 13 passing</span>
-          <button class="btn" type="button">${icon("download", 15)}<span>Evidence pack</span></button>
-        </div>
-      </div>
-      ${subnav([["Reports", "chart"], ["Activity log", "list"], ["Launch readiness", "flag", true], ["Runtime", "target"]])}
-      <section class="panel">
-        <div class="panel-hd"><h2>Gates</h2><span class="sub">A gate passes on external evidence, never on a local smoke test.</span></div>
-${[
-  ["ok","Crawl parity against both legacy domains","457 URLs · titles, metadata and content compared","Report 29 Aug"],
-  ["ok","Listing facts reviewed by a person","165 of 165 in the review CSV","Signed off 24 Aug"],
-  ["ok","Public search serves the approved catalogue","84 published listings indexed in Typesense","Live check"],
-  ["ok","Database and CMS runtime","Payload on Postgres, migrations current","Live check"],
-  ["ok","Media mirrored and reviewed","11,859 files in R2 · 46 still in the review queue","Live check"],
-  ["ok","Deterministic email delivery","Templates render identically across locales","Report 26 Aug"],
-  ["ok","Monitoring and alerting","Drill completed, alerts reached the on-call phone","Drill 30 Aug"],
-  ["ok","Rollback rehearsal","Restored the previous release inside the window","Drill 30 Aug"],
-  ["ok","Backup and recovery","R2 restore verified against a clean environment","Drill 28 Aug"],
-  ["ok","Owner handover pack","Credentials, runbooks and contacts transferred","Signed 31 Aug"],
-  ["block","Every legacy URL has a terminal outcome","419 of 457 decided · 38 undecided","Blocks launch"],
-  ["block","Search Console and Yandex ownership","Neither property is verified for the canonical domains","Blocks launch"],
-  ["block","Hermes worker report from a live run","The endpoint is not configured, so no live report exists","Blocks launch"],
-].map(([state, title, detail, evidence]) => `        <div class="gate">
-          <span class="av" style="background:${state === "ok" ? "var(--success-50); color:var(--success-600)" : "var(--danger-50); color:var(--danger-600)"}">${icon(state === "ok" ? "check" : "alert", 14)}</span>
-          <span style="min-width:0"><b>${title}</b><em>${detail}</em></span>
-          <span style="font-size:13px" class="muted">${evidence}</span>
-          <span style="display:flex; justify-content:flex-end">${state === "ok"
-            ? `<span class="pill pill--ok"><i></i>Passing</span>`
-            : `<button class="btn btn--sm btn--primary" type="button">Open</button>`}</span>
-        </div>`).join("\n")}
-        <div class="savebar"><span style="font-size:13px" class="muted">Production-Ready is the whole portfolio
-          passing on the temporary host. Production-Live needs the owner's DNS change and post-cutover
-          verification. Neither can be asserted from this screen.</span></div>
-      </section>`;
-fs.writeFileSync(W("LaunchReadiness.dc.html"), page({ active: "insight", body: LR_BODY, extraCss: SYS_CSS, height: 1020 }));
-
-/* ---------------------------------------------------------------- Team + 2FA */
-const TEAM_BODY = `      <div class="ph">
-        <div><h1>Team</h1><p>Three people and one agent. What each may do is decided here and enforced on every request, not in the interface.</p></div>
-        <div class="ph-actions"><button class="btn btn--primary" type="button">${icon("plus", 15)}<span>Invite</span></button></div>
-      </div>
-      ${subnav([["Workspace", "gear"], ["Team and roles", "team", true], ["Security", "shield"], ["Data and exports", "download"]])}
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <table>
-            <thead><tr><th>Person</th><th>Role</th><th>May approve</th><th>Two-factor</th><th>Last active</th><th></th></tr></thead>
-            <tbody>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-600); color:#fff">MR</span>
-                <span class="t2"><b>Mariya Ruseva</b><span>mariya@ms-realty.bg</span></span></span></td>
-                <td><span class="pill pill--ink"><i></i>Owner</span></td>
-                <td class="muted">Everything, including publication</td>
-                <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">now</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">PD</span>
-                <span class="t2"><b>Petar Dimitrov</b><span>petar@ms-realty.bg</span></span></span></td>
-                <td><span class="pill pill--sea"><i></i>Broker</span></td>
-                <td class="muted">Replies and viewings, not publication</td>
-                <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">1 hour ago</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">DK</span>
-                <span class="t2"><b>Desislava Koleva</b><span>desi@ms-realty.bg</span></span></span></td>
-                <td><span class="pill pill--sand"><i></i>Translator</span></td>
-                <td class="muted">Translations in DE and NL only</td>
-                <td><span class="pill pill--warn"><i></i>Not set up</span></td><td class="muted">3 days ago</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
-                <span class="t2"><b>Hermes</b><span>Agent · agency hardware</span></span></span></td>
-                <td><span class="pill pill--ai">${icon("sparkles", 11)}Agent</span></td>
-                <td class="muted">Nothing. It drafts only.</td>
-                <td class="muted">—</td><td class="muted">yesterday</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Limits</button></td></tr>
-            </tbody>
-          </table>
-          <div class="savebar"><span style="font-size:13px" class="muted">Removing a person revokes their
-            sessions immediately and leaves their name on everything they approved.</span></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Needs attention</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div class="note note--warn">${icon("alert", 14)}<span>Desislava has no second factor. She can approve
-                translations that go straight to the public site.</span></div>
-              <button class="btn btn--sm btn--primary" type="button">${icon("send", 13)}<span>Send her the setup link</span></button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Sessions</h2><span class="sub">4 open</span></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              ${[["Mariya · Mac · Sandanski","now"],["Mariya · iPhone","2 hours ago"],["Petar · Android","1 hour ago"],["Desislava · Windows · Sofia","3 days ago"]]
-                .map(([a, b]) => `<div style="display:flex; justify-content:space-between; align-items:center"><span>${a}</span><span class="muted">${b}</span></div>`).join("")}
-              <button class="btn btn--sm" type="button" style="margin-top:4px">Revoke the 3-day-old session</button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>What a role means</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div><b>Owner</b><span style="display:block" class="muted">Publication, settings, team, exports.</span></div>
-              <div><b>Broker</b><span style="display:block" class="muted">Leads, viewings, cases, documents. Cannot publish.</span></div>
-              <div><b>Translator</b><span style="display:block" class="muted">Only the languages named on their account.</span></div>
-              <div><b>Agent</b><span style="display:block" class="muted">Read and draft. Every mutation is refused.</span></div>
-            </div>
-          </section>
-        </div>
-      </div>`;
-fs.writeFileSync(W("Team.dc.html"), page({ active: "settings", body: TEAM_BODY, extraCss: SYS_CSS, height: 900 }));
-
-/* ----------------------------------------------------------------- Sign in */
-const SI_BODY = `<div style="display:grid; grid-template-columns:minmax(0,1fr) 520px; min-height:900px">
-  <div style="background:var(--ink-900); color:#fff; padding:64px 64px; display:grid; align-content:space-between">
-    <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="78" height="40" style="display:block; height:40px; width:auto" />
-    <div>
-      <p style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; line-height:1.25; max-width:440px">
-        The workspace for a family agency in Sandanski.</p>
-      <p style="margin-top:16px; font-size:13px; color:rgba(255,255,255,.66); max-width:420px; line-height:1.6">
-        Listings, enquiries, viewings, contracts and the website itself — in one place, in Bulgarian,
-        Russian or English.</p>
-    </div>
-    <p style="font-size:13px; color:rgba(255,255,255,.44)">Every sign-in is recorded. Report anything you
-      did not do to the owner.</p>
-  </div>
-  <div style="background:var(--surface); padding:64px 64px; display:grid; align-content:center; gap:20px">
-    <div>
-      <h1 style="font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.015em">Sign in</h1>
-      <p style="margin-top:4px; font-size:13px; color:var(--text-muted)">Use your MS Realty address.</p>
-    </div>
-    <div class="field"><label for="s1">Email</label><span class="in" id="s1">mariya@ms-realty.bg</span></div>
-    <div class="field"><label for="s2">Password</label><span class="in in--focus" id="s2">••••••••••••</span></div>
-    <div style="display:flex; align-items:center; gap:8px">
-      <span class="box" data-on="1"></span><span style="font-size:12px">Remember this device for 30 days</span>
-      <a href="#" style="margin-left:auto; font-size:13px; font-weight:600">Forgot your password?</a>
-    </div>
-    <button class="btn btn--lg btn--primary" type="button" style="justify-content:center">Sign in</button>
-    <div class="note note--info">${icon("shield", 15)}<span>A second factor is asked for after the password.
-      If you have lost your device, the owner can reset it for you.</span></div>
-    <div style="display:flex; align-items:center; gap:12px; margin-top:8px">
-      <span style="height:4px; flex:1 1 auto; background:var(--border)"></span>
-      <span style="font-size:11px" class="muted">or</span>
-      <span style="height:1px; flex:1 1 auto; background:var(--border)"></span>
-    </div>
-    <button class="btn btn--lg" type="button" style="justify-content:center">${icon("mail", 16)}<span>Continue with Google Workspace</span></button>
-  </div>
+const nav=on=>subnav([["Reports","chart",on==="Reports"],["Activity log","list",on==="Activity"],["Launch readiness","flag",on==="LaunchReadiness"]]);
+const states=rows=>`<div class="sy-states" aria-label="Additional states">${rows.map(([title,body,action,disabled=false])=>`<section class="sy-state"><h2>${title}</h2><p>${body}</p>${action?`<button class="btn" type="button"${disabled?" disabled":""}>${action}</button>`:""}</section>`).join("")}</div>`;
+const replyBuckets=[["Under 1 hour",21],["1 to 4 hours",28],["4 to 24 hours",9],["Over 24 hours",5]];
+assert.equal(replyBuckets.reduce((n,[,count])=>n+count,0),63);
+const reports=`<div class="sy"><div class="ph"><div><h1>Operations reports</h1><p>Start with work that missed its target, then open the records behind the number.</p></div><button class="btn btn--accent" type="button">Review overdue replies</button></div>${nav("Reports")}
+  <p class="muted">Illustrative August report · sample counts, not measured production performance.</p>
+  <section class="panel"><div class="panel-hd"><h2>14 of 63 replies missed the sample target</h2><span class="wit wit--none">Record review needed</span></div><div class="sy-section"><p>The example target is four hours. It is not the workspace default. Verify the target, period and denominator before comparing results.</p><dl class="sy-facts"><dt>Within target</dt><dd>49 of 63 · 78% rounded</dd><dt>Outside target</dt><dd>14 of 63</dd><dt>Source</dt><dd>Illustrative reply records</dd><dt>Current reply target</dt><dd>Read the saved workspace setting</dd></dl></div></section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Time to first reply</h2><span class="sub">63 sample replies</span></div><div class="sy-section sy-chart">${replyBuckets.map(([label,count])=>`<div class="sy-bar"><span>${label}</span><span class="sy-track"><i style="width:${count/28*100}%"></i></span><b class="sy-value">${count}</b></div>`).join("")}<p class="hint">The count is written beside every bar. The longest bar is 28 replies.</p></div></section>
+  <section class="panel"><div class="panel-hd"><h2>What the figures cannot establish</h2></div><div class="sy-section"><p>A draft is not a delivered reply. A planned viewing is not a held viewing. A case awaiting a deed is not a completed sale.</p><p>Do not infer the cause of delay from a customer’s language. Open the records and their delivery times.</p><p class="hint">Comparison and saved-time claims need their own measured evidence.</p></div></section></div>
+  <section class="panel"><div class="panel-hd"><h2>Records behind the exception</h2></div><div class="sy-row sy-heading"><span>Record</span><span>Time to reply</span><span>Review</span><span>Action</span></div>${[["Екатерина Константинова-Александрова","Over 24 hours"],["מרים כהן","4 to 24 hours"],["Anna Weber","4 to 24 hours"]].map(([name,time])=>`<div class="sy-row"><b><bdi dir="auto">${name}</bdi></b><span>${time}</span><span class="wit wit--none">Delivery evidence due</span><button class="btn btn--sm" type="button">Open record</button></div>`).join("")}<div class="foot"><span>Showing 3 of 14 sample exceptions</span><button class="btn btn--sm" type="button">Next page</button></div></section>
+  ${states([["No records in this period","An empty period has no response-rate denominator. Show no rate, rather than 0%.","Change period"],["Report loading","The period and filters remain visible while the report loads.","Loading report…",true],["Report could not load","Keep the last report labelled with its date. No new totals are confirmed.","Reload report"],["Some source records unavailable","Show the missing source and avoid a complete-portfolio total.","Review missing source"],["Many exceptions","Filter by owner, source or period and page through the records.","Open report filters"],["Export unavailable","A partial or unavailable report must not be presented as a complete export.","Export report",true]])}
 </div>`;
-fs.writeFileSync(W("SignIn.dc.html"), sheet({ body: SI_BODY, width: 1440, height: 900, pad: 0, extraCss: SYS_CSS }));
-
+const activityRows=[["1 Sep, 09:41","Mariya","Translation approved","Sample description · DE"],["1 Sep, 09:12","Mariya","Settings updated","Agency profile · revision 3"],["1 Sep, 08:40","Hermes","Translation drafted","Sample description · NL"],["1 Sep, 08:02","Petar","Reply delivery recorded","Sample lead"],["31 Aug, 17:20","Mariya","Media reviewed","Sample image"]];
+const activity=`<div class="sy"><div class="ph"><div><h1>Activity log</h1><p>Open the event to see the actor, record and outcome. An action name alone is not proof of completion.</p></div><button class="btn btn--accent" type="button">Review selected event</button></div>${nav("Activity")}
+  <p class="muted">Illustrative events · no live audit log has been read into this preview.</p>
+  <section class="panel"><div class="sy-toolbar"><div class="field"><label for="activity-search">Find an event</label><input class="in" id="activity-search" type="search" placeholder="Action, person or record"></div><div class="field"><label for="activity-date">From date</label><input class="in" id="activity-date" type="date" value="2026-08-31"></div><button class="btn" type="button">Apply filters</button></div>
+    <div class="sy-row sy-heading"><span>Action and record</span><span>Actor</span><span>Recorded at</span><span>Action</span></div>${activityRows.map(([date,who,action,record])=>`<div class="sy-row"><b title="${record}">${action} · ${record}</b><span>${who}</span><span>${date} · example</span><button class="btn btn--sm" type="button">Open event</button></div>`).join("")}<div class="foot"><span>5 sample events</span><button class="btn btn--sm" type="button" disabled>Next page</button></div>
+  </section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Selected event · settings updated</h2></div><div class="sy-section"><dl class="sy-facts"><dt>Actor</dt><dd><span class="wit">Mariya · 1 Sep, 09:12 · example</span></dd><dt>Record</dt><dd>Agency profile</dd><dt>Change</dt><dd>Name and offices</dd><dt>Result</dt><dd>Revision 3 saved · illustrative receipt</dd></dl><p>This event records a settings save. It does not certify a public deployment.</p></div></section><section class="panel"><div class="panel-hd"><h2>Read the linked evidence</h2></div><div class="sy-section"><p>Approval, publication and delivery are separate events. Open the relevant receipt to establish what happened.</p><p>Events cannot be edited in this screen. Retention maintenance is separate; this design does not promise a fixed retention period.</p><button class="btn" type="button">Open related record</button></div></section></div>
+  ${states([["No matching events","Clear the filters to check whether the log is empty or the search excludes its events.","Clear filters"],["Loading events","Keep the date and search visible while the next page loads.","Loading events…",true],["Audit log unavailable","No event readback is confirmed. An empty table must not hide this failure.","Reload log"],["Event detail unavailable","The row can remain visible, but its result is unverified until the detail loads.","Reload event"],["Long event history","Keep filters and page position when returning from a record.","Next page"],["Connection lost","Previously loaded events remain dated. Changes elsewhere may not yet appear.","Refresh log",true]])}
+</div>`;
+const launch=`<div class="sy"><div class="ph"><div><h1>Launch readiness</h1><p>The saved report is blocked. Resolve the evidence gaps before assessing a release.</p></div><button class="btn btn--accent" type="button">Review blocked evidence</button></div>${nav("LaunchReadiness")}
+  <p class="muted">Saved report: ${escape(readiness.generated_at)} · no live refresh performed by this canvas.</p>
+  <section class="panel"><div class="panel-hd"><h2>${blocked.length} of ${readiness.gates.length} gates are blocked</h2><span class="wit wit--none">Production not verified</span></div><div class="sy-section"><p>Passing entries below are claims in the saved report. Their source, date and scope must be checked against the candidate release and live services.</p><p>Local smoke tests and fixtures cannot replace production evidence or human approval.</p></div></section>
+  <section class="panel"><div class="panel-hd"><h2>Evidence gates</h2><span class="sub">Blocked first</span></div><div class="sy-row sy-heading"><span>Gate</span><span>Saved status</span><span>Evidence scope</span><span>Action</span></div>${[...readiness.gates].sort((a,b)=>Number(a.status==="pass")-Number(b.status==="pass")).map(g=>`<div class="sy-row"><b>${gateNames[g.id]}</b><span>${g.status==="pass"?"Reported pass":"Blocked"}</span><span>${g.status==="pass"?"Saved report only":"Required evidence missing"}</span><button class="btn btn--sm" type="button">Open gate</button></div>`).join("")}</section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Live search and Hermes evidence</h2><span class="wit wit--none">Not supplied</span></div><div class="sy-section"><p>Capture the actual search synchronisation and query results, plus a live Hermes draft-worker report. Name the environment, time and candidate revision.</p><p>Readiness follows successful readback. Configured credentials alone do not prove these services work.</p><button class="btn" type="button">Open evidence requirements</button></div></section><section class="panel"><div class="panel-hd"><h2>Content warnings remain visible</h2></div><div class="sy-section"><p>A schema check may pass while property facts are missing. The report lists these saved warnings:</p><dl class="sy-facts">${readiness.warnings.map(w=>`<dt>${escape(w.id.replaceAll("_"," ").replaceAll("."," · "))}</dt><dd>${w.count} records · saved report</dd>`).join("")}</dl><p class="hint">These counts are dated evidence, not a current live-listing count.</p></div></section></div>
+  ${states([["No report available","No gate can be inferred as passed. Obtain a report for the candidate release.","Open report requirements"],["Evidence loading","Keep the previously loaded date visible until the refresh completes.","Loading evidence…",true],["Evidence import failed","The old report remains dated. The failed import cannot create a passing witness.","Review import error"],["Only part of the evidence loaded","Name each missing source. Complete-portfolio readiness stays unverified.","Review missing sources"],["Many warnings","Filter by warning and open the affected records; preserve the warning counts.","Open warning records"],["Report is stale","Obtain current live readback for the candidate revision before authorising release.","Release unavailable",true]])}
+</div>`;
+const roleLabel={admin:"Administrator",broker:"Broker",editor:"Editor",translator:"Translator"};
+const team=`<div class="sy"><div class="ph"><div><h1>Team and access</h1><p>Give a person the role and workspace scope they need. Review the change before saving.</p></div></div>${subnav([["Workspace","gear",false],["Team and roles","team",true],["Security","shield",false]])}
+  <p class="muted">Illustrative people and access states · roles below come from the current account schema.</p>
+  <section class="panel"><div class="panel-hd"><h2>People</h2></div><div class="sy-row sy-heading"><span>Person</span><span>Role</span><span>Workspace access</span><span>Action</span></div>${[["Mariya Ruseva","Administrator","All workspaces"],["Petar Dimitrov","Broker","Agency workspace"],["Екатерина Константинова-Александрова","Translator","Agency workspace"]].map(([name,role,scope])=>`<div class="sy-row"><b title="${name}">${name}</b><span>${role}</span><span>${scope} · example</span><button class="btn btn--sm" type="button">Review access</button></div>`).join("")}</section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Review Petar’s access</h2><span class="wit wit--none">Change not saved</span></div><form class="sy-section"><div class="field"><label for="team-role">Role</label><select class="in" id="team-role">${PAYLOAD_ADMIN_ROLES.map(role=>`<option${role==="broker"?" selected":""}>${roleLabel[role]}</option>`).join("")}</select></div><div class="field"><label for="team-scope">Workspace identifiers</label><input class="in" id="team-scope" value="agency-example" aria-describedby="team-scope-help"><p class="hint" id="team-scope-help">Example scope. A blank scope grants administrator-wide access only to an administrator.</p></div><label class="sy-check"><input type="checkbox"><span>I, Mariya, confirm this role and workspace scope.</span></label><button class="btn btn--accent" type="button">Save Petar’s access</button></form></section>
+  <section class="panel"><div class="panel-hd"><h2>A saved change names its author</h2></div><div class="sy-section"><dl class="sy-facts"><dt>Person</dt><dd>Petar · example</dd><dt>Role</dt><dd>Broker</dd><dt>Scope</dt><dd>Agency workspace</dd><dt>Changed by</dt><dd><span class="wit">Mariya · 1 Sep, 09:10 · example</span></dd></dl><p>Do not infer second-factor status, active sessions or automatic revocation from a role-change receipt.</p><button class="btn" type="button">Review security status</button></div></section></div>
+  <section class="panel"><div class="panel-hd"><h2>Role capabilities</h2><span class="sub">Record-specific approval still applies</span></div><div class="sy-row sy-heading"><span>Role</span><span>Content editing</span><span>Translation publishing</span><span>Team access</span></div>${PAYLOAD_ADMIN_ROLES.map(role=>{const caps=adminCapabilities({roles:[role]});const allows=c=>caps.includes("*")||caps.includes(c);return `<div class="sy-row"><b>${roleLabel[role]}</b><span>${allows("content:write")?"Permitted":"Not permitted"}</span><span>${allows("translations:publish")?"Permitted":"Not permitted"}</span><span>${allows("team:manage")?"Permitted":"Not permitted"}</span></div>`;}).join("")}</section>
+  <section class="panel"><div class="panel-hd"><h2>Add a person</h2></div><form class="sy-section"><div class="sy-grid"><div class="field"><label for="new-person">Name</label><input class="in" id="new-person" autocomplete="off"></div><div class="field"><label for="new-email">Work email</label><input class="in" id="new-email" type="email" autocomplete="off"></div><div class="field"><label for="new-password">Temporary password</label><input class="in" id="new-password" type="password" minlength="12" autocomplete="new-password"><p class="hint">At least 12 characters. The person must change it at first sign-in.</p></div><div class="field"><label for="new-role">Role</label><select class="in" id="new-role">${PAYLOAD_ADMIN_ROLES.map(role=>`<option${role==="broker"?" selected":""}>${roleLabel[role]}</option>`).join("")}</select></div></div><p>Review the workspace scope and account details before creating access. Account creation is not evidence that an invitation email was delivered.</p><button class="btn" type="button">Review new account</button></form></section>
+  ${states([["No people loaded","An empty account list is different from a failed account lookup. Show which state occurred.","Reload people"],["Saving access","Keep the proposed role and scope visible until the result arrives.","Saving access…",true],["Access change failed","No new permission is confirmed. Keep the proposed values for correction.","Review access"],["Security details unavailable","People may be readable while second-factor or session data is unavailable. Do not display a green security status.","Reload security status"],["Many people","Search by name or account and preserve the selected person through pagination.","Find a person"],["Permission missing","Only a person with team-management permission can change accounts.","Save access",true]])}
+</div>`;
+const signIn=`<main class="sy"><div class="sy-login"><div class="sy-brand"><img src="ms-realty-logo-reversed.png" alt="MS Realty"><h1>Sign in to the workspace</h1><p>Listings, enquiries, viewings and documents for the agency in Sandanski.</p><p class="muted">Use your work account. If you have lost access, contact the agency administrator.</p><p class="hint">Design preview · no credentials are sent from this artboard.</p></div><form class="sy-auth"><nav class="sy-languages" aria-label="Workbench language">${ADMIN_LOGIN_LOCALES.map(code=>`<a href="#" lang="${code}"${code==="en"?' aria-current="page"':""}>${{bg:"Български",ru:"Русский",en:"English"}[code]}</a>`).join("")}</nav><h2>Team sign-in</h2><div class="field"><label for="signin-email">Work email</label><input class="in" id="signin-email" type="email" autocomplete="username" required></div><div class="field"><label for="signin-password">Password</label><input class="in" id="signin-password" type="password" autocomplete="current-password" required></div><div class="field"><label for="signin-code">Authenticator code</label><input class="in" id="signin-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" aria-describedby="signin-code-help"><p class="hint" id="signin-code-help">Only if two-factor protection is enabled for your account.</p></div><button class="btn btn--accent" type="button">Sign in</button><p class="hint">The current browser session lasts at most two hours. There is no 30-day “remember me” option.</p></form></div>
+  <div class="sy-auth-extra">${states([["Fields are empty","Enter the work email and password. Keep their labels visible when typing starts.","Sign in",true],["Sign-in in progress","Wait for the response. Do not create another request while this one is pending.","Signing in…",true],["Credentials not accepted","Check the email address and password. The message must not reveal whether an account exists.","Return to sign-in"],["Authenticator code rejected","Use a fresh code. Mark the code field rather than treating the accepted password as incorrect.","Enter a new code"],["Too many failed attempts","Wait before trying again. Repeated submissions must not bypass the sign-in limit.","Sign-in paused",true],["Temporary password must change","The current, new and repeated passwords are required. The new password must contain at least 12 characters and differ from the temporary one.","Change temporary password"]])}</div>
+</main>`;
+for(const [name,body,active] of [["Reports",reports,"insight"],["Activity",activity,"insight"],["LaunchReadiness",launch,"insight"],["Team",team,"settings"]]) fs.writeFileSync(W(`${name}.dc.html`),page({active,body,extraCss:CSS,height:0,healthText:name==="LaunchReadiness"?"Saved report · blocked":"Illustrative workspace"}));
+fs.writeFileSync(W("SignIn.dc.html"),sheet({body:signIn,width:1440,height:0,pad:0,extraCss:CSS}));
 console.log("Reports, Activity, LaunchReadiness, Team, SignIn");

@@ -335,24 +335,45 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .bars { display:grid; gap:8px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:16px 20px; }
-    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
-      color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:4px; font-size:11px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gate:last-child { border-bottom:0; }
-    .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
+  .sy { display:grid; gap:20px; }
+  .sy .ph { margin:0; }
+  .sy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .sy-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .sy-section h2,.sy-state h2 { font-size:16px; }
+  .sy-section > .btn { justify-self:start; }
+  .sy-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 200px 104px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .sy-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sy-row:hover { background:var(--tile); }
+  .sy-row .btn { justify-self:end; }
+  .sy-heading { font-weight:600; background:var(--tile-deep); }
+  .sy .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .sy textarea.in { min-height:96px; resize:vertical; }
+  .sy :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .sy button:disabled { opacity:.5; cursor:not-allowed; }
+  .sy-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .sy-facts dt { color:var(--text-muted); }
+  .sy-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .sy-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .sy-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .sy-state .btn { justify-self:start; }
+  .sy-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .sy-toolbar .field { flex:1; }
+  .sy-check { display:flex; align-items:flex-start; gap:12px; }
+  .sy-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .sy-chart { display:grid; gap:12px; }
+  .sy-bar { display:grid; grid-template-columns:180px minmax(0,1fr) 48px; gap:16px; align-items:center; }
+  .sy-track { height:8px; background:var(--joint); }
+  .sy-track i { display:block; height:100%; background:var(--spring-700); }
+  .sy-value { font-size:16px; font-weight:600; text-align:end; }
+  .sy-login { display:grid; grid-template-columns:minmax(0,1fr) 480px; gap:64px; padding:64px; align-items:center; background:var(--tile); }
+  .sy-login h1 { font:600 22px var(--font-sans); }
+  .sy-brand { display:grid; gap:24px; align-content:start; }
+  .sy-brand img { width:118px; height:auto; background:var(--spring-900); padding:12px; border-radius:var(--r-panel); }
+  .sy-languages { display:flex; gap:12px; }
+  .sy-languages [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+  .sy-auth { padding:24px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--tile-glaze); display:grid; gap:16px; }
+  .sy-auth .btn { justify-content:center; }
+  .sy-auth-extra { margin:0 64px 48px; }
 
   </style>
 </helmet>
@@ -364,7 +385,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -406,101 +427,19 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Activity log</h1><p>Append-only. Every mutation names a person or an agent, and an action that is not registered cannot be written at all.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Export</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reports</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Activity log</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span>Launch readiness</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg><span>Runtime</span></a></nav>
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Action, record or person</span>
-          <button class="btn btn--sm" type="button">Anyone <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any action <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Last 7 days <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <span style="margin-left:auto" class="mono">4,182 entries · retained 24 months</span>
-        </div>
-        <table>
-          <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Record</th><th>What changed</th><th>Where from</th></tr></thead>
-          <tbody>
-            <tr>
-              <td class="mono">Today 09:41</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av">MR</span>Mariya Ruseva</span></td>
-              <td><span class="mono">translation_approved</span></td>
-              <td>MS-00932 · DE</td>
-              <td class="muted">Draft accepted as written, marked indexable</td>
-              <td class="muted">Sandanski office</td>
-            </tr>
-            <tr>
-              <td class="mono">Today 09:12</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av">MR</span>Mariya Ruseva</span></td>
-              <td><span class="mono">document_sent</span></td>
-              <td>CASE-0007 · preliminary contract</td>
-              <td class="muted">Sent to the seller for signature</td>
-              <td class="muted">Sandanski office</td>
-            </tr>
-            <tr>
-              <td class="mono">Today 08:40</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">H</span>Hermes</span></td>
-              <td><span class="mono">hermes_translation_draft</span></td>
-              <td>7 listings · DE, NL, EL</td>
-              <td class="muted">21 drafts stored unpublished, 2 lines refused</td>
-              <td class="muted">Agency hardware</td>
-            </tr>
-            <tr>
-              <td class="mono">Today 08:02</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av">PD</span>Petar Dimitrov</span></td>
-              <td><span class="mono">reply_sent</span></td>
-              <td>Lead · Anna Weber</td>
-              <td class="muted">Reply approved by Mariya and delivered</td>
-              <td class="muted">Mobile</td>
-            </tr>
-            <tr>
-              <td class="mono">Yesterday 17:20</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av">MR</span>Mariya Ruseva</span></td>
-              <td><span class="mono">listing_published</span></td>
-              <td>MS-00791</td>
-              <td class="muted">Moved from needs review to published</td>
-              <td class="muted">Sandanski office</td>
-            </tr>
-            <tr>
-              <td class="mono">Yesterday 16:55</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av" style="background:var(--spring-50); color:var(--spring-800)">S</span>System</span></td>
-              <td><span class="mono">consent_withdrawn</span></td>
-              <td>Dmitri Volkov</td>
-              <td class="muted">Removed from 2 alert audiences</td>
-              <td class="muted">Website</td>
-            </tr>
-            <tr>
-              <td class="mono">Yesterday 11:04</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av">MR</span>Mariya Ruseva</span></td>
-              <td><span class="mono">connection_disconnected</span></td>
-              <td>Google Workspace</td>
-              <td class="muted">Token expired, delivery paused</td>
-              <td class="muted">Sandanski office</td>
-            </tr>
-            <tr>
-              <td class="mono">28 Aug 09:00</td>
-              <td><span style="display:flex; align-items:center; gap:8px"><span class="av" style="background:var(--spring-50); color:var(--spring-800)">S</span>System</span></td>
-              <td><span class="mono">automation_failed</span></td>
-              <td>Saved-search digest</td>
-              <td class="muted">Google delivery unavailable, nothing sent</td>
-              <td class="muted">Scheduler</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="foot"><span>Showing 8 of 4,182</span>
-          <span style="display:flex; gap:8px"><button class="btn btn--sm" type="button">Previous</button><button class="btn btn--sm" type="button">Next</button></span></div>
-      </section>
-      <div class="note note--info" style="margin-top:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-        <span>An entry cannot be edited or deleted from the workspace, and a new kind of action has to be
-          registered in code before it can appear here at all — an unregistered action fails the write.</span></div>
+<div class="sy"><div class="ph"><div><h1>Activity log</h1><p>Open the event to see the actor, record and outcome. An action name alone is not proof of completion.</p></div><button class="btn btn--accent" type="button">Review selected event</button></div><nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reports</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Activity log</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span>Launch readiness</span></a></nav>
+  <p class="muted">Illustrative events · no live audit log has been read into this preview.</p>
+  <section class="panel"><div class="sy-toolbar"><div class="field"><label for="activity-search">Find an event</label><input class="in" id="activity-search" type="search" placeholder="Action, person or record"></div><div class="field"><label for="activity-date">From date</label><input class="in" id="activity-date" type="date" value="2026-08-31"></div><button class="btn" type="button">Apply filters</button></div>
+    <div class="sy-row sy-heading"><span>Action and record</span><span>Actor</span><span>Recorded at</span><span>Action</span></div><div class="sy-row"><b title="Sample description · DE">Translation approved · Sample description · DE</b><span>Mariya</span><span>1 Sep, 09:41 · example</span><button class="btn btn--sm" type="button">Open event</button></div><div class="sy-row"><b title="Agency profile · revision 3">Settings updated · Agency profile · revision 3</b><span>Mariya</span><span>1 Sep, 09:12 · example</span><button class="btn btn--sm" type="button">Open event</button></div><div class="sy-row"><b title="Sample description · NL">Translation drafted · Sample description · NL</b><span>Hermes</span><span>1 Sep, 08:40 · example</span><button class="btn btn--sm" type="button">Open event</button></div><div class="sy-row"><b title="Sample lead">Reply delivery recorded · Sample lead</b><span>Petar</span><span>1 Sep, 08:02 · example</span><button class="btn btn--sm" type="button">Open event</button></div><div class="sy-row"><b title="Sample image">Media reviewed · Sample image</b><span>Mariya</span><span>31 Aug, 17:20 · example</span><button class="btn btn--sm" type="button">Open event</button></div><div class="foot"><span>5 sample events</span><button class="btn btn--sm" type="button" disabled>Next page</button></div>
+  </section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Selected event · settings updated</h2></div><div class="sy-section"><dl class="sy-facts"><dt>Actor</dt><dd><span class="wit">Mariya · 1 Sep, 09:12 · example</span></dd><dt>Record</dt><dd>Agency profile</dd><dt>Change</dt><dd>Name and offices</dd><dt>Result</dt><dd>Revision 3 saved · illustrative receipt</dd></dl><p>This event records a settings save. It does not certify a public deployment.</p></div></section><section class="panel"><div class="panel-hd"><h2>Read the linked evidence</h2></div><div class="sy-section"><p>Approval, publication and delivery are separate events. Open the relevant receipt to establish what happened.</p><p>Events cannot be edited in this screen. Retention maintenance is separate; this design does not promise a fixed retention period.</p><button class="btn" type="button">Open related record</button></div></section></div>
+  <div class="sy-states" aria-label="Additional states"><section class="sy-state"><h2>No matching events</h2><p>Clear the filters to check whether the log is empty or the search excludes its events.</p><button class="btn" type="button">Clear filters</button></section><section class="sy-state"><h2>Loading events</h2><p>Keep the date and search visible while the next page loads.</p><button class="btn" type="button" disabled>Loading events…</button></section><section class="sy-state"><h2>Audit log unavailable</h2><p>No event readback is confirmed. An empty table must not hide this failure.</p><button class="btn" type="button">Reload log</button></section><section class="sy-state"><h2>Event detail unavailable</h2><p>The row can remain visible, but its result is unverified until the detail loads.</p><button class="btn" type="button">Reload event</button></section><section class="sy-state"><h2>Long event history</h2><p>Keep filters and page position when returning from a record.</p><button class="btn" type="button">Next page</button></section><section class="sy-state"><h2>Connection lost</h2><p>Previously loaded events remain dated. Changes elsewhere may not yet appear.</p><button class="btn" type="button" disabled>Refresh log</button></section></div>
+</div>
     </div>
   </div>
 </div>

@@ -327,24 +327,45 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .bars { display:grid; gap:8px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:16px 20px; }
-    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
-      color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:4px; font-size:11px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gate:last-child { border-bottom:0; }
-    .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
+  .sy { display:grid; gap:20px; }
+  .sy .ph { margin:0; }
+  .sy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .sy-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .sy-section h2,.sy-state h2 { font-size:16px; }
+  .sy-section > .btn { justify-self:start; }
+  .sy-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 200px 104px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .sy-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sy-row:hover { background:var(--tile); }
+  .sy-row .btn { justify-self:end; }
+  .sy-heading { font-weight:600; background:var(--tile-deep); }
+  .sy .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .sy textarea.in { min-height:96px; resize:vertical; }
+  .sy :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .sy button:disabled { opacity:.5; cursor:not-allowed; }
+  .sy-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .sy-facts dt { color:var(--text-muted); }
+  .sy-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .sy-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .sy-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .sy-state .btn { justify-self:start; }
+  .sy-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .sy-toolbar .field { flex:1; }
+  .sy-check { display:flex; align-items:flex-start; gap:12px; }
+  .sy-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .sy-chart { display:grid; gap:12px; }
+  .sy-bar { display:grid; grid-template-columns:180px minmax(0,1fr) 48px; gap:16px; align-items:center; }
+  .sy-track { height:8px; background:var(--joint); }
+  .sy-track i { display:block; height:100%; background:var(--spring-700); }
+  .sy-value { font-size:16px; font-weight:600; text-align:end; }
+  .sy-login { display:grid; grid-template-columns:minmax(0,1fr) 480px; gap:64px; padding:64px; align-items:center; background:var(--tile); }
+  .sy-login h1 { font:600 22px var(--font-sans); }
+  .sy-brand { display:grid; gap:24px; align-content:start; }
+  .sy-brand img { width:118px; height:auto; background:var(--spring-900); padding:12px; border-radius:var(--r-panel); }
+  .sy-languages { display:flex; gap:12px; }
+  .sy-languages [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+  .sy-auth { padding:24px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--tile-glaze); display:grid; gap:16px; }
+  .sy-auth .btn { justify-content:center; }
+  .sy-auth-extra { margin:0 64px 48px; }
 
   </style>
 </head><body>
@@ -356,7 +377,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1020px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -398,103 +419,18 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Saved report · blocked</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Launch readiness</h1><p>Thirteen gates between here and serving both canonical domains. Three are blocked, and none of them can be waved through from this screen.</p></div>
-        <div class="ph-actions">
-          <span class="pill pill--warn"><i></i>10 of 13 passing</span>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Evidence pack</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reports</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Activity log</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span>Launch readiness</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg><span>Runtime</span></a></nav>
-      <section class="panel">
-        <div class="panel-hd"><h2>Gates</h2><span class="sub">A gate passes on external evidence, never on a local smoke test.</span></div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Crawl parity against both legacy domains</b><em>457 URLs · titles, metadata and content compared</em></span>
-          <span style="font-size:13px" class="muted">Report 29 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Listing facts reviewed by a person</b><em>165 of 165 in the review CSV</em></span>
-          <span style="font-size:13px" class="muted">Signed off 24 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Public search serves the approved catalogue</b><em>84 published listings indexed in Typesense</em></span>
-          <span style="font-size:13px" class="muted">Live check</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Database and CMS runtime</b><em>Payload on Postgres, migrations current</em></span>
-          <span style="font-size:13px" class="muted">Live check</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Media mirrored and reviewed</b><em>11,859 files in R2 · 46 still in the review queue</em></span>
-          <span style="font-size:13px" class="muted">Live check</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Deterministic email delivery</b><em>Templates render identically across locales</em></span>
-          <span style="font-size:13px" class="muted">Report 26 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Monitoring and alerting</b><em>Drill completed, alerts reached the on-call phone</em></span>
-          <span style="font-size:13px" class="muted">Drill 30 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Rollback rehearsal</b><em>Restored the previous release inside the window</em></span>
-          <span style="font-size:13px" class="muted">Drill 30 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Backup and recovery</b><em>R2 restore verified against a clean environment</em></span>
-          <span style="font-size:13px" class="muted">Drill 28 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <span style="min-width:0"><b>Owner handover pack</b><em>Credentials, runbooks and contacts transferred</em></span>
-          <span style="font-size:13px" class="muted">Signed 31 Aug</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Passing</span></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-          <span style="min-width:0"><b>Every legacy URL has a terminal outcome</b><em>419 of 457 decided · 38 undecided</em></span>
-          <span style="font-size:13px" class="muted">Blocks launch</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--primary" type="button">Open</button></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-          <span style="min-width:0"><b>Search Console and Yandex ownership</b><em>Neither property is verified for the canonical domains</em></span>
-          <span style="font-size:13px" class="muted">Blocks launch</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--primary" type="button">Open</button></span>
-        </div>
-        <div class="gate">
-          <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-          <span style="min-width:0"><b>Hermes worker report from a live run</b><em>The endpoint is not configured, so no live report exists</em></span>
-          <span style="font-size:13px" class="muted">Blocks launch</span>
-          <span style="display:flex; justify-content:flex-end"><button class="btn btn--sm btn--primary" type="button">Open</button></span>
-        </div>
-        <div class="savebar"><span style="font-size:13px" class="muted">Production-Ready is the whole portfolio
-          passing on the temporary host. Production-Live needs the owner's DNS change and post-cutover
-          verification. Neither can be asserted from this screen.</span></div>
-      </section>
+<div class="sy"><div class="ph"><div><h1>Launch readiness</h1><p>The saved report is blocked. Resolve the evidence gaps before assessing a release.</p></div><button class="btn btn--accent" type="button">Review blocked evidence</button></div><nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reports</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Activity log</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span>Launch readiness</span></a></nav>
+  <p class="muted">Saved report: 2026-08-27T14:16:20.632Z · no live refresh performed by this canvas.</p>
+  <section class="panel"><div class="panel-hd"><h2>4 of 12 gates are blocked</h2><span class="wit wit--none">Production not verified</span></div><div class="sy-section"><p>Passing entries below are claims in the saved report. Their source, date and scope must be checked against the candidate release and live services.</p><p>Local smoke tests and fixtures cannot replace production evidence or human approval.</p></div></section>
+  <section class="panel"><div class="panel-hd"><h2>Evidence gates</h2><span class="sub">Blocked first</span></div><div class="sy-row sy-heading"><span>Gate</span><span>Saved status</span><span>Evidence scope</span><span>Action</span></div><div class="sy-row"><b>Live search and Hermes evidence</b><span>Blocked</span><span>Required evidence missing</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Monitoring and rollback</b><span>Blocked</span><span>Required evidence missing</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Payload runtime</b><span>Blocked</span><span>Required evidence missing</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Backup and recovery</b><span>Blocked</span><span>Required evidence missing</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Legacy crawl inventory</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Legacy URL decisions</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Localised sitemap</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Structured data</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Listing publication review</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Local runtime smoke</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Production application layer</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div><div class="sy-row"><b>Media coverage</b><span>Reported pass</span><span>Saved report only</span><button class="btn btn--sm" type="button">Open gate</button></div></section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Live search and Hermes evidence</h2><span class="wit wit--none">Not supplied</span></div><div class="sy-section"><p>Capture the actual search synchronisation and query results, plus a live Hermes draft-worker report. Name the environment, time and candidate revision.</p><p>Readiness follows successful readback. Configured credentials alone do not prove these services work.</p><button class="btn" type="button">Open evidence requirements</button></div></section><section class="panel"><div class="panel-hd"><h2>Content warnings remain visible</h2></div><div class="sy-section"><p>A schema check may pass while property facts are missing. The report lists these saved warnings:</p><dl class="sy-facts"><dt>structured data · missing area</dt><dd>165 records · saved report</dd><dt>structured data · missing bedrooms</dt><dd>10 records · saved report</dd><dt>structured data · missing public images</dt><dd>9 records · saved report</dd><dt>listing quality · missing area</dt><dd>165 records · saved report</dd><dt>listing quality · thin public gallery</dt><dd>18 records · saved report</dd></dl><p class="hint">These counts are dated evidence, not a current live-listing count.</p></div></section></div>
+  <div class="sy-states" aria-label="Additional states"><section class="sy-state"><h2>No report available</h2><p>No gate can be inferred as passed. Obtain a report for the candidate release.</p><button class="btn" type="button">Open report requirements</button></section><section class="sy-state"><h2>Evidence loading</h2><p>Keep the previously loaded date visible until the refresh completes.</p><button class="btn" type="button" disabled>Loading evidence…</button></section><section class="sy-state"><h2>Evidence import failed</h2><p>The old report remains dated. The failed import cannot create a passing witness.</p><button class="btn" type="button">Review import error</button></section><section class="sy-state"><h2>Only part of the evidence loaded</h2><p>Name each missing source. Complete-portfolio readiness stays unverified.</p><button class="btn" type="button">Review missing sources</button></section><section class="sy-state"><h2>Many warnings</h2><p>Filter by warning and open the affected records; preserve the warning counts.</p><button class="btn" type="button">Open warning records</button></section><section class="sy-state"><h2>Report is stale</h2><p>Obtain current live readback for the candidate revision before authorising release.</p><button class="btn" type="button" disabled>Release unavailable</button></section></div>
+</div>
     </div>
   </div>
 </div>

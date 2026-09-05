@@ -348,7 +348,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 1104,
+      "h": 2338,
       "page": "page-6"
     },
     {
@@ -357,7 +357,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 973,
+      "h": 2056,
       "page": "page-6"
     },
     {
@@ -366,34 +366,34 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 1044,
+      "h": 1582,
       "page": "page-6"
     },
     {
       "file": "Activity.dc.html",
       "title": "Activity log",
       "x": 0,
-      "y": 1274,
+      "y": 2508,
       "w": 1440,
-      "h": 928,
+      "h": 1478,
       "page": "page-6"
     },
     {
       "file": "LaunchReadiness.dc.html",
       "title": "Launch readiness",
       "x": 1560,
-      "y": 1274,
+      "y": 2508,
       "w": 1440,
-      "h": 1149,
+      "h": 1988,
       "page": "page-6"
     },
     {
       "file": "SignIn.dc.html",
       "title": "Sign in",
       "x": 3120,
-      "y": 1274,
+      "y": 2508,
       "w": 1440,
-      "h": 924,
+      "h": 1186,
       "page": "page-6"
     },
     {

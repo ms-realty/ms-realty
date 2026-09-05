@@ -335,24 +335,45 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .bars { display:grid; gap:8px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:16px 20px; }
-    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
-      color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:4px; font-size:11px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gate:last-child { border-bottom:0; }
-    .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
+  .sy { display:grid; gap:20px; }
+  .sy .ph { margin:0; }
+  .sy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .sy-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .sy-section h2,.sy-state h2 { font-size:16px; }
+  .sy-section > .btn { justify-self:start; }
+  .sy-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 200px 104px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .sy-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sy-row:hover { background:var(--tile); }
+  .sy-row .btn { justify-self:end; }
+  .sy-heading { font-weight:600; background:var(--tile-deep); }
+  .sy .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .sy textarea.in { min-height:96px; resize:vertical; }
+  .sy :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .sy button:disabled { opacity:.5; cursor:not-allowed; }
+  .sy-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .sy-facts dt { color:var(--text-muted); }
+  .sy-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .sy-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .sy-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .sy-state .btn { justify-self:start; }
+  .sy-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .sy-toolbar .field { flex:1; }
+  .sy-check { display:flex; align-items:flex-start; gap:12px; }
+  .sy-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .sy-chart { display:grid; gap:12px; }
+  .sy-bar { display:grid; grid-template-columns:180px minmax(0,1fr) 48px; gap:16px; align-items:center; }
+  .sy-track { height:8px; background:var(--joint); }
+  .sy-track i { display:block; height:100%; background:var(--spring-700); }
+  .sy-value { font-size:16px; font-weight:600; text-align:end; }
+  .sy-login { display:grid; grid-template-columns:minmax(0,1fr) 480px; gap:64px; padding:64px; align-items:center; background:var(--tile); }
+  .sy-login h1 { font:600 22px var(--font-sans); }
+  .sy-brand { display:grid; gap:24px; align-content:start; }
+  .sy-brand img { width:118px; height:auto; background:var(--spring-900); padding:12px; border-radius:var(--r-panel); }
+  .sy-languages { display:flex; gap:12px; }
+  .sy-languages [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+  .sy-auth { padding:24px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--tile-glaze); display:grid; gap:16px; }
+  .sy-auth .btn { justify-content:center; }
+  .sy-auth-extra { margin:0 64px 48px; }
 
   </style>
 </helmet>
@@ -364,42 +385,10 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div style="width:1440px; min-height:900px; background:var(--canvas); padding:0px">
-<div style="display:grid; grid-template-columns:minmax(0,1fr) 520px; min-height:900px">
-  <div style="background:var(--ink-900); color:#fff; padding:64px 64px; display:grid; align-content:space-between">
-    <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="78" height="40" style="display:block; height:40px; width:auto" />
-    <div>
-      <p style="font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; line-height:1.25; max-width:440px">
-        The workspace for a family agency in Sandanski.</p>
-      <p style="margin-top:16px; font-size:13px; color:rgba(255,255,255,.66); max-width:420px; line-height:1.6">
-        Listings, enquiries, viewings, contracts and the website itself — in one place, in Bulgarian,
-        Russian or English.</p>
-    </div>
-    <p style="font-size:13px; color:rgba(255,255,255,.44)">Every sign-in is recorded. Report anything you
-      did not do to the owner.</p>
-  </div>
-  <div style="background:var(--surface); padding:64px 64px; display:grid; align-content:center; gap:20px">
-    <div>
-      <h1 style="font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.015em">Sign in</h1>
-      <p style="margin-top:4px; font-size:13px; color:var(--text-muted)">Use your MS Realty address.</p>
-    </div>
-    <div class="field"><label for="s1">Email</label><span class="in" id="s1">mariya@ms-realty.bg</span></div>
-    <div class="field"><label for="s2">Password</label><span class="in in--focus" id="s2">••••••••••••</span></div>
-    <div style="display:flex; align-items:center; gap:8px">
-      <span class="box" data-on="1"></span><span style="font-size:12px">Remember this device for 30 days</span>
-      <a href="#" style="margin-left:auto; font-size:13px; font-weight:600">Forgot your password?</a>
-    </div>
-    <button class="btn btn--lg btn--primary" type="button" style="justify-content:center">Sign in</button>
-    <div class="note note--info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>A second factor is asked for after the password.
-      If you have lost your device, the owner can reset it for you.</span></div>
-    <div style="display:flex; align-items:center; gap:12px; margin-top:8px">
-      <span style="height:4px; flex:1 1 auto; background:var(--border)"></span>
-      <span style="font-size:11px" class="muted">or</span>
-      <span style="height:1px; flex:1 1 auto; background:var(--border)"></span>
-    </div>
-    <button class="btn btn--lg" type="button" style="justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg><span>Continue with Google Workspace</span></button>
-  </div>
-</div>
+<div style="width:1440px; min-height:0px; background:var(--canvas); padding:0px">
+<main class="sy"><div class="sy-login"><div class="sy-brand"><img src="ms-realty-logo-reversed.png" alt="MS Realty"><h1>Sign in to the workspace</h1><p>Listings, enquiries, viewings and documents for the agency in Sandanski.</p><p class="muted">Use your work account. If you have lost access, contact the agency administrator.</p><p class="hint">Design preview · no credentials are sent from this artboard.</p></div><form class="sy-auth"><nav class="sy-languages" aria-label="Workbench language"><a href="#" lang="bg">Български</a><a href="#" lang="ru">Русский</a><a href="#" lang="en" aria-current="page">English</a></nav><h2>Team sign-in</h2><div class="field"><label for="signin-email">Work email</label><input class="in" id="signin-email" type="email" autocomplete="username" required></div><div class="field"><label for="signin-password">Password</label><input class="in" id="signin-password" type="password" autocomplete="current-password" required></div><div class="field"><label for="signin-code">Authenticator code</label><input class="in" id="signin-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" aria-describedby="signin-code-help"><p class="hint" id="signin-code-help">Only if two-factor protection is enabled for your account.</p></div><button class="btn btn--accent" type="button">Sign in</button><p class="hint">The current browser session lasts at most two hours. There is no 30-day “remember me” option.</p></form></div>
+  <div class="sy-auth-extra"><div class="sy-states" aria-label="Additional states"><section class="sy-state"><h2>Fields are empty</h2><p>Enter the work email and password. Keep their labels visible when typing starts.</p><button class="btn" type="button" disabled>Sign in</button></section><section class="sy-state"><h2>Sign-in in progress</h2><p>Wait for the response. Do not create another request while this one is pending.</p><button class="btn" type="button" disabled>Signing in…</button></section><section class="sy-state"><h2>Credentials not accepted</h2><p>Check the email address and password. The message must not reveal whether an account exists.</p><button class="btn" type="button">Return to sign-in</button></section><section class="sy-state"><h2>Authenticator code rejected</h2><p>Use a fresh code. Mark the code field rather than treating the accepted password as incorrect.</p><button class="btn" type="button">Enter a new code</button></section><section class="sy-state"><h2>Too many failed attempts</h2><p>Wait before trying again. Repeated submissions must not bypass the sign-in limit.</p><button class="btn" type="button" disabled>Sign-in paused</button></section><section class="sy-state"><h2>Temporary password must change</h2><p>The current, new and repeated passwords are required. The new password must contain at least 12 characters and differ from the temporary one.</p><button class="btn" type="button">Change temporary password</button></section></div></div>
+</main>
 </div>
 </x-dc>
 </body>

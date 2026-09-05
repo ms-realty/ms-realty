@@ -335,24 +335,45 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .bars { display:grid; gap:8px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:16px 20px; }
-    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
-      color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:4px; font-size:11px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gate:last-child { border-bottom:0; }
-    .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
+  .sy { display:grid; gap:20px; }
+  .sy .ph { margin:0; }
+  .sy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .sy-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .sy-section h2,.sy-state h2 { font-size:16px; }
+  .sy-section > .btn { justify-self:start; }
+  .sy-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 200px 104px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .sy-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sy-row:hover { background:var(--tile); }
+  .sy-row .btn { justify-self:end; }
+  .sy-heading { font-weight:600; background:var(--tile-deep); }
+  .sy .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .sy textarea.in { min-height:96px; resize:vertical; }
+  .sy :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .sy button:disabled { opacity:.5; cursor:not-allowed; }
+  .sy-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .sy-facts dt { color:var(--text-muted); }
+  .sy-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .sy-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .sy-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .sy-state .btn { justify-self:start; }
+  .sy-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .sy-toolbar .field { flex:1; }
+  .sy-check { display:flex; align-items:flex-start; gap:12px; }
+  .sy-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .sy-chart { display:grid; gap:12px; }
+  .sy-bar { display:grid; grid-template-columns:180px minmax(0,1fr) 48px; gap:16px; align-items:center; }
+  .sy-track { height:8px; background:var(--joint); }
+  .sy-track i { display:block; height:100%; background:var(--spring-700); }
+  .sy-value { font-size:16px; font-weight:600; text-align:end; }
+  .sy-login { display:grid; grid-template-columns:minmax(0,1fr) 480px; gap:64px; padding:64px; align-items:center; background:var(--tile); }
+  .sy-login h1 { font:600 22px var(--font-sans); }
+  .sy-brand { display:grid; gap:24px; align-content:start; }
+  .sy-brand img { width:118px; height:auto; background:var(--spring-900); padding:12px; border-radius:var(--r-panel); }
+  .sy-languages { display:flex; gap:12px; }
+  .sy-languages [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+  .sy-auth { padding:24px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--tile-glaze); display:grid; gap:16px; }
+  .sy-auth .btn { justify-content:center; }
+  .sy-auth-extra { margin:0 64px 48px; }
 
   </style>
 </helmet>
@@ -364,7 +385,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1020px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -406,73 +427,19 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Insight</h1><p>August, compared with July. Numbers come from the lead, viewing and deal ledgers — nothing is estimated.</p></div>
-        <div class="ph-actions">
-          <button class="btn btn--sm" type="button">August 2026 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Export</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reports</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Activity log</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span>Launch readiness</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg><span>Runtime</span></a></nav>
-      <section class="panel">
-        <dl class="kpi">
-          <div><dt>Enquiries received</dt><dd>63</dd><small style="color:var(--success-600)">+11 on July</small></div>
-          <div><dt>Answered inside the target</dt><dd>78%</dd><small style="color:var(--danger-600)">−6 points · target is 90</small></div>
-          <div><dt>Viewings held</dt><dd>24</dd><small style="color:var(--success-600)">+3</small></div>
-          <div><dt>Deals closed</dt><dd>2</dd><small class="muted">€284,000 · one still in notary</small></div>
-        </dl>
-      </section>
-      <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:16px; align-items:start">
-        <section class="panel">
-          <div class="panel-hd"><h2>Where enquiries came from</h2><span class="sub">63 in August</span></div>
-          <div class="bars">
-            <div class="bar"><span>Website enquiry form</span><span class="t"><i style="width:100%; background:var(--spring-700)"></i></span><b style="text-align:right">26</b></div>
-            <div class="bar"><span>WhatsApp</span><span class="t"><i style="width:53.84615384615385%; background:var(--spring-700)"></i></span><b style="text-align:right">14</b></div>
-            <div class="bar"><span>Phone</span><span class="t"><i style="width:42.30769230769231%; background:var(--spring-700)"></i></span><b style="text-align:right">11</b></div>
-            <div class="bar"><span>Legacy .ru pages</span><span class="t"><i style="width:26.923076923076923%; background:var(--spring-700)"></i></span><b style="text-align:right">7</b></div>
-            <div class="bar"><span>Facebook</span><span class="t"><i style="width:11.538461538461538%; background:var(--spring-700)"></i></span><b style="text-align:right">3</b></div>
-            <div class="bar"><span>Walk-in</span><span class="t"><i style="width:7.6923076923076925%; background:var(--spring-700)"></i></span><b style="text-align:right">2</b></div>
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">Seven enquiries still arrive on legacy
-            Russian pages, which is the strongest argument for keeping every one of those URLs alive.</span></div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Reply speed against the target</h2><span class="sub">Target: first reply in 4 hours</span></div>
-          <div class="bars">
-            <div class="bar"><span>Under 1 hour</span><span class="t"><i style="width:75%; background:var(--success-500)"></i></span><b style="text-align:right">21</b></div>
-            <div class="bar"><span>1 to 4 hours</span><span class="t"><i style="width:100%; background:var(--success-500)"></i></span><b style="text-align:right">28</b></div>
-            <div class="bar"><span>4 to 24 hours</span><span class="t"><i style="width:32.142857142857146%; background:var(--warning-700)"></i></span><b style="text-align:right">9</b></div>
-            <div class="bar"><span>Over 24 hours</span><span class="t"><i style="width:17.857142857142858%; background:var(--danger-500)"></i></span><b style="text-align:right">5</b></div>
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">The five over 24 hours were all
-            Hebrew or Greek and all arrived at the weekend. That is a staffing question, not a tooling one.</span></div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Catalogue health</h2></div>
-          <div class="bars">
-            <div class="bar"><span>Published and complete</span><span class="t"><i style="width:100%; background:var(--success-500)"></i></span><b style="text-align:right">84</b></div>
-            <div class="bar"><span>Published, facts thin</span><span class="t"><i style="width:22.61904761904762%; background:var(--warning-700)"></i></span><b style="text-align:right">19</b></div>
-            <div class="bar"><span>Needs review</span><span class="t"><i style="width:51.19047619047619%; background:var(--warning-700)"></i></span><b style="text-align:right">43</b></div>
-            <div class="bar"><span>Archived</span><span class="t"><i style="width:45.23809523809524%; background:var(--marble-600)"></i></span><b style="text-align:right">38</b></div>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Hermes contribution</h2><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Drafts only</span></div>
-          <div class="bars">
-            <div class="bar"><span>Accepted as written</span><span class="t"><i style="width:100%; background:var(--success-500)"></i></span><b style="text-align:right">96</b></div>
-            <div class="bar"><span>Accepted after edits</span><span class="t"><i style="width:35.41666666666667%; background:var(--spring-700)"></i></span><b style="text-align:right">34</b></div>
-            <div class="bar"><span>Rejected</span><span class="t"><i style="width:18.75%; background:var(--marble-600)"></i></span><b style="text-align:right">18</b></div>
-            <div class="bar"><span>Refused by a guardrail</span><span class="t"><i style="width:7.291666666666667%; background:var(--danger-500)"></i></span><b style="text-align:right">7</b></div>
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">Roughly nine hours of translation and
-            drafting time in August, all of it reviewed by a person before anyone outside saw it.</span></div>
-        </section>
-      </div>
+<div class="sy"><div class="ph"><div><h1>Operations reports</h1><p>Start with work that missed its target, then open the records behind the number.</p></div><button class="btn btn--accent" type="button">Review overdue replies</button></div><nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><span>Reports</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Activity log</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg><span>Launch readiness</span></a></nav>
+  <p class="muted">Illustrative August report · sample counts, not measured production performance.</p>
+  <section class="panel"><div class="panel-hd"><h2>14 of 63 replies missed the sample target</h2><span class="wit wit--none">Record review needed</span></div><div class="sy-section"><p>The example target is four hours. It is not the workspace default. Verify the target, period and denominator before comparing results.</p><dl class="sy-facts"><dt>Within target</dt><dd>49 of 63 · 78% rounded</dd><dt>Outside target</dt><dd>14 of 63</dd><dt>Source</dt><dd>Illustrative reply records</dd><dt>Current reply target</dt><dd>Read the saved workspace setting</dd></dl></div></section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Time to first reply</h2><span class="sub">63 sample replies</span></div><div class="sy-section sy-chart"><div class="sy-bar"><span>Under 1 hour</span><span class="sy-track"><i style="width:75%"></i></span><b class="sy-value">21</b></div><div class="sy-bar"><span>1 to 4 hours</span><span class="sy-track"><i style="width:100%"></i></span><b class="sy-value">28</b></div><div class="sy-bar"><span>4 to 24 hours</span><span class="sy-track"><i style="width:32.142857142857146%"></i></span><b class="sy-value">9</b></div><div class="sy-bar"><span>Over 24 hours</span><span class="sy-track"><i style="width:17.857142857142858%"></i></span><b class="sy-value">5</b></div><p class="hint">The count is written beside every bar. The longest bar is 28 replies.</p></div></section>
+  <section class="panel"><div class="panel-hd"><h2>What the figures cannot establish</h2></div><div class="sy-section"><p>A draft is not a delivered reply. A planned viewing is not a held viewing. A case awaiting a deed is not a completed sale.</p><p>Do not infer the cause of delay from a customer’s language. Open the records and their delivery times.</p><p class="hint">Comparison and saved-time claims need their own measured evidence.</p></div></section></div>
+  <section class="panel"><div class="panel-hd"><h2>Records behind the exception</h2></div><div class="sy-row sy-heading"><span>Record</span><span>Time to reply</span><span>Review</span><span>Action</span></div><div class="sy-row"><b><bdi dir="auto">Екатерина Константинова-Александрова</bdi></b><span>Over 24 hours</span><span class="wit wit--none">Delivery evidence due</span><button class="btn btn--sm" type="button">Open record</button></div><div class="sy-row"><b><bdi dir="auto">מרים כהן</bdi></b><span>4 to 24 hours</span><span class="wit wit--none">Delivery evidence due</span><button class="btn btn--sm" type="button">Open record</button></div><div class="sy-row"><b><bdi dir="auto">Anna Weber</bdi></b><span>4 to 24 hours</span><span class="wit wit--none">Delivery evidence due</span><button class="btn btn--sm" type="button">Open record</button></div><div class="foot"><span>Showing 3 of 14 sample exceptions</span><button class="btn btn--sm" type="button">Next page</button></div></section>
+  <div class="sy-states" aria-label="Additional states"><section class="sy-state"><h2>No records in this period</h2><p>An empty period has no response-rate denominator. Show no rate, rather than 0%.</p><button class="btn" type="button">Change period</button></section><section class="sy-state"><h2>Report loading</h2><p>The period and filters remain visible while the report loads.</p><button class="btn" type="button" disabled>Loading report…</button></section><section class="sy-state"><h2>Report could not load</h2><p>Keep the last report labelled with its date. No new totals are confirmed.</p><button class="btn" type="button">Reload report</button></section><section class="sy-state"><h2>Some source records unavailable</h2><p>Show the missing source and avoid a complete-portfolio total.</p><button class="btn" type="button">Review missing source</button></section><section class="sy-state"><h2>Many exceptions</h2><p>Filter by owner, source or period and page through the records.</p><button class="btn" type="button">Open report filters</button></section><section class="sy-state"><h2>Export unavailable</h2><p>A partial or unavailable report must not be presented as a complete export.</p><button class="btn" type="button" disabled>Export report</button></section></div>
+</div>
     </div>
   </div>
 </div>

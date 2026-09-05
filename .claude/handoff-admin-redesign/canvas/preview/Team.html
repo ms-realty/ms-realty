@@ -327,24 +327,45 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .bars { display:grid; gap:8px; padding:16px 20px; }
-    .bar { display:grid; grid-template-columns:150px minmax(0,1fr) 54px; gap:12px; align-items:center; font-size:13px; }
-    .bar .t { height:9px; border-radius:var(--r-full); background:var(--joint); overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-full); }
-    .kpi { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; background:var(--border); }
-    .kpi > div { background:var(--surface); padding:16px 20px; }
-    .kpi dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .kpi dd { margin:0; font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.02em;
-      color:var(--text-strong); line-height:1; }
-    .kpi small { display:block; margin-top:4px; font-size:11px; }
-    .gate { display:grid; grid-template-columns:auto minmax(0,1fr) 200px 128px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gate:last-child { border-bottom:0; }
-    .gate b { font-size:13px; font-weight:600; display:block; color:var(--text-strong); }
-    .gate em { font-style:normal; font-size:13px; color:var(--text-muted); }
+  .sy { display:grid; gap:20px; }
+  .sy .ph { margin:0; }
+  .sy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .sy-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .sy-section h2,.sy-state h2 { font-size:16px; }
+  .sy-section > .btn { justify-self:start; }
+  .sy-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 200px 104px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .sy-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sy-row:hover { background:var(--tile); }
+  .sy-row .btn { justify-self:end; }
+  .sy-heading { font-weight:600; background:var(--tile-deep); }
+  .sy .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .sy textarea.in { min-height:96px; resize:vertical; }
+  .sy :is(button,input,select,textarea,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .sy button:disabled { opacity:.5; cursor:not-allowed; }
+  .sy-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .sy-facts dt { color:var(--text-muted); }
+  .sy-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .sy-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .sy-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); min-width:0; }
+  .sy-state .btn { justify-self:start; }
+  .sy-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .sy-toolbar .field { flex:1; }
+  .sy-check { display:flex; align-items:flex-start; gap:12px; }
+  .sy-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .sy-chart { display:grid; gap:12px; }
+  .sy-bar { display:grid; grid-template-columns:180px minmax(0,1fr) 48px; gap:16px; align-items:center; }
+  .sy-track { height:8px; background:var(--joint); }
+  .sy-track i { display:block; height:100%; background:var(--spring-700); }
+  .sy-value { font-size:16px; font-weight:600; text-align:end; }
+  .sy-login { display:grid; grid-template-columns:minmax(0,1fr) 480px; gap:64px; padding:64px; align-items:center; background:var(--tile); }
+  .sy-login h1 { font:600 22px var(--font-sans); }
+  .sy-brand { display:grid; gap:24px; align-content:start; }
+  .sy-brand img { width:118px; height:auto; background:var(--spring-900); padding:12px; border-radius:var(--r-panel); }
+  .sy-languages { display:flex; gap:12px; }
+  .sy-languages [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+  .sy-auth { padding:24px; border:1px solid var(--joint); border-radius:var(--r-panel); background:var(--tile-glaze); display:grid; gap:16px; }
+  .sy-auth .btn { justify-content:center; }
+  .sy-auth-extra { margin:0 64px 48px; }
 
   </style>
 </head><body>
@@ -356,7 +377,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -398,77 +419,20 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Team</h1><p>Three people and one agent. What each may do is decided here and enforced on every request, not in the interface.</p></div>
-        <div class="ph-actions"><button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Invite</span></button></div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M20.3 14.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9.8 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 8.8a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.8a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.04A1.7 1.7 0 0 0 21.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03z"/></svg><span>Workspace</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="8" r="4"/></svg><span>Team and roles</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Security</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Data and exports</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <table>
-            <thead><tr><th>Person</th><th>Role</th><th>May approve</th><th>Two-factor</th><th>Last active</th><th></th></tr></thead>
-            <tbody>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-600); color:#fff">MR</span>
-                <span class="t2"><b>Mariya Ruseva</b><span>mariya@ms-realty.bg</span></span></span></td>
-                <td><span class="pill pill--ink"><i></i>Owner</span></td>
-                <td class="muted">Everything, including publication</td>
-                <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">now</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">PD</span>
-                <span class="t2"><b>Petar Dimitrov</b><span>petar@ms-realty.bg</span></span></span></td>
-                <td><span class="pill pill--sea"><i></i>Broker</span></td>
-                <td class="muted">Replies and viewings, not publication</td>
-                <td><span class="pill pill--ok"><i></i>On</span></td><td class="muted">1 hour ago</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av">DK</span>
-                <span class="t2"><b>Desislava Koleva</b><span>desi@ms-realty.bg</span></span></span></td>
-                <td><span class="pill pill--sand"><i></i>Translator</span></td>
-                <td class="muted">Translations in DE and NL only</td>
-                <td><span class="pill pill--warn"><i></i>Not set up</span></td><td class="muted">3 days ago</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Manage</button></td></tr>
-              <tr><td><span style="display:flex; align-items:center; gap:12px"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span>
-                <span class="t2"><b>Hermes</b><span>Agent · agency hardware</span></span></span></td>
-                <td><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Agent</span></td>
-                <td class="muted">Nothing. It drafts only.</td>
-                <td class="muted">—</td><td class="muted">yesterday</td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Limits</button></td></tr>
-            </tbody>
-          </table>
-          <div class="savebar"><span style="font-size:13px" class="muted">Removing a person revokes their
-            sessions immediately and leaves their name on everything they approved.</span></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Needs attention</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div class="note note--warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Desislava has no second factor. She can approve
-                translations that go straight to the public site.</span></div>
-              <button class="btn btn--sm btn--primary" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Send her the setup link</span></button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Sessions</h2><span class="sub">4 open</span></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between; align-items:center"><span>Mariya · Mac · Sandanski</span><span class="muted">now</span></div><div style="display:flex; justify-content:space-between; align-items:center"><span>Mariya · iPhone</span><span class="muted">2 hours ago</span></div><div style="display:flex; justify-content:space-between; align-items:center"><span>Petar · Android</span><span class="muted">1 hour ago</span></div><div style="display:flex; justify-content:space-between; align-items:center"><span>Desislava · Windows · Sofia</span><span class="muted">3 days ago</span></div>
-              <button class="btn btn--sm" type="button" style="margin-top:4px">Revoke the 3-day-old session</button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>What a role means</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div><b>Owner</b><span style="display:block" class="muted">Publication, settings, team, exports.</span></div>
-              <div><b>Broker</b><span style="display:block" class="muted">Leads, viewings, cases, documents. Cannot publish.</span></div>
-              <div><b>Translator</b><span style="display:block" class="muted">Only the languages named on their account.</span></div>
-              <div><b>Agent</b><span style="display:block" class="muted">Read and draft. Every mutation is refused.</span></div>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="sy"><div class="ph"><div><h1>Team and access</h1><p>Give a person the role and workspace scope they need. Review the change before saving.</p></div></div><nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M20.3 14.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9.8 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 8.8a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.8a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.04A1.7 1.7 0 0 0 21.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03z"/></svg><span>Workspace</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="8" r="4"/></svg><span>Team and roles</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Security</span></a></nav>
+  <p class="muted">Illustrative people and access states · roles below come from the current account schema.</p>
+  <section class="panel"><div class="panel-hd"><h2>People</h2></div><div class="sy-row sy-heading"><span>Person</span><span>Role</span><span>Workspace access</span><span>Action</span></div><div class="sy-row"><b title="Mariya Ruseva">Mariya Ruseva</b><span>Administrator</span><span>All workspaces · example</span><button class="btn btn--sm" type="button">Review access</button></div><div class="sy-row"><b title="Petar Dimitrov">Petar Dimitrov</b><span>Broker</span><span>Agency workspace · example</span><button class="btn btn--sm" type="button">Review access</button></div><div class="sy-row"><b title="Екатерина Константинова-Александрова">Екатерина Константинова-Александрова</b><span>Translator</span><span>Agency workspace · example</span><button class="btn btn--sm" type="button">Review access</button></div></section>
+  <div class="sy-grid"><section class="panel"><div class="panel-hd"><h2>Review Petar’s access</h2><span class="wit wit--none">Change not saved</span></div><form class="sy-section"><div class="field"><label for="team-role">Role</label><select class="in" id="team-role"><option>Administrator</option><option selected>Broker</option><option>Editor</option><option>Translator</option></select></div><div class="field"><label for="team-scope">Workspace identifiers</label><input class="in" id="team-scope" value="agency-example" aria-describedby="team-scope-help"><p class="hint" id="team-scope-help">Example scope. A blank scope grants administrator-wide access only to an administrator.</p></div><label class="sy-check"><input type="checkbox"><span>I, Mariya, confirm this role and workspace scope.</span></label><button class="btn btn--accent" type="button">Save Petar’s access</button></form></section>
+  <section class="panel"><div class="panel-hd"><h2>A saved change names its author</h2></div><div class="sy-section"><dl class="sy-facts"><dt>Person</dt><dd>Petar · example</dd><dt>Role</dt><dd>Broker</dd><dt>Scope</dt><dd>Agency workspace</dd><dt>Changed by</dt><dd><span class="wit">Mariya · 1 Sep, 09:10 · example</span></dd></dl><p>Do not infer second-factor status, active sessions or automatic revocation from a role-change receipt.</p><button class="btn" type="button">Review security status</button></div></section></div>
+  <section class="panel"><div class="panel-hd"><h2>Role capabilities</h2><span class="sub">Record-specific approval still applies</span></div><div class="sy-row sy-heading"><span>Role</span><span>Content editing</span><span>Translation publishing</span><span>Team access</span></div><div class="sy-row"><b>Administrator</b><span>Permitted</span><span>Permitted</span><span>Permitted</span></div><div class="sy-row"><b>Broker</b><span>Not permitted</span><span>Not permitted</span><span>Not permitted</span></div><div class="sy-row"><b>Editor</b><span>Permitted</span><span>Permitted</span><span>Not permitted</span></div><div class="sy-row"><b>Translator</b><span>Not permitted</span><span>Not permitted</span><span>Not permitted</span></div></section>
+  <section class="panel"><div class="panel-hd"><h2>Add a person</h2></div><form class="sy-section"><div class="sy-grid"><div class="field"><label for="new-person">Name</label><input class="in" id="new-person" autocomplete="off"></div><div class="field"><label for="new-email">Work email</label><input class="in" id="new-email" type="email" autocomplete="off"></div><div class="field"><label for="new-password">Temporary password</label><input class="in" id="new-password" type="password" minlength="12" autocomplete="new-password"><p class="hint">At least 12 characters. The person must change it at first sign-in.</p></div><div class="field"><label for="new-role">Role</label><select class="in" id="new-role"><option>Administrator</option><option selected>Broker</option><option>Editor</option><option>Translator</option></select></div></div><p>Review the workspace scope and account details before creating access. Account creation is not evidence that an invitation email was delivered.</p><button class="btn" type="button">Review new account</button></form></section>
+  <div class="sy-states" aria-label="Additional states"><section class="sy-state"><h2>No people loaded</h2><p>An empty account list is different from a failed account lookup. Show which state occurred.</p><button class="btn" type="button">Reload people</button></section><section class="sy-state"><h2>Saving access</h2><p>Keep the proposed role and scope visible until the result arrives.</p><button class="btn" type="button" disabled>Saving access…</button></section><section class="sy-state"><h2>Access change failed</h2><p>No new permission is confirmed. Keep the proposed values for correction.</p><button class="btn" type="button">Review access</button></section><section class="sy-state"><h2>Security details unavailable</h2><p>People may be readable while second-factor or session data is unavailable. Do not display a green security status.</p><button class="btn" type="button">Reload security status</button></section><section class="sy-state"><h2>Many people</h2><p>Search by name or account and preserve the selected person through pagination.</p><button class="btn" type="button">Find a person</button></section><section class="sy-state"><h2>Permission missing</h2><p>Only a person with team-management permission can change accounts.</p><button class="btn" type="button" disabled>Save access</button></section></div>
+</div>
     </div>
   </div>
 </div>
