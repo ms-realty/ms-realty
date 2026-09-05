@@ -43,8 +43,13 @@ jobs:
       # (indexable, canonical links, sitemap on the real domain) is asserted by
       # the same script.
       - name: Probe canonical production journeys
+        if: ${{ vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD != 'true' }}
         env:
           MS_REALTY_PRODUCTION_URL: https://makler-realty.com
         run: |
           test "$MS_REALTY_PRODUCTION_URL" = "https://makler-realty.com"
           node production/scripts/probe-production-journeys.mjs
+
+      - name: Verify the public construction hold
+        if: ${{ vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD == 'true' }}
+        run: node production/scripts/probe-public-hold.mjs
