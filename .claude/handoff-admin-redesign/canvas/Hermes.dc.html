@@ -335,26 +335,36 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .cap { display:grid; grid-template-columns:auto minmax(0,1fr) 118px 118px; gap:12px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; }
-    .cap:last-child { border-bottom:0; }
-    .cap b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .cap em { font-style:normal; font-size:11px; color:var(--text-muted); }
-    .yes { color:var(--success-600); font-weight:600; display:flex; align-items:center; gap:8px; }
-    .no { color:var(--danger-600); font-weight:600; display:flex; align-items:center; gap:8px; }
-    .dq { display:grid; grid-template-columns:auto minmax(0,1fr) 148px 128px 156px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .dq:last-child { border-bottom:0; }
-    .dq:hover { background:var(--tile); }
-    .dq b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .dq em { font-style:normal; font-size:13px; color:var(--text-muted); }
-    .runstep { display:grid; grid-template-columns:26px minmax(0,1fr) 132px 104px; gap:12px; align-items:start;
-      padding:12px 20px; border-bottom:1px solid var(--border); }
-    .runstep:last-child { border-bottom:0; }
-    .runstep b { font-size:13px; font-weight:600; display:block; }
-    .runstep em { font-style:normal; font-size:11px; color:var(--text-muted); display:block; margin-top:4px; }
-    .quote { margin-top:8px; padding:12px 12px; border-left:2px solid var(--border-control);
-      background:var(--tile); font-size:13px; color:var(--text-body); border-radius:0 var(--r-sm) var(--r-sm) 0; }
+  .ai { display:grid; gap:20px; }
+  .ai .ph { margin:0; }
+  .ai-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .ai-section { min-width:0; padding:20px; border-top:1px solid var(--joint); }
+  .ai-section h2 { font-size:16px; margin-bottom:12px; }
+  .ai-section p + p { margin-top:8px; }
+  .ai-form { display:grid; gap:16px; }
+  .ai .in { width:100%; font:inherit; background:var(--tile-glaze); color:var(--text-body); }
+  .ai textarea.in { min-height:96px; resize:vertical; }
+  .ai :is(button,input,textarea,select,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .ai button:disabled { opacity:.5; cursor:not-allowed; }
+  .ai .assist { border-color:var(--brick-700); }
+  .ai-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+  .ai-row { display:grid; grid-template-columns:minmax(0,1fr) 108px 180px 100px; gap:16px; align-items:center; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .ai-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ai-row:hover { background:var(--tile); }
+  .ai-row .btn { justify-self:end; }
+  .ai-heading { background:var(--tile-deep); font-weight:600; }
+  .ai-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; }
+  .ai-facts dt { color:var(--text-muted); }
+  .ai-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .ai-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .ai-state { display:grid; align-content:start; gap:12px; min-width:0; padding:20px 0; border-top:1px solid var(--joint); }
+  .ai-state h2 { font-size:16px; }
+  .ai-state .btn { justify-self:start; }
+  .ai-steps { list-style:none; padding:0; margin:0; }
+  .ai-steps li { display:grid; grid-template-columns:32px minmax(0,1fr) 180px; gap:16px; padding:16px 20px; border-top:1px solid var(--joint); }
+  .ai-steps p { margin-top:4px; color:var(--text-muted); }
+  .ai-source { border-inline-start:2px solid var(--spring-700); padding:12px 16px; background:var(--tile); }
+  .ai-meta { color:var(--text-muted); font-size:11px; }
 
   </style>
 </helmet>
@@ -366,7 +376,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1240px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -408,184 +418,52 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Hermes</h1><p>The agency's own model, running on the agency's own hardware. It drafts and it checks. It never publishes, sends, prices, or redirects.</p></div>
-        <div class="ph-actions">
-          <span class="pill pill--warn"><i></i>Not configured — 2 secrets missing</span>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M20.3 14.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9.8 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 8.8a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.8a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.04A1.7 1.7 0 0 0 21.9 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03z"/></svg><span>Finish setup</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Work</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Runs</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>What it may do</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg><span>Sources</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Audit</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 348px; gap:20px; align-items:start">
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Ask Hermes</h2><span class="sub">It answers only from approved records.</span></div>
-            <div class="sect">
-              <span class="in in--area" style="min-height:64px; color:var(--text-body)">Which listings in Sandanski
-                under €80,000 have no German description, and what is missing from each before it can be published?</span>
-              <div style="display:flex; align-items:center; gap:8px; margin-top:12px">
-                <button class="btn btn--sm btn--primary" type="button" data-disabled="1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Prepare a plan</span></button>
-                <span class="pill pill--sand">Read-only</span>
-                <span style="margin-left:auto; font-size:11px" class="muted">Every answer names the records it used.</span>
-              </div>
-              <div class="note note--warn" style="margin-top:12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
-                <span>Hermes cannot run until <span class="mono">HERMES_CHAT_COMPLETIONS_URL</span> and
-                  <span class="mono">HERMES_API_KEY</span> are set. Everything below is from the last configured run.</span></div>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-hd"><h2>Drafts waiting for a person</h2><span class="sub">11 · nothing here is visible to a customer</span></div>
-            <div class="dq">
-              <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></span>
-              <span style="min-width:0"><b>7 listing descriptions</b><em>DE 3 · NL 2 · EL 2 · translated from the approved Bulgarian</em></span>
-              <span><span class="pill pill--sand">Translation</span></span>
-              <span><span class="pill pill--warn"><i></i>Blocks indexing</span></span>
-              <span style="display:flex; gap:8px; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button>
-                <button class="btn btn--sm" type="button">Discard</button></span>
-            </div>
-            <div class="dq">
-              <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-              <span style="min-width:0"><b>Reply to Maria Petrova</b><em>Offers Thursday 11:00 or Friday 15:00 from the real calendar</em></span>
-              <span><span class="pill pill--sand">Reply</span></span>
-              <span><span class="pill pill--warn"><i></i>Needs approval</span></span>
-              <span style="display:flex; gap:8px; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button>
-                <button class="btn btn--sm" type="button">Discard</button></span>
-            </div>
-            <div class="dq">
-              <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg></span>
-              <span style="min-width:0"><b>Alt text for 312 photos</b><em>Describes what is visible; flags 9 with a face or a document</em></span>
-              <span><span class="pill pill--sand">Media</span></span>
-              <span><span class="pill pill--sand"><i></i>Batch</span></span>
-              <span style="display:flex; gap:8px; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button>
-                <button class="btn btn--sm" type="button">Discard</button></span>
-            </div>
-            <div class="dq">
-              <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-              <span style="min-width:0"><b>Evidence summary · CASE-0013</b><em>Greek buyer tax-number step, from the case record</em></span>
-              <span><span class="pill pill--sand">Case note</span></span>
-              <span><span class="pill pill--sand"><i></i>Needs approval</span></span>
-              <span style="display:flex; gap:8px; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button>
-                <button class="btn btn--sm" type="button">Discard</button></span>
-            </div>
-            <div class="dq">
-              <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></span>
-              <span style="min-width:0"><b>36 redirect proposals</b><em>One outcome per legacy URL, each with its crawl evidence</em></span>
-              <span><span class="pill pill--sand">Migration</span></span>
-              <span><span class="pill pill--sand"><i></i>Needs approval</span></span>
-              <span style="display:flex; gap:8px; justify-content:flex-end">
-                <button class="btn btn--sm btn--primary" type="button">Review</button>
-                <button class="btn btn--sm" type="button">Discard</button></span>
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-hd"><h2>What Hermes may and may not do</h2><span class="sub">Enforced in code, not by prompt</span></div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-              <span><b>Translate an approved description</b><em>Source text is fixed; property facts are copied, never restated</em></span>
-              <span class="yes">May draft</span>
-              <span class="muted">Human approves</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-              <span><b>Draft a reply to an enquiry</b><em>From the lead record and the listing facts</em></span>
-              <span class="yes">May draft</span>
-              <span class="muted">Human approves</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-              <span><b>Summarise evidence on a case</b><em>From documents already attached</em></span>
-              <span class="yes">May draft</span>
-              <span class="muted">Human approves</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-              <span><b>Propose a redirect for a legacy URL</b><em>From the crawl and archive record</em></span>
-              <span class="yes">May draft</span>
-              <span class="muted">Human approves</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-              <span><b>Describe what is visible in a photo</b><em>Flags faces, documents and plates for a person</em></span>
-              <span class="yes">May draft</span>
-              <span class="muted">Human approves</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-              <span><b>Publish a page or mark a translation indexable</b></span>
-              <span class="no">Refused</span>
-              <span class="muted">Always a person</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-              <span><b>Send a message to a customer</b></span>
-              <span class="no">Refused</span>
-              <span class="muted">Always a person</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-              <span><b>Change a price or a redirect</b></span>
-              <span class="no">Refused</span>
-              <span class="muted">Always a person</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-              <span><b>Approve a legal, tax or process claim</b></span>
-              <span class="no">Refused</span>
-              <span class="muted">Always a person</span>
-            </div>
-            <div class="cap">
-              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
-              <span><b>Close a step on a transaction case</b></span>
-              <span class="no">Refused</span>
-              <span class="muted">Always a person</span>
-            </div>
-            <div class="savebar"><span style="font-size:13px" class="muted">The five refusals are a hard list in
-              <span class="mono">hermes.mjs</span>. A prompt cannot widen them, and a refused action fails loudly rather than silently.</span></div>
-          </section>
-        </div>
-
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Setup</h2><span class="pill pill--warn"><i></i>2 of 4</span></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Model chosen — Hermes, open weights, self-hosted</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Guardrails and refusals in force</span></div>
-              <div style="display:flex; gap:8px; color:var(--warning-700)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span class="mono">HERMES_CHAT_COMPLETIONS_URL</span></div>
-              <div style="display:flex; gap:8px; color:var(--warning-700)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span class="mono">HERMES_API_KEY</span></div>
-              <button class="btn btn--sm btn--primary" type="button" style="margin-top:4px">Enter these two</button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>What it reads</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>Approved listing facts</span><span class="muted">165 listings</span></div><div style="display:flex; justify-content:space-between"><span>Approved CMS guides</span><span class="muted">6 documents</span></div><div style="display:flex; justify-content:space-between"><span>Approved area guides</span><span class="muted">31 locations</span></div><div style="display:flex; justify-content:space-between"><span>Lead and case records</span><span class="muted">the ones you open</span></div><div style="display:flex; justify-content:space-between"><span>Crawl and archive evidence</span><span class="muted">457 URLs</span></div>
-              <div class="note note--info" style="margin-top:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Contact details are decrypted only for the one lead a draft is about, and the value never enters the draft.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Last 30 days</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>Drafts produced</span><b>148</b></div>
-              <div style="display:flex; justify-content:space-between"><span>Accepted as written</span><b>96</b></div>
-              <div style="display:flex; justify-content:space-between"><span>Accepted after edits</span><b>34</b></div>
-              <div style="display:flex; justify-content:space-between"><span>Rejected</span><b>18</b></div>
-              <div style="display:flex; justify-content:space-between"><span>Refused by a guardrail</span><b>7</b></div>
-              <div class="note note--info" style="margin-top:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Five of the seven refusals were a Sandanski sea claim in a translated marketing line.</span></div>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="ai">
+  <div class="ph"><div><h1>Hermes</h1><p>Prepare work for a person to review. Customer replies, publication and listing facts keep their approval boundaries.</p></div></div>
+  <nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft requests</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Run review</span></a></nav>
+  <p class="muted">Illustrative workspace · sample requests and states, not a live service report.</p>
+  <div class="ai-grid">
+    <section class="panel"><div class="panel-hd"><h2>What needs a draft?</h2><span class="wit wit--none">Your review follows</span></div>
+      <div class="ai-section"><form class="ai-form">
+        <div class="field"><label for="draft-kind">Work to prepare</label><select class="in" id="draft-kind"><option>Translation review plan</option><option>Listing copy draft</option><option>Broker task summary</option></select></div>
+        <div class="field"><label for="draft-request">Request</label><textarea class="in in--area" id="draft-request" aria-describedby="draft-help">Prepare a review plan for the German, Dutch and Greek listing descriptions. Identify missing approvals and link each task to its source.</textarea><p class="hint" id="draft-help">Name the records and the intended output. A request cannot grant publishing or sending permission.</p></div>
+        <div class="ai-source"><b>Source selection</b><p>Approved Bulgarian listing content and the current translation queue. Open each source before reviewing a draft.</p></div>
+        <div class="ai-actions"><button class="btn btn--accent" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Prepare draft plan</button><span class="ai-meta">Example: owner planning is available</span></div>
+      </form></div>
+    </section>
+    <section class="panel"><div class="panel-hd"><h2>Availability is per task</h2></div><div class="ai-section ai-form">
+      <div><b>Owner planning</b><p>Can use the configured provider or a connected OpenRouter account.</p></div>
+      <div><b>Customer reply drafts</b><p>Require the configured self-hosted reply service. An owner-planning connection does not enable them.</p></div>
+      <div><span class="wit wit--none">Reply service unavailable</span><p>Example state: connect the reply service, then return to the lead.</p></div>
+      <button class="btn" type="button">Review connections</button>
+      <p class="hint">Model, hosting and verification time appear only when the service returns them.</p>
+    </div></section>
+  </div>
+  <section class="panel"><div class="panel-hd"><h2>Waiting for a person</h2><span class="sub">3 sample requests</span></div>
+    <div class="ai-row ai-heading"><span>Request</span><span>Output</span><span>Witness</span><span>Action</span></div>
+    <div class="ai-row"><b title="Екатерина Константинова-Александрова · listing translation">Екатерина Константинова-Александрова · listing translation</b><span>German</span><span class="wit wit--none">Reviewer needed</span><button class="btn btn--sm" type="button">Open draft</button></div><div class="ai-row"><b title="Seven listing descriptions · three target languages">Seven listing descriptions · three target languages</b><span>21 drafts</span><span class="wit wit--none">Not approved</span><button class="btn btn--sm" type="button">Open run</button></div><div class="ai-row"><b title="Case summary · missing document evidence">Case summary · missing document evidence</b><span>Summary</span><span class="wit wit--none">Source check due</span><button class="btn btn--sm" type="button">Open draft</button></div>
+    <div class="foot"><span>Showing 3 of 3 sample requests</span><button class="btn btn--sm" type="button" disabled>Next page</button></div>
+  </section>
+  <section class="panel"><div class="panel-hd"><h2>What the review protects</h2></div><dl class="ai-section ai-facts">
+    <dt>Property facts</dt><dd>Price, area, bedrooms, location, reference and source URL stay as supplied by the approved source.</dd>
+    <dt>Public language</dt><dd>BG is the source. EN, DE, NL, RU, EL and HE each require human approval before indexing.</dd>
+    <dt>Decisions</dt><dd>Hermes does not send customer messages, publish pages, approve legal claims, change prices or change redirects.</dd>
+    <dt>Private records</dt><dd>Show the records and data scope used for this request. Do not infer privacy guarantees from the model name.</dd>
+  </dl></section>
+  <div class="ai-states" aria-label="Additional request states">
+    <section class="ai-state"><h2>No drafts waiting</h2><p><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> All reviewed work is in its record. Start a request when another draft is needed.</p><button class="btn" type="button">View reviewed requests</button></section>
+    <section class="ai-state"><h2>Request in progress</h2><p role="status">Preparing the plan. Keep this request open until its outcome is known.</p><button class="btn" type="button" disabled>Preparing draft…</button></section>
+    <section class="ai-state"><h2>Service did not answer</h2><p role="alert">No result is confirmed. Your request stays visible; check its status before submitting again.</p><button class="btn" type="button">Check request status</button></section>
+    <section class="ai-state"><h2>Only part of the queue loaded</h2><p>Loaded requests can be opened. Missing rows are unavailable, not complete.</p><button class="btn" type="button">Reload queue</button></section>
+    <section class="ai-state"><h2>More requests than fit here</h2><div class="field"><label for="request-filter">Find a request</label><input class="in" id="request-filter" type="search" placeholder="Name, reference or language"></div><p>Keep the filter and page position when returning from a review.</p></section>
+    <section class="ai-state"><h2>Connection lost</h2><p>Previously loaded drafts remain readable. Submission waits for a connection and a status check.</p><button class="btn" type="button" disabled>Prepare draft plan</button></section>
+  </div>
+</div>
     </div>
   </div>
 </div>

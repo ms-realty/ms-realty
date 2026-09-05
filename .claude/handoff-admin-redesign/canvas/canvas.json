@@ -303,7 +303,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 1577,
+      "h": 1831,
       "page": "page-5"
     },
     {
@@ -312,7 +312,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1144,
+      "h": 1936,
       "page": "page-5"
     },
     {
@@ -321,25 +321,25 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 1344,
+      "h": 2108,
       "page": "page-5"
     },
     {
       "file": "IntegrationCatalogue.dc.html",
       "title": "Integration catalogue",
       "x": 0,
-      "y": 1747,
+      "y": 2278,
       "w": 1440,
-      "h": 1104,
+      "h": 1937,
       "page": "page-5"
     },
     {
       "file": "Automations.dc.html",
       "title": "Automations and webhooks",
       "x": 1560,
-      "y": 1747,
+      "y": 2278,
       "w": 1440,
-      "h": 1284,
+      "h": 1877,
       "page": "page-5"
     },
     {

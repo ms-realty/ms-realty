@@ -1,187 +1,115 @@
 import fs from "node:fs";
+import assert from "node:assert/strict";
 import { page, icon, subnav } from "../shell.mjs";
-const W = (n) => new URL(`../${n}`, import.meta.url);
-
-const INT_NAV = (on) => subnav([
-  ["Connected", "link", on === "conn"], ["Catalogue", "puzzle", on === "cat"],
-  ["Automations", "bolt", on === "auto"], ["Webhooks", "webhook", on === "hook"], ["API keys", "key", on === "keys"],
-]);
-
-const CAT_CSS = `
-    .cat { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px; }
-    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
-      display:grid; gap:8px; }
-    .capp .hd { display:flex; align-items:center; gap:8px; }
-    .capp .lg { display:grid; place-items:center; width:32px; height:32px; border-radius:var(--r-sm);
-      font:700 11px var(--font-sans); flex:0 0 auto; }
-    .capp b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .capp p { font-size:11px; color:var(--text-muted); min-height:30px; }
-    .capp .ft { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .auto:last-child { border-bottom:0; }
-    .auto b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .auto em { font-style:normal; font-size:13px; color:var(--text-muted); }
-    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:11px; }
-    .rule span.k { padding:4px 8px; border-radius:var(--r-xs); background:var(--tile-deep); color:var(--marble-700); font-weight:600; }
-    .rule span.v { padding:4px 8px; border-radius:var(--r-xs); background:var(--spring-50); color:var(--spring-800); font-weight:600; }
+import { OPERATOR_PROVIDER_COVERAGE } from "../../../../production/lib/operator-provider-catalog.mjs";
+const labels = {
+  google:["Google Workspace","Approved email and viewing-calendar sync"],
+  whatsapp:["WhatsApp Business","Approved replies and verified enquiries"],
+  facebook:["Facebook Page","Separately approved social posts"],
+  instagram:["Instagram","Separately approved photo posts"],
+  ai:["OpenRouter","Guarded owner plans with Hermes"],
+  google_drive:["Google Drive","No supported workspace workflow yet"],
+  github:["GitHub","No supported workspace workflow yet"],
+  viber:["Viber","No supported owner sign-in flow"],
+  cloudflare:["Cloudflare","Infrastructure managed outside connections"],
+  neon:["Neon","Database managed outside connections"],
+};
+for(const {provider} of OPERATOR_PROVIDER_COVERAGE) assert(labels[provider],`Describe provider ${provider}`);
+const enabled=OPERATOR_PROVIDER_COVERAGE.filter(row=>row.enabled);
+const unavailable=OPERATOR_PROVIDER_COVERAGE.filter(row=>row.state==="disabled");
+const managed=OPERATOR_PROVIDER_COVERAGE.filter(row=>row.state==="managed");
+const nav=on=>subnav([["Connections","link",false],["Catalogue","puzzle",on==="catalogue"],["Automations","bolt",on==="automations"]]);
+const CSS=`
+  .rx { display:grid; gap:20px; }
+  .rx .ph { margin:0; }
+  .rx-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .rx-section { padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .rx-section h2 { font-size:16px; margin-bottom:12px; }
+  .rx-section p + p { margin-top:8px; }
+  .rx-row { display:grid; grid-template-columns:180px minmax(0,1fr) 160px 108px; gap:16px; align-items:center; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .rx-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rx-row:hover { background:var(--tile); }
+  .rx-row .btn { justify-self:end; }
+  .rx-heading { background:var(--tile-deep); font-weight:600; }
+  .rx-form { display:grid; gap:16px; }
+  .rx .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .rx textarea.in { min-height:96px; resize:vertical; }
+  .rx :is(button,input,textarea,select,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .rx button:disabled { opacity:.5; cursor:not-allowed; }
+  .rx-check { display:flex; align-items:flex-start; gap:12px; }
+  .rx-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .rx-facts { display:grid; grid-template-columns:132px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .rx-facts dt { color:var(--text-muted); }
+  .rx-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .rx-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .rx-state { display:grid; align-content:start; gap:12px; min-width:0; padding:20px 0; border-top:1px solid var(--joint); }
+  .rx-state h2 { font-size:16px; }
+  .rx-state .btn { justify-self:start; }
+  .rx-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .rx-toolbar .field { flex:1; }
 `;
+const catalogue=`<div class="rx">
+  <div class="ph"><div><h1>Integration catalogue</h1><p>Choose the service for the work you need. Review permissions before connecting an account.</p></div><div class="ph-actions"><button class="btn btn--accent" type="button">Review Google connection</button></div></div>
+  ${nav("catalogue")}
+  <p class="muted">Availability is generated from the product catalogue. Account states are not loaded in this design preview.</p>
+  <section class="panel"><div class="panel-hd"><h2>Supported owner connections</h2><span class="sub">${enabled.length} services</span></div>
+    <div class="rx-toolbar"><div class="field"><label for="service-search">Find a service</label><input class="in" id="service-search" type="search" placeholder="Service or workflow"></div><button class="btn" type="button">Search catalogue</button></div>
+    <div class="rx-row rx-heading"><span>Service</span><span>What it supports</span><span>Authorisation</span><span>Next step</span></div>
+    ${enabled.map(row=>`<div class="rx-row"><b>${labels[row.provider][0]}</b><span title="${labels[row.provider][1]}">${labels[row.provider][1]}</span><span>${row.provider==="whatsapp"?"Provider sign-up":"Provider sign-in"}</span><button class="btn btn--sm" type="button">Review access</button></div>`).join("")}
+    <div class="foot"><span>All ${enabled.length} supported services shown</span><button class="btn btn--sm" type="button" disabled>Next page</button></div>
+  </section>
+  <div class="rx-grid">
+    <section class="panel"><div class="panel-hd"><h2>Review access · Google Workspace</h2><span class="wit wit--none">Owner approval needed</span></div><div class="rx-section rx-form">
+      <dl class="rx-facts"><dt>Identity</dt><dd>Identify the Google account and its email address.</dd><dt>Email</dt><dd>Send approved email from the connected account.</dd><dt>Calendar</dt><dd>Manage events in owned calendars and read availability.</dd><dt>Approval</dt><dd>The owner authorises account access. Customer-facing actions keep their own review.</dd></dl>
+      <p>The account and permissions shown by Google must match the intended agency account before you continue.</p>
+    </div></section>
+    <section class="panel"><div class="panel-hd"><h2>Before sign-in is available</h2></div><div class="rx-section rx-form"><p>The service must be configured for this workspace. Missing setup has a recovery explanation, not an active sign-in button.</p><p>After sign-in, the connection needs a verified account and time. Until then, it stays pending.</p><p class="hint">This form never asks you to paste a provider password or API key.</p></div></section>
+  </div>
+  <section class="panel"><div class="panel-hd"><h2>Unavailable owner connections</h2><span class="sub">${unavailable.length} named gaps</span></div>
+    ${unavailable.map(row=>`<div class="rx-row"><b>${labels[row.provider][0]}</b><span>${labels[row.provider][1]}</span><span>Unavailable</span><button class="btn btn--sm" type="button" disabled>Connect</button></div>`).join("")}
+  </section>
+  <section class="panel"><div class="panel-hd"><h2>Managed outside this catalogue</h2><span class="sub">${managed.length} services</span></div>
+    ${managed.map(row=>`<div class="rx-row"><b>${labels[row.provider][0]}</b><span>${labels[row.provider][1]}</span><span>Health not loaded</span><button class="btn btn--sm" type="button">View report</button></div>`).join("")}
+  </section>
+  <div class="rx-states" aria-label="Additional catalogue states">
+    <section class="rx-state"><h2>No matching service</h2><p>${icon("search",28)} Clear the search to see supported connections. An absent service is not available through this workspace.</p><button class="btn" type="button">Clear search</button></section>
+    <section class="rx-state"><h2>Checking setup</h2><p role="status">Permissions and service availability are loading.</p><button class="btn" type="button" disabled>Checking connection…</button></section>
+    <section class="rx-state"><h2>Catalogue could not load</h2><p role="alert">No account change is available until the service and its permissions can be read.</p><button class="btn" type="button">Reload catalogue</button></section>
+    <section class="rx-state"><h2>Account status unavailable</h2><p>The list may be readable while the connection store is unavailable. Do not turn that state into “Not connected”.</p><button class="btn" type="button">Refresh account status</button></section>
+    <section class="rx-state"><h2>Large result set</h2><p>Keep one service per row. Search and page controls preserve the selected service and permission review.</p><button class="btn" type="button">Return to selected service</button></section>
+    <section class="rx-state"><h2>Offline catalogue</h2><p>Read the last loaded permissions. Refresh availability after reconnecting before starting sign-in.</p><button class="btn" type="button" disabled>Start sign-in</button></section>
+  </div>
+</div>`;
 
-const CAT_APPS = [
-  ["Gmail","#C5221F","GM","Send approved replies from the agency address","Connect","Messaging"],
-  ["Google Calendar","#1A73E8","GC","Put viewings in the broker's calendar","Connect","Calendar"],
-  ["Google Drive","#0F9D58","GD","File signed contracts by case","Connect","Storage"],
-  ["Outlook","#0F6CBD","OL","For brokers who live in Outlook","Connect","Messaging"],
-  ["Telegram","#229ED9","TG","A channel Russian buyers actually use","Connect","Messaging"],
-  ["Viber","#7360F2","VB","Common with Bulgarian sellers","Connect","Messaging"],
-  ["DocuSign","#D4AF37","DS","Qualified signature on a preliminary contract","Connect","Signature"],
-  ["Dropbox Sign","#0061FF","DB","A cheaper signature route","Connect","Signature"],
-  ["Xero","#13B5EA","XR","Commission invoices against a closed deal","Connect","Finance"],
-  ["Stripe","#635BFF","ST","Take a reservation fee online","Connect","Finance"],
-  ["Mailchimp","#FFE01B","MC","Newsletters to consented contacts only","Connect","Marketing"],
-  ["Meta Ads","#0866FF","MA","Boost a listing that is already published","Connect","Marketing"],
-  ["Slack","#611F69","SL","Overdue-lead alerts where the team already is","Connect","Notify"],
-  ["Notion","#111111","NO","Where the agency keeps its own notes","Connect","Docs"],
-  ["Zoom","#2D8CFF","ZM","Remote viewings for buyers abroad","Connect","Calls"],
-  ["Twilio","#F22F46","TW","SMS fallback when a message will not deliver","Connect","Messaging"],
-];
-
-const CAT_BODY = `      <div class="ph">
-        <div><h1>Integrations</h1><p>Ten services are wired directly because a workflow depends on them. Everything else comes through one aggregator, so a new tool is a connection rather than a release.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button">${icon("list", 15)}<span>Connection log</span></button>
-          <button class="btn btn--primary" type="button">${icon("plus", 15)}<span>Request a service</span></button>
-        </div>
-      </div>
-      ${INT_NAV("cat")}
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar">
-            <span class="find">${icon("search", 14)}Search 300+ services</span>
-            <div class="seg" style="background:transparent; padding:0">
-              <button type="button" data-on="1">All</button><button type="button">Messaging</button>
-              <button type="button">Signature</button><button type="button">Finance</button><button type="button">Marketing</button>
-            </div>
-            <span style="margin-left:auto" class="pill pill--sea"><i></i>via Composio</span>
-          </div>
-          <div class="note note--info" style="border-radius:0; padding:12px 16px">${icon("puzzle", 16)}
-            <span>These are brokered by one aggregator that holds the OAuth app registrations. The agency
-              consents once per service; MS Realty never stores a third-party password, and a service the
-              agency drops takes its tokens with it.</span></div>
-          <div class="cat">
-${CAT_APPS.map(([name, colour, ini, what, cta, cat]) => `            <div class="capp">
-              <div class="hd"><span class="lg" style="background:${colour}; color:#fff">${ini}</span>
-                <span style="min-width:0"><b>${name}</b><span style="display:block; font-size:11px" class="muted">${cat}</span></span></div>
-              <p>${what}</p>
-              <div class="ft"><button class="btn btn--sm" type="button">${cta}</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>`).join("\n")}
-          </div>
-          <div class="foot"><span>Showing 16 of 312 available services</span>
-            <button class="btn btn--sm" type="button">Browse all</button></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Wired directly</h2><span class="sub">10</span></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              ${[["WhatsApp Business","Not connected","sand"],["Google Workspace","Reauthorise","warn"],["Facebook Page","Connected","ok"],["Instagram","Connected","ok"],["PostgreSQL · Payload","Live","ok"],["Cloudflare R2","Live","ok"],["Typesense","Live","ok"],["Hermes endpoint","Not configured","sand"],["GitHub","Not connected","sand"],["Viber","Unavailable","sand"]]
-                .map(([n, s, t]) => `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>${n}</span><span class="pill pill--${t}"><i></i>${s}</span></div>`).join("")}
-              <p class="muted" style="font-size:11px; margin-top:4px">These ten carry a named workflow, so they
-                stay first-party: an aggregator outage must not stop a reply from being delivered.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>What a connection may touch</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Only the scopes shown before you consent, and each one is named in plain words.</span></div>
-              <div style="display:flex; gap:8px">${icon("check", 15)}<span>Only records the connected workflow needs — a calendar link never sees lead contact details.</span></div>
-              <div style="display:flex; gap:8px; color:var(--danger-600)">${icon("x", 15)}<span>Nothing may send to a customer without the same approval a broker needs.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Not listed?</h2></div>
-            <div class="side-sect" style="font-size:13px; color:var(--text-body)">
-              Ask for it and the agency's own developer sees the request with the workflow you described.
-              <button class="btn btn--sm" type="button" style="margin-top:8px">${icon("send", 13)}<span>Request a service</span></button>
-            </div>
-          </section>
-        </div>
-      </div>`;
-fs.writeFileSync(W("IntegrationCatalogue.dc.html"), page({ active: "integrations", body: CAT_BODY, extraCss: CAT_CSS, height: 1080 }));
-
-/* ------------------------------------------------------------- Automations */
-const AUTO_BODY = `      <div class="ph">
-        <div><h1>Automations</h1><p>Rules the workspace runs on a schedule. Anything that would reach a customer stops at a draft and waits for a person.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button">${icon("history", 15)}<span>Run history</span></button>
-          <button class="btn btn--primary" type="button">${icon("plus", 15)}<span>New automation</span></button>
-        </div>
-      </div>
-      ${INT_NAV("auto")}
-      <section class="panel">
-        <div class="toolbar"><span class="find">${icon("search", 14)}Automation name</span>
-          <div class="seg" style="background:transparent; padding:0">
-            <button type="button" data-on="1">On <em>7</em></button><button type="button">Off <em>3</em></button><button type="button">Failing <em>1</em></button></div>
-          <span style="margin-left:auto" class="mono">Next run 09:00</span></div>
-${[
-  [1,"Escalate a lead with no reply","when lead age > SLA · then notify the manager and mark it escalated","Every 15 min","4 today","ok","Internal only"],
-  [1,"Run due saved-search alerts","when a saved search has a new match · then queue a digest for approval","Daily 08:00","2 queued","warn","Needs approval"],
-  [1,"Publish listings scheduled for today","when publication date = today and approval is on file · then publish","Daily 06:00","1 today","ok","Approved in advance"],
-  [1,"Re-check register extracts before a deed","when a notary date is within 24 h · then request a fresh extract","Daily 07:00","0 today","ok","Internal only"],
-  [1,"Warn on consent expiring in 30 days","when consent expiry < 30 days · then create a renewal task","Weekly Mon","3 open","ok","Internal only"],
-  [1,"Sync approved listings to search","when a listing is published or edited · then reindex","On change","84 documents","ok","Internal only"],
-  [1,"Mirror new media to R2","when a photo is uploaded · then mirror and record the checksum","On change","12 today","ok","Internal only"],
-  [0,"Draft translations for new listings","when a listing is approved in Bulgarian · then draft DE, NL, RU","On change","paused","sand","Needs approval"],
-  [0,"Post a published listing to Facebook","when a listing is published · then draft a post for approval","On change","paused","sand","Needs approval"],
-  [0,"Chase a viewing with no feedback","when a viewing is 3 days old with no outcome · then create a task","Daily 09:00","paused","sand","Internal only"],
-].map(([on, name, rule, when, last, tone, boundary]) => {
-  const [k, v] = rule.split(" · then ");
-  return `        <div class="auto">
-          <span class="toggle"${on ? ' data-on="1"' : ""}><i></i></span>
-          <span style="min-width:0"><b>${name}</b>
-            <span class="rule"><span class="k">${k}</span>${icon("arrow", 12)}<span class="v">then ${v}</span></span></span>
-          <span style="font-size:13px" class="muted">${when}</span>
-          <span style="font-size:13px" class="muted">${last}</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--${tone}"><i></i>${boundary}</span></span>
-        </div>`;
-}).join("\n")}
-        <div class="savebar"><span style="font-size:13px" class="muted">A failing automation raises a workspace
-          alert rather than retrying silently. The last failure was the saved-search digest on 28 August, when
-          Google delivery expired.</span></div>
-      </section>
-      <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px">
-        <section class="panel">
-          <div class="panel-hd"><h2>Webhooks in</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:13px">
-            <div style="display:flex; justify-content:space-between"><span class="mono">meta/whatsapp</span><span class="pill pill--sand"><i></i>Awaiting token</span></div>
-            <div style="display:flex; justify-content:space-between"><span class="mono">meta/leadgen</span><span class="pill pill--ok"><i></i>Verified</span></div>
-            <div style="display:flex; justify-content:space-between"><span class="mono">payload/afterChange</span><span class="pill pill--ok"><i></i>Verified</span></div>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Webhooks out</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:13px">
-            <div style="display:flex; justify-content:space-between"><span>Lead created</span><span class="muted">2 subscribers</span></div>
-            <div style="display:flex; justify-content:space-between"><span>Listing published</span><span class="muted">1 subscriber</span></div>
-            <div style="display:flex; justify-content:space-between"><span>Case step closed</span><span class="muted">none</span></div>
-            <button class="btn btn--sm" type="button" style="margin-top:4px">${icon("plus", 13)}<span>Add a subscriber</span></button>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Agent access</h2><span class="pill pill--ai">${icon("sparkles", 11)}MCP</span></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:13px">
-            <p class="muted">The owner's own assistant can reach this workspace over four tools, each bound to
-              the same permissions the person has.</p>
-            <div style="display:grid; gap:4px">
-              ${["ms_realty_admin_read","ms_realty_admin_write","ms_realty_hermes","ms_realty_admin_context"].map((t) => `<span class="mono">${t}</span>`).join("")}
-            </div>
-            <button class="btn btn--sm" type="button" style="margin-top:4px">${icon("key", 13)}<span>Connect an assistant</span></button>
-          </div>
-        </section>
-      </div>`;
-fs.writeFileSync(W("Automations.dc.html"), page({ active: "integrations", body: AUTO_BODY, extraCss: CAT_CSS, height: 1080 }));
-
+// Draft PR #173 supports two rule types and manual runs. This canvas is its
+// review target, not evidence that the backend is integrated or deployed.
+const automations=`<div class="rx">
+  <div class="ph"><div><h1>Automations</h1><p>Review a rule, then authorise one manual run. Enabling a rule does not schedule it.</p></div></div>
+  ${nav("automations")}
+  <p class="muted">Illustrative review target · backend integration is pending. Rules, runs and owner confirmations below are sample states.</p>
+  <section class="panel"><div class="panel-hd"><h2>Review a saved-search run</h2><span class="wit wit--none">Owner confirmation needed</span></div>
+    <div class="rx-grid"><div class="rx-section rx-form"><dl class="rx-facts"><dt>Rule</dt><dd>Saved-search alerts</dd><dt>Trigger</dt><dd>Manual · one run</dd><dt>Effect</dt><dd>Process due alerts through the existing delivery workflow. This can reach customers.</dd><dt>Required review</dt><dd>Check due work, recipients, consent and delivery approval before authorising this run.</dd><dt>Rule status</dt><dd>Enabled · example, not a live setting</dd></dl><button class="btn" type="button">Review due alerts</button></div>
+    <form class="rx-section rx-form"><h2>Confirm this run</h2><p>One owner confirmation applies to this rule and this run request. It cannot bypass a record’s approval.</p><label class="rx-check"><input type="checkbox"><span>I, Mariya, have reviewed the due alerts and authorise this manual run.</span></label><button class="btn btn--accent" type="button">Run saved-search alerts</button><p class="hint">Example only. A production run needs a durable receipt before it can be reported as complete.</p></form></div>
+  </section>
+  <section class="panel"><div class="panel-hd"><h2>Rules</h2><span class="sub">2 rule types in the review target</span></div><div class="rx-row rx-heading"><span>Rule</span><span>Scope</span><span>Sample state</span><span>Action</span></div>
+    <div class="rx-row"><b>Saved-search alerts</b><span>Process due customer alerts</span><span>Enabled · manual</span><button class="btn btn--sm" type="button">Review rule</button></div>
+    <div class="rx-row"><b>Listing publication</b><span>Process due, approved publication schedules</span><span>Disabled</span><button class="btn btn--sm" type="button">Review rule</button></div>
+    <div class="foot"><span>No recurring schedule is configured by these controls.</span><button class="btn btn--sm" type="button">Open run history</button></div>
+  </section>
+  <div class="rx-grid">
+    <section class="panel"><div class="panel-hd"><h2>Rule changes need their own confirmation</h2></div><form class="rx-section rx-form"><div class="field"><label for="rule-name">Rule name</label><input class="in" id="rule-name" value="Saved-search alerts"></div><div class="field"><label for="rule-purpose">Description</label><textarea class="in in--area" id="rule-purpose">Review and run alerts that are due for active saved searches.</textarea></div><dl class="rx-facts"><dt>Execution</dt><dd>Manual only</dd><dt>Change</dt><dd>Disable saved-search alerts</dd></dl><label class="rx-check"><input type="checkbox"><span>I, Mariya, confirm disabling this rule. Future manual runs must be refused.</span></label><button class="btn" type="button">Disable this rule</button></form></section>
+    <section class="panel"><div class="panel-hd"><h2>Read the outcome, not just the status</h2></div><div class="rx-section rx-form"><p>A completed run can include record-level failures. Open the result summary and affected records before deciding what is finished.</p><dl class="rx-facts"><dt>Requested by</dt><dd>Mariya · example owner</dd><dt>Run status</dt><dd>Completed · illustrative receipt</dd><dt>Result</dt><dd>One record needs attention</dd><dt>Witness</dt><dd><span class="wit">Mariya · 1 Sep, 09:10 · example</span></dd></dl><button class="btn" type="button">Open affected record</button><p class="hint">The witness records run authorisation. It does not certify delivery or listing correctness.</p></div></section>
+  </div>
+  <div class="rx-states" aria-label="Additional automation states">
+    <section class="rx-state"><h2>No rules saved</h2><p>${icon("bolt",28)} Create a rule from a supported type. It starts disabled until the owner confirms enabling it.</p><button class="btn" type="button">Review a new rule</button></section>
+    <section class="rx-state"><h2>Run in progress</h2><p role="status">The request is running or its outcome is uncertain. Check status before starting another run.</p><button class="btn" type="button" disabled>Run in progress…</button></section>
+    <section class="rx-state"><h2>Run failed</h2><p role="alert">Open the failure and result summary. Do not assume no external action occurred before failure.</p><button class="btn" type="button">Open failure details</button></section>
+    <section class="rx-state"><h2>Rule changed while open</h2><p>The version you reviewed is no longer current. Reload it and confirm the scope before submitting.</p><button class="btn" type="button">Reload rule</button></section>
+    <section class="rx-state"><h2>Many past runs</h2><div class="field"><label for="run-filter">Find a run</label><input class="in" id="run-filter" type="search" placeholder="Rule or requesting person"></div><p>Keep the filter and page when returning from a receipt.</p></section>
+    <section class="rx-state"><h2>Service unavailable</h2><p>The rule store or connection cannot be read. No change or run is confirmed.</p><button class="btn" type="button" disabled>Run saved-search alerts</button></section>
+  </div>
+</div>`;
+for(const [name,body] of [["IntegrationCatalogue",catalogue],["Automations",automations]]) {
+  fs.writeFileSync(new URL(`../${name}.dc.html`,import.meta.url),page({active:"integrations",body,extraCss:CSS,height:0,healthText:"Illustrative workspace"}));
+}
 console.log("IntegrationCatalogue, Automations");

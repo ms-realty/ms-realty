@@ -327,26 +327,33 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .cat { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px; }
-    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
-      display:grid; gap:8px; }
-    .capp .hd { display:flex; align-items:center; gap:8px; }
-    .capp .lg { display:grid; place-items:center; width:32px; height:32px; border-radius:var(--r-sm);
-      font:700 11px var(--font-sans); flex:0 0 auto; }
-    .capp b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .capp p { font-size:11px; color:var(--text-muted); min-height:30px; }
-    .capp .ft { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .auto:last-child { border-bottom:0; }
-    .auto b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .auto em { font-style:normal; font-size:13px; color:var(--text-muted); }
-    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:11px; }
-    .rule span.k { padding:4px 8px; border-radius:var(--r-xs); background:var(--tile-deep); color:var(--marble-700); font-weight:600; }
-    .rule span.v { padding:4px 8px; border-radius:var(--r-xs); background:var(--spring-50); color:var(--spring-800); font-weight:600; }
+  .rx { display:grid; gap:20px; }
+  .rx .ph { margin:0; }
+  .rx-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .rx-section { padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .rx-section h2 { font-size:16px; margin-bottom:12px; }
+  .rx-section p + p { margin-top:8px; }
+  .rx-row { display:grid; grid-template-columns:180px minmax(0,1fr) 160px 108px; gap:16px; align-items:center; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .rx-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rx-row:hover { background:var(--tile); }
+  .rx-row .btn { justify-self:end; }
+  .rx-heading { background:var(--tile-deep); font-weight:600; }
+  .rx-form { display:grid; gap:16px; }
+  .rx .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .rx textarea.in { min-height:96px; resize:vertical; }
+  .rx :is(button,input,textarea,select,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .rx button:disabled { opacity:.5; cursor:not-allowed; }
+  .rx-check { display:flex; align-items:flex-start; gap:12px; }
+  .rx-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .rx-facts { display:grid; grid-template-columns:132px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .rx-facts dt { color:var(--text-muted); }
+  .rx-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .rx-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .rx-state { display:grid; align-content:start; gap:12px; min-width:0; padding:20px 0; border-top:1px solid var(--joint); }
+  .rx-state h2 { font-size:16px; }
+  .rx-state .btn { justify-self:start; }
+  .rx-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .rx-toolbar .field { flex:1; }
 
   </style>
 </head><body>
@@ -358,7 +365,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1080px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -400,176 +407,43 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Integrations</h1><p>Ten services are wired directly because a workflow depends on them. Everything else comes through one aggregator, so a new tool is a connection rather than a release.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>Connection log</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Request a service</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Connected</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg><span>Catalogue</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Automations</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0-3.4 3.95"/><path d="m9 20 3.5-6"/><path d="M15 20a4 4 0 1 0-1.5-7.7"/><path d="M6 14a4 4 0 0 0 3 6h6"/></svg><span>Webhooks</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 9-9"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg><span>API keys</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar">
-            <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Search 300+ services</span>
-            <div class="seg" style="background:transparent; padding:0">
-              <button type="button" data-on="1">All</button><button type="button">Messaging</button>
-              <button type="button">Signature</button><button type="button">Finance</button><button type="button">Marketing</button>
-            </div>
-            <span style="margin-left:auto" class="pill pill--sea"><i></i>via Composio</span>
-          </div>
-          <div class="note note--info" style="border-radius:0; padding:12px 16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg>
-            <span>These are brokered by one aggregator that holds the OAuth app registrations. The agency
-              consents once per service; MS Realty never stores a third-party password, and a service the
-              agency drops takes its tokens with it.</span></div>
-          <div class="cat">
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#C5221F; color:#fff">GM</span>
-                <span style="min-width:0"><b>Gmail</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
-              <p>Send approved replies from the agency address</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#1A73E8; color:#fff">GC</span>
-                <span style="min-width:0"><b>Google Calendar</b><span style="display:block; font-size:11px" class="muted">Calendar</span></span></div>
-              <p>Put viewings in the broker's calendar</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#0F9D58; color:#fff">GD</span>
-                <span style="min-width:0"><b>Google Drive</b><span style="display:block; font-size:11px" class="muted">Storage</span></span></div>
-              <p>File signed contracts by case</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#0F6CBD; color:#fff">OL</span>
-                <span style="min-width:0"><b>Outlook</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
-              <p>For brokers who live in Outlook</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#229ED9; color:#fff">TG</span>
-                <span style="min-width:0"><b>Telegram</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
-              <p>A channel Russian buyers actually use</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#7360F2; color:#fff">VB</span>
-                <span style="min-width:0"><b>Viber</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
-              <p>Common with Bulgarian sellers</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#D4AF37; color:#fff">DS</span>
-                <span style="min-width:0"><b>DocuSign</b><span style="display:block; font-size:11px" class="muted">Signature</span></span></div>
-              <p>Qualified signature on a preliminary contract</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#0061FF; color:#fff">DB</span>
-                <span style="min-width:0"><b>Dropbox Sign</b><span style="display:block; font-size:11px" class="muted">Signature</span></span></div>
-              <p>A cheaper signature route</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#13B5EA; color:#fff">XR</span>
-                <span style="min-width:0"><b>Xero</b><span style="display:block; font-size:11px" class="muted">Finance</span></span></div>
-              <p>Commission invoices against a closed deal</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#635BFF; color:#fff">ST</span>
-                <span style="min-width:0"><b>Stripe</b><span style="display:block; font-size:11px" class="muted">Finance</span></span></div>
-              <p>Take a reservation fee online</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#FFE01B; color:#fff">MC</span>
-                <span style="min-width:0"><b>Mailchimp</b><span style="display:block; font-size:11px" class="muted">Marketing</span></span></div>
-              <p>Newsletters to consented contacts only</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#0866FF; color:#fff">MA</span>
-                <span style="min-width:0"><b>Meta Ads</b><span style="display:block; font-size:11px" class="muted">Marketing</span></span></div>
-              <p>Boost a listing that is already published</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#611F69; color:#fff">SL</span>
-                <span style="min-width:0"><b>Slack</b><span style="display:block; font-size:11px" class="muted">Notify</span></span></div>
-              <p>Overdue-lead alerts where the team already is</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#111111; color:#fff">NO</span>
-                <span style="min-width:0"><b>Notion</b><span style="display:block; font-size:11px" class="muted">Docs</span></span></div>
-              <p>Where the agency keeps its own notes</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#2D8CFF; color:#fff">ZM</span>
-                <span style="min-width:0"><b>Zoom</b><span style="display:block; font-size:11px" class="muted">Calls</span></span></div>
-              <p>Remote viewings for buyers abroad</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-            <div class="capp">
-              <div class="hd"><span class="lg" style="background:#F22F46; color:#fff">TW</span>
-                <span style="min-width:0"><b>Twilio</b><span style="display:block; font-size:11px" class="muted">Messaging</span></span></div>
-              <p>SMS fallback when a message will not deliver</p>
-              <div class="ft"><button class="btn btn--sm" type="button">Connect</button>
-                <span class="mono" style="font-size:11px">OAuth</span></div>
-            </div>
-          </div>
-          <div class="foot"><span>Showing 16 of 312 available services</span>
-            <button class="btn btn--sm" type="button">Browse all</button></div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Wired directly</h2><span class="sub">10</span></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>WhatsApp Business</span><span class="pill pill--sand"><i></i>Not connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Google Workspace</span><span class="pill pill--warn"><i></i>Reauthorise</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Facebook Page</span><span class="pill pill--ok"><i></i>Connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Instagram</span><span class="pill pill--ok"><i></i>Connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>PostgreSQL · Payload</span><span class="pill pill--ok"><i></i>Live</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Cloudflare R2</span><span class="pill pill--ok"><i></i>Live</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Typesense</span><span class="pill pill--ok"><i></i>Live</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Hermes endpoint</span><span class="pill pill--sand"><i></i>Not configured</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>GitHub</span><span class="pill pill--sand"><i></i>Not connected</span></div><div style="display:flex; justify-content:space-between; align-items:center; gap:8px"><span>Viber</span><span class="pill pill--sand"><i></i>Unavailable</span></div>
-              <p class="muted" style="font-size:11px; margin-top:4px">These ten carry a named workflow, so they
-                stay first-party: an aggregator outage must not stop a reply from being delivered.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>What a connection may touch</h2></div>
-            <div class="side-sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Only the scopes shown before you consent, and each one is named in plain words.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Only records the connected workflow needs — a calendar link never sees lead contact details.</span></div>
-              <div style="display:flex; gap:8px; color:var(--danger-600)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span>Nothing may send to a customer without the same approval a broker needs.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Not listed?</h2></div>
-            <div class="side-sect" style="font-size:13px; color:var(--text-body)">
-              Ask for it and the agency's own developer sees the request with the workflow you described.
-              <button class="btn btn--sm" type="button" style="margin-top:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Request a service</span></button>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="rx">
+  <div class="ph"><div><h1>Integration catalogue</h1><p>Choose the service for the work you need. Review permissions before connecting an account.</p></div><div class="ph-actions"><button class="btn btn--accent" type="button">Review Google connection</button></div></div>
+  <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Connections</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg><span>Catalogue</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Automations</span></a></nav>
+  <p class="muted">Availability is generated from the product catalogue. Account states are not loaded in this design preview.</p>
+  <section class="panel"><div class="panel-hd"><h2>Supported owner connections</h2><span class="sub">5 services</span></div>
+    <div class="rx-toolbar"><div class="field"><label for="service-search">Find a service</label><input class="in" id="service-search" type="search" placeholder="Service or workflow"></div><button class="btn" type="button">Search catalogue</button></div>
+    <div class="rx-row rx-heading"><span>Service</span><span>What it supports</span><span>Authorisation</span><span>Next step</span></div>
+    <div class="rx-row"><b>Google Workspace</b><span title="Approved email and viewing-calendar sync">Approved email and viewing-calendar sync</span><span>Provider sign-in</span><button class="btn btn--sm" type="button">Review access</button></div><div class="rx-row"><b>WhatsApp Business</b><span title="Approved replies and verified enquiries">Approved replies and verified enquiries</span><span>Provider sign-up</span><button class="btn btn--sm" type="button">Review access</button></div><div class="rx-row"><b>Facebook Page</b><span title="Separately approved social posts">Separately approved social posts</span><span>Provider sign-in</span><button class="btn btn--sm" type="button">Review access</button></div><div class="rx-row"><b>Instagram</b><span title="Separately approved photo posts">Separately approved photo posts</span><span>Provider sign-in</span><button class="btn btn--sm" type="button">Review access</button></div><div class="rx-row"><b>OpenRouter</b><span title="Guarded owner plans with Hermes">Guarded owner plans with Hermes</span><span>Provider sign-in</span><button class="btn btn--sm" type="button">Review access</button></div>
+    <div class="foot"><span>All 5 supported services shown</span><button class="btn btn--sm" type="button" disabled>Next page</button></div>
+  </section>
+  <div class="rx-grid">
+    <section class="panel"><div class="panel-hd"><h2>Review access · Google Workspace</h2><span class="wit wit--none">Owner approval needed</span></div><div class="rx-section rx-form">
+      <dl class="rx-facts"><dt>Identity</dt><dd>Identify the Google account and its email address.</dd><dt>Email</dt><dd>Send approved email from the connected account.</dd><dt>Calendar</dt><dd>Manage events in owned calendars and read availability.</dd><dt>Approval</dt><dd>The owner authorises account access. Customer-facing actions keep their own review.</dd></dl>
+      <p>The account and permissions shown by Google must match the intended agency account before you continue.</p>
+    </div></section>
+    <section class="panel"><div class="panel-hd"><h2>Before sign-in is available</h2></div><div class="rx-section rx-form"><p>The service must be configured for this workspace. Missing setup has a recovery explanation, not an active sign-in button.</p><p>After sign-in, the connection needs a verified account and time. Until then, it stays pending.</p><p class="hint">This form never asks you to paste a provider password or API key.</p></div></section>
+  </div>
+  <section class="panel"><div class="panel-hd"><h2>Unavailable owner connections</h2><span class="sub">3 named gaps</span></div>
+    <div class="rx-row"><b>Google Drive</b><span>No supported workspace workflow yet</span><span>Unavailable</span><button class="btn btn--sm" type="button" disabled>Connect</button></div><div class="rx-row"><b>Viber</b><span>No supported owner sign-in flow</span><span>Unavailable</span><button class="btn btn--sm" type="button" disabled>Connect</button></div><div class="rx-row"><b>GitHub</b><span>No supported workspace workflow yet</span><span>Unavailable</span><button class="btn btn--sm" type="button" disabled>Connect</button></div>
+  </section>
+  <section class="panel"><div class="panel-hd"><h2>Managed outside this catalogue</h2><span class="sub">2 services</span></div>
+    <div class="rx-row"><b>Cloudflare</b><span>Infrastructure managed outside connections</span><span>Health not loaded</span><button class="btn btn--sm" type="button">View report</button></div><div class="rx-row"><b>Neon</b><span>Database managed outside connections</span><span>Health not loaded</span><button class="btn btn--sm" type="button">View report</button></div>
+  </section>
+  <div class="rx-states" aria-label="Additional catalogue states">
+    <section class="rx-state"><h2>No matching service</h2><p><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Clear the search to see supported connections. An absent service is not available through this workspace.</p><button class="btn" type="button">Clear search</button></section>
+    <section class="rx-state"><h2>Checking setup</h2><p role="status">Permissions and service availability are loading.</p><button class="btn" type="button" disabled>Checking connection…</button></section>
+    <section class="rx-state"><h2>Catalogue could not load</h2><p role="alert">No account change is available until the service and its permissions can be read.</p><button class="btn" type="button">Reload catalogue</button></section>
+    <section class="rx-state"><h2>Account status unavailable</h2><p>The list may be readable while the connection store is unavailable. Do not turn that state into “Not connected”.</p><button class="btn" type="button">Refresh account status</button></section>
+    <section class="rx-state"><h2>Large result set</h2><p>Keep one service per row. Search and page controls preserve the selected service and permission review.</p><button class="btn" type="button">Return to selected service</button></section>
+    <section class="rx-state"><h2>Offline catalogue</h2><p>Read the last loaded permissions. Refresh availability after reconnecting before starting sign-in.</p><button class="btn" type="button" disabled>Start sign-in</button></section>
+  </div>
+</div>
     </div>
   </div>
 </div>

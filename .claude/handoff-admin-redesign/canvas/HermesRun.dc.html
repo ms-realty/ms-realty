@@ -335,26 +335,36 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .cap { display:grid; grid-template-columns:auto minmax(0,1fr) 118px 118px; gap:12px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); font-size:13px; }
-    .cap:last-child { border-bottom:0; }
-    .cap b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .cap em { font-style:normal; font-size:11px; color:var(--text-muted); }
-    .yes { color:var(--success-600); font-weight:600; display:flex; align-items:center; gap:8px; }
-    .no { color:var(--danger-600); font-weight:600; display:flex; align-items:center; gap:8px; }
-    .dq { display:grid; grid-template-columns:auto minmax(0,1fr) 148px 128px 156px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .dq:last-child { border-bottom:0; }
-    .dq:hover { background:var(--tile); }
-    .dq b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .dq em { font-style:normal; font-size:13px; color:var(--text-muted); }
-    .runstep { display:grid; grid-template-columns:26px minmax(0,1fr) 132px 104px; gap:12px; align-items:start;
-      padding:12px 20px; border-bottom:1px solid var(--border); }
-    .runstep:last-child { border-bottom:0; }
-    .runstep b { font-size:13px; font-weight:600; display:block; }
-    .runstep em { font-style:normal; font-size:11px; color:var(--text-muted); display:block; margin-top:4px; }
-    .quote { margin-top:8px; padding:12px 12px; border-left:2px solid var(--border-control);
-      background:var(--tile); font-size:13px; color:var(--text-body); border-radius:0 var(--r-sm) var(--r-sm) 0; }
+  .ai { display:grid; gap:20px; }
+  .ai .ph { margin:0; }
+  .ai-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .ai-section { min-width:0; padding:20px; border-top:1px solid var(--joint); }
+  .ai-section h2 { font-size:16px; margin-bottom:12px; }
+  .ai-section p + p { margin-top:8px; }
+  .ai-form { display:grid; gap:16px; }
+  .ai .in { width:100%; font:inherit; background:var(--tile-glaze); color:var(--text-body); }
+  .ai textarea.in { min-height:96px; resize:vertical; }
+  .ai :is(button,input,textarea,select,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .ai button:disabled { opacity:.5; cursor:not-allowed; }
+  .ai .assist { border-color:var(--brick-700); }
+  .ai-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+  .ai-row { display:grid; grid-template-columns:minmax(0,1fr) 108px 180px 100px; gap:16px; align-items:center; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .ai-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ai-row:hover { background:var(--tile); }
+  .ai-row .btn { justify-self:end; }
+  .ai-heading { background:var(--tile-deep); font-weight:600; }
+  .ai-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px 16px; }
+  .ai-facts dt { color:var(--text-muted); }
+  .ai-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .ai-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .ai-state { display:grid; align-content:start; gap:12px; min-width:0; padding:20px 0; border-top:1px solid var(--joint); }
+  .ai-state h2 { font-size:16px; }
+  .ai-state .btn { justify-self:start; }
+  .ai-steps { list-style:none; padding:0; margin:0; }
+  .ai-steps li { display:grid; grid-template-columns:32px minmax(0,1fr) 180px; gap:16px; padding:16px 20px; border-top:1px solid var(--joint); }
+  .ai-steps p { margin-top:4px; color:var(--text-muted); }
+  .ai-source { border-inline-start:2px solid var(--spring-700); padding:12px 16px; background:var(--tile); }
+  .ai-meta { color:var(--text-muted); font-size:11px; }
 
   </style>
 </helmet>
@@ -366,7 +376,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1120px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -408,108 +418,46 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="crumbs" style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:12px">
-        <a href="#">Hermes</a> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg> <a href="#">Runs</a> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-        <b style="color:var(--text-strong)">run-2026-08-31-0142</b>
-      </div>
-      <div class="ph">
-        <div><h1>Translate 7 descriptions into German, Dutch and Greek</h1>
-          <p>Started by Mariya, 31 August 09:04 · finished in 2 min 18 s · <span class="mono">run-2026-08-31-0142</span></p></div>
-        <div class="ph-actions">
-          <span class="pill pill--warn"><i></i>Waiting for approval</span>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Repeat</span></button>
-          <button class="btn btn--primary" type="button">Review the 7 drafts</button>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="panel-hd"><h2>What it did, in order</h2><span class="sub">Every step names its source</span></div>
-          <div class="runstep">
-            <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <span><b>Read the approved Bulgarian descriptions</b>
-              <em>7 listings · source hash recorded for each, so a later edit invalidates the draft</em></span>
-            <span class="mono">09:04:11</span><span class="muted" style="font-size:13px">0.4 s</span>
-          </div>
-          <div class="runstep">
-            <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <span><b>Copied the property facts verbatim</b>
-              <em>Price, area, bedrooms, location, reference and source URL are moved, never re-expressed</em>
-              <div class="quote">MS-00932 · €54,500 · 96 m² · 3 bedrooms · Katuntsi · makler-realty.com/obj/0032.html</div></span>
-            <span class="mono">09:04:19</span><span class="muted" style="font-size:13px">1.1 s</span>
-          </div>
-          <div class="runstep">
-            <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <span><b>Drafted 21 translations</b>
-              <em>7 listings × 3 languages · tone rules applied · no marketing claim added</em>
-              <div class="quote">Renoviertes Dorfhaus mit Garten in Katunzi. Das Haus hat 96 m² Wohnfläche,
-                drei Schlafzimmer und einen eigenen Garten. Preis: 54.500 EUR.</div></span>
-            <span class="mono">09:05:02</span><span class="muted" style="font-size:13px">1 m 43 s</span>
-          </div>
-          <div class="runstep">
-            <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-            <span><b>Refused two lines and rewrote them</b>
-              <em>A Greek draft called Sandanski a coastal town. The claim is on the forbidden list, so the
-                sentence was dropped rather than softened.</em>
-              <div class="quote" style="border-left-color:var(--warning-700)">Rejected: «παραθαλάσσια πόλη Σαντάνσκι»
-                → replaced with the approved description of the spa town.</div></span>
-            <span class="mono">09:06:12</span><span class="muted" style="font-size:13px">0.8 s</span>
-          </div>
-          <div class="runstep">
-            <span class="av" style="background:var(--success-50); color:var(--success-600)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <span><b>Checked every draft against its source</b>
-              <em>Facts compared field by field · 21 of 21 match · 3 SEO titles were over 60 characters and were shortened</em></span>
-            <span class="mono">09:06:20</span><span class="muted" style="font-size:13px">2.1 s</span>
-          </div>
-          <div class="runstep">
-            <span class="av" style="background:var(--joint); color:var(--marble-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
-            <span><b>Stopped at the approval boundary</b>
-              <em>Marking a translation indexable is a refused action. The 21 drafts are stored unpublished and
-                appear in the translation queue.</em></span>
-            <span class="mono">09:06:22</span><span class="muted" style="font-size:13px">—</span>
-          </div>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>Cost and model</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; justify-content:space-between"><span>Model</span><span class="mono">hermes-3-70b</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Where it ran</span><span class="muted">Agency hardware</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Tokens in / out</span><span class="mono">41,208 / 9,644</span></div>
-              <div style="display:flex; justify-content:space-between"><span>Left the building</span><b style="color:var(--success-600)">Nothing</b></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Audit entry</h2></div>
-            <div class="sect" style="font-size:13px; color:var(--text-body)">
-              <p class="mono" style="white-space:pre-wrap; font-size:11px; line-height:1.6">{
-  "action": "hermes_translation_draft",
-  "actor": "hermes",
-  "requested_by": "mariya.ruseva",
-  "listings": 7,
-  "locales": ["de","nl","el"],
-  "published": false,
-  "refusals": 2
-}</p>
-              <p class="muted" style="margin-top:8px">Written to the append-only audit log. A registered action
-                is the only way a run can record anything at all.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>If you approve</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px">
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>21 descriptions become indexable in DE, NL and EL.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>The sitemap picks them up on the next build.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Your name goes on each one.</span></div>
-              <button class="btn btn--sm btn--primary" type="button" style="margin-top:4px">Review them one by one</button>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="ai">
+  <div class="ph"><div><h1>Review a translation run</h1><p>Seven descriptions × three languages · 21 draft outputs · human review still required.</p></div><div class="ph-actions"><button class="btn btn--accent" type="button">Open first draft</button></div></div>
+  <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft requests</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Run review</span></a></nav>
+  <p class="muted">Illustrative run · counts, people and decisions below demonstrate the review, not a production execution.</p>
+  <section class="panel"><div class="panel-hd"><h2>The result is a draft</h2><span class="wit wit--none">0 of 21 approved</span></div><div class="ai-section">
+    <p>Review one language and source version at a time. Opening this run does not approve a translation or make it indexable.</p>
+  </div></section>
+  <div class="ai-grid">
+    <section class="panel"><div class="panel-hd"><h2>Source and result</h2></div><ol class="ai-steps">
+      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg><div><b>Approved Bulgarian sources selected</b><p>Each output links to the exact description version used. Missing approval stops that record.</p></div><span>7 sample records</span></li>
+      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg><div><b>German, Dutch and Greek drafts prepared</b><p>One draft per listing and target language. A changed source requires a fresh comparison.</p></div><span>21 sample drafts</span></li>
+      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><div><b>Geography needs a human check</b><p>Sandanski is an inland spa town. A conflicting claim must be corrected from the approved source.</p></div><span class="wit wit--none">Reviewer needed</span></li>
+      <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><div><b>Publication is still closed</b><p>Draft generation supplies no approval witness. The translation review records the responsible person and decision.</p></div><span class="wit wit--none">Not indexable</span></li>
+    </ol></section>
+    <section class="panel"><div class="panel-hd"><h2>Run evidence</h2></div><div class="ai-section"><dl class="ai-facts">
+      <dt>Requested by</dt><dd>Mariya · example operator</dd><dt>Source locale</dt><dd>Bulgarian</dd><dt>Output locales</dt><dd>DE, NL, EL</dd><dt>Run identifier</dt><dd>Example run</dd><dt>Model and host</dt><dd>No runtime evidence in this preview</dd><dt>Usage and cost</dt><dd>Not reported</dd><dt>Customer delivery</dt><dd>No send action in this review</dd>
+    </dl></div></section>
+  </div>
+  <section class="panel"><div class="panel-hd"><h2>Check the fact before the phrasing</h2><span class="sub">Illustrative data</span></div><div class="ai-section ai-grid">
+    <div><h2>Bulgarian source</h2><p class="ai-source" lang="bg">Къща с двор в Катунци · €1,245,000 · 196 m² · 3 спални</p><p class="hint">Example source text. The real review must open the approved record and its source URL.</p></div>
+    <div><h2>German draft</h2><p class="ai-source" lang="de">Haus mit Garten in Katunzi · €1,245,000 · 196 m² · 3 Schlafzimmer</p><span class="wit wit--none">Language approval missing</span><p class="hint">Preserve the source figures. Language review is a separate human decision.</p></div>
+  </div></section>
+  <section class="panel"><div class="panel-hd"><h2>Drafts to review</h2></div><div class="ai-row ai-heading"><span>Description</span><span>Language</span><span>Witness</span><span>Action</span></div>
+    <div class="ai-row"><b>Екатерина Константинова-Александрова · house description</b><span>German</span><span class="wit wit--none">Not approved</span><button class="btn btn--sm" type="button">Review draft</button></div><div class="ai-row"><b>Екатерина Константинова-Александрова · house description</b><span>Dutch</span><span class="wit wit--none">Not approved</span><button class="btn btn--sm" type="button">Review draft</button></div><div class="ai-row"><b>Екатерина Константинова-Александрова · house description</b><span>Greek</span><span class="wit wit--none">Not approved</span><button class="btn btn--sm" type="button">Review draft</button></div>
+    <div class="foot"><span>Showing 3 of 21 sample drafts</span><button class="btn btn--sm" type="button">Next 3 drafts</button></div>
+  </section>
+  <div class="ai-states" aria-label="Additional run states">
+    <section class="ai-state"><h2>No drafts produced</h2><p><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg> The run has no reviewable output. Open its request and source selection.</p><button class="btn" type="button">Open request</button></section>
+    <section class="ai-state"><h2>Run still processing</h2><p role="status">Outputs are not final. Approval controls stay unavailable.</p><button class="btn" type="button" disabled>Open next draft</button></section>
+    <section class="ai-state"><h2>Some outputs failed</h2><p>Review completed drafts individually. Failed language rows retain their error and source; the run cannot be marked wholly approved.</p><button class="btn" type="button">Show failed outputs</button></section>
+    <section class="ai-state"><h2>Source changed during review</h2><p role="alert">The old draft cannot be approved against the new facts. Reopen the source before requesting a replacement.</p><button class="btn" type="button">Compare source versions</button></section>
+    <section class="ai-state"><h2>No drafts match this filter</h2><p>The run still contains outputs in other languages. Clear the filter to see them.</p><button class="btn" type="button">Clear language filter</button></section>
+    <section class="ai-state"><h2>Run evidence is unavailable</h2><p>Do not display a successful check without its evidence. Reconnect and reload before continuing review.</p><button class="btn" type="button">Reload evidence</button></section>
+  </div>
+</div>
     </div>
   </div>
 </div>

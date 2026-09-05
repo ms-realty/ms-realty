@@ -335,26 +335,33 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .cat { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px; }
-    .capp { border:1px solid var(--border); border-radius:var(--r-md); padding:12px; background:var(--surface);
-      display:grid; gap:8px; }
-    .capp .hd { display:flex; align-items:center; gap:8px; }
-    .capp .lg { display:grid; place-items:center; width:32px; height:32px; border-radius:var(--r-sm);
-      font:700 11px var(--font-sans); flex:0 0 auto; }
-    .capp b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .capp p { font-size:11px; color:var(--text-muted); min-height:30px; }
-    .capp .ft { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .side-sect { padding:16px 16px; border-bottom:1px solid var(--border); }
-    .side-sect:last-child { border-bottom:0; }
-    .side-sect > b { display:block; font-size:13px; margin-bottom:8px; }
-    .auto { display:grid; grid-template-columns:auto minmax(0,1fr) 220px 128px 100px; gap:16px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .auto:last-child { border-bottom:0; }
-    .auto b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .auto em { font-style:normal; font-size:13px; color:var(--text-muted); }
-    .rule { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:11px; }
-    .rule span.k { padding:4px 8px; border-radius:var(--r-xs); background:var(--tile-deep); color:var(--marble-700); font-weight:600; }
-    .rule span.v { padding:4px 8px; border-radius:var(--r-xs); background:var(--spring-50); color:var(--spring-800); font-weight:600; }
+  .rx { display:grid; gap:20px; }
+  .rx .ph { margin:0; }
+  .rx-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .rx-section { padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .rx-section h2 { font-size:16px; margin-bottom:12px; }
+  .rx-section p + p { margin-top:8px; }
+  .rx-row { display:grid; grid-template-columns:180px minmax(0,1fr) 160px 108px; gap:16px; align-items:center; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .rx-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rx-row:hover { background:var(--tile); }
+  .rx-row .btn { justify-self:end; }
+  .rx-heading { background:var(--tile-deep); font-weight:600; }
+  .rx-form { display:grid; gap:16px; }
+  .rx .in { width:100%; font:inherit; color:var(--text-body); background:var(--tile-glaze); }
+  .rx textarea.in { min-height:96px; resize:vertical; }
+  .rx :is(button,input,textarea,select,a):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .rx button:disabled { opacity:.5; cursor:not-allowed; }
+  .rx-check { display:flex; align-items:flex-start; gap:12px; }
+  .rx-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .rx-facts { display:grid; grid-template-columns:132px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .rx-facts dt { color:var(--text-muted); }
+  .rx-facts dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+  .rx-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .rx-state { display:grid; align-content:start; gap:12px; min-width:0; padding:20px 0; border-top:1px solid var(--joint); }
+  .rx-state h2 { font-size:16px; }
+  .rx-state .btn { justify-self:start; }
+  .rx-toolbar { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .rx-toolbar .field { flex:1; }
 
   </style>
 </helmet>
@@ -366,7 +373,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1080px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -408,138 +415,37 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Automations</h1><p>Rules the workspace runs on a schedule. Anything that would reach a customer stops at a draft and waits for a person.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Run history</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New automation</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Connected</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg><span>Catalogue</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Automations</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0-3.4 3.95"/><path d="m9 20 3.5-6"/><path d="M15 20a4 4 0 1 0-1.5-7.7"/><path d="M6 14a4 4 0 0 0 3 6h6"/></svg><span>Webhooks</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 9-9"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg><span>API keys</span></a></nav>
-      <section class="panel">
-        <div class="toolbar"><span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Automation name</span>
-          <div class="seg" style="background:transparent; padding:0">
-            <button type="button" data-on="1">On <em>7</em></button><button type="button">Off <em>3</em></button><button type="button">Failing <em>1</em></button></div>
-          <span style="margin-left:auto" class="mono">Next run 09:00</span></div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Escalate a lead with no reply</b>
-            <span class="rule"><span class="k">when lead age > SLA</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then notify the manager and mark it escalated</span></span></span>
-          <span style="font-size:13px" class="muted">Every 15 min</span>
-          <span style="font-size:13px" class="muted">4 today</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Run due saved-search alerts</b>
-            <span class="rule"><span class="k">when a saved search has a new match</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then queue a digest for approval</span></span></span>
-          <span style="font-size:13px" class="muted">Daily 08:00</span>
-          <span style="font-size:13px" class="muted">2 queued</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--warn"><i></i>Needs approval</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Publish listings scheduled for today</b>
-            <span class="rule"><span class="k">when publication date = today and approval is on file</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then publish</span></span></span>
-          <span style="font-size:13px" class="muted">Daily 06:00</span>
-          <span style="font-size:13px" class="muted">1 today</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Approved in advance</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Re-check register extracts before a deed</b>
-            <span class="rule"><span class="k">when a notary date is within 24 h</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then request a fresh extract</span></span></span>
-          <span style="font-size:13px" class="muted">Daily 07:00</span>
-          <span style="font-size:13px" class="muted">0 today</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Warn on consent expiring in 30 days</b>
-            <span class="rule"><span class="k">when consent expiry < 30 days</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then create a renewal task</span></span></span>
-          <span style="font-size:13px" class="muted">Weekly Mon</span>
-          <span style="font-size:13px" class="muted">3 open</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Sync approved listings to search</b>
-            <span class="rule"><span class="k">when a listing is published or edited</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then reindex</span></span></span>
-          <span style="font-size:13px" class="muted">On change</span>
-          <span style="font-size:13px" class="muted">84 documents</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle" data-on="1"><i></i></span>
-          <span style="min-width:0"><b>Mirror new media to R2</b>
-            <span class="rule"><span class="k">when a photo is uploaded</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then mirror and record the checksum</span></span></span>
-          <span style="font-size:13px" class="muted">On change</span>
-          <span style="font-size:13px" class="muted">12 today</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--ok"><i></i>Internal only</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle"><i></i></span>
-          <span style="min-width:0"><b>Draft translations for new listings</b>
-            <span class="rule"><span class="k">when a listing is approved in Bulgarian</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then draft DE, NL, RU</span></span></span>
-          <span style="font-size:13px" class="muted">On change</span>
-          <span style="font-size:13px" class="muted">paused</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--sand"><i></i>Needs approval</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle"><i></i></span>
-          <span style="min-width:0"><b>Post a published listing to Facebook</b>
-            <span class="rule"><span class="k">when a listing is published</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then draft a post for approval</span></span></span>
-          <span style="font-size:13px" class="muted">On change</span>
-          <span style="font-size:13px" class="muted">paused</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--sand"><i></i>Needs approval</span></span>
-        </div>
-        <div class="auto">
-          <span class="toggle"><i></i></span>
-          <span style="min-width:0"><b>Chase a viewing with no feedback</b>
-            <span class="rule"><span class="k">when a viewing is 3 days old with no outcome</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="v">then create a task</span></span></span>
-          <span style="font-size:13px" class="muted">Daily 09:00</span>
-          <span style="font-size:13px" class="muted">paused</span>
-          <span style="display:flex; justify-content:flex-end"><span class="pill pill--sand"><i></i>Internal only</span></span>
-        </div>
-        <div class="savebar"><span style="font-size:13px" class="muted">A failing automation raises a workspace
-          alert rather than retrying silently. The last failure was the saved-search digest on 28 August, when
-          Google delivery expired.</span></div>
-      </section>
-      <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px">
-        <section class="panel">
-          <div class="panel-hd"><h2>Webhooks in</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:13px">
-            <div style="display:flex; justify-content:space-between"><span class="mono">meta/whatsapp</span><span class="pill pill--sand"><i></i>Awaiting token</span></div>
-            <div style="display:flex; justify-content:space-between"><span class="mono">meta/leadgen</span><span class="pill pill--ok"><i></i>Verified</span></div>
-            <div style="display:flex; justify-content:space-between"><span class="mono">payload/afterChange</span><span class="pill pill--ok"><i></i>Verified</span></div>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Webhooks out</h2></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:13px">
-            <div style="display:flex; justify-content:space-between"><span>Lead created</span><span class="muted">2 subscribers</span></div>
-            <div style="display:flex; justify-content:space-between"><span>Listing published</span><span class="muted">1 subscriber</span></div>
-            <div style="display:flex; justify-content:space-between"><span>Case step closed</span><span class="muted">none</span></div>
-            <button class="btn btn--sm" type="button" style="margin-top:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add a subscriber</span></button>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Agent access</h2><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>MCP</span></div>
-          <div class="sect" style="display:grid; gap:8px; font-size:13px">
-            <p class="muted">The owner's own assistant can reach this workspace over four tools, each bound to
-              the same permissions the person has.</p>
-            <div style="display:grid; gap:4px">
-              <span class="mono">ms_realty_admin_read</span><span class="mono">ms_realty_admin_write</span><span class="mono">ms_realty_hermes</span><span class="mono">ms_realty_admin_context</span>
-            </div>
-            <button class="btn btn--sm" type="button" style="margin-top:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m11 12 9-9"/><path d="m17 6 3 3"/><path d="m14 9 3 3"/></svg><span>Connect an assistant</span></button>
-          </div>
-        </section>
-      </div>
+<div class="rx">
+  <div class="ph"><div><h1>Automations</h1><p>Review a rule, then authorise one manual run. Enabling a rule does not schedule it.</p></div></div>
+  <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Connections</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3a2 2 0 0 1 4 0v1h3a1 1 0 0 1 1 1v3h1a2 2 0 0 1 0 4h-1v3a1 1 0 0 1-1 1h-3v1a2 2 0 0 1-4 0v-1H6a1 1 0 0 1-1-1v-3H4a2 2 0 0 1 0-4h1V5a1 1 0 0 1 1-1h3z"/></svg><span>Catalogue</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Automations</span></a></nav>
+  <p class="muted">Illustrative review target · backend integration is pending. Rules, runs and owner confirmations below are sample states.</p>
+  <section class="panel"><div class="panel-hd"><h2>Review a saved-search run</h2><span class="wit wit--none">Owner confirmation needed</span></div>
+    <div class="rx-grid"><div class="rx-section rx-form"><dl class="rx-facts"><dt>Rule</dt><dd>Saved-search alerts</dd><dt>Trigger</dt><dd>Manual · one run</dd><dt>Effect</dt><dd>Process due alerts through the existing delivery workflow. This can reach customers.</dd><dt>Required review</dt><dd>Check due work, recipients, consent and delivery approval before authorising this run.</dd><dt>Rule status</dt><dd>Enabled · example, not a live setting</dd></dl><button class="btn" type="button">Review due alerts</button></div>
+    <form class="rx-section rx-form"><h2>Confirm this run</h2><p>One owner confirmation applies to this rule and this run request. It cannot bypass a record’s approval.</p><label class="rx-check"><input type="checkbox"><span>I, Mariya, have reviewed the due alerts and authorise this manual run.</span></label><button class="btn btn--accent" type="button">Run saved-search alerts</button><p class="hint">Example only. A production run needs a durable receipt before it can be reported as complete.</p></form></div>
+  </section>
+  <section class="panel"><div class="panel-hd"><h2>Rules</h2><span class="sub">2 rule types in the review target</span></div><div class="rx-row rx-heading"><span>Rule</span><span>Scope</span><span>Sample state</span><span>Action</span></div>
+    <div class="rx-row"><b>Saved-search alerts</b><span>Process due customer alerts</span><span>Enabled · manual</span><button class="btn btn--sm" type="button">Review rule</button></div>
+    <div class="rx-row"><b>Listing publication</b><span>Process due, approved publication schedules</span><span>Disabled</span><button class="btn btn--sm" type="button">Review rule</button></div>
+    <div class="foot"><span>No recurring schedule is configured by these controls.</span><button class="btn btn--sm" type="button">Open run history</button></div>
+  </section>
+  <div class="rx-grid">
+    <section class="panel"><div class="panel-hd"><h2>Rule changes need their own confirmation</h2></div><form class="rx-section rx-form"><div class="field"><label for="rule-name">Rule name</label><input class="in" id="rule-name" value="Saved-search alerts"></div><div class="field"><label for="rule-purpose">Description</label><textarea class="in in--area" id="rule-purpose">Review and run alerts that are due for active saved searches.</textarea></div><dl class="rx-facts"><dt>Execution</dt><dd>Manual only</dd><dt>Change</dt><dd>Disable saved-search alerts</dd></dl><label class="rx-check"><input type="checkbox"><span>I, Mariya, confirm disabling this rule. Future manual runs must be refused.</span></label><button class="btn" type="button">Disable this rule</button></form></section>
+    <section class="panel"><div class="panel-hd"><h2>Read the outcome, not just the status</h2></div><div class="rx-section rx-form"><p>A completed run can include record-level failures. Open the result summary and affected records before deciding what is finished.</p><dl class="rx-facts"><dt>Requested by</dt><dd>Mariya · example owner</dd><dt>Run status</dt><dd>Completed · illustrative receipt</dd><dt>Result</dt><dd>One record needs attention</dd><dt>Witness</dt><dd><span class="wit">Mariya · 1 Sep, 09:10 · example</span></dd></dl><button class="btn" type="button">Open affected record</button><p class="hint">The witness records run authorisation. It does not certify delivery or listing correctness.</p></div></section>
+  </div>
+  <div class="rx-states" aria-label="Additional automation states">
+    <section class="rx-state"><h2>No rules saved</h2><p><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg> Create a rule from a supported type. It starts disabled until the owner confirms enabling it.</p><button class="btn" type="button">Review a new rule</button></section>
+    <section class="rx-state"><h2>Run in progress</h2><p role="status">The request is running or its outcome is uncertain. Check status before starting another run.</p><button class="btn" type="button" disabled>Run in progress…</button></section>
+    <section class="rx-state"><h2>Run failed</h2><p role="alert">Open the failure and result summary. Do not assume no external action occurred before failure.</p><button class="btn" type="button">Open failure details</button></section>
+    <section class="rx-state"><h2>Rule changed while open</h2><p>The version you reviewed is no longer current. Reload it and confirm the scope before submitting.</p><button class="btn" type="button">Reload rule</button></section>
+    <section class="rx-state"><h2>Many past runs</h2><div class="field"><label for="run-filter">Find a run</label><input class="in" id="run-filter" type="search" placeholder="Rule or requesting person"></div><p>Keep the filter and page when returning from a receipt.</p></section>
+    <section class="rx-state"><h2>Service unavailable</h2><p>The rule store or connection cannot be read. No change or run is confirmed.</p><button class="btn" type="button" disabled>Run saved-search alerts</button></section>
+  </div>
+</div>
     </div>
   </div>
 </div>
