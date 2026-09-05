@@ -1,245 +1,61 @@
-import fs from "node:fs";
-import { page, icon } from "../shell.mjs";
-const W = (n) => new URL(`../${n}`, import.meta.url);
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { page } from '../shell.mjs';
+import { REALTY_CASE_TYPES, REALTY_WORKFLOW_VERSION, planOpenRealtyCase, planRealtyCaseAction } from '../../../../production/lib/realty-cases.mjs';
 
-/* ------------------------------------------------------------------- Cases
-   One table on grout: a case is a row, 44px, one line of identity. The case
-   reference is a caption after the client and the property, never the title.
-   Below it, three flat panels side by side; nothing sits inside a panel that
-   is itself a panel. */
-const CASE_CSS = `
-    .cs-id { display:flex; align-items:baseline; gap:8px; min-width:0; }
-    .cs-id b { font-size:13px; font-weight:600; color:var(--text-strong); overflow:hidden;
-      text-overflow:ellipsis; white-space:nowrap; }
-    .cs-phases { display:flex; gap:4px; align-items:center; }
-    .cs-phase { height:6px; flex:1 1 auto; border-radius:var(--r-pill); background:var(--tile-shadow); }
-    .cs-phase[data-done] { background:var(--success-500); }
-    .cs-phase[data-on] { background:var(--ink-800); }
-    .cs-phase[data-block] { background:var(--danger-500); }
-    .cs-now { display:flex; align-items:center; gap:8px; min-width:0; }
-    .cs-next { color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .cs-owner { display:flex; justify-content:flex-end; }
-    .cs-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin-top:20px; align-items:start; }
-    .cs-item { display:grid; gap:4px; min-height:var(--row); padding:12px 20px; border-bottom:1px solid var(--joint); }
-    .cs-item:last-child { border-bottom:0; }
-    .cs-item-hd { display:flex; align-items:baseline; justify-content:space-between; gap:12px; min-width:0; }
-    .cs-tags { display:flex; flex-wrap:wrap; gap:8px; padding:16px 20px; }
-    .cs-rule { display:flex; gap:12px; align-items:flex-start; min-height:var(--row); padding:12px 20px;
-      border-bottom:1px solid var(--joint); }
-    .cs-rule svg { flex:0 0 auto; margin-top:4px; color:var(--text-muted); }
+const labels={buyer_purchase:'Buyer purchase',seller_sale:'Seller sale',tenant_rental:'Tenant rental',landlord_rental:'Landlord rental',short_term_rental:'Short-term rental',property_management:'Property management'};
+const people=['Anna Weber','Екатерина Константинова-Александрова','Georgi Nikolov','מרים כהן','Elena Dimitrova','Kostas Papadakis'];
+const examples=REALTY_CASE_TYPES.map((type,i)=>planOpenRealtyCase({id:`CASE-EXAMPLE-${i+1}`,caseType:type,jurisdiction:i===5?'GR':'BG',assetKind:'residential',clientRef:`client-example-${i+1}`,executionMode:'manual',actor:'mariya-example',executorKind:'human',mandate:{ref:'mandate-example',grantedByRef:'client-example',signedAt:'2026-09-01T09:00:00Z',signedEvidenceRef:'evidence-example',capabilities:['case:*']}},{recordedAt:'2026-09-05T09:00:00Z'}));
+const selected=examples[0].case;
+const current=selected.steps[0];
+const completion={caseId:selected.id,action:'step_completed',stepKey:current.key,actor:'mariya-example',executorKind:'human',evidenceRefs:[{ref:'evidence-example',type:'review',producerKind:current.evidence_producers[0]}]};
+assert(planRealtyCaseAction(completion,{events:[examples[0].event],recordedAt:'2026-09-05T09:01:00Z'}).event.evidence_refs.length);
+assert.throws(()=>planRealtyCaseAction({...completion,executorKind:'agent'},{events:[examples[0].event],recordedAt:'2026-09-05T09:01:00Z'}),/human executor/);
+assert.throws(()=>planRealtyCaseAction({...completion,evidenceRefs:[]},{events:[examples[0].event],recordedAt:'2026-09-05T09:01:00Z'}),/evidenceRefs/);
+for(const type of REALTY_CASE_TYPES)assert(labels[type]);
+const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
+const CSS=`
+  .rc { display:grid; gap:20px; }
+  .rc .ph { margin:0; }
+  .rc-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .rc h2 { font-size:16px; }
+  .rc-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; }
+  .rc-form .rc-wide { grid-column:1/-1; }
+  .rc .in { width:100%; font:inherit; color:var(--text-body); }
+  .rc textarea.in { min-height:96px; resize:vertical; }
+  .rc :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .rc button:disabled { opacity:.5; cursor:not-allowed; }
+  .rc-check { display:flex; gap:12px; align-items:start; }
+  .rc-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .rc-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 96px 128px 72px; gap:16px; align-items:center; height:44px; padding:0 20px; border-top:1px solid var(--joint); }
+  .rc-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rc-row:hover { background:var(--tile); }
+  .rc-step { grid-template-columns:minmax(0,1fr) 160px 200px 72px; }
+  .rc-group { padding:12px 20px; border-top:1px solid var(--joint); background:var(--tile); font-size:13px; font-weight:600; }
+  .rc-cols,.rc-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .rc-state { display:grid; gap:12px; padding-top:20px; border-top:1px solid var(--joint); }
+  .rc-state .btn,.rc-section > .btn { justify-self:start; }
+  .rc-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px; margin:0; }
+  .rc-facts dt { color:var(--text-muted); }
+  .rc-facts dd { margin:0; overflow-wrap:anywhere; }
 `;
-
-const CASES = [
-  ["CASE-0007", "Anna Weber · villa, Katuntsi", "Buyer purchase", "BG", [1, 1, 1, 2, 0, 0, 0, 0], "Agreement", "Preliminary contract signature", "warn", "Manual", "MR"],
-  ["CASE-0011", "Elena Dimitrova · house, Sandanski", "Seller sale", "BG", [1, 1, 3, 0, 0, 0, 0, 0], "Evidence", "Cadastral sketch from the registry", "danger", "Manual", "—"],
-  ["CASE-0009", "Georgi Nikolov · 1-bed, centre", "Tenant rental", "BG", [1, 1, 1, 1, 1, 2, 0, 0], "Agreement", "Lease review with the landlord", "sea", "Manual", "PD"],
-  ["CASE-0013", "Kostas Papadakis · maisonette, Thessaloniki", "Buyer purchase", "GR", [1, 2, 0, 0, 0, 0, 0, 0], "Onboarding", "Greek tax number for the buyer", "sea", "Manual", "MR"],
-  ["CASE-0006", "Villa Katuntsi · short-let operation", "Short-term rental", "BG", [1, 1, 1, 1, 1, 1, 2, 0], "Completion", "Tourism register entry", "warn", "Autonomous", "HE"],
-];
-const phaseAttr = (v) => (v === 1 ? ' data-done="1"' : v === 2 ? ' data-on="1"' : v === 3 ? ' data-block="1"' : "");
-
-const CASES_BODY = `      <div class="ph">
-        <div><h1>Transaction cases</h1><p>Every case runs the Bulgarian or Greek step list for its type. A step is closed by a person or by Hermes, and the closer is recorded either way.</p></div>
-        <div class="ph-actions">
-          <div class="seg"><button type="button" data-on="1">Active <em>5</em></button><button type="button">Blocked <em>1</em></button><button type="button">Closed <em>23</em></button></div>
-          <button class="btn btn--accent" type="button">${icon("plus", 16)}<span>Open a case</span></button>
-        </div>
-      </div>
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find">${icon("search", 14)}Case, client or property</span>
-          <button class="btn btn--sm" type="button">Any type ${icon("down", 14)}</button>
-          <button class="btn btn--sm" type="button">BG ${icon("down", 14)}</button>
-          <button class="btn btn--sm" type="button">Any phase ${icon("down", 14)}</button>
-          <span style="margin-left:auto" class="mono">Workflow 2026-07-30.bg-gr-v1</span>
-        </div>
-        <table>
-          <thead><tr>
-            <th>Case</th><th style="width:96px">Phases</th><th style="width:96px">Now, and the next step</th>
-            <th style="width:96px">Mode</th><th style="width:64px; text-align:right">Owner</th>
-          </tr></thead>
-          <tbody>
-${CASES.map(([id, who, typeLabel, juris, phases, phase, next, tone, mode, owner]) => `            <tr>
-              <td><span class="cs-id"><b>${who}</b><span class="mono">${id} · ${typeLabel} · ${juris}</span></span></td>
-              <td><span class="cs-phases">${phases.map((v) => `<i class="cs-phase"${phaseAttr(v)}></i>`).join("")}</span></td>
-              <td><span class="cs-now"><span class="pill pill--${tone}"><i></i>${phase}</span><span class="cs-next">${next}</span></span></td>
-              <td>${mode === "Autonomous"
-                ? `<span class="pill pill--ai">${icon("sparkles", 11)}Autonomous</span>`
-                : `<span class="pill pill--sand"><i></i>Manual</span>`}</td>
-              <td><span class="cs-owner"><span class="av"${owner === "HE" ? ' style="background:var(--brick-50); color:var(--brick-700)"' : ""}>${owner}</span></span></td>
-            </tr>`).join("\n")}
-          </tbody>
-        </table>
-      </section>
-      <div class="cs-grid">
-        <section class="panel">
-          <div class="panel-hd"><h2>Blocked on someone else</h2><span class="sub">2</span></div>
-          <div class="cs-item">
-            <span class="cs-item-hd"><span class="cs-id"><b>Cadastral sketch</b><span class="mono">CASE-0011</span></span>
-              <span class="wit wit--none"><b>Property register</b>since 24 Aug</span></span>
-            <span class="muted">Waiting on the property register since 24 August. Nine working days.</span>
-          </div>
-          <div class="cs-item">
-            <span class="cs-item-hd"><span class="cs-id"><b>Proof of funds</b><span class="mono">CASE-0007</span></span>
-              <span class="wit wit--none"><b>Buyer's bank</b>since 29 Aug</span></span>
-            <span class="muted">Requested from the buyer's bank on 29 August.</span>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Evidence produced by</h2></div>
-          <div class="cs-tags">
-            ${["Notary 6", "Registry 5", "Lawyer 4", "Bank 3", "Client 8", "Engineer 1", "Insurer 1", "Agency 12", "Hermes 3"].map((t) =>
-              `<span class="pill pill--${t.startsWith("Hermes") ? "ai" : "sand"}">${t}</span>`).join("")}
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd"><h2>Jurisdiction rules in force</h2></div>
-          <div class="cs-rule">${icon("flag", 16)}<span><b>Bulgaria</b> — cadastre, notarial deed, local acquisition tax, ESTI guest reporting for short lets.</span></div>
-          <div class="cs-rule">${icon("flag", 16)}<span><b>Greece</b> — buyer tax number, engineer certificate, electronic property register.</span></div>
-          <div class="sect"><div class="note note--info">${icon("alert", 16)}<span>A foreign buyer of land in Bulgaria adds an eligibility step before any deed can be prepared.</span></div></div>
-        </section>
-      </div>`;
-fs.writeFileSync(W("Cases.dc.html"), page({ active: "cases", body: CASES_BODY, extraCss: CASE_CSS, height: 960 }));
-
-/* -------------------------------------------------------------- Case detail
-   The step list is the screen. Every step carries its witness: who produced or
-   confirmed it and when, or the outlined square of a step nobody has closed.
-   The current step shows the form the server asks for: an evidence reference
-   and a named person. A condition can be met, waived or blocked, never
-   extended; waiving asks for the authority and a reason, in the form. */
-const CD_CSS = `
-    .cd-facts .kv { border-bottom:0; grid-template-columns:1.3fr 1.5fr 1fr 1.2fr 1fr 1.1fr; }
-    .cd-facts .wit { margin-left:8px; }
-    .cd-cols { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start; margin-top:20px; }
-    .cd-side { display:grid; gap:20px; }
-    .cd-phase { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:36px;
-      padding:0 20px; background:var(--tile); border-bottom:1px solid var(--joint); font-weight:600; color:var(--text-muted); }
-    .cd-step { display:grid; grid-template-columns:22px minmax(0,1fr) 200px 96px; gap:16px; align-items:center;
-      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
-    .cd-step:last-child { border-bottom:0; }
-    .cd-step:hover { background:var(--tile); }
-    .cd-n { display:grid; place-items:center; width:22px; height:22px; border-radius:var(--r-pill);
-      background:var(--tile-deep); color:var(--marble-700); font-size:11px; font-weight:600; }
-    .cd-n[data-done] { background:var(--success-500); color:#fff; }
-    .cd-n[data-on] { background:var(--ink-900); color:#fff; }
-    .cd-n[data-block] { background:var(--danger-600); color:#fff; }
-    .cd-n[data-na] { background:transparent; border:1px dashed var(--border-control); color:var(--text-muted); }
-    .cd-step[data-na] .t2 b { color:var(--text-muted); font-weight:400; }
-    .cd-who { display:flex; align-items:center; gap:8px; min-width:0; }
-    .cd-act { display:flex; justify-content:flex-end; white-space:nowrap; }
-    .cd-form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; align-items:end;
-      padding:12px 20px 16px 64px; background:var(--tile); border-bottom:1px solid var(--joint); }
-    .cd-form .hint { grid-column:1 / -1; }
-    .cd-actions { display:flex; gap:8px; margin-top:12px; white-space:nowrap; }
-    .cd-waive { display:grid; gap:12px; padding:12px 20px 16px; background:var(--tile); border-bottom:1px solid var(--joint); }
-    .cd-waive > b { font-size:13px; color:var(--text-strong); }
-    .cd-confirm { display:flex; align-items:center; gap:12px; }
-    .cd-formrow { display:flex; align-items:center; gap:12px; }
-    .cd-stat { display:grid; gap:8px; }
-`;
-function step({ n, state, title, sub, wit, action, tag = "" }) {
-  const attr = state === "done" ? ' data-done="1"' : state === "on" ? ' data-on="1"' : state === "block" ? ' data-block="1"' : state === "na" ? ' data-na="1"' : "";
-  const mark = state === "done" ? icon("check", 12) : state === "block" ? "!" : state === "na" ? "–" : n;
-  return `          <div class="cd-step"${state === "na" ? ' data-na="1"' : ""}>
-            <span class="cd-n"${attr}>${mark}</span>
-            <span class="t2"><b>${title}</b><span>${sub}</span></span>
-            <span class="cd-who">${tag}${wit}</span>
-            <span class="cd-act">${action}</span>
-          </div>`;
-}
-const ghost = (t) => `<button class="btn btn--sm btn--ghost" type="button">${t}</button>`;
-const plain = (t) => `<button class="btn btn--sm" type="button">${t}</button>`;
-const CD_BODY = `      <div class="crumbs"><a href="#">Transaction cases</a>${icon("chevron", 13)}<b>CASE-0007</b></div>
-      <div class="ph">
-        <div><h1>Anna Weber · villa, Katuntsi</h1>
-          <p><span class="mono">CASE-0007</span> · Buyer purchase · Bulgaria · opened 11 July · notary booked for 8 September</p></div>
-        <div class="ph-actions">
-          <span class="pill pill--sand"><i></i>Manual mode</span>
-          <button class="btn" type="button">${icon("history", 16)}<span>History</span></button>
-          <button class="btn btn--accent" type="button">${icon("filesign", 16)}<span>Prepare documents</span></button>
-        </div>
-      </div>
-      <section class="panel cd-facts">
-        <dl class="kv">
-          <div><dt>Property</dt><dd>Villa, Katuntsi <span class="mono">MS-00191</span></dd></div>
-          <div><dt>Price agreed</dt><dd><span class="price">€185,000</span><span class="wit"><b>Mariya Ruseva</b>4 Aug</span></dd></div>
-          <div><dt>Buyer</dt><dd>Anna Weber</dd></div>
-          <div><dt>Seller</dt><dd>Katuntsi Estates OOD</dd></div>
-          <div><dt>Notary</dt><dd>8 Sep, 11:00</dd></div>
-          <div><dt>Responsible</dt><dd>Mariya Ruseva</dd></div>
-        </dl>
-      </section>
-      <div class="cd-cols">
-        <section class="panel">
-          <div class="panel-hd"><h2>Steps</h2><span class="sub">14 of 22 resolved · 1 blocked</span></div>
-          <div class="cd-phase"><span>Intake and onboarding</span><span class="pill pill--ok"><i></i>Complete</span></div>
-${step({ state: "done", title: "Client identified and mandate recorded", sub: "Anti-money-laundering screening passed", wit: `<span class="wit"><b>Mariya Ruseva</b>11 Jul</span>`, action: ghost("Evidence") })}
-${step({ state: "done", title: "Foreign-buyer land eligibility confirmed", sub: "EU national · apartment and building, no agricultural land", wit: `<span class="wit"><b>Lawyer</b>14 Jul</span>`, action: ghost("Evidence") })}
-          <div class="cd-phase"><span>Evidence</span><span class="pill pill--ok"><i></i>Complete</span></div>
-${step({ state: "done", title: "Cadastral sketch and scheme", sub: "Agency of Geodesy, Cartography and Cadastre", wit: `<span class="wit"><b>Registry</b>22 Jul</span>`, action: ghost("Evidence") })}
-${step({ state: "done", title: "Property register extract", sub: "No encumbrances recorded", wit: `<span class="wit"><b>Registry</b>24 Jul</span>`, action: ghost("Evidence") })}
-${step({ state: "done", title: "Energy performance certificate", sub: "Class C, valid to 2033", wit: `<span class="wit"><b>Engineer</b>29 Jul</span>`, action: ghost("Evidence") })}
-${step({ state: "done", title: "Draft summary of the evidence pack", sub: "Drafted by Hermes, checked and accepted by Mariya", tag: `<span class="pill pill--ai">${icon("sparkles", 11)}Hermes</span>`, wit: `<span class="wit"><b>Mariya Ruseva</b>29 Jul</span>`, action: ghost("Draft") })}
-          <div class="cd-phase"><span>Commercial and agreement</span><span class="pill pill--warn"><i></i>In progress</span></div>
-${step({ state: "done", title: "Offer accepted and reservation recorded", sub: "€185,000 · reservation fee received 4 Aug", wit: `<span class="wit"><b>Mariya Ruseva</b>4 Aug</span>`, action: ghost("Evidence") })}
-${step({ state: "block", title: "Proof of funds from the buyer's bank", sub: "Requested 29 August · no answer for 3 days", wit: `<span class="wit wit--none"><b>Bank</b>blocked</span>`, action: plain("Chase") })}
-${step({ state: "on", title: "Preliminary contract signed by both parties", sub: "Drafted from the agency template, waiting on the seller", wit: `<span class="wit wit--none"><b>Lawyer</b>due 4 Sep</span>`, action: plain("Open") })}
-          <div class="cd-form">
-            <div class="field"><label>Evidence reference <em>*</em></label><span class="in in--empty">A reference to the signed contract</span></div>
-            <button class="btn btn--sm" type="button">Complete step</button>
-            <span class="hint">Closed as Mariya Ruseva, with the lawyer recorded as the evidence producer. Hermes cannot close a step on a manual case.</span>
-          </div>
-${step({ state: "todo", n: 10, title: "Local acquisition tax calculated", sub: "Sandanski municipality rate applied to the deed value", wit: `<span class="wit wit--none"><b>Agency</b>before 8 Sep</span>`, action: plain("Start") })}
-          <div class="cd-phase"><span>Completion and aftercare</span><span class="pill pill--sand"><i></i>Not started</span></div>
-${step({ state: "todo", n: 11, title: "Notarial deed executed", sub: "Notary Ivanova · 8 September, 11:00", wit: `<span class="wit wit--none"><b>Notary</b>8 Sep</span>`, action: `<span class="muted">Scheduled</span>` })}
-${step({ state: "todo", n: 12, title: "Entry in the property register", sub: "Within seven days of the deed", wit: `<span class="wit wit--none"><b>Registry</b>by 15 Sep</span>`, action: `<span class="muted">—</span>` })}
-${step({ state: "na", title: "Short-let tourism register entry", sub: "Not applicable — the buyer will occupy the property", wit: `<span class="wit"><b>Marked not applicable</b>11 Jul</span>`, action: ghost("Reopen") })}
-        </section>
-        <div class="cd-side">
-          <section class="panel">
-            <div class="panel-hd"><h2>Hermes on this case</h2><span class="pill pill--ai">${icon("sparkles", 11)}Drafts only</span></div>
-            <div class="sect cd-stat">
-              <div class="note note--ai">${icon("sparkles", 16)}<span>Hermes may draft the evidence summary, the client update and the document checklist. It cannot sign, send, or close a step.</span></div>
-              <div class="kvline"><span>Drafts accepted</span><b>3</b></div>
-              <div class="kvline"><span>Drafts rejected</span><b>1</b></div>
-              <div class="kvline"><span>Steps closed by Hermes</span><b>0</b></div>
-              <div><button class="btn btn--sm" type="button">${icon("sparkles", 14)}<span>Draft the client update</span></button></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Conditions</h2><span class="sub">2 open</span></div>
-            <div class="sect">
-              <h3>Subject to mortgage approval<span class="wit wit--none">deadline 5 Sep</span></h3>
-              <p class="muted">Deadline 5 September. If it lapses the reservation fee is returned.</p>
-              <div class="cd-actions">
-                <button class="btn btn--sm" type="button">Met</button>
-                <button class="btn btn--sm" type="button" data-focus="1">Waived…</button>
-                <button class="btn btn--sm" type="button">Blocked…</button>
-              </div>
-            </div>
-            <div class="cd-waive">
-              <b>Waive the condition</b>
-              <div class="field"><label>Authority or instruction reference <em>*</em></label><span class="in in--empty">The mandate or written instruction it rests on</span></div>
-              <div class="field"><label>Reason code <em>*</em></label><span class="in"></span><span class="hint">Lower case: letters, digits, underscore, colon or hyphen.</span></div>
-              <label class="cd-confirm"><span class="box"></span><span>I confirm this waiver as Mariya Ruseva</span></label>
-              <div class="cd-formrow"><button class="btn btn--sm" type="button">Waive the condition</button><span class="hint">Recorded on the case with the authority and the reason.</span></div>
-            </div>
-            <div class="sect"><span class="hint">There is no extend: a condition's actions are met, blocked, expired, waived or reopened, and reopening applies to a closed one. Waiving asks for the authority it rests on and a reason code.</span></div>
-            <div class="sect">
-              <h3>Subject to a clean register extract on the deed date<span class="wit wit--none">re-check 8 Sep</span></h3>
-              <p class="muted">Re-checked automatically the morning of 8 September.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Recent</h2></div>
-            <div class="sect" style="padding-top:4px; padding-bottom:4px">
-              <div class="tl-row"><span class="av">MR</span><p>Marked the reservation received<em> · 4 Aug</em></p><span class="mono">14:02</span></div>
-              <div class="tl-row"><span class="av" style="background:var(--brick-50); color:var(--brick-700)">HE</span><p>Drafted the evidence summary<em> · 29 Jul · accepted</em></p><span class="mono">09:41</span></div>
-              <div class="tl-row"><span class="av">MR</span><p>Opened the case<em> · 11 Jul</em></p><span class="mono">16:20</span></div>
-            </div>
-          </section>
-        </div>
-      </div>`;
-fs.writeFileSync(W("CaseDetail.dc.html"), page({ active: "cases", body: CD_BODY, extraCss: CD_CSS, height: 1180 }));
-
-console.log("Cases, CaseDetail");
+const button=(label,primary=false,disabled=false)=>`<button class="btn${primary?' btn--accent':''}" type="button"${disabled?' disabled':''}>${label}</button>`;
+const field=(id,label,type='text',value='')=>`<div class="field"><label for="${id}">${label}</label><input class="in" id="${id}" type="${type}" value="${esc(value)}"></div>`;
+const select=(id,label,options)=>`<div class="field"><label for="${id}">${label}</label><select class="in" id="${id}">${options.map(([value,text])=>`<option value="${value}">${text}</option>`).join('')}</select></div>`;
+const note=(id,label)=>`<div class="field rc-wide"><label for="${id}">${label}</label><textarea class="in" id="${id}"></textarea></div>`;
+const confirm=text=>`<label class="rc-check rc-wide"><input type="checkbox"><span>I, Mariya, ${text}</span></label>`;
+const pending=text=>`<span class="wit wit--none">${text}</span>`;
+const section=(title,body)=>`<section class="panel"><div class="panel-hd"><h2>${title}</h2></div><div class="rc-section">${body}</div></section>`;
+const states=`<div class="rc-states">${[
+  ['No matching cases','Check the type, jurisdiction and owner filters before treating the workspace as clear.','Change filters'],
+  ['Case is loading','Retain the selected reference while evidence is loading.','Loading…',true],
+  ['Evidence was rejected','Keep the supplied reference. Check the accepted producer and any unresolved earlier phases.','Review evidence'],
+  ['Private evidence unavailable','A case may load while an attached document or external record cannot be read.','Review access'],
+  ['Many cases','Keep each identity on one line and retain the current page.','Next page'],
+  ['Action outcome unknown','Read the existing event before repeating completion or waiver.','Repeat action',true],
+].map(([title,text,action,disabled])=>`<section class="rc-state"><h2>${title}</h2><p>${text}</p>${button(action,false,disabled)}</section>`).join('')}</div>`;
+const header=(title,text)=>`<div class="ph"><div><h1>${title}</h1><p>${text}</p></div></div><p class="muted">Illustrative cases and mandates · no live transaction, legal clearance or external receipt loaded.</p>`;
+const CASES=header('Transaction cases','See the current step, its owner and the evidence it still needs.')+section('Case queue',`${field('case-search','Find a client or case','search')}<p>${examples.length} sample cases, generated from the current case types. Each starts with unresolved steps.</p>`)+`<section class="panel">${examples.map(({case:row},i)=>`<div class="rc-row"><b title="${esc(people[i])}"><bdi dir="auto">${people[i]}</bdi></b><span>${labels[row.case_type]}</span><span>${row.jurisdiction} · manual</span>${pending('First step open')}<button class="btn btn--sm" type="button">Open</button></div>`).join('')}</section>`+section('Open a case',`<form class="rc-form">${select('case-type','Case type',REALTY_CASE_TYPES.map(type=>[type,labels[type]]))}${select('jurisdiction','Jurisdiction',[['BG','Bulgaria'],['GR','Greece']])}${select('asset-kind','Asset kind',['residential','commercial','land','new_build','mixed_use'].map(x=>[x,x.charAt(0).toUpperCase()+x.slice(1).replaceAll('_',' ')]))}${field('client-ref','Client reference')}${field('property-ref','Property reference (optional)')}${field('mandate-ref','Mandate reference')}${field('granted-by','Mandate granted by · reference')}${field('mandate-evidence','Signed mandate evidence reference')}${field('signed-at','Mandate signed at','datetime-local')}${field('mandate-expires','Mandate expiry (optional)','datetime-local')}${note('mandate-scope','Approved scope and reason for opening')}${confirm('have checked the mandate and confirm this manual case.')}${pending('Opening decision not saved')}${button('Open case',true)}</form><p class="hint">The case must have a mandate that permits opening and the later actions it will need. Changing execution mode requires separate authority; opening this example does not authorise Hermes to complete a manual case.</p>`)+states;
+const DETAIL=header('Anna Weber · example case','Review the step and its evidence before recording an outcome.')+section('Case record',`<dl class="rc-facts"><dt>Reference</dt><dd><bdi dir="ltr">${selected.id}</bdi></dd><dt>Type</dt><dd>${labels[selected.case_type]} · ${selected.jurisdiction}</dd><dt>Execution</dt><dd>Manual · example mandate</dd><dt>Workflow version</dt><dd>${REALTY_WORKFLOW_VERSION}</dd><dt>Resolved steps</dt><dd>0 of ${selected.steps.length}</dd><dt>Responsible</dt><dd>Mariya · example</dd></dl><p>The step labels below come from the saved workflow. They are not a current legal opinion or proof that a requirement has been satisfied.</p>`)+`<section class="panel"><div class="panel-hd"><h2>Steps and evidence</h2>${pending('No step completed')}</div>${selected.workflow_phases.map(phase=>`<h3 class="rc-group">${phase.charAt(0).toUpperCase()+phase.slice(1)}</h3>${selected.steps.filter(step=>step.phase===phase).map(step=>`<div class="rc-row rc-step"><b title="${esc(step.label)}">${step.label}</b><span>${step.optional?'Optional · unresolved':'Required · unresolved'}</span>${pending('Evidence needed')}<button class="btn btn--sm" type="button">Review</button></div>`).join('')}`).join('')}</section>`+section('Complete the current step',`<h3>${current.label}</h3><form class="rc-form">${field('evidence-ref','Internal evidence reference')}${field('evidence-type','Evidence type')}${select('producer-kind','Evidence producer',current.evidence_producers.map(x=>[x,x.charAt(0).toUpperCase()+x.slice(1)]))}${field('issued-at','Evidence issued at (optional)','datetime-local')}${note('step-review','Review note')}${confirm('have checked the evidence and confirm this completion.')}${pending('Completion not saved')}${button('Complete step',true)}</form><p class="hint">The backend checks the mandate, executor, step order and accepted evidence producer. This preview does not write a case event.</p>`)+`<div class="rc-cols">${section('Waive a condition',`<h3>Mortgage approval · illustrative open condition</h3>${pending('No waiver recorded')}${field('waiver-authority','Authority or instruction reference')}${field('waiver-code','Reason code','text','client_instruction')}${note('waiver-note','Reason for the decision')}${confirm('confirm the waiver and the authority it rests on.')}${button('Waive condition')}<p class="hint">Waiver records a human decision; it does not assert finance approval or a refund entitlement. Reopening requires authority, a reason and a new due date.</p>`)}${section('Hermes and external evidence',`<p>Hermes can help draft an evidence summary for review. A manual case requires a human executor for its actions.</p><p>There is no live bank, registry or notary receipt in this example. Do not replace missing evidence with an automated success label.</p>${button('Review a draft')}<p class="hint">No message, signature request or legal approval is produced by this preview.</p>`)}</div>`+states;
+for(const [name,body] of [['Cases',CASES],['CaseDetail',DETAIL]]){assert.equal((body.match(/btn--accent/g)||[]).length,1);fs.writeFileSync(new URL(`../${name}.dc.html`,import.meta.url),page({active:'cases',body:`<div class="rc">${body}</div>`,extraCss:CSS,height:0,healthText:'Illustrative workspace'}));}
+console.log('Cases, CaseDetail');

@@ -327,23 +327,29 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .ed-cols { display:grid; grid-template-columns:minmax(0,1fr) 348px; gap:20px; align-items:start; }
-    .ed-side { display:grid; gap:20px; }
-    .ed-state { display:flex; align-items:center; gap:12px; margin-left:auto; }
-    .ed-doc { padding:32px 48px; line-height:1.7; color:var(--text-body); }
-    .ed-doc h4 { font-size:16px; font-weight:600; margin-bottom:16px; }
-    .ed-doc p { margin-bottom:12px; }
-    .ed-doc p:last-child { margin-bottom:0; }
-    .ed-fill { background:var(--spring-50); border-bottom:1px solid var(--spring-200); padding:0 4px; font-weight:600;
-      color:var(--spring-800); }
-    .ed-gap { background:var(--warning-50); border-bottom:1px dashed var(--warning-700); padding:0 4px;
-      font-weight:600; color:var(--warning-700); }
-    .ed-src { display:grid; grid-template-columns:16px minmax(0,1fr) auto; gap:12px; align-items:center;
-      min-height:var(--row); padding:0 20px; border-bottom:1px solid var(--joint); }
-    .ed-src svg { color:var(--success-600); }
-    .ed-req { display:grid; gap:8px; padding:12px 20px; border-bottom:1px solid var(--joint); }
-    .ed-signer { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center;
-      min-height:var(--row); padding:8px 20px; border-bottom:1px solid var(--joint); }
+  .dr { display:grid; gap:20px; }
+  .dr .ph { margin:0; }
+  .dr h2 { font-size:16px; }
+  .dr-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .dr-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; }
+  .dr .dr-wide { grid-column:1/-1; }
+  .dr .in { width:100%; font:inherit; color:var(--text-body); }
+  .dr textarea.in { min-height:96px; resize:vertical; }
+  .dr input[type=file] { padding:8px; height:auto; }
+  .dr :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .dr button:disabled { opacity:.5; cursor:not-allowed; }
+  .dr-check { display:flex; gap:12px; align-items:start; }
+  .dr-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .dr-row { display:grid; grid-template-columns:minmax(0,1fr) 160px 96px 200px 72px; gap:16px; align-items:center; height:44px; padding:0 20px; border-top:1px solid var(--joint); }
+  .dr-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dr-row:hover { background:var(--tile); }
+  .dr-checkrow { grid-template-columns:minmax(0,1fr) 200px 72px; }
+  .dr-cols,.dr-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .dr-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; }
+  .dr-state .btn,.dr-section > .btn { justify-self:start; }
+  .dr-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px; margin:0; }
+  .dr-facts dt { color:var(--text-muted); }
+  .dr-facts dd { margin:0; overflow-wrap:anywhere; }
 
   </style>
 </head><body>
@@ -355,7 +361,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:1080px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -397,96 +403,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="crumbs">
-        <a href="#">Documents</a><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><a href="#">CASE-0007</a><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg><b>Preliminary purchase contract</b>
-      </div>
-      <div class="ph">
-        <div><h1>Preliminary purchase contract</h1>
-          <p>From the lawyer-reviewed Bulgarian template · filled from CASE-0007 · <span class="mono">v4</span>, saved 09:12</p></div>
-        <div class="ph-actions">
-          <span class="pill pill--warn"><i></i>2 fields need a person</span>
-          <button class="btn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><span>Versions</span></button>
-          <button class="btn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>PDF</span></button>
-          <button class="btn btn--accent" type="button" data-disabled="1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18c3-1 4-8 7-8s2 6 5 6 3-4 6-4"/><path d="M3 21h18"/></svg><span>Send for signature</span></button>
-        </div>
-      </div>
-      <div class="ed-cols">
-        <section class="panel">
-          <div class="toolbar">
-            <button class="btn btn--sm" type="button">Bulgarian <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span>Edit</span></button>
-            <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span>Compare with v3</span></button>
-            <span class="ed-state"><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Filled by Hermes</span><span class="wit wit--none"><b>v4</b>unreviewed · saved 09:12</span></span>
-          </div>
-          <div class="ed-doc">
-            <h4>ПРЕДВАРИТЕЛЕН ДОГОВОР ЗА ПОКУПКО-ПРОДАЖБА НА НЕДВИЖИМ ИМОТ</h4>
-            <p>Днес, <span class="ed-fill">4 септември 2026 г.</span>, в гр. <span class="ed-fill">Сандански</span>,
-              между <span class="ed-fill">Katuntsi Estates OOD</span>, ЕИК <span class="ed-fill">205118342</span>,
-              наричан по-долу ПРОДАВАЧ, и <span class="ed-fill">Anna Weber</span>, гражданин на
-              <span class="ed-fill">Германия</span>, наричан по-долу КУПУВАЧ, се сключи настоящият договор.</p>
-            <p><b>Чл. 1.</b> ПРОДАВАЧЪТ се задължава да прехвърли на КУПУВАЧА правото на собственост върху
-              <span class="ed-fill">вила със застроена площ 214 кв. м</span> в землището на
-              <span class="ed-fill">с. Катунци, общ. Сандански</span>, идентификатор
-              <span class="ed-fill">36693.501.114</span>, при цена <span class="ed-fill">185 000 EUR</span>.</p>
-            <p><b>Чл. 2.</b> КУПУВАЧЪТ е заплатил задатък в размер на <span class="ed-gap">[сума на задатъка]</span>,
-              платен на <span class="ed-fill">4 август 2026 г.</span></p>
-            <p><b>Чл. 3.</b> Окончателният договор ще бъде сключен пред нотариус
-              <span class="ed-fill">Иванова</span> на <span class="ed-fill">8 септември 2026 г.</span></p>
-            <p><b>Чл. 4.</b> Настоящият договор се разваля без последици за КУПУВАЧА, ако
-              <span class="ed-gap">[условие за одобрение на ипотечен кредит]</span> не бъде изпълнено до
-              <span class="ed-fill">5 септември 2026 г.</span></p>
-          </div>
-        </section>
-        <div class="ed-side">
-          <section class="panel">
-            <div class="panel-hd"><h2>Two fields need a person</h2><span class="pill pill--warn"><i></i>2</span></div>
-            <div class="sect">
-              <h3>Reservation amount — article 2</h3>
-              <p class="muted" style="margin-bottom:12px">The case records that a reservation was received on 4 August but not the amount. Hermes will not guess a figure that goes into a contract.</p>
-              <span class="in in--empty">Enter the amount in EUR</span>
-            </div>
-            <div class="sect">
-              <h3>Mortgage condition wording — article 4</h3>
-              <p class="muted" style="margin-bottom:12px">The case carries the condition and its deadline, but the wording is a legal choice.</p>
-              <button class="btn btn--sm" type="button">Use the lawyer's standard clause</button>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Where each value came from</h2></div>
-            <div class="ed-src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Buyer, nationality</span><span class="wit"><b>Contact record</b></span></div>
-            <div class="ed-src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Seller, company number</span><span class="wit"><b>Company record</b></span></div>
-            <div class="ed-src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Property, area, identifier</span><span class="wit"><b>Cadastral sketch</b>22 Jul</span></div>
-            <div class="ed-src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Price</span><span class="wit"><b>Accepted offer</b>4 Aug</span></div>
-            <div class="ed-src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Notary and date</span><span class="wit"><b>Case</b><span class="mono">CASE-0007</span></span></div>
-            <div class="sect"><div class="note note--ai"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Every filled value is traceable to a record. Nothing here was written from memory.</span></div></div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Signature</h2><span class="pill pill--warn"><i></i>Pending</span></div>
-            <div class="ed-req">
-              <div class="kvline"><span class="muted">Provider</span><b>Internal</b></div>
-              <div class="kvline"><span class="muted">Request</span><b>1 of 2 signed</b></div>
-            </div>
-            <div class="ed-signer"><span class="av">AW</span>
-              <span class="t2"><b>Anna Weber</b><span>Buyer · signs first</span></span>
-              <span class="pill pill--ok"><i></i>Signed</span></div>
-            <div class="ed-signer"><span class="av">KE</span>
-              <span class="t2"><b>Katuntsi Estates OOD</b><span>Seller · Todor Katsarov</span></span>
-              <span class="pill pill--warn"><i></i>Waiting</span></div>
-            <div class="ed-signer"><span class="av">MR</span>
-              <span class="t2"><b>Mariya Ruseva</b><span>Agency witness</span></span>
-              <span class="pill pill--sand"><i></i>After both</span></div>
-            <div class="savebar">
-              <button class="btn btn--sm" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Remind the seller</span></button>
-              <span class="wit" style="margin-left:auto"><b>Mariya Ruseva</b>sent 09:12 today</span>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="dr"><div class="ph"><div><h1>Revise a document</h1><p>Keep the earlier version and record why this revision is needed.</p></div></div><p class="muted">Illustrative document records · no private file, legal review or signature receipt loaded.</p><section class="panel"><div class="panel-hd"><h2>Current record · example</h2></div><div class="dr-section"><dl class="dr-facts"><dt>Document</dt><dd>Agency mandate · example</dd><dt>Reference</dt><dd><bdi dir="ltr">DOC-EXAMPLE-1</bdi></dd><dt>Current revision</dt><dd>1 · illustrative</dd><dt>Record status</dt><dd>Active · does not mean signed</dd><dt>File evidence</dt><dd><span class="wit wit--none">Bytes not loaded</span></dd></dl><p>No contract text, company number, cadastral identifier, payment amount or signature is invented in this preview.</p></div></section><div class="dr-cols"><section class="panel"><div class="panel-hd"><h2>Add the next revision</h2></div><div class="dr-section"><form class="dr-section" style="padding:0"><div class="field"><label for="revised-file">Select the revised file</label><input class="in" id="revised-file" type="file"></div><div class="field dr-wide"><label for="revision-reason">What changed, and why?</label><textarea class="in" id="revision-reason"></textarea></div><label class="dr-check dr-wide"><input type="checkbox"><span>I, Mariya, have checked this file and confirm the new revision.</span></label><span class="wit wit--none">Revision not saved</span><button class="btn btn--accent" type="button">Save revision 2</button></form><p class="hint">The source appends the next revision and keeps its actor, time, reason and file digest. A version conflict requires reading the current record again.</p></div></section><section class="panel"><div class="panel-hd"><h2>File evidence</h2></div><div class="dr-section"><dl class="dr-facts"><dt>Type</dt><dd>Awaiting file</dd><dt>Size</dt><dd>Awaiting file</dd><dt>Digest</dt><dd>Awaiting byte verification</dd><dt>Source</dt><dd>Agency · example</dd><dt>Retention</dt><dd>Case file · example class</dd></dl><p>The class is a stored label. No deletion date or legal retention period is asserted.</p></div></section></div><section class="panel"><div class="panel-hd"><h2>Signature request</h2></div><div class="dr-section"><p>The source supports an internal request record. External signature providers are not configured; creating this record does not dispatch a document.</p><form class="dr-form"><div class="field"><label for="signer-ref">Signer reference</label><input class="in" id="signer-ref" type="text" value=""></div><div class="field"><label for="signer-role">Signer role</label><input class="in" id="signer-role" type="text" value=""></div><div class="field"><label for="signature-version">Revision to sign</label><input class="in" id="signature-version" type="number" value="1"></div><div class="field"><label for="signature-expiry">Expiry (optional)</label><input class="in" id="signature-expiry" type="datetime-local" value=""></div><div class="field dr-wide"><label for="signature-note">Review note</label><textarea class="in" id="signature-note"></textarea></div><label class="dr-check dr-wide"><input type="checkbox"><span>I, Mariya, have checked the signer and selected revision.</span></label><span class="wit wit--none">No provider receipt</span><button class="btn" type="button">Record signature request</button></form><p class="hint">A signed status requires a provider receipt. Editing the current document must not imply that an earlier signature covers the new revision.</p><p>Source request states: Provider pending, Signed, Declined, Expired, Cancelled, Failed.</p></div></section><div class="dr-states"><section class="dr-state"><h2>No matching documents</h2><p>Change the filter or create a record. Empty results do not prove that the external file store is empty.</p><button class="btn" type="button">Change filters</button></section><section class="dr-state"><h2>Loading the file record</h2><p>Keep the document identity and selected revision visible.</p><button class="btn" type="button" disabled>Loading…</button></section><section class="dr-state"><h2>Upload or save failed</h2><p>Retain the title and change reason. A failed byte check must not appear as a saved revision.</p><button class="btn" type="button">Review upload</button></section><section class="dr-state"><h2>Document store unavailable</h2><p>Metadata, bytes and provider receipts can be unavailable separately. Keep the missing part explicit.</p><button class="btn" type="button">Review availability</button></section><section class="dr-state"><h2>Many versions</h2><p>Preserve page position and the selected revision. A long title stays on one list row.</p><button class="btn" type="button">Next page</button></section><section class="dr-state"><h2>Revision conflict</h2><p>Another revision may have been saved. Read the current version before repeating the action.</p><button class="btn" type="button" disabled>Save over it</button></section></div></div>
     </div>
   </div>
 </div>
