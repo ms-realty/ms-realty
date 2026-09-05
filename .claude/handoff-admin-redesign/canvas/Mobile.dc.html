@@ -1,15 +1,5 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
-  <style>
+<!doctype html><html><head><meta charset="utf-8"><script src="./support.js"></script></head><body><x-dc><helmet>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap"><style>
     :root {
       /* Tile — the ground. Glazed white with a warm-grey glaze; cooler than paper. */
       --tile:#F6F5F1; --tile-glaze:#FFFFFF; --tile-deep:#ECEAE4; --tile-shadow:#E2DFD7;
@@ -335,142 +325,36 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .ph-app { width:390px; min-height:844px; background:var(--canvas); display:flex; flex-direction:column; }
-    .ph-hd { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:12px 16px 0; }
-    .ph-hd h1 { flex:1 1 auto; min-width:0; font-size:22px; font-weight:600; letter-spacing:-.01em;
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ph-sub { padding:4px 16px 12px; font-size:13px; color:var(--text-muted); }
-    .ph-ic { display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-edge);
-      border:1px solid var(--border-control); background:var(--surface); color:var(--text-strong); flex:0 0 auto; }
-    .ph-ic--ghost { border-color:transparent; background:transparent; color:var(--text-muted); }
-    .ph-av { display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-pill);
-      background:var(--ink-900); color:#fff; font-size:13px; font-weight:600; flex:0 0 auto; }
-    .ph-body { flex:1 1 auto; display:grid; gap:16px; padding:0 16px 16px; align-content:start; }
-    .ph-app .seg { display:flex; }
-    .ph-app .seg button { height:44px; flex:1 1 auto; justify-content:center; padding:0 8px; }
-    .ph-app .btn--lg { width:100%; justify-content:center; }
-    .ph-next { display:grid; gap:8px; }
-    .ph-next > b { font-size:16px; font-weight:600; color:var(--text-strong); }
-    .ph-next > p { font-size:13px; color:var(--text-muted); }
-    /* A queue row: one line of identity, when it is due, and who holds it. */
-    .ph-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:12px;
-      min-height:var(--row); padding:0 12px; border-bottom:1px solid var(--joint); color:var(--text-body); }
-    .ph-row:last-child { border-bottom:0; }
-    .ph-row:hover { background:var(--tile); color:var(--text-body); text-decoration:none; }
-    .ph-row > b { font-size:13px; font-weight:600; color:var(--text-strong); overflow:hidden;
-      text-overflow:ellipsis; white-space:nowrap; }
-    .ph-row > b em { font-style:normal; font-weight:400; color:var(--text-muted); }
-    .ph-row .when { font-size:11px; font-weight:600; color:var(--text-muted); white-space:nowrap; }
-    .ph-row .when--late { color:var(--danger-600); }
-    .ph-row .when--today { color:var(--warning-700); }
-    .ph-note { margin:0; padding:12px 16px; border-top:1px solid var(--joint); font-size:11px; color:var(--text-muted); }
-    .ph-tabs { margin-top:auto; display:grid; grid-template-columns:repeat(5,1fr); background:var(--surface);
-      border-top:1px solid var(--joint); }
-    .ph-tab { position:relative; display:grid; justify-items:center; align-content:center; gap:4px;
-      min-height:56px; padding:8px 4px 12px; margin-top:-4px; border-top:2px solid transparent;
-      color:var(--text-muted); font-size:11px; font-weight:600; }
-    .ph-tab:hover { color:var(--text-strong); text-decoration:none; }
-    .ph-tab[data-on] { color:var(--text-strong); border-top-color:var(--ink-900); }
-    .ph-tab .sb-badge { position:absolute; top:4px; left:calc(50% + 4px); }
-
-  </style>
-</helmet>
-<div class="ph-app">
-  <div class="ph-hd">
-    <h1>Today</h1>
-    <button class="ph-ic ph-ic--ghost" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
-    <button class="ph-av" type="button">MR</button>
-  </div>
-  <p class="ph-sub">Tuesday, 1 September · 12 open, 5 of them late.</p>
-
-  <div class="ph-body">
-    <section class="panel">
-      <div class="panel-hd"><h2>Next</h2><span class="pill pill--danger"><i></i>Overdue 2 d</span></div>
-      <div class="sect ph-next">
-        <b>Maria Petrova · listing enquiry</b>
-        <p><span class="mono">MS-00815</span> · 2-bed apartment, Sandanski · WhatsApp · HE → EN</p>
-        <span class="wit wit--none">Unassigned · no reply yet · escalated to the manager</span>
-      </div>
-      <div class="sect">
-        <button class="btn btn--accent btn--lg" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg><span>Reply to Maria Petrova</span></button>
-      </div>
-    </section>
-
-    <div class="seg">
-      <button type="button" data-on="1">All <em>12</em></button>
-      <button type="button">Overdue <em>5</em></button>
-      <button type="button">Replies <em>4</em></button>
-      <button type="button">Viewings <em>2</em></button>
-    </div>
-
-    <section class="panel">
-      <a class="ph-row" href="#">
-        <b>Ivan Georgiev <em>· callback</em></b>
-        <span class="when when--late">Overdue 2 d</span>
-        <span class="wit"><b>MR</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Elena Dimitrova <em>· valuation</em></b>
-        <span class="when when--late">Overdue 1 d</span>
-        <span class="wit wit--none">Unassigned</span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Anna Weber <em>· viewing</em></b>
-        <span class="when when--today">Today 15:00</span>
-        <span class="wit"><b>PD</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>French language request</b>
-        <span class="when when--today">Today</span>
-        <span class="wit"><b>MR</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Georgi Nikolov <em>· follow-up</em></b>
-        <span class="when when--today">Today 17:00</span>
-        <span class="wit"><b>PD</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>7 translations to approve</b>
-        <span class="when when--today">Today</span>
-        <span class="wit"><b>MR</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Weber <em>· preliminary contract</em></b>
-        <span class="when">Tomorrow</span>
-        <span class="wit"><b>MR</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Dmitri Volkov <em>· price enquiry</em></b>
-        <span class="when">Tomorrow 10:00</span>
-        <span class="wit"><b>PD</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Petar Kolev <em>· second viewing</em></b>
-        <span class="when">Wed 11:00</span>
-        <span class="wit"><b>MR</b></span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>38 legacy URLs undecided</b>
-        <span class="when">This week</span>
-        <span class="wit wit--none">Unassigned</span>
-      </a>
-      <a class="ph-row" href="#">
-        <b>Volkov <em>· consent expiring</em></b>
-        <span class="when">This week</span>
-        <span class="wit wit--none">Unassigned</span>
-      </a>
-      <p class="ph-note">Hermes drafted the translations. Nothing is indexed until a person approves.</p>
-      <div class="foot"><span>12 open · 4 unassigned</span><a href="#" style="font-weight:600">All tasks</a></div>
-    </section>
-  </div>
-  <nav class="ph-tabs">
-    <a class="ph-tab" href="#" data-on="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>Today</a>
-    <a class="ph-tab" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span class="sb-badge">4</span>Inbox</a>
-    <a class="ph-tab" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h4v13H4z"/><path d="M10 3h4v9h-4z"/><path d="M16 3h4v17h-4z"/></svg>Pipeline</a>
-    <a class="ph-tab" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>Listings</a>
-    <a class="ph-tab" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>More</a>
-  </nav>
-</div>
-</x-dc>
-</body>
-</html>
+  .wm { width:390px; min-height:844px; display:flex; flex-direction:column; background:var(--canvas); }
+  .wm-hd { display:flex; gap:12px; padding:12px 16px; align-items:center; border-bottom:1px solid var(--joint); }
+  .wm h1 { font-size:22px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wm h2 { font-size:16px; }
+  .wm h3 { font-size:13px; }
+  .wm .wm-back { display:grid; place-items:center; width:44px; height:44px; flex:0 0 auto; border:1px solid var(--border-control); border-radius:var(--r-edge); color:var(--text-strong); }
+  .wm-body { display:grid; gap:20px; padding:16px; align-content:start; flex:1; }
+  .wm-section { display:grid; gap:16px; padding:16px; background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); min-width:0; }
+  .wm-section > * { min-width:0; }
+  .wm .btn { min-height:44px; height:auto; white-space:normal; justify-content:center; }
+  .wm .in { width:100%; min-height:44px; font:inherit; color:var(--text-body); }
+  .wm textarea.in { min-height:96px; resize:vertical; }
+  .wm :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .wm .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .wm .wit { white-space:normal; flex-wrap:wrap; }
+  .wm p,.wm dd { overflow-wrap:anywhere; }
+  .wm-facts { display:grid; grid-template-columns:96px minmax(0,1fr); gap:12px; margin:0; }
+  .wm-facts dt { color:var(--text-muted); }
+  .wm-facts dd { margin:0; }
+  .wm-check { display:flex; align-items:center; gap:12px; min-height:44px; }
+  .wm-check input { width:20px; height:20px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .wm-queue { border-top:1px solid var(--joint); }
+  .wm-row { display:grid; grid-template-columns:minmax(0,1fr) 72px; gap:12px; align-items:center; height:44px; border-bottom:1px solid var(--joint); color:var(--text-body); }
+  .wm-row b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wm-row span { font-size:11px; color:var(--text-muted); text-align:end; }
+  .wm-row:hover { background:var(--tile); text-decoration:none; }
+  .wm-states { display:grid; gap:20px; }
+  .wm-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; }
+  .wm-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid var(--joint); background:var(--surface); }
+  .wm-tab { display:grid; justify-items:center; align-content:center; gap:4px; min-height:64px; color:var(--text-muted); font-size:11px; font-weight:600; border-top:2px solid transparent; }
+  .wm-tab[aria-current] { color:var(--text-strong); border-top-color:var(--ink-900); }
+  .wm-tab:hover { color:var(--text-strong); background:var(--tile); text-decoration:none; }
+</style></helmet><div class="wm"><header class="wm-hd"><a class="wm-back" href="Mobile.html" aria-label="Back to Today"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a><h1>Today</h1></header><div class="wm-body"><p class="muted">Illustrative workspace · Mariya · no live record loaded.</p><section class="wm-section"><h2>Next: assign the enquiry</h2><h3 lang="bg">Екатерина Константинова-Александрова</h3><p>A viewing question needs an owner. Check the property’s availability before proposing an appointment.</p><span class="wit wit--none">No assignment confirmed</span><div class="field"><label for="owner">Proposed broker</label><input class="in" id="owner" type="text" value="Mariya · example"></div><div class="field"><label for="assign-reason">Reason for assignment</label><textarea class="in" id="assign-reason"></textarea></div><label class="wm-check"><input type="checkbox"><span>I, Mariya, confirm the broker and reason for this assignment.</span></label><button class="btn btn--accent" type="button">Save assignment</button></section><section class="wm-section"><h2>Work waiting</h2><p>4 sample records. No live deadline or overdue count is asserted.</p><div class="field"><label for="queue-search">Find a person or task</label><input class="in" id="queue-search" type="search" value=""></div><div class="wm-queue"><a class="wm-row" href="MobileLead.html"><b title="Екатерина Константинова-Александрова"><bdi dir="auto">Екатерина Константинова-Александрова</bdi></b><span>Assign</span></a><a class="wm-row" href="MobileCase.html"><b title="Anna Weber"><bdi dir="auto">Anna Weber</bdi></b><span>Case</span></a><a class="wm-row" href="MobileLead.html"><b title="מרים כהן"><bdi dir="auto">מרים כהן</bdi></b><span>Reply</span></a><a class="wm-row" href="MobileLead.html"><b title="Elena Dimitrova"><bdi dir="auto">Elena Dimitrova</bdi></b><span>Review</span></a></div><p class="hint">Open the owning record to resolve a derived task.</p></section><div class="wm-states"><section class="wm-state"><h2>Nothing in this view</h2><p>No work matches the current filter. Check the scope before treating the workspace as clear.</p><button class="btn" type="button">Change filters</button></section><section class="wm-state"><h2>Loading the record</h2><p>Keep the selected identity visible until the record has loaded.</p><button class="btn" type="button" disabled>Loading…</button></section><section class="wm-state"><h2>The action failed</h2><p>The proposed broker and assignment reason remain entered. No new owner is confirmed.</p><button class="btn" type="button">Review entered values</button></section><section class="wm-state"><h2>Some evidence is unavailable</h2><p>The record can load while a private document, contact channel or external receipt is unavailable.</p><button class="btn" type="button">Review missing evidence</button></section><section class="wm-state"><h2>More records to review</h2><p>Keep the selected record and page position. Long identities stay on a single queue row.</p><button class="btn" type="button">Next page</button></section><section class="wm-state"><h2>Save outcome unknown</h2><p>Check for the original receipt before repeating a consequential action.</p><button class="btn" type="button" disabled>Try again</button></section></div></div><nav class="wm-tabs" aria-label="Workspace"><a class="wm-tab" href="Mobile.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>Today</a><a class="wm-tab" href="MobileLead.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Inbox</a><a class="wm-tab" href="MobileCase.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Cases</a></nav></div></x-dc></body></html>

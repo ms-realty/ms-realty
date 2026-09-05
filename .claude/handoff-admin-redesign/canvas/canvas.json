@@ -402,7 +402,7 @@
       "x": 0,
       "y": 0,
       "w": 1560,
-      "h": 1204,
+      "h": 1728,
       "page": "page-7"
     },
     {
@@ -411,7 +411,7 @@
       "x": 1680,
       "y": 0,
       "w": 1560,
-      "h": 1264,
+      "h": 1553,
       "page": "page-7"
     },
     {
@@ -420,34 +420,34 @@
       "x": 3360,
       "y": 0,
       "w": 1560,
-      "h": 2349,
+      "h": 2362,
       "page": "page-7"
     },
     {
       "file": "Mobile.dc.html",
       "title": "Phone — Today",
       "x": 0,
-      "y": 2519,
+      "y": 2532,
       "w": 390,
-      "h": 1106,
+      "h": 2208,
       "page": "page-7"
     },
     {
       "file": "MobileLead.dc.html",
       "title": "Phone — lead and reply",
       "x": 510,
-      "y": 2519,
+      "y": 2532,
       "w": 390,
-      "h": 886,
+      "h": 2507,
       "page": "page-7"
     },
     {
       "file": "MobileCase.dc.html",
       "title": "Phone — case",
       "x": 1020,
-      "y": 2519,
+      "y": 2532,
       "w": 390,
-      "h": 930,
+      "h": 2771,
       "page": "page-7"
     }
   ],

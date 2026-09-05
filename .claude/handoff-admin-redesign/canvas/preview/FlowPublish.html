@@ -327,30 +327,20 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .doc-hd h1 { font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; }
-    .doc-hd p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:700px; }
-    .lane { display:grid; grid-template-columns:132px minmax(0,1fr); gap:0; border:1px solid var(--border);
-      border-radius:var(--r-lg); overflow:hidden; background:var(--surface); margin-bottom:16px; }
-    .lane-l { background:var(--tile); border-right:1px solid var(--border); padding:16px 16px;
-      display:grid; align-content:start; gap:4px; }
-    .lane-l b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .lane-l span { font-size:11px; color:var(--text-muted); }
-    .lane-r { padding:16px; display:flex; align-items:center; gap:0; flex-wrap:wrap; }
-    .node { display:grid; gap:4px; min-width:150px; max-width:186px; padding:12px 12px; border-radius:var(--r-md);
-      border:1px solid var(--border); background:var(--surface); }
-    .node b { font-size:13px; font-weight:600; color:var(--text-strong); line-height:1.3; }
-    .node span { font-size:11px; color:var(--text-muted); line-height:1.35; }
-    .node--ai { border-color:var(--brick-300); background:var(--brick-50); }
-    .node--gate { border-color:var(--warning-700); background:var(--warning-50); }
-    .node--out { border-color:var(--success-500); background:var(--success-50); }
-    .node--stop { border-color:var(--danger-600); background:var(--danger-50); }
-    .arw { display:grid; place-items:center; width:34px; color:var(--text-muted); flex:0 0 auto; }
-    .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--text-muted); margin-top:8px; }
-    .legend span { display:inline-flex; align-items:center; gap:8px; }
-    .key { width:13px; height:13px; border-radius:var(--r-edge); border:1px solid; flex:0 0 auto; }
-    .grp > h2 { font-size:13px; font-weight:600; color:var(--text-muted); margin:24px 0 12px;
-      padding-bottom:8px; border-bottom:1px solid var(--border); }
+  .fl { display:grid; gap:24px; }
+  .fl h1 { font-size:22px; font-weight:600; }
+  .fl h2 { font-size:16px; }
+  .fl p { max-width:960px; }
+  .fl-hd,.fl-close { display:grid; gap:12px; }
+  .fl-group { display:grid; gap:16px; }
+  .fl-row { display:grid; grid-template-columns:160px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap:24px; padding:20px 0; border-top:1px solid var(--joint); align-items:start; }
+  .fl-row > div { display:grid; gap:8px; min-width:0; }
+  .fl-row b { color:var(--text-strong); }
+  .fl-row .wit { white-space:normal; }
+  .fl-head { padding:12px 0; color:var(--text-muted); font-weight:600; }
+  .fl-close { border-top:1px solid var(--joint); padding-top:24px; }
+  .fl a { display:inline-flex; align-items:center; min-height:44px; width:fit-content; }
+  .fl a:focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
 
   </style>
 </head><body>
@@ -362,50 +352,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div style="width:1560px; min-height:1240px; background:var(--canvas); padding:40px">
-<div class="doc-hd">
-  <div><h1>From a legacy page to a published listing</h1>
-    <p>Thirteen years of indexed URLs are the asset the rebuild exists to protect. Nothing becomes public
-      without a person, and no legacy address changes meaning without a recorded decision.</p></div>
-  <span class="pill pill--ink"><i></i>457 URLs · 165 listings · 11,859 files</span>
-</div>
-<div class="legend">
-  <span><i class="key" style="background:var(--surface); border-color:var(--border)"></i>A person does it</span>
-  <span><i class="key" style="background:var(--brick-50); border-color:var(--brick-300)"></i>Hermes drafts it</span>
-  <span><i class="key" style="background:var(--warning-50); border-color:var(--warning-700)"></i>Approval gate — a named person</span>
-  <span><i class="key" style="background:var(--success-50); border-color:var(--success-500)"></i>Reaches the customer or the public site</span>
-  <span><i class="key" style="background:var(--danger-50); border-color:var(--danger-600)"></i>Refused to the agent, always</span>
-</div>
-<div class="grp"><h2>Preserve first</h2></div>
-<div class="lane">
-  <div class="lane-l"><b>Legacy URL</b><span>makler-realty.com and .ru</span></div>
-  <div class="lane-r"><div class="node"><b>Crawled and archived</b><span>Title, metadata, content, media</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--ai"><b>Hermes proposes an outcome</b><span>200, 301 or 410, with its evidence</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--gate"><b>A person decides</b><span>419 of 457 done</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--out"><b>Redirect file built</b><span>Only from approved decisions</span></div></div>
-</div>
-<div class="grp"><h2>Make the listing true</h2></div>
-<div class="lane">
-  <div class="lane-l"><b>Facts</b><span>listing editor</span></div>
-  <div class="lane-r"><div class="node"><b>Imported from the source</b><span>Price, area, rooms, reference</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node"><b>Checked against the registry</b><span>Cadastral sketch and extract</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node"><b>Unconfirmed facts stay off</b><span>The page omits rather than guesses</span></div></div>
-</div>
-<div class="lane">
-  <div class="lane-l"><b>Media</b><span>review queue</span></div>
-  <div class="lane-r"><div class="node"><b>Mirrored to R2</b><span>Checksum recorded</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--ai"><b>Hermes drafts alt text</b><span>Flags faces, documents, plates</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--gate"><b>A person approves each photo</b><span>46 in the queue</span></div></div>
-</div>
-<div class="lane">
-  <div class="lane-l"><b>Language</b><span>translation queue</span></div>
-  <div class="lane-r"><div class="node"><b>Bulgarian approved</b><span>The source, hashed</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--ai"><b>Hermes translates</b><span>Facts copied verbatim, claims refused</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--gate"><b>A speaker of that language approves</b><span>Their name goes on it</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--out"><b>Indexable in that locale</b><span>Sitemap picks it up</span></div></div>
-</div>
-<div class="grp"><h2>Publish</h2></div>
-<div class="lane">
-  <div class="lane-l"><b>Publication</b><span>the boundary</span></div>
-  <div class="lane-r"><div class="node node--gate"><b>Owner approves publication</b><span>Facts, media and language all green</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--out"><b>Public page live</b><span>With its structured data</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--out"><b>Search index updated</b><span>Typesense, on change</span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--out"><b>Legacy URL honoured</b><span>200 kept or one-hop 301</span></div></div>
-</div>
-<div class="lane">
-  <div class="lane-l"><b>Refused</b><span>to the agent, permanently</span></div>
-  <div class="lane-r"><div class="node node--stop"><b>Publish a page</b><span></span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--stop"><b>Mark a translation indexable</b><span></span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--stop"><b>Change a price</b><span></span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--stop"><b>Change a redirect</b><span></span></div><span class="arw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><div class="node node--stop"><b>Send a customer message</b><span></span></div></div>
-</div>
-<div class="note note--info" style="margin-top:16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
-  <span><b>What the CMS does not yet cover.</b> This path round-trips for listings and guides. The home,
-    search, seller and contact pages still take their text from the renderer, so the Website section
-    designs the collection that has to exist for them.</span></div>
+<div style="width:1560px; min-height:0px; background:var(--canvas); padding:40px">
+<div class="fl"><header class="fl-hd"><h1>From source content to a verified public page</h1><p>Preserve the old address and property facts, then review media, language and publication before checking the live result.</p><p class="muted">Design sequence · no completed action or live service is asserted. Filled witnesses belong to actual recorded decisions; the unfilled witnesses below mark evidence still needed.</p></header><div class="fl-row fl-head"><span>Who</span><span>Action</span><span>Evidence at the decision</span><span>If it fails or is incomplete</span></div><section class="fl-group"><h2>Preserve the source</h2><div class="fl-row"><b>Reviewer</b><div><b>Checks the legacy URL</b></div><div><p>Keep the original URL, source content and recorded destination decision together.</p><span class="wit wit--none">Decision evidence needed</span></div><p>Do not infer that an old home or search page should redirect to a new home page.</p></div><div class="fl-row"><b>Editor</b><div><b>Checks listing facts</b></div><div><p>Keep the reference, price, area, bedrooms, location and source URL exact. Unknown facts stay unknown.</p><span class="wit wit--none">Fact review needed</span></div><p>A missing price is not zero; descriptive prose is not automatically a verified numeric field.</p></div></section><section class="fl-group"><h2>Review media and language</h2><div class="fl-row"><b>Reviewer</b><div><b>Checks each photograph</b></div><div><p>Inspect the file and its rights, property association and public safety; record the reason and named confirmation.</p><span class="wit wit--none">Media approval needed</span></div><p>A stored or mirrored file is not automatically an approved public photograph. No photograph is supplied in this canvas.</p></div><div class="fl-row"><b>Hermes</b><div><b>Drafts a translation</b></div><div><p>Bulgarian remains the source locale. Copy approved facts without extending their claims.</p><span class="wit wit--none">Human language review needed</span></div><p>An automated draft or successful generation is not approval to index the language.</p></div><div class="fl-row"><b>Language reviewer</b><div><b>Approves the wording</b></div><div><p>Check the current source and target text. Retain who reviewed it and which version they reviewed.</p><span class="wit wit--none">Version-specific approval needed</span></div><p>A changed source can invalidate a prior translation review. Do not preserve a green status without checking its version.</p></div></section><section class="fl-group"><h2>Release with evidence</h2><div class="fl-row"><b>Authorised person</b><div><b>Reviews publication</b></div><div><p>Check the listing, media, language and applicable release gates before publication.</p><span class="wit wit--none">Publication receipt needed</span></div><p>A canvas verdict, local test or green CI run does not supply missing human listing or translation approval.</p></div><div class="fl-row"><b>Operator</b><div><b>Verifies the public result</b></div><div><p>Read back the deployed page, canonical URL, language, media and indexing decisions for the released revision.</p><span class="wit wit--none">Live readback needed</span></div><p>A successful build or upload does not prove that the intended route is serving the intended content.</p></div><div class="fl-row"><b>Operator</b><div><b>Verifies search and redirects</b></div><div><p>Check live search behaviour and the preserved old addresses against their recorded decisions.</p><span class="wit wit--none">Live parity evidence needed</span></div><p>Do not replace missing search results or failed redirects with a broad homepage fallback.</p></div></section><footer class="fl-close"><h2>What this flow does not establish</h2><p>PR #182 remains draft and unmerged. Its listing-URL migration is outside this release path. Current launch status must be checked against the launch authority and fresh service reports; this sequence supplies no production approval.</p><a href="Coverage.html">Review source and delivery coverage</a></footer></div>
 </div>
 </body></html>

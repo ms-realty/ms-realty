@@ -1,7 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
-  <style>
+<!doctype html><html lang="en"><head><meta charset="utf-8">  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap"><style>
     :root {
       /* Tile — the ground. Glazed white with a warm-grey glaze; cooler than paper. */
       --tile:#F6F5F1; --tile-glaze:#FFFFFF; --tile-deep:#ECEAE4; --tile-shadow:#E2DFD7;
@@ -327,109 +325,36 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .ph-app { width:390px; min-height:844px; background:var(--canvas); display:flex; flex-direction:column; }
-    .ph-bar { display:flex; align-items:center; gap:12px; padding:12px 16px 12px; background:var(--surface);
-      border-bottom:1px solid var(--border); }
-    .ph-bar h1 { font-family:var(--font-display); font-size:19px; font-weight:600; letter-spacing:-.01em;
-      flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ph-ic { display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-panel);
-      border:1px solid var(--border); background:var(--surface); color:var(--text-body); flex:0 0 auto; }
-    .ph-ic--plain { border-color:transparent; }
-    .ph-body { flex:1 1 auto; display:grid; gap:12px; padding:12px 16px 16px; align-content:start; }
-    .ph-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-panel);
-      box-shadow:var(--e-1); padding:12px 16px; display:grid; gap:8px; }
-    .ph-card h2 { font-size:13px; font-weight:600; }
-    .ph-kv { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-    .ph-kv dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .ph-kv dd { margin:0; font-size:13px; font-weight:600; color:var(--text-strong); }
-    .ph-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px;
-      padding:0 16px; border-radius:var(--r-panel); border:1px solid var(--ink-800); background:var(--ink-800); color:#fff;
-      font-size:13px; font-weight:600; flex:1 1 auto; }
-    .ph-btn--g { background:var(--surface); border-color:var(--border-control); color:var(--text-strong);
-      flex:0 0 auto; width:44px; padding:0; }
-    .ph-row { display:flex; gap:8px; }
-    .ph-msg { padding:12px 12px; border-radius:var(--r-panel); font-size:13px; line-height:1.55; }
-    .ph-msg--in { background:var(--tile-deep); color:var(--text-body); border-bottom-left-radius:4px; }
-    .ph-msg--draft { background:var(--brick-50); color:var(--text-body); border:1px solid var(--brick-300);
-      border-bottom-right-radius:4px; }
-    .ph-tabs { margin-top:auto; display:grid; grid-template-columns:repeat(5,1fr); gap:4px;
-      padding:8px 8px 20px; background:var(--surface); border-top:1px solid var(--border); }
-    .ph-tab { display:grid; justify-items:center; gap:4px; min-height:52px; padding:8px 4px; border-radius:var(--r-panel);
-      color:var(--text-muted); font-size:11px; font-weight:600; position:relative; }
-    .ph-tab[data-on] { color:var(--marble-900); }
-    .ph-tab[data-on] svg { color:var(--brick-600); }
-    .ph-tab u { position:absolute; top:4px; right:16px; min-width:16px; height:16px; padding:0 4px;
-      border-radius:var(--r-pill); background:var(--brick-600); color:#fff; font-size:11px; font-weight:700;
-      line-height:16px; text-align:center; text-decoration:none; }
-    .ph-step { display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:start;
-      padding:12px 0; border-bottom:1px solid var(--border); }
-    .ph-step:last-child { border-bottom:0; }
-    .ph-step b { font-size:13px; font-weight:600; display:block; }
-    .ph-step em { font-style:normal; font-size:11px; color:var(--text-muted); }
-
-  </style>
-</head><body>
-<div class="ph-app">
-  <div class="ph-bar">
-    <span class="ph-ic ph-ic--plain"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span>
-    <h1>CASE-0007</h1>
-    <span class="ph-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></span>
-  </div>
-  <div class="ph-body">
-    <div class="ph-card">
-      <h2>Anna Weber · villa, Katuntsi</h2>
-      <p style="font-size:13px; color:var(--text-muted)">Buyer purchase · Bulgaria · notary 8 September, 11:00</p>
-      <div style="height:6px; border-radius:var(--r-pill); background:var(--joint); overflow:hidden">
-        <i style="display:block; height:100%; width:64%; background:var(--success-500)"></i></div>
-      <p style="font-size:13px; color:var(--text-muted)">14 of 22 steps resolved · 1 blocked</p>
-    </div>
-
-    <div class="ph-card" style="border-color:var(--danger-600)">
-      <div style="display:flex; align-items:center; gap:8px">
-        <span class="pill pill--danger"><i></i>Blocked</span>
-        <span style="font-size:12px" class="muted">3 days</span>
-      </div>
-      <b style="font-size:12px">Proof of funds from the buyer's bank</b>
-      <p style="font-size:12px; color:var(--text-muted)">Requested 29 August. The preliminary contract cannot be signed without it.</p>
-      <div class="ph-row">
-        <span class="ph-btn">Chase the bank</span>
-        <span class="ph-btn ph-btn--g"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-      </div>
-    </div>
-
-    <div class="ph-card">
-      <h2>Next up</h2>
-      <div class="ph-step">
-        <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
-        <span><b>Preliminary contract signed</b><em>Buyer signed · waiting on the seller</em></span>
-      </div>
-      <div class="ph-step">
-        <span class="av"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h6"/></svg></span>
-        <span><b>Local acquisition tax calculated</b><em>Sandanski rate · before 8 September</em></span>
-      </div>
-      <div class="ph-step">
-        <span class="av"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18c3-1 4-8 7-8s2 6 5 6 3-4 6-4"/><path d="M3 21h18"/></svg></span>
-        <span><b>Notarial deed executed</b><em>Notary Ivanova · 8 September</em></span>
-      </div>
-    </div>
-
-    <div class="ph-card">
-      <h2>Conditions</h2>
-      <div class="ph-step">
-        <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-        <span><b>Subject to mortgage approval</b><em>Deadline 5 September</em></span>
-      </div>
-      <div class="ph-row"><span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Met</span>
-        <span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Waived</span>
-        <span class="ph-btn ph-btn--g" style="width:auto; flex:1 1 auto">Blocked…</span></div>
-    </div>
-  </div>
-  <nav class="ph-tabs">
-    <span class="ph-tab"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>Today</span>
-    <span class="ph-tab"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><u>4</u>Inbox</span>
-    <span class="ph-tab"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h4v13H4z"/><path d="M10 3h4v9h-4z"/><path d="M16 3h4v17h-4z"/></svg>Pipeline</span>
-    <span class="ph-tab" data-on="1"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Cases</span>
-    <span class="ph-tab"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>More</span>
-  </nav>
-</div>
-</body></html>
+  .wm { width:390px; min-height:844px; display:flex; flex-direction:column; background:var(--canvas); }
+  .wm-hd { display:flex; gap:12px; padding:12px 16px; align-items:center; border-bottom:1px solid var(--joint); }
+  .wm h1 { font-size:22px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wm h2 { font-size:16px; }
+  .wm h3 { font-size:13px; }
+  .wm .wm-back { display:grid; place-items:center; width:44px; height:44px; flex:0 0 auto; border:1px solid var(--border-control); border-radius:var(--r-edge); color:var(--text-strong); }
+  .wm-body { display:grid; gap:20px; padding:16px; align-content:start; flex:1; }
+  .wm-section { display:grid; gap:16px; padding:16px; background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); min-width:0; }
+  .wm-section > * { min-width:0; }
+  .wm .btn { min-height:44px; height:auto; white-space:normal; justify-content:center; }
+  .wm .in { width:100%; min-height:44px; font:inherit; color:var(--text-body); }
+  .wm textarea.in { min-height:96px; resize:vertical; }
+  .wm :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .wm .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .wm .wit { white-space:normal; flex-wrap:wrap; }
+  .wm p,.wm dd { overflow-wrap:anywhere; }
+  .wm-facts { display:grid; grid-template-columns:96px minmax(0,1fr); gap:12px; margin:0; }
+  .wm-facts dt { color:var(--text-muted); }
+  .wm-facts dd { margin:0; }
+  .wm-check { display:flex; align-items:center; gap:12px; min-height:44px; }
+  .wm-check input { width:20px; height:20px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .wm-queue { border-top:1px solid var(--joint); }
+  .wm-row { display:grid; grid-template-columns:minmax(0,1fr) 72px; gap:12px; align-items:center; height:44px; border-bottom:1px solid var(--joint); color:var(--text-body); }
+  .wm-row b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .wm-row span { font-size:11px; color:var(--text-muted); text-align:end; }
+  .wm-row:hover { background:var(--tile); text-decoration:none; }
+  .wm-states { display:grid; gap:20px; }
+  .wm-state { display:grid; gap:12px; border-top:1px solid var(--joint); padding-top:20px; }
+  .wm-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid var(--joint); background:var(--surface); }
+  .wm-tab { display:grid; justify-items:center; align-content:center; gap:4px; min-height:64px; color:var(--text-muted); font-size:11px; font-weight:600; border-top:2px solid transparent; }
+  .wm-tab[aria-current] { color:var(--text-strong); border-top-color:var(--ink-900); }
+  .wm-tab:hover { color:var(--text-strong); background:var(--tile); text-decoration:none; }
+</style></head><body><div class="wm"><header class="wm-hd"><a class="wm-back" href="Mobile.html" aria-label="Back to Today"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a><h1>Transaction case</h1></header><div class="wm-body"><p class="muted">Illustrative workspace · Mariya · no live record loaded.</p><section class="wm-section"><h2>Anna Weber · example case</h2><p>Buyer purchase · Bulgaria · manual case.</p><dl class="wm-facts"><dt>Reference</dt><dd><bdi dir="ltr">CASE-0007</bdi></dd><dt>Property facts</dt><dd>Not loaded</dd><dt>Responsible</dt><dd>Mariya · example</dd><dt>Evidence</dt><dd>Review pending</dd></dl><p>No transaction value, notary appointment or legal clearance is asserted.</p></section><section class="wm-section"><h2>Review the current step</h2><h3>Evidence pack review · example</h3><span class="wit wit--none">No completion recorded</span><div class="field"><label for="step-ref">Internal evidence reference</label><input class="in" id="step-ref" type="text" value=""></div><div class="field"><label for="producer-ref">Evidence producer reference</label><input class="in" id="producer-ref" type="text" value=""></div><div class="field"><label for="step-note">Review note</label><textarea class="in" id="step-note"></textarea></div><label class="wm-check"><input type="checkbox"><span>I, Mariya, have checked the evidence and confirm this step.</span></label><button class="btn btn--accent" type="button">Complete step</button><p class="hint">The source requires evidence from an accepted producer and resolved earlier phases. A reference alone does not certify legal sufficiency.</p></section><section class="wm-section"><h2>Waive a condition</h2><h3>Mortgage approval · example condition</h3><span class="wit wit--none">No waiver recorded</span><div class="field"><label for="authority">Authority or written instruction reference</label><input class="in" id="authority" type="text" value=""></div><div class="field"><label for="waive-code">Reason code</label><input class="in" id="waive-code" type="text" value="client_instruction"></div><div class="field"><label for="waive-note">Reason for this decision</label><textarea class="in" id="waive-note"></textarea></div><label class="wm-check"><input type="checkbox"><span>I, Mariya, confirm this waiver and the authority it rests on.</span></label><button class="btn" type="button">Waive condition</button><p class="hint">A waiver records a human decision. It does not establish finance approval or a refund entitlement. The source retains earlier events.</p></section><div class="wm-states"><section class="wm-state"><h2>Nothing in this view</h2><p>No case matches the current filter. Check the scope before treating the workspace as clear.</p><button class="btn" type="button">Change filters</button></section><section class="wm-state"><h2>Loading the record</h2><p>Keep the selected identity visible until the record has loaded.</p><button class="btn" type="button" disabled>Loading…</button></section><section class="wm-state"><h2>The action failed</h2><p>The evidence references and note remain entered. No step or condition change is confirmed.</p><button class="btn" type="button">Review entered values</button></section><section class="wm-state"><h2>Some evidence is unavailable</h2><p>The record can load while a private document, contact channel or external receipt is unavailable.</p><button class="btn" type="button">Review missing evidence</button></section><section class="wm-state"><h2>More records to review</h2><p>Keep the selected record and page position. Long identities stay on a single queue row.</p><button class="btn" type="button">Next page</button></section><section class="wm-state"><h2>Save outcome unknown</h2><p>Check for the original receipt before repeating a consequential action.</p><button class="btn" type="button" disabled>Try again</button></section></div></div><nav class="wm-tabs" aria-label="Workspace"><a class="wm-tab" href="Mobile.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>Today</a><a class="wm-tab" href="MobileLead.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Inbox</a><a class="wm-tab" href="MobileCase.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Cases</a></nav></div></body></html>

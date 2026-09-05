@@ -335,23 +335,24 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .doc-hd { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-    .doc-hd h1 { font-family:var(--font-display); font-size:32px; font-weight:600; letter-spacing:-.02em; }
-    .doc-hd p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:760px; }
-    .grp > h2 { font-size:13px; font-weight:600; color:var(--text-muted); margin:0 0 12px;
-      padding-bottom:8px; border-bottom:1px solid var(--border); }
-    .grp { margin-bottom:24px; }
-    .cov { width:100%; }
-    .cov th { font-size:11px; }
-    .cov td { font-size:13px; vertical-align:top; padding:8px 12px; }
-    .cov td.api { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); line-height:1.6; }
-    .cov td b { font-size:13px; color:var(--text-strong); }
-    .gapc { display:grid; grid-template-columns:auto minmax(0,1fr) 190px 108px; gap:16px; align-items:start;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .gapc:last-child { border-bottom:0; }
-    .gapc b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .gapc em { font-style:normal; font-size:13px; color:var(--text-muted); display:block; margin-top:4px; }
-    .cols2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .cv { display:grid; gap:24px; }
+  .cv h1 { font-size:22px; font-weight:600; }
+  .cv h2 { font-size:16px; }
+  .cv-hd,.cv-section { display:grid; gap:12px; }
+  .cv p { max-width:1080px; }
+  .cv-table { table-layout:fixed; border-collapse:collapse; }
+  .cv-table th { font-size:13px; }
+  .cv-table td { height:44px; font-size:13px; padding:12px; vertical-align:top; border-bottom:1px solid var(--joint); white-space:normal; overflow-wrap:anywhere; }
+  .cv-table th:nth-child(1) { width:160px; }
+  .cv-table th:nth-child(2) { width:320px; }
+  .cv-table th:nth-child(3) { width:256px; }
+  .cv-table td code { font-size:11px; }
+  .cv-section { padding-top:24px; border-top:1px solid var(--joint); }
+  .cv-facts { display:grid; grid-template-columns:200px minmax(0,1fr); gap:12px 24px; margin:0; }
+  .cv-facts dd { margin:0; }
+  .cv-facts dt { color:var(--text-muted); }
+  .cv a { display:inline-flex; width:fit-content; align-items:center; min-height:44px; }
+  .cv a:focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
 
   </style>
 </helmet>
@@ -363,257 +364,8 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div style="width:1560px; min-height:1720px; background:var(--canvas); padding:40px">
-<div class="doc-hd">
-  <div><h1>Design against the backend</h1>
-    <p>Every screen in this canvas checked against the 118 admin routes, the 8 CMS collections and the 7 public
-      page types that exist in the repository today. Twenty of twenty-four surfaces are already backed. Four
-      are designed ahead of the code, and this page says which.</p></div>
-  <div style="display:grid; gap:8px; justify-items:end">
-    <span class="pill pill--ok"><i></i>20 backed</span>
-    <span class="pill pill--warn"><i></i>4 partial</span>
-    <span class="pill pill--danger"><i></i>4 need new backend</span>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>Screen to endpoint</h2>
-  <div class="panel">
-    <table class="cov">
-      <thead><tr><th>Surface</th><th>Artboard</th><th>Endpoints behind it</th><th>State</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><b>Today</b></td>
-          <td class="muted">Main</td>
-          <td class="api">/api/admin/today · /api/admin/views</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Lead inbox</b></td>
-          <td class="muted">LeadInbox</td>
-          <td class="api">/leads · /replies · /replies/draft · /replies/delivery · /leads/assign · /leads/bulk · /leads/snooze</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Pipeline</b></td>
-          <td class="muted">Pipeline</td>
-          <td class="api">/pipeline · /lead-pipeline/outcome · /seller-pipeline/outcome · /deals/close</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Viewings</b></td>
-          <td class="muted">Viewings</td>
-          <td class="api">/viewings · /viewings/week · /viewings.ics · /viewings/follow-up · /availability</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Requests</b></td>
-          <td class="muted">Requests</td>
-          <td class="api">/requests · /public-requests/outcome · /locales</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Contacts</b></td>
-          <td class="muted">Contacts</td>
-          <td class="api">/contacts · /accounts · /accounts/link · /broker-contacts</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Consent</b></td>
-          <td class="muted">Consent</td>
-          <td class="api">/consents · /consents/withdraw</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Transaction cases</b></td>
-          <td class="muted">Cases, CaseDetail</td>
-          <td class="api">/cases · /cases/actions · /cases/conditions · /cases/intents</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Listings</b></td>
-          <td class="muted">Listings, ListingEditor</td>
-          <td class="api">/listings · /listings/edit · /listings/status · /listings/slug · /listing-quality · /listings/publication-schedules</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Media</b></td>
-          <td class="muted">Media</td>
-          <td class="api">/media/uploads · /media/reviews · /tours/approve</td>
-          <td><span class="pill pill--warn"><i></i>No admin route yet</span></td>
-        </tr>
-        <tr>
-          <td><b>Translations</b></td>
-          <td class="muted">Translations</td>
-          <td class="api">/translations · /translations/draft · /translations/approve · /translations/publish</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>SEO and redirects</b></td>
-          <td class="muted">SeoRedirects</td>
-          <td class="api">/migration/review · /redirect-approvals · /deployable-redirects/export · /seo-evidence · /seo-preflight</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Hermes</b></td>
-          <td class="muted">Hermes, HermesRun</td>
-          <td class="api">/hermes</td>
-          <td><span class="pill pill--warn"><i></i>Run history not exposed</span></td>
-        </tr>
-        <tr>
-          <td><b>Integrations</b></td>
-          <td class="muted">Integrations</td>
-          <td class="api">/connections · /connections/agent-config · /connections/disconnect · /social-marketing/publish</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Insight</b></td>
-          <td class="muted">Reports, Activity</td>
-          <td class="api">/reports · /reports/export · /activity</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Launch readiness</b></td>
-          <td class="muted">LaunchReadiness</td>
-          <td class="api">/launch-readiness · /launch-input-checklist · /preflight-reports · /live-services · /production-recovery</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Settings</b></td>
-          <td class="muted">Settings</td>
-          <td class="api">/settings · /profile · /locales</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Team and security</b></td>
-          <td class="muted">Team</td>
-          <td class="api">/team · /security/sessions · /security/two-factor · /security/audit-retention</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Data and exports</b></td>
-          <td class="muted">Team</td>
-          <td class="api">/data-exports · /data-exports/download</td>
-          <td><span class="pill pill--ok"><i></i>Backed</span></td>
-        </tr>
-        <tr>
-          <td><b>Documents</b></td>
-          <td class="muted">Documents, DocumentEditor</td>
-          <td class="api">/documents · /documents/outcome</td>
-          <td><span class="pill pill--warn"><i></i>Checklist only — no document object</span></td>
-        </tr>
-        <tr>
-          <td><b>Website pages</b></td>
-          <td class="muted">SitePages, PageEditor</td>
-          <td class="api">— none —</td>
-          <td><span class="pill pill--danger"><i></i>No collection exists</span></td>
-        </tr>
-        <tr>
-          <td><b>Tasks</b></td>
-          <td class="muted">Tasks</td>
-          <td class="api">— none —</td>
-          <td><span class="pill pill--danger"><i></i>No task entity</span></td>
-        </tr>
-        <tr>
-          <td><b>Automations</b></td>
-          <td class="muted">Automations</td>
-          <td class="api">/saved-search-alerts/run-due · /listings/publication-schedules/run-due</td>
-          <td><span class="pill pill--warn"><i></i>Runners exist, no rule model</span></td>
-        </tr>
-        <tr>
-          <td><b>Integration catalogue</b></td>
-          <td class="muted">IntegrationCatalogue</td>
-          <td class="api">— none —</td>
-          <td><span class="pill pill--danger"><i></i>10 hardcoded providers only</span></td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="foot"><span>Endpoint paths are relative to <span class="mono">/api/admin</span>.</span>
-      <span class="mono">Read from owner-operator-catalog.mjs</span></div>
-  </div>
-</div>
-
-<div class="grp">
-  <h2>What the design needs that the backend does not have</h2>
-  <div class="panel">
-    <div class="gapc">
-      <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>Website pages are not in the CMS</b><em>Home, search, seller, contact and location copy is rendered from code, so 7 of the 7 public page types cannot be edited by the owner. The catalogue and the guides already round-trip.</em></span>
-      <span style="font-size:13px" class="muted">New collections: pages, blocks, navigation, forms</span>
-      <span><span class="pill pill--danger"><i></i>Large</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>There is no document object</b><em>document-checklists.mjs records outcomes against a lead but there is nothing to create, render, version, send or sign. The composer designs what has to exist.</em></span>
-      <span style="font-size:13px" class="muted">New: templates, documents, versions, signature</span>
-      <span><span class="pill pill--danger"><i></i>Large</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>No integration aggregator</b><em>operator-provider-catalog.mjs hardcodes ten providers. Anything else is a code change and a release.</em></span>
-      <span style="font-size:13px" class="muted">Broker layer + a connection record</span>
-      <span><span class="pill pill--danger"><i></i>Medium</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--danger-50); color:var(--danger-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>Tasks have no entity</b><em>Work is implied by leads, viewings and cases. A broker cannot see one list of what they owe.</em></span>
-      <span style="font-size:13px" class="muted">New: tasks, with a source record</span>
-      <span><span class="pill pill--danger"><i></i>Medium</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>No automation rule model</b><em>Two run-due endpoints exist, but the rules themselves are code. The screen shows what a rule record needs.</em></span>
-      <span style="font-size:13px" class="muted">New: automations, runs, failures</span>
-      <span><span class="pill pill--warn"><i></i>Medium</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>Media has no admin route</b><em>/api/admin/media/uploads exists; there is no page behind it, so 11,859 files have no browser.</em></span>
-      <span style="font-size:13px" class="muted">Route + list view</span>
-      <span><span class="pill pill--warn"><i></i>Small</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>Hermes run history is not exposed</b><em>Runs are written to hermes-audit.jsonl but no endpoint reads them back.</em></span>
-      <span style="font-size:13px" class="muted">GET /api/admin/hermes/runs</span>
-      <span><span class="pill pill--warn"><i></i>Small</span></span>
-    </div>
-    <div class="gapc">
-      <span class="av" style="background:var(--warning-50); color:var(--warning-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
-      <span style="min-width:0"><b>No news or blog</b><em>No route type and no collection. Legacy .ru had a news index that is currently proposed for 410.</em></span>
-      <span style="font-size:13px" class="muted">Decide, then a collection or a redirect</span>
-      <span><span class="pill pill--warn"><i></i>Small</span></span>
-    </div>
-  </div>
-</div>
-
-<div class="grp" style="margin-bottom:0">
-  <h2>What the backend has that nothing was showing</h2>
-  <div class="cols2">
-    <div class="panel">
-      <div class="panel-hd"><h2>Now given a surface</h2></div>
-      <div class="sect" style="display:grid; gap:8px; font-size:13px">
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Transaction cases</b> — six case types across eight phases, Bulgarian and Greek step lists, and a manual or autonomous execution mode per case. The richest model in the repository and the least visible.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Case conditions</b> — subject-to clauses with deadlines, met, waived or extended.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Saved views</b> — a real endpoint, previously invisible in the interface.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Two-factor, sessions, audit retention</b> — three security endpoints with no screen.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Launch readiness and live-service provisioning</b> — thirteen gates that decide whether the site may go live.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span><b>Listing publication schedules</b> — publish at a date, with the approval taken in advance.</span></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-hd"><h2>Constraints the design had to obey</h2></div>
-      <div class="sect" style="display:grid; gap:8px; font-size:13px">
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Five actions are refused to Hermes in code — publish, send a message, mark indexable, change a price, change a redirect. The interface never offers them to it.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Sandanski may never be described as a sea destination. The guardrail is a token list, and the run detail shows it firing.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>A published listing needs facts, media and freeze-active approval. The publication boundary is why a seeded workspace shows zero public listings.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>A new audit action has to be registered before it can be written, so every screen's actions map to registered names.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Completing a document checklist item requires a note or a reference plus a named human confirmation.</span></div>
-        <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Admin locales are BG, RU and EN only; the public site carries seven, and Hebrew is a full right-to-left build.</span></div>
-      </div>
-    </div>
-  </div>
-</div>
+<div style="width:1560px; min-height:0px; background:var(--canvas); padding:40px">
+<div class="cv"><header class="cv-hd"><h1>Design, source and delivery evidence</h1><p>50 artboards are mapped below. The generator reads 23 admin page declarations and 135 method-and-path declarations from the current source catalogue. These are declarations, not a count of verified working screens.</p><span class="wit wit--none">Live adoption not verified</span></header><table class="cv-table"><thead><tr><th>Surface</th><th>Artboards</th><th>Declared admin page</th><th>Boundary to verify</th></tr></thead><tbody><tr><td><b>System examples</b></td><td>Foundations, Components, Interaction</td><td>No catalogue page mapped</td><td>Shared design contracts and interaction states.</td></tr><tr><td><b>Today</b></td><td>Main, Mobile</td><td><code>/admin/today</code></td><td>Current task and queue composition.</td></tr><tr><td><b>Lead inbox</b></td><td>LeadInbox, MobileLead</td><td><code>/admin/leads</code></td><td>Assignment, draft review, snooze and delivery remain distinct.</td></tr><tr><td><b>Pipeline</b></td><td>Pipeline</td><td><code>/admin/pipeline</code></td><td>Qualification and source outcomes.</td></tr><tr><td><b>Viewings</b></td><td>Viewings</td><td><code>/admin/viewings</code></td><td>Booking and external calendar receipts remain distinct.</td></tr><tr><td><b>Tasks</b></td><td>Tasks</td><td><code>/admin/tasks</code></td><td>Authored tasks and work derived from owning records.</td></tr><tr><td><b>Requests</b></td><td>Requests</td><td><code>/admin/requests</code></td><td>Saved searches, language and viewing-trip requests.</td></tr><tr><td><b>Contacts</b></td><td>Contacts</td><td><code>/admin/contacts</code></td><td>Identity, purpose and private contact access.</td></tr><tr><td><b>Consent</b></td><td>Consent</td><td><code>/admin/consents</code></td><td>A purpose-specific grant or withdrawal.</td></tr><tr><td><b>Transaction cases</b></td><td>Cases, CaseDetail, MobileCase</td><td><code>/admin/cases</code></td><td>Step evidence and condition decisions.</td></tr><tr><td><b>Document records</b></td><td>Documents, DocumentEditor</td><td><code>/admin/documents/records</code></td><td>Document records and revisions; a record does not prove a signature.</td></tr><tr><td><b>Listings</b></td><td>Listings, ListingEditor</td><td><code>/admin/listings</code></td><td>Source facts and listing decisions.</td></tr><tr><td><b>Translations</b></td><td>Translations</td><td><code>/admin/translations</code></td><td>Draft, review and publication boundaries.</td></tr><tr><td><b>Website pages</b></td><td>SitePages, PageEditor</td><td>No catalogue page mapped</td><td>Canvas editor concept; route and persistence integration need verification.</td></tr><tr><td><b>Media</b></td><td>Media, MediaEditor, MediaStates</td><td><code>/admin/media</code></td><td>Media records and review states.</td></tr><tr><td><b>SEO and redirects</b></td><td>SeoRedirects</td><td><code>/admin/migration/review</code></td><td>Recorded legacy decisions; live parity needs separate evidence.</td></tr><tr><td><b>Hermes</b></td><td>Hermes, HermesRun</td><td><code>/admin/hermes</code></td><td>Registered surface does not establish a live worker or run-history interface.</td></tr><tr><td><b>Integrations</b></td><td>Integrations, IntegrationCatalogue</td><td><code>/admin/connect</code></td><td>Provider definitions do not establish authorisation or a successful sync.</td></tr><tr><td><b>Automations</b></td><td>Automations</td><td>No catalogue page mapped</td><td>The separate draft PR #173 is not integrated here.</td></tr><tr><td><b>Settings</b></td><td>Settings</td><td><code>/admin/settings</code></td><td>Workspace settings and approval boundaries.</td></tr><tr><td><b>Team</b></td><td>Team</td><td><code>/admin/team</code></td><td>Account roles and access.</td></tr><tr><td><b>Reports</b></td><td>Reports</td><td><code>/admin/reports</code></td><td>Metrics require their source, scope and reporting period.</td></tr><tr><td><b>Activity</b></td><td>Activity</td><td><code>/admin/activity</code></td><td>Recorded actions remain distinct from external outcomes.</td></tr><tr><td><b>Launch readiness</b></td><td>LaunchReadiness</td><td>No catalogue page mapped</td><td>Saved launch report; fresh gate evidence remains required.</td></tr><tr><td><b>Sign-in</b></td><td>SignIn</td><td>No catalogue page mapped</td><td>Authentication composition; not an admin catalogue page.</td></tr><tr><td><b>Public home</b></td><td>PublicHome</td><td>No catalogue page mapped</td><td>Public composition; not an admin catalogue page.</td></tr><tr><td><b>Public search</b></td><td>PublicSearch, PublicMobileSearch</td><td>No catalogue page mapped</td><td>Search composition with explicit empty and failure states.</td></tr><tr><td><b>Public listing</b></td><td>PublicListing, PublicMobileListing, PublicMobileHebrew</td><td>No catalogue page mapped</td><td>Source facts and unknown availability; Hebrew preview is unapproved.</td></tr><tr><td><b>Location guide</b></td><td>PublicLocation</td><td>No catalogue page mapped</td><td>Reading layout; no invented local facts or legal advice.</td></tr><tr><td><b>Seller enquiry</b></td><td>PublicSeller</td><td>No catalogue page mapped</td><td>Initial contact is separate from authorising a listing.</td></tr><tr><td><b>Contact</b></td><td>PublicContact</td><td>No catalogue page mapped</td><td>Enquiry permission is separate from marketing consent.</td></tr><tr><td><b>Flows and coverage</b></td><td>FlowLead, FlowPublish, Coverage</td><td>No catalogue page mapped</td><td>Design evidence maps; not runtime completion reports.</td></tr></tbody></table><section class="cv-section"><h2>Evidence is specific to its layer</h2><dl class="cv-facts"><dt>Canvas</dt><dd>Generated composition, measured frames and individual review verdicts. A visual control does not prove an implemented action.</dd><dt>Source</dt><dd>Trace the rendered route, its action handler, capability check and persistence path. Catalogue membership alone is insufficient.</dd><dt>Local checks</dt><dd>Run focused tests, validation, build and smoke against the revision being considered. A fixture is not a live service report.</dd><dt>Pull request</dt><dd>Check the current head, draft state, CI and release conditions. PR #182 stays draft and unmerged; its listing-URL change is not included by implication.</dd><dt>Production</dt><dd>Verify the deployed revision, public and authenticated routes, external receipts and current launch gates. A successful upload is not a complete release.</dd></dl></section><section class="cv-section"><h2>Saved launch authority</h2><p>The saved report was generated at <bdi dir="ltr">2026-08-27T14:16:20.632Z</bdi>. It reports <b>blocked</b>: 4 of 12 gates are not passing. This is a historical file read, not a fresh production check.</p><dl class="cv-facts"><dt>live services</dt><dd>Run live Postgres sync/query and Hermes draft worker commands after provisioning.</dd><dt>monitoring rollback</dt><dd>Monitoring evidence, an automated rollback report, and rollback steps are required before launch.</dd><dt>payload runtime</dt><dd>Payload runtime report must pass before final production readiness.</dd><dt>production recovery</dt><dd>Encrypted off-site backup and isolated production restore evidence are required before launch.</dd></dl><a href="LaunchReadiness.html">Inspect the saved gate evidence</a></section><section class="cv-section"><h2>Approval remains with a person</h2><p>Hermes may draft. It does not publish pages, send customer messages, mark translations indexable or approve legal claims. Bulgarian is the source locale; the seven public languages and three admin languages keep their separate approval and layout requirements.</p><p>Detailed composition verdicts are recorded in REVIEW-2026-09-04.md. They identify what was reviewed and what was not verified.</p></section></div>
 </div>
 </x-dc>
 </body>
