@@ -3462,11 +3462,9 @@ function ListingBody({ page }) {
   const floorPlans = page.body.media.floor_plans || [];
   const videos = page.body.media.videos || [];
   const galleryCount = page.body.media.gallery_count || gallery.length;
-  // Desktop shows the main photo plus a 2x2 thumbnail block; phones reuse the
-  // same DOM as a swipe carousel, so every reviewed photo stays in the markup
-  // instead of trapping buyers in a five-image teaser.
+  // One lead photograph on desktop; phones reuse the full gallery as a swipe
+  // carousel. Every reviewed image remains available in the photo viewer.
   const gallerySlides = gallery.length ? gallery : [null];
-  const galleryLayout = gallerySlides.length >= 5 ? "quad" : gallerySlides.length >= 3 ? "trio" : gallerySlides.length === 2 ? "pair" : "single";
   const channels = page.body.actions.direct_contact.channels || [];
   const brokerChannels = channels.filter((channel) => channel.enabled);
   // Without a per-listing approved broker contact the panel falls back to the
@@ -3489,6 +3487,14 @@ function ListingBody({ page }) {
   const sourceLanguageLabel = contentLocale !== page.locale ? contentLocale.toUpperCase() : null;
   const verifiedAt = page.body.verification?.availability_verified_at || null;
   const verificationDate = listingVerificationDate(verifiedAt, page.locale);
+  const verifiedBy = String(page.body.verification?.availability_verified_by || "").trim();
+  const hasAvailabilityWitness = Boolean(verificationDate && verifiedBy);
+  const availabilityWitness = h(
+    "p",
+    { className: "ld-witness", "data-availability-witness": hasAvailabilityWitness ? "signed" : "missing" },
+    h("span", null, `${labels.availability}: ${hasAvailabilityWitness ? verifiedBy : labels.reviewRequired}`),
+    hasAvailabilityWitness ? h("time", { dateTime: verifiedAt }, verificationDate) : null,
+  );
   // Publication approval says the listing may be shown; it says nothing about
   // whether anybody checked its figures. Claiming reviewed facts beside a
   // table that carries source-stated ones is the contradiction this page used
@@ -3660,7 +3666,7 @@ function ListingBody({ page }) {
 
   const galleryShell = h(
     "div",
-    { className: "ld-gallery-shell", "data-gallery-layout": galleryLayout },
+    { className: "ld-gallery-shell", "data-gallery-layout": "single" },
     h(
       "div",
       {
@@ -3745,6 +3751,7 @@ function ListingBody({ page }) {
           ),
         )
       : null,
+    tools,
   );
 
   const photoViewer = gallery.length
@@ -4029,9 +4036,8 @@ function ListingBody({ page }) {
       "div",
       { className: "ld" },
       h("div", { className: "ld-topbar" }, crumbs, backLink("-desktop")),
-      header,
+      h("div", { className: "ld-hero" }, h("div", { className: "ld-hero__copy" }, header, availabilityWitness, primaryActions), galleryShell),
       factsBar,
-      galleryShell,
       photoViewer,
       h(
         "section",
@@ -4162,7 +4168,7 @@ function ListingBody({ page }) {
         h(
           "aside",
           { className: "ld-aside", "aria-label": labels.contactBroker, "data-listing-contact-panel": "true" },
-          h("div", { className: "ld-panel" }, priceBlock({ "data-listing-price": "true" }, { compact: true }), primaryActions, officeBlock, trustBlock, tools),
+          h("div", { className: "ld-panel" }, priceBlock({ "data-listing-price": "true" }, { compact: true }), officeBlock, trustBlock),
         ),
       ),
     ),

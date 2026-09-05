@@ -43,7 +43,7 @@ function richListingPage(localeCode = "en", { related = true, broker = false } =
   return page;
 }
 
-test("listing detail leads with the decision: price block, facts bar, and a five-photo gallery", () => {
+test("listing detail leads with price and one photograph while retaining the full gallery", () => {
   const page = richListingPage("en");
   const labels = labelsFor("en");
   const html = renderReactPublicBody(page);
@@ -59,11 +59,27 @@ test("listing detail leads with the decision: price block, facts bar, and a five
   for (const fact of ["bedrooms", "area", "land", "floor", "availability"]) {
     assert.match(html, new RegExp(`data-listing-fact="${fact}"`), fact);
   }
-  assert.match(html, /data-gallery-layout="quad"/);
+  assert.match(html, /data-gallery-layout="single"/);
   assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 9);
   assert.match(html, /data-listing-gallery-all="true"/);
   assert.match(html, new RegExp(labels.allPhotos.replace("{count}", "9")));
   assert.match(html, /class="ld-g ld-g--main[^"]*"[^>]*data-has-photo="true"/);
+});
+
+test("availability witness needs both its recorded reviewer and date in every public locale", () => {
+  for (const locale of PUBLIC_LOCALES) {
+    const page = richListingPage(locale);
+    page.body.verification.availability_verified_by = "Mariya <reviewer>";
+    let html = renderReactPublicBody(page);
+    assert.match(html, /data-availability-witness="signed"><span>[^<]*Mariya &lt;reviewer&gt;<\/span><time dateTime="2026-07-19T11:30:00Z">/);
+    page.body.verification.availability_verified_by = " ";
+    html = renderReactPublicBody(page);
+    assert.match(html, /data-availability-witness="missing"/);
+    assert.doesNotMatch(html, /data-availability-witness="signed"/);
+    page.body.verification.availability_verified_by = "Mariya";
+    page.body.verification.availability_verified_at = null;
+    assert.match(renderReactPublicBody(page), /data-availability-witness="missing"/);
+  }
 });
 
 test("listing facts are grouped and the pending capabilities stay visible but inert", () => {

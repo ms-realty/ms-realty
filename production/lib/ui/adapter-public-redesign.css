@@ -97,8 +97,58 @@ html:has(main[data-react-public-ui="home"]) .hp-search__card { background: trans
 [data-react-public-ui="home"] .hp-resort:hover { box-shadow: none; transform: none; border: 1px solid var(--border); }
 .site-hd .site-hd__call { background: var(--surface); color: var(--text-strong); border: 1px solid var(--border-strong); }
 .site-hd .site-hd__call:hover { background: var(--surface-hover); }
+
+/* Listing decisions sit beside the lead photograph. */
+[data-react-public-ui="listing"] .ld { max-width: none; padding-inline: 0; }
+[data-react-public-ui="listing"] .ld-topbar,
+[data-react-public-ui="listing"] .ld-bar,
+[data-react-public-ui="listing"] .ld-cols { width: min(1280px, calc(100% - 48px)); margin-inline: auto; }
+[data-react-public-ui="listing"] .ld-cols { margin-top: var(--space-8); }
+[data-react-public-ui="listing"] .ld-hero {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+  padding: var(--space-12) max(var(--space-6), calc((100% - 1280px) / 2));
+  margin-bottom: var(--space-6);
+  background: var(--field);
+  color: var(--field-text);
+}
+[data-react-public-ui="listing"] .ld-hero__copy { display: grid; align-content: start; gap: var(--space-5); min-width: 0; }
+[data-react-public-ui="listing"] .ld-head { display: grid; gap: var(--space-5); margin: 0; padding: 0; order: 0; }
+[data-react-public-ui="listing"] .ld-head h1 { color: var(--field-text); font-size: var(--display-md); text-wrap: auto; }
+[data-react-public-ui="listing"] .ld-head__loc,
+[data-react-public-ui="listing"] .ld-head__loc .mk-icon { color: var(--field-muted); }
+[data-react-public-ui="listing"] .ld-head .ld-price { justify-content: start; text-align: start; margin: 0; }
+[data-react-public-ui="listing"] .ld-price .ld-price__amount,
+[data-react-public-ui="listing"] .ld-bar__value--mono,
+[data-react-public-ui="listing"] .ld-factgroup__mono { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+[data-react-public-ui="listing"] .ld-head .ld-price .ld-price__amount { color: var(--field-text); font-size: 32px; }
+[data-react-public-ui="listing"] .ld-head .ld-price__per { color: var(--field-muted); }
+[data-react-public-ui="listing"] .ld-witness { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); font-size: 13px; color: var(--field-muted); }
+[data-react-public-ui="listing"] .ld-witness::before { content: ""; width: 8px; height: 8px; border: 1px solid currentColor; flex: none; }
+[data-react-public-ui="listing"] .ld-witness[data-availability-witness="signed"]::before { background: currentColor; }
+[data-react-public-ui="listing"] .ld-hero .ld-gallery-shell { min-width: 0; margin: 0; }
+[data-react-public-ui="listing"] .ld-hero .ld-gallery { border-radius: var(--radius-image); }
+[data-react-public-ui="listing"] .ld-gallery-shell .ld-tools { position: absolute; top: var(--space-3); inset-inline: var(--space-3); display: flex; justify-content: end; padding: 0; border: 0; z-index: 4; }
+[data-react-public-ui="listing"] .ld-panel,
+[data-react-public-ui="listing"] .ld-bar { box-shadow: none; }
+[data-react-public-ui="listing"] .ld-price .mk-badge { text-transform: none; letter-spacing: normal; }
+@media (min-width: 901px) {
+  [data-react-public-ui="listing"] .ld-hero .ld-gallery-shell[data-gallery-layout] .ld-gallery { display: block; height: 100%; min-height: 480px; }
+  [data-react-public-ui="listing"] .ld-hero .ld-gallery .ld-g--main { width: 100%; height: 100%; min-height: 480px; }
+  [data-react-public-ui="listing"] .ld-hero .ld-gallery .ld-g:not(.ld-g--main) { display: none; }
+  [data-react-public-ui="listing"] .ld-hero .ld-aside__btns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-react-public-ui="listing"] .ld-hero .ld-aside__btns > .mk-btn:first-of-type { grid-column: 1 / -1; }
+}
 @media (max-width: 900px) {
   [data-react-public-ui="home"] .hp-hero { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); padding: var(--space-8) var(--space-5); }
   [data-react-public-ui="home"] .hp-hero__bg { grid-column: 1; grid-row: 2; min-height: 0; aspect-ratio: 4 / 3; }
   [data-react-public-ui="home"] .hp-hero h1 { max-width: 100%; }
+  [data-react-public-ui="listing"] .ld-hero { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); padding: var(--space-8) var(--space-5); order: 1; }
+  [data-react-public-ui="listing"] .ld-head h1 { font-size: var(--display-sm); max-width: 100%; }
+  [data-react-public-ui="listing"] .ld-hero .ld-gallery-shell[data-gallery-layout] .ld-gallery { display: flex; height: auto; overflow-x: auto; scroll-snap-type: inline mandatory; }
+  [data-react-public-ui="listing"] .ld-hero .ld-gallery .ld-g { display: block; flex: 0 0 100%; min-width: 100%; aspect-ratio: 4 / 3; scroll-snap-align: start; }
+  [data-react-public-ui="listing"] .ld-topbar,
+  [data-react-public-ui="listing"] .ld-bar,
+  [data-react-public-ui="listing"] .ld-cols { width: calc(100% - 40px); }
 }
