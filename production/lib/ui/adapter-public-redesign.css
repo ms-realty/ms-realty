@@ -169,7 +169,7 @@ html:has(main[data-react-public-ui="home"]) .hp-search__card { background: trans
 [data-react-public-ui="search"] .sr-hero .sr-label { color: var(--field-muted); font-weight: 400; }
 [data-react-public-ui="search"] .sr-hero .sr-more { margin: 0; border-color: var(--spring-200); }
 [data-react-public-ui="search"] .sr-hero .sr-more__summary { color: var(--field-text); }
-[data-react-public-ui="search"] .sr-hero .sr-more__body { padding-inline: var(--space-4); padding-bottom: var(--space-4); border-radius: var(--radius-panel); background: var(--surface); color: var(--text-body); }
+[data-react-public-ui="search"] .sr-hero .sr-more__body { padding-inline: var(--space-4); padding-bottom: var(--space-4); border-radius: var(--radius-card); background: var(--surface); color: var(--text-body); }
 [data-react-public-ui="search"] .sr-more__body .sr-label { color: var(--text-body); }
 [data-react-public-ui="search"] .sr-hero .sr-filter-actions { padding: 0; justify-items: start; }
 [data-react-public-ui="search"] .sr-hero .sr-filter-actions .mk-btn--accent { width: auto; padding-inline: var(--space-6); }
@@ -201,3 +201,41 @@ html:has(main[data-react-public-ui="home"]) .hp-search__card { background: trans
 [data-react-public-ui="search"] .sr-mobile-filters:not([open]) .sr-mobile-filters__chevron { color: inherit; }
 [data-react-public-ui] .mk-pcard__badges .mk-badge { text-transform: none; letter-spacing: normal; }
 [data-react-public-ui] [data-card-spec="reference"] { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+
+/* Seller and contact lead with the existing enquiry, then its form. */
+[data-react-public-ui="seller"].sell-page,
+[data-react-public-ui="contact"].ct-page { max-width: none; padding: 0; }
+[data-react-public-ui="seller"] .sell-head,
+[data-react-public-ui="contact"] .ct-page__head { max-width: none; width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-12); padding: var(--space-12) max(var(--space-6), calc((100% - 1280px) / 2)); margin: 0; background: var(--field); color: var(--field-text); }
+[data-react-public-ui] .public-band__copy { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; justify-items: start; gap: var(--space-5); min-width: 0; }
+[data-react-public-ui] .public-band__copy > .mk-btn { max-width: 100%; min-height: 44px; height: auto; white-space: normal; }
+[data-react-public-ui] .public-band__copy h1 { color: var(--field-text); }
+[data-react-public-ui] .public-band__copy > p { color: var(--field-muted); font-size: var(--text-base); }
+[data-react-public-ui] .public-band__photo { display: block; min-width: 0; height: 480px; overflow: hidden; border-radius: var(--radius-image); }
+[data-react-public-ui] .public-band__photo img { width: 100%; height: 100%; object-fit: cover; }
+[data-react-public-ui="seller"] .sell-promise .mk-icon { color: var(--field-muted); }
+[data-react-public-ui="seller"] .sell-head .sell-steps { width: 100%; margin: var(--space-5) 0 0; }
+[data-react-public-ui="seller"] .sell-head .sell-steps li { color: var(--field-muted); }
+[data-react-public-ui="seller"] .sell-head .sell-steps li[aria-current="step"] { color: var(--field-text); }
+[data-react-public-ui="seller"].sell-page > :not(.sell-head) { width: min(960px, calc(100% - 48px)); margin: var(--space-8) auto; }
+[data-react-public-ui="seller"] .sell-form,
+[data-react-public-ui="contact"] .ct-form { background: transparent; border: 0; padding: 0; box-shadow: none; scroll-margin-top: 96px; }
+[data-react-public-ui="seller"] .sell-photos { background: transparent; border: 0; padding: var(--space-6) 0; border-top: 1px solid var(--border); box-shadow: none; }
+[data-react-public-ui="seller"] .sell-form__review > div { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; }
+[data-react-public-ui="contact"] .ct-page__cols { width: min(1280px, calc(100% - 48px)); margin: var(--space-10) auto; }
+[data-react-public-ui="contact"] .ct-office { border: 0; border-bottom: 1px solid var(--border); padding: 0 0 var(--space-4); border-radius: 0; background: transparent; box-shadow: none; }
+[data-react-public-ui="location"] .loc-head { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-12); padding: var(--space-12) max(var(--space-6), calc((100% - 1280px) / 2)); background: var(--canvas); }
+[data-react-public-ui="location"] .loc-head--photo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-react-public-ui="location"] .loc-head__in { padding: 0; margin: 0; min-width: 0; align-content: start; justify-items: start; gap: var(--space-5); }
+[data-react-public-ui="location"] .loc-head h1 { font-size: var(--display-lg); font-weight: var(--fw-display); }
+[data-react-public-ui="location"] #location-listings { scroll-margin-top: 96px; }
+@media (max-width: 1080px) {
+  [data-react-public-ui="seller"] .sell-head,
+  [data-react-public-ui="contact"] .ct-page__head,
+  [data-react-public-ui="location"] .loc-head { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); padding: var(--space-8) var(--space-5); }
+  [data-react-public-ui] .public-band__photo { height: auto; aspect-ratio: 4 / 3; }
+  [data-react-public-ui] .public-band__copy h1,
+  [data-react-public-ui="location"] .loc-head h1 { font-size: var(--display-sm); }
+  [data-react-public-ui="seller"].sell-page > :not(.sell-head),
+  [data-react-public-ui="contact"] .ct-page__cols { width: calc(100% - 40px); }
+}

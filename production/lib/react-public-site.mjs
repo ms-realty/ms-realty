@@ -1051,6 +1051,14 @@ function formatEuro(value, localeCode = "en") {
   }
 }
 
+function SandanskiPhotograph({ className, localeCode }) {
+  const photo = HERO_GALLERY_SLIDES[0];
+  return h("picture", { className },
+    h("source", { type: "image/avif", srcSet: photo.avif, sizes: "(max-width: 1080px) 100vw, 50vw" }),
+    h("img", { src: photo.src, alt: localizedLocationValue(localeCode, "Sandanski"), width: photo.width, height: photo.height, fetchPriority: "high", decoding: "async" }),
+  );
+}
+
 function pricePresetOptions({ values, localeCode, labels, suffix = "", selected = "" }) {
   return [
     h("option", { key: "any", value: "" }, labels.any),
@@ -2960,10 +2968,7 @@ function SearchBody({ page }) {
             filterForm("sr"),
           ),
       ),
-      h("picture", { className: "sr-hero__photo" },
-        h("source", { type: "image/avif", srcSet: HERO_GALLERY_SLIDES[0].avif, sizes: "(max-width: 1080px) 100vw, 50vw" }),
-        h("img", { src: HERO_GALLERY_SLIDES[0].src, alt: "", width: HERO_GALLERY_SLIDES[0].width, height: HERO_GALLERY_SLIDES[0].height, fetchPriority: "high", decoding: "async" }),
-      ),
+      h(SandanskiPhotograph, { className: "sr-hero__photo", localeCode: page.locale }),
     ),
     h(
       "div",
@@ -3169,13 +3174,14 @@ function LocationBody({ page }) {
     },
     h(
       "header",
-      { className: "loc-head" },
+      { className: `loc-head${page.body.location === "Sandanski" ? " loc-head--photo" : ""}` },
       h(
         "div",
         { className: "loc-head__in" },
         h("h1", null, page.body.h1),
         h("p", { className: "loc-head__count", "data-location-count": page.body.listing_count }, `${page.body.listing_count} ${labels.reviewedListings}`),
         page.body.intro ? h("p", { className: "loc-head__intro" }, page.body.intro) : null,
+        h(Btn, { tag: "a", variant: "accent", href: "#location-listings" }, labels.browseAllListings),
         context
           ? h(
               "div",
@@ -3199,10 +3205,11 @@ function LocationBody({ page }) {
             )
           : null,
       ),
+      page.body.location === "Sandanski" ? h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }) : null,
     ),
     h(
       "section",
-      { className: "loc-sec", "aria-label": labels.locationListings },
+      { id: "location-listings", className: "loc-sec", "aria-label": labels.locationListings },
       h(
         "div",
         { className: "loc-sec__head" },
@@ -4312,9 +4319,11 @@ function SellerBody({ page }) {
     h(
       "section",
       { className: "page-head sell-head", "aria-label": labels.sellerValuation, "data-seller-valuation-flow": "broker_callback" },
+      h("div", { className: "public-band__copy" },
       h("h1", null, page.body.h1),
       h("p", null, page.body.intro),
       h("p", { className: "sell-promise", "data-seller-promise": "true" }, h(Icon, { name: "shield-check", size: 18 }), h("span", null, labels.sellerPromise)),
+      valuation ? h(Btn, { tag: "a", variant: "accent", href: "#seller-enquiry" }, labels.propertyDetails) : channels ? phoneAction(channels.phone, "accent") : null,
       // Without a submittable form there is no flow to track, so the progress
       // indicator would promise a stepper the visitor cannot use.
       valuation
@@ -4331,11 +4340,14 @@ function SellerBody({ page }) {
             ),
           )
         : null,
+      ),
+      h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }),
     ),
     valuation
       ? h(
           "form",
           {
+            id: "seller-enquiry",
             className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-form",
             method: valuation.method || "POST",
             action: valuation.endpoint,
@@ -4441,7 +4453,7 @@ function SellerBody({ page }) {
               "div",
               { className: "sell-form__actions" },
               h(Btn, { type: "button", variant: "secondary", size: "lg", iconStart: "arrow-left", "data-seller-back": "true", hidden: true }, labels.previous),
-              h(Btn, { type: "submit", variant: "accent", size: "lg", iconStart: "send" }, valuation.label),
+              h(Btn, { type: "submit", variant: "secondary", size: "lg", iconStart: "send" }, valuation.label),
             ),
           ),
         )
@@ -4450,7 +4462,7 @@ function SellerBody({ page }) {
           { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
           h("h2", { className: "ct-form__title" }, labels.sellerValuation),
           h("p", null, page.body.form_unavailable),
-          channels ? phoneAction(channels.phone, "accent") : null,
+          channels ? phoneAction(channels.phone, "secondary") : null,
         ),
     // The one photo-upload path on the page. It cannot live inside the intake
     // form - forms do not nest, and a seller who already holds a reference must
@@ -4623,7 +4635,13 @@ function ContactBody({ page }) {
   const main = h(
     "main",
     { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
-    h("div", { className: "page-head ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
+    h("div", { className: "page-head ct-page__head" },
+      h("div", { className: "public-band__copy" },
+        h("h1", null, page.body.h1), h("p", null, page.body.intro),
+        callback ? h(Btn, { tag: "a", variant: "accent", href: "#contact-form" }, labels.contactFormTitle) : channels ? phoneAction(channels.phone, "accent") : null,
+      ),
+      h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }),
+    ),
     h(
       "div",
       { className: "ct-page__cols" },
@@ -4638,7 +4656,7 @@ function ContactBody({ page }) {
               h(
                 "div",
                 { className: "channel-row" },
-                h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
+                h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
                 channels.whatsapp ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.whatsapp.href }, channels.whatsapp.label) : null,
                 channels.viber ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.viber.href }, channels.viber.label) : null,
                 channels.email ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: channels.email.href }, channels.email.label) : null,
@@ -4688,6 +4706,7 @@ function ContactBody({ page }) {
         ? h(
             "form",
             {
+              id: "contact-form",
               className: "mk-card mk-card--elevated mk-card--pad-lg ct-form ct-form--contact",
               method: callback.method || "POST",
               action: callback.endpoint,
@@ -4732,7 +4751,7 @@ function ContactBody({ page }) {
             { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", "data-form-unavailable": "true" },
             h("h2", { className: "ct-form__title" }, labels.contactFormTitle),
             h("p", null, page.body.form_unavailable),
-            channels ? phoneAction(channels.phone, "accent") : null,
+            channels ? phoneAction(channels.phone, "secondary") : null,
           ),
     ),
   );

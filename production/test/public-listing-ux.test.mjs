@@ -184,7 +184,8 @@ test("location landing opens with the area, its sub-areas, guides, and a seller 
   assert.equal(page.body.sub_areas[0].href.startsWith("/bg/tarsene?region_id="), true);
   assert.equal(page.body.search_href, "/bg/tarsene?region_id=BG%3Amunicipality%3ABLG40");
   assert.equal(page.body.seller.path, "/bg/prodai");
-  assert.match(html, /class="loc-head"/);
+  assert.match(html, /class="loc-head loc-head--photo"/);
+  assert.match(html, /class="public-band__photo"/);
   assert.match(html, /data-location-count="\d+"/);
   assert.match(html, /data-location-areas="true"/);
   assert.match(html, /data-location-area="BG:settlement:65334"/);
