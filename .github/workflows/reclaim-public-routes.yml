@@ -12,6 +12,11 @@ name: Reclaim the public routes
 on:
   workflow_dispatch:
     inputs:
+      restore_construction_hold:
+        description: Restore the existing holding Worker on all canonical public routes
+        required: false
+        default: false
+        type: boolean
       detach_foreign_routes:
         description: >-
           Type the name of the Worker whose canonical .com routes should be
@@ -34,6 +39,7 @@ jobs:
       DETACH_WORKER: ${{ inputs.detach_foreign_routes }}
       PRODUCTION_WORKER: ms-realty
       PUBLIC_ZONE: makler-realty.com
+      MS_REALTY_PUBLIC_CONSTRUCTION_HOLD: ${{ vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -90,11 +96,29 @@ jobs:
           );
           NODE
 
+      - name: Restore the public construction hold
+        if: ${{ inputs.restore_construction_hold }}
+        env:
+          ZONE_ID: ${{ steps.zone.outputs.id }}
+        run: |
+          test -z "$DETACH_WORKER"
+          node production/scripts/restore-public-hold.mjs
+          node production/scripts/probe-public-hold.mjs
+
+      - name: Preserve holding route receipts
+        if: ${{ always() && inputs.restore_construction_hold }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-hold-routes
+          path: public-hold-*.json
+          if-no-files-found: warn
+
       - name: Detach the named Worker from the canonical public routes
         if: ${{ inputs.detach_foreign_routes != '' }}
         env:
           ZONE_ID: ${{ steps.zone.outputs.id }}
         run: |
+          test "$MS_REALTY_PUBLIC_CONSTRUCTION_HOLD" != "true"
           test "$DETACH_WORKER" != "$PRODUCTION_WORKER"
           mapfile -t targets < <(node -e '
             const rows = JSON.parse(require("node:fs").readFileSync("foreign-routes.json", "utf8"));
