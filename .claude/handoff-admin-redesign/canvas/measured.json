@@ -19,8 +19,8 @@
   "Interaction": 2477,
   "LaunchReadiness": 1964,
   "LeadInbox": 2267,
-  "ListingEditor": 1072,
-  "Listings": 940,
+  "ListingEditor": 2066,
+  "Listings": 1221,
   "Main": 1556,
   "Media": 1240,
   "MediaEditor": 1882,
@@ -47,6 +47,6 @@
   "SitePages": 979,
   "Tasks": 1643,
   "Team": 2032,
-  "Translations": 904,
+  "Translations": 1955,
   "Viewings": 1436
 }

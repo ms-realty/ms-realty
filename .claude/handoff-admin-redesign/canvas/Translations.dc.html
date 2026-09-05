@@ -335,18 +335,28 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .diff { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0; border-top:1px solid var(--border); }
-    .diff > div { padding:16px 20px; }
-    .diff > div:first-child { border-right:1px solid var(--border); background:var(--tile); }
-    .diff h4 { font-size:11px; font-weight:600; color:var(--text-muted); margin-bottom:8px;
-      display:flex; align-items:center; justify-content:space-between; }
-    .diff p { font-size:13px; line-height:1.6; color:var(--text-body); }
-    .fact-lock { display:inline; background:var(--spring-50); border-bottom:1px solid var(--spring-200);
-      padding:0 4px; font-weight:600; color:var(--spring-800); }
-    .qrow { display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .qrow:last-child { border-bottom:0; }
-    .qrow:hover { background:var(--tile); }
+  .lcg { display:grid; gap:20px; }
+  .lcg .ph { margin:0; }
+  .lcg h2 { font-size:16px; }
+  .lcg-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .lcg-form,.lcg-cols,.lcg-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; align-items:start; }
+  .lcg-wide { grid-column:1/-1; }
+  .lcg .in { width:100%; font:inherit; color:var(--text-body); }
+  .lcg textarea.in { min-height:144px; resize:vertical; }
+  .lcg :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .lcg button:disabled { opacity:.5; cursor:not-allowed; }
+  .lcg-check { display:flex; gap:12px; align-items:start; }
+  .lcg-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .lcg-row { display:grid; grid-template-columns:minmax(0,1fr) 128px 128px 200px 72px; gap:16px; align-items:center; height:44px; padding:0 20px; border-top:1px solid var(--joint); }
+  .lcg-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lcg-row:hover { background:var(--tile); }
+  .lcg-lang { grid-template-columns:128px minmax(0,1fr) 200px 72px; }
+  .lcg-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px; margin:0; }
+  .lcg-facts dt { color:var(--text-muted); }
+  .lcg-facts dd { margin:0; overflow-wrap:anywhere; }
+  .lcg-state { display:grid; gap:12px; padding-top:20px; border-top:1px solid var(--joint); }
+  .lcg-state .btn,.lcg-section > .btn { justify-self:start; }
+  .lcg-quote { margin:0; padding:0; border:0; overflow-wrap:anywhere; }
 
   </style>
 </helmet>
@@ -358,7 +368,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -400,100 +410,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Saved fixture preview</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Translations</h1><p>Bulgarian is the source. A translation is indexed only when a person who reads that language has approved it.</p></div>
-        <div class="ph-actions">
-          <div class="seg"><button type="button" data-on="1">Needs approval <em>7</em></button><button type="button">Approved <em>1,148</em></button><button type="button">Stale <em>4</em></button></div>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg><span>Draft the missing 96</span></button>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:340px minmax(0,1fr); gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar"><span class="find" style="width:auto; flex:1 1 auto"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Listing or page</span>
-            <button class="btn btn--sm" type="button">DE <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
-          <div class="qrow" style="background:var(--surface); box-shadow:inset 3px 0 0 var(--brick-500)">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Renovated village house</b>
-              <span style="font-size:11px" class="muted">MS-00932 · DE</span></span>
-            </div>
-          <div class="qrow">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Studio near the mineral baths</b>
-              <span style="font-size:11px" class="muted">MS-00791 · DE</span></span>
-            </div>
-          <div class="qrow">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Apartment with parking</b>
-              <span style="font-size:11px" class="muted">MS-00499 · DE</span></span>
-            </div>
-          <div class="qrow">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Melnik location page</b>
-              <span style="font-size:11px" class="muted">/lokacii/melnik · NL</span></span>
-            </div>
-          <div class="qrow">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Katuntsi location page</b>
-              <span style="font-size:11px" class="muted">/lokacii/katuntsi · NL</span></span>
-            </div>
-          <div class="qrow">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Villa with a pool</b>
-              <span style="font-size:11px" class="muted">MS-00191 · EL</span></span>
-            </div>
-          <div class="qrow">
-            <span class="av" style="background:var(--brick-50); color:var(--brick-700)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span>
-            <span style="min-width:0"><b style="font-size:13px; font-weight:600; display:block; color:var(--text-strong)">Purchase fees guide</b>
-              <span style="font-size:11px" class="muted">/rakovodstva/taksi · EL</span></span>
-            </div>
-          <div class="foot"><span>7 waiting</span><span class="mono">Oldest 3 days</span></div>
-        </section>
-        <section class="panel">
-          <div class="panel-hd">
-            <div><h2>Renovated village house with a garden</h2>
-              <p class="sub"><span class="mono">MS-00932</span> · Bulgarian → German · drafted by Hermes 31 Aug 09:05</p></div>
-            <div style="display:flex; gap:8px">
-              <button class="btn btn--sm" type="button">Edit the German</button>
-              <button class="btn btn--sm btn--primary" type="button">Approve</button>
-              <button class="btn btn--sm" type="button">Publish</button>
-            </div>
-          </div>
-          <div class="diff">
-            <div>
-              <h4>Bulgarian — approved source<span class="pill pill--ok"><i></i>Locked</span></h4>
-              <p>Реновирана селска къща с двор в Катунци. Къщата е с
-                <span class="fact-lock">96 кв. м</span> жилищна площ,
-                <span class="fact-lock">три спални</span> и собствен двор.
-                Цена: <span class="fact-lock">54 500 EUR</span>. Референция:
-                <span class="fact-lock">MS-00932</span>.</p>
-              <p style="margin-top:12px; font-size:11px" class="muted">Editing the source invalidates every
-                translation drawn from it. The source hash is stored with each draft.</p>
-            </div>
-            <div>
-              <h4>German — draft<span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg>Unpublished</span></h4>
-              <p>Renoviertes Dorfhaus mit Garten in Katunzi. Das Haus hat
-                <span class="fact-lock">96 m²</span> Wohnfläche,
-                <span class="fact-lock">drei Schlafzimmer</span> und einen eigenen Garten.
-                Preis: <span class="fact-lock">54.500 EUR</span>. Referenz:
-                <span class="fact-lock">MS-00932</span>.</p>
-              <div style="margin-top:12px; display:grid; gap:8px; font-size:13px">
-                <div style="display:flex; gap:8px; color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Every fact matches the source, field by field.</span></div>
-                <div style="display:flex; gap:8px; color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>No claim was added that the Bulgarian does not make.</span></div>
-                <div style="display:flex; gap:8px; color:var(--success-600)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>SEO title 54 characters, description 141.</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="savebar"><span style="font-size:13px" class="muted">Approving puts your name on this text.
-            Publishing is the separate act that makes it indexable in German and adds it to the next sitemap
-            build — a translator may approve, and only an editor may publish, so the two are two buttons.
-            There is no reject: a draft that is wrong is edited or left, and the ledger records no rejection.</span></div>
-        </section>
-      </div>
+<div class="lcg"><div class="ph"><div><h1>Translations</h1><p>Read the current Bulgarian source beside the target wording before approving a version.</p></div></div><p class="muted">Saved Bulgarian fixture · <bdi dir="ltr">MS-CRAWL-0001</bdi> · no fresh listing or publication approval is asserted.</p><section class="panel"><div class="panel-hd"><h2>Public languages</h2><span>7 languages</span></div><div class="lcg-row lcg-lang"><b>Български</b><span>Source text</span><span class="wit wit--none">Review record not loaded</span><button class="btn btn--sm" type="button">Open</button></div><div class="lcg-row lcg-lang"><b>English</b><span>Target translation</span><span class="wit wit--none">Approval not loaded</span><button class="btn btn--sm" type="button">Open</button></div><div class="lcg-row lcg-lang"><b>Deutsch</b><span>Target translation</span><span class="wit wit--none">Approval not loaded</span><button class="btn btn--sm" type="button">Open</button></div><div class="lcg-row lcg-lang"><b>Nederlands</b><span>Target translation</span><span class="wit wit--none">Approval not loaded</span><button class="btn btn--sm" type="button">Open</button></div><div class="lcg-row lcg-lang"><b>Русский</b><span>Target translation</span><span class="wit wit--none">Approval not loaded</span><button class="btn btn--sm" type="button">Open</button></div><div class="lcg-row lcg-lang"><b>Ελληνικά</b><span>Target translation</span><span class="wit wit--none">Approval not loaded</span><button class="btn btn--sm" type="button">Open</button></div><div class="lcg-row lcg-lang"><b>עברית</b><span>Target translation</span><span class="wit wit--none">Approval not loaded</span><button class="btn btn--sm" type="button">Open</button></div></section><div class="lcg-cols"><section class="panel"><div class="panel-hd"><h2>Bulgarian source</h2></div><div class="lcg-section"><blockquote class="lcg-quote" lang="bg"><b>Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!</b><p>Комплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.</p></blockquote><p>Reference: <bdi dir="ltr">MS-CRAWL-0001</bdi>. Price: Price on request. Confirmed area and bedroom count are not recorded.</p></div></section><section class="panel"><div class="panel-hd"><h2>Target text for review</h2></div><div class="lcg-section"><div class="field"><label for="target-language">Target language</label><select class="in" id="target-language"><option value="en">English</option><option value="de">Deutsch</option><option value="nl">Nederlands</option><option value="ru">Русский</option><option value="el">Ελληνικά</option><option value="he">עברית</option></select></div><span class="wit wit--none">Draft and human approval missing</span><div class="field lcg-wide"><label for="translation-text">Target wording</label><textarea class="in" id="translation-text" dir="auto"></textarea></div><div class="field lcg-wide"><label for="translation-review">Source and language review note</label><textarea class="in" id="translation-review" dir="auto"></textarea></div><label class="lcg-check"><input type="checkbox"><span>I, Mariya, can review this language and confirm that the wording preserves the current source facts.</span></label><button class="btn btn--accent" type="button" disabled>Record approval</button><p class="hint">Approval is unavailable while no target draft is loaded. Hermes can draft; a person reviews the wording. Publication remains a separate authorised action.</p></div></section></div><section class="panel"><div class="panel-hd"><h2>Before a language becomes indexable</h2></div><div class="lcg-section"><p>Match the review to the current source and target version. Check every price, area, bedroom count, location and reference. Keep unapproved or stale wording out of the indexable page.</p><span class="wit wit--none">Publication evidence needed</span><button class="btn" type="button" disabled>Review publication</button><p class="hint">The Bulgarian quotation is preserved as source material. This preview does not approve, publish or index a translation.</p></div></section><div class="lcg-states"><section class="lcg-state"><h2>No matching records</h2><p>Keep the current filter visible. Empty results do not establish that the full catalogue is empty.</p><button class="btn" type="button">Change filters</button></section><section class="lcg-state"><h2>Record is loading</h2><p>Retain its reference and selected language while facts load.</p><button class="btn" type="button" disabled>Loading…</button></section><section class="lcg-state"><h2>Save or review failed</h2><p>Keep entered values and the review note. No approval is shown as saved.</p><button class="btn" type="button">Review entered values</button></section><section class="lcg-state"><h2>Some evidence is missing</h2><p>The source text can exist while price, availability, media or language approval is unknown.</p><button class="btn" type="button">Review evidence</button></section><section class="lcg-state"><h2>Many matching records</h2><p>Keep a single identity line and the current page position.</p><button class="btn" type="button">Next page</button></section><section class="lcg-state"><h2>Source changed during review</h2><p>Read the latest source before approving a draft or applying an edit based on the older version.</p><button class="btn" type="button" disabled>Approve old draft</button></section></div></div>
     </div>
   </div>
 </div>

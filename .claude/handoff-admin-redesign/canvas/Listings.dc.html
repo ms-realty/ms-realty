@@ -335,27 +335,28 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .bulk { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 16px;
-      background:var(--tile-deep); border-bottom:1px solid var(--joint); font-size:13px; font-weight:600;
-      color:var(--text-strong); }
-    .bulk a { margin-left:auto; font-weight:600; }
-    .ident { display:flex; align-items:center; gap:8px; min-width:0; }
-    .ident b { min-width:0; font-weight:600; color:var(--text-strong); overflow:hidden; text-overflow:ellipsis;
-      white-space:nowrap; }
-    .state { display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .lcs { display:flex; align-items:center; gap:4px; white-space:nowrap; }
-    .lc { display:inline-grid; place-items:center; min-width:24px; height:20px; padding:0 4px;
-      border-radius:var(--r-edge); background:var(--tile-deep); color:var(--marble-700); font-size:11px;
-      font-weight:600; }
-    /* Completeness: the fill has to be read against its own track, so every
-       fill clears 3:1 on --tile-shadow (success 3.76, warning 4.23, marble-600 4.32). */
-    .bar { display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
-    .bar .t { display:block; width:56px; height:6px; border-radius:var(--r-pill); background:var(--tile-shadow);
-      overflow:hidden; }
-    .bar .t i { display:block; height:100%; border-radius:var(--r-pill); }
-    td .box { display:block; }
-    tbody tr[data-selected] td { background:var(--tile); }
-    .go { display:inline-flex; color:var(--text-muted); }
+  .lcg { display:grid; gap:20px; }
+  .lcg .ph { margin:0; }
+  .lcg h2 { font-size:16px; }
+  .lcg-section { display:grid; gap:16px; padding:20px; min-width:0; }
+  .lcg-form,.lcg-cols,.lcg-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; align-items:start; }
+  .lcg-wide { grid-column:1/-1; }
+  .lcg .in { width:100%; font:inherit; color:var(--text-body); }
+  .lcg textarea.in { min-height:144px; resize:vertical; }
+  .lcg :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .lcg button:disabled { opacity:.5; cursor:not-allowed; }
+  .lcg-check { display:flex; gap:12px; align-items:start; }
+  .lcg-check input { width:16px; height:16px; flex:0 0 auto; accent-color:var(--spring-700); }
+  .lcg-row { display:grid; grid-template-columns:minmax(0,1fr) 128px 128px 200px 72px; gap:16px; align-items:center; height:44px; padding:0 20px; border-top:1px solid var(--joint); }
+  .lcg-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lcg-row:hover { background:var(--tile); }
+  .lcg-lang { grid-template-columns:128px minmax(0,1fr) 200px 72px; }
+  .lcg-facts { display:grid; grid-template-columns:160px minmax(0,1fr); gap:12px; margin:0; }
+  .lcg-facts dt { color:var(--text-muted); }
+  .lcg-facts dd { margin:0; overflow-wrap:anywhere; }
+  .lcg-state { display:grid; gap:12px; padding-top:20px; border-top:1px solid var(--joint); }
+  .lcg-state .btn,.lcg-section > .btn { justify-self:start; }
+  .lcg-quote { margin:0; padding:0; border:0; overflow-wrap:anywhere; }
 
   </style>
 </helmet>
@@ -367,7 +368,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:940px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -409,191 +410,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Saved fixture preview</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div>
-          <h1>Listings</h1>
-          <p>A listing goes public only after its facts, media and translations are approved.</p>
-        </div>
-        <div class="ph-actions">
-          <div class="seg">
-            <button type="button" data-on="1">All <em>165</em></button>
-            <button type="button">Published <em>84</em></button>
-            <button type="button">Needs review <em>43</em></button>
-            <button type="button">Archived <em>38</em></button>
-          </div>
-          <button class="btn btn--accent" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New listing</span></button>
-        </div>
-      </div>
-
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Reference, title or location</span>
-          <button class="btn btn--sm" type="button">Sandanski<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any type<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any price<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm btn--ghost" type="button">Clear</button>
-          <span style="margin-left:auto" class="mono">Sorted by last updated</span>
-        </div>
-        <div class="bulk">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-          <span>3 selected</span>
-          <button class="btn btn--sm" type="button">Assign broker</button>
-          <button class="btn btn--sm" type="button">Request translation</button>
-          <button class="btn btn--sm" type="button">Send for approval</button>
-          <button class="btn btn--sm" type="button">Archive</button>
-          <a href="#">Clear selection</a>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:36px; padding-right:0"></th>
-              <th>Property</th>
-              <th style="width:96px">Location</th>
-              <th style="width:96px">Type</th>
-              <th style="width:96px">Price</th>
-              <th style="width:96px">Status</th>
-              <th style="width:96px">Languages</th>
-              <th style="width:96px">Completeness</th>
-              <th style="width:96px">Updated</th>
-              <th style="width:32px; padding-left:0"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>Two-bedroom apartment with a south terrace</b><span class="mono">MS-00815</span></span></td>
-              <td class="muted">Sandanski</td>
-              <td class="muted">Apartment</td>
-              <td style="white-space:nowrap"><span class="price">€68,000</span></td>
-              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>MR</b></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">RU</span><span class="muted">+4</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:92%; background:var(--success-500)"></i></span><span class="muted">92%</span></span></td>
-              <td class="muted" style="white-space:nowrap">18 min ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>Renovated village house with a garden</b><span class="mono">MS-00932</span></span></td>
-              <td class="muted">Katuntsi</td>
-              <td class="muted">House</td>
-              <td style="white-space:nowrap"><span class="price">€54,500</span></td>
-              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>PD</b></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">DE</span><span class="lc">RU</span><span class="muted">+3</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:88%; background:var(--success-500)"></i></span><span class="muted">88%</span></span></td>
-              <td class="muted" style="white-space:nowrap">2 hours ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr data-selected="1">
-              <td style="width:36px; padding-right:0"><span class="box" data-on="1"></span></td>
-              <td><span class="ident"><b>Studio near the mineral baths</b><span class="mono">MS-00791</span></span></td>
-              <td class="muted">Sandanski</td>
-              <td class="muted">Studio</td>
-              <td style="white-space:nowrap"><span class="price">€31,900</span></td>
-              <td><span class="state"><span class="pill pill--warn"><i></i>Needs review</span><span class="wit wit--none"></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="lc">RU</span><span class="muted">+5</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:61%; background:var(--warning-700)"></i></span><span class="muted">61%</span></span></td>
-              <td class="muted" style="white-space:nowrap">3 hours ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>Villa with a pool and mountain views</b><span class="mono">MS-00191</span></span></td>
-              <td class="muted">Katuntsi</td>
-              <td class="muted">Villa</td>
-              <td style="white-space:nowrap"><span class="price">€185,000</span></td>
-              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>MR</b></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">DE</span><span class="lc">NL</span><span class="lc">RU</span><span class="muted">+2</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:95%; background:var(--success-500)"></i></span><span class="muted">95%</span></span></td>
-              <td class="muted" style="white-space:nowrap">Yesterday</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr data-selected="1">
-              <td style="width:36px; padding-right:0"><span class="box" data-on="1"></span></td>
-              <td><span class="ident"><b>Building plot with road access</b><span class="mono">MS-00872</span></span></td>
-              <td class="muted">Levunovo</td>
-              <td class="muted">Plot</td>
-              <td style="white-space:nowrap"><span class="price">€28,000</span></td>
-              <td><span class="state"><span class="pill pill--warn"><i></i>Needs review</span><span class="wit wit--none"></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:44%; background:var(--warning-700)"></i></span><span class="muted">44%</span></span></td>
-              <td class="muted" style="white-space:nowrap">Yesterday</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>One-bedroom flat in the town centre</b><span class="mono">MS-00345</span></span></td>
-              <td class="muted">Sandanski</td>
-              <td class="muted">Apartment</td>
-              <td style="white-space:nowrap"><span class="price">€400 / month</span></td>
-              <td><span class="state"><span class="pill pill--ok"><i></i>Published</span><span class="wit"><b>PD</b></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="lc">RU</span><span class="muted">+4</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:79%; background:var(--success-500)"></i></span><span class="muted">79%</span></span></td>
-              <td class="muted" style="white-space:nowrap">2 days ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>Commercial unit on the main street</b><span class="mono">MS-00046</span></span></td>
-              <td class="muted">Sandanski</td>
-              <td class="muted">Commercial</td>
-              <td style="white-space:nowrap"><span class="price">€120,000</span></td>
-              <td><span class="state"><span class="pill pill--sand"><i></i>Draft</span><span class="wit wit--none"></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:33%; background:var(--marble-600)"></i></span><span class="muted">33%</span></span></td>
-              <td class="muted" style="white-space:nowrap">3 days ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>Three-bedroom house, source unavailable</b><span class="mono">MS-00696</span></span></td>
-              <td class="muted">Melnik</td>
-              <td class="muted">House</td>
-              <td style="white-space:nowrap"><span class="muted">Price withdrawn</span></td>
-              <td><span class="state"><span class="pill pill--sand"><i></i>Archived</span><span class="wit wit--none"></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:21%; background:var(--marble-600)"></i></span><span class="muted">21%</span></span></td>
-              <td class="muted" style="white-space:nowrap">5 days ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr data-selected="1">
-              <td style="width:36px; padding-right:0"><span class="box" data-on="1"></span></td>
-              <td><span class="ident"><b>Apartment with a covered parking space</b><span class="mono">MS-00499</span></span></td>
-              <td class="muted">Sandanski</td>
-              <td class="muted">Apartment</td>
-              <td style="white-space:nowrap"><span class="price">€72,400</span></td>
-              <td><span class="state"><span class="pill pill--warn"><i></i>Needs review</span><span class="wit wit--none"></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="lc">EN</span><span class="muted">+5</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:58%; background:var(--warning-700)"></i></span><span class="muted">58%</span></span></td>
-              <td class="muted" style="white-space:nowrap">6 days ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td style="width:36px; padding-right:0"><span class="box"></span></td>
-              <td><span class="ident"><b>Rural house for restoration</b><span class="mono">MS-00671</span></span></td>
-              <td class="muted">Lehovo</td>
-              <td class="muted">House</td>
-              <td style="white-space:nowrap"><span class="price">€19,500</span></td>
-              <td><span class="state"><span class="pill pill--sand"><i></i>Draft</span><span class="wit wit--none"></span></span></td>
-              <td><span class="lcs"><span class="lc">BG</span><span class="muted">+6</span></span></td>
-              <td><span class="bar"><span class="t"><i style="width:40%; background:var(--marble-600)"></i></span><span class="muted">40%</span></span></td>
-              <td class="muted" style="white-space:nowrap">1 week ago</td>
-              <td style="width:36px; padding-left:0; text-align:right"><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="foot">
-          <span>Showing 1–10 of 165</span>
-          <span style="display:flex; align-items:center; gap:8px">
-            <button class="btn btn--sm" type="button">Previous</button>
-            <button class="btn btn--sm" type="button">Next</button>
-          </span>
-        </div>
-      </section>
+<div class="lcg"><div class="ph"><div><h1>Listings</h1><p>Keep the source identity, asking-price state and availability witness together.</p></div></div><p class="muted">Saved Bulgarian fixture · <bdi dir="ltr">MS-CRAWL-0001</bdi> · no fresh listing or publication approval is asserted.</p><section class="panel"><div class="panel-hd"><h2>Find a listing</h2></div><div class="lcg-section"><div class="lcg-form"><div class="field"><label for="listing-search">Reference, title or location</label><input class="in" id="listing-search" type="search" value=""></div><div class="field"><label for="listing-location">Location</label><input class="in" id="listing-location" type="text" value="Сандански"></div></div><p>One saved fixture result. This is not a current stock count.</p><a class="btn btn--accent" href="ListingEditor.html">Open listing editor</a></div></section><section class="panel"><div class="lcg-row"><b lang="bg" title="Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!">Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!</b><span><bdi dir="ltr">MS-CRAWL-0001</bdi></span><span>Price on request</span><span class="wit wit--none">Availability not verified</span><button class="btn btn--sm" type="button">Review</button></div></section><section class="panel"><div class="panel-hd"><h2>Read the status with its evidence</h2></div><div class="lcg-section"><dl class="lcg-facts"><dt>Saved lifecycle</dt><dd>Available · source value</dd><dt>Availability check</dt><dd><span class="wit wit--none">No reviewer or date</span></dd><dt>Publication approval</dt><dd>Absent in saved fixture</dd><dt>Built area</dt><dd>Not recorded</dd><dt>Bedrooms</dt><dd>Not recorded</dd></dl><p>Do not treat an available status as a fresh inspection. A missing numeric fact is neither zero nor a guessed value from the description.</p></div></section><div class="lcg-states"><section class="lcg-state"><h2>No matching records</h2><p>Keep the current filter visible. Empty results do not establish that the full catalogue is empty.</p><button class="btn" type="button">Change filters</button></section><section class="lcg-state"><h2>Record is loading</h2><p>Retain its reference and selected language while facts load.</p><button class="btn" type="button" disabled>Loading…</button></section><section class="lcg-state"><h2>Save or review failed</h2><p>Keep entered values and the review note. No approval is shown as saved.</p><button class="btn" type="button">Review entered values</button></section><section class="lcg-state"><h2>Some evidence is missing</h2><p>The source text can exist while price, availability, media or language approval is unknown.</p><button class="btn" type="button">Review evidence</button></section><section class="lcg-state"><h2>Many matching records</h2><p>Keep a single identity line and the current page position.</p><button class="btn" type="button">Next page</button></section><section class="lcg-state"><h2>Source changed during review</h2><p>Read the latest source before approving a draft or applying an edit based on the older version.</p><button class="btn" type="button" disabled>Approve old draft</button></section></div></div>
     </div>
   </div>
 </div>
