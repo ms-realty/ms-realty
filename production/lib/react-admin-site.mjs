@@ -5,7 +5,7 @@ import { isFixtureBrokerId } from "./listing-verification.mjs";
 import { ownerConsoleNavigation } from "./owner-operator-catalog.mjs";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
-import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
+import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 import { deriveLeadQueueState, deriveSourceTasks, sortTasks } from "./tasks.mjs";
 
 function adminCopy(page) {
@@ -3475,7 +3475,8 @@ function Sidebar({ page }) {
       h(
         "a",
         { href: adminHref(adminHomeForPage(page), page), "aria-label": "MS Realty" },
-        h("img", { src: LOGO_URL_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL, alt: "MS Realty", "data-admin-logo": "light", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL_REVERSED, alt: "MS Realty", "data-admin-logo": "dark", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
       ),
     ),
     h(
