@@ -56,15 +56,15 @@ test("every new public page label exists in all seven locales without dashes or 
   assert.doesNotMatch(renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: true }).body.form_unavailable, /[—–]/);
 });
 
-test("home keeps the hero and orders the sections: areas, how buying works, featured, guides, trust, sell", () => {
+test("home puts featured listings before areas and buying guidance in every locale", () => {
   for (const code of PUBLIC_LOCALES) {
     const page = renderHomePage({ registry, listings, localeCode: code });
     const html = renderReactPublicBody(page);
     assert.match(html, /data-hero-search="true"/, `${code} hero search form`);
     const order = [
+      html.indexOf('data-featured-listings="true"'),
       html.indexOf('data-home-locations="true"'),
       html.indexOf('data-home-how-buying-works="true"'),
-      html.indexOf('data-featured-listings="true"'),
       html.indexOf('data-home-guides="true"'),
       html.indexOf('data-home-trust="true"'),
       html.indexOf('class="hp-sell"'),

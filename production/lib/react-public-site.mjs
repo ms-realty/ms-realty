@@ -1206,6 +1206,14 @@ function HeroSearch({ page, labels, chrome }) {
           { id: "home-search-price-max", name: "price_max", label: labels.maxPrice, className: "hp-search__seg--price", ...presetData },
           ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
         ),
+        showBedrooms
+          ? h(
+              SelectField,
+              { id: "home-search-bedrooms-min", name: "bedrooms_min", label: labels.factLabels?.bedrooms || "Bedrooms", className: "hp-search__more-field--bedrooms", "data-hero-bedrooms": "true" },
+              h("option", { value: "" }, labels.any),
+              ...bedroomCounts.map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
+            )
+          : null,
         h(
           "button",
           { className: "hp-search__go mk-search__go", type: "submit" },
@@ -1226,19 +1234,6 @@ function HeroSearch({ page, labels, chrome }) {
         h(
           "div",
           { className: "hp-search__more-grid" },
-          showBedrooms
-            ? h(
-                "div",
-                { className: "hp-search__more-field hp-search__more-field--bedrooms" },
-                h("label", { htmlFor: "home-search-bedrooms-min" }, labels.factLabels?.bedrooms || "Bedrooms"),
-                h(
-                  "select",
-                  { id: "home-search-bedrooms-min", name: "bedrooms_min", "data-hero-bedrooms": "true" },
-                  h("option", { value: "" }, labels.any),
-                  ...bedroomCounts.map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
-                ),
-              )
-            : null,
           h(
             "div",
             { className: "hp-search__more-field" },
@@ -1344,6 +1339,29 @@ function HomeBody({ page }) {
       ),
       h("span", { className: "mk-sr-only", role: "status", "aria-live": "off", "aria-atomic": "true", "data-hero-gallery-status": "true" }, `${labels.gallery} 1 / ${HERO_GALLERY_SLIDES.length}`),
     ),
+    h(
+      "section",
+      { className: "hp-sec hp-featured", "aria-label": labels.featuredListings, "data-featured-listings": "true" },
+      h(
+        "div",
+        { className: "hp-sec__head" },
+        h("div", null, h("h2", null, labels.featuredListings)),
+        h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.browseAllListings),
+      ),
+      (page.cards || []).length
+        ? h(
+            "div",
+            { className: "hp-grid" },
+            ...page.cards.map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, priority: index < 3 })),
+          )
+        : h(
+            "div",
+            { className: "mk-empty", "data-featured-empty": "true", "aria-live": "polite" },
+            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "shield-check", size: 24 })),
+            h("h3", { className: "mk-empty__title" }, labels.reviewRequired),
+            h("p", { className: "mk-empty__text" }, `0 ${labels.reviewedListings}`),
+          ),
+    ),
     (page.body.locations || []).length
       ? h(
           "section",
@@ -1412,29 +1430,6 @@ function HomeBody({ page }) {
           { title: labels.buyingStepThreeTitle, text: labels.buyingStepThreeText },
         ],
       }),
-    ),
-    h(
-      "section",
-      { className: "hp-sec hp-featured", "aria-label": labels.featuredListings, "data-featured-listings": "true" },
-      h(
-        "div",
-        { className: "hp-sec__head" },
-        h("div", null, h("h2", null, labels.featuredListings)),
-        h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.browseAllListings),
-      ),
-      (page.cards || []).length
-        ? h(
-            "div",
-            { className: "hp-grid" },
-            ...page.cards.map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
-          )
-        : h(
-            "div",
-            { className: "mk-empty", "data-featured-empty": "true", "aria-live": "polite" },
-            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "shield-check", size: 24 })),
-            h("h3", { className: "mk-empty__title" }, labels.reviewRequired),
-            h("p", { className: "mk-empty__text" }, `0 ${labels.reviewedListings}`),
-          ),
     ),
     guides.length
       ? h(
@@ -2421,7 +2416,7 @@ function SearchBody({ page }) {
   const contact = chrome.contact || {};
   const filtersLabel = chrome.copy.filters || labels.activeFilters;
   const offerLabel = labels.factLabels?.offer_type || "Offer";
-  const secondaryFilterKeys = ["property_subtype", "price_min", "price_max", "bedrooms_min", "premises_min", "hotel_rooms_min", "area_min", "area_max", "country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
+  const secondaryFilterKeys = ["property_subtype", "bedrooms_min", "premises_min", "hotel_rooms_min", "area_min", "area_max", "country_code", "region_id", "land_area_min", "land_area_max", "floor_min", "floor_max", "storeys_min"];
   const secondaryFiltersActive = Boolean(filterNotice || String(page.search.query || "").trim()) || secondaryFilterKeys.some((key) => filters[key]);
   const mobileSearchContext = String(
     page.search.query ||
@@ -2656,12 +2651,29 @@ function SearchBody({ page }) {
   const filterForm = (idPrefix) =>
     h(
       "form",
-      { id: `${idPrefix}-filter-form`, className: "sr-form", action: page.path, method: "get", role: "search", "data-search-filter-form": "true", "data-filter-form-id": idPrefix },
+      {
+        id: `${idPrefix}-filter-form`,
+        className: "sr-form",
+        action: page.path,
+        method: "get",
+        role: "search",
+        "data-search-filter-form": "true",
+        "data-search-quick-filters": "true",
+        "data-filter-form-id": idPrefix,
+      },
       offerSegments(idPrefix),
       geographyField(idPrefix),
-      filterSelect(idPrefix, "property_family", labels.propertyType, filterOptions.property_families || filterOptions.property_types || [], (value) =>
-        localizedListingValue(page.locale, "property_type", value),
+      filterSelect(
+        idPrefix,
+        "property_family",
+        labels.propertyType,
+        filterOptions.property_families || filterOptions.property_types || [],
+        (value) => localizedListingValue(page.locale, "property_type", value),
+        (value) => value,
+        () => ({}),
+        "sr-fg--type",
       ),
+      rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
       h(
         "details",
         { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },
@@ -2675,19 +2687,18 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-more__body" },
+          applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
+          applicableFilterFields.has("area_min")
+            ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
+            : null,
           applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
             ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
             : null,
-          rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
-          applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
           applicableFilterFields.has("premises_min")
             ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
             : null,
           applicableFilterFields.has("hotel_rooms_min")
             ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
-            : null,
-          applicableFilterFields.has("area_min")
-            ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
             : null,
           h(
             "div",
@@ -2968,7 +2979,6 @@ function SearchBody({ page }) {
             filterForm("sr"),
           ),
       ),
-      h(SandanskiPhotograph, { className: "sr-hero__photo", localeCode: page.locale }),
     ),
     h(
       "div",
@@ -3096,14 +3106,14 @@ function SearchBody({ page }) {
           : h(
               "section",
               {
-                className: savedView ? "sr-list sr-list--grid" : "sr-list",
+                className: "sr-list sr-list--grid",
                 "aria-label": savedView ? labels.savedListings : labels.searchResults,
                 "data-search-results": "true",
                 "data-saved-listings-grid": savedView ? "true" : undefined,
                 hidden: savedView ? true : undefined,
               },
               ...(page.cards || []).map((card, index) =>
-                h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: savedView ? "vertical" : "horizontal", priority: index === 0 }),
+                h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "vertical", priority: index < 3 }),
               ),
             ),
         savedView

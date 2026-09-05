@@ -118,3 +118,15 @@ test("the node origin recovers from a reversed range the same way", async () => 
   const apiBody = typeof api.body === "string" ? JSON.parse(api.body) : api.body;
   assert.equal(apiBody.message, "price_min cannot exceed price_max");
 });
+
+test("quick price filters stay editable without opening the advanced panel", async () => {
+  const { body } = await search("?price_max=100000");
+  for (const prefix of ["sr", "sr-mobile"]) {
+    const form = body.match(new RegExp(`<form id="${prefix}-filter-form"[\\s\\S]*?</form>`))?.[0];
+    assert.ok(form, `${prefix} filter form exists`);
+    const advanced = form.indexOf('data-search-more-filters="true"');
+    assert.ok(form.indexOf(`id="${prefix}-price_max"`) < advanced);
+    assert.equal((form.match(/name="price_max"/g) || []).length, 1);
+    assert.doesNotMatch(form, /data-search-more-filters="true" open/);
+  }
+});
