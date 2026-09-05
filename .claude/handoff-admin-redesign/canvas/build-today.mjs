@@ -211,6 +211,6 @@ fs.writeFileSync(new URL("./Main.dc.html", import.meta.url), page({
     .today-state { display:grid; gap:12px; padding-top:20px; border-top:1px solid var(--joint); }
     .today-state h2 { font-size:16px; }
     .today-state .btn { justify-self:start; }
-  `, height: 0, healthText:'Illustrative workspace',
+  `.trimEnd(), height: 0, healthText:'Illustrative workspace',
 }));
 console.log("Main.dc.html");
