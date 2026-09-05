@@ -327,30 +327,26 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .board { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(200px,1fr); gap:16px; align-items:start; }
-    .col { background:var(--sunken); border-radius:var(--r-panel); display:flex; flex-direction:column; min-height:420px; }
-    .col-hd { display:flex; align-items:center; gap:8px; padding:12px 16px 8px; }
-    .col-hd b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .col-n { min-width:20px; height:20px; padding:0 8px; border-radius:var(--r-pill); background:var(--marble-300);
-      color:var(--marble-800); font-size:11px; font-weight:600; line-height:20px; text-align:center; }
-    .col-sum { padding:0 16px 8px; font-size:11px; color:var(--text-muted); }
-    .col-list { display:flex; flex-direction:column; gap:8px; padding:0 8px 12px; min-width:0; }
-    .kc { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-panel); padding:12px 12px;
-      box-shadow:var(--e-1); display:grid; gap:8px; min-width:0; }
-    .kc-top { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
-    .kc-top .pill { flex:0 0 auto; }
-    .kc-top b { flex:1 1 auto; min-width:0; font-size:13px; font-weight:600; color:var(--text-strong);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .kc-line { font-size:13px; color:var(--text-muted); }
-    .kc-line .mono { white-space:nowrap; }
-    .kc-line b { display:block; font-weight:400; }
-    .kc-next { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:center;
-      padding:8px 8px; border-radius:var(--r-panel); background:var(--tile); border:1px solid var(--border); }
-    .kc-next b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .kc-next em { font-style:normal; font-size:11px; color:var(--text-muted); }
-    .kc-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .col-empty { margin:0 8px 12px; padding:24px 12px; border:1px dashed var(--border-control);
-      border-radius:var(--r-panel); text-align:center; font-size:13px; color:var(--text-subtle); }
+  .pl { display:grid; gap:20px; }
+  .pl .ph { margin:0; }
+  .pl-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .pl-section { display:grid; gap:16px; padding:20px; border-top:1px solid var(--joint); min-width:0; }
+  .pl-section h2,.pl-state h2 { font-size:16px; }
+  .pl-section > .btn { justify-self:start; }
+  .pl-row { display:grid; grid-template-columns:minmax(0,1fr) 144px 144px 200px 96px; align-items:center; gap:16px; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .pl-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pl-row:hover { background:var(--tile); }
+  .pl-heading { background:var(--tile-deep); font-weight:600; }
+  .pl .in { width:100%; font:inherit; color:var(--text-body); }
+  .pl textarea.in { min-height:96px; resize:vertical; }
+  .pl :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .pl button:disabled { opacity:.5; cursor:not-allowed; }
+  .pl-check { display:flex; align-items:start; gap:12px; }
+  .pl-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .pl-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .pl-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); }
+  .pl-state .btn { justify-self:start; }
+  .pl-path { display:flex; flex-wrap:wrap; gap:8px 16px; margin:0; padding-inline-start:20px; }
 
   </style>
 </head><body>
@@ -362,7 +358,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -404,173 +400,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div>
-          <h1>Buyers and renters</h1>
-          <p>One card per person, carrying the next action and who owns it. Two are overdue.</p>
-        </div>
-        <div class="ph-actions">
-          <div class="seg">
-            <button type="button" data-on="1">Open <em>9</em></button>
-            <button type="button">Buyers <em>5</em></button>
-            <button type="button">Renters <em>4</em></button>
-            <button type="button">Closed <em>12</em></button>
-          </div>
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>All brokers</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New opportunity</span></button>
-        </div>
-      </div>
-
-      <div class="board">
-        <section class="col">
-          <div class="col-hd"><b>New enquiry</b><span class="col-n">3</span></div>
-          <p class="col-sum">2 overdue · qualification incomplete</p>
-          <div class="col-list">
-            <article class="kc">
-              <div class="kc-top"><b>Maria Petrova</b><span class="pill pill--danger"><i></i>Overdue</span></div>
-              <p class="kc-line">2-bed apartment · Sandanski</p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Qualify and reply</b><em style="color:var(--danger-600); font-weight:600">Due 2 days ago</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">Budget not set</span>
-                <span class="av">—</span>
-              </div>
-            </article>
-            <article class="kc">
-              <div class="kc-top"><b>Dmitri Volkov</b><span class="pill pill--sea"><i></i>New</span></div>
-              <p class="kc-line">Studio · Sandanski · Russian</p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>First reply</b><em style="">Due tomorrow 10:00</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€45,000 – €60,000</span>
-                <span class="av">PD</span>
-              </div>
-            </article>
-            <article class="kc">
-              <div class="kc-top"><b>Elena Dimitrova</b><span class="pill pill--warn"><i></i>Unassigned</span></div>
-              <p class="kc-line">Seller · house, Sandanski</p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Assign a broker</b><em style="color:var(--danger-600); font-weight:600">Due today</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">Valuation pending</span>
-                <span class="av">—</span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Qualified</b><span class="col-n">2</span></div>
-          <p class="col-sum">€250,000 combined budget</p>
-          <div class="col-list">
-            <article class="kc">
-              <div class="kc-top"><b>Georgi Nikolov</b><span class="pill pill--sea"><i></i>Renter</span></div>
-              <p class="kc-line">Renter · 1-bed<br>Sandanski centre</p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Send 3 matches</b><em style="">Due Wed</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€400 / month</span>
-                <span class="av">PD</span>
-              </div>
-            </article>
-            <article class="kc">
-              <div class="kc-top"><b>Sofia Marinova</b><span class="pill pill--ok"><i></i>Cash</span></div>
-              <p class="kc-line">2-bed apartment · Melnik</p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Book a viewing</b><em style="">Due Thu</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€90,000 – €160,000</span>
-                <span class="av">MR</span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Viewing</b><span class="col-n">2</span></div>
-          <p class="col-sum">1 unconfirmed for today</p>
-          <div class="col-list">
-            <article class="kc">
-              <div class="kc-top"><b>Anna Weber</b><span class="pill pill--warn"><i></i>Today 15:00</span></div>
-              <p class="kc-line">Villa · Katuntsi<br><span class='mono'>MS-00191</span></p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Confirm the viewing</b><em style="color:var(--danger-600); font-weight:600">Not confirmed</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€185,000</span>
-                <span class="av">PD</span>
-              </div>
-            </article>
-            <article class="kc">
-              <div class="kc-top"><b>Petar Kolev</b><span class="pill pill--sea"><i></i>Wed 11:00</span></div>
-              <p class="kc-line">Plot · Levunovo<br><span class='mono'>MS-00872</span></p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Second viewing with the owner</b><em style="">Confirmed</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€28,000</span>
-                <span class="av">MR</span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Offer and contract</b><span class="col-n">1</span></div>
-          <p class="col-sum">Notary date set for 8 September</p>
-          <div class="col-list">
-            <article class="kc">
-              <div class="kc-top"><b>Anna Weber</b><span class="pill pill--warn"><i></i>Documents</span></div>
-              <p class="kc-line">Preliminary contract<br><span class='mono'>CASE-0007</span></p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Collect 4 missing documents</b><em style="">Notary 8 Sep</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€185,000</span>
-                <span class="av">MR</span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Closed</b><span class="col-n">1</span></div>
-          <p class="col-sum">This quarter · €96,000</p>
-          <div class="col-list">
-            <article class="kc">
-              <div class="kc-top"><b>Nikolay Stoyanov</b><span class="pill pill--ok"><i></i>Won</span></div>
-              <p class="kc-line">House · Sandanski<br>Completed 22 Aug</p>
-              <div class="kc-next">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                <span><b>Ask for a review</b><em style="">Due Fri</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">€96,000</span>
-                <span class="av">MR</span>
-              </div>
-            </article>
-          </div>
-          <div class="col-empty">Lost opportunities move to the Closed filter above.</div>
-        </section>
-      </div>
+<div class="pl"><div class="ph"><div><h1>Buyers and renters</h1><p>Follow the next evidenced action for each opportunity. Buyer and renter stages remain separate.</p></div></div><p class="muted">Illustrative people, budgets and stages · budget is not a property price or expected revenue.</p><section class="panel"><div class="panel-hd"><h2>Open opportunities</h2><span class="sub">Four examples</span></div><div class="pl-row pl-heading"><span>Person</span><span>Stage</span><span>Budget</span><span>Next action</span><span>Action</span></div><div class="pl-row"><b title="Екатерина Константинова-Александрова"><bdi dir="auto">Екатерина Константинова-Александрова</bdi></b><span>New enquiry</span><span>Not supplied</span><span>Qualify and reply</span><button class="btn btn--sm" type="button">Open record</button></div><div class="pl-row"><b title="Anna Weber"><bdi dir="auto">Anna Weber</bdi></b><span>Viewing booked</span><span>€1,245,000</span><span>Review booking</span><button class="btn btn--sm" type="button">Open record</button></div><div class="pl-row"><b title="מרים כהן"><bdi dir="auto">מרים כהן</bdi></b><span>Qualified</span><span>€800 / month</span><span>Arrange viewing</span><button class="btn btn--sm" type="button">Open record</button></div><div class="pl-row"><b title="Dmitri Volkov"><bdi dir="auto">Dmitri Volkov</bdi></b><span>Offer</span><span>€245,000</span><span>Review the offer</span><button class="btn btn--sm" type="button">Open record</button></div></section><div class="pl-grid"><section class="panel"><div class="panel-hd"><h2>Qualify the selected buyer</h2><span class="wit wit--none">Human review due</span></div><form class="pl-section"><div class="field"><label for="qualify-budget">Maximum budget · EUR</label><input class="in" id="qualify-budget" type="number" min="1" step="1"></div><div class="field"><label for="qualify-location">Preferred locations</label><input class="in" id="qualify-location" value="Sandanski"></div><div class="field"><label for="qualify-timeline">Decision timeline</label><input class="in" id="qualify-timeline"></div><div class="field"><label for="qualify-note">Qualification note</label><textarea class="in" id="qualify-note"></textarea></div><label class="pl-check"><input type="checkbox"><span>I, Mariya, confirm these requirements and their source.</span></label><button class="btn btn--accent" type="button">Record qualification</button></form></section><section class="panel"><div class="panel-hd"><h2>The stage follows the record</h2></div><div class="pl-section"><p>A booking, viewing outcome, offer or signed contract supplies different evidence. Moving a card cannot replace it.</p><p>Open the owning screen to perform the next action. A saved pipeline note does not send a customer reply.</p><p>Seller enquiries have their own path. They are not counted as buyer opportunities here.</p><span class="wit wit--none">Required evidence stays visible</span><button class="btn" type="button">Open related work</button></div></section></div><div class="pl-grid"><section class="panel"><div class="panel-hd"><h2>Buyer stages</h2></div><div class="pl-section"><ol class="pl-path"><li>New enquiry</li><li>Qualified</li><li>Viewing booked</li><li>Viewed</li><li>Offer</li><li>Due diligence</li><li>Contract</li><li>Closed</li></ol><p>Stages come from the current pipeline definition. Completed and lost outcomes require their own records.</p></div></section><section class="panel"><div class="panel-hd"><h2>Renter stages</h2></div><div class="pl-section"><ol class="pl-path"><li>Enquiry</li><li>Qualified</li><li>Viewing</li><li>Application</li><li>Lease</li><li>Closed</li></ol><p>Stages come from the current pipeline definition. Completed and lost outcomes require their own records.</p></div></section></div><div class="pl-states"><section class="pl-state"><h2>No matching opportunities</h2><p>Check the selected pipeline and filters.</p><button class="btn" type="button">Change filters</button></section><section class="pl-state"><h2>Qualification is saving</h2><p>The proposed requirements remain visible until confirmed.</p><button class="btn" type="button" disabled>Saving qualification…</button></section><section class="pl-state"><h2>Required facts are missing</h2><p>Add a positive maximum budget, a location and a decision timeline.</p><button class="btn" type="button">Review requirements</button></section><section class="pl-state"><h2>Related evidence unavailable</h2><p>A missing booking or contract readback must not advance the stage.</p><button class="btn" type="button">Reload related record</button></section><section class="pl-state"><h2>Many opportunities</h2><p>Filter by pipeline, stage and owner, then page through a single identity row per person.</p><button class="btn" type="button">Open filters</button></section><section class="pl-state"><h2>Stage change not permitted</h2><p>Complete the required action in its owning screen.</p><button class="btn" type="button" disabled>Move to completed</button></section></div></div>
     </div>
   </div>
 </div>

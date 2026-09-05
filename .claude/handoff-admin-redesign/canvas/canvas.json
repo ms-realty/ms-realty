@@ -123,7 +123,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 1282,
+      "h": 2291,
       "page": "page-2"
     },
     {
@@ -132,52 +132,52 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 928,
+      "h": 1778,
       "page": "page-2"
     },
     {
       "file": "Viewings.dc.html",
       "title": "Viewings",
       "x": 0,
-      "y": 1452,
+      "y": 2461,
       "w": 1440,
-      "h": 1004,
+      "h": 1460,
       "page": "page-2"
     },
     {
       "file": "Tasks.dc.html",
       "title": "Tasks",
       "x": 1560,
-      "y": 1452,
+      "y": 2461,
       "w": 1440,
-      "h": 928,
+      "h": 1667,
       "page": "page-2"
     },
     {
       "file": "Requests.dc.html",
       "title": "Requests from the website",
       "x": 3120,
-      "y": 1452,
+      "y": 2461,
       "w": 1440,
-      "h": 928,
+      "h": 1366,
       "page": "page-2"
     },
     {
       "file": "Contacts.dc.html",
       "title": "Contacts",
       "x": 0,
-      "y": 2626,
+      "y": 4298,
       "w": 1440,
-      "h": 928,
+      "h": 1419,
       "page": "page-2"
     },
     {
       "file": "Consent.dc.html",
       "title": "Consent",
       "x": 1560,
-      "y": 2626,
+      "y": 4298,
       "w": 1440,
-      "h": 928,
+      "h": 1365,
       "page": "page-2"
     },
     {

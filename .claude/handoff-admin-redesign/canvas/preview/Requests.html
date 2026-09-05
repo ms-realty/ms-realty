@@ -327,12 +327,31 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .rq { display:grid; grid-template-columns:150px minmax(0,1fr) 210px 150px; gap:16px; align-items:start;
-      padding:16px 16px; border-bottom:1px solid var(--border); }
-    .rq:last-child { border-bottom:0; }
-    .rq h3 { font-size:13px; font-weight:600; }
-    .rq p { font-size:13px; color:var(--text-muted); margin-top:4px; }
-    .rq-act { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+  .dw { display:grid; gap:20px; }
+  .dw .ph { margin:0; }
+  .dw-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .dw-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .dw-section h2,.dw-state h2 { font-size:16px; }
+  .dw-section > .btn { justify-self:start; }
+  .dw-row { display:grid; grid-template-columns:minmax(0,1fr) 176px 200px 112px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .dw-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dw-row:hover { background:var(--tile); }
+  .dw-row .btn { justify-self:end; }
+  .dw-heading { background:var(--tile-deep); font-weight:600; }
+  .dw .in { width:100%; color:var(--text-body); font:inherit; }
+  .dw textarea.in { min-height:96px; resize:vertical; }
+  .dw :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .dw button:disabled { opacity:.5; cursor:not-allowed; }
+  .dw-check { display:flex; align-items:start; gap:12px; }
+  .dw-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .dw-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .dw-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); }
+  .dw-state .btn { justify-self:start; }
+  .dw-facts { display:grid; grid-template-columns:144px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .dw-facts dt { color:var(--text-muted); }
+  .dw-facts dd { margin:0; overflow-wrap:anywhere; }
+  .dw-tools { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .dw-tools .field { flex:1; }
 
   </style>
 </head><body>
@@ -344,7 +363,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -386,64 +405,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Requests from the website</h1><p>Things a visitor asked the agency to decide. Each one closes with a recorded outcome.</p></div>
-        <div class="ph-actions">
-          <div class="seg"><button type="button" data-on="1">Open <em>2</em></button><button type="button">Answered <em>14</em></button><button type="button">All</button></div>
-        </div>
-      </div>
-      <section class="panel">
-        <div class="toolbar"><span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Request or page</span>
-          <button class="btn btn--sm" type="button">Any kind <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <span style="margin-left:auto" class="mono">Oldest first</span></div>
-        <div class="rq">
-          <div><span class="pill pill--warn"><i></i>Language request</span><p class="mono" style="margin-top:8px">/fr/</p></div>
-          <div><h3>French was requested three times this week</h3>
-            <p>Three visitors from France and Belgium switched the language menu and found no French. The two
-              most-viewed pages were the Sandanski search and the villa in Katuntsi.</p>
-            <div style="display:flex; gap:8px; margin-top:8px"><span class="pill pill--sand">3 visitors</span>
-              <span class="pill pill--sand">2 pages</span><span class="pill pill--sand">First asked 26 Aug</span></div></div>
-          <div style="font-size:12px; color:var(--text-muted)">Adding a locale commits the agency to a human
-            translation of every published listing before any French page can be indexed.</div>
-          <div class="rq-act">
-            <button class="btn btn--sm btn--primary" type="button">Plan French</button>
-            <button class="btn btn--sm" type="button">Decline and record why</button>
-          </div>
-        </div>
-        <div class="rq">
-          <div><span class="pill pill--warn"><i></i>Saved search alert</span><p class="mono" style="margin-top:8px">alert-0042</p></div>
-          <div><h3>A saved search has matched nothing for 21 days</h3>
-            <p>Two-bedroom apartments in Melnik under €90,000. The subscriber has opened the last four emails,
-              so the interest is real and the criteria are probably too narrow.</p>
-            <div style="display:flex; gap:8px; margin-top:8px"><span class="pill pill--sand">Sofia Marinova</span>
-              <span class="pill pill--sand">Weekly digest</span><span class="pill pill--sand">Consent current</span></div></div>
-          <div style="font-size:12px; color:var(--text-muted)">A broker can widen the radius or offer a
-            near match by hand. Nothing is sent automatically.</div>
-          <div class="rq-act">
-            <button class="btn btn--sm btn--primary" type="button">Offer a near match</button>
-            <button class="btn btn--sm" type="button">Widen the search</button>
-          </div>
-        </div>
-      </section>
-      <section class="panel" style="margin-top:16px">
-        <div class="panel-hd"><h2>Answered recently</h2><a href="#" style="font-size:12px; font-weight:600">All 14</a></div>
-        <table>
-          <thead><tr><th>Kind</th><th>Request</th><th>Outcome</th><th>Decided by</th><th>When</th></tr></thead>
-          <tbody>
-            <tr><td><span class="pill pill--sand">Language</span></td><td>Greek for the Melnik pages</td>
-              <td><span class="pill pill--ok"><i></i>Planned for October</span></td><td>Mariya Ruseva</td><td class="muted">28 Aug</td></tr>
-            <tr><td><span class="pill pill--sand">Valuation</span></td><td>House in Hotovo</td>
-              <td><span class="pill pill--ok"><i></i>Broker assigned</span></td><td>Petar Dimitrov</td><td class="muted">27 Aug</td></tr>
-            <tr><td><span class="pill pill--sand">Listing report</span></td><td>Photo does not match the description on <span class="mono">MS-00499</span></td>
-              <td><span class="pill pill--warn"><i></i>Media re-review</span></td><td>Mariya Ruseva</td><td class="muted">26 Aug</td></tr>
-          </tbody>
-        </table>
-      </section>
+<div class="dw"><div class="ph"><div><h1>Website requests</h1><p>Record what happened to the request. A saved outcome does not send a reply or publish a language.</p></div></div><p class="muted">Three illustrative requests · no visitor activity or delivery is inferred.</p><section class="panel"><div class="panel-hd"><h2>Requests awaiting review</h2></div><div class="dw-row dw-heading"><span>Request</span><span>Type</span><span>Next evidence</span><span>Action</span></div><div class="dw-row"><b title="French-language enquiry"><bdi dir="auto">French-language enquiry</bdi></b><span>Language request</span><span>Decision and reply record</span><button class="btn btn--sm" type="button">Open request</button></div><div class="dw-row"><b title="Property alert criteria"><bdi dir="auto">Property alert criteria</bdi></b><span>Saved search</span><span>Current criteria and consent</span><button class="btn btn--sm" type="button">Open request</button></div><div class="dw-row"><b title="A proposed viewing visit"><bdi dir="auto">A proposed viewing visit</bdi></b><span>Viewing trip</span><span>Agreed itinerary</span><button class="btn btn--sm" type="button">Open request</button></div></section><div class="dw-grid"><section class="panel"><div class="panel-hd"><h2>Record the language-request outcome</h2><span class="wit wit--none">Decision not saved</span></div><form class="dw-section"><div class="field"><label for="request-action">Outcome</label><select class="in" id="request-action"><option>Contact recorded</option><option>Completed</option><option>Closed</option><option>Reopened</option><option>Note added</option></select></div><div class="field"><label for="request-note">What happened?</label><textarea class="in" id="request-note" maxlength="2000"></textarea></div><label class="dw-check"><input type="checkbox"><span>I, Mariya, confirm this outcome and note.</span></label><button class="btn btn--accent" type="button">Save request outcome</button></form></section><section class="panel"><div class="panel-hd"><h2>Keep each decision separate</h2></div><div class="dw-section"><p>A language request does not add an approved public locale. Planning translation work does not approve its wording.</p><p>A saved-search request does not permit a broker to broaden a subscriber’s criteria without their choice.</p><p>A trip has its own itinerary and confirmation stages. Completing the request needs an outcome note.</p><button class="btn" type="button">Review the linked record</button></div></section></div><div class="dw-states" aria-label="Additional states"><section class="dw-state"><h2>No matching requests</h2><p>Clear filters before treating the whole queue as empty.</p><button class="btn" type="button">Clear filters</button></section><section class="dw-state"><h2>Outcome is saving</h2><p>Keep the selected request and note visible.</p><button class="btn" type="button" disabled>Saving outcome…</button></section><section class="dw-state"><h2>Outcome could not be saved</h2><p>Your note remains in the form. No result is confirmed.</p><button class="btn" type="button">Review outcome</button></section><section class="dw-state"><h2>Contact detail unavailable</h2><p>Do not infer that a reply was delivered because the request itself is readable.</p><button class="btn" type="button">Review contact status</button></section><section class="dw-state"><h2>Many requests</h2><p>Filter by request type and status and retain the selected record.</p><button class="btn" type="button">Next page</button></section><section class="dw-state"><h2>No permission to record an outcome</h2><p>The request remains open until an authorised person records what happened.</p><button class="btn" type="button" disabled>Save outcome</button></section></div></div>
     </div>
   </div>
 </div>

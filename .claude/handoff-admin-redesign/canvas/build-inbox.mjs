@@ -1,206 +1,31 @@
-import fs from "node:fs";
-import { page, icon } from "./shell.mjs";
-
-const CSS = `
-    .inbox { display:grid; grid-template-columns:352px minmax(0,1fr); align-items:stretch; }
-    .inbox-list { border-right:1px solid var(--border); display:flex; flex-direction:column; min-width:0; }
-    .inbox-tools { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border);
-      background:var(--sunken); }
-    .inbox-find { display:flex; align-items:center; gap:8px; flex:1 1 auto; height:30px; padding:0 12px;
-      border:1px solid var(--border-control); border-radius:var(--r-panel); background:var(--surface); color:var(--text-muted);
-      font-size:13px; }
-    .row { display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:12px; row-gap:4px;
-      padding:12px 16px; border-bottom:1px solid var(--border); }
-    .row:hover { background:var(--tile); }
-    .row--on { background:var(--surface); box-shadow:inset 3px 0 0 var(--brick-500); }
-    .row-hd { display:flex; align-items:baseline; gap:8px; min-width:0; }
-    .row-hd b { flex:1 1 auto; min-width:0; font-size:13px; font-weight:600; color:var(--text-strong);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .row-hd time { font-size:11px; color:var(--text-muted); flex:0 0 auto; }
-    .row-sub { grid-column:2; font-size:13px; color:var(--text-muted); overflow:hidden;
-      text-overflow:ellipsis; white-space:nowrap; }
-    .row-tags { grid-column:2; display:flex; gap:4px; flex-wrap:wrap; }
-    .detail { display:flex; flex-direction:column; min-width:0; }
-    .detail-hd { display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
-      padding:16px 20px 16px; border-bottom:1px solid var(--border); }
-    .detail-hd h2 { font-family:var(--font-display); font-size:19px; font-weight:600; letter-spacing:-.01em; }
-    .detail-hd .who { display:flex; align-items:center; gap:8px; margin-top:4px; font-size:13px;
-      color:var(--text-muted); flex-wrap:wrap; }
-    .facts { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:4px; background:var(--border);
-      border-bottom:1px solid var(--border); }
-    .fact { background:var(--surface); padding:12px 20px; min-width:0; }
-    .fact dt { font-size:11px; color:var(--text-muted); margin-bottom:4px; }
-    .fact dd { margin:0; font-size:13px; font-weight:600; color:var(--text-strong);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .composer { border:1px solid var(--border-control); border-radius:var(--r-panel); background:var(--surface); overflow:hidden; }
-    .composer-bar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--sunken);
-      border-bottom:1px solid var(--border); }
-    .composer-body { padding:12px 16px; font-size:13px; color:var(--text-body); min-height:88px; line-height:1.55; }
-    .composer-foot { display:flex; align-items:center; gap:12px; padding:8px 12px; border-top:1px solid var(--border); }
-    .ev { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:start; gap:12px;
-      padding:12px 0; border-bottom:1px solid var(--border); }
-    .ev:last-child { border-bottom:0; }
-    .ev p { font-size:13px; }
-    .ev em { font-style:normal; color:var(--text-muted); }
+import fs from 'node:fs';
+import {page,icon} from './shell.mjs';
+const CSS=`
+  .li { display:grid; gap:20px; }
+  .li .ph { margin:0; }
+  .li-layout { display:grid; grid-template-columns:320px minmax(0,1fr); gap:20px; align-items:start; }
+  .li-section { display:grid; gap:16px; padding:20px; border-top:1px solid var(--joint); min-width:0; }
+  .li-section h2,.li-state h2 { font-size:16px; }
+  .li-section > .btn { justify-self:start; }
+  .li-row { height:var(--row); display:grid; grid-template-columns:minmax(0,1fr) 72px; gap:12px; padding:0 16px; border-top:1px solid var(--joint); align-items:center; }
+  .li-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .li-row:hover { background:var(--tile); }
+  .li .in { width:100%; font:inherit; color:var(--text-body); }
+  .li textarea.in { min-height:96px; resize:vertical; }
+  .li :is(a,input,textarea,select,button):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .li .assist { border-color:var(--brick-700); font-size:13px; height:36px; }
+  .li button:disabled { opacity:.5; cursor:not-allowed; }
+  .li-check { display:flex; align-items:start; gap:12px; }
+  .li-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .li-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .li-state { display:grid; gap:12px; padding:20px 0; border-top:1px solid var(--joint); align-content:start; }
+  .li-state .btn { justify-self:start; }
+  .li-facts { display:grid; grid-template-columns:144px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .li-facts dt { color:var(--text-muted); }
+  .li-facts dd { margin:0; overflow-wrap:anywhere; }
+  .li-stack { display:grid; gap:20px; min-width:0; }
 `;
-
-function row({ on, name, time, sub, tags }) {
-  return `            <div class="row${on ? " row--on" : ""}">
-              <span class="box"></span>
-              <span class="row-hd"><b>${name}</b><time>${time}</time></span>
-              <span class="row-sub">${sub}</span>
-              <span class="row-tags">${tags}</span>
-            </div>`;
-}
-
-const BODY = `      <div class="ph">
-        <div>
-          <h1>Lead inbox</h1>
-          <p>A reply needs a named human approval before it leaves. Four are waiting.</p>
-        </div>
-        <div class="ph-actions">
-          <div class="seg">
-            <button type="button" data-on="1">Needs reply <em>4</em></button>
-            <button type="button">Overdue <em>3</em></button>
-            <button type="button">Unassigned <em>4</em></button>
-            <button type="button">All <em>28</em></button>
-          </div>
-          <button class="btn btn--primary" type="button">${icon("plus", 15)}<span>Log enquiry</span></button>
-        </div>
-      </div>
-
-      <section class="panel">
-        <div class="inbox">
-          <div class="inbox-list">
-            <div class="inbox-tools">
-              <span class="inbox-find">${icon("search", 14)}Filter these 4</span>
-              <button class="btn btn--sm" type="button">Newest${icon("down", 14)}</button>
-            </div>
-${row({ on: true, name: "Maria Petrova", time: "2 d", sub: "Listing enquiry · MS-00815, Sandanski",
-  tags: `<span class="pill pill--danger"><i></i>Escalated</span><span class="pill pill--sand">WhatsApp</span><span class="pill pill--sand">HE → EN</span>` })}
-${row({ name: "Anna Weber", time: "2 d", sub: "Viewing request · MS-00191, Katuntsi",
-  tags: `<span class="pill pill--warn"><i></i>Reply due today</span><span class="pill pill--sand">Email</span>` })}
-${row({ name: "Ivan Georgiev", time: "2 d", sub: "Callback · weekdays after 14:00",
-  tags: `<span class="pill pill--danger"><i></i>Escalated</span><span class="pill pill--sand">Phone</span>` })}
-${row({ name: "Elena Dimitrova", time: "1 d", sub: "Seller valuation · house, Sandanski",
-  tags: `<span class="pill pill--warn"><i></i>Unassigned</span><span class="pill pill--sand">Website form</span>` })}
-            <p style="padding:16px; font-size:13px; color:var(--text-subtle)">
-              24 answered leads are in <a href="#" style="font-weight:600">All</a>.
-            </p>
-          </div>
-
-          <div class="detail">
-            <div class="detail-hd">
-              <div style="min-width:0">
-                <h2>Maria Petrova</h2>
-                <div class="who">
-                  <span class="pill pill--sea"><i></i>Buyer</span>
-                  <span>Listing enquiry</span><span>·</span>
-                  <span>WhatsApp</span><span>·</span>
-                  <span class="mono">+972 ••• 8841</span><span>·</span>
-                  <span>Hebrew, replying in English</span>
-                </div>
-              </div>
-              <div class="ph-actions">
-                <button class="btn btn--sm" type="button">${icon("clock", 14)}<span>Snooze…</span></button>
-                <button class="btn btn--sm" type="button">${icon("users", 14)}<span>Reassign…</span></button>
-                <button class="btn btn--sm" type="button">${icon("list", 14)}<span>History</span></button>
-              </div>
-            </div>
-
-            <dl class="facts">
-              <div class="fact"><dt>Reply deadline</dt><dd style="color:var(--danger-600)">Overdue 2 days</dd></div>
-              <div class="fact"><dt>Received</dt><dd>4 Jul, 03:00</dd></div>
-              <div class="fact"><dt>Property</dt><dd><span class="mono" style="font-size:13px">MS-00815</span></dd></div>
-              <div class="fact"><dt>Assigned broker</dt><dd class="subtle">Not set</dd></div>
-              <div class="fact"><dt>Matching inventory</dt><dd>5 properties</dd></div>
-            </dl>
-
-            <div class="sect">
-              <h3>Reassign this enquiry
-                <span style="font-weight:500; font-size:13px; color:var(--text-muted)">
-                  Both fields are required — the server refuses a reassignment without them.
-                </span>
-              </h3>
-              <div style="display:grid; gap:12px; max-width:520px">
-                <div class="field"><label for="ra-broker">To</label>
-                  <span class="in" id="ra-broker">Mariya Ruseva ${icon("down", 13)}</span></div>
-                <div class="field"><label for="ra-reason">Why <em>required</em></label>
-                  <span class="in in--area" id="ra-reason">Hebrew enquiry; Mariya answers in Hebrew and
-                    the previous broker is on leave until the 12th.</span></div>
-                <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px">
-                  <span class="box" data-on="1"></span>
-                  <span>I am reassigning this enquiry and my name goes on it.</span>
-                </div>
-                <div style="display:flex; gap:8px">
-                  <button class="btn btn--sm btn--primary" type="button">Reassign</button>
-                  <button class="btn btn--sm" type="button">Cancel</button>
-                </div>
-                <span class="hint">Snoozing asks for the same two things plus the moment it comes back,
-                  at most 90 days out. The reply clock defers by that whole window rather than restarting.</span>
-              </div>
-            </div>
-
-            <div class="sect">
-              <h3>Reply
-                <span style="font-weight:500; font-size:13px; color:var(--text-muted)">
-                  Approved by a named person before sending — Hermes may only draft.
-                </span>
-              </h3>
-              <div class="composer">
-                <div class="composer-bar">
-                  <span class="pill pill--sand">${icon("sparkles", 13)}Hermes draft</span>
-                  <span class="pill pill--sand">Template: viewing offer</span>
-                  <span style="margin-left:auto" class="mono">EN · 412 characters</span>
-                </div>
-                <div class="composer-body">
-                  Hello Maria, thank you for your interest in the two-bedroom apartment in Sandanski
-                  (reference MS-00815, €68,000). It is still available. I can show it on Thursday
-                  at 11:00 or Friday at 15:00 — which suits you better?
-                </div>
-                <div class="composer-foot">
-                  <button class="btn btn--sm btn--primary" type="button">${icon("send", 14)}<span>Approve and send</span></button>
-                  <button class="btn btn--sm" type="button">Save as draft</button>
-                  <span style="margin-left:auto; font-size:13px" class="muted">Sends over WhatsApp Business</span>
-                </div>
-              </div>
-              <div class="note" style="margin-top:12px">
-                ${icon("alert", 15)}
-                <span>WhatsApp Business is not connected yet, so this reply will be marked ready for manual sending.
-                  <a href="#" style="font-weight:600; text-decoration:underline">Connect it</a>.</span>
-              </div>
-            </div>
-
-            <div class="sect">
-              <h3>Conversation <span style="font-weight:500; font-size:13px" class="muted">2 events</span></h3>
-              <div class="ev">
-                <span class="av">MP</span>
-                <p><em>Maria Petrova asked</em> whether the apartment is still available and if a viewing is possible next week.</p>
-                <span class="mono">4 Jul, 03:00</span>
-              </div>
-              <div class="ev">
-                <span class="av" style="background:var(--spring-50); color:var(--spring-800)">SY</span>
-                <p><em>Automatic acknowledgement sent</em> in Hebrew. No property facts included.</p>
-                <span class="mono">4 Jul, 03:01</span>
-              </div>
-            </div>
-
-            <div class="sect" style="border-bottom:0">
-              <h3>Requirements <a href="#" style="font-weight:600; font-size:13px">Edit</a></h3>
-              <div style="display:flex; flex-wrap:wrap; gap:8px">
-                <span class="pill pill--ink">Sandanski</span>
-                <span class="pill pill--ink">Apartment</span>
-                <span class="pill pill--ink">2 bedrooms</span>
-                <span class="pill pill--ink">Cash</span>
-                <span class="pill pill--warn"><i></i>Budget not captured</span>
-                <span class="pill pill--warn"><i></i>Decision timeline not captured</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>`;
-
-fs.writeFileSync(new URL("./LeadInbox.dc.html", import.meta.url), page({
-  active: "leads", body: BODY, extraCss: CSS, height: 980,
-}));
-console.log("LeadInbox.dc.html");
+const states=[['No replies waiting','No lead needs a reply in this filtered example. Check the scope before treating the whole queue as clear.','Change filters'],['Lead is loading','Keep the selected identity and search visible.','Loading lead…',true],['Assignment failed','The proposed broker and reason remain in the form. No new owner is confirmed.','Review assignment'],['Contact or channel unavailable','The enquiry can be readable while private contact details or delivery are unavailable.','Review contact status'],['Many matching leads','Keep a single identity line, the selected lead and page position.','Next page'],['Reply outcome unknown','A missing delivery receipt is not proof that nothing was sent. Check before retrying.','Send again',true]];
+const body=`<div class="li"><div class="ph"><div><h1>Lead inbox</h1><p>See the next action, assign its owner and review a reply before it leaves.</p></div></div><p class="muted">Illustrative leads, messages and receipts · no live inbox loaded.</p><div class="li-layout"><section class="panel"><div class="li-section"><div class="field"><label for="lead-search">Find an enquiry</label><input class="in" id="lead-search" type="search"></div><button class="btn" type="button">Review filters</button></div>${[['Екатерина Константинова-Александрова','Open'],['Anna Weber','Open'],['מרים כהן','Open'],['Elena Dimitrova','Open']].map(([name,action])=>`<div class="li-row"><b title="${name}"><bdi dir="auto">${name}</bdi></b><button class="btn btn--sm" type="button">${action}</button></div>`).join('')}<div class="li-section"><p>Four sample leads. Deadlines follow the saved lead state and workspace settings.</p><button class="btn" type="button">Next page</button></div></section><div class="li-stack"><section class="panel"><div class="panel-hd"><h2>Екатерина Константинова-Александрова</h2></div><div class="li-section"><dl class="li-facts"><dt>Enquiry</dt><dd>Viewing question · example</dd><dt>Source language</dt><dd>Bulgarian</dd><dt>Assigned broker</dt><dd><span class="wit wit--none">No owner confirmed</span></dd><dt>Contact details</dt><dd>Not loaded in this preview</dd></dl><p lang="bg">Примерно запитване: Може ли да уточним дали е възможен оглед?</p></div></section><section class="panel"><div class="panel-hd"><h2>Assign the enquiry</h2><span class="wit wit--none">Decision not saved</span></div><form class="li-section"><div class="field"><label for="assign-to">Broker</label><select class="in" id="assign-to"><option>Mariya · example</option><option>Petar · example</option></select></div><div class="field"><label for="assign-why">Reason for assignment</label><textarea class="in" id="assign-why">Mariya will review the enquiry and agree the next step.</textarea></div><label class="li-check"><input type="checkbox"><span>I, Mariya, confirm this assignment and its reason.</span></label><button class="btn btn--accent" type="button">Save assignment</button><p class="hint">The saved receipt names the owner, the person who changed it and the time. The example is not a live approval.</p></form></section><section class="panel"><div class="panel-hd"><h2>Draft the reply</h2><span class="wit wit--none">Human review needed</span></div><form class="li-section"><button class="btn assist" type="button">${icon('sparkles',16)}Ask Hermes for a draft</button><div class="field"><label for="reply-draft">Reply text · illustrative English draft</label><textarea class="in" id="reply-draft">Thank you for your enquiry. We will check the property’s current availability before proposing a viewing.</textarea></div><div class="field"><label for="reply-review">Review note</label><input class="in" id="reply-review" placeholder="Record the source and checks"></div><label class="li-check"><input type="checkbox"><span>I, Mariya, have reviewed this draft and its source facts.</span></label><button class="btn" type="button">Record draft review</button><p class="hint">Review and delivery are separate. Hermes does not approve or send. Check the destination and channel before a human sends the reply.</p></form></section><section class="panel"><div class="panel-hd"><h2>Snooze with a reason</h2></div><form class="li-section"><div class="field"><label for="snooze-until">Return date and time</label><input class="in" id="snooze-until" type="datetime-local"></div><div class="field"><label for="snooze-note">Why should it wait?</label><textarea class="in" id="snooze-note"></textarea></div><label class="li-check"><input type="checkbox"><span>I, Mariya, confirm the return time and reason.</span></label><button class="btn" type="button">Review snooze</button></form></section></div></div><div class="li-states">${states.map(([title,text,action,disabled])=>`<section class="li-state"><h2>${title}</h2><p>${text}</p><button class="btn" type="button"${disabled?' disabled':''}>${action}</button></section>`).join('')}</div></div>`;
+fs.writeFileSync(new URL('./LeadInbox.dc.html',import.meta.url),page({active:'leads',body,extraCss:CSS,height:0,healthText:'Illustrative workspace'}));
+console.log('LeadInbox');

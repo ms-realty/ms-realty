@@ -327,16 +327,31 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
-    .tk { display:grid; grid-template-columns:auto minmax(0,1fr) 168px 120px 96px; align-items:center;
-      gap:16px; padding:12px 16px; border-bottom:1px solid var(--border); }
-    .tk:last-child { border-bottom:0; }
-    .tk:hover { background:var(--tile); }
-    .tk-main { display:grid; gap:4px; min-width:0; }
-    .tk-main b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .tk-meta { display:flex; gap:8px; font-size:13px; color:var(--text-muted); min-width:0; }
-    .tk-meta span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .day { padding:8px 16px; background:var(--sunken); font-size:11px; font-weight:600; color:var(--text-muted);
-      border-bottom:1px solid var(--border); display:flex; justify-content:space-between; }
+  .dw { display:grid; gap:20px; }
+  .dw .ph { margin:0; }
+  .dw-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .dw-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .dw-section h2,.dw-state h2 { font-size:16px; }
+  .dw-section > .btn { justify-self:start; }
+  .dw-row { display:grid; grid-template-columns:minmax(0,1fr) 176px 200px 112px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .dw-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dw-row:hover { background:var(--tile); }
+  .dw-row .btn { justify-self:end; }
+  .dw-heading { background:var(--tile-deep); font-weight:600; }
+  .dw .in { width:100%; color:var(--text-body); font:inherit; }
+  .dw textarea.in { min-height:96px; resize:vertical; }
+  .dw :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .dw button:disabled { opacity:.5; cursor:not-allowed; }
+  .dw-check { display:flex; align-items:start; gap:12px; }
+  .dw-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .dw-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .dw-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); }
+  .dw-state .btn { justify-self:start; }
+  .dw-facts { display:grid; grid-template-columns:144px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .dw-facts dt { color:var(--text-muted); }
+  .dw-facts dd { margin:0; overflow-wrap:anywhere; }
+  .dw-tools { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .dw-tools .field { flex:1; }
 
   </style>
 </head><body>
@@ -348,7 +363,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -390,94 +405,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Tasks</h1><p>Everything a person owes someone else, from any record. Six open, two of them late.</p></div>
-        <div class="ph-actions">
-          <div class="seg"><button type="button" data-on="1">Mine <em>6</em></button><button type="button">Team <em>19</em></button><button type="button">Done</button></div>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New task</span></button>
-        </div>
-      </div>
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Task, person or property</span>
-          <button class="btn btn--sm" type="button">Any type <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any record <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <span style="margin-left:auto" class="mono">Grouped by due date</span>
-        </div>
-        <div class="day"><span>Late</span><span>2</span></div>
-        <div class="tk">
-          <span class="box"></span>
-          <span class="tk-main"><b style="">Call Ivan Georgiev back</b>
-            <span class="tk-meta"><span>Callback requested for weekdays after 14:00</span></span></span>
-          <span style="font-size:13px" class="muted">Lead · Ivan Georgiev</span>
-          <span style="font-size:13px; font-weight:600; color:var(--danger-600)">2 days late</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">MR</span></span>
-        </div>
-        <div class="tk">
-          <span class="box"></span>
-          <span class="tk-main"><b style="">Collect the preliminary contract from the seller</b>
-            <span class="tk-meta"><span>Notary is booked for 8 September</span></span></span>
-          <span style="font-size:13px" class="muted">Case CASE-0007</span>
-          <span style="font-size:13px; font-weight:600; color:var(--danger-600)">1 day late</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">MR</span></span>
-        </div>
-        <div class="day"><span>Today, Tuesday 1 September</span><span>3</span></div>
-        <div class="tk">
-          <span class="box"></span>
-          <span class="tk-main"><b style="">Confirm the Weber viewing</b>
-            <span class="tk-meta"><span>15:00 · villa, Katuntsi</span></span></span>
-          <span style="font-size:13px" class="muted">Viewing</span>
-          <span style="font-size:13px; font-weight:600; color:var(--warning-700)">By 12:00</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">PD</span></span>
-        </div>
-        <div class="tk">
-          <span class="box"></span>
-          <span class="tk-main"><b style="">Approve 7 listing descriptions</b>
-            <span class="tk-meta"><span>DE 3 · NL 2 · EL 2 · drafted by Hermes, nothing indexed yet</span></span></span>
-          <span style="font-size:13px" class="muted">Translations</span>
-          <span style="font-size:13px; font-weight:600; ">Today</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="pill pill--ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 13.9 8.1 19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 3v4"/><path d="M20 5h-4"/></svg></span><span class="av">MR</span></span>
-        </div>
-        <div class="tk">
-          <span class="box"></span>
-          <span class="tk-main"><b style="">Decide on the French language request</b>
-            <span class="tk-meta"><span>3 visitors asked for /fr/ this week</span></span></span>
-          <span style="font-size:13px" class="muted">Request</span>
-          <span style="font-size:13px; font-weight:600; ">Today</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">MR</span></span>
-        </div>
-        <div class="day"><span>This week</span><span>1</span></div>
-        <div class="tk">
-          <span class="box"></span>
-          <span class="tk-main"><b style="">Ask Nikolay Stoyanov for a review</b>
-            <span class="tk-meta"><span>Sale completed 22 August</span></span></span>
-          <span style="font-size:13px" class="muted">Deal · won</span>
-          <span style="font-size:13px; font-weight:600; ">Friday</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">MR</span></span>
-        </div>
-        <div class="day"><span>Done today</span><span>2</span></div>
-        <div class="tk">
-          <span class="box" data-on="1"></span>
-          <span class="tk-main"><b style="text-decoration:line-through; color:var(--text-muted); font-weight:400">Approve the German description for MS-00932</b>
-            <span class="tk-meta"><span>Published to the public site</span></span></span>
-          <span style="font-size:13px" class="muted">Translations</span>
-          <span style="font-size:13px; font-weight:600; ">18 min ago</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">MR</span></span>
-        </div>
-        <div class="tk">
-          <span class="box" data-on="1"></span>
-          <span class="tk-main"><b style="text-decoration:line-through; color:var(--text-muted); font-weight:400">Reply to Anna Weber</b>
-            <span class="tk-meta"><span>Sent by Petar, reviewed by Mariya</span></span></span>
-          <span style="font-size:13px" class="muted">Lead</span>
-          <span style="font-size:13px; font-weight:600; ">1 hour ago</span>
-          <span style="display:flex; justify-content:flex-end; gap:8px; align-items:center"><span class="av">PD</span></span>
-        </div>
-      </section>
+<div class="dw"><div class="ph"><div><h1>Tasks</h1><p>Open source work where it is completed. Finish a task created here with its evidence.</p></div></div><p class="muted">Illustrative tasks and people · no live queue loaded.</p><section class="panel"><div class="panel-hd"><h2>Work that needs attention</h2></div><div class="dw-row dw-heading"><span>Task</span><span>Owner</span><span>Completed in</span><span>Action</span></div><div class="dw-row"><b title="Reply to Екатерина Константинова-Александрова"><bdi dir="auto">Reply to Екатерина Константинова-Александрова</bdi></b><span>Mariya</span><span>Lead inbox</span><button class="btn btn--sm" type="button">Open source</button></div><div class="dw-row"><b title="Record viewing feedback"><bdi dir="auto">Record viewing feedback</bdi></b><span>Petar</span><span>Viewings</span><button class="btn btn--sm" type="button">Open source</button></div><div class="dw-row"><b title="Resolve a language request"><bdi dir="auto">Resolve a language request</bdi></b><span>Mariya</span><span>Requests</span><button class="btn btn--sm" type="button">Open source</button></div><div class="dw-row"><b title="Call the owner about access"><bdi dir="auto">Call the owner about access</bdi></b><span>Mariya</span><span>Tasks · created here</span><button class="btn btn--sm" type="button">Review task</button></div></section><div class="dw-grid"><section class="panel"><div class="panel-hd"><h2>Complete the access call</h2><span class="wit wit--none">Evidence required</span></div><form class="dw-section"><p>This example was created in Tasks. Completing it requires a note or an internal evidence reference.</p><div class="field"><label for="task-note">What was completed?</label><textarea class="in" id="task-note" placeholder="Record the outcome"></textarea></div><div class="field"><label for="task-ref">Internal reference, if available</label><input class="in" id="task-ref"></div><label class="dw-check"><input type="checkbox"><span>I, Mariya, confirm this task is complete and the evidence is accurate.</span></label><button class="btn btn--accent" type="button">Complete this task</button></form></section><section class="panel"><div class="panel-hd"><h2>Create a task</h2></div><form class="dw-section"><div class="field"><label for="task-new-note">Task and context</label><textarea class="in" id="task-new-note"></textarea></div><div class="field"><label for="task-priority">Priority</label><select class="in" id="task-priority"><option>Critical</option><option>Urgent</option><option>Normal</option></select></div><div class="field"><label for="task-due">Due date and time</label><input class="in" id="task-due" type="datetime-local"></div><button class="btn" type="button">Review owner and task</button></form></section></div><section class="panel"><div class="panel-hd"><h2>The completed task keeps its witness</h2></div><div class="dw-section"><dl class="dw-facts"><dt>Task</dt><dd>Call the owner about access · example</dd><dt>Outcome</dt><dd>Access arrangements recorded · illustrative receipt</dd><dt>Confirmed by</dt><dd><span class="wit">Mariya · 1 Sep, 10:20 · example</span></dd></dl><p>This receipt does not complete a lead, viewing or document in another screen.</p></div></section><div class="dw-states" aria-label="Additional states"><section class="dw-state"><h2>No open tasks</h2><p>An empty list means no tasks in the selected scope.</p><button class="btn" type="button">Change filters</button></section><section class="dw-state"><h2>Saving the outcome</h2><p>Keep the evidence and task identity visible.</p><button class="btn" type="button" disabled>Saving outcome…</button></section><section class="dw-state"><h2>Evidence is missing</h2><p>Add a completion note or internal reference and confirm the action.</p><button class="btn" type="button">Return to evidence</button></section><section class="dw-state"><h2>Source queue unavailable</h2><p>Tasks from that source are not known to be complete.</p><button class="btn" type="button">Reload source queue</button></section><section class="dw-state"><h2>Many tasks</h2><p>Filter by owner, source and priority; keep the selected task when paging.</p><button class="btn" type="button">Open task filters</button></section><section class="dw-state"><h2>Source task selected</h2><p>A derived task can only be completed in its owning screen.</p><button class="btn" type="button" disabled>Complete here</button></section></div></div>
     </div>
   </div>
 </div>

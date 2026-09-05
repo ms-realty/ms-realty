@@ -335,6 +335,32 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
+  .dw { display:grid; gap:20px; }
+  .dw .ph { margin:0; }
+  .dw-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .dw-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .dw-section h2,.dw-state h2 { font-size:16px; }
+  .dw-section > .btn { justify-self:start; }
+  .dw-row { display:grid; grid-template-columns:minmax(0,1fr) 176px 200px 112px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .dw-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dw-row:hover { background:var(--tile); }
+  .dw-row .btn { justify-self:end; }
+  .dw-heading { background:var(--tile-deep); font-weight:600; }
+  .dw .in { width:100%; color:var(--text-body); font:inherit; }
+  .dw textarea.in { min-height:96px; resize:vertical; }
+  .dw :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .dw button:disabled { opacity:.5; cursor:not-allowed; }
+  .dw-check { display:flex; align-items:start; gap:12px; }
+  .dw-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .dw-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .dw-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); }
+  .dw-state .btn { justify-self:start; }
+  .dw-facts { display:grid; grid-template-columns:144px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .dw-facts dt { color:var(--text-muted); }
+  .dw-facts dd { margin:0; overflow-wrap:anywhere; }
+  .dw-tools { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .dw-tools .field { flex:1; }
+
   </style>
 </helmet>
 <!--
@@ -345,7 +371,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -387,139 +413,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Contacts</h1><p>People and the companies they belong to. Contact details are stored encrypted and open only where a task needs them.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9"/><path d="m7 13 5-5 5 5"/><path d="M4 3h16"/></svg><span>Import</span></button>
-          <button class="btn btn--primary" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New contact</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>People</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="8" height="14" rx="1"/><path d="M11 21h10V3h-6v4"/><path d="M6 11h2"/><path d="M6 15h2"/><path d="M16 11h2"/><path d="M16 15h2"/></svg><span>Companies</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Consent</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span>Saved segments</span></a></nav>
-      <section class="panel">
-        <div class="toolbar">
-          <span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Name, phone, email or reference</span>
-          <button class="btn btn--sm" type="button">Any role <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any language <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <button class="btn btn--sm" type="button">Any broker <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-          <span style="margin-left:auto" class="mono">312 contacts</span>
-        </div>
-        <table>
-          <thead><tr><th style="width:32px"></th><th>Person</th><th>Role</th><th>Company</th><th>Language</th><th>Consent</th><th>Open work</th><th>Broker</th><th>Last contact</th><th></th></tr></thead>
-          <tbody>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">MP</span>
-                <span class="t2"><b>Maria Petrova</b><span>+972 ••• 8841</span></span></span></td>
-              <td><span class="pill pill--sea"><i></i>Buyer</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">HE → EN</span></td>
-              <td><span class="pill pill--ok"><i></i>Current</span></td>
-              <td><span class="pill pill--danger"><i></i>1 enquiry · overdue</span></td>
-              <td><span class="muted">Unassigned</span></td>
-              <td class="muted">2 days ago</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">AW</span>
-                <span class="t2"><b>Anna Weber</b><span>anna.w@••••.de</span></span></span></td>
-              <td><span class="pill pill--sea"><i></i>Buyer</span></td>
-              <td class="muted">Weber Immobilien GmbH</td>
-              <td><span class="pill pill--sand">DE</span></td>
-              <td><span class="pill pill--ok"><i></i>Current</span></td>
-              <td><span class="pill pill--warn"><i></i>Case CASE-0007</span></td>
-              <td><span class="av">MR</span></td>
-              <td class="muted">today</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">IG</span>
-                <span class="t2"><b>Ivan Georgiev</b><span>+359 ••• 412</span></span></span></td>
-              <td><span class="pill pill--sea"><i></i>Buyer</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">BG</span></td>
-              <td><span class="pill pill--ok"><i></i>Current</span></td>
-              <td><span class="pill pill--danger"><i></i>1 callback · overdue</span></td>
-              <td><span class="av">MR</span></td>
-              <td class="muted">2 days ago</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">ED</span>
-                <span class="t2"><b>Elena Dimitrova</b><span>+359 ••• 907</span></span></span></td>
-              <td><span class="pill pill--ink"><i></i>Seller</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">BG</span></td>
-              <td><span class="pill pill--ok"><i></i>Current</span></td>
-              <td><span class="pill pill--warn"><i></i>Valuation requested</span></td>
-              <td><span class="muted">Unassigned</span></td>
-              <td class="muted">yesterday</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">GN</span>
-                <span class="t2"><b>Georgi Nikolov</b><span>g.nikolov@••••.bg</span></span></span></td>
-              <td><span class="pill pill--sand"><i></i>Renter</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">BG</span></td>
-              <td><span class="pill pill--ok"><i></i>Current</span></td>
-              <td><span class="pill pill--warn"><i></i>Feedback due</span></td>
-              <td><span class="av">PD</span></td>
-              <td class="muted">30 Aug</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">SM</span>
-                <span class="t2"><b>Sofia Marinova</b><span>+30 ••• 553</span></span></span></td>
-              <td><span class="pill pill--sea"><i></i>Buyer</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">EL</span></td>
-              <td><span class="pill pill--ok"><i></i>Current</span></td>
-              <td><span class="pill pill--sand"><i></i>Saved search</span></td>
-              <td><span class="av">MR</span></td>
-              <td class="muted">28 Aug</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">NS</span>
-                <span class="t2"><b>Nikolay Stoyanov</b><span>+359 ••• 218</span></span></span></td>
-              <td><span class="pill pill--ok"><i></i>Past client</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">BG</span></td>
-              <td><span class="pill pill--warn"><i></i>expires 14 Sep</span></td>
-              <td><span class="pill pill--sand"><i></i>Review requested</span></td>
-              <td><span class="av">MR</span></td>
-              <td class="muted">22 Aug</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-            <tr>
-              <td><span class="box"></span></td>
-              <td><span style="display:flex; align-items:center; gap:12px"><span class="av">DV</span>
-                <span class="t2"><b>Dmitri Volkov</b><span>d.volkov@••••.ru</span></span></span></td>
-              <td><span class="pill pill--sea"><i></i>Buyer</span></td>
-              <td class="muted">—</td>
-              <td><span class="pill pill--sand">RU</span></td>
-              <td><span class="pill pill--sand"><i></i>Withdrawn</span></td>
-              <td><span class="pill pill--sand"><i></i>1 enquiry</span></td>
-              <td><span class="av">PD</span></td>
-              <td class="muted">yesterday</td>
-              <td style="text-align:right"><span class="muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="foot"><span>Showing 1–8 of 312</span>
-          <span style="display:flex; gap:8px"><button class="btn btn--sm" type="button">Previous</button><button class="btn btn--sm" type="button">Next</button></span></div>
-      </section>
+<div class="dw"><div class="ph"><div><h1>Contacts</h1><p>Find the person, their open work and the purpose for which you may contact them.</p></div><button class="btn btn--accent" type="button">Review a new contact</button></div><nav class="subnav"><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>People</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Consent</span></a></nav><p class="muted">Illustrative contacts · no private contact details loaded.</p><section class="panel"><div class="dw-tools"><div class="field"><label for="contact-search">Name or record reference</label><input class="in" id="contact-search" type="search"></div><div class="field"><label for="contact-role">Role</label><select class="in" id="contact-role"><option>Any role</option><option>Buyer</option><option>Seller</option><option>Renter</option></select></div><button class="btn" type="button">Find contact</button></div><div class="dw-row dw-heading"><span>Person</span><span>Open work</span><span>Contact purpose</span><span>Action</span></div><div class="dw-row"><b title="Екатерина Константинова-Александрова"><bdi dir="auto">Екатерина Константинова-Александрова</bdi></b><span>Enquiry reply</span><span>Review enquiry permission</span><button class="btn btn--sm" type="button">Open person</button></div><div class="dw-row"><b title="Anna Weber"><bdi dir="auto">Anna Weber</bdi></b><span>Viewing request</span><span>Review viewing purpose</span><button class="btn btn--sm" type="button">Open person</button></div><div class="dw-row"><b title="מרים כהן"><bdi dir="auto">מרים כהן</bdi></b><span>Property alerts</span><span>Review alert consent</span><button class="btn btn--sm" type="button">Open person</button></div><div class="dw-row"><b title="Dmitri Volkov"><bdi dir="auto">Dmitri Volkov</bdi></b><span>Previous enquiry</span><span>Alerts withdrawn · example</span><button class="btn btn--sm" type="button">Open person</button></div></section><div class="dw-grid"><section class="panel"><div class="panel-hd"><h2>Selected person</h2></div><div class="dw-section"><dl class="dw-facts"><dt>Name</dt><dd>Екатерина Константинова-Александрова</dd><dt>Language</dt><dd>Bulgarian · example</dd><dt>Open work</dt><dd>Enquiry reply</dd><dt>Contact detail</dt><dd>Not loaded in this preview</dd><dt>Permission</dt><dd><span class="wit wit--none">Purpose review due</span></dd></dl><button class="btn" type="button">Open enquiry</button></div></section><section class="panel"><div class="panel-hd"><h2>Check the purpose before contact</h2></div><div class="dw-section"><p>A person can have different choices for enquiries, viewing requests and property alerts.</p><p>A withdrawn alert choice is not a blanket description of every relationship with the agency. Check the relevant consent record.</p><button class="btn" type="button">Review consent history</button></div></section></div><div class="dw-states" aria-label="Additional states"><section class="dw-state"><h2>No matching person</h2><p>Clear the search or check the reference. A failed lookup must not look like an empty list.</p><button class="btn" type="button">Clear search</button></section><section class="dw-state"><h2>Contact is loading</h2><p>Keep the selected identity visible while details load.</p><button class="btn" type="button" disabled>Loading contact…</button></section><section class="dw-state"><h2>Contact could not load</h2><p>No contact details or current permission are confirmed.</p><button class="btn" type="button">Reload contact</button></section><section class="dw-state"><h2>Private details unavailable</h2><p>The task may be visible while its private contact data is unavailable.</p><button class="btn" type="button">Review access</button></section><section class="dw-state"><h2>Many matching names</h2><p>Use the record reference to distinguish people. Preserve page position when returning.</p><button class="btn" type="button">Next page</button></section><section class="dw-state"><h2>Contact permission not established</h2><p>Review the purpose and current record before sending.</p><button class="btn" type="button" disabled>Send message</button></section></div></div>
     </div>
   </div>
 </div>

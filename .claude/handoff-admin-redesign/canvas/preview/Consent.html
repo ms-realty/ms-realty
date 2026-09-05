@@ -327,6 +327,32 @@
     .app { --text-subtle:var(--text-muted); }
     .subtle { color:var(--text-muted); }
 
+  .dw { display:grid; gap:20px; }
+  .dw .ph { margin:0; }
+  .dw-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .dw-section { display:grid; gap:16px; padding:20px; min-width:0; border-top:1px solid var(--joint); }
+  .dw-section h2,.dw-state h2 { font-size:16px; }
+  .dw-section > .btn { justify-self:start; }
+  .dw-row { display:grid; grid-template-columns:minmax(0,1fr) 176px 200px 112px; gap:16px; height:var(--row); align-items:center; padding:0 20px; border-top:1px solid var(--joint); }
+  .dw-row > * { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dw-row:hover { background:var(--tile); }
+  .dw-row .btn { justify-self:end; }
+  .dw-heading { background:var(--tile-deep); font-weight:600; }
+  .dw .in { width:100%; color:var(--text-body); font:inherit; }
+  .dw textarea.in { min-height:96px; resize:vertical; }
+  .dw :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .dw button:disabled { opacity:.5; cursor:not-allowed; }
+  .dw-check { display:flex; align-items:start; gap:12px; }
+  .dw-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .dw-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .dw-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); }
+  .dw-state .btn { justify-self:start; }
+  .dw-facts { display:grid; grid-template-columns:144px minmax(0,1fr); gap:12px 16px; margin:0; }
+  .dw-facts dt { color:var(--text-muted); }
+  .dw-facts dd { margin:0; overflow-wrap:anywhere; }
+  .dw-tools { display:flex; align-items:end; gap:16px; padding:16px 20px; }
+  .dw-tools .field { flex:1; }
+
   </style>
 </head><body>
 <!--
@@ -337,7 +363,7 @@ FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action to
 FORM: the register of witnessed facts.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->
-<div class="app" style="width:1440px; min-height:900px">
+<div class="app" style="width:1440px; min-height:0px">
   <aside class="sb">
       <div class="sb-brand">
         <img src="ms-realty-logo-reversed.png" alt="MS Realty" width="59" height="30" />
@@ -379,77 +405,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <input type="search" placeholder="Search leads, listings, pages and documents" value="" />
           <kbd>⌘K</kbd>
         </label>
-        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>2 connections need attention</span></a>
+        <a class="top-health top-health--warn" href="#"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Illustrative workspace</span></a>
         <button class="btn btn--primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New</span></button>
         <button class="top-av" type="button">MR</button>
       </header>
     <div class="scroll">
-      <div class="ph">
-        <div><h1>Consent</h1><p>What each person agreed to, when, and from which form. A withdrawal takes effect everywhere within the hour.</p></div>
-        <div class="ph-actions">
-          <button class="btn" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg><span>Export the ledger</span></button>
-        </div>
-      </div>
-      <nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>People</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="8" height="14" rx="1"/><path d="M11 21h10V3h-6v4"/><path d="M6 11h2"/><path d="M6 15h2"/><path d="M16 11h2"/><path d="M16 15h2"/></svg><span>Companies</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Consent</span></a><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span>Saved segments</span></a></nav>
-      <div style="display:grid; grid-template-columns:minmax(0,1fr) 316px; gap:20px; align-items:start">
-        <section class="panel">
-          <div class="toolbar"><span class="find"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Person or email</span>
-            <button class="btn btn--sm" type="button">Any purpose <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <button class="btn btn--sm" type="button">Any state <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
-          <table>
-            <thead><tr><th>Person</th><th>Purpose</th><th>Given</th><th>Source</th><th>Legal basis</th><th>State</th><th></th></tr></thead>
-            <tbody>
-              <tr><td><b>Nikolay Stoyanov</b></td><td>Marketing email</td><td class="muted">14 Mar 2026</td>
-                <td class="mono">/bg/kontakt</td><td class="muted">consent</td>
-                <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
-              <tr><td><b>Dmitri Volkov</b></td><td>Marketing email</td><td class="muted">2 Jun 2026</td>
-                <td class="mono">/ru/kontakt</td><td class="muted">consent</td>
-                <td><span class="pill pill--sand"><i></i>Withdrawn 27 Aug</span></td>
-                <td style="text-align:right"><span class="muted" style="font-size:13px">No further contact</span></td></tr>
-              <tr><td><b>Anna Weber</b></td><td>Viewing and transaction contact</td><td class="muted">11 Jul 2026</td>
-                <td class="mono">/de/imoti/villa-katuntsi</td><td class="muted">legitimate_interest</td>
-                <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
-              <tr><td><b>Sofia Marinova</b></td><td>Saved-search alerts</td><td class="muted">3 Aug 2026</td>
-                <td class="mono">/el/tarsene</td><td class="muted">consent</td>
-                <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
-              <tr><td><b>Maria Petrova</b></td><td>Enquiry reply</td><td class="muted">4 Jul 2026</td>
-                <td class="mono">WhatsApp opt-in</td><td class="muted">consent</td>
-                <td><span class="pill pill--ok"><i></i>Current</span></td>
-                <td style="text-align:right"><button class="btn btn--sm" type="button">Withdraw…</button></td></tr>
-            </tbody>
-          </table>
-        </section>
-        <div style="display:grid; gap:16px">
-          <section class="panel">
-            <div class="panel-hd"><h2>What a withdrawal does</h2></div>
-            <div class="sect" style="display:grid; gap:8px; font-size:13px; color:var(--text-body)">
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Removes the person from every saved-search alert and campaign audience.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Keeps the records the agency is legally required to hold for a transaction.</span></div>
-              <div style="display:flex; gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Writes an entry naming who withdrew it and when, which cannot be edited.</span></div>
-              <div class="note note--info" style="margin-top:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg><span>Reply to a direct enquiry is a separate purpose and is not removed by withdrawing marketing consent.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-hd"><h2>Withdrawing a consent</h2></div>
-            <div class="sect" style="display:grid; gap:12px; font-size:13px">
-              <div class="field"><label for="wd-reason">Why <em>required</em></label>
-                <span class="in" id="wd-reason">The person asked us to <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div>
-              <span class="hint">One of three: the person asked us to, a broker recorded their request,
-                or a data correction. The server takes no other reason.</span>
-              <div style="display:flex; align-items:flex-start; gap:8px">
-                <span class="box" data-on="1"></span>
-                <span>I am recording this withdrawal and my name goes on it.</span>
-              </div>
-              <button class="btn btn--sm btn--danger" type="button">Withdraw this consent</button>
-              <span class="hint">Withdrawal supersedes rather than edits, and cannot be undone from
-                here — a new consent has to come from the person.</span>
-            </div>
-          </section>
-        </div>
-      </div>
+<div class="dw"><div class="ph"><div><h1>Consent</h1><p>Review the person, purpose and current record before recording a withdrawal.</p></div></div><nav class="subnav"><a class="subnav__i" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>People</span></a><a class="subnav__i subnav__i--on" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-3 8 3z"/><path d="m9 12 2 2 4-4"/></svg><span>Consent</span></a></nav><p class="muted">Illustrative ledger records · no customer choice is changed by this preview.</p><section class="panel"><div class="panel-hd"><h2>Consent by purpose</h2></div><div class="dw-row dw-heading"><span>Person</span><span>Purpose</span><span>Saved state</span><span>Action</span></div><div class="dw-row"><b title="Anna Weber"><bdi dir="auto">Anna Weber</bdi></b><span>Viewing trip</span><span>Granted · example</span><button class="btn btn--sm" type="button">Review record</button></div><div class="dw-row"><b title="מרים כהן"><bdi dir="auto">מרים כהן</bdi></b><span>Property alerts</span><span>Granted · example</span><button class="btn btn--sm" type="button">Review record</button></div><div class="dw-row"><b title="Dmitri Volkov"><bdi dir="auto">Dmitri Volkov</bdi></b><span>Property alerts</span><span>Withdrawn · example</span><button class="btn btn--sm" type="button">View history</button></div></section><div class="dw-grid"><section class="panel"><div class="panel-hd"><h2>Withdraw property-alert consent</h2><span class="wit wit--none">Confirmation needed</span></div><form class="dw-section"><p>Selected example: מרים כהן · property alerts. This action applies to that purpose.</p><div class="field"><label for="withdraw-reason">Reason</label><select class="in" id="withdraw-reason" required><option value="">Choose a reason</option><option value="customer_request">The person asked</option><option value="broker_recorded_request">Broker recorded the person’s request</option><option value="data_correction">Data correction</option></select></div><label class="dw-check"><input type="checkbox"><span>I, Mariya, confirm I am recording this withdrawal for this person and purpose.</span></label><button class="btn btn--accent" type="button">Record withdrawal</button><p class="hint">The new record supersedes the earlier grant. Repeating an already recorded withdrawal does not create a fresh grant.</p></form></section><section class="panel"><div class="panel-hd"><h2>The receipt names the decision</h2></div><div class="dw-section"><dl class="dw-facts"><dt>Purpose</dt><dd>Property alerts</dd><dt>Result</dt><dd>Withdrawn · illustrative receipt</dd><dt>Reason</dt><dd>The person asked</dd><dt>Recorded by</dt><dd><span class="wit">Mariya · 1 Sep, 10:20 · example</span></dd></dl><p>A local ledger receipt does not prove propagation to every external service. Check delivery exclusions separately.</p><p>It does not delete transaction records or determine how long they must be retained.</p></div></section></div><div class="dw-states" aria-label="Additional states"><section class="dw-state"><h2>No consent record found</h2><p>Do not infer permission from an absent record.</p><button class="btn" type="button">Check person and purpose</button></section><section class="dw-state"><h2>Withdrawal is saving</h2><p>Keep the person, purpose and reason visible.</p><button class="btn" type="button" disabled>Recording withdrawal…</button></section><section class="dw-state"><h2>Withdrawal was not confirmed</h2><p>Keep the request visible and check the latest record before retrying.</p><button class="btn" type="button">Read latest state</button></section><section class="dw-state"><h2>Delivery exclusion not verified</h2><p>The recorded withdrawal and external-service enforcement need separate evidence.</p><button class="btn" type="button">Review delivery status</button></section><section class="dw-state"><h2>Long consent history</h2><p>Show the latest state and retain the earlier records for review.</p><button class="btn" type="button">Open history</button></section><section class="dw-state"><h2>Already withdrawn</h2><p>The current record remains withdrawn. There is no one-click restoration of consent.</p><button class="btn" type="button" disabled>Grant again</button></section></div></div>
     </div>
   </div>
 </div>

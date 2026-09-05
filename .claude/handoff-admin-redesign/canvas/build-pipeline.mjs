@@ -1,113 +1,33 @@
-import fs from "node:fs";
-import { page, icon } from "./shell.mjs";
-
-const CSS = `
-    .board { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(200px,1fr); gap:16px; align-items:start; }
-    .col { background:var(--sunken); border-radius:var(--r-panel); display:flex; flex-direction:column; min-height:420px; }
-    .col-hd { display:flex; align-items:center; gap:8px; padding:12px 16px 8px; }
-    .col-hd b { font-size:13px; font-weight:600; color:var(--text-strong); }
-    .col-n { min-width:20px; height:20px; padding:0 8px; border-radius:var(--r-pill); background:var(--marble-300);
-      color:var(--marble-800); font-size:11px; font-weight:600; line-height:20px; text-align:center; }
-    .col-sum { padding:0 16px 8px; font-size:11px; color:var(--text-muted); }
-    .col-list { display:flex; flex-direction:column; gap:8px; padding:0 8px 12px; min-width:0; }
-    .kc { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-panel); padding:12px 12px;
-      box-shadow:var(--e-1); display:grid; gap:8px; min-width:0; }
-    .kc-top { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
-    .kc-top .pill { flex:0 0 auto; }
-    .kc-top b { flex:1 1 auto; min-width:0; font-size:13px; font-weight:600; color:var(--text-strong);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .kc-line { font-size:13px; color:var(--text-muted); }
-    .kc-line .mono { white-space:nowrap; }
-    .kc-line b { display:block; font-weight:400; }
-    .kc-next { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:center;
-      padding:8px 8px; border-radius:var(--r-panel); background:var(--tile); border:1px solid var(--border); }
-    .kc-next b { font-size:13px; font-weight:600; color:var(--text-strong); display:block; }
-    .kc-next em { font-style:normal; font-size:11px; color:var(--text-muted); }
-    .kc-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .col-empty { margin:0 8px 12px; padding:24px 12px; border:1px dashed var(--border-control);
-      border-radius:var(--r-panel); text-align:center; font-size:13px; color:var(--text-subtle); }
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {page} from './shell.mjs';
+import {LEAD_PIPELINES} from '../../../production/lib/lead-pipeline-outcomes.mjs';
+const labels={new:'New enquiry',inquiry:'Enquiry',qualified:'Qualified',viewing_booked:'Viewing booked',viewed:'Viewed',viewing:'Viewing',offer:'Offer',due_diligence:'Due diligence',contract:'Contract',application:'Application',lease:'Lease',closed:'Closed'};
+for(const stage of Object.values(LEAD_PIPELINES).flat())assert(labels[stage],`Describe pipeline stage ${stage}`);
+const CSS=`
+  .pl { display:grid; gap:20px; }
+  .pl .ph { margin:0; }
+  .pl-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+  .pl-section { display:grid; gap:16px; padding:20px; border-top:1px solid var(--joint); min-width:0; }
+  .pl-section h2,.pl-state h2 { font-size:16px; }
+  .pl-section > .btn { justify-self:start; }
+  .pl-row { display:grid; grid-template-columns:minmax(0,1fr) 144px 144px 200px 96px; align-items:center; gap:16px; height:var(--row); padding:0 20px; border-top:1px solid var(--joint); }
+  .pl-row > * { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pl-row:hover { background:var(--tile); }
+  .pl-heading { background:var(--tile-deep); font-weight:600; }
+  .pl .in { width:100%; font:inherit; color:var(--text-body); }
+  .pl textarea.in { min-height:96px; resize:vertical; }
+  .pl :is(a,button,input,textarea,select):focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+  .pl button:disabled { opacity:.5; cursor:not-allowed; }
+  .pl-check { display:flex; align-items:start; gap:12px; }
+  .pl-check input { width:16px; height:16px; accent-color:var(--spring-700); flex:0 0 auto; }
+  .pl-states { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+  .pl-state { display:grid; gap:12px; align-content:start; padding:20px 0; border-top:1px solid var(--joint); }
+  .pl-state .btn { justify-self:start; }
+  .pl-path { display:flex; flex-wrap:wrap; gap:8px 16px; margin:0; padding-inline-start:20px; }
 `;
-
-function card({ name, line, budget, nextTitle, nextWhen, tone = "ink", tag, broker, overdue }) {
-  return `            <article class="kc">
-              <div class="kc-top"><b>${name}</b><span class="pill pill--${tone}"><i></i>${tag}</span></div>
-              <p class="kc-line">${line}</p>
-              <div class="kc-next">
-                ${icon("arrow", 15)}
-                <span><b>${nextTitle}</b><em style="${overdue ? "color:var(--danger-600); font-weight:600" : ""}">${nextWhen}</em></span>
-              </div>
-              <div class="kc-foot">
-                <span class="price" style="font-size:13px">${budget}</span>
-                <span class="av">${broker}</span>
-              </div>
-            </article>`;
-}
-
-const BODY = `      <div class="ph">
-        <div>
-          <h1>Buyers and renters</h1>
-          <p>One card per person, carrying the next action and who owns it. Two are overdue.</p>
-        </div>
-        <div class="ph-actions">
-          <div class="seg">
-            <button type="button" data-on="1">Open <em>9</em></button>
-            <button type="button">Buyers <em>5</em></button>
-            <button type="button">Renters <em>4</em></button>
-            <button type="button">Closed <em>12</em></button>
-          </div>
-          <button class="btn" type="button">${icon("users", 15)}<span>All brokers</span>${icon("down", 14)}</button>
-          <button class="btn btn--primary" type="button">${icon("plus", 15)}<span>New opportunity</span></button>
-        </div>
-      </div>
-
-      <div class="board">
-        <section class="col">
-          <div class="col-hd"><b>New enquiry</b><span class="col-n">3</span></div>
-          <p class="col-sum">2 overdue · qualification incomplete</p>
-          <div class="col-list">
-${card({ name: "Maria Petrova", line: "2-bed apartment · Sandanski", budget: "Budget not set", tag: "Overdue", tone: "danger", nextTitle: "Qualify and reply", nextWhen: "Due 2 days ago", overdue: true, broker: "—" })}
-${card({ name: "Dmitri Volkov", line: "Studio · Sandanski · Russian", budget: "€45,000 – €60,000", tag: "New", tone: "sea", nextTitle: "First reply", nextWhen: "Due tomorrow 10:00", broker: "PD" })}
-${card({ name: "Elena Dimitrova", line: "Seller · house, Sandanski", budget: "Valuation pending", tag: "Unassigned", tone: "warn", nextTitle: "Assign a broker", nextWhen: "Due today", overdue: true, broker: "—" })}
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Qualified</b><span class="col-n">2</span></div>
-          <p class="col-sum">€250,000 combined budget</p>
-          <div class="col-list">
-${card({ name: "Georgi Nikolov", line: "Renter · 1-bed<br>Sandanski centre", budget: "€400 / month", tag: "Renter", tone: "sea", nextTitle: "Send 3 matches", nextWhen: "Due Wed", broker: "PD" })}
-${card({ name: "Sofia Marinova", line: "2-bed apartment · Melnik", budget: "€90,000 – €160,000", tag: "Cash", tone: "ok", nextTitle: "Book a viewing", nextWhen: "Due Thu", broker: "MR" })}
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Viewing</b><span class="col-n">2</span></div>
-          <p class="col-sum">1 unconfirmed for today</p>
-          <div class="col-list">
-${card({ name: "Anna Weber", line: "Villa · Katuntsi<br><span class='mono'>MS-00191</span>", budget: "€185,000", tag: "Today 15:00", tone: "warn", nextTitle: "Confirm the viewing", nextWhen: "Not confirmed", overdue: true, broker: "PD" })}
-${card({ name: "Petar Kolev", line: "Plot · Levunovo<br><span class='mono'>MS-00872</span>", budget: "€28,000", tag: "Wed 11:00", tone: "sea", nextTitle: "Second viewing with the owner", nextWhen: "Confirmed", broker: "MR" })}
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Offer and contract</b><span class="col-n">1</span></div>
-          <p class="col-sum">Notary date set for 8 September</p>
-          <div class="col-list">
-${card({ name: "Anna Weber", line: "Preliminary contract<br><span class='mono'>CASE-0007</span>", budget: "€185,000", tag: "Documents", tone: "warn", nextTitle: "Collect 4 missing documents", nextWhen: "Notary 8 Sep", broker: "MR" })}
-          </div>
-        </section>
-
-        <section class="col">
-          <div class="col-hd"><b>Closed</b><span class="col-n">1</span></div>
-          <p class="col-sum">This quarter · €96,000</p>
-          <div class="col-list">
-${card({ name: "Nikolay Stoyanov", line: "House · Sandanski<br>Completed 22 Aug", budget: "€96,000", tag: "Won", tone: "ok", nextTitle: "Ask for a review", nextWhen: "Due Fri", broker: "MR" })}
-          </div>
-          <div class="col-empty">Lost opportunities move to the Closed filter above.</div>
-        </section>
-      </div>`;
-
-fs.writeFileSync(new URL("./Pipeline.dc.html", import.meta.url), page({
-  active: "pipeline", body: BODY, extraCss: CSS, height: 900,
-}));
-console.log("Pipeline.dc.html");
+const opportunities=[['Екатерина Константинова-Александрова','buyer','new','Not supplied','Qualify and reply'],['Anna Weber','buyer','viewing_booked','€1,245,000','Review booking'],['מרים כהן','renter','qualified','€800 / month','Arrange viewing'],['Dmitri Volkov','buyer','offer','€245,000','Review the offer']];
+assert.equal(new Set(opportunities.map(row=>row[0])).size,opportunities.length);
+const body=`<div class="pl"><div class="ph"><div><h1>Buyers and renters</h1><p>Follow the next evidenced action for each opportunity. Buyer and renter stages remain separate.</p></div></div><p class="muted">Illustrative people, budgets and stages · budget is not a property price or expected revenue.</p><section class="panel"><div class="panel-hd"><h2>Open opportunities</h2><span class="sub">Four examples</span></div><div class="pl-row pl-heading"><span>Person</span><span>Stage</span><span>Budget</span><span>Next action</span><span>Action</span></div>${opportunities.map(([name,kind,stage,budget,next])=>`<div class="pl-row"><b title="${name}"><bdi dir="auto">${name}</bdi></b><span>${labels[stage]}</span><span>${budget}</span><span>${next}</span><button class="btn btn--sm" type="button">Open record</button></div>`).join('')}</section><div class="pl-grid"><section class="panel"><div class="panel-hd"><h2>Qualify the selected buyer</h2><span class="wit wit--none">Human review due</span></div><form class="pl-section"><div class="field"><label for="qualify-budget">Maximum budget · EUR</label><input class="in" id="qualify-budget" type="number" min="1" step="1"></div><div class="field"><label for="qualify-location">Preferred locations</label><input class="in" id="qualify-location" value="Sandanski"></div><div class="field"><label for="qualify-timeline">Decision timeline</label><input class="in" id="qualify-timeline"></div><div class="field"><label for="qualify-note">Qualification note</label><textarea class="in" id="qualify-note"></textarea></div><label class="pl-check"><input type="checkbox"><span>I, Mariya, confirm these requirements and their source.</span></label><button class="btn btn--accent" type="button">Record qualification</button></form></section><section class="panel"><div class="panel-hd"><h2>The stage follows the record</h2></div><div class="pl-section"><p>A booking, viewing outcome, offer or signed contract supplies different evidence. Moving a card cannot replace it.</p><p>Open the owning screen to perform the next action. A saved pipeline note does not send a customer reply.</p><p>Seller enquiries have their own path. They are not counted as buyer opportunities here.</p><span class="wit wit--none">Required evidence stays visible</span><button class="btn" type="button">Open related work</button></div></section></div><div class="pl-grid">${Object.entries(LEAD_PIPELINES).map(([kind,stages])=>`<section class="panel"><div class="panel-hd"><h2>${kind==='buyer'?'Buyer':'Renter'} stages</h2></div><div class="pl-section"><ol class="pl-path">${stages.map(s=>`<li>${labels[s]}</li>`).join('')}</ol><p>Stages come from the current pipeline definition. Completed and lost outcomes require their own records.</p></div></section>`).join('')}</div><div class="pl-states">${[['No matching opportunities','Check the selected pipeline and filters.','Change filters'],['Qualification is saving','The proposed requirements remain visible until confirmed.','Saving qualification…',true],['Required facts are missing','Add a positive maximum budget, a location and a decision timeline.','Review requirements'],['Related evidence unavailable','A missing booking or contract readback must not advance the stage.','Reload related record'],['Many opportunities','Filter by pipeline, stage and owner, then page through a single identity row per person.','Open filters'],['Stage change not permitted','Complete the required action in its owning screen.','Move to completed',true]].map(([title,text,action,disabled])=>`<section class="pl-state"><h2>${title}</h2><p>${text}</p><button class="btn" type="button"${disabled?' disabled':''}>${action}</button></section>`).join('')}</div></div>`;
+fs.writeFileSync(new URL('./Pipeline.dc.html',import.meta.url),page({active:'pipeline',body,extraCss:CSS,height:0,healthText:'Illustrative workspace'}));
+console.log('Pipeline');
