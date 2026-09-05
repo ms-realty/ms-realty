@@ -128,3 +128,25 @@ test("the library is reachable from the rail, under listings", async () => {
   assert.match(res.body, /data-admin-nav-route="media_library"/);
   assert.match(res.body, /href="\/admin\/media"/);
 });
+
+
+test("a completed human media review leaves the pending queue", () => {
+  const seed = loadCmsSeed();
+  const record = seed.records.find(row => row.collection === "listings" && row.media?.length);
+  const reviewed = { ...seed, records: [{ ...record, media: [{ ...record.media[0], review_status: "approved_by_human" }] }] };
+  const payload = renderAdminMediaLibraryPayload(loadLocaleRegistry(), "en", { seed: reviewed, issue: "media_review_pending" });
+  assert.equal(payload.summary.media_review_pending, 0);
+  assert.equal(payload.assets.length, 0);
+});
+
+test("the media review form asks for a reason in each admin language", async () => {
+  for (const locale of ["bg", "ru", "en"]) {
+    const response = await dispatchHttp(app(), { url: `/admin/listings/edit?listingId=MS-CRAWL-0001&locale=${locale}`, headers: AUTH });
+    assert.equal(response.status, 200);
+    const field = response.body.match(/<textarea[^>]*name="reviewNote"[^>]*>/)?.[0];
+    assert.ok(field, `missing review note for ${locale}`);
+    assert.match(field, /required(?:="")?\s/);
+    assert.match(field, /maxLength="2000"/);
+    assert.match(field, /dir="auto"/);
+  }
+});

@@ -114,6 +114,10 @@ export function createMediaReview(seed, input, reviewedAt = new Date().toISOStri
   const decision = normalizedDecision(input.decision);
   const kind = normalizedKind(input.kind, item.kind);
   const alt = normalizedText(input.alt || input.accessibilityCaption, "Media alt text");
+  const reviewNote = normalizedText(input.reviewNote ?? input.review_note, "Media review note", 2000);
+  if ((Object.hasOwn(input, "reviewNote") || Object.hasOwn(input, "review_note")) && !reviewNote) {
+    throw new Error("Media review note must not be empty");
+  }
   const replacementUrl = String(input.replacementUrl || input.replacement_url || "").trim();
   const staged = item.media_storage_state === "staged_private";
   const sourceUrl = sourceAssetUrl(item);
@@ -155,6 +159,7 @@ export function createMediaReview(seed, input, reviewedAt = new Date().toISOStri
     review_status: decision === "publish" ? "approved_by_human" : "reviewed_private",
     reviewer,
     human_confirmed: true,
+    ...(reviewNote ? { review_note: reviewNote } : {}),
   };
 }
 
@@ -166,7 +171,8 @@ function sameIntent(left, right) {
     left.decision === right.decision &&
     left.kind === right.kind &&
     left.alt === right.alt &&
-    left.replacement_url === right.replacement_url
+    left.replacement_url === right.replacement_url &&
+    String(left.review_note || "") === String(right.review_note || "")
   );
 }
 
@@ -224,6 +230,7 @@ export function applyMediaReviews(seed, reviews = []) {
             replacement_asset_id: replacement.assetId,
             media_reviewer: replacement.review.reviewer,
             media_reviewed_at: replacement.review.reviewed_at,
+            media_review_note: replacement.review.review_note || null,
           };
         }
         const review = latestByAsset.get(`${record.id}:${assetId}`);
@@ -240,6 +247,7 @@ export function applyMediaReviews(seed, reviews = []) {
           review_status: review.review_status,
           media_reviewer: review.reviewer,
           media_reviewed_at: review.reviewed_at,
+          media_review_note: review.review_note || null,
         };
       });
       if (!changed) return { ...record, media };

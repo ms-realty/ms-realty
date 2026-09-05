@@ -300,7 +300,7 @@ test("durable media review promotes private bytes and rendition, persists public
 
   const review = createMediaReview(
     projected,
-    { ...base, alt: "Reviewed room", reviewConfirmed: true },
+    { ...base, alt: "Reviewed room", reviewConfirmed: true, reviewNote: "Checked this room photo against the source asset." },
     "2026-09-01T10:05:00.000Z",
     { allowStaged: true },
   );
@@ -314,6 +314,7 @@ test("durable media review promotes private bytes and rendition, persists public
   assert.equal(persisted.review_decision, "publish");
   assert.equal(persisted.human_confirmed, true);
   assert.equal(persisted.review_history.length, 1);
+  assert.equal(persisted.review_history[0].review_note, review.review_note);
   assert.match(persisted.storage_key, /\/wp-content\/uploads\/2026\/09\/listings\/MS-CRAWL-0001\//);
   assert.equal(objects.has(record.storage_key), false);
   assert.equal(objects.has(record.rendition.storage_key), false);
@@ -325,11 +326,21 @@ test("durable media review promotes private bytes and rendition, persists public
   assert.equal(approved.is_public, true);
   assert.equal(approved.review_status, "approved_by_human");
   assert.equal(approved.alt, "Reviewed room");
+  assert.equal(approved.media_review_note, review.review_note);
   const listed = await listMediaUploadsDurably({ payload: harness.payload, listing: LISTING_ID });
   const exposed = listed.body.uploads.find((row) => row.asset_id === upload.asset_id);
   assert.equal(exposed.is_public, true);
   assert.equal(exposed.review_status, "approved_by_human");
   assert.equal(exposed.media_reviewer, EDITOR.id);
+  assert.equal(exposed.media_review_note, review.review_note);
+  await assert.rejects(
+    persistMediaReviewDurably({ ...review, id: saved.id, review_note: "Changed reason" }, { payload: harness.payload, principal: EDITOR, storage }),
+    /different decision/,
+  );
+  const changed = await persistMediaReviewDurably({ ...review, review_note: "Reviewed again against the updated source." }, { payload: harness.payload, principal: EDITOR, storage });
+  assert.equal(changed.idempotent, false);
+  assert.notEqual(changed.id, saved.id);
+  assert.equal(rawMedia(harness, upload.asset_id).review_history.length, 2);
   assert.equal(Object.hasOwn(exposed, "storage_key"), false);
 });
 

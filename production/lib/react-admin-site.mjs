@@ -10251,6 +10251,9 @@ function ListingEditorBody({ page }) {
                         h("span", { className: "adm-media-asset__preview-empty" }, ui.mediaPreviewUnavailable),
                         h("span", { className: "adm-media-asset__preview-video" }, ui.mediaPreviewVideo),
                       ),
+                      item.media_review_note
+                        ? h("p", { className: "adm-note", "data-media-review-note": item.asset_id }, `${ui.reason}: ${item.media_review_note}`)
+                        : null,
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
@@ -10364,6 +10367,7 @@ function ListingEditorBody({ page }) {
                                 item.kind === "video"
                                   ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
                                   : null,
+                                h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
                                 h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
                                 h(
                                   "label",

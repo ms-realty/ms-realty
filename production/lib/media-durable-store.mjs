@@ -614,6 +614,7 @@ function durableMediaUploadProjection(document) {
     replacement_asset_id: document.replacement_asset_id || null,
     media_reviewer: document.reviewer || null,
     media_reviewed_at: document.reviewed_at || null,
+    media_review_note: document.review_history?.at(-1)?.review_note || null,
   };
 }
 
@@ -625,7 +626,8 @@ function reviewIntent(left, right) {
     String(left?.decision || "") === String(right?.decision || "") &&
     String(left?.kind || "") === String(right?.kind || "") &&
     String(left?.alt || "") === String(right?.alt || "") &&
-    String(left?.replacement_url || "") === String(right?.replacement_url || "")
+    String(left?.replacement_url || "") === String(right?.replacement_url || "") &&
+    String(left?.review_note || "") === String(right?.review_note || "")
   );
 }
 
@@ -641,6 +643,7 @@ function reviewIdFor(review) {
       review?.kind,
       review?.alt,
       review?.replacement_url || null,
+      ...(review?.review_note ? [review.review_note] : []),
     ]))
     .digest("hex")
     .slice(0, 16);
@@ -663,6 +666,7 @@ function reviewEvent(review, id) {
     review_status: review.review_status,
     reviewer: review.reviewer,
     human_confirmed: true,
+    ...(review.review_note ? { review_note: review.review_note } : {}),
   };
 }
 
@@ -1135,6 +1139,7 @@ export function durableMediaDocumentProjection(document = {}) {
     source: document.source || null,
     media_reviewer: document.reviewer || null,
     media_reviewed_at: document.reviewed_at || null,
+    media_review_note: document.review_history?.at(-1)?.review_note || null,
     thumbnail_url: document.rendition?.storage_key ? `/api/admin/media/uploads/${assetId}?rendition=${encodeURIComponent(document.rendition.kind || "thumb")}` : null,
   };
 }

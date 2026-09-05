@@ -20,7 +20,7 @@ export const MEDIA_LIBRARY_ISSUES = Object.freeze([
   "tour_review_pending",
 ]);
 
-const REVIEWED = new Set(["approved_imported_photo", "reviewed_private", "approved"]);
+const REVIEWED = new Set(["approved_imported_photo", "approved_by_human", "reviewed_private", "replaced_by_human", "approved"]);
 const PAGE_SIZE = 48;
 
 function assetRow(record, item) {
