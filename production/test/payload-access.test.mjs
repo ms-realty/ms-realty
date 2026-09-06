@@ -57,9 +57,11 @@ function assertForbidden(run) {
 test("only admins manage operator accounts", () => {
   assert.equal(adminsCollectionAccess.create(req(admin)), true);
   assert.equal(adminsCollectionAccess.delete(req(admin)), true);
+  assert.equal(adminsCollectionAccess.unlock(req(admin)), true);
   for (const user of [broker, editor, translator, undefined]) {
     assert.equal(adminsCollectionAccess.create(req(user)), false);
     assert.equal(adminsCollectionAccess.delete(req(user)), false);
+    assert.equal(adminsCollectionAccess.unlock(req(user)), false);
   }
 });
 
@@ -275,6 +277,23 @@ test("config wires shared access onto admins, content, and case collections", as
     // admins: create is admin-only
     assert.equal(bySlug.admins.access.create(req(broker)), false);
     assert.equal(bySlug.admins.access.create(req(admin)), true);
+    assert.equal(bySlug.admins.access.unlock(req(admin)), true);
+    const { unlockOperation } = await import("payload");
+    for (const user of [broker, editor, translator, undefined]) {
+      assert.equal(bySlug.admins.access.unlock(req(user)), false);
+      let accountReads = 0;
+      await assert.rejects(unlockOperation({
+        collection: { config: bySlug.admins },
+        data: { email: "another-operator@example.test" },
+        overrideAccess: false,
+        req: {
+          user,
+          t: (key) => key,
+          payload: { db: { findOne: async () => { accountReads += 1; return null; } } },
+        },
+      }), (error) => error.status === 403);
+      assert.equal(accountReads, 0, "unlock must refuse the operator before reading or changing the target account");
+    }
     // listings: editor writes, broker does not
     assert.equal(bySlug.listings.access.create(req(editor)), true);
     assert.equal(bySlug.listings.access.create(req(broker)), false);

@@ -1,0 +1,17 @@
+.psa{max-width:none;border:1px solid var(--atlas-control);border-radius:20px;background:var(--atlas-canvas);color:var(--atlas-text);width:min(1120px,calc(100% - 32px));max-height:calc(100dvh - 32px);padding:32px;overflow:auto}
+.psa::backdrop{background:#111814b3}
+.psa h2{font:600 52px/56px "Sofia Sans Semi Condensed",sans-serif;letter-spacing:-.025em;margin:0 0 16px}
+.psa h3{font:600 24px/32px Commissioner,sans-serif;margin:0 0 16px}
+.psa p,.psa label,.psa li,.psa dl{font:400 14px/20px Commissioner,sans-serif;overflow-wrap:anywhere}
+.psa-layout{display:grid;grid-template-columns:minmax(0,680px) minmax(220px,1fr);gap:32px;margin-top:24px}
+.psa label{display:grid;gap:8px;font-weight:600}
+.psa input,.psa select,.psa textarea{box-sizing:border-box;width:100%;min-width:0;min-height:48px;padding:12px;border:1px solid var(--atlas-control);border-radius:12px;background:var(--atlas-canvas);color:var(--atlas-text);font:400 16px/20px Commissioner,sans-serif}
+.psa textarea{min-height:120px}.psa button{min-height:44px;font-size:14px;line-height:20px}.psa button:disabled{border:1px solid var(--atlas-control);opacity:1;background:var(--atlas-surface);color:var(--atlas-muted)}
+.psa-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.psa-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.psa-close{float:inline-end;margin:0 0 16px 16px}.psa aside{padding:20px;background:var(--atlas-surface);border-radius:16px;align-self:start}.psa dd{margin:0 0 12px}.psa-entry{min-height:44px;position:relative;margin-top:12px}.psa [hidden],.psa-entry[hidden]{display:none!important}
+@media(max-width:700px){.psa{width:calc(100% - 16px);padding:16px;border-radius:16px}.psa-layout{grid-template-columns:1fr;gap:24px}.psa h2{font-size:36px;line-height:40px;clear:both}.psa-fields{grid-template-columns:1fr 1fr;gap:12px}.psa-actions>*{width:100%}}
+
+.psa .mk-btn{padding:10px 16px;border:1px solid var(--atlas-control);border-radius:12px;background:var(--atlas-canvas);color:var(--atlas-text)}.psa .mk-btn--primary{background:var(--atlas-action);border-color:var(--atlas-action);color:#fff}.psa form{display:grid;gap:12px}.psa p{margin:0 0 12px}.psa [data-assistant-status]{margin:16px 0}.psa-fields>label:nth-child(3){grid-column:1/-1}.psa .mk-btn:disabled{background:var(--atlas-surface);border-color:var(--atlas-control);color:var(--atlas-muted)}
+
+html:has(.psa[open]){overflow:hidden}
+
+.psa [data-assistant-unresolved]{padding:20px;background:var(--atlas-surface);border-radius:16px}

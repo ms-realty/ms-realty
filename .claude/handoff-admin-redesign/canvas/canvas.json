@@ -1,0 +1,550 @@
+{
+  "artboards": [
+    {
+      "file": "PublicHome.dc.html",
+      "title": "Home",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 2569,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicSearch.dc.html",
+      "title": "Search with map",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2521,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicListing.dc.html",
+      "title": "Property page",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 2864,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicLocation.dc.html",
+      "title": "Location — Sandanski",
+      "x": 0,
+      "y": 3034,
+      "w": 1440,
+      "h": 2728,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicSeller.dc.html",
+      "title": "Sell with us",
+      "x": 1560,
+      "y": 3034,
+      "w": 1440,
+      "h": 2409,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicContact.dc.html",
+      "title": "Contact",
+      "x": 3120,
+      "y": 3034,
+      "w": 1440,
+      "h": 2286,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicMobileSearch.dc.html",
+      "title": "Phone — search",
+      "x": 0,
+      "y": 5932,
+      "w": 390,
+      "h": 2654,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicMobileListing.dc.html",
+      "title": "Phone — property",
+      "x": 510,
+      "y": 5932,
+      "w": 390,
+      "h": 2899,
+      "page": "page-0"
+    },
+    {
+      "file": "PublicMobileHebrew.dc.html",
+      "title": "Phone — Hebrew, right to left",
+      "x": 1020,
+      "y": 5932,
+      "w": 390,
+      "h": 2828,
+      "page": "page-0"
+    },
+    {
+      "file": "Foundations.dc.html",
+      "title": "Foundations — tokens, type, layout",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 3248,
+      "page": "page-1"
+    },
+    {
+      "file": "Components.dc.html",
+      "title": "Components and every state",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2987,
+      "page": "page-1"
+    },
+    {
+      "file": "Interaction.dc.html",
+      "title": "Interaction rules",
+      "x": 3120,
+      "y": 0,
+      "w": 1560,
+      "h": 2501,
+      "page": "page-1"
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "Today",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1580,
+      "page": "page-2"
+    },
+    {
+      "file": "LeadInbox.dc.html",
+      "title": "Lead inbox",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2291,
+      "page": "page-2"
+    },
+    {
+      "file": "Pipeline.dc.html",
+      "title": "Pipeline",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1778,
+      "page": "page-2"
+    },
+    {
+      "file": "Viewings.dc.html",
+      "title": "Viewings",
+      "x": 0,
+      "y": 2461,
+      "w": 1440,
+      "h": 1460,
+      "page": "page-2"
+    },
+    {
+      "file": "Tasks.dc.html",
+      "title": "Tasks",
+      "x": 1560,
+      "y": 2461,
+      "w": 1440,
+      "h": 1667,
+      "page": "page-2"
+    },
+    {
+      "file": "Requests.dc.html",
+      "title": "Requests from the website",
+      "x": 3120,
+      "y": 2461,
+      "w": 1440,
+      "h": 1366,
+      "page": "page-2"
+    },
+    {
+      "file": "Contacts.dc.html",
+      "title": "Contacts",
+      "x": 0,
+      "y": 4298,
+      "w": 1440,
+      "h": 1419,
+      "page": "page-2"
+    },
+    {
+      "file": "Consent.dc.html",
+      "title": "Consent",
+      "x": 1560,
+      "y": 4298,
+      "w": 1440,
+      "h": 1365,
+      "page": "page-2"
+    },
+    {
+      "file": "Cases.dc.html",
+      "title": "Transaction cases",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1891,
+      "page": "page-3"
+    },
+    {
+      "file": "CaseDetail.dc.html",
+      "title": "Case detail — BG step list",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 4414,
+      "page": "page-3"
+    },
+    {
+      "file": "Documents.dc.html",
+      "title": "Documents",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 2536,
+      "page": "page-3"
+    },
+    {
+      "file": "DocumentEditor.dc.html",
+      "title": "Document composer and signature",
+      "x": 0,
+      "y": 4584,
+      "w": 1440,
+      "h": 2024,
+      "page": "page-3"
+    },
+    {
+      "file": "Listings.dc.html",
+      "title": "Listings",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1245,
+      "page": "page-4"
+    },
+    {
+      "file": "ListingEditor.dc.html",
+      "title": "Listing editor",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2090,
+      "page": "page-4"
+    },
+    {
+      "file": "Translations.dc.html",
+      "title": "Translation approval",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1979,
+      "page": "page-4"
+    },
+    {
+      "file": "SitePages.dc.html",
+      "title": "Website — pages",
+      "x": 0,
+      "y": 2260,
+      "w": 1440,
+      "h": 1428,
+      "page": "page-4"
+    },
+    {
+      "file": "PageEditor.dc.html",
+      "title": "Page editor — blocks",
+      "x": 1560,
+      "y": 2260,
+      "w": 1440,
+      "h": 2078,
+      "page": "page-4"
+    },
+    {
+      "file": "Media.dc.html",
+      "title": "Media library",
+      "x": 3120,
+      "y": 2260,
+      "w": 1440,
+      "h": 1517,
+      "page": "page-4"
+    },
+    {
+      "file": "MediaEditor.dc.html",
+      "title": "Photo editor",
+      "x": 0,
+      "y": 4508,
+      "w": 1440,
+      "h": 1731,
+      "page": "page-4"
+    },
+    {
+      "file": "MediaStates.dc.html",
+      "title": "Upload and edit — every state",
+      "x": 1560,
+      "y": 4508,
+      "w": 1560,
+      "h": 2334,
+      "page": "page-4"
+    },
+    {
+      "file": "SeoRedirects.dc.html",
+      "title": "SEO and legacy redirects",
+      "x": 3240,
+      "y": 4508,
+      "w": 1440,
+      "h": 1720,
+      "page": "page-4"
+    },
+    {
+      "file": "Hermes.dc.html",
+      "title": "Hermes console",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1831,
+      "page": "page-5"
+    },
+    {
+      "file": "HermesRun.dc.html",
+      "title": "Hermes run — what it did",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1936,
+      "page": "page-5"
+    },
+    {
+      "file": "Integrations.dc.html",
+      "title": "Connected services",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 2108,
+      "page": "page-5"
+    },
+    {
+      "file": "IntegrationCatalogue.dc.html",
+      "title": "Integration catalogue",
+      "x": 0,
+      "y": 2278,
+      "w": 1440,
+      "h": 1937,
+      "page": "page-5"
+    },
+    {
+      "file": "Automations.dc.html",
+      "title": "Automations and webhooks",
+      "x": 1560,
+      "y": 2278,
+      "w": 1440,
+      "h": 1877,
+      "page": "page-5"
+    },
+    {
+      "file": "Settings.dc.html",
+      "title": "Settings",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 2338,
+      "page": "page-6"
+    },
+    {
+      "file": "Team.dc.html",
+      "title": "Team and roles",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 2056,
+      "page": "page-6"
+    },
+    {
+      "file": "Reports.dc.html",
+      "title": "Insight",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 1582,
+      "page": "page-6"
+    },
+    {
+      "file": "Activity.dc.html",
+      "title": "Activity log",
+      "x": 0,
+      "y": 2508,
+      "w": 1440,
+      "h": 1478,
+      "page": "page-6"
+    },
+    {
+      "file": "LaunchReadiness.dc.html",
+      "title": "Launch readiness",
+      "x": 1560,
+      "y": 2508,
+      "w": 1440,
+      "h": 1988,
+      "page": "page-6"
+    },
+    {
+      "file": "SignIn.dc.html",
+      "title": "Sign in",
+      "x": 3120,
+      "y": 2508,
+      "w": 1440,
+      "h": 1186,
+      "page": "page-6"
+    },
+    {
+      "file": "FlowLead.dc.html",
+      "title": "Flow — enquiry to keys",
+      "x": 0,
+      "y": 0,
+      "w": 1560,
+      "h": 1728,
+      "page": "page-7"
+    },
+    {
+      "file": "FlowPublish.dc.html",
+      "title": "Flow — legacy URL to published listing",
+      "x": 1680,
+      "y": 0,
+      "w": 1560,
+      "h": 1553,
+      "page": "page-7"
+    },
+    {
+      "file": "Coverage.dc.html",
+      "title": "Design against the backend",
+      "x": 3360,
+      "y": 0,
+      "w": 1560,
+      "h": 2362,
+      "page": "page-7"
+    },
+    {
+      "file": "Mobile.dc.html",
+      "title": "Phone — Today",
+      "x": 0,
+      "y": 2532,
+      "w": 390,
+      "h": 2208,
+      "page": "page-7"
+    },
+    {
+      "file": "MobileLead.dc.html",
+      "title": "Phone — lead and reply",
+      "x": 510,
+      "y": 2532,
+      "w": 390,
+      "h": 2507,
+      "page": "page-7"
+    },
+    {
+      "file": "MobileCase.dc.html",
+      "title": "Phone — case",
+      "x": 1020,
+      "y": 2532,
+      "w": 390,
+      "h": 2941,
+      "page": "page-7"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-public",
+      "page": "page-0",
+      "x": 0,
+      "y": -250,
+      "w": 900,
+      "text": "The public site — what the 13 years of indexed URLs actually resolve to.\n\nSearch is the hero, not a brochure. Every property page shows where each fact came from and which ones nobody has confirmed, because the agency's promise is that a price and an area are checked against a document rather than retyped.\n\nSeven languages, Bulgarian as the source. Hebrew is a full right-to-left build: the shell mirrors, but references, prices and areas stay left to right inside the mirrored line."
+    },
+    {
+      "id": "note-system",
+      "page": "page-1",
+      "x": 0,
+      "y": -250,
+      "w": 900,
+      "text": "MS Realty — the whole system, rebuilt in a world that belongs to Sandanski.\n\nOne idea runs through every screen: every fact carries its witness. Who verified it and when sits beside the number, the publish state, the translation, the redirect. The filled square is a signed seal; the outlined one is a fact nobody has confirmed.\n\nThe world is the town's thermal bath house: glazed tile for the ground, grout lines for every rule, warm marble for the words, deep spring water as the public field, and the logo's brick held to one action per screen. Three radii (2, 6, pill), two elevations (rest, float), one type ratio, a 44px row that is also the touch target. Commissioner for every word; Sofia Sans Semi Condensed where the public site speaks up. No serif headline, no cream paper, no dark rail, no card shadows — those are the looks every generated interface lands on."
+    },
+    {
+      "id": "note-work",
+      "page": "page-2",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "The rail is flat: seventeen destinations, no accordions. The three \"More in ...\" disclosures that hid ten routes are gone, and sections with real depth open a sub-nav inside the page instead.\n\nKPI tiles are gone too. Counts became filters, so every number on a screen is something you can click."
+    },
+    {
+      "id": "note-deals",
+      "page": "page-3",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "The richest model in the repository was also the least visible: six case types across eight phases, Bulgarian and Greek step lists, evidence attributed to a notary, registry, bank, lawyer or client, and a manual or autonomous execution mode per case.\n\nDocuments are real now: a document object with immutable revisions and signature requests, and bytes that go to the private object store, where the size and digest a row quotes are computed from what was actually stored."
+    },
+    {
+      "id": "note-cms",
+      "page": "page-4",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "The catalogue already round-trips through the CMS. The website does not: home, search, seller, contact and location copy is rendered from code, so the owner cannot edit five of the seven public page types.\n\nThe Website boards design the collections that have to exist for that."
+    },
+    {
+      "id": "note-ai",
+      "page": "page-5",
+      "x": 0,
+      "y": -230,
+      "w": 900,
+      "text": "Hermes drafts and checks. Five actions are refused to it in code — publish, send a message, mark a translation indexable, change a price, change a redirect — and the interface never offers them.\n\nThe run board shows a real guardrail firing: a Greek draft called Sandanski a coastal town, and the sentence was dropped rather than softened."
+    },
+    {
+      "id": "note-flows",
+      "page": "page-7",
+      "x": 0,
+      "y": -250,
+      "w": 900,
+      "text": "The last board checks every screen against the repository: every admin route, every CMS collection, every public page type. Surfaces that are backed, partial and unbacked are named, sized and separated from the rest — the numbers are on the board, not in this note, so they cannot drift."
+    }
+  ],
+  "pages": [
+    {
+      "id": "page-0",
+      "name": "Public site"
+    },
+    {
+      "id": "page-1",
+      "name": "Foundations"
+    },
+    {
+      "id": "page-2",
+      "name": "Daily work"
+    },
+    {
+      "id": "page-3",
+      "name": "Deals and documents"
+    },
+    {
+      "id": "page-4",
+      "name": "Catalogue and website"
+    },
+    {
+      "id": "page-5",
+      "name": "AI and integrations"
+    },
+    {
+      "id": "page-6",
+      "name": "System"
+    },
+    {
+      "id": "page-7",
+      "name": "Flows, phone, coverage"
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-2"
+  }
+}

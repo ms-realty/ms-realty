@@ -267,7 +267,17 @@ test("the adapter writes a snooze durably, reads it back, and leaves the file le
   const store = durableOperationStore();
   const paths = tempPaths(t);
 
+  const refused = await adapterPost(store, paths, "/api/admin/leads/snooze", {
+    leadId: buyerLead.lead_id,
+    reason: "Buyer is travelling until September",
+    until: "2026-09-10T09:00:00.000Z",
+  });
+  assert.equal(refused.status, 400);
+  assert.match((await refused.json()).message, /explicit human confirmation/);
+  assert.equal(store.rows.length, 0);
+
   const snoozed = await adapterPost(store, paths, "/api/admin/leads/snooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer is travelling until September",
     until: "2026-09-10T09:00:00.000Z",
@@ -292,6 +302,7 @@ test("the adapter writes a snooze durably, reads it back, and leaves the file le
 
   // A retry is the same deferral, not a second one.
   const retry = await adapterPost(store, paths, "/api/admin/leads/snooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer is travelling until September",
     until: "2026-09-10T09:00:00.000Z",
@@ -306,6 +317,7 @@ test("a durable snooze survives the container and still reaches the inbox", asyn
   const store = durableOperationStore();
   const paths = tempPaths(t);
   const snoozed = await adapterPost(store, paths, "/api/admin/leads/snooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer is travelling until September",
     until: "2026-09-10T09:00:00.000Z",
@@ -336,6 +348,7 @@ test("the standalone server writes every migrated lead operation durably", async
   const app = httpApp(store, paths);
 
   const snoozed = await httpPost(app, "/api/admin/leads/snooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer is travelling until September",
     until: "2026-09-10T09:00:00.000Z",
@@ -344,6 +357,7 @@ test("the standalone server writes every migrated lead operation durably", async
   assert.equal(snoozed.body.kind, "lead_snooze");
 
   const unsnoozed = await httpPost(app, "/api/admin/leads/unsnooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer came back early",
   });
@@ -580,6 +594,7 @@ test("the migrated routes are accepted and the unmigrated ones still fail closed
 
   // Migrated: reaches its handler instead of the boundary.
   const snoozed = await httpPost(app, "/api/admin/leads/snooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer is travelling until September",
     until: "2026-09-10T09:00:00.000Z",
@@ -621,6 +636,7 @@ test("an operator-requested but unconfigured operations store fails closed inste
     },
   });
   const response = await httpPost(app, "/api/admin/leads/snooze", {
+    humanConfirmed: true,
     leadId: buyerLead.lead_id,
     reason: "Buyer is travelling until September",
     until: "2026-09-10T09:00:00.000Z",

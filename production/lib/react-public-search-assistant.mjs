@@ -1,0 +1,43 @@
+import { h } from "./react-static-html.mjs";
+import { labelsFor, localizedListingValue } from "./public-site.mjs";
+import { SEARCH_INTENT_INPUT_FIELDS } from "./search-request.mjs";
+
+const KEYS = ["entry", "title", "intro", "words", "limit", "review", "loading", "apply", "edit", "close", "unresolved", "retained", "failure", "rate", "changed", "ready", "clarify", "checkChanges"];
+const COPY = {
+  en: ["Describe what you need", "Make this search yours.", "Review what we understood before you search.", "Your search", "Up to 240 characters. You can edit the filters below.", "Review my search", "Checking your words…", "Search with these filters", "Edit my words", "Close", "Still needs checking", "Your typed filters take priority. No alert or enquiry is sent.", "We could not check your words. They are still here. Try again.", "Please wait a moment before trying again.", "Your filters changed. Review your search again.", "Ready to apply", "Choose a value or edit your words, then review again.", "Review changes"],
+  bg: ["Опишете какво търсите", "Вашето търсене.", "Прегледайте какво разбрахме, преди да търсите.", "Вашето търсене", "До 240 знака. Можете да редактирате филтрите по-долу.", "Преглед на търсенето", "Проверяваме думите ви…", "Търсене с тези филтри", "Редактиране на текста", "Затвори", "Нуждае се от проверка", "Въведените филтри имат предимство. Не се изпраща известие или запитване.", "Не успяхме да проверим текста. Той е запазен. Опитайте отново.", "Изчакайте малко и опитайте отново.", "Филтрите са променени. Прегледайте търсенето отново.", "Готово за прилагане", "Изберете стойност или редактирайте текста и прегледайте отново.", "Преглед на промените"],
+  ru: ["Опишите, что вы ищете", "Ваш поиск.", "Проверьте, что мы поняли, прежде чем искать.", "Ваш запрос", "До 240 символов. Фильтры ниже можно изменить.", "Проверить запрос", "Проверяем ваш запрос…", "Искать с этими фильтрами", "Изменить запрос", "Закрыть", "Требует проверки", "Введённые фильтры имеют приоритет. Уведомление или обращение не отправляется.", "Не удалось проверить запрос. Текст сохранён. Попробуйте снова.", "Подождите немного и попробуйте снова.", "Фильтры изменились. Проверьте запрос снова.", "Готово к применению", "Выберите значение или измените запрос и проверьте снова.", "Проверить изменения"],
+  de: ["Beschreiben Sie Ihren Wunsch", "Ihre Suche.", "Prüfen Sie vor der Suche, was wir verstanden haben.", "Ihre Suchanfrage", "Bis zu 240 Zeichen. Die Filter unten können Sie bearbeiten.", "Suche prüfen", "Ihre Angaben werden geprüft…", "Mit diesen Filtern suchen", "Text bearbeiten", "Schließen", "Noch zu prüfen", "Ihre eingegebenen Filter haben Vorrang. Es wird keine Benachrichtigung oder Anfrage gesendet.", "Ihre Angaben konnten nicht geprüft werden. Der Text bleibt erhalten. Versuchen Sie es erneut.", "Warten Sie bitte kurz und versuchen Sie es erneut.", "Ihre Filter wurden geändert. Prüfen Sie die Suche erneut.", "Bereit zum Anwenden", "Wählen Sie einen Wert oder bearbeiten Sie den Text und prüfen Sie erneut.", "Änderungen prüfen"],
+  nl: ["Beschrijf wat u zoekt", "Uw zoekopdracht.", "Controleer wat we begrepen hebben voordat u zoekt.", "Uw zoekopdracht", "Maximaal 240 tekens. U kunt de filters hieronder wijzigen.", "Zoekopdracht controleren", "Uw tekst wordt gecontroleerd…", "Zoeken met deze filters", "Tekst wijzigen", "Sluiten", "Nog te controleren", "Uw ingevulde filters hebben voorrang. Er wordt geen melding of aanvraag verzonden.", "We konden uw tekst niet controleren. De tekst blijft staan. Probeer opnieuw.", "Wacht even voordat u het opnieuw probeert.", "Uw filters zijn gewijzigd. Controleer de zoekopdracht opnieuw.", "Klaar om toe te passen", "Kies een waarde of wijzig de tekst en controleer opnieuw.", "Wijzigingen controleren"],
+  el: ["Περιγράψτε τι ψάχνετε", "Η αναζήτησή σας.", "Ελέγξτε τι καταλάβαμε πριν αναζητήσετε.", "Η αναζήτησή σας", "Έως 240 χαρακτήρες. Μπορείτε να αλλάξετε τα φίλτρα παρακάτω.", "Έλεγχος αναζήτησης", "Ελέγχουμε το κείμενό σας…", "Αναζήτηση με αυτά τα φίλτρα", "Επεξεργασία κειμένου", "Κλείσιμο", "Χρειάζεται έλεγχο", "Τα φίλτρα που πληκτρολογήσατε έχουν προτεραιότητα. Δεν αποστέλλεται ειδοποίηση ή αίτημα.", "Δεν ήταν δυνατός ο έλεγχος. Το κείμενο διατηρείται. Δοκιμάστε ξανά.", "Περιμένετε λίγο και δοκιμάστε ξανά.", "Τα φίλτρα άλλαξαν. Ελέγξτε ξανά την αναζήτηση.", "Έτοιμο για εφαρμογή", "Επιλέξτε τιμή ή αλλάξτε το κείμενο και ελέγξτε ξανά.", "Έλεγχος αλλαγών"],
+  he: ["תארו מה אתם מחפשים", "החיפוש שלכם.", "בדקו מה הבנו לפני החיפוש.", "החיפוש שלכם", "עד 240 תווים. אפשר לערוך את המסננים למטה.", "בדיקת החיפוש", "בודקים את הטקסט…", "חיפוש עם המסננים האלה", "עריכת הטקסט", "סגירה", "עדיין דרוש בירור", "למסננים שהקלדתם יש עדיפות. לא נשלחת התראה או פנייה.", "לא הצלחנו לבדוק את הטקסט. הוא נשמר. נסו שוב.", "המתינו רגע ונסו שוב.", "המסננים השתנו. בדקו שוב את החיפוש.", "מוכן להחלה", "בחרו ערך או ערכו את הטקסט ובדקו שוב.", "בדיקת השינויים"],
+};
+export function searchAssistantCopy(locale) {
+  return Object.fromEntries(KEYS.map((key, index) => [key, (COPY[locale] || COPY.bg)[index]]));
+}
+export function SearchAssistantEntry({ page }) {
+  const copy = searchAssistantCopy(page.locale);
+  // Hidden until the client can open the real review flow; ordinary search remains available without JS.
+  return h("button", { type: "button", className: "mk-btn mk-btn--secondary psa-entry", "data-search-assistant-open": true, hidden: true }, copy.entry);
+}
+export function SearchAssistantDialog({ page }) {
+  if (!["home", "search"].includes(page.kind)) return null;
+  const locale = page.locale || "bg", copy = searchAssistantCopy(locale), labels = labelsFor(locale);
+  const field = (name, label, type = "number") => h("label", null, label, h("input", { name, type, min: type === "number" ? 0 : undefined, step: type === "number" ? (name.startsWith("bedrooms") ? "1" : "any") : undefined, "data-label": label, "data-assistant-field": true }));
+  const select = (name, label, options) => h("label", null, label, h("select", { name, "data-label": label, "data-assistant-field": true }, h("option", { value: "" }, labels.any), ...options.map(([value, text]) => h("option", { key: value, value }, text))));
+  const bounds = [["price", `${labels.price} · EUR`], ["primary_area", labels.area], ["bedrooms", labels.factLabels?.bedrooms || labels.bedrooms]];
+  return h("dialog", { className: "psa", "data-search-assistant": true, "data-locale": locale, "data-copy": JSON.stringify(copy), "data-fields": JSON.stringify(SEARCH_INTENT_INPUT_FIELDS), "data-search-path": page.kind === "search" ? page.path : page.body.search.path, "aria-labelledby": "psa-title" },
+    h("button", { type: "button", className: "mk-btn mk-btn--secondary psa-close", "data-assistant-close": true }, copy.close),
+    h("h2", { id: "psa-title" }, copy.title), h("p", null, copy.intro),
+    h("div", { className: "psa-layout" }, h("div", null,
+      h("form", { "data-assistant-words": true }, h("label", { htmlFor: "psa-words" }, copy.words), h("textarea", { id: "psa-words", name: "text", required: true, maxLength: 240, rows: 3, dir: "auto", "aria-describedby": "psa-limit" }), h("p", { id: "psa-limit" }, copy.limit), h("button", { type: "submit", className: "mk-btn mk-btn--primary" }, copy.review)),
+      h("p", { "data-assistant-status": true, role: "status", "aria-live": "polite" }),
+      h("form", { "data-assistant-review": true, hidden: true }, h("h3", null, copy.ready), h("div", { className: "psa-fields" },
+        field("location_ids", labels.location, "text"), select("property_families", labels.propertyType, ["apartment", "house", "plot", "agricultural_land", "commercial", "hotel"].map(value => [value, localizedListingValue(locale, "property_type", value)])),
+        select("offer_type", `${page.chrome?.nav?.find(x => x.id === "buy")?.label || "Buy"} / ${page.chrome?.nav?.find(x => x.id === "rent")?.label || "Rent"}`, [["sale", page.chrome?.nav?.find(x => x.id === "buy")?.label || "Buy"], ["rent", page.chrome?.nav?.find(x => x.id === "rent")?.label || "Rent"]]),
+        ...bounds.flatMap(([key, label]) => [field(`${key}_min`, `${label} · ${labels.min || "min"}`), field(`${key}_max`, `${label} · ${labels.max || "max"}`)])),
+        h("dl", { "data-assistant-preserved": true }),
+        h("section", { "data-assistant-unresolved": true, hidden: true }, h("h3", null, copy.unresolved), h("ul", null)),
+        h("div", { className: "psa-actions" }, h("button", { type: "submit", className: "mk-btn mk-btn--secondary" }, copy.checkChanges), h("button", { type: "button", className: "mk-btn mk-btn--primary", "data-assistant-apply": true, disabled: true }, copy.apply))),
+    ), h("aside", null, h("p", null, copy.retained))));
+}

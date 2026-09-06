@@ -18,6 +18,7 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/consents/withdraw",
   "/api/admin/deals/close",
   "/api/admin/deployable-redirects/export",
+  "/api/admin/documents/bytes",
   "/api/admin/documents/outcome",
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads",
@@ -41,6 +42,8 @@ export const FILE_BACKED_ADMIN_MUTATIONS = new Set([
   "/api/admin/replies/draft",
   "/api/admin/saved-search-alerts/run-due",
   "/api/admin/seller-pipeline/outcome",
+  "/api/admin/tasks",
+  "/api/admin/tasks/action",
   "/api/admin/tours/approve",
   "/api/admin/translations/approve",
   "/api/admin/translations/draft",
@@ -59,6 +62,7 @@ export const FILE_BACKED_ADMIN_READS = new Set([
   "/admin/pipeline",
   "/admin/reports",
   "/admin/requests",
+  "/admin/tasks",
   "/admin/viewings",
   "/api/admin/activity",
   "/api/admin/consents",
@@ -72,6 +76,7 @@ export const FILE_BACKED_ADMIN_READS = new Set([
   "/api/admin/reports",
   "/api/admin/reports/export",
   "/api/admin/requests",
+  "/api/admin/tasks",
   "/api/admin/viewings",
   "/api/admin/viewings.ics",
   "/api/admin/views",
@@ -128,7 +133,7 @@ export function productionRuntimeDataUnavailable({
   if (path === "/api/events" && durableEvent) return false;
   if (path === "/api/viewing-trips" && durableViewingTrip) return false;
   if (path === "/api/admin/replies/delivery" && durableProviderDelivery) return false;
-  if (["/api/admin/media/uploads", "/api/admin/media/reviews"].includes(path) && durableMedia) return false;
+  if (["/api/admin/media/uploads", "/api/admin/media/reviews", "/api/admin/documents/bytes"].includes(path) && durableMedia) return false;
   if (["/api/admin/viewings", "/api/admin/viewings/follow-up"].includes(path) && durableViewing) return false;
   if (durableLeadOperations && DURABLE_LEAD_OPERATION_PATHS.has(path)) return false;
   return FILE_BACKED_PUBLIC_MUTATIONS.has(path) || FILE_BACKED_ADMIN_MUTATIONS.has(path);

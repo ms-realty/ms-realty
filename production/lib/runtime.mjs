@@ -37,6 +37,7 @@ import {
   locationPath,
   listingPath,
   publicLocationNames,
+  searchPath,
   sellerPath,
   startPath,
 } from "./seo.mjs";
@@ -303,6 +304,17 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
     });
     if (match) return { type, localeCode: match.code };
   }
+
+  // Three places knew the search route and this one did not, so a target
+  // verifier that asked here was told the served search page did not exist.
+  const searchLocale = registry.locales.find((locale) => {
+    try {
+      return searchPath(registry, locale.code) === normalized;
+    } catch {
+      return false;
+    }
+  });
+  if (searchLocale) return { type: "search", localeCode: searchLocale.code };
 
   const contactLocale = registry.locales.find((locale) => {
     try {

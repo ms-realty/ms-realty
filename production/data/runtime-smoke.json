@@ -3444,7 +3444,8 @@
           },
           "applicable_filter_fields": [
             "bedrooms_min"
-          ]
+          ],
+          "widen_ranges": []
         }
       },
       "seller": {
@@ -4592,6 +4593,7 @@
             "EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing."
           ],
           "reviewer": "editor_bg",
+          "approved_at": "2026-07-06T00:00:00Z",
           "sources_label": "",
           "sources": []
         },
@@ -4603,6 +4605,7 @@
             "MS Realty treats financing as an early qualification item, not a late-stage surprise."
           ],
           "reviewer": "editor_bg",
+          "approved_at": "2026-07-06T00:00:00Z",
           "sources_label": "",
           "sources": []
         }
@@ -7315,7 +7318,8 @@
         },
         "applicable_filter_fields": [
           "bedrooms_min"
-        ]
+        ],
+        "widen_ranges": []
       },
       "fallback": {
         "enabled": true,
@@ -10058,7 +10062,8 @@
         },
         "applicable_filter_fields": [
           "bedrooms_min"
-        ]
+        ],
+        "widen_ranges": []
       },
       "fallback": {
         "enabled": true,
@@ -10761,9 +10766,9 @@
     ]
   },
   "lead_he": {
-    "id": "inbox-lead-draft-fb731b4c-c6d3-4bac-9c95-8ecc499b64b1",
+    "id": "inbox-lead-draft-72708dd0-e5ad-4b17-b23c-4a7a2c65e492",
     "lead": {
-      "id": "lead-draft-fb731b4c-c6d3-4bac-9c95-8ecc499b64b1",
+      "id": "lead-draft-72708dd0-e5ad-4b17-b23c-4a7a2c65e492",
       "idempotency_key": null,
       "source": "website_listing_detail",
       "intent": "inquiry",
@@ -10864,9 +10869,9 @@
     }
   },
   "viewingLead_he": {
-    "id": "inbox-lead-draft-5967ea66-20e0-4583-9dc6-88ad599a2f97",
+    "id": "inbox-lead-draft-deb6904d-fe81-446e-a651-de122cc8221b",
     "lead": {
-      "id": "lead-draft-5967ea66-20e0-4583-9dc6-88ad599a2f97",
+      "id": "lead-draft-deb6904d-fe81-446e-a651-de122cc8221b",
       "idempotency_key": null,
       "source": "website_viewing_request",
       "intent": "viewing",
@@ -10970,9 +10975,9 @@
     }
   },
   "contactLead_he": {
-    "id": "inbox-lead-draft-f871911a-4e04-49a4-9db0-ecc53d6934cc",
+    "id": "inbox-lead-draft-62452f3e-5cde-434e-bab1-11c3a8537d3b",
     "lead": {
-      "id": "lead-draft-f871911a-4e04-49a4-9db0-ecc53d6934cc",
+      "id": "lead-draft-62452f3e-5cde-434e-bab1-11c3a8537d3b",
       "idempotency_key": null,
       "source": "website_contact_callback",
       "intent": "callback",

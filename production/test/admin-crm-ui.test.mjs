@@ -68,7 +68,9 @@ test("lead inbox is a two-pane inbox: a list of rows that select a detail articl
   }
   // The reply composer, assignment control and thread stay inside the detail.
   assert.match(page.body, /class="adm-lead-detail__section adm-reply-cell"/);
-  assert.match(page.body, /data-hermes-draft-request="true"/);
+  // The draft is the shared assist control, named by what it calls and fills.
+  assert.match(page.body, /data-hermes-assist-endpoint="\/api\/admin\/replies\/draft"/);
+  assert.match(page.body, /data-hermes-assist-field="reply"/);
   assert.match(page.body, /data-reply-approval-required="true"/);
   assert.match(page.body, /data-lead-assignment-control=/);
 });
@@ -145,8 +147,14 @@ test("pipeline renders a stage board whose columns count their own cards", async
 
 test("every CRM list screen carries the same toolbar filter and empty-note pattern", async () => {
   const server = app();
+  // Contacts moved to the Paper 03.01 daily-workspace pattern (search plus
+  // tag filters beside a detail pane), so it is asserted on that contract below.
+  const contacts = await dispatchHttp(server, { url: "/admin/contacts?locale=en", headers: auth });
+  assert.equal(contacts.status, 200);
+  assert.match(contacts.body, /data-daily-workspace="contact"/);
+  assert.match(contacts.body, /data-daily-search/);
+  assert.match(contacts.body, /data-daily-tags="(with|no)_account"/);
   for (const [url, scope] of [
-    ["/admin/contacts?locale=en", "contacts"],
     ["/admin/consents?locale=en", "consents"],
     ["/admin/documents?locale=en", "documents"],
     ["/admin/requests?locale=en", "requests"],
@@ -191,6 +199,11 @@ test("the list tools strip and the snooze control are wired to their routes", as
   assert.match(inbox.body, /data-lead-snooze-control="[^"]+"/);
   assert.match(inbox.body, /action="\/api\/admin\/leads\/snooze"/);
   assert.match(inbox.body, /data-admin-mutation-form="lead-snooze"/);
+  const snooze = inbox.body.match(/<form[^>]*action="\/api\/admin\/leads\/snooze"[\s\S]*?<\/form>/)?.[0];
+  assert.ok(snooze);
+  assert.match(snooze, /name="actor" required/);
+  assert.match(snooze, /type="checkbox" name="humanConfirmed" required/);
+  assert.match(snooze, /I confirm this change to the enquiry/);
   assert.match(inbox.body, /type="datetime-local" name="until"/);
   assert.match(inbox.body, /Snoozing moves the reply and escalation clocks by the same window/);
   assert.match(ADMIN_APP_JS, /function initLeadBulkForm\(\)/);

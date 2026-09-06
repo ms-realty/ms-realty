@@ -375,7 +375,9 @@ test("the rendered document keeps the public shell in RTL", () => {
 
 test("the client enhances the page into a stepper and the stylesheet carries every control state", () => {
   assert.match(PUBLIC_APP_JS, /function initStartFlow\(\)/);
-  assert.match(PUBLIC_APP_JS, /markSaved\(\);\s+initStartFlow\(\);/);
+  assert.match(PUBLIC_APP_JS, /^  markSaved\(\);$/m);
+  assert.ok(PUBLIC_APP_JS.lastIndexOf("\n  markSaved();") < PUBLIC_APP_JS.indexOf("\n  initListingSourceQuestions();"));
+  assert.match(PUBLIC_APP_JS, /initListingSourceQuestions\(\);\s+initStartFlow\(\);/);
   assert.match(PUBLIC_APP_JS, /main\[data-start-flow\]/);
   // Answers drive the results link, the lead payload, the alert filters and the
   // conditional coming-soon panel.

@@ -56,41 +56,28 @@ test("every new public page label exists in all seven locales without dashes or 
   assert.doesNotMatch(renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: true }).body.form_unavailable, /[—–]/);
 });
 
-test("home keeps the hero and orders the sections: areas, how buying works, featured, guides, trust, sell", () => {
+test("Atlas home keeps discovery, current listings, location and seller destinations in every locale", () => {
   for (const code of PUBLIC_LOCALES) {
     const page = renderHomePage({ registry, listings, localeCode: code });
     const html = renderReactPublicBody(page);
-    assert.match(html, /data-hero-search="true"/, `${code} hero search form`);
     const order = [
-      html.indexOf('data-home-locations="true"'),
-      html.indexOf('data-home-how-buying-works="true"'),
+      html.indexOf('class="hp-hero"'),
+      html.indexOf('data-hero-search="true"'),
       html.indexOf('data-featured-listings="true"'),
-      html.indexOf('data-home-guides="true"'),
-      html.indexOf('data-home-trust="true"'),
+      html.indexOf('data-home-locations="true"'),
       html.indexOf('class="hp-sell"'),
     ];
-    assert.ok(order.every((index) => index > 0), `${code} sections present: ${order.join(",")}`);
-    assert.deepEqual([...order].sort((a, b) => a - b), order, `${code} section order`);
-    assert.equal(page.body.start.path, `/${code}/${registry.locales.find((locale) => locale.code === code).route_segments.start || "start"}`);
-    assert.match(html, new RegExp(`href="${page.body.start.path}" data-action="start"`));
-    assert.match(html, /class="flow-steps hp-how__steps"/);
-    assert.equal((html.match(/class="flow-steps__item"/g) || []).length >= 3, true);
-    assert.equal((html.match(/<ul class="hp-trust__in">[\s\S]*?<\/ul>/)[0].match(/<li>/g) || []).length, 3);
-    assert.match(html, new RegExp(labelsFor(code).trustOffices));
-    assert.match(html, new RegExp(`${labelsFor(code).browseAllListings}`));
+    assert.ok(order.every((index) => index > 0), `${code}: all Atlas sections present`);
+    assert.deepEqual([...order].sort((a, b) => a - b), order);
+    assert.match(html, new RegExp(`href="${page.body.seller.path}" data-action="seller"`));
+    assert.ok(html.includes(`href="${page.body.search.path}"`));
+    assert.equal((html.match(/data-search-card="true"/g) || []).length, Math.min(page.cards.length, 3));
+    for (const card of page.cards.slice(0, 3)) {
+      assert.ok(html.includes(`data-client-save-listing="${card.id}"`));
+      assert.ok(html.includes(`data-listing-reference="${card.id}"`));
+      assert.ok(html.includes(`href="${card.path}"`));
+    }
   }
-  const en = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
-  assert.match(en, /<h2 id="hp-how-title">How buying works<\/h2>/);
-  assert.match(en, /Tell us what you want/);
-  assert.match(en, /Get a broker shortlist/);
-  assert.match(en, /View and buy with local paperwork done/);
-  assert.match(en, /Start your search/);
-  assert.match(en, /class="hp-resort__c">\d+ reviewed listings</);
-  assert.doesNotMatch(en, /hp-guide__icon/);
-  // The agency runs one office, in Sandanski. The chrome must not name Bansko
-  // or Sveti Vlas here: it sells property there, it has no office there.
-  assert.match(en, /Local office: Sandanski</);
-  assert.doesNotMatch(en.match(/<ul class="hp-trust__in">[\s\S]*?<\/ul>/)[0], /Bansko|Sveti Vlas/);
 });
 
 test("seller page keeps its intake contract and adds the promise, step questions, what happens next and channels", () => {
@@ -98,7 +85,7 @@ test("seller page keeps its intake contract and adds the promise, step questions
   const html = renderReactPublicBody(page);
   assert.match(html, /data-seller-intake="true" data-seller-step="1"/);
   assert.match(html, /data-seller-promise="true"/);
-  assert.match(html, /not an automated estimate/);
+  assert.match(html, /This is an enquiry\. Sending it does not publish your property\./);
   assert.match(html, /<p class="sell-form__step">Step 1 of 3<\/p>/);
   assert.match(html, /<p class="sell-form__step">Step 3 of 3<\/p>/);
   assert.match(html, /data-seller-step-title="true">Tell us about your property</);
@@ -140,7 +127,8 @@ test("contact page lists the single Sandanski office as an object, channels, and
   assert.match(html, /name="contact.phone" type="tel" required/);
   assert.match(html, /name="request_details.callback_time"/);
   assert.match(html, /website_contact_callback/);
-  assert.match(html, /class="mk-btn mk-btn--accent mk-btn--lg" href="tel:\+359879696870"/);
+  assert.match(html, /class="ct-page__cols enquiry-columns"/);
+  assert.match(html, /class="ct-direct-phone" href="tel:\+359879696870"/);
   assert.doesNotMatch(html, /ct-office__ph/);
   const he = renderContactPage({ registry, localeCode: "he", leadWritesDisabled: false });
   assert.equal(he.body.offices[0].name, "סנדנסקי");
@@ -165,7 +153,7 @@ test("guide pages read as articles with a table of contents, sources, ask-a-brok
   const sources = renderReactPublicBody(guide("/bg/guides/proverka-na-imot-sandanski"));
   assert.match(sources, /data-guide-sources="true"/);
   assert.match(sources, /https:\/\/kais\.cadastre\.bg\//);
-  assert.match(pagesCss, /\.guide-page__in--toc \{ grid-template-columns: minmax\(0, 68ch\)/);
+  assert.match(pagesCss, /\.guide-page__in--toc \{ grid-template-columns: 240px minmax\(0,1fr\)/);
   assert.match(pagesCss, /\.guide-page__aside \{ grid-area: aside; position: sticky;/);
 });
 
@@ -237,21 +225,13 @@ test("home rails carry an empty state instead of disappearing", () => {
   assert.match(empty, /There are no areas to browse yet\./);
   assert.match(empty, /data-featured-empty="true"/);
 
-  // German has no approved guides: the rail says so and links the English ones.
+  // Atlas removes the old guide rail; it must not turn an unapproved
+  // translation into displayed guide content while keeping the guide route.
   const german = renderHomePage({ registry, listings, localeCode: "de" });
   assert.equal(german.body.guides, null);
   assert.equal(german.body.guides_alternate.locale, "en");
-  assert.ok(german.body.guides_alternate.links.length >= 2);
-  const germanHtml = renderReactPublicBody(german);
-  assert.match(germanHtml, /data-home-guides="true" data-home-guides-empty="true"/);
-  assert.match(germanHtml, /Ratgeber für Käufer sind in dieser Sprache noch nicht verfügbar\./);
-  assert.match(germanHtml, /href="\/en\/guides\/foreign-buyers" lang="en" hrefLang="en"/);
-  assert.match(germanHtml, /Auf Englisch lesen/);
+  assert.doesNotMatch(renderReactPublicBody(german), /data-home-guides="true"/);
 
-  // English has guides, so it keeps the real rail.
-  const english = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
-  assert.match(english, /data-home-guides="true" data-approved-source="cms"/);
-  assert.doesNotMatch(english, /data-home-guides-empty/);
 });
 
 test("lead forms offer an optional email and the seller flow offers a working photo upload", () => {
@@ -309,10 +289,6 @@ test("the 404 page carries a working search form that needs no JavaScript", () =
 
 test("interactive parts of the new pages declare hover, focus, disabled and current states", () => {
   const states = [
-    /\.hp-resort:hover \{/,
-    /\.hp-resort:focus-visible \{ outline: none; box-shadow: var\(--shadow-focus\)/,
-    /\.hp-guide:hover \{/,
-    /\.hp-guide:focus-visible \{/,
     /\.ct-office__links a:hover \{/,
     /\.ct-office__links a:focus-visible \{/,
     /\.guide-toc a:hover \{/,
@@ -324,7 +300,7 @@ test("interactive parts of the new pages declare hover, focus, disabled and curr
     /\.ct-form \.mk-btn\[data-loading\] \{/,
     /\.ct-form :disabled \{/,
     /\.sell-form__pending \.mk-btn:disabled \{/,
-    /\.hp-rail-empty,\n\.hp-featured \[data-featured-empty\] \{/,
+    /\.hp-featured \[data-featured-empty\] \{/,
     /\.sell-steps li\[aria-current="step"\] \{/,
     /\.sell-steps li\[data-complete="true"\] \{/,
   ];
@@ -351,7 +327,7 @@ test("the public stylesheet carries no admin CRM chrome", () => {
 });
 
 test("the page styles are part of the built design bundle and use logical properties for RTL", () => {
-  for (const selector of [".flow-steps__item", ".hp-trust__in", ".ut-card", ".ct-office", ".guide-toc", ".sell-steps__num"]) {
+  for (const selector of [".flow-steps__item", ".hp-filter-drawer", ".ut-card", ".ct-office", ".guide-toc", ".sell-steps__num"]) {
     assert.ok(vendorCss.includes(selector), `${selector} is built into public/vendor/ms-realty-public.css`);
   }
   assert.match(pagesCss, /\[dir="rtl"\] \.ico-dir \{ transform: scaleX\(-1\); \}/);

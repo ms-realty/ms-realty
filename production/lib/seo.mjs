@@ -82,6 +82,12 @@ export function sellerPath(registry, localeCode) {
   return `/${locale.code}/${locale.route_segments.seller}`;
 }
 
+export function searchPath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  if (!locale.route_segments?.search) throw new Error(`Locale ${locale.code} has no search route segment`);
+  return `/${locale.code}/${locale.route_segments.search}`;
+}
+
 export function contactPath(registry, localeCode) {
   const locale = getLocale(registry, localeCode);
   return `/${locale.code}/${locale.route_segments.contact}`;

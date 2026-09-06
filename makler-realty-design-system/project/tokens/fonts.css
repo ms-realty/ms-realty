@@ -1,31 +1,7 @@
-/* ============================================================
-   MS Realty — Webfonts
-   ------------------------------------------------------------
-   SUBSTITUTE FONTS (no brand fonts were provided).
-   The base families cover Latin + Cyrillic + Greek. Noto Hebrew
-   fallbacks cover the public Hebrew/Israel website locale, and
-   are requested only on that locale.
-
-   These are loaded from Google Fonts rather than bundled binaries.
-   If MS has licensed brand fonts, drop the .woff2 files into
-   assets/fonts/ and replace the @import below with @font-face rules.
-
-   Only weights the design system actually asks for are requested:
-   Commissioner 400/500/600/700, IBM Plex Mono 400/500, and
-   Source Serif 4 400/600/700. Source Serif 4 is requested as static
-   weights rather than across its 8..60 optical-size axis — the axis
-   makes Google serve the full variable font, which costs 122 KB for
-   Latin and 93 KB for Cyrillic against 51 KB and 37 KB for the
-   wght-only build. Nothing in the system varies optical size by hand,
-   and no rule uses an italic serif, so the italic cut is not requested
-   either.
-
-   The generator (production/scripts/build-design-assets.mjs) reads both
-   URLs by the marker comments below; keep the markers if you edit them.
-   ============================================================ */
-
+/* Font markers are consumed by build-design-assets.mjs.
+   Hebrew adds its own sans fallback; other locales use the base request. */
 /* @fonts base */
-@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Sofia+Sans+Semi+Condensed:wght@600;700;800&display=swap');
 
 /* @fonts hebrew */
-@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Hebrew:wght@400;500;600;700&family=Noto+Serif+Hebrew:wght@400;600;700&family=Source+Serif+4:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@400;500;600;700;800&family=Sofia+Sans+Semi+Condensed:wght@600;700;800&display=swap');

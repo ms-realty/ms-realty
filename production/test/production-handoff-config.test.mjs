@@ -85,7 +85,10 @@ test("production compose runs one durable app at the workers.dev public origin",
   assert.match(compose, /MS_REALTY_PROVIDER_TOKEN_KEY: \$\{MS_REALTY_PROVIDER_TOKEN_KEY:\?/);
   assert.match(compose, /MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: \$\{MS_REALTY_PROVIDER_OAUTH_STATE_SECRET:\?/);
   assert.match(compose, /MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY: \$\{MS_REALTY_RECOVERY_SIGNING_PUBLIC_KEY:\?/);
-  assert.match(compose, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: \/app\/production\/data\/r2-media-coverage-report\.json/);
+  assert.match(compose, /MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: \/runtime-evidence\/r2-media-coverage-report\.json/);
+  assert.match(compose, /MS_REALTY_TASK_LEDGER_PATH: \/runtime-data\/task-events\.jsonl/);
+  assert.match(localCompose, /runtime-evidence:\/runtime-evidence/);
+  assert.match(localCompose, /local-dev-app-data:\/runtime-data/);
   assert.match(compose, /MS_REALTY_ORIGIN_TOKEN: \$\{MS_REALTY_ORIGIN_TOKEN:\?MS_REALTY_ORIGIN_TOKEN is required\}/);
   assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_DRIVER: r2/);
   assert.match(compose, /MS_REALTY_MEDIA_UPLOAD_HOST: ms-realty\.ms-realty-bg\.workers\.dev/);

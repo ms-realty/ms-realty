@@ -1,16 +1,5 @@
-/* ============================================================
-   MS Realty — Typography
-   ------------------------------------------------------------
-   Display : Source Serif 4  — editorial headlines, property
-             names, prices. Warm, literary, multi-script,
-             with Noto Serif Hebrew fallback.
-   Sans    : Commissioner    — UI, body, labels. Low-contrast
-             humanist grotesque, full Latin/Cyrillic/Greek,
-             with Noto Sans Hebrew fallback.
-   Mono    : IBM Plex Mono    — reference codes, m² specs,
-             tabular data.
-   ============================================================ */
-
+/* MS Realty: Sofia Sans Semi Condensed for public display, Commissioner
+   for body text and figures. Monospace is reserved for code. */
 :root {
   /* ---- Families ----
      The Noto Hebrew fallbacks are named only under :lang(he) below. They used
@@ -18,15 +7,16 @@
      Latin and Cyrillic pages just to typeset the five characters of the
      Hebrew endonym in the language menu. Dropping them here leaves the same
      system fallbacks every other non-Hebrew glyph already relies on. */
-  --font-display: 'Source Serif 4', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-display: 'Sofia Sans Semi Condensed', 'Commissioner', system-ui, Arial, sans-serif;
   --font-sans:    'Commissioner', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --font-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  --font-mono:    ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
 
   /* ---- Weights ---- */
   --fw-light:    300; /* @kind other */
   --fw-regular:  400; /* @kind other */
   --fw-medium:   500; /* @kind other */
   --fw-semibold: 600; /* @kind other */
+  --fw-display:  800; /* @kind other */
   --fw-bold:     700; /* @kind other */
 
   /* ---- Line heights ---- */
@@ -45,29 +35,29 @@
 
   /* ---- Fixed type sizes ---- */
   --text-2xs:  0.6875rem;  /* 11 */
-  --text-xs:   0.75rem;    /* 12 */
+  --text-xs:   0.8125rem;  /* 13 */
   --text-sm:   0.8125rem;  /* 13 */
-  --text-base: 0.9375rem;  /* 15 — UI default */
+  --text-base: 1rem;       /* 16 — reading default */
   --text-md:   1rem;       /* 16 — reading body */
-  --text-lg:   1.125rem;   /* 18 */
+  --text-lg:   1.1875rem;  /* 19 */
   --text-xl:   1.375rem;   /* 22 */
-  --text-2xl:  1.75rem;    /* 28 */
-  --text-3xl:  2.25rem;    /* 36 */
-  --text-4xl:  3rem;       /* 48 */
-  --text-5xl:  4rem;       /* 64 */
+  --text-2xl:  1.6875rem;  /* 27 */
+  --text-3xl:  2.4375rem;  /* 39 */
+  --text-4xl:  2.9375rem;  /* 47 */
+  --text-5xl:  3.5rem;     /* 56 */
 
   /* ---- Fluid display sizes (hero / marketing) ---- */
-  --display-sm: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);   /* @kind other */
-  --display-md: clamp(2.25rem, 1.4rem + 3.6vw, 3.5rem);   /* @kind other */
-  --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 5rem);     /* @kind other */
-  --display-xl: clamp(3.25rem, 1.2rem + 8vw, 6.5rem);     /* @kind other */
+  --display-sm: 2.4375rem;   /* @kind other */
+  --display-md: 2.9375rem;   /* @kind other */
+  --display-lg: 3.5rem;     /* @kind other */
+  --display-xl: 3.5rem;     /* @kind other */
 }
 
 /* The Hebrew locale is the only one served the Noto Hebrew faces, so it is the
-   only one that names them. Commissioner and Source Serif 4 stay in front for
+   only one that names them. Commissioner and Sofia Sans Semi Condensed stay in front for
    the Latin runs that appear inside Hebrew pages (reference codes, m², URLs). */
 :root:lang(he) {
-  --font-display: 'Source Serif 4', 'Noto Serif Hebrew', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-display: 'Sofia Sans Semi Condensed', 'Noto Sans Hebrew', 'Commissioner', system-ui, Arial, sans-serif;
   --font-sans:    'Commissioner', 'Noto Sans Hebrew', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
 }
 
@@ -87,7 +77,7 @@
 }
 .t-display {
   font-family: var(--font-display);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-display);
   line-height: var(--lh-tight);
   letter-spacing: var(--tracking-tight);
   color: var(--text-strong);

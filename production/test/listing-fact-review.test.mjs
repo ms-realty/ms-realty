@@ -24,7 +24,7 @@ import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
-import { saveListingDraft } from "../lib/listing-draft-service.mjs";
+import { projectListingDraftSeed, saveListingDraft } from "../lib/listing-draft-service.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 const registry = loadLocaleRegistry();
@@ -140,6 +140,8 @@ test("existing listing editor confirmation persists broker verification and remo
   };
   const form = new URLSearchParams();
   form.append("listingId", "MS-CRAWL-0003");
+  const projected = await projectListingDraftSeed(seed, { payload: runtime.payload });
+  form.append("draftRevision", projected.records.find((record) => record.id === "MS-CRAWL-0003").draft_revision);
   form.append("editor", "editor_bg");
   form.append("bedrooms", "2");
   form.append("confirmedFacts", "bedrooms");

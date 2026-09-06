@@ -28,6 +28,9 @@ import {
   writeApprovedRecordFile,
 } from "./approved-records.mjs";
 import { fromRoot } from "./paths.mjs";
+import { NEVER_A_SEA_DESTINATION, containsSeaClaim } from "./sea-claims.mjs";
+
+export { NEVER_A_SEA_DESTINATION, containsSeaClaim };
 
 export const DEFAULT_APPROVED_AREA_GUIDES_PATH = fromRoot("production", "data", "approved-area-guides.json");
 
@@ -43,48 +46,6 @@ export const SEA_ACCESS_AREA_KEYS = Object.freeze([
   "Elani-Sani, Halkidiki",
   "Pasalimani, Piraeus",
 ]);
-
-// Named explicitly so the prohibition in AGENTS.md is greppable from the code
-// that enforces it.
-export const NEVER_A_SEA_DESTINATION = Object.freeze(["Sandanski", "Sandanski Municipality", "Melnik", "Hotovo", "Petrich"]);
-
-// Sea vocabulary across the seven public locales plus the source language.
-// Hebrew is matched on חוף (shore) and on הים followed by a non-Hebrew letter,
-// because the bare ים is also the masculine plural ending and would refuse
-// ordinary copy.
-const SEA_CLAIM_PATTERN = new RegExp(
-  [
-    "\\bsea\\b",
-    "\\bseaside\\b",
-    "\\bseafront\\b",
-    "\\bsea[- ]?views?\\b",
-    "\\bbeach\\b",
-    "\\bcoast(al|line)?\\b",
-    "\\bshore\\b",
-    "\\bwaterfront\\b",
-    "мор[ея]",
-    "морск",
-    "крайбреж",
-    "побереж",
-    "плаж",
-    "пляж",
-    "\\bmeer\\b",
-    "\\bstrand\\b",
-    "\\bküste\\b",
-    "\\bzee\\b",
-    "\\bkust\\b",
-    "θάλασσ",
-    "παραλί",
-    "ακτή",
-    "חוף",
-    "הים(?![\\u0590-\\u05FF])",
-  ].join("|"),
-  "iu",
-);
-
-export function containsSeaClaim(value) {
-  return SEA_CLAIM_PATTERN.test(String(value || ""));
-}
 
 export function readApprovedAreaGuides(filePath = DEFAULT_APPROVED_AREA_GUIDES_PATH) {
   return readApprovedRecordFile(filePath, { collection: "guides" });

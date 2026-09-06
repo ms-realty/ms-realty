@@ -13,6 +13,7 @@ import {
   renderRuntimePath,
   searchRuntimeListings,
   submitRuntimeLead,
+  resolveRuntimePath,
 } from "../lib/runtime.mjs";
 import { createTourApproval } from "../lib/tours.mjs";
 
@@ -594,4 +595,27 @@ test("generated runtime smoke file is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const smoke = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertRuntimeSmoke(smoke), true);
+});
+
+// The origin, the Next adapter and the route manifest all served the search
+// page; the resolver alone said it did not exist, so a redirect-target check
+// that asked the resolver refused a page the site serves.
+test("the resolver classifies every locale's search route the way the origin serves it", () => {
+  for (const locale of registry.locales.filter((row) => row.public_enabled && row.route_segments?.search)) {
+    const resolved = resolveRuntimePath(registry, seed, `/${locale.code}/${locale.route_segments.search}`);
+    assert.equal(resolved.type, "search", locale.code);
+    assert.equal(resolved.localeCode, locale.code);
+    // The trailing-slash form resolves the same way, as it does at the origin.
+    assert.equal(resolveRuntimePath(registry, seed, `/${locale.code}/${locale.route_segments.search}/`).type, "search");
+  }
+  // A search segment under the wrong locale is still nothing.
+  assert.equal(resolveRuntimePath(registry, seed, "/bg/search").type, "not_found");
+});
+
+test("one helper knows the search route; the origin and the adapter no longer carry their own", () => {
+  const read = (file) => fs.readFileSync(fromRoot("production", "lib", file), "utf8");
+  for (const file of ["http.mjs", "app-router-adapter.mjs", "runtime.mjs"]) {
+    assert.doesNotMatch(read(file), /route_segments\?\.search\}?`? === normalized/, `${file} matches the search route inline`);
+    assert.match(read(file), /searchPath\(/, `${file} reads the shared helper`);
+  }
 });

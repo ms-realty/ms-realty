@@ -174,8 +174,10 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
   assert.match(html, /adm-lead-more/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.match(html, /class="adm-lead-detail"/);
-  assert.match(html, /class="adm-kpis"/);
-  assert.match(html, /class="adm-kpis"/);
+  // The inbox metrics are the Atlas summary strip now, not the compact <dl> KPI grid.
+  assert.match(html, /class="adm-summary-strip"/);
+  assert.match(html, /data-summary-card=/);
+  assert.doesNotMatch(html, /class="adm-kpis"/);
   assert.match(html, /data-lead-filter=/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.doesNotMatch(html, /<h2>CRM запитвания<\/h2>/);
@@ -325,9 +327,9 @@ test("admin Today ranks pipeline and follow-up work in one priority list", () =>
 
   assert.match(html, /data-next-action="pipeline"/);
   assert.match(html, /data-next-action="seller"/);
-  assert.match(html, /data-next-actions="true" data-next-action-count="2" data-next-action-total="3" data-next-action-visible="2"/);
-  assert.doesNotMatch(html, /data-next-action="viewing"/);
-  assert.match(html, /class="mk-btn mk-btn--secondary mk-btn--sm"[^>]*><span>Запиши стъпка за продавача<\/span>/);
+  assert.match(html, /data-next-actions="true" data-next-action-count="3" data-next-action-total="3" data-next-action-visible="3"/);
+  assert.match(html, /data-next-action="viewing"/);
+  assert.match(html, /data-today-primary-open="seller"><span>Запиши стъпка за продавача<\/span>/);
   const dueAction = html.match(/<time dateTime="2026-07-06T12:00:00.000Z"[^>]*>([\s\S]*?)<\/time>/)?.[1] || "";
   assert.ok(dueAction, "follow-up due time stays in the source-backed priority row");
   assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);

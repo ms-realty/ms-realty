@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 111,
-    "admin_methods": 130,
-    "admin_pages": 19,
+    "admin_route_files": 115,
+    "admin_methods": 135,
+    "admin_pages": 23,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 152,
-    "structurally_covered_workflows": 152,
+    "authorized_workflows": 161,
+    "structurally_covered_workflows": 161,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -42,6 +42,15 @@
       "path": "/admin/today",
       "icon": "layout-dashboard",
       "kind": "admin_today",
+      "capability": "operations:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "tasks",
+      "group": "today",
+      "path": "/admin/tasks",
+      "icon": "list-checks",
+      "kind": "admin_task_queue",
       "capability": "operations:read",
       "declared_entrypoint": "signed_in_admin_ui"
     },
@@ -159,6 +168,33 @@
       "path": "/admin/approved-content",
       "icon": "check-circle-2",
       "kind": "admin_approved_content_review",
+      "capability": "content:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "document_records",
+      "group": "crm",
+      "path": "/admin/documents/records",
+      "icon": "file-text",
+      "kind": "admin_document_records",
+      "capability": "documents:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "media_library",
+      "group": "cms",
+      "path": "/admin/media",
+      "icon": "camera",
+      "kind": "admin_media_library",
+      "capability": "content:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "locale_rollout",
+      "group": "cms",
+      "path": "/admin/locales",
+      "icon": "globe",
+      "kind": "admin_locale_rollout",
       "capability": "content:read",
       "declared_entrypoint": "signed_in_admin_ui"
     },
@@ -1166,6 +1202,23 @@
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
+      "operation": "admin_get_tasks",
+      "method": "GET",
+      "pathname": "/api/admin/tasks",
+      "family": "administration",
+      "tool": "ms_realty_admin_read",
+      "capability": "operations:read",
+      "read_only": true,
+      "sensitive": false,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
       "operation": "admin_get_team",
       "method": "GET",
       "pathname": "/api/admin/team",
@@ -1766,6 +1819,34 @@
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
+      "operation": "admin_post_documents_bytes",
+      "method": "POST",
+      "pathname": "/api/admin/documents/bytes",
+      "family": "operations",
+      "tool": "ms_realty_admin_write",
+      "capability": "documents:write",
+      "read_only": false,
+      "sensitive": true,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/documents/bytes/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
       "operation": "admin_post_documents_outcome",
       "method": "POST",
       "pathname": "/api/admin/documents/outcome",
@@ -2074,6 +2155,34 @@
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/listing-quality/import/route.js",
       "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
+    },
+    {
+      "operation": "admin_post_listings_copy_draft",
+      "method": "POST",
+      "pathname": "/api/admin/listings/copy/draft",
+      "family": "content",
+      "tool": "ms_realty_admin_write",
+      "capability": "content:write",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/listings/copy/draft/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
       "operation": "admin_post_listings_edit",
@@ -2982,6 +3091,62 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/social-marketing/publish/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_tasks",
+      "method": "POST",
+      "pathname": "/api/admin/tasks",
+      "family": "administration",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_tasks_action",
+      "method": "POST",
+      "pathname": "/api/admin/tasks/action",
+      "family": "administration",
+      "tool": "ms_realty_admin_write",
+      "capability": "operations:write",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/tasks/action/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {

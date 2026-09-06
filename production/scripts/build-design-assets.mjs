@@ -61,7 +61,8 @@ function stripCssComments(css) {
 function minifyCss(css) {
   return stripCssComments(css)
     .replace(/\s+/g, " ")
-    .replace(/\s*([{}:;,>])\s*/g, "$1")
+    .replace(/\s*([{};,>])\s*/g, "$1")
+    .replace(/:\s+/g, ":")
     .replace(/;}/g, "}")
     .trim();
 }
