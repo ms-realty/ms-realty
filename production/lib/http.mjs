@@ -1,3 +1,4 @@
+import { PUBLIC_SEARCH_ASSISTANT_PATHS, PUBLIC_SEARCH_ASSISTANT_MAX_BYTES, publicSearchAssistant, publicSearchAssistantFailure } from "./public-search-assistant.mjs";
 import { LISTING_QUESTION_PATH, LISTING_QUESTION_MAX_BYTES, publicListingQuestion } from "./public-listing-questions.mjs";
 import { searchPath } from "./seo.mjs";
 import fs from "node:fs";
@@ -559,6 +560,7 @@ const PRIVATE_HEADERS = { "cache-control": "no-store" };
 // Public (unauthenticated) write endpoints protected by the rate limiter.
 const PUBLIC_WRITE_PATHS = new Set([
   LISTING_QUESTION_PATH,
+  ...PUBLIC_SEARCH_ASSISTANT_PATHS,
   "/api/leads",
   "/api/events",
   "/api/language-requests",
@@ -2641,7 +2643,7 @@ export function createHttpApp({
       };
     }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
-    if (request.method === "POST" && ["/api/leads", LISTING_QUESTION_PATH].includes(url.pathname)) {
+    if (request.method === "POST" && ["/api/leads", LISTING_QUESTION_PATH, ...PUBLIC_SEARCH_ASSISTANT_PATHS].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
       const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
@@ -4803,6 +4805,22 @@ export function createHttpApp({
         "application/json; charset=utf-8",
         { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" },
       );
+    }
+
+    if (request.method === "POST" && PUBLIC_SEARCH_ASSISTANT_PATHS.includes(url.pathname)) {
+      if (Buffer.byteLength(request.body || "", "utf8") > PUBLIC_SEARCH_ASSISTANT_MAX_BYTES) return privateJson(413, { kind: "body_too_large" });
+      let input;
+      try { input = parseBody(request); } catch {
+        const failure = publicSearchAssistantFailure({ status: 400, code: "invalid_search_assistant_input" });
+        return privateJson(failure.status, failure.body);
+      }
+      try {
+        const context = url.pathname.endsWith("/interpret") ? { registry: activeRegistry, seed: null } : await currentPublicContext();
+        return privateJson(200, publicSearchAssistant({ pathname: url.pathname, registry: context.registry, seed: context.seed, input }));
+      } catch (error) {
+        const failure = publicSearchAssistantFailure(error, input?.locale);
+        return privateJson(failure.status, failure.body);
+      }
     }
 
     if (request.method === "POST" && url.pathname === LISTING_QUESTION_PATH) {

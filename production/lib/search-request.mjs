@@ -88,6 +88,35 @@ const LOCATION_RULES = [
   ["Sveti Vlas", /(?:\bsveti vlas\b|свети влас)/iu],
 ];
 
+const OFFER_RULES = [
+  ["rent", /(?:\b(?:for rent|rent)\b|наем|под наем)/iu],
+  ["sale", /(?:\b(?:for sale|buy|sale)\b|продажба|за продажба)/iu],
+];
+const BEDROOM_RULE = /(?:\b(\d+)\s*bed(?:room)?s?\b|(\d+)\s*спални)/iu;
+const PRICE_MAX_RULE = /(?:\b(?:under|below|up to|maximum|max)\b|до|под)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu;
+const PRICE_MIN_RULE = /(?:\b(?:over|above|from|minimum|min)\b|над|от)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu;
+
+// Evidence for the interpretation review uses the parser's own vocabulary.
+// Every span is retained, including competing choices the legacy parser picks
+// between. Public assistance can therefore ask for a choice rather than guess.
+export function naturalLanguageSearchCandidates(value) {
+  const text = String(value || "").trim();
+  const candidates = [];
+  const collect = (field, pattern, convert) => {
+    for (const match of text.matchAll(new RegExp(pattern.source, `${pattern.flags}g`))) {
+      candidates.push({ field, value: convert(match), text: match[0], start: match.index, end: match.index + match[0].length });
+    }
+  };
+  collect("exact_reference", EXACT_REFERENCE, (match) => match[0].toUpperCase());
+  for (const [value, pattern] of PROPERTY_RULES) collect("property_families", pattern, () => [value]);
+  for (const [value, pattern] of LOCATION_RULES) collect("location_ids", pattern, () => [value]);
+  for (const [value, pattern] of OFFER_RULES) collect("offer_type", pattern, () => value);
+  collect("bedrooms_min", BEDROOM_RULE, (match) => Number(match[1] || match[2]));
+  collect("price_max", PRICE_MAX_RULE, parseAmount);
+  collect("price_min", PRICE_MIN_RULE, parseAmount);
+  return candidates;
+}
+
 function objectInput(input) {
   if (input instanceof URLSearchParams) return Object.fromEntries(input);
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("search input must be an object");
@@ -180,24 +209,24 @@ export function parseNaturalLanguageSearchIntent(value, { defaultLocale = "bg" }
       break;
     }
   }
-  if (/(?:\b(?:for rent|rent)\b|наем|под наем)/iu.test(text)) {
+  if (OFFER_RULES[0][1].test(text)) {
     fields.offer_type = "rent";
     structured = true;
-  } else if (/(?:\b(?:for sale|buy|sale)\b|продажба|за продажба)/iu.test(text)) {
+  } else if (OFFER_RULES[1][1].test(text)) {
     fields.offer_type = "sale";
     structured = true;
   }
-  const bedrooms = text.match(/(?:\b(\d+)\s*bed(?:room)?s?\b|(\d+)\s*спални)/iu);
+  const bedrooms = text.match(BEDROOM_RULE);
   if (bedrooms) {
     fields.bedrooms_min = Number(bedrooms[1] || bedrooms[2]);
     structured = true;
   }
-  const priceMax = text.match(/(?:\b(?:under|below|up to|maximum|max)\b|до|под)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu);
+  const priceMax = text.match(PRICE_MAX_RULE);
   if (priceMax) {
     fields.price_max = parseAmount(priceMax);
     structured = true;
   }
-  const priceMin = text.match(/(?:\b(?:over|above|from|minimum|min)\b|над|от)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu);
+  const priceMin = text.match(PRICE_MIN_RULE);
   if (priceMin) {
     fields.price_min = parseAmount(priceMin);
     structured = true;
@@ -244,7 +273,7 @@ const INPUT_ALIAS_GROUPS = [
   ["primary_area_max", "area_max"],
 ];
 
-function mergeSearchInputs(...layers) {
+export function mergeSearchInputs(...layers) {
   const merged = {};
   for (const layer of layers) {
     for (const aliases of INPUT_ALIAS_GROUPS) {

@@ -19,6 +19,18 @@ const UNSAFE = /<[^>]*>|https?:\/\/|javascript:|\b(?:ignore|system|developer|pro
 const tokens = (value) => [...new Set((value.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu) || []).filter((word) => word.length > 1 && !STOP_WORDS.has(word)))];
 const badRequest = () => Object.assign(new Error("Use a known listing reference, an available language and a question of 1–240 characters."), { status: 400, code: "invalid_listing_question" });
 
+// Callers must first restrict records with publicSeedFor. This shared gate
+// verifies the requested locale against the exact current facts and copy.
+export function currentApprovedListingSource(record, locale, now = new Date().toISOString()) {
+  const translation = (record.translations || []).find((row) => row.locale === locale);
+  const copy = publishedListingTranslationCopy(translation);
+  const sourceHash = contentHash(record.facts);
+  if (!copy || translation.source_locale !== record.source_locale || translation.listing !== record.id ||
+      translation.source_hash !== sourceHash || translation.translated_hash !== contentHash(copy) ||
+      [translation.approved_at, translation.publication_authorized_at, translation.published_at].some((value) => Date.parse(value) > Date.parse(now))) return null;
+  return { copy, source_hash: sourceHash, reviewer: translation.reviewer, reviewed_at: translation.approved_at };
+}
+
 export function publicListingQuestion({ registry, seed, input, now = new Date().toISOString() }) {
   if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).some((key) => !INPUT_FIELDS.has(key))) throw badRequest();
   if (typeof input.listingId !== "string" || !/^MS-[A-Z0-9-]{1,70}$/u.test(input.listingId) || typeof input.question !== "string" || typeof input.locale !== "string") throw badRequest();
@@ -30,17 +42,10 @@ export function publicListingQuestion({ registry, seed, input, now = new Date().
   const base = { kind: "listing_source_passages", listing_id: record.id, locale: locale.code, question,
     canonical_url: listingPath(registry, locale.code, record.id), contact_url: contactPath(registry, locale.code),
     source_hash: null, reviewer: null, reviewed_at: null, passages: [], status: "no_answer" };
-  const translation = (record.translations || []).find((row) => row.locale === locale.code);
-  const copy = publishedListingTranslationCopy(translation);
-  // CMS seed facts are the canonical source snapshot used by its translation
-  // importer. Compare that exact hash; never accept an older catalogue hash.
-  const sourceHash = contentHash(record.facts);
-  if (!copy || translation.source_locale !== record.source_locale || translation.listing !== record.id ||
-      translation.source_hash !== sourceHash || translation.translated_hash !== contentHash(copy) ||
-      [translation.approved_at, translation.publication_authorized_at, translation.published_at].some((value) => Date.parse(value) > Date.parse(now))) {
-    return { ...base, reason: "approved_source_unavailable" };
-  }
-  const source = { source_hash: sourceHash, reviewer: translation.reviewer, reviewed_at: translation.approved_at };
+  const approved = currentApprovedListingSource(record, locale.code, now);
+  if (!approved) return { ...base, reason: "approved_source_unavailable" };
+  const { copy, ...source } = approved;
+  const sourceHash = source.source_hash;
   if (ADVICE.test(question) || UNSAFE.test(question)) return { ...base, ...source, reason: "outside_source_lookup" };
   const terms = tokens(question);
   if (!terms.length || /<[^>]*>/u.test(copy.description)) return { ...base, ...source, reason: "no_related_passage" };

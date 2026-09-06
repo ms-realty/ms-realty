@@ -1,3 +1,4 @@
+import { PUBLIC_SEARCH_ASSISTANT_PATHS, PUBLIC_SEARCH_ASSISTANT_MAX_BYTES, publicSearchAssistant, publicSearchAssistantFailure } from "./public-search-assistant.mjs";
 import { LISTING_QUESTION_PATH, LISTING_QUESTION_MAX_BYTES, publicListingQuestion } from "./public-listing-questions.mjs";
 import fs from "node:fs";
 import { readBuildMarker } from "./build-marker.mjs";
@@ -340,6 +341,7 @@ function currentTranslationTasks(config) {
 // Public (unauthenticated) write endpoints protected by the rate limiter.
 const PUBLIC_WRITE_PATHS = new Set([
   LISTING_QUESTION_PATH,
+  ...PUBLIC_SEARCH_ASSISTANT_PATHS,
   "/api/leads",
   "/api/events",
   "/api/language-requests",
@@ -814,7 +816,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (url.pathname === "/api/hermes/chat") {
       return webResponse(privateJson(404, { kind: "not_found" }));
     }
-    if (request.method === "POST" && ["/api/leads", "/api/events", SELLER_PHOTO_UPLOAD_PATH, LISTING_QUESTION_PATH].includes(url.pathname)) {
+    if (request.method === "POST" && ["/api/leads", "/api/events", SELLER_PHOTO_UPLOAD_PATH, LISTING_QUESTION_PATH, ...PUBLIC_SEARCH_ASSISTANT_PATHS].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : url.protocol.slice(0, -1);
       const host = requestHost(request.headers);
@@ -853,7 +855,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
         );
       }
     }
-    const bodyBytes = await readRequestBytes(request, url.pathname === LISTING_QUESTION_PATH ? Math.min(config.maxBodyBytes, LISTING_QUESTION_MAX_BYTES) : config.maxBodyBytes);
+    const bodyBytes = await readRequestBytes(request, url.pathname === LISTING_QUESTION_PATH ? Math.min(config.maxBodyBytes, LISTING_QUESTION_MAX_BYTES) : PUBLIC_SEARCH_ASSISTANT_PATHS.includes(url.pathname) ? Math.min(config.maxBodyBytes, PUBLIC_SEARCH_ASSISTANT_MAX_BYTES) : config.maxBodyBytes);
     const body = bodyBytes.toString("utf8");
 
     if (request.method === "GET" && url.pathname === "/api/health") {
@@ -903,6 +905,21 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
           { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" },
         ),
       );
+    }
+
+    if (request.method === "POST" && PUBLIC_SEARCH_ASSISTANT_PATHS.includes(url.pathname)) {
+      let input;
+      try { input = parseBody(request, body); } catch {
+        const failure = publicSearchAssistantFailure({ status: 400, code: "invalid_search_assistant_input" });
+        return webResponse(privateJson(failure.status, failure.body));
+      }
+      try {
+        const result = publicSearchAssistant({ pathname: url.pathname, registry: currentRegistry(config), seed: url.pathname.endsWith("/interpret") ? null : await currentRequestSeed(config), input });
+        return webResponse(privateJson(200, result));
+      } catch (error) {
+        const failure = publicSearchAssistantFailure(error, input?.locale);
+        return webResponse(privateJson(failure.status, failure.body));
+      }
     }
 
     if (request.method === "POST" && url.pathname === LISTING_QUESTION_PATH) {
