@@ -30,21 +30,27 @@ function parseJsonObject(value) {
   return JSON.parse(trimmed);
 }
 
-export function providerRequestBody(row, model) {
+export function providerRequestBody(row, model, { providerMode = "self_hosted" } = {}) {
+  const immutableFacts = Object.entries(row.prompt?.propertyFacts || {})
+    .filter(([, value]) => ["string", "number"].includes(typeof value) && String(value) !== "")
+    .map(([field, value]) => ({ field, value: String(value) }));
   return {
     model,
     temperature: 0.2,
     max_tokens: 1024,
     reasoning_effort: "none",
+    // Hermes Agent reads request reasoning from model_options, not the
+    // top-level OpenAI-compatible field. Keep that extension off hosted APIs.
+    ...(providerMode === "self_hosted" ? { model_options: { reasoning: { enabled: false } } } : {}),
     response_format: { type: "json_object" },
     tool_choice: "none",
     messages: [
       {
         role: "system",
         content:
-          "You are Hermes Agent. Return exactly one JSON object with title, body, seo_title, meta_description, citations. Draft only; never publish or invoke tools.",
+          "You are Hermes Agent. Return exactly one JSON object with string fields title, body, seo_title, meta_description and an array citations. Draft only; never publish or invoke tools. Translate sourceText concisely into targetLocale. Include every immutableFacts value verbatim in body, including the listing reference, even if it is absent from sourceText. Translate labels, not immutable values; do not round numbers, convert units or transliterate those values. Use only supplied facts and source text. Do not fill missing facts. Check every immutable value is present before returning JSON.",
       },
-      { role: "user", content: JSON.stringify(row.prompt) },
+      { role: "user", content: JSON.stringify({ ...row.prompt, immutableFacts }) },
     ],
   };
 }
@@ -266,7 +272,7 @@ export function openAiCompatibleHermesProvider({
         "content-type": "application/json",
         ...(resolvedApiKey ? { authorization: `Bearer ${resolvedApiKey}` } : {}),
       },
-      body: JSON.stringify(providerRequestBody(row, resolvedModel)),
+      body: JSON.stringify(providerRequestBody(row, resolvedModel, { providerMode: config.mode })),
     });
     if (!response.ok) throw new Error(`Hermes provider failed: ${response.status}`);
     const payload = await response.json();

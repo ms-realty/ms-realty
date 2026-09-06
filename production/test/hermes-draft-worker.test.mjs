@@ -7,6 +7,7 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
+  providerRequestBody,
   readReusableHermesDraftWorkerReport,
   runHermesDraftWorker,
   taskFromHermesDraft,
@@ -445,11 +446,72 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
   assert.equal(request.body.max_tokens, 1024);
   assert.equal(request.body.reasoning_effort, "none");
+  assert.deepEqual(request.body.model_options, { reasoning: { enabled: false } });
   assert.equal(request.body.response_format.type, "json_object");
   assert.ok(request.options.signal instanceof AbortSignal);
   assert.equal(request.body.tools, undefined);
   assert.equal(request.body.tool_choice, "none");
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
+});
+
+test("Hermes request preserves exact protected values without adding missing facts", () => {
+  const row = dispatchRow();
+  row.prompt.propertyFacts = {
+    id: "MS-CRAWL-0069", location: "Leshnitsa", price_eur: 9000,
+    area_sqm: 8000, bedrooms: 0, source_url: "https://makler-realty.com/listing/example/",
+    unknown_floor: null, unknown_condition: "", available: false,
+  };
+  const original = structuredClone(row);
+  const request = providerRequestBody(row, "qwen3.5:0.8b");
+  const prompt = JSON.parse(request.messages[1].content);
+  assert.deepEqual(prompt.immutableFacts, [
+    { field: "id", value: "MS-CRAWL-0069" },
+    { field: "location", value: "Leshnitsa" },
+    { field: "price_eur", value: "9000" },
+    { field: "area_sqm", value: "8000" },
+    { field: "bedrooms", value: "0" },
+    { field: "source_url", value: "https://makler-realty.com/listing/example/" },
+  ]);
+  assert.equal(prompt.sourceText, original.prompt.sourceText);
+  assert.deepEqual(prompt.propertyFacts, original.prompt.propertyFacts);
+  assert.deepEqual(row, original);
+  assert.match(request.messages[0].content, /Include every immutableFacts value verbatim in body/);
+});
+
+test("Hosted provider requests keep gateway-only reasoning options out", async () => {
+  let body;
+  const provider = openAiCompatibleHermesProvider({
+    env: { HERMES_PROVIDER_MODE: "openrouter", HERMES_API_KEY: "test-key" },
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    fetchImpl: async (_url, options) => {
+      body = JSON.parse(options.body);
+      return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(validDraft()) } }] }) };
+    },
+  });
+  await provider(dispatchRow());
+  assert.equal(body.model_options, undefined);
+  assert.equal(body.reasoning_effort, "none");
+});
+
+test("A model response that omits the reference is rejected without repair or persistence", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-missing-reference-`);
+  const filePath = `${dir}/translations.jsonl`;
+  const modelOutput = { title: "Sandanski apartment", body: "Sandanski 50000", seo_title: "Sandanski", meta_description: "Sandanski 50000", citations: [] };
+  const provider = openAiCompatibleHermesProvider({
+    env: { HERMES_API_KEY: "test-key" },
+    endpoint: "https://hermes.local/v1/chat/completions",
+    fetchImpl: async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(modelOutput) } }] }) }),
+  });
+  const report = await runHermesDraftWorker({
+    dispatch: isolatedDispatch(), provider, filePath,
+    auditPath: `${dir}/hermes-audit.jsonl`, auditLogPath: `${dir}/audit-log.jsonl`,
+    providerMetadata: { mode: "self_hosted", model: "qwen3.5:0.8b", sensitiveDataAllowed: true },
+  });
+  assert.deepEqual(report.summary, { attempted: 1, persisted: 0, rejected: 1 });
+  assert.match(report.rejected[0].error, /changed or omitted property fact: MS-TEST-1/);
+  assert.equal(fs.existsSync(filePath), false);
+  assert.equal(modelOutput.body, "Sandanski 50000");
+  assert.throws(() => assertHermesDraftWorkerReport(report), /persist at least one draft/);
 });
 
 test("OpenAI-compatible Hermes provider rejects non-empty tool-call draft arguments", async () => {
