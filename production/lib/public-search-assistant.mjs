@@ -77,7 +77,12 @@ export function interpretPublicSearch({ registry, input }) {
   });
   // The small parser does not understand negation, non-EUR amounts or units.
   // Refuse those inferred comparisons instead of treating a nearby number as a price.
-  const semanticRisk = /\b(?:not|except|without|excluding|no|usd|gbp|dollars?|pounds?|sqm|m2|m²)\b|(?:без|освен|не |кв\.?\s*м|m[²2]|лв|лева|руб|\$|£)|\d[.,]\d{1,2}(?![\d\w])/iu.test(text);
+  const unsupportedWording = /\b(?:not|except|without|excluding|no|usd|gbp|dollars?|pounds?|sqm|m2|m²)\b|(?:без|освен|не |кв\.?\s*м|m[²2]|лв|лева|руб|\$|£)|\d[.,]\d{1,2}(?![\d\w])/iu.test(text);
+  const overlappingUnits = candidates.some((row) => row.field.startsWith("price_") && candidates.some((other) => other.field === "bedrooms_min" && row.start < other.end && other.start < row.end));
+  const unsupportedBedroomBound = /(?:\b(?:at most|fewer than|less than|maximum|max|up to|under|below)\b|до|под|най-много)\s*\d+\s*(?:bed(?:room)?s?\b|спални)/iu.test(text);
+  const unsupportedBillingPeriod = /\b(?:per|each|a)\s+(?:month|week|day|year)\b|\/\s*(?:month|week|day|year)\b|на\s+(?:месец|седмица|ден|година)/iu.test(text);
+  const nonPriceUnit = candidates.some((row) => row.field.startsWith("price_") && /^\s*(?:bathrooms?|rooms?|floors?|storeys?|years?|бани|етажа|години)\b/iu.test(text.slice(row.end)));
+  const semanticRisk = unsupportedWording || overlappingUnits || unsupportedBedroomBound || unsupportedBillingPeriod || nonPriceUnit;
   const inferredIntent = { ...parsed.intent };
   if (semanticRisk) {
     for (const row of candidates) inferredIntent[row.field] = Array.isArray(row.value) ? [] : null;

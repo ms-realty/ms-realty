@@ -231,3 +231,18 @@ test("unrecognised decimal amount formatting requires clarification instead of c
   }
   assert.equal(interpret("apartment under 120.5k").proposed_intent.price_max, 120500);
 });
+
+
+test("number units, upper bedroom bounds and billing periods cannot silently become different filters", () => {
+  for (const text of ["apartment under 3 bedrooms", "apartment with at most 3 bedrooms", "apartment under 1000 per month", "house under 3 bathrooms", "апартамент под 3 спални"]) {
+    const result = interpret(text);
+    assert.equal(result.status, "needs_clarification", text);
+    assert.equal(result.proposed_url, null, text);
+    assert.equal(result.proposed_intent.price_max, null, text);
+    assert.equal(result.proposed_intent.bedrooms_min, null, text);
+    assert.deepEqual(result.unresolved, [{ text, reason: "not_applied_as_filter" }]);
+  }
+  const supported = interpret("apartment with 3 bedrooms under 120000");
+  assert.equal(supported.proposed_intent.price_max, 120000);
+  assert.equal(supported.proposed_intent.bedrooms_min, 3);
+});
