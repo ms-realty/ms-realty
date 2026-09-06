@@ -64,8 +64,8 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /data-route-decision-state", "saved"/);
   assert.match(ADMIN_APP_JS, /summary\.focus\(\{ preventScroll: true \}\)/);
   assert.match(ADMIN_APP_JS, /prefers-reduced-motion: reduce/);
-  assert.match(ADMIN_APP_JS, /function commitEditorFormState\(form\)/);
-  assert.match(ADMIN_APP_JS, /form\.hasAttribute\("data-editor-form"\)\) commitEditorFormState\(form\)/);
+  assert.match(ADMIN_APP_JS, /function commitEditorFormState\(form, snapshot\)/);
+  assert.match(ADMIN_APP_JS, /commitEditorFormState\(form, editorSnapshot\)/);
   assert.match(ADMIN_APP_JS, /form\.hasAttribute\("data-route-decision-form"\)\) completeRouteDecision\(form, payload\)/);
   assert.doesNotMatch(ADMIN_APP_JS, /window\.location\.reload\(/);
   assert.match(ADMIN_APP_JS, /function initListingEditorTabs\(\)/);

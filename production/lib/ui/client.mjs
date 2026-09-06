@@ -4786,6 +4786,7 @@ ${THEME_SWITCH_JS}
       event.preventDefault();
       if (form.getAttribute("aria-busy") === "true") return;
       var editorSnapshot = form.hasAttribute("data-editor-form") ? snapshotEditorFormState(form) : null;
+      var mutationPayload = adminMutationPayload(form);
       var buttons = form.querySelectorAll('[type="submit"]');
       var status = form.querySelector("[data-admin-mutation-status]");
       var saving = form.getAttribute("data-admin-mutation-saving") || "Saving…";
@@ -4799,7 +4800,7 @@ ${THEME_SWITCH_JS}
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify(adminMutationPayload(form)),
+        body: JSON.stringify(mutationPayload),
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
@@ -4817,7 +4818,10 @@ ${THEME_SWITCH_JS}
           var partial = payload && payload.kind === "lead_bulk_action" && payload.refused > 0;
           if (editorSnapshot) {
             var revision = form.querySelector('[name="draftRevision"]');
-            if (revision && (payload.kind !== "listing_draft_saved" || !/^[a-f0-9]{64}$/.test(payload.draft_revision || ""))) {
+            if (revision && (payload.kind !== "listing_draft_saved"
+              || !/^[a-f0-9]{64}$/.test(payload.draft_revision || "")
+              || typeof mutationPayload.listingId !== "string" || !mutationPayload.listingId
+              || payload.listing_id !== mutationPayload.listingId || payload.draft_only !== true)) {
               throw new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
             }
             if (revision) revision.value = revision.defaultValue = payload.draft_revision;

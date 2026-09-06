@@ -23,8 +23,9 @@ class Form extends Element {
     this.description = new Input("description", "Original description");
     this.checkbox = new Input("confirmedFacts", "title", "checkbox");
     this.select = new Select();
+    this.listingId = new Input("listingId", "MS-CRAWL-0106", "hidden");
     this.revision = new Input("draftRevision", "a".repeat(64), "hidden");
-    this.elements = [this.title, this.description, this.checkbox, this.select, this.revision];
+    this.elements = [this.title, this.description, this.checkbox, this.select, this.listingId, this.revision];
     this.save = new Element(); this.resetButton = new Element(); this.note = new Element(); this.status = new Element();
     this.savebar = new Element();
     this.savebar.querySelector = (selector) => ({ '[type="submit"]': this.save, "[data-editor-reset]": this.resetButton, "[data-editor-dirty-note]": this.note })[selector];
@@ -52,7 +53,7 @@ function harness() {
   api.commitEditorFormState(form);
   return { form, requests, api,
     submit() { submit({ target: form, preventDefault() {} }); },
-    async respond(status = 201, payload = { kind: "listing_draft_saved", draft_revision: "b".repeat(64) }) {
+    async respond(status = 201, payload = { kind: "listing_draft_saved", draft_revision: "b".repeat(64), listing_id: "MS-CRAWL-0106", draft_only: true }) {
       resolve({ ok: status >= 200 && status < 300, status, json: async () => payload });
       await new Promise((done) => setImmediate(done));
     },
@@ -113,4 +114,54 @@ test("conflicts and unknown successful responses never acknowledge unsaved text"
     assert.equal(form.savebar.getAttribute("data-dirty"), "true");
     assert.equal(form.status.getAttribute("data-state"), "error");
   }
+});
+
+test("listing acknowledgements require the submitted identity and an explicit draft-only result", async (t) => {
+  const cases = [
+    ["another listing", { listing_id: "MS-CRAWL-0165" }],
+    ["missing listing identity", { listing_id: undefined }],
+    ["missing draft-only result", { draft_only: undefined }],
+    ["non-draft result", { draft_only: false }],
+    ["string draft-only result", { draft_only: "true" }],
+  ];
+  for (const [name, override] of cases) {
+    await t.test(name, async () => {
+      const ui = harness(); const { form } = ui;
+      const initialState = form.getAttribute("data-editor-initial-state");
+      form.title.value = "Submitted title";
+      form.checkbox.checked = true;
+      ui.submit();
+      assert.equal(ui.requests[0].listingId, "MS-CRAWL-0106");
+      form.title.value = "Newer unsaved title";
+      form.select.options[0].selected = false; form.select.options[1].selected = true;
+      await ui.respond(201, { kind: "listing_draft_saved", draft_revision: "b".repeat(64), listing_id: "MS-CRAWL-0106", draft_only: true, ...override });
+      assert.equal(form.title.value, "Newer unsaved title");
+      assert.equal(form.title.defaultValue, "Original title");
+      assert.equal(form.checkbox.checked, true);
+      assert.equal(form.checkbox.defaultChecked, false);
+      assert.equal(form.select.value, "new");
+      assert.equal(form.select.options[0].defaultSelected, true);
+      assert.equal(form.revision.value, "a".repeat(64));
+      assert.equal(form.revision.defaultValue, "a".repeat(64));
+      assert.equal(form.getAttribute("data-editor-initial-state"), initialState);
+      assert.equal(form.savebar.getAttribute("data-dirty"), "true");
+      assert.equal(form.status.getAttribute("data-state"), "error");
+      assert.match(form.status.textContent, /save could not be confirmed/);
+      assert.equal(form.hasAttribute("aria-busy"), false);
+      assert.equal(form.save.disabled, false);
+      assert.equal(form.resetButton.disabled, false);
+    });
+  }
+});
+
+test("listing acknowledgement identity is bound to the submitted request, not a changed form field", async () => {
+  const ui = harness(); const { form } = ui;
+  form.title.value = "Unsaved title";
+  ui.submit();
+  form.listingId.value = "MS-CRAWL-0165";
+  await ui.respond(200, { kind: "listing_draft_saved", draft_revision: "b".repeat(64), listing_id: "MS-CRAWL-0165", draft_only: true });
+  assert.equal(form.title.defaultValue, "Original title");
+  assert.equal(form.revision.value, "a".repeat(64));
+  assert.equal(form.status.getAttribute("data-state"), "error");
+  assert.equal(form.savebar.getAttribute("data-dirty"), "true");
 });
