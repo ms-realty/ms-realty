@@ -2,6 +2,8 @@ import { h, renderStaticElement } from "./react-static-html.mjs";
 import { humanizeIdentifier, labelsFor, localizedListingValue, localizedLocationValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
+import { SearchAssistantEntry, SearchAssistantDialog } from "./react-public-search-assistant.mjs";
+import { ListingMatchEntry, SearchAlternativesEntry, SearchEvidenceDialog } from "./react-public-search-evidence.mjs";
 
 function uiLabels(page) {
   return labelsFor(page.locale || page.lang || "en");
@@ -721,6 +723,8 @@ function shell(page, main) {
     h(MobileTaskNavigation, { key: "mobile-tasks", page, chrome }),
     h(SiteFooter, { key: "footer", chrome, labels, guides: page.body?.guides?.links || [] }),
     h(EnquiryDialog, { key: "enquiry", page, labels, copy: chrome.copy }),
+    h(SearchAssistantDialog, { key: "search-assistant", page }),
+    h(SearchEvidenceDialog, { key: "search-evidence", page }),
   ];
 }
 
@@ -751,7 +755,7 @@ function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
   };
 }
 
-function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs, priority = false }) {
+function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs, priority = false, page }) {
   const badge = cardBadge(card, labels, localeCode);
   const tone = toneFor(card.id);
   const imageCount = Number(card.image_count || 0);
@@ -850,6 +854,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       h(
         "nav",
         { className: "mk-pcard__actions", "aria-label": labels.searchResultActions },
+        page ? h(ListingMatchEntry, { page, listingId: card.id }) : null,
         h(
           "a",
           { className: "mk-btn mk-btn--secondary mk-btn--sm", href: card.actions.detail.href, "data-card-action": "detail" },
@@ -1318,6 +1323,7 @@ function HomeBody({ page }) {
         ),
         h(HeroSearch, { page, labels, chrome }),
       ),
+      h(SearchAssistantEntry, { page }),
     ),
     ),
     h("p", { className: "hp-photo-credit" }, "Sandanski · ", h("a", { href: "https://commons.wikimedia.org/wiki/File:Sandan1.JPG" }, "Bovlad62 / Wikimedia Commons"), " · ", h("a", { href: "https://creativecommons.org/licenses/by-sa/3.0/" }, "CC BY-SA 3.0"), english ? ", cropped" : ""),
@@ -2841,6 +2847,8 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-toolbar" },
+          !savedView ? h(SearchAssistantEntry, { page }) : null,
+          !savedView ? h(SearchAlternativesEntry, { page }) : null,
           h(
             "div",
             { className: "sr-results__head" },
@@ -2965,7 +2973,7 @@ function SearchBody({ page }) {
                 hidden: savedView ? true : undefined,
               },
               ...(page.cards || []).map((card, index) =>
-                h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "vertical", priority: index < 3 }),
+                h(SearchCard, { key: card.id, page, card, labels, localeCode: page.locale, orientation: "vertical", priority: index < 3 }),
               ),
             ),
         savedView
@@ -3022,6 +3030,17 @@ function LocationBody({ page }) {
   const searchPath = chrome?.nav?.find((item) => item.id === "buy")?.href || `/${page.locale}/search`;
   const allListingsHref = page.body.search_href || searchPath;
   const locationName = localizedLocationValue(page.locale, page.body.location);
+  const english = page.locale === "en";
+  const sandanski = page.body.location === "Sandanski";
+  const families = ["apartment", "house", "land", "commercial"];
+  const searchUrl = new URL(allListingsHref, "https://ms-realty.invalid");
+  const locationHref = (fields) => {
+    const url = new URL(searchUrl);
+    for (const [key, value] of Object.entries(fields)) url.searchParams.set(key, value);
+    return `${url.pathname}${url.search}`;
+  };
+  const offerName = (id) => chrome.nav?.find((item) => item.id === id)?.label || labels.search;
+  const familyName = (family) => english && family === "apartment" ? "Apartments" : english && family === "house" ? "Houses" : localizedSearchFilterValue(page.locale, "property_family", family);
   const forwardArrow = page.dir === "rtl" ? "arrow-left" : "arrow-right";
   const main = h(
     "main",
@@ -3030,44 +3049,53 @@ function LocationBody({ page }) {
       tabIndex: -1,
       "data-kind": "location",
       "data-react-public-ui": "location",
+      "data-atlas-public": "location",
       "data-location": page.body.location,
       "data-total-matches": page.body.listing_count,
       "data-list-first-mobile": "true",
     },
-    h(
-      "header",
-      { className: `loc-head${page.body.location === "Sandanski" ? " loc-head--photo" : ""}` },
-      h(
-        "div",
-        { className: "loc-head__in" },
-        h("h1", null, page.body.h1),
-        h("p", { className: "loc-head__count", "data-location-count": page.body.listing_count }, `${page.body.listing_count} ${labels.reviewedListings}`),
-        page.body.intro ? h("p", { className: "loc-head__intro" }, page.body.intro) : null,
-        h(Btn, { tag: "a", variant: "accent", href: "#location-listings" }, labels.browseAllListings),
-        context
-          ? h(
-              "div",
-              { className: "loc-context", "data-location-context": "true" },
-              h(Icon, { name: "file-check", size: 18 }),
-              h("p", null, `${context.summary} `, h("a", { href: context.href }, context.title)),
-            )
-          : null,
-        subAreas.length > 1
-          ? h(
-              "nav",
-              { className: "loc-areas", "aria-label": labels.areas, "data-location-areas": "true" },
-              ...subAreas.map((area) =>
-                h(
-                  "a",
-                  { key: area.id, className: "mk-tag mk-tag--outline mk-tag--interactive", href: area.href, "data-location-area": area.id },
-                  area.label,
-                  h("span", { className: "loc-areas__count" }, String(area.count)),
-                ),
-              ),
-            )
-          : null,
+    h("form", { className: "loc-search", action: searchUrl.pathname, method: "get", role: "search", "aria-label": labels.search },
+      ...[...searchUrl.searchParams].filter(([key]) => !["offer_type", "property_family", "price_max"].includes(key)).map(([key, value]) => h("input", { key, type: "hidden", name: key, value })),
+      h("label", null, h("span", null, labels.factLabels?.offer_type || labels.search),
+        h("select", { name: "offer_type", className: "mk-select__field", defaultValue: "sale" }, h("option", { value: "sale" }, offerName("buy")), h("option", { value: "rent" }, offerName("rent")))),
+      h("div", { className: "loc-search__place" }, h("span", null, labels.location), h("strong", null, locationName)),
+      h("label", null, h("span", null, labels.propertyType),
+        h("select", { name: "property_family", className: "mk-select__field", defaultValue: "" }, h("option", { value: "" }, labels.any), ...families.map((family) => h("option", { key: family, value: family }, familyName(family))))),
+      h("label", null, h("span", null, labels.priceMax), h("input", { name: "price_max", type: "number", min: "0", step: "any", inputMode: "decimal", className: "mk-input__field", placeholder: labels.any })),
+      h(Btn, { type: "submit", variant: "accent", iconStart: "search" }, labels.search),
+    ),
+    h("header", { className: "loc-hero" },
+      h("h1", null, english && sandanski ? "Sandanski." : page.body.h1, english && sandanski ? h("br") : null, english && sandanski ? "A place to make your own." : null),
+      h("p", null, english && sandanski ? "An inland spa town at the foot of Pirin. Get a feel for the place before you choose a property." : page.body.intro),
+    ),
+    sandanski ? h("figure", { className: "loc-panorama" },
+      h("img", { src: "/hero/sandanski-1280.webp", srcSet: "/hero/sandanski-640.webp 640w, /hero/sandanski-1280.webp 1280w", sizes: "(max-width: 760px) calc(100vw - 40px), calc(100vw - 128px)", width: 1280, height: 890, alt: english ? "Sandanski town and park" : locationName, fetchPriority: "high", decoding: "async" }),
+      h("figcaption", null, english ? "Sandanski town and park · area photograph supplied for this website" : locationName),
+    ) : null,
+    h("nav", { className: "loc-intents", "aria-label": labels.primaryActions },
+      h(Btn, { tag: "a", href: locationHref({ offer_type: "sale" }), variant: "accent", "data-location-intent": "sale" }, `${offerName("buy")} · ${locationName}`),
+      h(Btn, { tag: "a", href: locationHref({ offer_type: "rent" }), variant: "secondary", "data-location-intent": "rent" }, `${offerName("rent")} · ${locationName}`),
+    ),
+    h("section", { className: `loc-story${sandanski ? " loc-story--photo" : ""}`, "aria-label": labels.areas },
+      h("div", { className: "loc-story__copy" },
+        h("h2", null, english && sandanski ? "Start with the place. Then find your property." : labels.locationListings),
+        english && sandanski ? h("p", null, "Sandanski brings town life, parkland and the Pirin foothills into the same picture. Explore the area, then narrow your search to the property that suits you.") : null,
+        context ? h("div", { className: "loc-context", "data-location-context": "true" }, h("p", null, context.summary), h("a", { href: context.href }, context.title)) : null,
+        h("div", { className: "loc-story__actions" },
+          h(Btn, { tag: "a", variant: "accent", href: "#location-listings" }, english ? "Explore properties" : labels.browseAllListings),
+          chrome?.contact?.path ? h(Btn, { tag: "a", variant: "ghost", href: chrome.contact.path }, english ? "Ask about the area" : chrome.contact.label) : null,
+        ),
       ),
-      page.body.location === "Sandanski" ? h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }) : null,
+      sandanski ? h("figure", null,
+        h(SandanskiPhotograph, { className: "loc-story__photo", localeCode: page.locale }),
+        h("figcaption", null, "Sandanski · ", h("a", { href: "https://commons.wikimedia.org/wiki/File:Sandan1.JPG" }, "Bovlad62 / Wikimedia Commons"), " · ", h("a", { href: "https://creativecommons.org/licenses/by-sa/3.0/" }, "CC BY-SA 3.0"), english ? ", cropped" : ""),
+      ) : null,
+    ),
+    h("section", { className: "loc-types", "aria-label": labels.propertyType },
+      h("h2", null, english ? "What would you like to find here?" : labels.propertyType),
+      h("nav", { "aria-label": labels.propertyType }, ...families.map((family) => h("a", { key: family, href: locationHref({ property_family: family }), "data-location-family": family }, familyName(family), h(Icon, { name: forwardArrow, size: 18 })))),
+      english ? h("p", null, "Choose Buy or Rent above. Confirm the precise location of a property with the agency before arranging a visit.") : null,
+      subAreas.length > 1 ? h("nav", { className: "loc-areas", "aria-label": labels.areas, "data-location-areas": "true" }, ...subAreas.map((area) => h("a", { key: area.id, className: "mk-tag mk-tag--outline mk-tag--interactive", href: area.href, "data-location-area": area.id }, area.label, h("span", { className: "loc-areas__count" }, String(area.count))))) : null,
     ),
     h(
       "section",
@@ -3075,7 +3103,7 @@ function LocationBody({ page }) {
       h(
         "div",
         { className: "loc-sec__head" },
-        h("h2", null, labels.locationListings),
+        h("div", null, h("h2", null, labels.locationListings), h("p", { className: "loc-count", "data-location-count": page.body.listing_count }, `${page.body.listing_count} ${labels.reviewedListings}`)),
         cards.length ? h(Btn, { tag: "a", variant: "secondary", iconEnd: forwardArrow, href: allListingsHref, "data-location-all": "true" }, labels.browseAllListings) : null,
       ),
       cards.length
@@ -3093,7 +3121,7 @@ function LocationBody({ page }) {
             h(
               "div",
               { className: "mk-empty__actions" },
-              h(Btn, { tag: "a", variant: "primary", size: "lg", iconStart: "search", href: searchPath }, labels.browseAllListings),
+              h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "search", href: searchPath }, labels.browseAllListings),
               chrome?.contact?.path
                 ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: chrome.contact.path }, chrome.contact.label)
                 : null,
@@ -3943,7 +3971,7 @@ function ListingBody({ page }) {
       "div",
       { className: "ld" },
       h("div", { className: "ld-topbar" }, crumbs, backLink("-desktop")),
-      h("div", { className: "ld-hero" }, h("div", { className: "ld-hero__copy" }, header, availabilityWitness, primaryActions), galleryShell),
+      h("div", { className: "ld-hero" }, h("div", { className: "ld-hero__copy" }, header, availabilityWitness, primaryActions, h(ListingMatchEntry, { page, listingId: facts.id })), galleryShell),
       factsBar,
       photoViewer,
       h(
@@ -4181,6 +4209,7 @@ function phoneAction(channel, variant = "secondary") {
 
 function SellerBody({ page }) {
   const labels = uiLabels(page);
+  const english = page.locale === "en";
   const valuation = page.body.valuation;
   const photoUpload = page.body.photo_upload;
   const channels = page.body.contact_channels;
@@ -4205,22 +4234,39 @@ function SellerBody({ page }) {
       tabIndex: -1,
       "data-kind": "seller",
       "data-react-public-ui": "seller",
+      "data-atlas-public": "seller",
       "data-phone-first": "true",
       "data-no-public-avm": "true",
       "data-broker-review-required": "true",
       "data-min-touch-target": "44",
-      className: "pg-narrow sell-page",
+      className: "pg-narrow sell-page atlas-enquiry",
     },
-    h(
-      "section",
-      { className: "page-head sell-head", "aria-label": labels.sellerValuation, "data-seller-valuation-flow": "broker_callback" },
-      h("div", { className: "public-band__copy" },
-      h("h1", null, page.body.h1),
-      h("p", null, page.body.intro),
-      h("p", { className: "sell-promise", "data-seller-promise": "true" }, h(Icon, { name: "shield-check", size: 18 }), h("span", null, labels.sellerPromise)),
-      valuation ? h(Btn, { tag: "a", variant: "accent", href: "#seller-enquiry" }, labels.propertyDetails) : channels ? phoneAction(channels.phone, "accent") : null,
-      // Without a submittable form there is no flow to track, so the progress
-      // indicator would promise a stepper the visitor cannot use.
+    h("header", { className: "page-head enquiry-head", "data-seller-valuation-flow": "broker_callback" },
+      h("h1", null, english ? ["Your property.", h("br", { key: "break" }), "Let’s talk about what’s next."] : page.body.h1),
+      h("p", null, english ? "Thinking of selling in Sandanski or the region? Start with a few details about your property." : page.body.intro),
+    ),
+    h("div", { className: "enquiry-columns" },
+      h("aside", { className: "enquiry-context" },
+        h("figure", null,
+          h(SandanskiPhotograph, { className: "enquiry-photo", localeCode: page.locale }),
+          h("figcaption", null, "Sandanski · ", h("a", { href: "https://commons.wikimedia.org/wiki/File:Sandan1.JPG" }, "Bovlad62 / Wikimedia Commons"), " · ", h("a", { href: "https://creativecommons.org/licenses/by-sa/3.0/" }, "CC BY-SA 3.0")),
+        ),
+        h("h2", null, english ? "Begin with what you know." : labels.sellerStepOneQuestion),
+        h("p", { className: "sell-promise", "data-seller-promise": "true" }, english ? "Property type, area and location are a useful start. Add a message about what you have in mind." : labels.sellerPromise),
+        h("p", null, english ? "This is an enquiry. Sending it does not publish your property." : labels.sellerNextThreeText),
+      ),
+    valuation
+      ? h(
+          "form",
+          {
+            id: "seller-enquiry",
+            className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-form",
+            method: valuation.method || "POST",
+            action: valuation.endpoint,
+            "data-lead-type": "seller",
+            "data-seller-intake": "true",
+            "data-seller-step": "1",
+          },
       valuation
         ? h(
             "ol",
@@ -4235,21 +4281,6 @@ function SellerBody({ page }) {
             ),
           )
         : null,
-      ),
-      h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }),
-    ),
-    valuation
-      ? h(
-          "form",
-          {
-            id: "seller-enquiry",
-            className: "mk-card mk-card--elevated mk-card--pad-lg ct-form sell-form",
-            method: valuation.method || "POST",
-            action: valuation.endpoint,
-            "data-lead-type": "seller",
-            "data-seller-intake": "true",
-            "data-seller-step": "1",
-          },
           h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
           h("input", { type: "hidden", name: "intent", defaultValue: valuation.payload.intent }),
           h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
@@ -4285,7 +4316,7 @@ function SellerBody({ page }) {
                   ...propertyTypes.map(([value, option]) => h("option", { key: value, value }, option)),
                 ),
               ),
-              h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
+              h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", step: "any", inputMode: "decimal" })),
               h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
             ),
             h(
@@ -4359,6 +4390,7 @@ function SellerBody({ page }) {
           h("p", null, page.body.form_unavailable),
           channels ? phoneAction(channels.phone, "secondary") : null,
         ),
+    ),
     // The one photo-upload path on the page. It cannot live inside the intake
     // form - forms do not nest, and a seller who already holds a reference must
     // be able to send photos even when the intake form is switched off - so it
@@ -4517,6 +4549,7 @@ function SellerBody({ page }) {
 
 function ContactBody({ page }) {
   const labels = uiLabels(page);
+  const english = page.locale === "en";
   const chrome = page.chrome;
   const callback = page.body.callback;
   const channels = page.body.contact_channels;
@@ -4529,35 +4562,36 @@ function ContactBody({ page }) {
   ];
   const main = h(
     "main",
-    { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
-    h("div", { className: "page-head ct-page__head" },
-      h("div", { className: "public-band__copy" },
-        h("h1", null, page.body.h1), h("p", null, page.body.intro),
-        callback ? h(Btn, { tag: "a", variant: "accent", href: "#contact-form" }, labels.contactFormTitle) : channels ? phoneAction(channels.phone, "accent") : null,
-      ),
-      h(SandanskiPhotograph, { className: "public-band__photo", localeCode: page.locale }),
+    { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-atlas-public": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page atlas-enquiry" },
+    h("header", { className: "page-head enquiry-head" },
+      h("h1", null, english ? ["A property question?", h("br", { key: "break" }), "Start a conversation."] : page.body.h1),
+      h("p", null, english ? "Buying, renting or selling. Tell us what you have in mind." : page.body.intro),
     ),
     h(
       "div",
-      { className: "ct-page__cols" },
+      { className: "ct-page__cols enquiry-columns" },
       h(
         "div",
-        { className: "ct-side" },
+        { className: "ct-side enquiry-context" },
         channels
           ? h(
               "section",
               { className: "ct-section", "aria-labelledby": "ct-channels-title", "data-contact-channels": "true" },
               h("h2", { id: "ct-channels-title" }, labels.callOrMessage),
+              h("a", { className: "ct-direct-phone", href: channels.phone.href }, channels.phone.label),
               h(
                 "div",
                 { className: "channel-row" },
-                h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: channels.phone.href }, channels.phone.label),
                 channels.whatsapp ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.whatsapp.href }, channels.whatsapp.label) : null,
                 channels.viber ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: channels.viber.href }, channels.viber.label) : null,
-                channels.email ? h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: channels.email.href }, channels.email.label) : null,
               ),
             )
           : null,
+        channels?.email ? h("a", { className: "ct-direct-email", href: channels.email.href }, channels.email.href.replace(/^mailto:/, "")) : null,
+        h("figure", null,
+          h(SandanskiPhotograph, { className: "enquiry-photo", localeCode: page.locale }),
+          h("figcaption", null, english ? "Sandanski · local area photograph, not our office. " : "Sandanski · ", h("a", { href: "https://commons.wikimedia.org/wiki/File:Sandan1.JPG" }, "Bovlad62 / Wikimedia Commons"), " · ", h("a", { href: "https://creativecommons.org/licenses/by-sa/3.0/" }, "CC BY-SA 3.0")),
+        ),
         offices.length
           ? h(
               "section",

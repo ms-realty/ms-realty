@@ -85,7 +85,7 @@ test("seller page keeps its intake contract and adds the promise, step questions
   const html = renderReactPublicBody(page);
   assert.match(html, /data-seller-intake="true" data-seller-step="1"/);
   assert.match(html, /data-seller-promise="true"/);
-  assert.match(html, /not an automated estimate/);
+  assert.match(html, /This is an enquiry\. Sending it does not publish your property\./);
   assert.match(html, /<p class="sell-form__step">Step 1 of 3<\/p>/);
   assert.match(html, /<p class="sell-form__step">Step 3 of 3<\/p>/);
   assert.match(html, /data-seller-step-title="true">Tell us about your property</);
@@ -127,8 +127,8 @@ test("contact page lists the single Sandanski office as an object, channels, and
   assert.match(html, /name="contact.phone" type="tel" required/);
   assert.match(html, /name="request_details.callback_time"/);
   assert.match(html, /website_contact_callback/);
-  assert.match(html, /class="mk-btn mk-btn--accent[^\"]*" href="#contact-form"/);
-  assert.match(html, /class="mk-btn mk-btn--secondary mk-btn--lg" href="tel:\+359879696870"/);
+  assert.match(html, /class="ct-page__cols enquiry-columns"/);
+  assert.match(html, /class="ct-direct-phone" href="tel:\+359879696870"/);
   assert.doesNotMatch(html, /ct-office__ph/);
   const he = renderContactPage({ registry, localeCode: "he", leadWritesDisabled: false });
   assert.equal(he.body.offices[0].name, "סנדנסקי");
@@ -289,8 +289,6 @@ test("the 404 page carries a working search form that needs no JavaScript", () =
 
 test("interactive parts of the new pages declare hover, focus, disabled and current states", () => {
   const states = [
-    /\.hp-resort:hover \{/,
-    /\.hp-resort:focus-visible \{ outline: none; box-shadow: var\(--shadow-focus\)/,
     /\.ct-office__links a:hover \{/,
     /\.ct-office__links a:focus-visible \{/,
     /\.guide-toc a:hover \{/,
@@ -302,7 +300,7 @@ test("interactive parts of the new pages declare hover, focus, disabled and curr
     /\.ct-form \.mk-btn\[data-loading\] \{/,
     /\.ct-form :disabled \{/,
     /\.sell-form__pending \.mk-btn:disabled \{/,
-    /\.hp-rail-empty,\n\.hp-featured \[data-featured-empty\] \{/,
+    /\.hp-featured \[data-featured-empty\] \{/,
     /\.sell-steps li\[aria-current="step"\] \{/,
     /\.sell-steps li\[data-complete="true"\] \{/,
   ];

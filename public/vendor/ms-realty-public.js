@@ -2068,7 +2068,7 @@
       }
     }
     function currentStepIsValid() {
-      var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
+      var fields = panels[currentIndex].querySelectorAll("input, select, textarea");
       for (var i = 0; i < fields.length; i += 1) {
         if (fields[i].checkValidity()) continue;
         // Mark the field so it also reads as an error visually, not only in
@@ -2079,6 +2079,11 @@
       }
       return true;
     }
+    form.addEventListener("invalid", function (event) {
+      var panel = event.target.closest("[data-seller-step]");
+      var index = Array.prototype.indexOf.call(panels, panel);
+      if (index >= 0 && index !== currentIndex) showStep(index, false);
+    }, true);
     form.addEventListener("input", function (event) {
       var field = event.target;
       if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {
@@ -3071,6 +3076,223 @@
       });
     });
   }
+  (function initPublicSearchAssistant() {
+  var dialog = document.querySelector("[data-search-assistant]");
+  if (!dialog || typeof dialog.showModal !== "function") return;
+  var copy = JSON.parse(dialog.dataset.copy), allowed = JSON.parse(dialog.dataset.fields);
+  var words = dialog.querySelector("[data-assistant-words]"), review = dialog.querySelector("[data-assistant-review]");
+  var text = words.elements.text, status = dialog.querySelector("[data-assistant-status]");
+  var apply = dialog.querySelector("[data-assistant-apply]"), unresolved = dialog.querySelector("[data-assistant-unresolved]");
+  var submit = words.querySelector('[type="submit"]'), check = review.querySelector('[type="submit"]');
+  var fields = Array.from(review.querySelectorAll("[data-assistant-field]"));
+  var generation = 0, controller = null, proposal = null, origin = "", opener = null, edited = false, reviewed = new Set();
+  var filterForms = Array.from(document.querySelectorAll("[data-hero-search], [data-search-filter-form]")), lastEditedForm = null;
+  var initialValues = new Map();
+  filterForms.forEach(function (form) {
+    var initial = {}; new FormData(form).forEach(function (value, key) { initial[key] = value; }); initialValues.set(form, initial);
+    ["input", "change"].forEach(function (event) { form.addEventListener(event, function () { lastEditedForm = form; }); });
+  });
+  function filterForm() { return lastEditedForm || filterForms.find(function (form) { return form.getClientRects().length; }) || filterForms[0]; }
+  function current() {
+    var params = new URLSearchParams(window.location.search), form = filterForm(), result = {};
+    params.forEach(function (value, key) { if (allowed.indexOf(key) >= 0 || key === "search_intent") result[key] = value; });
+    if (form) new FormData(form).forEach(function (value, key) {
+      if (allowed.indexOf(key) >= 0 && typeof value === "string") {
+        // A scalar form projection must not replace an unchanged canonical multi-select.
+        if (result.search_intent && initialValues.get(form)[key] === value) return;
+        if (value !== "" || result.search_intent || Object.prototype.hasOwnProperty.call(result, key)) result[key] = value;
+      }
+    });
+    return result;
+  }
+  function invalidate(clearReview) {
+    generation += 1;
+    if (controller) controller.abort();
+    controller = null; apply.disabled = true; submit.disabled = false; check.disabled = false;
+    dialog.removeAttribute("aria-busy");
+    if (clearReview) { proposal = null; review.hidden = true; unresolved.hidden = true; }
+  }
+  function add(parent, tag, value) {
+    var node = document.createElement(tag); node.textContent = value; parent.appendChild(node); return node;
+  }
+  function safeProposal(value) {
+    if (typeof value !== "string" || value.charAt(0) !== "/" || value.slice(0, 2) === "//") return null;
+    try {
+      var url = new URL(value, window.location.origin);
+      return url.origin === window.location.origin && url.pathname === dialog.dataset.searchPath ? url.href : null;
+    } catch (_) { return null; }
+  }
+  function fill(result) {
+    if (!result.proposed_intent && result.criteria) result = Object.assign({}, result, { proposed_intent: result.criteria });
+    proposal = result; edited = false; review.hidden = !result.proposed_intent;
+    review.querySelector("h3").textContent = result.proposed_url ? copy.ready : copy.review;
+    fields.forEach(function (field) {
+      var value = result.proposed_intent && result.proposed_intent[field.name];
+      if (field.tagName === "SELECT" && Array.isArray(value) && value.length && !Array.from(field.options).some(function (row) { return row.value === value.join(", "); })) {
+        var option = Array.from(field.options).find(function (row) { return row.dataset.multiple === "true"; });
+        if (!option) { option = document.createElement("option"); option.dataset.multiple = "true"; field.appendChild(option); }
+        option.value = value.join(", "); option.textContent = value.join(", ");
+      }
+      field.value = Array.isArray(value) ? value.join(", ") : value == null ? "" : String(value);
+    });
+    var list = unresolved.querySelector("ul"); list.replaceChildren();
+    (result.unresolved || []).forEach(function (item) { add(list, "li", item.text); });
+    (result.ambiguities || []).forEach(function (item) {
+      var labels = (item.required_fields || []).map(function (key) { var field = fields.find(function (node) { return node.name === key; }); return field && field.dataset.label; }).filter(Boolean);
+      add(list, "li", (labels.length ? labels.join(", ") + ": " : "") + copy.clarify + (item.options && item.options.length ? " " + item.options.map(function (v) { return Array.isArray(v) ? v.join(", ") : String(v); }).join(" / ") : ""));
+    });
+    unresolved.hidden = !list.children.length;
+    // Additional criteria stay in the canonical proposal even when they have no editor here.
+    var preserved = dialog.querySelector("[data-assistant-preserved]"); preserved.replaceChildren();
+    Object.entries(result.proposed_intent || {}).forEach(function (row) {
+      var key = row[0], value = row[1];
+      if (["schema_version", "locale", "mandatory_filters", "price_currency", "page", "page_size", "sort"].indexOf(key) >= 0 || fields.some(function (f) { return f.name === key; }) || value == null || value === "" || (Array.isArray(value) && !value.length)) return;
+      add(preserved, "dt", key.replace(/_/g, " ")); add(preserved, "dd", Array.isArray(value) ? value.join(", ") : typeof value === "object" ? JSON.stringify(value) : String(value));
+    });
+    status.textContent = result.proposed_url ? result.message : copy.clarify;
+    apply.disabled = !(result.applied === false && result.requires_confirmation === true && safeProposal(result.proposed_url));
+  }
+  async function request(input, reviewedFields) {
+    invalidate(false);
+    var own = generation, query = text.value.trim(), snapshot = JSON.stringify(current());
+    submit.disabled = true; check.disabled = true; status.textContent = copy.loading;
+    dialog.setAttribute("aria-busy", "true"); controller = new AbortController();
+    try {
+      var response = await fetch("/api/search/interpret", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, cache: "no-store", signal: controller.signal, body: JSON.stringify(Object.assign({ locale: dialog.dataset.locale, text: query, current: input }, reviewedFields && reviewedFields.length ? { reviewed_fields: reviewedFields } : {})) });
+      var body = await response.json();
+      if (own !== generation) return;
+      if (snapshot !== JSON.stringify(current())) { invalidate(true); status.textContent = copy.changed; return; }
+      if (!response.ok) { status.textContent = response.status === 429 ? copy.rate : body.message || copy.failure; return; }
+      if (body.kind !== "search_interpretation" || body.locale !== dialog.dataset.locale || body.original_query !== query || body.applied !== false || body.requires_confirmation !== true || !Array.isArray(body.unresolved) || !Array.isArray(body.ambiguities)) throw new Error("invalid_receipt");
+      origin = snapshot; fill(body);
+    } catch (error) {
+      if (own === generation && error.name !== "AbortError") status.textContent = copy.failure;
+    } finally {
+      if (own === generation) { controller = null; submit.disabled = false; check.disabled = false; dialog.removeAttribute("aria-busy"); }
+    }
+  }
+  document.querySelectorAll("[data-search-assistant-open]").forEach(function (button) {
+    button.hidden = false;
+    button.addEventListener("click", function () {
+      opener = button; invalidate(true); reviewed.clear(); status.textContent = "";
+      if (!text.value) text.value = new URLSearchParams(window.location.search).get("nl_context") || "";
+      dialog.showModal(); text.focus();
+    });
+  });
+  dialog.querySelector("[data-assistant-close]").addEventListener("click", function () { dialog.close(); });
+  dialog.addEventListener("close", function () { invalidate(true); if (opener) opener.focus(); });
+  text.addEventListener("input", function () { invalidate(true); reviewed.clear(); status.textContent = ""; });
+  words.addEventListener("submit", function (event) {
+    event.preventDefault(); if (controller || !words.reportValidity()) return;
+    var form = filterForm(); if (form && !form.checkValidity()) { status.textContent = copy.changed; return; }
+    reviewed.clear(); request(current());
+  });
+  function fieldChanged(event) {
+    if (!fields.includes(event.target)) return;
+    reviewed.add(event.target.name); edited = true; invalidate(false); status.textContent = copy.checkChanges;
+  }
+  review.addEventListener("input", fieldChanged);
+  review.addEventListener("change", fieldChanged);
+  review.addEventListener("submit", function (event) {
+    event.preventDefault(); if (controller || !proposal || !review.reportValidity()) return;
+    if (origin !== JSON.stringify(current())) { invalidate(true); status.textContent = copy.changed; return; }
+    var intent = Object.assign({}, proposal.proposed_intent);
+    fields.forEach(function (field) {
+      intent[field.name] = ["property_families", "location_ids"].indexOf(field.name) >= 0 ? field.value.split(",").map(function (v) { return v.trim(); }).filter(Boolean) : field.value === "" ? null : field.type === "number" ? Number(field.value) : field.value;
+    });
+    request({ search_intent: intent }, Array.from(reviewed));
+  });
+  apply.addEventListener("click", function () {
+    if (apply.disabled || edited || !proposal) return;
+    if (origin !== JSON.stringify(current())) { invalidate(true); status.textContent = copy.changed; return; }
+    var href = safeProposal(proposal.proposed_url); if (href) window.location.assign(href);
+  });
+})();
+  (function initPublicSearchEvidence() {
+  var dialog=document.querySelector('[data-search-evidence]'); if(!dialog || typeof dialog.showModal!=='function')return;
+  var copy=JSON.parse(dialog.dataset.copy),labels=JSON.parse(dialog.dataset.labels),allowed=JSON.parse(dialog.dataset.fields),base=JSON.parse(dialog.dataset.criteria);
+  var result=dialog.querySelector('[data-evidence-result]'),status=dialog.querySelector('[data-evidence-status]'),changeForm=dialog.querySelector('[data-evidence-change]');
+  var retry=dialog.querySelector('[data-evidence-retry]'),apply=dialog.querySelector('[data-evidence-apply]'),wishes=dialog.querySelector('[data-evidence-wishes]');
+  var mode='',listingId='',opener=null,generation=0,controller=null,proposal=null,sourceHash=null,sourceChanged=false,snapshot='',lastChange=null,changedForm=null,listingCriteria={};
+  var forms=Array.from(document.querySelectorAll('[data-search-filter-form]')),initial=new Map();
+  forms.forEach(function(form){var values={};new FormData(form).forEach(function(v,k){values[k]=v;});initial.set(form,values);['input','change'].forEach(function(event){form.addEventListener(event,function(){changedForm=form;if(dialog.open){cancel();result.replaceChildren();status.textContent=copy.changed;}});});});
+  function criteria(){
+    var value=dialog.dataset.kind==='listing'?Object.assign({},listingCriteria):JSON.parse(JSON.stringify(base));
+    if(dialog.dataset.kind==='listing')return value;
+    var form=changedForm||forms.find(function(f){return f.getClientRects().length;})||forms[0];
+    if(form)new FormData(form).forEach(function(v,k){if(allowed.includes(k)&&typeof v==='string'&&initial.get(form)[k]!==v)value[k]=v;});
+    return value;
+  }
+  function textValue(v){return v==null||v===''||(Array.isArray(v)&&!v.length)?copy.any:Array.isArray(v)?v.join(', '):typeof v==='object'?Object.values(v).map(textValue).join(' · '):String(v);}
+  function label(key){return labels[key]||key.replace(/_/g,' ');}
+  function add(parent,tag,text){var node=document.createElement(tag);if(text!==undefined)node.textContent=text;parent.appendChild(node);return node;}
+  function cancel(){generation++;if(controller)controller.abort();controller=null;proposal=null;apply.disabled=true;retry.disabled=false;changeForm.querySelector('[type="submit"]').disabled=false;dialog.removeAttribute('aria-busy');}
+  function safeLink(raw,searchOnly){try{var u=new URL(raw,location.origin);if(!['http:','https:'].includes(u.protocol))return null;if(searchOnly&&(u.origin!==location.origin||u.pathname!==dialog.dataset.searchPath))return null;return u.href;}catch(_){return null;}}
+  function showCriteria(value){
+    var dl=dialog.querySelector('[data-evidence-criteria]');dl.replaceChildren();var intent=value.search_intent||value;
+    if(typeof intent==='string'){try{intent=JSON.parse(intent);}catch(_){intent={};}}
+    Object.entries(intent).forEach(function(row){if(['schema_version','locale','mandatory_filters','page','page_size','sort','price_currency'].includes(row[0])||row[1]==null||row[1]===''||(Array.isArray(row[1])&&!row[1].length))return;add(dl,'dt',label(row[0]));add(dl,'dd',textValue(row[1]));});
+    if(value.nl_context){add(dl,'dt',copy.words);add(dl,'dd',value.nl_context);}
+    wishes.hidden=!value.nl_context;wishes.textContent=copy.wishes+(value.nl_context?' '+value.nl_context:'');
+  }
+  function sourceDetails(source,parent){
+    if(!source)return;var details=add(parent,'details'),summary=add(details,'summary',copy.source),dl=add(details,'dl');
+    [[copy.reviewer,source.reviewer],[copy.reviewed,source.reviewed_at],[copy.version,source.source_hash]].forEach(function(row){if(row[1]){add(dl,'dt',row[0]);add(dl,'dd',row[1]);}});
+    var href=safeLink(source.canonical_url,false);if(href){var a=add(details,'a',copy.readListing);a.href=href;}
+  }
+  function renderMatch(body){
+    if(['unavailable','source_changed'].includes(body.status)){sourceChanged=body.status==='source_changed';status.textContent=body.status==='source_changed'?copy.sourceChanged:body.message||copy.failure;sourceDetails(body.source,result);var href=opener&&safeLink(opener.dataset.listingHref,false);if(href){var link=add(result,'a',copy.readListing);link.href=href;}return;}
+    if(body.status==='no_criteria'){status.textContent=copy.noCriteria;var a=add(result,'a',copy.entry);a.href=dialog.dataset.searchPath;return;}
+    var statuses={matched:copy.matched,not_matched:copy.different,unknown:copy.unknown,unsupported:copy.unsupported};
+    body.comparisons.forEach(function(row){var section=add(result,'section');add(section,'h3',label(row.field));add(section,'p',copy.criteria+': '+textValue(row.requested));add(section,'strong',statuses[row.status]||copy.unsupported);if(row.evidence)add(section,'p',textValue(row.evidence.value));if(row.reason==='literal_words_only')add(section,'p',copy.literal);if(row.reason==='stated_area_only')add(section,'p',copy.areaOnly);});
+    sourceDetails(body.source,result);sourceHash=body.source&&body.source.source_hash;sourceChanged=false;
+    status.textContent='';
+  }
+  function renderAlternative(body){
+    status.textContent=body.status==='unavailable'?(body.message||copy.failure):body.status==='no_supported_alternative'?copy.noAlternative:'';
+    if(body.status==='unavailable')return;
+    body.alternatives.forEach(function(item){
+      var section=add(result,'section');add(section,'h3',label(item.change.field));add(section,'p',copy.before+': '+textValue(item.change.before)+' → '+copy.after+': '+textValue(item.change.after));
+      if(typeof item.matching_reviewed_listings==='number')add(section,'p',String(item.matching_reviewed_listings)+' · '+copy.countScope);
+      (item.source_examples||[]).forEach(function(source){var href=safeLink(source.canonical_url,false);if(href){var a=add(section,'a',source.listing_id);a.href=href;}});
+      if(body.status==='preview'){
+        if(body.alternatives.length===1 && item.requires_confirmation===true && item.applied===false && safeLink(item.proposed_url,true)){proposal=item;apply.disabled=false;}
+      }else{var button=add(section,'button',copy.preview);button.type='button';button.className='mk-btn mk-btn--secondary';button.addEventListener('click',function(){request({field:item.change.field,value:item.change.after});});}
+    });
+  }
+  async function request(change){
+    cancel();result.replaceChildren();var activeForm=changedForm||forms.find(function(f){return f.getClientRects().length;})||forms[0];if(activeForm&&!activeForm.checkValidity()){status.textContent=copy.changed;return;}var own=generation,current=criteria(),ownListing=listingId; snapshot=JSON.stringify(current);lastChange=change||null;
+    showCriteria(current);status.textContent=copy.loading;retry.disabled=true;changeForm.querySelector('[type="submit"]').disabled=true;dialog.setAttribute('aria-busy','true');controller=new AbortController();
+    var input={locale:dialog.dataset.locale,criteria:current};if(mode==='match'){input.listingId=listingId;if(sourceHash)input.sourceHash=sourceHash;}else if(change)input.change=change;
+    try{
+      var response=await fetch(mode==='match'?'/api/listings/match':'/api/search/alternatives',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify(input)});var body=await response.json();
+      if(own!==generation)return;if(snapshot!==JSON.stringify(criteria())||ownListing!==listingId){cancel();status.textContent=copy.changed;return;}
+      if(!response.ok){status.textContent=response.status===429?copy.rate:body.message||copy.failure;return;}
+      if(body.kind!==(mode==='match'?'listing_match_explanation':'search_alternatives')||body.locale!==dialog.dataset.locale||body.applied!==false)throw new Error('invalid_receipt');
+      showCriteria({search_intent:body.criteria,nl_context:current.nl_context||body.original_query||''});
+      if(mode==='match'){if(body.listing_id!==listingId||!Array.isArray(body.comparisons)||(body.source&&body.source.listing_id!==listingId)||body.comparisons.some(function(row){return row.evidence&&(!body.source||row.evidence.listing_id!==listingId||row.evidence.source_hash!==body.source.source_hash);}))throw new Error('wrong_listing');renderMatch(body);}else{if(!Array.isArray(body.alternatives)||body.result_count!==null||body.count_scope!=='current_human_approved_source_records')throw new Error('invalid_count');renderAlternative(body);}
+    }catch(error){if(own===generation&&error.name!=='AbortError')status.textContent=copy.failure;}
+    finally{if(own===generation){controller=null;retry.disabled=false;changeForm.querySelector('[type="submit"]').disabled=false;dialog.removeAttribute('aria-busy');}}
+  }
+  function loadListingContext(id){
+    try{var saved=JSON.parse(sessionStorage.getItem('ms-realty:match-context')||'null');if(saved&&saved.listingId===id&&saved.locale===dialog.dataset.locale&&Date.now()-saved.at<1800000)return saved.criteria;}catch(_){}
+    var params=new URLSearchParams(location.search),value={};params.forEach(function(v,k){if(allowed.includes(k)||['search_intent','nl_context'].includes(k))value[k]=v;});return value;
+  }
+  document.querySelectorAll('[data-evidence-open]').forEach(function(button){button.hidden=false;button.addEventListener('click',function(){
+    cancel();opener=button;mode=button.dataset.evidenceOpen;listingId=button.dataset.listingId||'';sourceHash=null;sourceChanged=false;listingCriteria=mode==='match'&&dialog.dataset.kind==='listing'?loadListingContext(listingId):{};
+    dialog.querySelector('#pse-title').textContent=mode==='match'?copy.matchTitle:copy.alternativesTitle;dialog.querySelector('[data-evidence-note]').textContent=mode==='match'?copy.matchNote:copy.alternativesNote;dialog.querySelector('[data-evidence-reference]').textContent=listingId;
+    var property=dialog.querySelector('[data-evidence-property]');
+    if(property){property.replaceChildren();property.hidden=true;var card=Array.from(document.querySelectorAll('article[data-listing-id]')).find(function(node){return node.dataset.listingId===listingId;})||(dialog.dataset.kind==='listing'?document.querySelector('main[data-kind="listing"]'):null);if(mode==='match'&&card){property.hidden=false;var title=card.querySelector('h1,h2,h3'),photo=card.querySelector('img');if(photo&&photo.currentSrc){var image=add(property,'img');image.src=photo.currentSrc;image.alt=photo.alt||'';}if(title){var heading=add(property,'h3',title.textContent);heading.lang=title.lang||card.getAttribute('data-content-language')||dialog.dataset.locale;}add(property,'p',listingId);}}
+    changeForm.hidden=mode!=='alternatives';apply.hidden=mode!=='alternatives';dialog.showModal();retry.focus();request();
+  });});
+  document.addEventListener('click',function(event){var anchor=event.target.closest&&event.target.closest('a');var card=anchor&&anchor.closest('[data-search-card][data-listing-id]');if(!card||dialog.dataset.kind!=='search')return;try{sessionStorage.setItem('ms-realty:match-context',JSON.stringify({listingId:card.dataset.listingId,locale:dialog.dataset.locale,criteria:criteria(),at:Date.now()}));}catch(_){} });
+  dialog.querySelector('[data-evidence-close]').addEventListener('click',function(){dialog.close();});dialog.addEventListener('close',function(){cancel();if(opener)opener.focus();});
+  retry.addEventListener('click',function(){if(sourceChanged)sourceHash=null;request(lastChange);});
+  changeForm.elements.field.addEventListener('change',function(){cancel();var field=changeForm.elements.field.value,input=changeForm.elements.value,family=changeForm.elements.family;family.hidden=field!=='property_families';family.disabled=family.hidden;input.hidden=!family.hidden;input.disabled=input.hidden;input.type=field==='location_ids'?'text':'number';input.required=field!=='location_ids';input.step=field.startsWith('bedrooms')?'1':'any';input.value='';status.textContent=copy.oneChange;});
+  changeForm.addEventListener('input',function(){cancel();lastChange=null;status.textContent=copy.oneChange;});
+  changeForm.addEventListener('submit',function(event){event.preventDefault();if(!changeForm.reportValidity())return;var field=changeForm.elements.field.value,value=field==='property_families'?changeForm.elements.family.value:changeForm.elements.value.value;if(['property_families','location_ids'].includes(field))value=value?value.split(',').map(function(x){return x.trim();}).filter(Boolean):[];else value=Number(value);request({field:field,value:value});});
+  apply.addEventListener('click',function(){if(apply.disabled||!proposal)return;if(snapshot!==JSON.stringify(criteria())){cancel();status.textContent=copy.changed;return;}var href=safeLink(proposal.proposed_url,true);if(href)location.assign(href);});
+})();
   initListingSourceQuestions();
   initStartFlow();
   initCompareLinks();

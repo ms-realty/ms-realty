@@ -2088,7 +2088,7 @@ ${THEME_SWITCH_JS}
       }
     }
     function currentStepIsValid() {
-      var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
+      var fields = panels[currentIndex].querySelectorAll("input, select, textarea");
       for (var i = 0; i < fields.length; i += 1) {
         if (fields[i].checkValidity()) continue;
         // Mark the field so it also reads as an error visually, not only in
@@ -2099,6 +2099,11 @@ ${THEME_SWITCH_JS}
       }
       return true;
     }
+    form.addEventListener("invalid", function (event) {
+      var panel = event.target.closest("[data-seller-step]");
+      var index = Array.prototype.indexOf.call(panels, panel);
+      if (index >= 0 && index !== currentIndex) showStep(index, false);
+    }, true);
     form.addEventListener("input", function (event) {
       var field = event.target;
       if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {

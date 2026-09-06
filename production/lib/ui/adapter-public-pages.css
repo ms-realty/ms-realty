@@ -81,90 +81,6 @@
   .flow-steps__num { font-size: var(--text-2xl); min-width: 1.25em; }
 }
 
-/* ---- Home: browse by area (photo cards with counts) ---- */
-.hp-resorts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
-.hp-resort {
-  position: relative;
-  isolation: isolate;
-  display: block;
-  /* The kit gives the card a fixed 200px height, which makes aspect-ratio
-     resolve the WIDTH and leaves the grid column half empty. Height auto puts
-     the ratio back in charge of the height. */
-  height: auto;
-  aspect-ratio: 4 / 3;
-  min-height: 200px;
-  overflow: hidden;
-  border-radius: var(--radius-card);
-  background: var(--surface-inverse);
-  box-shadow: var(--shadow-sm);
-  color: var(--text-on-dark);
-  text-decoration: none;
-  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-standard);
-}
-.hp-resort > img {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--dur-slow) var(--ease-out);
-}
-.hp-resort::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--ink-950) 78%, transparent) 0%,
-    color-mix(in srgb, var(--ink-950) 30%, transparent) 48%,
-    color-mix(in srgb, var(--ink-950) 8%, transparent) 100%
-  );
-}
-.hp-resort[data-location-media="fallback"]::before { background: linear-gradient(160deg, var(--ink-700), var(--ink-900)); }
-.hp-resort:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); text-decoration: none; }
-.hp-resort:hover > img { transform: scale(1.03); }
-.hp-resort:focus-visible { outline: none; box-shadow: var(--shadow-focus), var(--shadow-lg); }
-.hp-resort__t { position: absolute; inset: auto 0 0 0; z-index: 2; display: grid; gap: var(--space-1); padding: var(--space-5); }
-.hp-resort__t h3 { font-size: var(--text-xl); line-height: var(--lh-snug); letter-spacing: var(--tracking-tight); color: var(--text-on-dark); }
-.hp-resort__c {
-  position: static;
-  display: block;
-  width: auto;
-  padding: 0;
-  background: none;
-  color: var(--stone-200);
-  font-size: var(--text-sm);
-  font-weight: var(--fw-medium);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-@media (max-width: 1080px) {
-  .hp-resorts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 760px) {
-  .hp-resorts {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: min(78vw, 300px);
-    gap: var(--space-3);
-    margin-inline: calc(-1 * var(--gutter));
-    padding: 0 var(--gutter) var(--space-2);
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scroll-padding-inline: var(--gutter);
-    scroll-snap-type: inline mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .hp-resorts::-webkit-scrollbar { display: none; }
-  .hp-resort { min-height: 0; scroll-snap-align: start; scroll-snap-stop: always; }
-  .hp-resort:hover { transform: none; }
-  .hp-resort:hover > img { transform: none; }
-  .hp-resort__t { padding: var(--space-4); }
-}
-
 /* ---- Home: featured listings ---- */
 /* One section rhythm down the page: each block owns its bottom padding only. */
 .hp-featured { padding-top: 0; }
@@ -417,7 +333,6 @@ form[data-seller-stepper] .sell-form__section { padding-top: 0; border-top: 0; }
 }
 
 /* ---- Rail empty states (home areas and buyer guides) ---- */
-.hp-rail-empty,
 .hp-featured [data-featured-empty] {
   padding: var(--space-8) var(--space-6);
   border: 1px dashed var(--border-strong);
@@ -427,10 +342,6 @@ form[data-seller-stepper] .sell-form__section { padding-top: 0; border-top: 0; }
 /* An empty rail still owes the section below it the same breathing room a
    full one would. */
 .hp-featured:has([data-featured-empty]) { padding-bottom: var(--space-8); }
-.hp-rail-empty .mk-empty__text { max-width: 52ch; color: var(--text-body); font-size: var(--text-base); }
-.hp-rail-empty .mk-empty__actions { margin-top: var(--space-5); }
-.hp-rail-empty__note { margin: var(--space-2) 0 0; color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
-.hp-rail-empty__note + .mk-empty__actions { margin-top: var(--space-3); }
 
 /* ---- Form states shared by the seller and contact forms ----
    The client script marks the submit button [data-loading][aria-busy],
