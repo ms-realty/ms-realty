@@ -62,6 +62,7 @@ export const THEME_SWITCH_JS = `
 `;
 
 import { initPublicSearchAssistant } from "./public-search-assistant-client.mjs";
+import { initPublicSearchEvidence } from "./public-search-evidence-client.mjs";
 
 export const PUBLIC_APP_JS = `(function () {
   "use strict";
@@ -3090,6 +3091,7 @@ ${THEME_SWITCH_JS}
     });
   }
   (${initPublicSearchAssistant.toString()})();
+  (${initPublicSearchEvidence.toString()})();
   initListingSourceQuestions();
   initStartFlow();
   initCompareLinks();
