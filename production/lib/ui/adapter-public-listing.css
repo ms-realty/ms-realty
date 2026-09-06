@@ -866,8 +866,3 @@ dl[data-listing-facts="true"] dd { margin: 0; color: var(--text-strong); font-si
   .sr-list--grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
 }
 
-/* Same reason as the pages sheet: this file is concatenated after
-   adapter-public.css, so the related-listings grid keeps its own breakpoint. */
-@media (max-width: 760px) {
-  .ld-similar__grid { grid-template-columns: 1fr; gap: var(--space-7); }
-}

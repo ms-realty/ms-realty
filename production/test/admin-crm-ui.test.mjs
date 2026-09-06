@@ -173,6 +173,14 @@ test("every CRM list screen carries the same toolbar filter and empty-note patte
 // and the contract now asserts working controls. Saved views stay marked when
 // the caller has no operator identity to own them, and the viewings week view
 // is still waiting for broker availability.
+test("the languages page signs its forms with the operator id, never the principal object", async () => {
+  const page = await dispatchHttp(app(), { url: "/admin/locales?locale=en", headers: auth });
+  assert.equal(page.status, 200);
+  assert.doesNotMatch(page.body, /\[object Object\]/);
+  const reviewer = page.body.match(/name="reviewer" value="([^"]*)"/)?.[1];
+  assert.ok(reviewer, "the add-language form carries a reviewer id");
+});
+
 test("the list tools strip and the snooze control are wired to their routes", async () => {
   const inbox = await dispatchHttp(app(), { url: "/admin/leads?locale=en", headers: auth });
   // The strip is live, so it no longer carries the planned marking or badge.

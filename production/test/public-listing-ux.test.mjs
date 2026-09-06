@@ -282,6 +282,11 @@ test("the listing sheet keeps hover, focus, active, disabled, and empty states i
   assert.match(css, /\.ld-photo-viewer__nav:disabled \{ visibility: hidden; \}/);
   assert.match(css, /\.ld-soon \{[\s\S]*?border: 1px dashed var\(--border-strong\)/);
   assert.match(css, /\.ld-similar__empty \{[\s\S]*?border: 1px dashed var\(--border-strong\)/);
+  // On phones the related listings are one horizontal rail. A second
+  // max-width:760px rule used to reset the template to 1fr while the rail kept
+  // grid-auto-flow: column, which collapsed the first card to ~96px.
+  assert.equal((css.match(/\.ld-similar__grid \{ grid-template-columns: 1fr/g) || []).length, 0);
+  assert.match(css, /\.ld-similar__grid \{\s*grid-template-columns: none;\s*grid-auto-flow: column;/);
   assert.match(css, /\.loc-guide:focus-visible \{[^}]*outline: 2px solid var\(--text-strong\)/);
   assert.match(css, /\.sr-saved__search summary:focus-visible \{[^}]*box-shadow: var\(--shadow-focus\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);

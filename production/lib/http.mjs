@@ -5808,7 +5808,7 @@ export function createHttpApp({
         translationTasks: latestTranslationTasks(currentTranslationTasks()),
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
         generatedAt: reviewedAt || new Date().toISOString(),
-        operatorId: principal || null,
+        operatorId: principal?.id || null,
         focus: url.searchParams.get("focus") || url.searchParams.get("language") || "",
       });
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
