@@ -14,15 +14,14 @@ const listings = loadListings();
 test("home hero has responsive local imagery and a lean, accessible search contract", () => {
   const html = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
 
-  assert.match(html, /data-hero-gallery="true"[^>]*data-hero-gallery-interval="7000"[^>]*aria-roledescription="carousel"/);
-  assert.equal((html.match(/data-hero-gallery-slide=/g) || []).length, 4);
-  assert.match(html, /media="\(max-width: 679px\)" type="image\/avif" srcSet="\/hero\/sandanski-640\.avif 640w, \/hero\/sandanski-1280\.avif 1280w" sizes="100vw"/);
-  assert.match(html, /type="image\/webp" srcSet="\/hero\/sozopol-town-1280\.webp 1280w, \/hero\/sozopol-town-1920\.webp 1920w" sizes="100vw"/);
-  assert.match(html, /data-hero-gallery-slide="2"[^>]*hidden/);
-  assert.match(html, /data-hero-gallery-status="true">Gallery 1 \/ 4<\/span>/);
-  assert.doesNotMatch(html, /data-hero-gallery-(?:previous|next)/);
-  assert.match(html, /data-hero-gallery-slide="1"[^>]*style="--hero-object-position:50% 54%;--hero-mobile-object-position:54% 50%"/);
-  assert.equal((html.match(/data-hero-mobile-only="true"/g) || []).length, 1);
+  assert.match(html, /data-atlas-public="home"/);
+  assert.ok(html.indexOf('class="hp-hero"') < html.indexOf('data-hero-search="true"'), "the photograph-backed hero contains search");
+  assert.match(html, /Find your place\.<br>In Sandanski\./);
+  assert.match(html, /src="\/hero\/sandanski-town-1920\.webp"[^>]*fetchPriority="high"/);
+  assert.match(html, /src="\/hero\/sandanski-1280\.webp"/);
+  assert.doesNotMatch(html, /data-hero-gallery|sozopol-town|belogradchik/);
+  assert.match(html, /Bovlad62 \/ Wikimedia Commons/);
+  assert.match(html, /Town life\. A little closer to nature\./);
   assert.match(LOGO_URL, /^\/vendor\/ms-realty-logo-[a-f0-9]{12}\.png$/);
   assert.match(LOGO_URL_REVERSED, /^\/vendor\/ms-realty-logo-reversed-[a-f0-9]{12}\.png$/);
   assert.equal(existsSync(new URL(`../../public${LOGO_URL}`, import.meta.url)), true);
@@ -51,19 +50,19 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   }
   assert.match(form, /<option value="agricultural_land">Agricultural land<\/option>/);
   assert.match(form, /<label class="hp-search__label" for="home-search-price-max">Max price<\/label>/);
-  assert.match(form, /<select id="home-search-price-max" name="price_max" class="hp-search__input" data-price-presets="true" data-price-any="Any" data-price-sale="50000\|€50,000;75000\|€75,000;[^"]*1000000\|€1,000,000" data-price-rent="300\|€300 per month;[^"]*2000\|€2,000 per month">/);
-  assert.match(form, /<option value="">Any<\/option><option value="50000">€50,000<\/option>/);
+  assert.match(form, /<input id="home-search-price-max" name="price_max" type="number" min="0" step="any" inputmode="decimal"/);
+  assert.match(form, /<datalist id="home-search-price-max-suggestions" data-price-presets="true"[^>]*data-price-sale="50000\|€50,000;75000\|€75,000;/);
+  assert.match(form, /data-price-rent="300\|€300 per month;/);
   assert.equal((form.match(/type="submit"/g) || []).length, 1);
   assert.match(form, /class="hp-search__go mk-search__go" type="submit">[\s\S]*?<span>Search<\/span><\/button>/);
   // Secondary filters are disclosed natively, without JavaScript.
   assert.match(form, /<details class="hp-search__more" data-hero-more-filters="true"><summary class="hp-search__more-summary">/);
   assert.match(form, /<span data-more-label="More filters" data-fewer-label="Fewer filters">More filters<\/span>/);
-  assert.match(form, /<select id="home-search-bedrooms-min" name="bedrooms_min" class="hp-search__input" data-hero-bedrooms="true"><option value="">Any<\/option><option value="1">1\+<\/option>/);
-  assert.match(form, /<select id="home-search-price-min" name="price_min" data-price-presets="true"/);
-  // No listing in this catalogue publishes an area, so the hero does not offer
-  // a control that can only return an empty results page.
-  assert.doesNotMatch(form, /name="area_min"/);
-  assert.doesNotMatch(form, /name="area_max"/);
+  assert.match(form, /<input id="home-search-bedrooms-min" name="bedrooms_min" type="number" min="0" step="1"/);
+  assert.match(form, /<input id="home-search-bedrooms-max" name="bedrooms_max" type="number" min="0" step="1"/);
+  assert.match(form, /<input id="home-search-price-min" name="price_min" type="number" min="0" step="any"/);
+  assert.match(form, /name="area_min" type="number"/);
+  assert.match(form, /name="area_max" type="number"/);
   assert.match(form, /<button class="mk-btn mk-btn--ghost mk-btn--sm" type="reset">/);
   // Administrative geography, keyword, sort and view controls belong to the results page.
   for (const name of ["q", "country_code", "region_id", "municipality", "district", "sort", "view", "property_type"]) {
@@ -91,14 +90,14 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   assert.match(attribution, /CC BY-SA 3\.0/);
 });
 
-test("the hero offers a facet again as soon as the catalogue can answer it", () => {
+test("typed area bounds stay available when current catalogue facts are incomplete", () => {
   const withArea = listings.map((listing, index) =>
     index === 0 ? { ...listing, property_type: "apartment", area_sqm: 82, primary_area_sqm: 82 } : listing,
   );
   const withoutArea = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
   const restored = renderReactPublicBody(renderHomePage({ registry, listings: withArea, localeCode: "en" }));
 
-  assert.doesNotMatch(withoutArea, /name="area_min"/);
+  assert.match(withoutArea, /name="area_min" type="number"/);
   assert.match(restored, /id="home-search-area-min" name="area_min" type="number" min="0" step="any" inputmode="decimal"/);
   assert.match(restored, /id="home-search-area-max" name="area_max" type="number"/);
 });
@@ -123,7 +122,7 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(PUBLIC_APP_JS, /function applyPricePresets\(\)/);
   assert.match(PUBLIC_APP_JS, /offerType\(\) === "rent" \? "data-price-rent" : "data-price-sale"/);
   assert.match(PUBLIC_APP_JS, /function syncBedrooms\(\)/);
-  assert.match(PUBLIC_APP_JS, /bedrooms\.disabled = nonResidential/);
+  assert.match(PUBLIC_APP_JS, /bedrooms\[i\]\.disabled = nonResidential/);
   assert.match(PUBLIC_APP_JS, /more\.addEventListener\("toggle"/);
   assert.match(PUBLIC_APP_JS, /function initSearchToolbar\(\)/);
   assert.match(PUBLIC_APP_JS, /form\.requestSubmit\(view && view\.value === "map" \? view : undefined\)/);

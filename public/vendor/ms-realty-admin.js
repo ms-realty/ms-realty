@@ -145,6 +145,44 @@
     var empty = document.querySelector("[data-lead-queue-empty]");
     if (empty) empty.hidden = visible > 0 || rows.length === 0;
   }
+  function initTodayWorkspace() {
+    var root = document.querySelector("[data-today-workspace]");
+    if (!root) return;
+    var search = root.querySelector("[data-today-search]");
+    var rows = Array.from(root.querySelectorAll("[data-next-action]"));
+    var details = Array.from(root.querySelectorAll("[data-today-detail]"));
+    var buttons = root.querySelectorAll("[data-today-filter]");
+    var activeFilter = "all";
+    function apply() {
+      var query = (search.value || "").trim().toLocaleLowerCase();
+      var wanted = "";
+      try { wanted = decodeURIComponent(window.location.hash.slice(1)); } catch (error) {}
+      var visible = rows.filter(function (row) {
+        var match = (activeFilter === "all" || (activeFilter === "overdue" ? row.getAttribute("data-overdue") === "true" : row.getAttribute("data-next-action") === activeFilter)) && row.textContent.toLocaleLowerCase().indexOf(query) >= 0;
+        row.hidden = !match;
+        return match;
+      });
+      var selected = visible.find(function (row) { return row.querySelector("[data-today-select]").getAttribute("data-today-select") === wanted; }) || visible[0];
+      var selectedId = selected ? selected.querySelector("[data-today-select]").getAttribute("data-today-select") : "";
+      rows.forEach(function (row) {
+        var link = row.querySelector("[data-today-select]");
+        if (row === selected) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      });
+      details.forEach(function (detail) { detail.hidden = detail.id !== selectedId; });
+      root.querySelector("[data-today-no-matches]").hidden = visible.length > 0 || rows.length === 0;
+      Array.from(buttons).forEach(function (button) {
+        var on = button.getAttribute("data-today-filter") === activeFilter;
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+        button.setAttribute("data-on", on ? "1" : "0");
+      });
+    }
+    search.addEventListener("input", apply);
+    Array.from(buttons).forEach(function (button) { button.addEventListener("click", function () { activeFilter = button.getAttribute("data-today-filter"); apply(); }); });
+    window.addEventListener("hashchange", apply);
+    root.setAttribute("data-today-enhanced", "true");
+    apply();
+  }
   function initAdminListFilters() {
     var navs = document.querySelectorAll("[data-list-filter]");
     for (var i = 0; i < navs.length; i += 1) {
@@ -2031,6 +2069,7 @@
   initReplyForms();
   initHermesAssist();
   initCommunicationTemplates();
+  initTodayWorkspace();
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();

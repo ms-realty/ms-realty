@@ -3732,8 +3732,8 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
               : na.actions.reply;
       return {
         ...base,
-        title: [row.listing_reference, row.property?.location].filter(Boolean).join(" · ") || valueText(ui, row.source),
-        context: statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus),
+        title: leadTitle(row, ui),
+        context: [row.listing_reference, row.property?.location, statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus)].filter(Boolean).join(" · "),
         href: `${inboxHref}#lead-${encodeURIComponent(row.lead_id)}`,
         action,
       };
@@ -3789,12 +3789,11 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map(decorate);
 }
 
-function TodayBriefingPanel({ page, rows, total }) {
+function TodayBriefingPanel({ page, rows, total, detailId }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
   const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
   const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
-  const count = copy.count.replace("{count}", String(rows.length));
   const prompt = first
     ? hermesCopy.todayPrompt
         .replace("{action}", first.action)
@@ -3804,7 +3803,10 @@ function TodayBriefingPanel({ page, rows, total }) {
   return h(
     Panel,
     {
-      title: copy.title,
+      title: first?.title || copy.title,
+      id: detailId,
+      tabIndex: -1,
+      "data-today-detail": detailId,
       "data-today-briefing": "true",
       "data-today-primary-action": first?.kind || "none",
       "data-today-priority-count": String(rows.length),
@@ -3817,7 +3819,7 @@ function TodayBriefingPanel({ page, rows, total }) {
         "div",
         null,
         h("dt", null, copy.attention),
-        h("dd", null, first ? `${count} · ${first.title}` : copy.clear),
+        h("dd", null, first ? first.title : copy.clear),
       ),
       h(
         "div",
@@ -3854,9 +3856,9 @@ function TodayBriefingPanel({ page, rows, total }) {
         { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
         h("p", { className: "adm-hermes-entry__description" }, hermes.description),
         h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
-        h("label", { htmlFor: "today-hermes-prompt" }, hermesCopy.commandLabel),
+        h("label", { htmlFor: `${detailId || "today"}-hermes-prompt` }, hermesCopy.commandLabel),
         h("textarea", {
-          id: "today-hermes-prompt",
+          id: `${detailId || "today"}-hermes-prompt`,
           name: "prompt",
           rows: 2,
           maxLength: 2000,
@@ -3877,66 +3879,33 @@ function TodayBriefingPanel({ page, rows, total }) {
 }
 
 function NextActionsPanel({ page, rows, total }) {
-  const na = workbenchCopy(page).workspaceSettings.nextActions;
-  const remaining = rows.length ? rows.slice(1) : rows;
-  return h(
-    Panel,
-    {
-      title: na.title,
-      "data-next-actions": "true",
-      "data-next-action-count": String(remaining.length),
-      "data-next-action-total": String(total),
-      "data-next-action-visible": String(remaining.length),
-    },
-    h("p", { className: "adm-next-actions__intro" }, na.description),
-    remaining.length
-      ? h(
-          "ol",
-          { className: "adm-next-actions" },
-          ...remaining.map((row) =>
-            h(
-              "li",
-              {
-                key: row.key,
-                "data-next-action": row.kind,
-                "data-next-action-priority": row.priority,
-                "data-overdue": row.overdue ? "true" : "false",
-              },
-              h(
-                "div",
-                { className: "adm-next-actions__body" },
-                h(
-                  "div",
-                  { className: "adm-next-actions__meta" },
-                  h(
-                    StatusPill,
-                    { tone: row.priority === "critical" ? "brick" : row.priority === "urgent" ? "sun" : "sea" },
-                    na.kinds[row.kind],
-                  ),
-                  row.dueAt
-                    ? h(
-                        "time",
-                        { dateTime: row.dueAt, title: row.dueAt },
-                        `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.dueAt, page.workspace?.locale)}`,
-                      )
-                    : null,
-                ),
-                h("strong", { title: row.title }, row.title),
-                h("small", { className: "adm-lead-context", title: row.context }, row.context),
-              ),
-              h(
-                "div",
-                { className: "adm-next-actions__action" },
-                h(
-                  "a",
-                  { className: "mk-btn mk-btn--secondary mk-btn--sm", href: row.href },
-                  h("span", null, row.action),
-                ),
-              ),
-            ),
-          ),
-      )
+  const ui = workbenchCopy(page);
+  const na = ui.workspaceSettings.nextActions;
+  const words = {
+    bg: ["Намери задача", "Търси в опашката", "Всички", "Просрочени", "Отговори", "Няма съвпадащи задачи.", "Отвори всички задачи"],
+    ru: ["Найти задачу", "Поиск в очереди", "Все", "Просроченные", "Ответы", "Подходящих задач нет.", "Открыть все задачи"],
+    en: ["Find work", "Search this queue", "All", "Overdue", "Replies", "No matching tasks.", "Open all tasks"],
+  }[page.workspace?.locale] || [];
+  return h(Panel, {
+    title: words[0], className: "adm-today-queue", "data-next-actions": "true",
+    "data-next-action-count": String(rows.length), "data-next-action-total": String(total), "data-next-action-visible": String(rows.length),
+  },
+    h("div", { className: "adm-today-queue__tools" },
+      h("input", { type: "search", "aria-label": words[1], placeholder: words[1], "data-today-search": "true" }),
+      h("div", { className: "crm-seg", role: "group", "aria-label": words[0] },
+        ...["all", "overdue", "lead"].map((value, index) => h("button", {
+          key: value, type: "button", "data-today-filter": value, "aria-pressed": value === "all" ? "true" : "false", "data-on": value === "all" ? "1" : "0",
+        }, words[index + 2])))),
+    rows.length ? h("ol", { className: "adm-today-queue__rows" }, ...rows.map((row) =>
+      h("li", { key: row.key, "data-next-action": row.kind, "data-next-action-priority": row.priority, "data-overdue": row.overdue ? "true" : "false" },
+        h("a", { href: `#${encodeURIComponent(`today-task-${row.key}`)}`, "data-today-select": `today-task-${row.key}` },
+          h("span", null, h("strong", null, row.title), h("small", null, row.context)),
+          h("span", { className: "adm-today-queue__due" },
+            row.dueAt ? h("time", { dateTime: row.dueAt }, `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.dueAt, page.workspace?.locale)}`) : na.kinds[row.kind],
+            h(Icon, { name: "arrow-right", size: 16 }))))))
       : h("p", { className: "adm-empty", "data-next-actions-empty": "true" }, na.empty),
+    h("p", { className: "adm-empty", role: "status", hidden: true, "data-today-no-matches": "true" }, words[5]),
+    h("a", { className: "adm-today-queue__footer", href: adminHref("/admin/tasks", page) }, words[6], h(Icon, { name: "arrow-right", size: 16 })),
   );
 }
 
@@ -4124,10 +4093,13 @@ function TodayBody({ page }) {
   const settingsCopy = workbenchCopy(page).workspaceSettings;
   const queue = deriveLeadQueueState(page);
   const title = label(copy, "today", "Today");
+  const subtitle = {
+    bg: "Избери следващата задача. Виж какво я задържа.",
+    ru: "Выбери следующую задачу. Узнай, чего она ждёт.",
+    en: "Choose the next task. See what it waits for.",
+  }[page.workspace?.locale] || settingsCopy.todayBriefing.description;
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
-  const visibleNextActions = nextActions.slice(0, 7);
-  const showNextActionsPanel = visibleNextActions.length === 0 || visibleNextActions.length > 1;
   const openLeadPipelineTasks =
     page.leadPipelineQueue?.summary?.open || (page.leadPipelineQueue?.rows || []).filter((row) => !row.status || row.status === "open").length;
   const openSellerTasks =
@@ -4149,19 +4121,21 @@ function TodayBody({ page }) {
     children: [
       h(
         PageHeader,
-        { title, subtitle: settingsCopy.todayBriefing.description },
+        { title, subtitle },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
       ),
       h(WorkspaceWelcomeBanner, { page }),
       h(
         "div",
-        { className: "adm-owner-flow adm-owner-flow--today", "data-today-layout": "operating-flow" },
-        h(
-          "div",
-          { className: "adm-owner-flow__stack" },
-          h(TodayBriefingPanel, { page, rows: visibleNextActions, total: nextActions.length }),
-          showNextActionsPanel ? h(NextActionsPanel, { page, rows: visibleNextActions, total: nextActions.length }) : null,
-        ),
+        { className: "adm-today-workspace", "data-today-workspace": "true" },
+        h(NextActionsPanel, { page, rows: nextActions, total: nextActions.length }),
+        h("div", { className: "adm-today-details" },
+          ...(nextActions.length ? nextActions.map((row) => h(TodayBriefingPanel, {
+            key: row.key, page, rows: [row], total: nextActions.length, detailId: `today-task-${row.key}`,
+          })) : [h(TodayBriefingPanel, { key: "empty", page, rows: [], total: 0 })])),
+      ),
+      h("details", { className: "adm-workbench-disclosure" },
+        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), ui.operationsReports),
         h(TodayReadinessRail, {
           page,
           copy,

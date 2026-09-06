@@ -1410,7 +1410,7 @@
     if (!form) return;
     var priceSelects = form.querySelectorAll("[data-price-presets]");
     var family = form.querySelector("[data-hero-family]");
-    var bedrooms = form.querySelector("[data-hero-bedrooms]");
+    var bedrooms = form.querySelectorAll("[data-hero-bedrooms]");
     var more = form.querySelector("[data-hero-more-filters]");
     function offerType() {
       var checked = form.querySelector('input[name="offer_type"]:checked');
@@ -1443,8 +1443,10 @@
     function syncBedrooms() {
       if (!family || !bedrooms) return;
       var nonResidential = NON_RESIDENTIAL_FAMILIES.indexOf(family.value) >= 0;
-      bedrooms.disabled = nonResidential;
-      if (nonResidential) bedrooms.value = "";
+      for (var i = 0; i < bedrooms.length; i += 1) {
+        bedrooms[i].disabled = nonResidential;
+        if (nonResidential) bedrooms[i].value = "";
+      }
     }
     form.addEventListener("change", function (event) {
       if (event.target && event.target.name === "offer_type") applyPricePresets();

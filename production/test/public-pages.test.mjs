@@ -56,41 +56,28 @@ test("every new public page label exists in all seven locales without dashes or 
   assert.doesNotMatch(renderSellerPage({ registry, localeCode: "bg", leadWritesDisabled: true }).body.form_unavailable, /[—–]/);
 });
 
-test("home puts featured listings before areas and buying guidance in every locale", () => {
+test("Atlas home keeps discovery, current listings, location and seller destinations in every locale", () => {
   for (const code of PUBLIC_LOCALES) {
     const page = renderHomePage({ registry, listings, localeCode: code });
     const html = renderReactPublicBody(page);
-    assert.match(html, /data-hero-search="true"/, `${code} hero search form`);
     const order = [
+      html.indexOf('class="hp-hero"'),
+      html.indexOf('data-hero-search="true"'),
       html.indexOf('data-featured-listings="true"'),
       html.indexOf('data-home-locations="true"'),
-      html.indexOf('data-home-how-buying-works="true"'),
-      html.indexOf('data-home-guides="true"'),
-      html.indexOf('data-home-trust="true"'),
       html.indexOf('class="hp-sell"'),
     ];
-    assert.ok(order.every((index) => index > 0), `${code} sections present: ${order.join(",")}`);
-    assert.deepEqual([...order].sort((a, b) => a - b), order, `${code} section order`);
-    assert.equal(page.body.start.path, `/${code}/${registry.locales.find((locale) => locale.code === code).route_segments.start || "start"}`);
-    assert.match(html, new RegExp(`href="${page.body.start.path}" data-action="start"`));
-    assert.match(html, /class="flow-steps hp-how__steps"/);
-    assert.equal((html.match(/class="flow-steps__item"/g) || []).length >= 3, true);
-    assert.equal((html.match(/<ul class="hp-trust__in">[\s\S]*?<\/ul>/)[0].match(/<li>/g) || []).length, 3);
-    assert.match(html, new RegExp(labelsFor(code).trustOffices));
-    assert.match(html, new RegExp(`${labelsFor(code).browseAllListings}`));
+    assert.ok(order.every((index) => index > 0), `${code}: all Atlas sections present`);
+    assert.deepEqual([...order].sort((a, b) => a - b), order);
+    assert.match(html, new RegExp(`href="${page.body.seller.path}" data-action="seller"`));
+    assert.ok(html.includes(`href="${page.body.search.path}"`));
+    assert.equal((html.match(/data-search-card="true"/g) || []).length, Math.min(page.cards.length, 3));
+    for (const card of page.cards.slice(0, 3)) {
+      assert.ok(html.includes(`data-client-save-listing="${card.id}"`));
+      assert.ok(html.includes(`data-listing-reference="${card.id}"`));
+      assert.ok(html.includes(`href="${card.path}"`));
+    }
   }
-  const en = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
-  assert.match(en, /<h2 id="hp-how-title">How buying works<\/h2>/);
-  assert.match(en, /Tell us what you want/);
-  assert.match(en, /Get a broker shortlist/);
-  assert.match(en, /View and buy with local paperwork done/);
-  assert.match(en, /Start your search/);
-  assert.match(en, /class="hp-resort__c">\d+ reviewed listings</);
-  assert.doesNotMatch(en, /hp-guide__icon/);
-  // The agency runs one office, in Sandanski. The chrome must not name Bansko
-  // or Sveti Vlas here: it sells property there, it has no office there.
-  assert.match(en, /Local office: Sandanski</);
-  assert.doesNotMatch(en.match(/<ul class="hp-trust__in">[\s\S]*?<\/ul>/)[0], /Bansko|Sveti Vlas/);
 });
 
 test("seller page keeps its intake contract and adds the promise, step questions, what happens next and channels", () => {
@@ -238,21 +225,13 @@ test("home rails carry an empty state instead of disappearing", () => {
   assert.match(empty, /There are no areas to browse yet\./);
   assert.match(empty, /data-featured-empty="true"/);
 
-  // German has no approved guides: the rail says so and links the English ones.
+  // Atlas removes the old guide rail; it must not turn an unapproved
+  // translation into displayed guide content while keeping the guide route.
   const german = renderHomePage({ registry, listings, localeCode: "de" });
   assert.equal(german.body.guides, null);
   assert.equal(german.body.guides_alternate.locale, "en");
-  assert.ok(german.body.guides_alternate.links.length >= 2);
-  const germanHtml = renderReactPublicBody(german);
-  assert.match(germanHtml, /data-home-guides="true" data-home-guides-empty="true"/);
-  assert.match(germanHtml, /Ratgeber für Käufer sind in dieser Sprache noch nicht verfügbar\./);
-  assert.match(germanHtml, /href="\/en\/guides\/foreign-buyers" lang="en" hrefLang="en"/);
-  assert.match(germanHtml, /Auf Englisch lesen/);
+  assert.doesNotMatch(renderReactPublicBody(german), /data-home-guides="true"/);
 
-  // English has guides, so it keeps the real rail.
-  const english = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
-  assert.match(english, /data-home-guides="true" data-approved-source="cms"/);
-  assert.doesNotMatch(english, /data-home-guides-empty/);
 });
 
 test("lead forms offer an optional email and the seller flow offers a working photo upload", () => {

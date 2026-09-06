@@ -71,6 +71,7 @@ html:root .crm-app {
   --text-2xl: 2rem;
   --text-3xl: 2rem;
   --radius-button: 12px;
+  --radius-input: 12px;
   --radius-card: 16px;
   --adm-shell-top-offset: 56px;
   font-size: 16px;
@@ -155,3 +156,40 @@ html[data-theme="dark"] .crm-sb__brand [data-admin-logo="dark"] { display: block
   .crm-app .crm-top__sub { border: 0; padding: 0; }
 }
 .crm-wrap > .mk-alert { margin: 0; }
+
+/* Today's ranked queue and the selected task share the same source records. */
+.adm-today-workspace { display: grid; grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr); gap: 24px; align-items: start; }
+.adm-today-workspace > * { min-width: 0; }
+.adm-today-queue { overflow: clip; }
+.adm-today-queue__tools { display: grid; gap: 8px; padding: 0 16px 12px; }
+.adm-today-queue__tools input { width: 100%; }
+.adm-today-queue__tools .crm-seg { justify-self: start; }
+.adm-today-queue__rows { list-style: none; padding: 0; margin: 0; max-height: 520px; overflow: auto; }
+.adm-today-queue__rows li { border-top: 1px solid var(--border); }
+.adm-today-queue__rows li[hidden] { display: none; }
+.adm-today-queue__rows a { display: flex; min-height: 64px; padding: 14px 16px; gap: 16px; align-items: center; justify-content: space-between; color: var(--text-strong); text-decoration: none; }
+.adm-today-queue__rows a:hover,
+.adm-today-queue__rows a[aria-current="true"] { background: var(--atlas-tint); }
+.adm-today-queue__rows a > span:first-child { display: grid; min-width: 0; gap: 4px; }
+.adm-today-queue__rows strong { font-size: 16px; line-height: 20px; }
+.adm-today-queue__rows small { font-size: 14px; line-height: 20px; color: var(--text-muted); }
+.adm-today-queue__due { display: flex; align-items: center; gap: 12px; max-width: 42%; color: var(--text-muted); font-size: 14px; line-height: 20px; }
+.adm-today-queue__due svg { flex: none; }
+.adm-today-queue__footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; min-height: 44px; border-top: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text-strong); }
+.crm-app .adm-today-details [data-today-briefing] { border: 0; border-radius: 0; }
+.crm-app .adm-today-details .crm-panel__hd { padding-top: 0; }
+.crm-app main[data-react-admin-ui="today"] .adm-today-details .crm-panel__hd h2 { font-size: 24px; line-height: 28px; }
+.crm-app .adm-today-details .adm-today-briefing__facts { grid-template-columns: minmax(0, 1fr); margin: 16px; padding: 16px; border-radius: 16px; background: var(--atlas-surface); }
+.crm-app .adm-today-details .adm-today-briefing__facts > div { grid-template-columns: 1fr; gap: 4px; padding: 12px 0; }
+.crm-app .adm-today-details .adm-today-briefing__facts dt { font-size: 14px; }
+.crm-app .adm-today-details .adm-today-briefing__facts dd { font-size: 16px; line-height: 24px; }
+.crm-app .adm-today-details [data-today-detail][hidden] { display: none; }
+.adm-today-workspace:not([data-today-enhanced]) [data-today-detail]:not(:first-child) { display: none; }
+.adm-today-workspace:not([data-today-enhanced]):has([data-today-detail]:target) [data-today-detail]:not(:target) { display: none; }
+.adm-today-workspace:not([data-today-enhanced]) [data-today-detail]:target { display: block; }
+.adm-today-workspace:not([data-today-enhanced]) .adm-today-queue__tools { display: none; }
+@media (max-width: 1023px) {
+  .adm-today-workspace { grid-template-columns: minmax(0, 1fr); }
+  .adm-today-queue__rows { max-height: none; }
+  .adm-today-queue__due time { font-size: 14px; }
+}

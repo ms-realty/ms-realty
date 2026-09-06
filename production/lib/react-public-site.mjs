@@ -1095,6 +1095,15 @@ function SelectField({ id, name, label, className = "", children, ...attrs }) {
   );
 }
 
+function NumberField({ id, name, label, className = "", suggestions = [], suggestionAttrs = {}, children, ...attrs }) {
+  const listId = `${id}-suggestions`;
+  return h("div", { className: `hp-search__seg ${className}`.trim() },
+    h("label", { className: "hp-search__label", htmlFor: id }, label),
+    h("input", { id, name, type: "number", min: "0", step: "any", inputMode: "decimal", className: "hp-search__input", list: suggestions.length ? listId : undefined, ...attrs }),
+    suggestions.length ? h("datalist", { id: listId, ...suggestionAttrs }, ...suggestions.map((value) => h("option", { key: value, value: String(value) }))) : null,
+  );
+}
+
 function HeroSearch({ page, labels, chrome }) {
   const formId = "home-hero-search-form";
   const controls = page.body.search?.controls || {};
@@ -1105,13 +1114,12 @@ function HeroSearch({ page, labels, chrome }) {
   const rentLabel = chrome.nav?.find((item) => item.id === "rent")?.label || "Rent";
   const offerLabel = labels.factLabels?.offer_type || "Offer";
   const presetData = pricePresetData(presets, page.locale, labels);
-  // The hero opens the same catalogue as the results page, so it offers the
-  // same facets. A control the catalogue cannot answer would send the visitor
-  // straight to an empty page on their first interaction with the site.
+  // Numeric limits accept the visitor's own values. Suggestions follow the
+  // current catalogue; absent source facts remain unknown in search results.
   const availableFilterFields = new Set(controls.applicable_filter_fields || []);
   const bedroomCounts = [1, 2, 3, 4].filter((count) => (filterOptions.bedrooms || []).some((value) => value >= count));
   const showBedrooms = availableFilterFields.has("bedrooms_min") && bedroomCounts.length > 0;
-  const showArea = availableFilterFields.has("area_min");
+  const showArea = true;
 
   return h(
     "form",
@@ -1201,19 +1209,14 @@ function HeroSearch({ page, labels, chrome }) {
           h("option", { key: "any", value: "" }, labels.any),
           ...families.map((family) => h("option", { key: family, value: family }, localizedListingValue(page.locale, "property_type", family))),
         ),
+          h(
+            NumberField,
+            { id: "home-search-price-min", name: "price_min", label: labels.minPrice, className: "hp-search__more-field", suggestions: presets.sale, suggestionAttrs: presetData, placeholder: labels.any },
+          ),
         h(
-          SelectField,
-          { id: "home-search-price-max", name: "price_max", label: labels.maxPrice, className: "hp-search__seg--price", ...presetData },
-          ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
+          NumberField,
+          { id: "home-search-price-max", name: "price_max", label: labels.maxPrice, className: "hp-search__seg--price", suggestions: presets.sale, suggestionAttrs: presetData, placeholder: labels.any },
         ),
-        showBedrooms
-          ? h(
-              SelectField,
-              { id: "home-search-bedrooms-min", name: "bedrooms_min", label: labels.factLabels?.bedrooms || "Bedrooms", className: "hp-search__more-field--bedrooms", "data-hero-bedrooms": "true" },
-              h("option", { value: "" }, labels.any),
-              ...bedroomCounts.map((count) => h("option", { key: count, value: String(count) }, `${count}+`)),
-            )
-          : null,
         h(
           "button",
           { className: "hp-search__go mk-search__go", type: "submit" },
@@ -1234,16 +1237,14 @@ function HeroSearch({ page, labels, chrome }) {
         h(
           "div",
           { className: "hp-search__more-grid" },
-          h(
-            "div",
-            { className: "hp-search__more-field" },
-            h("label", { htmlFor: "home-search-price-min" }, labels.minPrice),
-            h(
-              "select",
-              { id: "home-search-price-min", name: "price_min", ...presetData },
-              ...pricePresetOptions({ values: presets.sale, localeCode: page.locale, labels }),
-            ),
-          ),
+        showBedrooms
+          ? h(
+              "fieldset", { className: "hp-search__bedrooms" },
+              h("legend", null, labels.factLabels?.bedrooms || "Bedrooms"),
+              h(NumberField, { id: "home-search-bedrooms-min", name: "bedrooms_min", label: labels.min, step: "1", inputMode: "numeric", suggestions: bedroomCounts, "data-hero-bedrooms": "true" }),
+              h(NumberField, { id: "home-search-bedrooms-max", name: "bedrooms_max", label: labels.max, step: "1", inputMode: "numeric", suggestions: bedroomCounts, "data-hero-bedrooms": "true" }),
+            )
+          : null,
           showArea
             ? h(
                 "div",
@@ -1274,243 +1275,77 @@ function HeroSearch({ page, labels, chrome }) {
 function HomeBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
-  const guides = page.body.guides?.links || [];
-  const alternateGuides = page.body.guides_alternate?.links || [];
-  const start = page.body.start || { path: `/${page.locale}/start`, label: labels.startSearch };
+  const english = page.locale === "en";
+  const locations = page.body.locations || [];
+  const sandanski = locations.find((location) => /\/sandanski(?:$|[/?])/u.test(location.path));
+  const families = page.body.search?.controls?.filter_options?.property_families || [];
+  const hero = HERO_GALLERY_SLIDES[0];
   const main = h(
     "main",
-    { id: "main", tabIndex: -1, "data-kind": "home", "data-react-public-ui": "home" },
+    { id: "main", tabIndex: -1, "data-kind": "home", "data-react-public-ui": "home", "data-atlas-public": "home" },
     h(
       "section",
-      {
-        className: "hp-hero",
-        "data-hero-gallery": "true",
-        "data-hero-gallery-interval": "7000",
-        "data-hero-gallery-label": labels.gallery,
-        "aria-roledescription": labels.carousel || "carousel",
-        "aria-label": labels.gallery,
-      },
-      h(
-        "div",
-        { className: "hp-hero__bg hp-hero__gallery", "data-hero-media": "approved" },
-        ...HERO_GALLERY_SLIDES.map((slide, index) =>
-          h(
-            "picture",
-            {
-              key: slide.id,
-              className: "hp-hero__slide",
-              "data-hero-gallery-slide": String(index + 1),
-              "data-gallery-active": index === 0 ? "true" : "false",
-              "aria-hidden": index === 0 ? "false" : "true",
-              "data-hero-mobile-only": slide.mobileOnly ? "true" : undefined,
-              hidden: index === 0 ? undefined : true,
-              style: `--hero-object-position:${slide.objectPosition};--hero-mobile-object-position:${slide.mobileObjectPosition}`,
-            },
-            slide.mobileAvif ? h("source", { media: "(max-width: 679px)", type: "image/avif", srcSet: slide.mobileAvif, sizes: "100vw" }) : null,
-            slide.mobileWebp ? h("source", { media: "(max-width: 679px)", type: "image/webp", srcSet: slide.mobileWebp, sizes: "100vw" }) : null,
-            h("source", { type: "image/avif", srcSet: slide.avif, sizes: "100vw" }),
-            h("source", { type: "image/webp", srcSet: slide.webp, sizes: "100vw" }),
-            h("img", {
-              src: slide.src,
-              alt: "",
-              width: slide.width,
-              height: slide.height,
-              loading: index === 0 ? "eager" : "lazy",
-              decoding: "async",
-              fetchPriority: index === 0 ? "high" : undefined,
-            }),
-          ),
-        ),
+      { className: "hp-hero", "data-hero-media": "approved" },
+      h("picture", { className: "hp-hero__bg" },
+        h("source", { type: "image/avif", srcSet: hero.avif, sizes: "100vw" }),
+        h("source", { type: "image/webp", srcSet: hero.webp, sizes: "100vw" }),
+        h("img", { src: hero.src, width: hero.width, height: hero.height, alt: "", fetchPriority: "high", decoding: "async" }),
       ),
-      h(
-        "div",
-        { className: "hp-hero__in" },
-        h(
-          "div",
-          { className: "hp-hero__copy" },
-          h("h1", null, page.body.h1),
-          h("p", null, page.body.intro),
-        ),
-        h(
-          "div",
-          { className: "hp-hero__search" },
-          h(HeroSearch, { page, labels, chrome }),
-        ),
+      h("div", { className: "hp-hero__copy" },
+        english ? h("p", { className: "hp-hero__place" }, "Sandanski, Bulgaria") : null,
+        h("h1", null, english ? "Find your place." : page.body.h1, english ? h("br") : null, english ? "In Sandanski." : null),
+        h("p", null, english ? "Homes, land and space for what comes next." : page.body.intro),
       ),
-      h("span", { className: "mk-sr-only", role: "status", "aria-live": "off", "aria-atomic": "true", "data-hero-gallery-status": "true" }, `${labels.gallery} 1 / ${HERO_GALLERY_SLIDES.length}`),
+    h("section", { className: "hp-discovery", "aria-label": labels.search },
+      h("details", { className: "hp-discovery__panel" },
+        h("summary", { className: "hp-discovery__summary" },
+          h("span", null, h("strong", null, labels.locationPlaceholder), h("small", null, `${chrome.nav?.find((item) => item.id === "buy")?.label || labels.search} · ${labels.any}`)),
+          h("span", { className: "hp-discovery__search-icon" }, h(Icon, { name: "search", size: 20 })),
+        ),
+        h(HeroSearch, { page, labels, chrome }),
+      ),
     ),
+    ),
+    h("p", { className: "hp-photo-credit" }, "Sandanski · ", h("a", { href: "https://commons.wikimedia.org/wiki/File:Sandan1.JPG" }, "Bovlad62 / Wikimedia Commons"), " · ", h("a", { href: "https://creativecommons.org/licenses/by-sa/3.0/" }, "CC BY-SA 3.0"), english ? ", cropped" : ""),
     h(
       "section",
       { className: "hp-sec hp-featured", "aria-label": labels.featuredListings, "data-featured-listings": "true" },
-      h(
-        "div",
-        { className: "hp-sec__head" },
-        h("div", null, h("h2", null, labels.featuredListings)),
-        h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.browseAllListings),
+      h("div", { className: "hp-sec__head" },
+        h("h2", null, english ? "Explore properties" : labels.featuredListings),
+        h(Btn, { tag: "a", variant: "ghost", iconEnd: "arrow-right", href: page.body.search.path }, labels.browseAllListings),
+      ),
+      h("nav", { className: "hp-categories", "aria-label": labels.propertyType },
+        h("a", { className: "hp-category", href: page.body.search.path, "aria-current": "true" }, english ? "All properties" : labels.any),
+        ...families.filter((family) => ["apartment", "house", "plot", "commercial"].includes(family)).map((family) => h("a", { key: family, className: "hp-category", href: `${page.body.search.path}?property_family=${encodeURIComponent(family)}` }, localizedListingValue(page.locale, "property_type", family))),
       ),
       (page.cards || []).length
-        ? h(
-            "div",
-            { className: "hp-grid" },
-            ...page.cards.map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, priority: index < 3 })),
-          )
-        : h(
-            "div",
-            { className: "mk-empty", "data-featured-empty": "true", "aria-live": "polite" },
-            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "shield-check", size: 24 })),
-            h("h3", { className: "mk-empty__title" }, labels.reviewRequired),
-            h("p", { className: "mk-empty__text" }, `0 ${labels.reviewedListings}`),
-          ),
+        ? h("div", { className: "hp-grid" }, ...page.cards.slice(0, 3).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })))
+        : h("div", { className: "mk-empty", "data-featured-empty": "true", "aria-live": "polite" }, h("h3", { className: "mk-empty__title" }, labels.reviewRequired), h("p", null, `0 ${labels.reviewedListings}`)),
     ),
-    (page.body.locations || []).length
-      ? h(
-          "section",
-          { className: "hp-sec hp-areas", "aria-labelledby": "hp-areas-title" },
-          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-areas-title" }, labels.browseByArea))),
-          h(
-            "nav",
-            { className: "hp-resorts", "aria-label": labels.browseByArea, "data-home-locations": "true" },
-            ...(page.body.locations || []).map((location) =>
-              h(
-                "a",
-                {
-                  key: location.path,
-                  href: location.path,
-                  className: "hp-resort",
-                  "data-location-media": location.image?.url ? "approved" : "fallback",
-                },
-                location.image?.url ? h("img", { src: location.image.url, alt: "", loading: "lazy", decoding: "async" }) : null,
-                h(
-                  "div",
-                  { className: "hp-resort__t" },
-                  h("h3", null, location.location),
-                  location.listing_count
-                    ? h("span", { className: "hp-resort__c" }, `${location.listing_count} ${labels.reviewedListings}`)
-                    : null,
-                ),
-              ),
-            ),
-          ),
-        )
-      : h(
-          "section",
-          { className: "hp-sec hp-areas", "aria-labelledby": "hp-areas-title" },
-          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-areas-title" }, labels.browseByArea))),
-          h(
-            "nav",
-            { className: "mk-empty hp-rail-empty", "aria-label": labels.browseByArea, "data-home-locations": "true", "data-home-locations-empty": "true" },
-            h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "map-pin", size: 24 })),
-            h("p", { className: "mk-empty__text" }, labels.areasEmpty),
-            h(
-              "div",
-              { className: "mk-empty__actions" },
-              h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.search.path }, labels.browseAllListings),
-            ),
-          ),
+    h("section", { className: "hp-town", "aria-labelledby": "hp-areas-title" },
+      h("figure", { className: "hp-town__photo" },
+        h("picture", null,
+          h("source", { type: "image/avif", srcSet: "/hero/sandanski-640.avif 640w, /hero/sandanski-1280.avif 1280w", sizes: "(max-width: 720px) calc(100vw - 40px), 55vw" }),
+          h("img", { src: "/hero/sandanski-1280.webp", width: 1280, height: 890, alt: english ? "Sandanski town and park" : "Sandanski", loading: "lazy", decoding: "async" }),
         ),
-    h(
-      "section",
-      { className: "hp-sec hp-how", "aria-labelledby": "hp-how-title", "data-home-how-buying-works": "true" },
-      h(
-        "div",
-        { className: "hp-sec__head" },
-        h("div", null, h("h2", { id: "hp-how-title" }, labels.howBuyingWorks)),
-        h(
-          "a",
-          { className: "mk-btn mk-btn--primary mk-btn--lg", href: start.path, "data-action": "start" },
-          h("span", null, start.label),
-          h(Icon, { name: "arrow-right", size: 20, className: "ico-dir" }),
+        english ? h("figcaption", null, "Sandanski town and park") : null,
+      ),
+      h("div", { className: "hp-town__copy" },
+        h("h2", { id: "hp-areas-title" }, english ? "Town life. A little closer to nature." : labels.browseByArea),
+        english ? h("p", null, "Explore Sandanski, its parkland and the Pirin foothills. Start with the place, then find a property that fits your plans.") : null,
+        h("nav", { "data-home-locations": "true", "data-home-locations-empty": locations.length ? undefined : "true", "aria-label": labels.browseByArea },
+          sandanski ? h(Btn, { tag: "a", variant: "primary", iconEnd: "arrow-right", href: sandanski.path }, english ? "Explore Sandanski" : sandanski.location) : h(Btn, { tag: "a", variant: "primary", href: page.body.search.path }, labels.browseAllListings),
+          !locations.length ? h("p", null, labels.areasEmpty) : null,
         ),
       ),
-      h(FlowSteps, {
-        className: "hp-how__steps",
-        steps: [
-          { title: labels.buyingStepOneTitle, text: labels.buyingStepOneText },
-          { title: labels.buyingStepTwoTitle, text: labels.buyingStepTwoText },
-          { title: labels.buyingStepThreeTitle, text: labels.buyingStepThreeText },
-        ],
-      }),
     ),
-    guides.length
-      ? h(
-          "section",
-          { className: "hp-sec hp-guides", "data-home-guides": "true", "data-approved-source": "cms", "aria-labelledby": "hp-guides-title" },
-          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-guides-title" }, page.body.guides.label))),
-          h(
-            "nav",
-            { className: "hp-guides__rail", "aria-label": page.body.guides.label },
-            ...guides.map((guide) =>
-              h(
-                "a",
-                {
-                  key: guide.id,
-                  href: guide.href,
-                  className: "hp-guide",
-                  "data-guide-reviewer": guide.reviewer,
-                },
-                h(
-                  "div",
-                  { className: "hp-guide__meta" },
-                  h(Badge, { variant: "neutral", icon: "shield-check" }, labels.approvedSource),
-                  h(Icon, { name: "arrow-right", size: 18, className: "hp-guide__arrow ico-dir" }),
-                ),
-                h("h3", null, guide.label),
-                h("p", null, guide.summary),
-              ),
-            ),
-          ),
-        )
-      : alternateGuides.length
-        ? h(
-            "section",
-            { className: "hp-sec hp-guides", "data-home-guides": "true", "data-home-guides-empty": "true", "data-approved-source": "cms", "aria-labelledby": "hp-guides-title" },
-            h("div", { className: "hp-sec__head" }, h("div", null, h("h2", { id: "hp-guides-title" }, chrome.copy.buyerGuides))),
-            h(
-              "div",
-              { className: "mk-empty hp-rail-empty" },
-              h("span", { className: "mk-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "languages", size: 24 })),
-              h("p", { className: "mk-empty__text" }, labels.guidesUnavailable),
-              h("p", { className: "hp-rail-empty__note" }, labels.guidesInEnglish),
-              h(
-                "nav",
-                { className: "mk-empty__actions", "aria-label": chrome.copy.buyerGuides },
-                ...alternateGuides.slice(0, 2).map((guide) =>
-                  h(
-                    "a",
-                    { key: guide.id, className: "mk-btn mk-btn--secondary mk-btn--md", href: guide.href, lang: page.body.guides_alternate.locale, hrefLang: page.body.guides_alternate.locale },
-                    h(Icon, { name: "file-check", size: 18 }),
-                    h("span", null, guide.label),
-                  ),
-                ),
-              ),
-            ),
-          )
-        : null,
-    h(
-      "section",
-      { className: "hp-trust", "aria-label": labels.trustOffices, "data-home-trust": "true" },
-      h(
-        "ul",
-        { className: "hp-trust__in" },
-        h("li", null, h(Icon, { name: "shield-check", size: 20 }), h("span", null, labels.trustReviewed)),
-        h("li", null, h(Icon, { name: "languages", size: 20 }), h("span", null, labels.trustLanguages)),
-        h("li", null, h(Icon, { name: "map-pin", size: 20 }), h("span", null, `${labels.trustOffices}: ${chrome.copy.offices || ""}`)),
-      ),
-    ),
-    h(
-      "section",
-      { className: "hp-sell", "aria-labelledby": "hp-sell-title" },
-      h("div", { className: "hp-sell__glow", "aria-hidden": "true" }),
-      h(
-        "div",
-        { className: "hp-sell__in" },
-        h("div", null, h("h2", { id: "hp-sell-title" }, page.body.seller.title || page.body.seller.label), h("p", null, page.body.seller.description || "")),
-        h(
-          "nav",
-          { "aria-label": labels.primaryActions, className: "hp-sell__actions" },
-          h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "landmark", href: page.body.seller.path, "data-action": "seller" }, page.body.seller.label),
-          h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "phone", href: page.body.contact.path, "data-action": "contact" }, page.body.contact.label),
+    h("section", { className: "hp-sell", "aria-labelledby": "hp-sell-title" },
+      h("div", { className: "hp-sell__in" },
+        h("div", null,
+          h("h2", { id: "hp-sell-title" }, english ? "Sell or rent your property." : page.body.seller.title || page.body.seller.label),
+          h("p", null, english ? "Have a property to sell or rent? Tell MS Realty what you have in mind." : page.body.seller.description || ""),
         ),
+        h(Btn, { tag: "a", variant: "accent", size: "lg", iconEnd: "arrow-right", href: page.body.seller.path, "data-action": "seller" }, english ? "List your property" : page.body.seller.label),
       ),
     ),
   );
@@ -2566,27 +2401,7 @@ function SearchBody({ page }) {
         ),
       ),
     );
-  const bedroomPills = (idPrefix) => {
-    const counts = [1, 2, 3, 4, 5].filter((count) => (filterOptions.bedrooms || []).some((value) => value >= count));
-    if (!counts.length) return null;
-    return h(
-      "fieldset",
-      { className: "sr-fg sr-fg--bedrooms" },
-      h("legend", { className: "sr-label" }, labels.factLabels?.bedrooms || "Bedrooms"),
-      h(
-        "div",
-        { className: "sr-pills" },
-        ...[["", labels.any], ...counts.map((count) => [String(count), `${count}+`])].map(([value, text]) =>
-          h(
-            "label",
-            { key: value || "any", className: "sr-pill" },
-            h("input", { type: "radio", name: "bedrooms_min", value, id: `${idPrefix}-bedrooms-${value || "any"}`, defaultChecked: filterValue("bedrooms_min") === value ? true : undefined }),
-            h("span", null, text),
-          ),
-        ),
-      ),
-    );
-  };
+  const bedroomPills = (idPrefix) => rangePair(idPrefix, labels.factLabels?.bedrooms || "Bedrooms", "bedrooms_min", "bedrooms_max", { className: "sr-fg--bedrooms" });
   const guidedSearch = (idPrefix) =>
     !reviewedLocations.length && !reviewedPropertyFamilies.length
       ? null
@@ -2689,7 +2504,7 @@ function SearchBody({ page }) {
         () => ({}),
         "sr-fg--type",
       ),
-      rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { className: "sr-fg--price" }),
+      rangePair(idPrefix, `${labels.price} (EUR)`, "price_min", "price_max", { step: "any", inputMode: "decimal", className: "sr-fg--price" }),
       h(
         "details",
         { className: "sr-more", "data-search-more-filters": "true", open: secondaryFiltersActive ? true : undefined },
@@ -2704,17 +2519,15 @@ function SearchBody({ page }) {
           "div",
           { className: "sr-more__body" },
           applicableFilterFields.has("bedrooms_min") ? bedroomPills(idPrefix) : null,
-          applicableFilterFields.has("area_min")
-            ? rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" })
-            : null,
+          rangePair(idPrefix, labels.area, "area_min", "area_max", { step: "any", inputMode: "decimal", className: "sr-fg--area" }),
           applicableFilterFields.has("property_subtype") && (filterOptions.property_subtypes || []).length
             ? filterSelect(idPrefix, "property_subtype", labels.propertySubtype || labels.propertyType, filterOptions.property_subtypes || [])
             : null,
           applicableFilterFields.has("premises_min")
-            ? filterSelect(idPrefix, "premises_min", labels.factLabels?.premises || labels.propertyType, filterOptions.premises || [], (value) => `${value}+`)
+            ? h("div", { className: "sr-fg" }, h("label", { className: "sr-label", htmlFor: `${idPrefix}-premises_min` }, labels.factLabels?.premises || labels.propertyType), numberInput(idPrefix, "premises_min"))
             : null,
           applicableFilterFields.has("hotel_rooms_min")
-            ? filterSelect(idPrefix, "hotel_rooms_min", labels.factLabels?.hotel_rooms || labels.propertyType, filterOptions.hotel_rooms || [], (value) => `${value}+`)
+            ? h("div", { className: "sr-fg" }, h("label", { className: "sr-label", htmlFor: `${idPrefix}-hotel_rooms_min` }, labels.factLabels?.hotel_rooms || labels.propertyType), numberInput(idPrefix, "hotel_rooms_min"))
             : null,
           h(
             "div",
@@ -2936,6 +2749,7 @@ function SearchBody({ page }) {
       tabIndex: -1,
       "data-kind": "search",
       "data-react-public-ui": "search",
+      "data-atlas-public": "search",
       "data-total-matches": page.search.total_matches,
       "data-list-first-mobile": page.mobile_policy?.list_first_mobile ? "true" : "false",
       "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false",
@@ -4101,6 +3915,7 @@ function ListingBody({ page }) {
       "data-kind": "listing",
       "data-listing-id": facts.id,
       "data-react-public-ui": "listing",
+      "data-atlas-public": "listing",
       "data-review-status": page.body.actions.direct_contact.review_status,
       "data-listing-status": page.body.lifecycle?.status || "available",
       "data-active-in-search": page.body.lifecycle?.active_in_search ? "true" : "false",
