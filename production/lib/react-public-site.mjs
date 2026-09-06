@@ -2247,6 +2247,7 @@ function guidedSearchCopyFor(locale) {
 function searchHref(page, omitFilter, targetPage = 1, overrides = {}) {
   const params = new URLSearchParams();
   if (page.search.query) params.set("q", page.search.query);
+  if (page.search.natural_language?.original_query) params.set("nl_context", page.search.natural_language.original_query);
   if (page.search.sort && page.search.sort !== "recommended") params.set("sort", page.search.sort);
   if (page.search.view === "map") params.set("view", "map");
   for (const key of SEARCH_FILTER_QUERY_KEYS) {
@@ -2369,6 +2370,7 @@ function OfficialAreaMaps({ page, labels }) {
 
 function guidedSearchHref(page, filters) {
   const params = new URLSearchParams();
+  if (page.search.natural_language?.original_query) params.set("nl_context", page.search.natural_language.original_query);
   for (const [key, value] of Object.entries(filters || {})) {
     if (value !== "" && value !== null && value !== undefined) params.set(key, String(value));
   }
@@ -2376,8 +2378,21 @@ function guidedSearchHref(page, filters) {
   return query ? `${page.path}?${query}` : page.path;
 }
 
+const SEARCH_INTERPRETATION_COPY = {
+  bg: ["Вашите думи", "Проверяваме само показаните филтри и ключови думи. Другите желания в заявката не са проверени."],
+  en: ["Your words", "We check only the filters and keywords shown. Other wishes in your request have not been checked."],
+  ru: ["Ваши слова", "Проверяются только указанные фильтры и ключевые слова. Другие пожелания в запросе не проверены."],
+  de: ["Ihre Worte", "Wir prüfen nur die angezeigten Filter und Suchbegriffe. Andere Wünsche in Ihrer Anfrage wurden nicht geprüft."],
+  nl: ["Uw woorden", "We controleren alleen de getoonde filters en zoekwoorden. Andere wensen in uw zoekopdracht zijn niet gecontroleerd."],
+  el: ["Τα λόγια σας", "Ελέγχουμε μόνο τα φίλτρα και τις λέξεις αναζήτησης που εμφανίζονται. Άλλες επιθυμίες στο αίτημά σας δεν έχουν ελεγχθεί."],
+  fr: ["Vos mots", "Seuls les filtres et les mots-clés affichés sont vérifiés. Les autres souhaits de votre demande n’ont pas été vérifiés."],
+  he: ["המילים שלך", "נבדקים רק המסננים ומילות החיפוש המוצגים. בקשות אחרות בחיפוש שלך לא נבדקו."],
+};
+
 function SearchBody({ page }) {
   const labels = uiLabels(page);
+  const originalQuery = page.search.natural_language?.original_query;
+  const interpretationCopy = SEARCH_INTERPRETATION_COPY[page.locale] || SEARCH_INTERPRETATION_COPY.bg;
   const guidedCopy = guidedSearchCopyFor(page.locale);
   const chrome = page.chrome || { copy: {} };
   const savedView = page.search.saved_view === true;
@@ -2661,6 +2676,7 @@ function SearchBody({ page }) {
         "data-search-quick-filters": "true",
         "data-filter-form-id": idPrefix,
       },
+      originalQuery ? h("input", { type: "hidden", name: "nl_context", defaultValue: originalQuery }) : null,
       offerSegments(idPrefix),
       geographyField(idPrefix),
       filterSelect(
@@ -2868,6 +2884,7 @@ function SearchBody({ page }) {
     );
   const toolbarForm = () => {
     const hiddenFields = [];
+    if (originalQuery) hiddenFields.push(["nl_context", originalQuery]);
     if (page.search.query) hiddenFields.push(["q", page.search.query]);
     for (const key of SEARCH_FILTER_QUERY_KEYS) {
       const value = filters[key];
@@ -2932,6 +2949,13 @@ function SearchBody({ page }) {
       { className: "sr-hero" },
       h("div", { className: "sr-hero__copy" },
         h("h1", null, page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+        originalQuery ? h(
+          "section",
+          { "data-search-interpretation": "true", "aria-labelledby": "search-original-query-title" },
+          h("h2", { id: "search-original-query-title" }, interpretationCopy[0]),
+          h("p", { dir: "auto", style: { overflowWrap: "anywhere" } }, originalQuery),
+          h("p", null, interpretationCopy[1]),
+        ) : null,
         noticeLabels.length
           ? h(
               "p",

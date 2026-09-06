@@ -62,6 +62,7 @@ const SEARCH_REQUEST_FIELDS = new Set([
   "search_intent",
   "intent",
   "nl",
+  "nl_context",
   "saved",
   "format",
   "print",
@@ -226,6 +227,36 @@ export function searchParamsFromUrl(searchParams) {
   return known;
 }
 
+// Clear equivalent names before applying a later layer. Otherwise a parsed
+// canonical value (including an empty array) can mask a user's form alias.
+const INPUT_ALIAS_GROUPS = [
+  ["text_query", "q", "query"],
+  ["exact_reference", "listing_reference"],
+  ["property_families", "property_family", "property_type"],
+  ["property_subtypes", "property_subtype"],
+  ["listing_status", "status"],
+  ["price_currency", "currency"],
+  ["parking_kinds", "parking_kind"],
+  ["construction_statuses", "construction_status"],
+  ["location_ids", "location_id", "location"],
+  ["page_size", "per_page"],
+  ["primary_area_min", "area_min"],
+  ["primary_area_max", "area_max"],
+];
+
+function mergeSearchInputs(...layers) {
+  const merged = {};
+  for (const layer of layers) {
+    for (const aliases of INPUT_ALIAS_GROUPS) {
+      if (aliases.some((key) => Object.hasOwn(layer, key))) {
+        for (const key of aliases) delete merged[key];
+      }
+    }
+    Object.assign(merged, layer);
+  }
+  return merged;
+}
+
 export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLanguageEnabled = false } = {}) {
   const raw = objectInput(input);
   assertKnownFields(raw, SEARCH_REQUEST_FIELDS, "search request");
@@ -240,24 +271,22 @@ export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLan
     assertMandatoryFilters(encodedIntent, raw.locale || defaultLocale);
   }
   const naturalLanguage = String(raw.nl || "").trim();
-  if (naturalLanguage && naturalLanguageEnabled) {
-    const parsed = parseNaturalLanguageSearchIntent(naturalLanguage, { defaultLocale: raw.locale || defaultLocale });
-    return {
-      intent: parsed.intent,
-      query: parsed.intent.text_query,
-      filters: compactFilters(searchIntentToQueryFilters(parsed.intent)),
-      sort: parsed.intent.sort,
-      page: parsed.intent.page,
-      natural_language: { enabled: true, mode: parsed.mode },
-    };
-  }
+  // Context survives filter edits but is never parsed or sent as a lexical
+  // query. Keeping the complete words avoids claiming semantic understanding
+  // of wishes that this deliberately small parser cannot evaluate.
+  const originalQuery = naturalLanguage || String(raw.nl_context || "").trim();
+  if (originalQuery.length > 240) throw new Error("natural language search text must be 240 characters or fewer");
+  const parsed = naturalLanguage && naturalLanguageEnabled
+    ? parseNaturalLanguageSearchIntent(naturalLanguage, { defaultLocale: raw.locale || defaultLocale })
+    : null;
+  const explicit = Object.fromEntries(Object.entries(raw).filter(([key]) => SEARCH_INTENT_FIELD_SET.has(key)));
   const intent = normalizeSearchIntent(
-    {
-      ...filters,
-      ...Object.fromEntries(Object.entries(encodedIntent || {}).filter(([key]) => key !== "mandatory_filters")),
-      ...Object.fromEntries(Object.entries(raw).filter(([key]) => SEARCH_INTENT_FIELD_SET.has(key))),
-      ...(naturalLanguage && !raw.q && !raw.query && !raw.text_query ? { text_query: naturalLanguage } : {}),
-    },
+    mergeSearchInputs(
+      parsed?.intent || (naturalLanguage ? { text_query: naturalLanguage } : {}),
+      filters,
+      Object.fromEntries(Object.entries(encodedIntent || {}).filter(([key]) => key !== "mandatory_filters")),
+      explicit,
+    ),
     { defaultLocale },
   );
   return {
@@ -266,6 +295,10 @@ export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLan
     filters: compactFilters(searchIntentToQueryFilters(intent)),
     sort: intent.sort,
     page: intent.page,
-    natural_language: naturalLanguage ? { enabled: false, mode: "lexical_fallback" } : null,
+    natural_language: originalQuery ? {
+      enabled: naturalLanguageEnabled,
+      mode: parsed?.mode || (naturalLanguage ? "lexical_fallback" : "reviewed"),
+      original_query: originalQuery,
+    } : null,
   };
 }

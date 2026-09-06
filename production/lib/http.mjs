@@ -411,7 +411,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
-import { seedForPostgresSearchHits } from "./public-search.mjs";
+import { seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
@@ -2564,7 +2564,7 @@ export function createHttpApp({
               : {}),
             },
           );
-    return withSearchBackend(result, engineResult);
+    return withSearchRequest(withSearchBackend(result, engineResult), engineResult, searchRequest);
   };
   const searchResultOrUnavailable = async (searchRequest, options) => {
     try {

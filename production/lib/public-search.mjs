@@ -176,7 +176,7 @@ function engineResultIsComplete(engineResult) {
   return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
 }
 
-function withSearchRequest(result, engineResult, request) {
+export function withSearchRequest(result, engineResult, request) {
   const saveSearch = result.search?.controls?.save_search;
   const controls = {
     ...result.search?.controls,
