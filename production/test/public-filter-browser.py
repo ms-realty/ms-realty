@@ -26,7 +26,7 @@ def main():
                 summary = page.locator(".hp-discovery__summary")
                 if summary.is_visible():
                     summary.click()
-                page.locator('[name="price_max"]').fill(values["price_max"])
+                page.locator('#home-hero-search-form [name="price_max"]').fill(values["price_max"])
                 trigger = page.locator(".hp-search__more-summary")
                 trigger.click()
                 drawer = page.locator("[data-hero-filter-dialog]")
@@ -45,8 +45,9 @@ def main():
                 assert not drawer.is_visible()
                 assert trigger.evaluate("element => element === document.activeElement")
                 for name, value in values.items():
-                    assert page.locator(f'[name="{name}"]').count() == 1
-                    assert page.locator(f'[name="{name}"]').input_value() == value
+                    # The search assistant dialog carries its own copy of each field name.
+                    assert page.locator(f'#home-hero-search-form [name="{name}"]').count() == 1
+                    assert page.locator(f'#home-hero-search-form [name="{name}"]').input_value() == value
                 trigger.click()
                 drawer.locator('[name="area_min"]').fill("-1")
                 page.keyboard.press("Escape")

@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 BASE_URL = os.environ.get("MS_REALTY_TEST_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
 TOKEN = os.environ["MS_REALTY_TEST_ADMIN_TOKEN"]
@@ -34,7 +34,8 @@ def main():
             assert page.locator("[data-today-detail]:visible").count() == 1
             target = links.nth(1).get_attribute("data-today-select")
             links.nth(1).click()
-            assert page.locator("[data-today-detail]:visible").get_attribute("id") == target
+            # The pane swap is synchronous but the click event is not: wait for it.
+            expect(page.locator("[data-today-detail]:visible")).to_have_id(target)
             if javascript:
                 search = page.get_by_role("searchbox", name="Search this queue")
                 search.fill("no-match-unique-test-string")
