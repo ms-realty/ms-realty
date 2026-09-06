@@ -3908,8 +3908,9 @@ ${THEME_SWITCH_JS}
     var reset = savebar.querySelector("[data-editor-reset]");
     var note = savebar.querySelector("[data-editor-dirty-note]");
     savebar.setAttribute("data-dirty", dirty ? "true" : "false");
-    if (save) save.disabled = !dirty;
-    if (reset) reset.disabled = !dirty;
+    var busy = form.getAttribute("aria-busy") === "true";
+    if (save) save.disabled = busy || !dirty;
+    if (reset) reset.disabled = busy || !dirty;
     if (note) {
       note.textContent = dirty
         ? form.getAttribute("data-editor-dirty-message") || "Unsaved changes"
@@ -3919,29 +3920,43 @@ ${THEME_SWITCH_JS}
   }
   function editorFormState(form) {
     var fields = [];
-    var data = new FormData(form);
-    data.forEach(function (value, key) {
-      fields.push(key + "=" + String(value));
+    new FormData(form).forEach(function (value, key) {
+      if (key !== "draftRevision") fields.push([key, String(value)]);
     });
-    return fields.join("&");
+    return JSON.stringify(fields);
   }
-  function commitEditorFormState(form) {
-    var elements = form.elements;
-    for (var i = 0; i < elements.length; i += 1) {
-      var field = elements[i];
-      if (!field || !field.name) continue;
+  function snapshotEditorFormState(form) {
+    return {
+      state: editorFormState(form),
+      fields: Array.prototype.filter.call(form.elements, function (field) { return field && field.name; }).map(function (field) {
+        return { field: field, value: field.value, checked: field.checked,
+          selected: field instanceof HTMLSelectElement ? Array.prototype.map.call(field.options, function (option) { return option.selected; }) : null };
+      }),
+    };
+  }
+  function commitEditorFormState(form, snapshot) {
+    snapshot = snapshot || snapshotEditorFormState(form);
+    snapshot.fields.forEach(function (saved) {
+      var field = saved.field;
+      if (field.name === "draftRevision") return;
+      // Updating reset defaults must not alter text or selections made while
+      // the request was pending, including controls still carrying defaults.
+      var value = field.value;
+      var checked = field.checked;
+      var selected = field instanceof HTMLSelectElement ? Array.prototype.map.call(field.options, function (option) { return option.selected; }) : null;
       if (field instanceof HTMLInputElement && (field.type === "checkbox" || field.type === "radio")) {
-        field.defaultChecked = field.checked;
+        field.defaultChecked = saved.checked;
+        field.checked = checked;
       } else if ("defaultValue" in field) {
-        field.defaultValue = field.value;
+        field.defaultValue = saved.value;
+        field.value = value;
       }
-      if (field instanceof HTMLSelectElement) {
-        for (var j = 0; j < field.options.length; j += 1) {
-          field.options[j].defaultSelected = field.options[j].selected;
-        }
+      if (selected) {
+        for (var j = 0; j < field.options.length; j += 1) field.options[j].defaultSelected = Boolean(saved.selected[j]);
+        for (var k = 0; k < field.options.length; k += 1) field.options[k].selected = selected[k];
       }
-    }
-    form.setAttribute("data-editor-initial-state", editorFormState(form));
+    });
+    form.setAttribute("data-editor-initial-state", snapshot.state);
     syncEditorSavebar(form);
   }
   function initEditorForms() {
@@ -4448,6 +4463,14 @@ ${THEME_SWITCH_JS}
   // instant, so the browser resolves it before the request leaves.
   function adminMutationPayload(form) {
     var payload = tourPayload(form);
+    if (form.hasAttribute("data-editor-form")) {
+      payload = {};
+      new FormData(form).forEach(function (value, key) {
+        if (!(key in payload)) payload[key] = value;
+        else if (Array.isArray(payload[key])) payload[key].push(value);
+        else payload[key] = [payload[key], value];
+      });
+    }
     var stamps = form.querySelectorAll('input[type="datetime-local"]');
     for (var i = 0; i < stamps.length; i += 1) {
       var field = stamps[i];
@@ -4679,6 +4702,8 @@ ${THEME_SWITCH_JS}
       var form = event.target;
       if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-admin-mutation-form")) return;
       event.preventDefault();
+      if (form.getAttribute("aria-busy") === "true") return;
+      var editorSnapshot = form.hasAttribute("data-editor-form") ? snapshotEditorFormState(form) : null;
       var buttons = form.querySelectorAll('[type="submit"]');
       var status = form.querySelector("[data-admin-mutation-status]");
       var saving = form.getAttribute("data-admin-mutation-saving") || "Saving…";
@@ -4686,6 +4711,7 @@ ${THEME_SWITCH_JS}
       var failure = form.getAttribute("data-admin-mutation-failure") || "Could not save.";
       for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
       form.setAttribute("aria-busy", "true");
+      if (editorSnapshot) syncEditorSavebar(form);
       if (status) { status.textContent = saving; status.setAttribute("data-state", "saving"); }
       fetch(form.getAttribute("action"), {
         method: "POST",
@@ -4695,7 +4721,11 @@ ${THEME_SWITCH_JS}
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
-            if (!response.ok && response.status !== 207) throw new Error(payload.message || failure);
+            if (!response.ok && response.status !== 207) {
+              throw new Error(payload.kind === "listing_draft_conflict"
+                ? form.getAttribute("data-editor-conflict-message") || payload.message || failure
+                : payload.message || failure);
+            }
             return payload;
           });
         })
@@ -4703,11 +4733,21 @@ ${THEME_SWITCH_JS}
           // A batch that refused some enquiries is not a success: the strip
           // says how many landed and how many did not.
           var partial = payload && payload.kind === "lead_bulk_action" && payload.refused > 0;
+          if (editorSnapshot) {
+            var revision = form.querySelector('[name="draftRevision"]');
+            if (revision && (payload.kind !== "listing_draft_saved" || !/^[a-f0-9]{64}$/.test(payload.draft_revision || ""))) {
+              throw new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+            }
+            if (revision) revision.value = revision.defaultValue = payload.draft_revision;
+            commitEditorFormState(form, editorSnapshot);
+          }
           if (status) {
-            status.textContent = partial ? bulkOutcomeText(form, payload) : success;
+            var laterEdits = editorSnapshot && editorFormState(form) !== editorSnapshot.state;
+            status.textContent = partial ? bulkOutcomeText(form, payload) : laterEdits
+              ? form.getAttribute("data-editor-later-edits-message") || "Submitted changes saved. Your newer edits are still unsaved."
+              : success;
             status.setAttribute("data-state", partial ? "error" : "success");
           }
-          if (form.hasAttribute("data-editor-form")) commitEditorFormState(form);
           if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
         })
         .catch(function (error) {
@@ -4716,6 +4756,7 @@ ${THEME_SWITCH_JS}
         .then(function () {
           form.removeAttribute("aria-busy");
           for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+          if (editorSnapshot) syncEditorSavebar(form);
       });
     });
   }

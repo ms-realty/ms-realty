@@ -879,6 +879,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     },
     body: new URLSearchParams({
       listingId: "MS-CRAWL-0001",
+      draftRevision: "0".repeat(64), // Valid precondition shape; this smoke checks unavailable storage.
       description: "Updated approved source description.",
     }).toString(),
   });

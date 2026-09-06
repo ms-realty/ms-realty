@@ -1744,6 +1744,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
+            draftRevision: "0".repeat(64), // Valid precondition shape; this test has no durable runtime.
             title: "Updated title for Next admin",
             floor: "2",
             total_floors: "5",

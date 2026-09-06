@@ -85,6 +85,7 @@ export function renderAdminListingEditorPayload(
     },
     workspace: workspaceWithOperator(workspace, operator),
     listing,
+    draftRevision: record.draft_revision || null,
     factReview: { ...factReview, copy: factReviewCopyFor(requestedLocale) },
     qualityReview,
     edits: edits.filter((edit) => edit.listing_id === record.id),

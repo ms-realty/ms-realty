@@ -699,6 +699,12 @@ function projectedTour(document) {
   };
 }
 
+// The editor precondition covers the draft and its shared property. Hash the
+// authoritative documents, not a public source hash that omits workflow/SEO.
+export function listingDraftRevision(document, property = null) {
+  return createHash("sha256").update(JSON.stringify(normalize({ listing: document, property }))).digest("hex");
+}
+
 function projectedListingRecord(document, snapshot) {
   const translationDocs = relationId(document.translations || [])
     .map((id) => snapshot.listing_translations.byId.get(id))
@@ -711,6 +717,7 @@ function projectedListingRecord(document, snapshot) {
   const tourDocument = snapshot.listing_tours.byId.get(relationId(document.tour)) || snapshot.listing_tours.byListingId.get(document.id) || null;
   return {
     id: document.id,
+    draft_revision: listingDraftRevision(document, snapshot.properties.byId.get(relationId(document.property)) || null),
     collection: "listings",
     cms_status: document.cms_status,
     source_locale: localeCode(document.source_locale, snapshot),

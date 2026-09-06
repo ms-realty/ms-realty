@@ -268,7 +268,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
-import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { browserListingRevisionRequired, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
@@ -6509,6 +6509,7 @@ export function createHttpApp({
           payload: payloadListingRuntime,
           principal,
           input: listingEditInput(request),
+          requireRevision: browserListingRevisionRequired(request.headers),
           editedAt,
         });
         if (!result.idempotent) {
@@ -6525,6 +6526,7 @@ export function createHttpApp({
         }
         return adminJson(result.idempotent ? 200 : 201, {
           kind: "listing_draft_saved",
+          draft_revision: result.draftRevision,
           listing_id: result.listingId,
           changed_fields: result.changedFields,
           staleTranslations: result.staleTranslations,

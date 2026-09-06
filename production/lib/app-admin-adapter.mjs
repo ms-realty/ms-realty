@@ -213,7 +213,7 @@ import {
   recordSellerPipelineOutcomeOperation,
 } from "./lead-ops-workflows.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
-import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { browserListingRevisionRequired, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
@@ -5885,6 +5885,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           payload: config.payloadListingRuntime || null,
           principal: config.adminPrincipal,
           input,
+          requireRevision: config.requestChannel !== "mcp" && browserListingRevisionRequired(request.headers),
           editedAt: config.editedAt,
           requestChannel: config.requestChannel || "admin",
         });
@@ -5906,6 +5907,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         }
         return jsonResponse(result.idempotent ? 200 : 201, {
           kind: "listing_draft_saved",
+          draft_revision: result.draftRevision,
           listing_id: result.listingId,
           changed_fields: result.changedFields,
           verified_fact_fields: result.verifiedFactFields || [],
