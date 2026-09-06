@@ -1,3 +1,4 @@
+import { submitPublicEnquiry } from "./public-enquiry-submit.mjs";
 // Progressive-enhancement scripts emitted as versioned local assets by
 // build-design-assets.mjs. Pages stay fully server-rendered; this layer wires
 // saved listings, enquiries, the 360 viewer, and admin filters.
@@ -288,6 +289,9 @@ ${THEME_SWITCH_JS}
     if (warn) warn.remove();
   }
   function submitJson(form, onDone) {
+    if (form.getAttribute("action") === "/api/leads") {
+      return (${submitPublicEnquiry.toString()})(form, nestFormData(form), onDone, showFormError);
+    }
     var submit = form.querySelector('[type="submit"]');
     if (submit) {
       submit.setAttribute("data-loading", "");
@@ -519,6 +523,7 @@ ${THEME_SWITCH_JS}
   function configureEnquiryDialog(dialog, lead) {
     var form = dialog.querySelector("form");
     if (!form) return;
+    if (form.__publicEnquirySubmission) return;
     var intent = lead.getAttribute("data-lead-intent") || "inquiry";
     if (intent === "request_viewing") intent = "viewing";
     var title = lead.getAttribute("data-lead-title") || lead.textContent.trim();
@@ -1055,7 +1060,9 @@ ${THEME_SWITCH_JS}
         })
         .then(function (data) {
           if (payload.action === "delete") {
+            if (managed && feedback) managed.insertAdjacentElement("afterend", feedback);
             if (managed) managed.hidden = true;
+            if (localEmpty) localEmpty.hidden = readSavedSearches().length > 0;
             say("deleted");
             return;
           }
@@ -3015,6 +3022,8 @@ ${THEME_SWITCH_JS}
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  (${initPublicSearchAssistant.toString()})();
+  (${initPublicSearchEvidence.toString()})();
   function initListingSourceQuestions() {
     document.querySelectorAll("[data-listing-question-form]").forEach(function (form) {
       var copy = JSON.parse(form.getAttribute("data-question-copy"));
@@ -3096,8 +3105,6 @@ ${THEME_SWITCH_JS}
       });
     });
   }
-  (${initPublicSearchAssistant.toString()})();
-  (${initPublicSearchEvidence.toString()})();
   initListingSourceQuestions();
   initStartFlow();
   initCompareLinks();

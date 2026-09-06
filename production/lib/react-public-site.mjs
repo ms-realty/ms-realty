@@ -4853,10 +4853,24 @@ function GuideBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || {};
   const sections = page.body.sections || [];
+  const reviewLabels = {
+    bg: ["Редактор в източника", "Дата на одобрение в CMS", "Дата на проверка в източника"],
+    en: ["Source reviewer", "CMS approval date", "Source checked"],
+    de: ["Prüfung der Quelle", "CMS-Freigabedatum", "Quelle geprüft"],
+    nl: ["Bronbeoordelaar", "Goedkeuringsdatum in CMS", "Bron gecontroleerd"],
+    ru: ["Редактор источника", "Дата одобрения в CMS", "Источник проверен"],
+    el: ["Ελεγκτής πηγής", "Ημερομηνία έγκρισης CMS", "Έλεγχος πηγής"],
+    he: ["בודק המקור", "תאריך אישור CMS", "בדיקת המקור"],
+  }[page.locale] || ["Source reviewer", "CMS approval date", "Source checked"];
+  const sourceDate = (value) => {
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat(page.locale, { dateStyle: "medium", timeZone: "UTC" }).format(date) : value;
+  };
   const related = (chrome.resources?.links || []).filter((link) => !link.active);
   const phone = phoneChannel(page);
   const tocEntries = [
     ...sections.filter((section) => section.title !== page.body.h1).map((section) => ({ id: section.id, label: section.title })),
+    ...sections.filter((section) => section.sources?.length).map((section) => ({ id: `${section.id}-sources`, label: section.sources_label || labels.approvedSource })),
     { id: "guide-ask", label: labels.askBroker },
     ...(related.length ? [{ id: "guide-related", label: labels.relatedGuides }] : []),
   ];
@@ -4869,6 +4883,20 @@ function GuideBody({ page }) {
           h("ol", null, ...tocEntries.map((entry) => h("li", { key: entry.id }, h("a", { href: `#${entry.id}` }, entry.label)))),
         )
       : null;
+  const ask = h(
+          "section",
+          { id: "guide-ask", className: "guide-ask", "aria-labelledby": "guide-ask-title", "data-guide-ask-broker": "true" },
+          h("h2", { id: "guide-ask-title" }, labels.askBroker),
+          h("p", null, labels.askBrokerText),
+          h(
+            "nav",
+            { className: "pg-actions", "aria-label": labels.guideActions },
+            h(Btn, { tag: "a", variant: "accent", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactBroker),
+            phone ? h(Btn, { tag: "a", variant: "secondary", iconStart: "phone", href: phone.href }, phone.label) : null,
+            h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.ctas.search.path }, labels.search),
+            h(Btn, { tag: "a", variant: "ghost", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
+          ),
+        );
   const main = h(
     "main",
     {
@@ -4876,6 +4904,7 @@ function GuideBody({ page }) {
       tabIndex: -1,
       "data-kind": "guide",
       "data-react-public-ui": "guide",
+      "data-atlas-public": "guide",
       "data-approved-source": "cms",
       "data-min-touch-target": "44",
       className: "guide-page",
@@ -4886,8 +4915,13 @@ function GuideBody({ page }) {
       h(
         "header",
         { className: "guide-head" },
-        h(Badge, { variant: "neutral", icon: "shield-check", "data-guide-trust": "approved" }, labels.approvedSource),
         h("h1", null, page.body.h1),
+        h("div", { className: "guide-review", "data-guide-trust": "approved" },
+          ...sections.map((section) => h("div", { key: section.id },
+            section.reviewer ? h("p", null, `${reviewLabels[0]}: ${section.reviewer}`) : null,
+            section.approved_at ? h("p", null, `${reviewLabels[1]}: `, h("time", { dateTime: section.approved_at }, sourceDate(section.approved_at))) : null,
+          )),
+        ),
       ),
       toc ? h("aside", { className: "guide-page__aside" }, toc) : null,
       h(
@@ -4906,11 +4940,11 @@ function GuideBody({ page }) {
               "aria-label": primary ? section.title : undefined,
             },
             primary ? null : h("h2", null, section.title),
-            h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 16 }), h("span", null, fact)))),
+            h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h("p", null, fact)))),
             section.sources?.length
               ? h(
                   "div",
-                  { className: "guide-sources", "data-guide-sources": "true" },
+                  { id: `${section.id}-sources`, className: "guide-sources", "data-guide-sources": "true" },
                   section.sources_label ? h("p", { className: "guide-sources__label" }, section.sources_label) : null,
                   h(
                     "ul",
@@ -4925,6 +4959,8 @@ function GuideBody({ page }) {
                           h("span", null, source.label || source.publisher),
                           h(Icon, { name: "external-link", size: 14 }),
                         ),
+                        source.publisher ? h("p", { className: "guide-sources__meta" }, source.publisher) : null,
+                        source.checked_at ? h("p", { className: "guide-sources__meta" }, `${reviewLabels[2]}: `, h("time", { dateTime: source.checked_at }, sourceDate(source.checked_at))) : null,
                       ),
                     ),
                   ),
@@ -4932,20 +4968,6 @@ function GuideBody({ page }) {
               : null,
           );
         }),
-        h(
-          "section",
-          { id: "guide-ask", className: "guide-ask", "aria-labelledby": "guide-ask-title", "data-guide-ask-broker": "true" },
-          h("h2", { id: "guide-ask-title" }, labels.askBroker),
-          h("p", null, labels.askBrokerText),
-          h(
-            "nav",
-            { className: "pg-actions", "aria-label": labels.guideActions },
-            h(Btn, { tag: "a", variant: "primary", iconStart: "message-circle", href: page.body.ctas.contact.path }, labels.contactBroker),
-            phone ? h(Btn, { tag: "a", variant: "secondary", iconStart: "phone", href: phone.href }, phone.label) : null,
-            h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.ctas.search.path }, labels.search),
-            h(Btn, { tag: "a", variant: "ghost", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
-          ),
-        ),
         related.length
           ? h(
               "section",
@@ -4975,6 +4997,7 @@ function GuideBody({ page }) {
             )
           : null,
       ),
+      ask,
     ),
   );
   return shell(page, main);
@@ -5208,7 +5231,17 @@ function CompareBody({ page }) {
 
 function AboutBody({ page }) {
   const body = page.body;
-  const copy = body.copy;
+  const english = page.locale === "en";
+  const seller = page.chrome?.nav?.find((item) => item.id === "sell");
+  const emptyCopy = {
+    bg: ["Профилите на екипа още не са налични.", "Свържете се с офиса за помощ с вашето запитване."],
+    en: ["Team profiles aren’t available yet.", "Contact the office for help with your enquiry."],
+    de: ["Teamprofile sind noch nicht verfügbar.", "Wenden Sie sich mit Ihrer Anfrage an unser Büro."],
+    nl: ["Teamprofielen zijn nog niet beschikbaar.", "Neem contact op met het kantoor voor hulp bij uw vraag."],
+    ru: ["Профили команды пока недоступны.", "Свяжитесь с офисом, чтобы получить помощь с вашим запросом."],
+    el: ["Τα προφίλ της ομάδας δεν είναι ακόμη διαθέσιμα.", "Επικοινωνήστε με το γραφείο για βοήθεια με το αίτημά σας."],
+    he: ["פרופילי הצוות עדיין אינם זמינים.", "צרו קשר עם המשרד לקבלת עזרה בפנייה שלכם."],
+  }[page.locale];
   const labels = uiLabels(page);
   const team = body.team;
   const contact = body.contact;
@@ -5221,18 +5254,20 @@ function AboutBody({ page }) {
       className: "ab-page",
       "data-kind": "about",
       "data-react-public-ui": "about",
+      "data-atlas-public": "about",
       "data-min-touch-target": "44",
     },
     h(
       "header",
       { className: "ab-head" },
-      h("h1", null, body.h1),
-      h("p", { className: "ab-head__intro" }, body.intro),
-      h(
-        "div",
-        { className: "ab-head__actions" },
-        h(Btn, { tag: "a", variant: "accent", size: "md", iconStart: "message-circle", href: contact.path }, contact.label),
-        h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "search", href: body.search.path }, labels.browseListings),
+      h("div", { className: "ab-head__copy" },
+        h("h1", null, english ? "Property starts" : body.h1, english ? h("br") : null, english ? "with a conversation." : null),
+        h("p", { className: "ab-head__intro" }, english ? "Buying, renting or selling in Sandanski and the region? Tell the office what you have in mind." : body.intro),
+        h("div", { className: "ab-head__actions" }, h(Btn, { tag: "a", variant: "accent", href: contact.path }, english ? "Contact MS Realty" : contact.label)),
+      ),
+      h("figure", { className: "ab-photo" },
+        h("img", { src: "/hero/sandanski-1280.webp", srcSet: "/hero/sandanski-640.webp 640w, /hero/sandanski-1280.webp 1280w", sizes: "(max-width: 760px) calc(100vw - 40px), 50vw", width: 1280, height: 890, alt: localizedLocationValue(page.locale, "Sandanski"), fetchPriority: "high", decoding: "async" }),
+        h("figcaption", null, english ? "Sandanski · supplied area photograph, not an office photograph" : localizedLocationValue(page.locale, "Sandanski")),
       ),
     ),
     h(
@@ -5240,6 +5275,10 @@ function AboutBody({ page }) {
       { className: "ab-story", "aria-labelledby": "about-story-title" },
       h("h2", { id: "about-story-title" }, body.story.title),
       ...body.story.paragraphs.map((paragraph, index) => h("p", { key: index }, paragraph)),
+      h("nav", { className: "ab-head__actions", "aria-label": labels.primaryActions },
+        h(Btn, { tag: "a", variant: "secondary", href: body.search.path }, labels.browseListings),
+        seller ? h(Btn, { tag: "a", variant: "secondary", href: seller.href }, seller.label) : null,
+      ),
     ),
     h(
       "section",
@@ -5292,8 +5331,8 @@ function AboutBody({ page }) {
         "data-about-team-available": team.available ? "true" : "false",
         "data-about-team-count": String(team.profiles.length),
       },
-      h("h2", { id: "about-team-title" }, team.title),
-      h("p", { className: "ab-lede" }, team.intro),
+      h("h2", { id: "about-team-title" }, team.empty ? emptyCopy?.[0] || team.empty.title : team.title),
+      team.empty ? null : h("p", { className: "ab-lede" }, team.intro),
       team.empty
         ? h(
             "div",
@@ -5303,13 +5342,10 @@ function AboutBody({ page }) {
               "data-about-team-reason": team.empty.reason,
               "data-about-team-source": team.empty.source,
             },
-            h("span", { className: "ab-team__empty-icon", "aria-hidden": "true" }, h(Icon, { name: "users", size: 26 })),
             h(
               "div",
               null,
-              h("p", { className: "ab-team__empty-title" }, team.empty.title),
-              h("p", { className: "ab-team__empty-text" }, team.empty.text),
-              h("p", { className: "ab-team__empty-fields" }, team.empty.fields),
+              h("p", { className: "ab-team__empty-text" }, emptyCopy?.[1] || contact.text),
               h(Btn, { tag: "a", variant: "secondary", size: "md", iconStart: "phone", href: contact.channels.phone.href }, contact.channels.phone.label),
             ),
           )
@@ -5363,9 +5399,12 @@ function AboutBody({ page }) {
       h(
         "div",
         { className: "ab-contact__actions" },
-        h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: contact.channels.phone.href }, contact.channels.phone.label),
-        h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: contact.channels.whatsapp.href }, contact.channels.whatsapp.label),
-        h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "mail", href: contact.channels.email.href }, contact.channels.email.label),
+        h("a", { className: "ab-contact__phone", href: contact.channels.phone.href }, contact.channels.phone.label),
+        h("a", { className: "ab-contact__email", href: contact.channels.email.href }, contact.channels.email.label),
+        h("div", { className: "ab-contact__channels" },
+          h(Btn, { tag: "a", variant: "secondary", href: contact.channels.whatsapp.href }, contact.channels.whatsapp.label),
+          contact.channels.viber ? h(Btn, { tag: "a", variant: "secondary", href: contact.channels.viber.href }, contact.channels.viber.label) : null,
+        ),
       ),
     ),
   );
@@ -5541,6 +5580,7 @@ function AlertsBody({ page }) {
       className: "al-page",
       "data-kind": "alerts",
       "data-react-public-ui": "alerts",
+      "data-atlas-public": "alerts",
       "data-alerts-page": "true",
       "data-alerts-storage-key": body.storage_key,
       "data-alerts-endpoint": body.create.endpoint,
@@ -5555,7 +5595,9 @@ function AlertsBody({ page }) {
       "data-alerts-search-path": body.search.path,
       "data-min-touch-target": "44",
     },
-    h("header", { className: "al-head" }, h("h1", null, body.h1), h("p", { className: "al-head__intro" }, body.intro)),
+    h("header", { className: "al-head" },
+      h("h1", null, page.locale === "en" ? ["Your searches.", h("br", { key: "break" }), "Your pace."] : body.h1),
+      h("p", { className: "al-head__intro" }, body.intro)),
     managed,
     linkInvalid,
     h(

@@ -6833,57 +6833,7 @@ function ContactsBody({ page }) {
     { value: "no_account", label: ui.withoutAccount, count: page.contacts.length - withAccount },
     { value: "with_account", label: ui.withAccount, count: withAccount },
   ];
-  return adminShell(page, {
-    title,
-    mainAttrs: {
-      "data-kind": "admin-contacts",
-      "data-react-admin-ui": "contacts",
-      "data-contact-count": page.summary.contacts,
-      "data-account-count": page.summary.accounts,
-      "data-task-led": "true",
-    },
-    children: [
-      h(PageHeader, { title, subtitle: page.metadata.description }),
-      h(StatGrid, { metrics }),
-      h(
-        PageToolbar,
-        null,
-        h(ListFilterTabs, { key: "tabs", scope: "contacts", label: label(copy, "contactRecords", "Customer contacts"), options: filterOptions }),
-        pageCan(page, "operations:write")
-          ? h(ActionDisclosure, { key: "new", summary: ui.newAccountAction, icon: "plus", "data-account-create": "true" }, h(AccountCreateForm, { page, copy }))
-          : null,
-      ),
-      h(
-        "div",
-        { className: "adm-contact-layout" },
-        h(
-          Panel,
-          { title: label(copy, "accounts", "Accounts") },
-          page.accounts.length
-            ? h(
-                "ul",
-                { className: "adm-account-list" },
-                ...page.accounts.map((account) =>
-                  h(
-                    "li",
-                    { key: account.id, "data-account-record": account.id },
-                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono" }, account.id)),
-                    h(StatusPill, { tone: account.type === "company" ? "sea" : "sand" }, label(copy, account.type, account.type)),
-                    h("span", null, `${account.contact_count} ${label(copy, "contactRecords", "contacts")}`),
-                  ),
-                ),
-              )
-            : h(EmptyState, { icon: "building-2" }, label(copy, "noAccounts", "No family or company accounts yet.")),
-        ),
-        h(
-          Panel,
-          { title: label(copy, "contactRecords", "Customer contacts") },
-          page.contacts.length ? h(ListEmptyNote, { scope: "contacts" }, ui.noFilterMatches) : h("p", { className: "adm-empty", "data-empty-contacts": "true" }, ui.noContacts),
-          h(
-            "div",
-            { className: "adm-contact-grid", hidden: page.contacts.length ? undefined : true },
-            ...page.contacts.map((contact) =>
-              h(
+  const renderContact = (contact) => h(
                 "article",
                 {
                   key: contact.id,
@@ -6917,11 +6867,44 @@ function ContactsBody({ page }) {
                   ...contact.lead_ids.map((leadId) => h("a", { key: leadId, href: adminHref(`/admin/leads?locale=${page.workspace.locale}#lead-${encodeURIComponent(leadId)}`, page) }, leadId)),
                 ),
                 h(AccountLinkForm, { page, contact, copy }),
-              ),
-            ),
-          ),
-        ),
-      ),
+              );
+  return adminShell(page, {
+    title,
+    mainAttrs: { "data-kind": "admin-contacts", "data-react-admin-ui": "contacts", "data-contact-count": page.summary.contacts, "data-account-count": page.summary.accounts, "data-task-led": "true" },
+    children: [
+      h(PageHeader, { title, subtitle: page.metadata.description },
+        pageCan(page, "operations:write")
+          ? h(ActionDisclosure, { summary: ui.newAccountAction, icon: "plus", "data-account-create": "true" }, h(AccountCreateForm, { page, copy }))
+          : null),
+      h(DailyWorkspace, {
+        scope: "contact", page, title,
+        rows: page.contacts.map(contact => ({ ...contact, tags: contact.account_id ? "with_account" : "no_account" })),
+        filters: filterOptions.filter(option => option.value !== "all"),
+        empty: h(EmptyState, { icon: "users", "data-empty-contacts": "true" }, ui.noContacts),
+        renderRow: contact => h("div", { className: "adm-contact-directory-row" },
+          h("strong", null, contactTitle(contact, ui)),
+          h("span", null, contact.id),
+          h("span", null, contact.account_label || ui.withoutAccount),
+          h("small", null, `${contact.lead_count} ${label(copy, "leads", "Enquiries")} · ${contact.languages.join(", ").toUpperCase() || ui.notSet}`)),
+        renderDetail: renderContact,
+      }),
+      h(SummaryStrip, { cards: metrics.map(([title, value], index) => ({ id: `contacts-${index}`, title, value })), "data-summary-kind": "contacts" }),
+      h("details", { className: "adm-contact-accounts", "data-contact-accounts": "true" },
+        h("summary", null, h(Icon, { name: "building-2", size: 18 }), label(copy, "accounts", "Accounts"), ` · ${page.accounts.length}`, h(Icon, { name: "chevron-down", size: 16 })),
+        page.accounts.length ? h(
+                "ul",
+                { className: "adm-account-list" },
+                ...page.accounts.map((account) =>
+                  h(
+                    "li",
+                    { key: account.id, "data-account-record": account.id },
+                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono" }, account.id)),
+                    h(StatusPill, { tone: account.type === "company" ? "sea" : "sand" }, label(copy, account.type, account.type)),
+                    h("span", null, `${account.contact_count} ${label(copy, "contactRecords", "contacts")}`),
+                  ),
+                ),
+              )
+          : h(EmptyState, { icon: "building-2" }, label(copy, "noAccounts", "No family or company accounts yet."))),
     ],
   });
 }
@@ -8428,81 +8411,15 @@ function ListingManagerBody({ page }) {
         { title, subtitle: page.metadata?.description },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) }, h(Icon, { name: "languages", size: 16 }), h("span", null, label(copy, "translationQueue", "Translation review"))),
       ),
-      h(StatGrid, { metrics }),
+      h(SummaryStrip, { cards: metrics.map(([title, value], index) => ({ id: `listings-${index}`, title, value })), "data-summary-kind": "listings" }),
       h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
         null,
         h(CmsFilterLinks, { scope: "listings", label: label(copy, "qualityStatus", "Status"), options: statusFilterOptions }),
       ),
-      h(
-        Panel,
-        {
-          title: `${factReviewCopy.title || "Facts to confirm"} · ${factReviewSummary.unchecked_figures || 0}`,
-          "data-fact-review-queue": "true",
-        },
-        h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
-        h(
-          "form",
-          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
-          filterLocaleInput(page),
-          h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
-          h(
-            "label",
-            null,
-            factReviewCopy.title || "Fact",
-            h(
-              "select",
-              { name: "factRow" },
-              h("option", { value: "" }, label(copy, "all", "All")),
-              ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
-            ),
-          ),
-          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
-          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
-        ),
-        h(
-          "p",
-          { className: "adm-note", "data-fact-review-summary": "true" },
-          `${factReviewSummary.listings_with_unchecked_facts || 0} · ${factReviewSummary.unchecked_figures || 0} ${factReviewCopy.count || "unchecked facts"}`,
-        ),
-        factReviewRows.length
-          ? h(
-              "details",
-              {
-                open: Boolean(factReview.filters?.row || factReview.filters?.q),
-                className: "adm-workbench-disclosure",
-                "data-fact-review-results": String(factReviewRows.length),
-              },
-              h("summary", null, h("span", null, `${label(copy, "results", "Results")} · ${factReviewRows.length}`)),
-              h(
-                "ul",
-                { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
-                ...factReviewRows.map((row) =>
-                  h(
-                    "li",
-                    { key: row.listing_id, "data-fact-review-listing": row.listing_id },
-                    h(
-                      "div",
-                      { className: "adm-task-list__body" },
-                      h("strong", null, row.title),
-                      h("code", { className: "crm-mono" }, row.listing_id),
-                      h("small", null, row.location || ui.notSet),
-                      h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
-                    ),
-                    h(
-                      "div",
-                      { className: "adm-task-list__actions" },
-                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : h(EmptyState, { icon: "check", "data-empty-fact-review": "true" }, factReviewCopy.noRows || "No facts need confirmation."),
-      ),
-      h(DuplicateReviewPanel, { page }),
-      h(AreaReviewPanel, { page }),
+      h("div", { className: "adm-catalogue-workspace" },
+      h("section", { className: "adm-catalogue-records", "aria-label": label(copy, "results", "Results") },
       h(
         "form",
         { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
@@ -8550,8 +8467,10 @@ function ListingManagerBody({ page }) {
           label(copy, "language", "Language"),
           h("select", { name: "sourceLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.sourceLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.sourceLocale === value }, value.toUpperCase()))),
         ),
-        rangeFields.includes("price") ? rangeField("price") : null,
-        rangeFields.includes("area") ? rangeField("area", { step: "any", inputMode: "decimal" }) : null,
+        rangeFields.length ? h("details", { className: "adm-catalogue-ranges", open: Boolean(filterErrors.length || page.filters.priceMin || page.filters.priceMax || page.filters.areaMin || page.filters.areaMax) },
+          h("summary", null, [rangeFields.includes("price") ? ui.priceRange : null, rangeFields.includes("area") ? ui.areaRange : null].filter(Boolean).join(" · ")),
+          rangeFields.includes("price") ? rangeField("price") : null,
+          rangeFields.includes("area") ? rangeField("area", { step: "any", inputMode: "decimal" }) : null) : null,
         filterErrors.length
           ? h(
               "p",
@@ -8721,6 +8640,83 @@ function ListingManagerBody({ page }) {
             ),
       ),
       h(Pagination, { page, path: "/admin/listings" }),
+      ),
+      h("aside", { className: "adm-catalogue-review", "aria-label": ui.reviewRequired },
+        h("h2", null, ui.reviewRequired),
+        h("details", { className: "adm-catalogue-review-section", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review": "facts" },
+          h("summary", null, factReviewCopy.title || "Facts to confirm", ` · ${factReviewSummary.unchecked_figures || 0}`),
+h(
+        Panel,
+        {
+          title: `${factReviewCopy.title || "Facts to confirm"} · ${factReviewSummary.unchecked_figures || 0}`,
+          "data-fact-review-queue": "true",
+        },
+        h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
+        h(
+          "form",
+          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
+          filterLocaleInput(page),
+          h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
+          h(
+            "label",
+            null,
+            factReviewCopy.title || "Fact",
+            h(
+              "select",
+              { name: "factRow" },
+              h("option", { value: "" }, label(copy, "all", "All")),
+              ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
+            ),
+          ),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
+        ),
+        h(
+          "p",
+          { className: "adm-note", "data-fact-review-summary": "true" },
+          `${factReviewSummary.listings_with_unchecked_facts || 0} · ${factReviewSummary.unchecked_figures || 0} ${factReviewCopy.count || "unchecked facts"}`,
+        ),
+        factReviewRows.length
+          ? h(
+              "details",
+              {
+                open: Boolean(factReview.filters?.row || factReview.filters?.q),
+                className: "adm-workbench-disclosure",
+                "data-fact-review-results": String(factReviewRows.length),
+              },
+              h("summary", null, h("span", null, `${label(copy, "results", "Results")} · ${factReviewRows.length}`)),
+              h(
+                "ul",
+                { className: "adm-task-list", "data-fact-review-rows": String(factReviewRows.length) },
+                ...factReviewRows.map((row) =>
+                  h(
+                    "li",
+                    { key: row.listing_id, "data-fact-review-listing": row.listing_id },
+                    h(
+                      "div",
+                      { className: "adm-task-list__body" },
+                      h("strong", null, row.title),
+                      h("code", { className: "crm-mono" }, row.listing_id),
+                      h("small", null, row.location || ui.notSet),
+                      h("small", null, row.unchecked_rows.map((key) => factReviewLabels[key] || key).join(" · ")),
+                    ),
+                    h(
+                      "div",
+                      { className: "adm-task-list__actions" },
+                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, factReviewCopy.openEditor || label(copy, "openEditor", "Open editor")),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h(EmptyState, { icon: "check", "data-empty-fact-review": "true" }, factReviewCopy.noRows || "No facts need confirmation."),
+      )),
+        h("details", { className: "adm-catalogue-review-section", "data-catalogue-review": "duplicates" },
+          h("summary", null, page.duplicateReview?.copy?.duplicateTitle || "Manual duplicate comparison"), h(DuplicateReviewPanel, { page })),
+        h("details", { className: "adm-catalogue-review-section", "data-catalogue-review": "area" },
+          h("summary", null, page.areaReview?.copy?.areaTitle || "Areas for review"), h(AreaReviewPanel, { page })),
+      ),
+      ),
       canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/listings/publication-schedules")
         ? h(PublicationSchedulePanel, { page })
         : null,
@@ -9893,9 +9889,6 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
-  // The topbar already names the screen. The page heading names the listing,
-  // so an operator with several editor tabs open can tell them apart.
-  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
   // One descriptor, so the button is the same control on every field it
@@ -9942,7 +9935,7 @@ function ListingEditorBody({ page }) {
       id: "translations",
       title: label(copy, "translationState", "Translation state"),
       value: String(translationStates.length),
-      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : statusText(ui, "approved"),
+      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : translationStates.length ? translationStates.map((translation) => `${String(translation.locale).toUpperCase()}: ${statusText(ui, translation.status)}`).join(" · ") : ui.notSet,
       tone: staleTranslations.length ? "brick" : "sea",
     },
     {
@@ -9959,7 +9952,7 @@ function ListingEditorBody({ page }) {
       "data-kind": "admin-listing-editor",
       "data-react-admin-ui": "listing-editor",
       "data-admin-workbench": "cms",
-      "data-editor-layout": "stacked-workflow",
+      "data-editor-layout": "facts-and-review",
       "data-cms-status": page.listing.cms_status,
       "data-schema-ready": page.listing.seo?.schema_present ? "true" : "false",
       "data-publish-approved": workflow.publish_approved ? "true" : "false",
@@ -9972,7 +9965,7 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: listingName,
+          title: page.listing.id,
           subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
@@ -9981,7 +9974,9 @@ function ListingEditorBody({ page }) {
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(DataAvailabilityNotice, { page }),
-      h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" }),
+      h("details", { className: "adm-editor-overview" },
+        h("summary", null, statusText(ui, page.listing.cms_status), " · ", ui.listingChecks),
+        h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" })),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -10071,7 +10066,7 @@ function ListingEditorBody({ page }) {
                       "data-editor-savebar": "true",
                       "data-dirty": "false",
                       "data-save-state": "clean",
-                      "data-editor-conflict-marker": ui.saveConflictTitle,
+                      "data-editor-conflict-marker": ui.editorConflict,
                     },
                     h(
                       "div",

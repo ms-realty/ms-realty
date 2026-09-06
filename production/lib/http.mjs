@@ -1,3 +1,4 @@
+import { PUBLIC_LEAD_STATUS_PATH, publicLeadReceipt, publicLeadStatus } from "./public-lead-receipts.mjs";
 import { PUBLIC_SEARCH_ASSISTANT_PATHS, PUBLIC_SEARCH_ASSISTANT_MAX_BYTES, publicSearchAssistant, publicSearchAssistantFailure } from "./public-search-assistant.mjs";
 import { LISTING_QUESTION_PATH, LISTING_QUESTION_MAX_BYTES, publicListingQuestion } from "./public-listing-questions.mjs";
 import { searchPath } from "./seo.mjs";
@@ -562,6 +563,7 @@ const PUBLIC_WRITE_PATHS = new Set([
   LISTING_QUESTION_PATH,
   ...PUBLIC_SEARCH_ASSISTANT_PATHS,
   "/api/leads",
+  PUBLIC_LEAD_STATUS_PATH,
   "/api/events",
   "/api/language-requests",
   "/api/saved-searches",
@@ -2643,7 +2645,7 @@ export function createHttpApp({
       };
     }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
-    if (request.method === "POST" && ["/api/leads", LISTING_QUESTION_PATH, ...PUBLIC_SEARCH_ASSISTANT_PATHS].includes(url.pathname)) {
+    if (request.method === "POST" && ["/api/leads", PUBLIC_LEAD_STATUS_PATH, LISTING_QUESTION_PATH, ...PUBLIC_SEARCH_ASSISTANT_PATHS].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
       const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
@@ -7761,8 +7763,16 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === PUBLIC_LEAD_STATUS_PATH) {
+      let input;
+      try { input = parseBody(request); } catch { return privateJson(400, { kind: "lead_status_invalid" }); }
+      const result = await publicLeadStatus(input, { store: leadDurableStore, payload: leadDurablePayload });
+      return privateJson(result.status, result.body);
+    }
+
     if (request.method === "POST" && url.pathname === "/api/leads") {
-      try {
+      let persistenceStarted = false;
+  try {
         const input = parseBody(request);
         const context = await currentPublicContext();
         const workspaceSettings =
@@ -7781,6 +7791,7 @@ export function createHttpApp({
         if (durableRequested && !isLeadDurableStoreEnabled(leadDurableStore)) {
           throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
         }
+        persistenceStarted = true;
         const durable = durableRequested
           ? await persistLeadIntake({
               lead,
@@ -7827,15 +7838,15 @@ export function createHttpApp({
             action: lead.lead?.source,
           });
         }
-        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
+        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(ledger, { retrySafe: Boolean(durable) }) });
       } catch (error) {
         if (error instanceof WorkspaceSettingsStoreUnavailableError) {
           return privateJson(error.status || 503, { kind: error.code, message: "Workspace settings are temporarily unavailable" });
         }
         if (error instanceof LeadStoreUnavailableError) {
-          return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
+          return privateJson(503, { kind: error.code, intake_status: persistenceStarted ? "unknown" : "rejected", message: "Lead storage is temporarily unavailable" });
         }
-        return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", intake_status: persistenceStarted ? "unknown" : "rejected", message: error.message });
       }
     }
 

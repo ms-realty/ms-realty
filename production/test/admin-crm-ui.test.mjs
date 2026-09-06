@@ -147,8 +147,14 @@ test("pipeline renders a stage board whose columns count their own cards", async
 
 test("every CRM list screen carries the same toolbar filter and empty-note pattern", async () => {
   const server = app();
+  // Contacts moved to the Paper 03.01 daily-workspace pattern (search plus
+  // tag filters beside a detail pane), so it is asserted on that contract below.
+  const contacts = await dispatchHttp(server, { url: "/admin/contacts?locale=en", headers: auth });
+  assert.equal(contacts.status, 200);
+  assert.match(contacts.body, /data-daily-workspace="contact"/);
+  assert.match(contacts.body, /data-daily-search/);
+  assert.match(contacts.body, /data-daily-tags="(with|no)_account"/);
   for (const [url, scope] of [
-    ["/admin/contacts?locale=en", "contacts"],
     ["/admin/consents?locale=en", "consents"],
     ["/admin/documents?locale=en", "documents"],
     ["/admin/requests?locale=en", "requests"],

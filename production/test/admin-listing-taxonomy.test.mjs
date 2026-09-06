@@ -174,8 +174,10 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
   assert.match(html, /adm-lead-more/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.match(html, /class="adm-lead-detail"/);
-  assert.match(html, /class="adm-kpis"/);
-  assert.match(html, /class="adm-kpis"/);
+  // The inbox metrics are the Atlas summary strip now, not the compact <dl> KPI grid.
+  assert.match(html, /class="adm-summary-strip"/);
+  assert.match(html, /data-summary-card=/);
+  assert.doesNotMatch(html, /class="adm-kpis"/);
   assert.match(html, /data-lead-filter=/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.doesNotMatch(html, /<h2>CRM запитвания<\/h2>/);

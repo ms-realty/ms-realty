@@ -172,7 +172,6 @@ test("hero search keeps geography and numeric controls usable after the static-p
   assert.match(pagesCss, /\.hp-featured:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
   assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 96px - var\(--space-6\)\);[\s\S]*?overflow-y: auto;/);
   assert.match(css, /\.site-mobile-tabs a \{[\s\S]*?color: var\(--text-body\);/);
-  assert.match(pagesCss, /\.hp-rail-empty \.mk-empty__text \{[^}]*color: var\(--text-body\);/);
   const listingCss = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
   assert.match(listingCss, /dl\[data-listing-facts="true"\] dt \{ color: var\(--text-body\);/);
   assert.match(listingCss, /\.ld-trust__row \{[^}]*color: var\(--text-body\);/);

@@ -3286,3 +3286,126 @@ html[data-theme="dark"] .crm-top {
 @media (max-width: 600px) {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Catalogue: Paper 05.01–05.02 puts records first and review beside the work.
+   Existing forms and evidence queues remain in their owning sections. */
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-workspace {
+  display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start;
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records {
+  display: grid; gap: 20px; min-width: 0;
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review {
+  background: var(--atlas-surface); border-radius: 24px; padding: 20px; min-width: 0;
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review h2 { margin: 0 0 16px; font-size: 20px; line-height: 24px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-section { border-block-start: 1px solid var(--atlas-line); }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-section > summary {
+  min-height: 52px; padding: 12px 0; cursor: pointer; font-size: 16px; line-height: 24px; font-weight: 600;
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .crm-panel { border: 0; box-shadow: none; background: transparent; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review :is(.adm-filterbar,.adm-report-grid) { grid-template-columns: minmax(0, 1fr); }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list > li { flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list__body { min-width: 0; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list__actions { flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-filterbar__summary { grid-column: 1 / -1; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table { display: block; min-width: 0; width: 100%; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table thead { display: none; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table tbody { display: grid; gap: 12px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table tr {
+  display: grid; grid-template-columns: 44px minmax(0,1fr) 150px; gap: 8px 12px;
+  padding: 16px; border: 1px solid var(--atlas-line); border-radius: 20px; background: var(--atlas-surface);
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table td { border: 0; padding: 0; min-width: 0; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="select"] { grid-column: 1; grid-row: 1; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="listing"] { grid-column: 2; grid-row: 1; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="status"] { grid-column: 3; grid-row: 1; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="location"] { grid-column: 2; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="property-family"] { grid-column: 3; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="locale"] { grid-column: 2; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="quality"] { grid-column: 3; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="action"] { grid-column: 2 / -1; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-bulk__bar { position: static; flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-select-hit { min-width: 44px; min-height: 44px; }
+.crm-app main[data-react-admin-ui="listing-manager"] :is(input:not([type="checkbox"]), select, button, .mk-btn),
+.crm-app main[data-react-admin-ui="listing-editor"] :is(input:not([type="hidden"]):not([type="checkbox"]), select, button, .mk-btn) { min-height: 44px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 { font-size: 32px; line-height: 36px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p { font-size: 14px; line-height: 20px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell { grid-template-columns: minmax(0,1fr) 360px; gap: 24px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-main { grid-column: 1; grid-row: 1 / span 2; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support { display: contents; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > * { grid-column: 1 / -1; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-quality-panel] { grid-column: 2; grid-row: 1; background: var(--atlas-surface); }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-translation-panel] { grid-column: 2; grid-row: 2; background: var(--atlas-surface); }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-media-review-panel] { grid-column: 1 / -1; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-facts { display: grid; grid-template-columns: 1fr; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-savebar { background: var(--atlas-canvas); border-color: var(--atlas-control); }
+.crm-app main[data-react-admin-ui="listing-editor"] :is(input,select,textarea,button):disabled { opacity: 1; border-color: var(--atlas-control); color: var(--atlas-muted); }
+@media (max-width: 1100px) {
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-workspace,
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell { grid-template-columns: minmax(0,1fr); }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-main,
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > * { grid-column: 1; grid-row: auto; }
+}
+@media (max-width: 600px) {
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table tr { grid-template-columns: 44px minmax(0,1fr); padding: 12px; }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="listing"] { padding: 0; }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="action"] { grid-column: 1 / -1; }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review { padding: 16px; }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-summary-strip,
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-summary-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs { display: flex; flex-wrap: wrap; }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs .mk-tab { flex: 1 0 auto; min-height: 44px; }
+}
+
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar { grid-template-columns: repeat(4,minmax(0,1fr)); align-items: end; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar > label:first-of-type { grid-column: 1 / span 2; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-ranges { min-width: 0; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-ranges > summary { min-height: 44px; padding-block: 12px; cursor: pointer; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-ranges[open] { grid-column: 1 / -1; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-bulk { display: flex; flex-direction: column; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-bulk__bar { order: 2; border-block-start: 1px solid var(--atlas-line); }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-bulk__bar[data-selection="empty"] .adm-listing-bulk__scope { display: none; }
+.crm-app main[data-react-admin-ui="listing-editor"] :is(.adm-editor-overview > summary,.adm-media-review > summary,.adm-media-replace > summary) { min-height: 44px; padding-block: 12px; cursor: pointer; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-overview > summary { font-size: 14px; line-height: 20px; color: var(--atlas-muted); }
+.crm-app main[data-react-admin-ui="listing-editor"] summary { min-height: 44px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .mk-btn:disabled { background: var(--atlas-surface); }
+@media (max-width: 600px) {
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar > label:first-of-type { grid-column: 1 / -1; }
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: minmax(0,1fr); }
+}
+
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-identity__desktop strong { white-space: normal; overflow: visible; text-overflow: clip; font-size: 16px; line-height: 20px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-identity__desktop code { font-size: 14px; line-height: 20px; }
+@media (max-width: 1100px) {
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-quality-panel],
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-translation-panel],
+  .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-media-review-panel] { grid-column: 1; grid-row: auto; }
+}
+
+/* People directory: Paper03.01, one selected record beside searchable names. */
+.crm-app main[data-react-admin-ui="contacts"] .adm-daily-workspace { grid-template-columns: minmax(0,1.3fr) minmax(320px,.85fr); }
+.crm-app main[data-react-admin-ui="contacts"] .adm-daily-queue { border: 0; border-radius: 0; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-daily-tools { padding: 0 0 20px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-daily-rows a { min-height: 96px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-directory-row { display: grid; gap: 8px; width: 100%; min-width: 0; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-directory-row span { font-size: 14px; line-height: 20px; color: var(--atlas-muted); overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-card { border: 0; border-inline-start: 1px solid var(--atlas-line); border-radius: 0; box-shadow: none; padding: 20px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-card h3 { font-size: 24px; line-height: 28px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-facts { grid-template-columns: 1fr; background: var(--atlas-surface); border-radius: 16px; padding: 16px; gap: 16px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-facts > div { padding: 0; background: transparent; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-facts :is(dt,dd) { font-size: 14px; line-height: 20px; }
+.crm-app main[data-react-admin-ui="contacts"] :is(button,select,input:not([type="checkbox"]):not([type="hidden"]),summary,.mk-btn,.adm-contact-card__leads a) { min-height: 44px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-card__leads a { display: inline-flex; align-items: center; font-size: 14px; line-height: 20px; border-color: var(--atlas-control); overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-accounts > summary { display: flex; align-items: center; gap: 12px; cursor: pointer; padding-block: 12px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-accounts .adm-summary-strip { margin-block: 16px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-check { min-height: 44px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-account-list code { font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+@media (max-width: 1023px) {
+  .crm-app main[data-react-admin-ui="contacts"] .adm-daily-workspace { grid-template-columns: minmax(0,1fr); }
+  .crm-app main[data-react-admin-ui="contacts"] .adm-daily-rows { max-height: 320px; }
+  .crm-app main[data-react-admin-ui="contacts"] .adm-contact-card { border-inline-start: 0; border-block-start: 1px solid var(--atlas-line); padding: 20px 0; }
+  .crm-app main[data-react-admin-ui="contacts"] .adm-summary-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}

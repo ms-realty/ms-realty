@@ -153,7 +153,7 @@ test("guide pages read as articles with a table of contents, sources, ask-a-brok
   const sources = renderReactPublicBody(guide("/bg/guides/proverka-na-imot-sandanski"));
   assert.match(sources, /data-guide-sources="true"/);
   assert.match(sources, /https:\/\/kais\.cadastre\.bg\//);
-  assert.match(pagesCss, /\.guide-page__in--toc \{ grid-template-columns: minmax\(0, 68ch\)/);
+  assert.match(pagesCss, /\.guide-page__in--toc \{ grid-template-columns: 240px minmax\(0,1fr\)/);
   assert.match(pagesCss, /\.guide-page__aside \{ grid-area: aside; position: sticky;/);
 });
 
