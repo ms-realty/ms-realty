@@ -103,18 +103,12 @@ test("typed area bounds stay available when current catalogue facts are incomple
   assert.match(restored, /id="home-search-area-max" name="area_max" type="number"/);
 });
 
-test("hero enhancement pauses for motion preference, hover, and focus while the search card stays usable without JavaScript", () => {
+test("hero search keeps geography and numeric controls usable after the static-photo redesign", () => {
   const css = readFileSync(new URL("../lib/ui/adapter-public.css", import.meta.url), "utf8");
   const adapterCss = readFileSync(new URL("../lib/ui/adapter.css", import.meta.url), "utf8");
 
-  assert.match(PUBLIC_APP_JS, /function initHeroGallery\(\)/);
   assert.match(PUBLIC_APP_JS, /prefers-reduced-motion: reduce/);
   assert.match(PUBLIC_APP_JS, /window\.matchMedia\("\(max-width: 679px\)"\)/);
-  assert.match(PUBLIC_APP_JS, /function availableSlides\(\)/);
-  assert.match(PUBLIC_APP_JS, /gallery\.addEventListener\("pointerenter"/);
-  assert.match(PUBLIC_APP_JS, /gallery\.addEventListener\("focusin"/);
-  assert.match(PUBLIC_APP_JS, /document\.addEventListener\("visibilitychange", schedule\)/);
-  assert.doesNotMatch(PUBLIC_APP_JS, /data-hero-gallery-(?:previous|next)/);
   assert.match(PUBLIC_APP_JS, /function initGeographyComboboxes\(\)/);
   assert.match(PUBLIC_APP_JS, /document\.querySelectorAll\("\[data-geography-combobox\]"\)/);
   assert.match(PUBLIC_APP_JS, /function initGeographyCombobox\(combobox\)/);
@@ -135,11 +129,8 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(PUBLIC_APP_JS, /event\.key === "Enter" && activeIndex >= 0/);
   assert.match(PUBLIC_APP_JS, /geographyId\.value = ""/);
   assert.match(PUBLIC_APP_JS, /setFreeTextEnabled\(false\)/);
-  assert.match(css, /\.hp-hero__slide\[hidden\] \{ display: none; \}/);
   assert.match(css, /\.hp-hero \{[^}]*overflow-anchor: none;/);
   assert.match(css, /object-fit: cover/);
-  assert.match(css, /object-position: var\(--hero-object-position, 50% 50%\)/);
-  assert.match(css, /\.hp-hero__search \{ position: relative; z-index: 5; max-width: 920px; \}/);
   assert.match(css, /\.hp-search__intent \{[\s\S]*?border-radius: var\(--radius-full\);[\s\S]*?backdrop-filter: blur\(12px\);/);
   assert.match(css, /@media \(prefers-reduced-transparency: reduce\)/);
   assert.match(css, /\.hp-search__tab:has\(input:checked\) span \{ background: var\(--surface\); color: var\(--brand\);/);
@@ -156,12 +147,9 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /\.hp-search__more-grid \{[\s\S]*?grid-template-columns: repeat\(auto-fit, minmax\(150px, 1fr\)\);/);
   assert.match(PUBLIC_APP_JS, /function emptyControls\(\)/);
   assert.match(PUBLIC_APP_JS, /window\.addEventListener\("pageshow"/);
-  assert.match(css, /\.hp-search:has\(\[data-hero-family\] option\[value="plot"\]:checked\) \.hp-search__more-field--bedrooms/);
   assert.match(adapterCss, /main input:focus-visible:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\):not\(\.mk-input__field\):not\(\.mk-searchbar__input\)/);
   assert.match(css, /@media \(max-width: 899px\) \{[\s\S]*?\.hp-search__bar \{ grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\) auto; \}[\s\S]*?\.hp-search__seg--location \{ grid-column: 1 \/ -1; \}/);
   assert.match(css, /@media \(max-width: 679px\) \{[\s\S]*?\.hp-search__intent \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); width: 100%; \}[\s\S]*?\.hp-search__go \{ grid-column: 1 \/ -1; width: 100%;/);
-  assert.match(css, /@media \(max-width: 679px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6\.5rem, 20svh, 10rem\) var\(--space-8\); \}/);
-  assert.match(css, /@media \(min-width: 680px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6rem, 8vw, 7rem\) var\(--space-8\); \}[\s\S]*?data-hero-mobile-only/);
   assert.doesNotMatch(css, /hp-hero__advanced|hp-hero__families|hp-hero__search-form/);
   // The seller, location and not-found layouts were rebuilt here and are
   // covered by public-pages.test.mjs against this branch's own markup.

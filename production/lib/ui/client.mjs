@@ -61,6 +61,8 @@ export const THEME_SWITCH_JS = `
   }
 `;
 
+import { initPublicSearchAssistant } from "./public-search-assistant-client.mjs";
+
 export const PUBLIC_APP_JS = `(function () {
   "use strict";
 ${THEME_SWITCH_JS}
@@ -3087,6 +3089,7 @@ ${THEME_SWITCH_JS}
       });
     });
   }
+  (${initPublicSearchAssistant.toString()})();
   initListingSourceQuestions();
   initStartFlow();
   initCompareLinks();
