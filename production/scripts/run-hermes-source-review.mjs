@@ -46,3 +46,8 @@ if (options["--read"]) {
     await payload.destroy?.();
   }
 }
+
+// The command has finished its durable writes and closed Payload. Provider or
+// database transport handles can remain referenced; drain output before exiting.
+await new Promise((resolve, reject) => process.stdout.write("", (error) => error ? reject(error) : resolve()));
+process.exit(0);
