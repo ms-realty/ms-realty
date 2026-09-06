@@ -23,8 +23,8 @@ const REASONS = {
  he: ['הושוו רק המילים הרשומות. אין בכך אישור להעדפה.', 'האזור המצוין אינו מאשר כתובת מדויקת או זמן נסיעה.'],
 };
 export function searchEvidenceCopy(locale) { return {...searchAssistantCopy(locale),any:labelsFor(locale).any,literal:(REASONS[locale]||REASONS.bg)[0],areaOnly:(REASONS[locale]||REASONS.bg)[1],...Object.fromEntries(KEYS.map((key,i)=>[key,(COPY[locale]||COPY.bg)[i]]))}; }
-export function ListingMatchEntry({page,listingId}) { return h('button',{type:'button',className:'mk-btn mk-btn--secondary pse-entry','data-evidence-open':'match','data-listing-id':listingId,'data-listing-href':page.kind==='listing'?page.path:page.cards?.find(card=>card.id===listingId)?.path,hidden:true},searchEvidenceCopy(page.locale).match); }
-export function SearchAlternativesEntry({page}) { return h('button',{type:'button',className:'mk-btn mk-btn--secondary pse-entry','data-evidence-open':'alternatives',hidden:true},searchEvidenceCopy(page.locale).alternatives); }
+export function ListingMatchEntry({page,listingId}) { return h('button',{type:'button',lang:page.locale,className:'mk-btn mk-btn--secondary pse-entry','data-evidence-open':'match','data-listing-id':listingId,'data-listing-href':page.kind==='listing'?page.path:page.cards?.find(card=>card.id===listingId)?.path,hidden:true},searchEvidenceCopy(page.locale).match); }
+export function SearchAlternativesEntry({page}) { return h('button',{type:'button',lang:page.locale,className:'mk-btn mk-btn--secondary pse-entry','data-evidence-open':'alternatives',hidden:true},searchEvidenceCopy(page.locale).alternatives); }
 export function SearchEvidenceDialog({page}) {
  if(!['search','listing'].includes(page.kind))return null;
  const locale=page.locale,copy=searchEvidenceCopy(locale),labels=labelsFor(locale);

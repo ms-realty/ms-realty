@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {initPublicSearchEvidence} from '../lib/ui/public-search-evidence-client.mjs';
-import {searchEvidenceCopy,SearchEvidenceDialog} from '../lib/react-public-search-evidence.mjs';
+import {searchEvidenceCopy,SearchEvidenceDialog,ListingMatchEntry} from '../lib/react-public-search-evidence.mjs';
 import {h,renderStaticElement} from '../lib/react-static-html.mjs';
 import {loadLocaleRegistry} from '../lib/locales.mjs';
 import {searchPath} from '../lib/seo.mjs';
@@ -39,3 +39,5 @@ test('a comparison carrying another listing source is refused',async()=>{const u
 test('invalid typed filters cannot silently become an unbounded comparison',async()=>{const ui=harness();await ui.respond(match());ui.filters.checkValidity=()=>false;ui.filters.fire('input');ui.retry.fire('click');assert.equal(ui.requests.length,1);assert.equal(ui.apply.disabled,true);assert.match(ui.status.textContent,/filters changed/);});
 
 test('literal word and approximate area comparisons state their limited scope',async()=>{const ui=harness();await ui.respond(match({comparisons:[{field:'text_query',requested:'quiet',status:'matched',reason:'literal_words_only',evidence:{...source,value:'quiet street'}},{field:'location_ids',requested:['Sandanski'],status:'matched',reason:'stated_area_only',evidence:{...source,value:'Sandanski'}}]}));assert.match(text(ui.result),/does not confirm a preference/);assert.match(text(ui.result),/does not confirm an exact address/);});
+
+test('match controls retain the interface language inside a source-language card',()=>{const html=renderStaticElement(h(ListingMatchEntry,{page:{kind:'search',locale:'en',cards:[{id:'MS-CRAWL-0069',path:'/en/properties/MS-CRAWL-0069'}]},listingId:'MS-CRAWL-0069'}));assert.match(html,/lang="en"/);assert.match(html,/data-listing-id="MS-CRAWL-0069"/);assert.match(html,/Why this property/);});
