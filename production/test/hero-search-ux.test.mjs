@@ -37,7 +37,7 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   assert.match(form, /<fieldset class="hp-search__intent" data-search-intent="true"><legend class="mk-sr-only">Offer<\/legend>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="sale" checked><span>Buy<\/span><\/label>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="rent"><span>Rent<\/span><\/label>/);
-  // One row: Location, Type, Max price, Search.
+  // One row: Location, Type, Max price, Bedrooms, Search.
   assert.match(form, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"[^>]*data-geography-locale="en"/);
   assert.match(form, /<label class="hp-search__label" for="home-search-q">Location<\/label>/);
   assert.match(form, /id="home-search-q" name="location" type="search" class="hp-search__input mk-searchbar__input" autocomplete="off" placeholder="City, town or region" role="combobox"/);
@@ -58,7 +58,7 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   // Secondary filters are disclosed natively, without JavaScript.
   assert.match(form, /<details class="hp-search__more" data-hero-more-filters="true"><summary class="hp-search__more-summary">/);
   assert.match(form, /<span data-more-label="More filters" data-fewer-label="Fewer filters">More filters<\/span>/);
-  assert.match(form, /<select id="home-search-bedrooms-min" name="bedrooms_min" data-hero-bedrooms="true"><option value="">Any<\/option><option value="1">1\+<\/option>/);
+  assert.match(form, /<select id="home-search-bedrooms-min" name="bedrooms_min" class="hp-search__input" data-hero-bedrooms="true"><option value="">Any<\/option><option value="1">1\+<\/option>/);
   assert.match(form, /<select id="home-search-price-min" name="price_min" data-price-presets="true"/);
   // No listing in this catalogue publishes an area, so the hero does not offer
   // a control that can only return an empty results page.
