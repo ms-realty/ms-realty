@@ -43,10 +43,29 @@ console.log(JSON.stringify(pages));
                         page.on("pageerror", lambda error: errors.append(str(error)))
                         page.route(base + fixture["path"], lambda route: route.fulfill(status=200, content_type="text/html", body=fixture["html"]))
                         attempts = []
+                        status_checks = []
+                        # The receipt flow: a 503 with no intake_status leaves the
+                        # outcome unknown, so the form offers a status check; the
+                        # status service says nothing was received and a retry is
+                        # safe, and only then does the same enquiry go out again.
+                        def receipt(body):
+                            return json.dumps({"receipt": {"kind": "lead_receipt", "state": "received", "lead_id": "lead-ui-test",
+                                "idempotency_key": body["idempotencyKey"], "source": body["source"],
+                                "listing_reference": body.get("listingReference") or None}})
                         def respond(route):
-                            attempts.append(route.request.post_data_json)
-                            route.fulfill(status=503 if len(attempts) == 1 else 201, content_type="application/json", body='{"status":"accepted"}')
+                            body = route.request.post_data_json
+                            attempts.append(body)
+                            if len(attempts) == 1:
+                                route.fulfill(status=503, content_type="application/json", body='{"kind":"lead_store_unavailable"}')
+                            else:
+                                route.fulfill(status=201, content_type="application/json", body=receipt(body))
+                        def status(route):
+                            body = route.request.post_data_json
+                            status_checks.append(body)
+                            route.fulfill(status=200, content_type="application/json", body=json.dumps({"kind": "lead_status", "state": "not_received",
+                                "retry_safe": True, "idempotency_key": body["idempotencyKey"]}))
                         page.route("**/api/leads", respond)
+                        page.route("**/api/leads/status", status)
                         page.goto(base + fixture["path"], wait_until="networkidle")
                         assert not page.evaluate("document.documentElement.scrollWidth > innerWidth")
                         form = page.locator("#seller-enquiry" if kind == "seller" else "#contact-form")
@@ -70,7 +89,10 @@ console.log(JSON.stringify(pages));
                         form.locator('[type="submit"]').click()
                         expect(form.locator('[data-enquiry-error]')).to_be_visible()
                         assert form.locator('[name="contact.name"]').input_value() == "UI test"
+                        expect(form.locator('[type="submit"]')).to_be_disabled()
+                        form.locator('[data-enquiry-status-check]').click()
                         expect(form.locator('[type="submit"]')).to_be_enabled()
+                        assert len(status_checks) == 1 and status_checks[0]["idempotencyKey"] == attempts[0]["idempotencyKey"]
                         form.locator('[type="submit"]').click()
                         expect(page.locator('main [data-request-success]')).to_be_visible()
                         assert len(attempts) == 2 and attempts[0] == attempts[1]
