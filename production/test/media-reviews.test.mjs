@@ -98,3 +98,28 @@ test("media publication rejects missing human confirmation, captions, and non-ow
     /owned storage URL/,
   );
 });
+
+
+test("media review notes survive reload and distinguish a changed decision from a retry", (t) => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-media-note-`);
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const filePath = `${directory}/reviews.jsonl`;
+  const { seed, assetId } = fixture();
+  const input = { listingId: "MS-CRAWL-0037", assetId, kind: "floor_plan", decision: "keep_private", reviewer: "media_editor", reviewConfirmed: true, reviewNote: "  Client details are visible; await a redacted replacement.  " };
+  const review = createMediaReview(seed, input);
+  const first = appendMediaReview(review, { filePath });
+  assert.equal(first.review_note, input.reviewNote.trim());
+  assert.equal(appendMediaReview(review, { filePath }).idempotent, true);
+  assert.throws(() => appendMediaReview({ ...review, id: first.id, review_note: "Different reason" }, { filePath }), /different decision/);
+  const changed = appendMediaReview({ ...review, review_note: "Replacement still needs review." }, { filePath });
+  assert.notEqual(changed.id, first.id);
+  const reloaded = applyMediaReviews(seed, readMediaReviews(filePath));
+  const asset = reloaded.records.find(row => row.id === input.listingId).media.find(row => row.asset_id === assetId);
+  assert.equal(asset.media_review_note, changed.review_note);
+  assert.equal(asset.is_public, false);
+  assert.throws(() => createMediaReview(seed, { ...input, reviewNote: " " }), /must not be empty/);
+  assert.throws(() => createMediaReview(seed, { ...input, reviewNote: "x".repeat(2001) }), /2000 characters/);
+  // Old callers and historical rows had no note. Do not invent one for them.
+  const { reviewNote, ...legacy } = input;
+  assert.equal(Object.hasOwn(createMediaReview(seed, legacy), "review_note"), false);
+});

@@ -546,6 +546,8 @@ smoke.listingEdit = await dispatchHttp(app, {
   },
   body: new URLSearchParams({
     listingId: "MS-CRAWL-0001",
+    // A browser may retain its revision after the draft store becomes unavailable.
+    draftRevision: "0".repeat(64),
     description: "Updated approved source description.",
   }).toString(),
 });

@@ -325,9 +325,9 @@ test("admin Today ranks pipeline and follow-up work in one priority list", () =>
 
   assert.match(html, /data-next-action="pipeline"/);
   assert.match(html, /data-next-action="seller"/);
-  assert.match(html, /data-next-actions="true" data-next-action-count="2" data-next-action-total="3" data-next-action-visible="2"/);
-  assert.doesNotMatch(html, /data-next-action="viewing"/);
-  assert.match(html, /class="mk-btn mk-btn--secondary mk-btn--sm"[^>]*><span>Запиши стъпка за продавача<\/span>/);
+  assert.match(html, /data-next-actions="true" data-next-action-count="3" data-next-action-total="3" data-next-action-visible="3"/);
+  assert.match(html, /data-next-action="viewing"/);
+  assert.match(html, /data-today-primary-open="seller"><span>Запиши стъпка за продавача<\/span>/);
   const dueAction = html.match(/<time dateTime="2026-07-06T12:00:00.000Z"[^>]*>([\s\S]*?)<\/time>/)?.[1] || "";
   assert.ok(dueAction, "follow-up due time stays in the source-backed priority row");
   assert.doesNotMatch(dueAction, /2026-07-06T12:00:00/);

@@ -1,41 +1,27 @@
-/* ============================================================
-   MS Realty — Color System
-   ------------------------------------------------------------
-   Anchored on the brand's OFFICIAL palette (the mark = red "MS"
-   + charcoal "REAL·TY" + grey "makler real estate"):
-
-     · Jasper       #DB3E3E  — the identity RED   → --brick-500
-     · Apple Valley #ED8484  — the light red tint → --brick-300
-     · Bauhaus      #3F3F3F  — the charcoal        → --ink-600
-
-   Built into a MONOCHROME CHARCOAL system: charcoal (Ink) carries
-   almost everything and RED is held back as rare punctuation.
-
-     · Ink    — near-neutral charcoal (the "REAL·TY" wordmark). The
-                BRAND workhorse AND the functional colour: header,
-                buttons, footer/bands, prices, links, rating stars,
-                and the buy / rent / new status chips.
-     · Brick  — the logo RED (pure-hue, G=B, like Jasper). The LONE
-                accent, reserved for just TWO jobs: the single
-                highest-intent CTA (call / book) and the "reduced" flag.
-     · Stone  — warm limestone & sand neutrals (canvas, text, borders).
-                The warmth that keeps the charcoal from reading cold.
-     · Sea    — deep marine green-blue. RESERVED / optional — retired
-                from default use in the monochrome push (ramp kept).
-     · Sun    — warm ochre gold. RESERVED / optional — retired too.
-
-   Error-red (--danger) is deliberately shifted COOLER than the
-   brand Brick so an alert never reads like the primary action.
-
-   Always reach for the SEMANTIC ALIASES below in components
-   (--brand, --accent, --price, --border …), not the raw ramps.
-   ============================================================ */
-
+/* MS Realty: glazed tile, warm marble text, spring-water public fields.
+   Brick remains the primary action colour. Use semantic roles in components. */
 :root {
+  --tile: #F6F5F1;
+  --tile-glaze: #FFFFFF;
+  --tile-deep: #ECEAE4;
+  --joint: #D9D5CC;
+  --spring-950: #0A2321;
+  --spring-900: #0F2F2D;
+  --spring-800: #163E3B;
+  --spring-700: #1F4F4B;
+  --spring-600: #2A6560;
+  --spring-200: #A9CBC6;
+  --spring-100: #D8E8E5;
+  --spring-50: #EEF4F2;
+  --field: var(--spring-800);
+  --field-deep: var(--spring-900);
+  --field-text: var(--tile);
+  --field-muted: var(--spring-200);
+  --border-control: var(--stone-500);
   /* ---- Stone (warm neutral) ---- */
-  --stone-50:  #FAF7F1;
-  --stone-100: #F2ECE1;
-  --stone-200: #E6DCCB;
+  --stone-50:  #F6F5F1;
+  --stone-100: #ECEAE4;
+  --stone-200: #D9D5CC;
   --stone-300: #D3C4AC;
   --stone-400: #B7A585;
   --stone-500: #948263;
@@ -70,7 +56,7 @@
   --brick-800: #7F1B1B;
   --brick-900: #571212;
 
-  /* ---- Sea (supporting coastal accent + "for sale" status) ---- */
+  /* ---- Legacy supporting ramp; public fields use Spring ---- */
   --sea-50:  #ECF3F2;
   --sea-100: #D2E3E1;
   --sea-200: #A6C7C4;
@@ -116,8 +102,8 @@
   /* Text */
   --text-strong:  var(--stone-900);   /* headings                     */
   --text-body:    var(--stone-800);   /* paragraph body               */
-  --text-muted:   var(--stone-500);   /* captions, meta               */
-  --text-subtle:  var(--stone-400);   /* placeholders, disabled       */
+  --text-muted:   var(--stone-600);   /* captions, meta               */
+  --text-subtle:  var(--stone-600);   /* placeholders, disabled       */
   --text-on-dark: var(--stone-50);    /* text on inverse surfaces     */
   --text-on-brand:  #FFFFFF;
   --text-on-accent: #FFFFFF;
@@ -125,7 +111,7 @@
 
   /* Borders / dividers */
   --border:        var(--stone-200);
-  --border-strong: var(--stone-300);
+  --border-strong: var(--stone-500);
   --border-inverse: rgba(255, 255, 255, 0.16);
 
   /* Brand (Ink / charcoal) + accent (Brick / Jasper red) */
@@ -141,7 +127,7 @@
   /* Functional */
   --price:       var(--ink-900);   /* listing prices — strong charcoal */
   --rating:      var(--ink-700);   /* star fill — charcoal (monochrome) */
-  --ring:        rgba(219, 62, 62, 0.45);  /* focus ring — Jasper red (visible on white + on charcoal brand controls) */
+  --ring:        rgba(31, 79, 75, 0.45); /* spring focus ring */
   --ring-accent: rgba(34, 34, 34, 0.45);   /* focus ring on RED accent controls — charcoal halo */
 
   /* Status text/bg pairs */

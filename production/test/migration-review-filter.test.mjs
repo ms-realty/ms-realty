@@ -31,6 +31,24 @@ test("migration review filters decoded legacy URLs and preserves operator filter
   assert.deepEqual(scoped.filters, { q: "", type: "taxonomy", domain: "makler-realty.ru" });
 });
 
+// The select's choices used to come from the rows being filtered, so a choice
+// vanished the moment the last pending URL of its kind was decided, and with
+// nothing pending the control offered only "All" while the URL still named a
+// type. The vocabulary is every reviewable route; the rows are what is left.
+test("migration review filter options come from the whole vocabulary, not the pending rows", () => {
+  const vocabulary = [
+    { old_url: "https://makler-realty.com/a/", source_domain: "makler-realty.com", url_type: "page" },
+    { old_url: "https://makler-realty.ru/tag/x/", source_domain: "makler-realty.ru", url_type: "taxonomy" },
+  ];
+  const nothingPending = filterMigrationReviewRoutes([], { type: "taxonomy" }, { vocabulary });
+  assert.deepEqual(nothingPending.rows, []);
+  assert.deepEqual(nothingPending.filters.type, "taxonomy");
+  assert.deepEqual(nothingPending.filterOptions.types, ["page", "taxonomy"]);
+  assert.deepEqual(nothingPending.filterOptions.domains, ["makler-realty.com", "makler-realty.ru"]);
+  // Without a vocabulary the rows still supply the options, as before.
+  assert.deepEqual(filterMigrationReviewRoutes(vocabulary.slice(1), {}).filterOptions.types, ["taxonomy"]);
+});
+
 test("migration review target options expose only published non-home content", () => {
   const options = migrationReviewTargetOptions({
     routes: [

@@ -212,8 +212,7 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "approved_buyer_guide_discovery",
-      includes(englishHome, "data-home-guides=\"true\"") &&
-        includes(englishHome, "href=\"/en/guides/foreign-buyers\"") &&
+      includes(englishHome, "href=\"/en/guides/foreign-buyers\"") &&
         includes(englishHome, "href=\"/en/guides/buying-process\"") &&
         includes(buyerGuide, "data-guide-trust=\"approved\"") &&
         includes(buyerGuide, "data-primary-guide-section=\"true\"") &&

@@ -62,6 +62,8 @@ const AGENT_REALTY_CASE_CONDITION_ACTIONS = new Set([
 const OPERATIONS_READ_PATHS = new Set([
   "/admin/today",
   "/api/admin/today",
+  "/admin/tasks",
+  "/api/admin/tasks",
   "/admin/leads",
   "/api/admin/leads",
   "/admin/contacts",
@@ -98,6 +100,8 @@ const CONTENT_READ_PATHS = new Set([
 
 const TRANSLATION_READ_PATHS = new Set(["/admin/translations", "/api/admin/translations"]);
 const OPERATIONS_WRITE_PATHS = new Set([
+  "/api/admin/tasks",
+  "/api/admin/tasks/action",
   "/api/admin/replies",
   "/api/admin/replies/delivery",
   "/api/admin/replies/draft",
@@ -132,6 +136,7 @@ const DOCUMENT_READ_PATHS = new Set([
 ]);
 const DOCUMENT_WRITE_PATHS = new Set([
   "/api/admin/documents",
+  "/api/admin/documents/bytes",
   "/api/admin/signature-requests",
 ]);
 
@@ -282,6 +287,12 @@ export function requiredAdminCapability(method, pathname) {
     return "translations:write";
   }
   if (verb !== "GET" && pathname === "/api/admin/translations/publish") return "translations:publish";
+  if (pathname === "/api/admin/listings/copy/draft" && verb === "POST") return "content:write";
+  // A broker holds documents:read but not administration:read, and the
+  // fallthrough below would hand this HTML path the latter.
+  if (pathname === "/admin/documents/records" && verb === "GET") return "documents:read";
+  if (pathname === "/admin/media" && verb === "GET") return "content:read";
+  if (pathname === "/admin/locales" && verb === "GET") return "content:read";
   if (pathname === "/api/admin/locales" && verb === "GET") return "content:read";
   if (pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/")) {
     return verb === "GET" ? "administration:read" : "administration:write";

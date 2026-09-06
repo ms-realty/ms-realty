@@ -224,7 +224,8 @@ test("the admin lead payload carries Hermes availability, and the button renders
 
   const ready = renderReactAdminBody({ ...payload.body, hermes: { available: true, reason_key: "available", reason: "ok", missing: [] } });
   assert.doesNotMatch(ready, /data-hermes-state="unavailable"/);
-  assert.match(ready, /data-hermes-draft-request="true"/);
+  assert.match(ready, /data-hermes-assist-endpoint="\/api\/admin\/replies\/draft"/);
+  assert.match(ready, /data-hermes-assist-field="reply"/);
 });
 
 test("the payload builder passes Hermes state through to the rendered inbox", () => {

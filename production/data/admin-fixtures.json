@@ -70,6 +70,12 @@
         "viewingsWorkspace": "Огледи и последващи действия",
         "viewingsDescription": "График на огледите, последващи задачи и календар за брокерите.",
         "translationQueue": "Преводи за преглед",
+        "localeRollout": "Езици на сайта",
+        "mediaLibrary": "Медия",
+        "documentRecords": "Досиета",
+        "documentRecordsDescription": "Всеки документ, версията му и кой още трябва да го подпише.",
+        "mediaLibraryDescription": "Всяка снимка, план и обиколка в каталога и какво чака всяка от тях.",
+        "localeRolloutDescription": "Всеки език на сайта, какво покрива и какво поема агенцията, когато добави или премахне език.",
         "translationQueueDescription": "Опашка за човешки преглед на липсващи, чернови и остарели преводи.",
         "leadInbox": "Входящи запитвания",
         "leadInboxDescription": "Входящи CRM запитвания с отговори, прегледани от брокер.",
@@ -104,6 +110,8 @@
         "owners": "Отговорници",
         "latestEnquiry": "Последно запитване",
         "documentsWorkspace": "Документи и процес",
+        "tasksWorkspace": "Задачи",
+        "tasksDescription": "Една подредена работна опашка. Работата, която друг екран приключва, води натам, вместо да се отмята тук.",
         "documentsDescription": "Проверими контролни списъци без съхраняване на файлове или автоматично правно одобрение.",
         "consentsWorkspace": "Съгласия и предпочитания",
         "consentsDescription": "Текущо състояние на последващ контакт и известия без показване на лични данни.",
@@ -494,6 +502,10 @@
               "label": "Днес"
             },
             {
+              "id": "tasks",
+              "label": "Задачи"
+            },
+            {
               "id": "viewings",
               "label": "Огледи и последващи действия"
             },
@@ -624,6 +636,12 @@
           "viewingsWorkspace": "Огледи и последващи действия",
           "viewingsDescription": "График на огледите, последващи задачи и календар за брокерите.",
           "translationQueue": "Преводи за преглед",
+          "localeRollout": "Езици на сайта",
+          "mediaLibrary": "Медия",
+          "documentRecords": "Досиета",
+          "documentRecordsDescription": "Всеки документ, версията му и кой още трябва да го подпише.",
+          "mediaLibraryDescription": "Всяка снимка, план и обиколка в каталога и какво чака всяка от тях.",
+          "localeRolloutDescription": "Всеки език на сайта, какво покрива и какво поема агенцията, когато добави или премахне език.",
           "translationQueueDescription": "Опашка за човешки преглед на липсващи, чернови и остарели преводи.",
           "leadInbox": "Входящи запитвания",
           "leadInboxDescription": "Входящи CRM запитвания с отговори, прегледани от брокер.",
@@ -658,6 +676,8 @@
           "owners": "Отговорници",
           "latestEnquiry": "Последно запитване",
           "documentsWorkspace": "Документи и процес",
+          "tasksWorkspace": "Задачи",
+          "tasksDescription": "Една подредена работна опашка. Работата, която друг екран приключва, води натам, вместо да се отмята тук.",
           "documentsDescription": "Проверими контролни списъци без съхраняване на файлове или автоматично правно одобрение.",
           "consentsWorkspace": "Съгласия и предпочитания",
           "consentsDescription": "Текущо състояние на последващ контакт и известия без показване на лични данни.",
@@ -1052,6 +1072,10 @@
                 "label": "Днес"
               },
               {
+                "id": "tasks",
+                "label": "Задачи"
+              },
+              {
                 "id": "viewings",
                 "label": "Огледи и последващи действия"
               },
@@ -1189,6 +1213,12 @@
         "viewingsWorkspace": "Просмотры и последующие действия",
         "viewingsDescription": "Расписание просмотров, последующие задачи и календарь брокеров.",
         "translationQueue": "Переводы на проверку",
+        "localeRollout": "Языки сайта",
+        "mediaLibrary": "Медиа",
+        "documentRecords": "Досье",
+        "documentRecordsDescription": "Каждый документ, его версия и кто ещё должен его подписать.",
+        "mediaLibraryDescription": "Каждое фото, план и тур в каталоге и чего ждёт каждый из них.",
+        "localeRolloutDescription": "Каждый язык сайта, что он покрывает и что берёт на себя агентство, добавляя или убирая язык.",
         "translationQueueDescription": "Очередь ручной проверки отсутствующих, черновых и устаревших переводов.",
         "leadInbox": "Входящие заявки",
         "leadInboxDescription": "Входящие заявки CRM с ответами, проверенными брокером.",
@@ -1223,6 +1253,8 @@
         "owners": "Ответственные",
         "latestEnquiry": "Последняя заявка",
         "documentsWorkspace": "Документы и процесс",
+        "tasksWorkspace": "Задачи",
+        "tasksDescription": "Одна упорядоченная рабочая очередь. Работа, которую закрывает другой экран, ведет туда, а не отмечается здесь.",
         "documentsDescription": "Проверяемые чек-листы без хранения файлов или автоматического юридического одобрения.",
         "consentsWorkspace": "Согласия и предпочтения",
         "consentsDescription": "Текущее состояние последующего контакта и уведомлений без показа персональных данных.",
@@ -1613,6 +1645,10 @@
               "label": "Сегодня"
             },
             {
+              "id": "tasks",
+              "label": "Задачи"
+            },
+            {
               "id": "viewings",
               "label": "Просмотры и последующие действия"
             },
@@ -1743,6 +1779,12 @@
           "viewingsWorkspace": "Просмотры и последующие действия",
           "viewingsDescription": "Расписание просмотров, последующие задачи и календарь брокеров.",
           "translationQueue": "Переводы на проверку",
+          "localeRollout": "Языки сайта",
+          "mediaLibrary": "Медиа",
+          "documentRecords": "Досье",
+          "documentRecordsDescription": "Каждый документ, его версия и кто ещё должен его подписать.",
+          "mediaLibraryDescription": "Каждое фото, план и тур в каталоге и чего ждёт каждый из них.",
+          "localeRolloutDescription": "Каждый язык сайта, что он покрывает и что берёт на себя агентство, добавляя или убирая язык.",
           "translationQueueDescription": "Очередь ручной проверки отсутствующих, черновых и устаревших переводов.",
           "leadInbox": "Входящие заявки",
           "leadInboxDescription": "Входящие заявки CRM с ответами, проверенными брокером.",
@@ -1777,6 +1819,8 @@
           "owners": "Ответственные",
           "latestEnquiry": "Последняя заявка",
           "documentsWorkspace": "Документы и процесс",
+          "tasksWorkspace": "Задачи",
+          "tasksDescription": "Одна упорядоченная рабочая очередь. Работа, которую закрывает другой экран, ведет туда, а не отмечается здесь.",
           "documentsDescription": "Проверяемые чек-листы без хранения файлов или автоматического юридического одобрения.",
           "consentsWorkspace": "Согласия и предпочтения",
           "consentsDescription": "Текущее состояние последующего контакта и уведомлений без показа персональных данных.",
@@ -2171,6 +2215,10 @@
                 "label": "Сегодня"
               },
               {
+                "id": "tasks",
+                "label": "Задачи"
+              },
+              {
                 "id": "viewings",
                 "label": "Просмотры и последующие действия"
               },
@@ -2308,6 +2356,12 @@
         "viewingsWorkspace": "Viewings and follow-ups",
         "viewingsDescription": "Viewing schedule, follow-up tasks, and broker calendar.",
         "translationQueue": "Translation review",
+        "localeRollout": "Website languages",
+        "mediaLibrary": "Media",
+        "documentRecords": "Document records",
+        "documentRecordsDescription": "Every document the workspace holds, the version it is on, and who still has to sign it.",
+        "mediaLibraryDescription": "Every photo, floor plan and tour in the catalogue, and what each one is waiting for.",
+        "localeRolloutDescription": "Every website language, what it covers, and what adding or removing one commits the agency to.",
         "translationQueueDescription": "Human review queue for missing, drafted, and stale listing translations.",
         "leadInbox": "Lead inbox",
         "leadInboxDescription": "CRM lead inbox with broker-reviewed replies.",
@@ -2342,6 +2396,8 @@
         "owners": "Owners",
         "latestEnquiry": "Latest enquiry",
         "documentsWorkspace": "Documents and process",
+        "tasksWorkspace": "Tasks",
+        "tasksDescription": "One ordered work queue. Work another screen closes links there instead of being ticked here.",
         "documentsDescription": "Reviewable process checklists without storing files or inferring legal approval.",
         "consentsWorkspace": "Consent and preferences",
         "consentsDescription": "Current follow-up and notification state without exposing personal contact values.",
@@ -2732,6 +2788,10 @@
               "label": "Today"
             },
             {
+              "id": "tasks",
+              "label": "Tasks"
+            },
+            {
               "id": "viewings",
               "label": "Viewings and follow-ups"
             },
@@ -2862,6 +2922,12 @@
           "viewingsWorkspace": "Viewings and follow-ups",
           "viewingsDescription": "Viewing schedule, follow-up tasks, and broker calendar.",
           "translationQueue": "Translation review",
+          "localeRollout": "Website languages",
+          "mediaLibrary": "Media",
+          "documentRecords": "Document records",
+          "documentRecordsDescription": "Every document the workspace holds, the version it is on, and who still has to sign it.",
+          "mediaLibraryDescription": "Every photo, floor plan and tour in the catalogue, and what each one is waiting for.",
+          "localeRolloutDescription": "Every website language, what it covers, and what adding or removing one commits the agency to.",
           "translationQueueDescription": "Human review queue for missing, drafted, and stale listing translations.",
           "leadInbox": "Lead inbox",
           "leadInboxDescription": "CRM lead inbox with broker-reviewed replies.",
@@ -2896,6 +2962,8 @@
           "owners": "Owners",
           "latestEnquiry": "Latest enquiry",
           "documentsWorkspace": "Documents and process",
+          "tasksWorkspace": "Tasks",
+          "tasksDescription": "One ordered work queue. Work another screen closes links there instead of being ticked here.",
           "documentsDescription": "Reviewable process checklists without storing files or inferring legal approval.",
           "consentsWorkspace": "Consent and preferences",
           "consentsDescription": "Current follow-up and notification state without exposing personal contact values.",
@@ -3288,6 +3356,10 @@
               {
                 "id": "today",
                 "label": "Today"
+              },
+              {
+                "id": "tasks",
+                "label": "Tasks"
               },
               {
                 "id": "viewings",
@@ -3427,6 +3499,12 @@
         "viewingsWorkspace": "Viewings and follow-ups",
         "viewingsDescription": "Viewing schedule, follow-up tasks, and broker calendar.",
         "translationQueue": "Translation review",
+        "localeRollout": "Website languages",
+        "mediaLibrary": "Media",
+        "documentRecords": "Document records",
+        "documentRecordsDescription": "Every document the workspace holds, the version it is on, and who still has to sign it.",
+        "mediaLibraryDescription": "Every photo, floor plan and tour in the catalogue, and what each one is waiting for.",
+        "localeRolloutDescription": "Every website language, what it covers, and what adding or removing one commits the agency to.",
         "translationQueueDescription": "Human review queue for missing, drafted, and stale listing translations.",
         "leadInbox": "Lead inbox",
         "leadInboxDescription": "CRM lead inbox with broker-reviewed replies.",
@@ -3461,6 +3539,8 @@
         "owners": "Owners",
         "latestEnquiry": "Latest enquiry",
         "documentsWorkspace": "Documents and process",
+        "tasksWorkspace": "Tasks",
+        "tasksDescription": "One ordered work queue. Work another screen closes links there instead of being ticked here.",
         "documentsDescription": "Reviewable process checklists without storing files or inferring legal approval.",
         "consentsWorkspace": "Consent and preferences",
         "consentsDescription": "Current follow-up and notification state without exposing personal contact values.",
@@ -3851,6 +3931,10 @@
               "label": "Today"
             },
             {
+              "id": "tasks",
+              "label": "Tasks"
+            },
+            {
               "id": "viewings",
               "label": "Viewings and follow-ups"
             },
@@ -3981,6 +4065,12 @@
           "viewingsWorkspace": "Viewings and follow-ups",
           "viewingsDescription": "Viewing schedule, follow-up tasks, and broker calendar.",
           "translationQueue": "Translation review",
+          "localeRollout": "Website languages",
+          "mediaLibrary": "Media",
+          "documentRecords": "Document records",
+          "documentRecordsDescription": "Every document the workspace holds, the version it is on, and who still has to sign it.",
+          "mediaLibraryDescription": "Every photo, floor plan and tour in the catalogue, and what each one is waiting for.",
+          "localeRolloutDescription": "Every website language, what it covers, and what adding or removing one commits the agency to.",
           "translationQueueDescription": "Human review queue for missing, drafted, and stale listing translations.",
           "leadInbox": "Lead inbox",
           "leadInboxDescription": "CRM lead inbox with broker-reviewed replies.",
@@ -4015,6 +4105,8 @@
           "owners": "Owners",
           "latestEnquiry": "Latest enquiry",
           "documentsWorkspace": "Documents and process",
+          "tasksWorkspace": "Tasks",
+          "tasksDescription": "One ordered work queue. Work another screen closes links there instead of being ticked here.",
           "documentsDescription": "Reviewable process checklists without storing files or inferring legal approval.",
           "consentsWorkspace": "Consent and preferences",
           "consentsDescription": "Current follow-up and notification state without exposing personal contact values.",
@@ -4407,6 +4499,10 @@
               {
                 "id": "today",
                 "label": "Today"
+              },
+              {
+                "id": "tasks",
+                "label": "Tasks"
               },
               {
                 "id": "viewings",
@@ -4900,9 +4996,9 @@
   },
   "crm_inbox": {
     "buyer_he": {
-      "id": "inbox-lead-draft-8a91e8a0-987e-4d1a-843d-d0cd1b172c19",
+      "id": "inbox-lead-draft-6ddf2ef0-ee64-4f9e-9201-49ef0fd9b391",
       "lead": {
-        "id": "lead-draft-8a91e8a0-987e-4d1a-843d-d0cd1b172c19",
+        "id": "lead-draft-6ddf2ef0-ee64-4f9e-9201-49ef0fd9b391",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": null,
@@ -4992,9 +5088,9 @@
       }
     },
     "seller_el": {
-      "id": "inbox-lead-draft-0ead9372-c336-46f0-a5ce-28a2d3cc8e2c",
+      "id": "inbox-lead-draft-709c3fdd-ef76-415a-9aa8-fdd532a7e7e2",
       "lead": {
-        "id": "lead-draft-0ead9372-c336-46f0-a5ce-28a2d3cc8e2c",
+        "id": "lead-draft-709c3fdd-ef76-415a-9aa8-fdd532a7e7e2",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": null,

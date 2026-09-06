@@ -1,0 +1,372 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&amp;family=Sofia+Sans+Semi+Condensed:wght@600;800&amp;family=Noto+Sans+Hebrew:wght@400;600&amp;display=swap">
+  <style>
+    :root {
+      /* Tile — the ground. Glazed white with a warm-grey glaze; cooler than paper. */
+      --tile:#F6F5F1; --tile-glaze:#FFFFFF; --tile-deep:#ECEAE4; --tile-shadow:#E2DFD7;
+      --joint:#D9D5CC;                    /* grout: dividers and rules, never a control edge */
+      /* Marble — the words. Warm dark neutrals. */
+      --marble-950:#16130E; --marble-900:#241F18; --marble-800:#3A3227; --marble-700:#574B38;
+      --marble-600:#73644A; --marble-500:#948263; --marble-400:#B7A585; --marble-300:#D3C4AC;
+      /* Ink — brand charcoal, the logo's REALTY. */
+      --ink-950:#0E0E0E; --ink-900:#181818; --ink-800:#222222; --ink-700:#2E2E2E; --ink-600:#3F3F3F;
+      --ink-500:#545453; --ink-400:#7A7A78; --ink-300:#A6A6A4; --ink-200:#C9C9C7; --ink-100:#E6E6E5; --ink-50:#F4F4F3;
+      /* Spring — the water. The public field; never an accent in the workspace. */
+      --spring-950:#0A2321; --spring-900:#0F2F2D; --spring-800:#163E3B; --spring-700:#1F4F4B;
+      --spring-600:#2A6560; --spring-200:#A9CBC6; --spring-100:#D8E8E5; --spring-50:#EEF4F2;
+      /* Brick — the logo's MS. One action per screen. */
+      --brick-50:#FCEBEB; --brick-100:#F9D4D4; --brick-300:#ED8484; --brick-400:#E45D5D; --brick-500:#DB3E3E;
+      --brick-600:#C42D2D; --brick-700:#A32323; --brick-800:#7F1B1B;
+      /* Status. Each verified against its own 50 and against tile-glaze. */
+      --success-50:#E7F3EC; --success-500:#2F7D57; --success-600:#256345;
+      --warning-50:#FBF1DD; --warning-700:#8A5F18;   /* 5.02:1 on warning-50 */
+      --danger-50:#F9E7EA; --danger-500:#C42E44; --danger-600:#9E2334;
+
+      /* Semantic roles */
+      --canvas:var(--tile);
+      --surface:var(--tile-glaze);
+      --sunken:var(--tile-deep);
+      --border:var(--joint);
+      --border-control:var(--marble-500);  /* 3.73:1 on surface — clears 1.4.11 for input and button edges */
+      --text-strong:var(--marble-900);     /* 16.35:1 on surface */
+      --text-body:var(--marble-800);       /* 11.79:1 on canvas */
+      --text-muted:var(--marble-600);      /* 5.75:1 on surface, 4.89:1 on sunken */
+      --text-ghost:var(--marble-400);      /* NON-TEXT ONLY — 2.40:1. Dashed edges, disabled glyphs. */
+      --brand:var(--ink-800); --accent:var(--brick-600);
+      --field:var(--spring-800); --field-deep:var(--spring-900); --field-text:var(--tile);
+      --field-muted:var(--spring-200);     /* 8.9:1 on spring-800 */
+      --sb-bg:var(--tile-deep); --sb-edge:var(--joint);
+      --sb-text:var(--marble-800); --sb-label:var(--marble-600); --sb-on:var(--ink-900);
+
+      /* Compatibility aliases: production stylesheets and older artboards name these. */
+      --stone-50:var(--tile); --stone-100:var(--tile-deep); --stone-200:var(--joint);
+      --stone-300:var(--marble-300); --stone-400:var(--marble-400); --stone-500:var(--marble-500);
+      --stone-600:var(--marble-600); --stone-700:var(--marble-700); --stone-800:var(--marble-800);
+      --stone-900:var(--marble-900); --stone-950:var(--marble-950);
+      --sea-50:var(--spring-50); --sea-100:var(--spring-100); --sea-200:var(--spring-200);
+      --sea-600:var(--spring-700); --sea-700:var(--spring-800);
+      --sun-100:#FBEECF; --sun-500:#D2952A; --sun-600:#AE7420;
+      --warning-600:var(--warning-700);
+
+      --font-sans:'Commissioner',system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+      --font-display:'Sofia Sans Semi Condensed','Commissioner',system-ui,Arial,sans-serif;
+      --font-mono:ui-monospace,'SF Mono',Menlo,monospace;   /* code only — never a costume for figures */
+
+      --r-edge:2px; --r-panel:6px; --r-pill:999px;
+      /* aliases kept for older artboards; every one resolves to the three above */
+      --r-xs:var(--r-edge); --r-sm:var(--r-edge); --r-md:var(--r-panel); --r-lg:var(--r-panel);
+      --r-xl:var(--r-panel); --r-full:var(--r-pill);
+      --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-8:32px;
+      --row:44px;
+      --e-rest:none;
+      --e-float:0 1px 2px rgba(22,19,14,.08),0 12px 28px rgba(22,19,14,.14);
+      --e-1:var(--e-rest); --e-2:var(--e-rest); --e-3:var(--e-float);
+      --ring:0 0 0 3px rgba(31,79,75,.45);   /* spring, not brick: focus is not an action */
+    }
+    ::selection { background:var(--spring-100); color:var(--marble-900); }
+
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--canvas); color:var(--text-body);
+      font-family:var(--font-sans); font-size:13px; line-height:1.45; -webkit-font-smoothing:antialiased;
+      font-variant-numeric:tabular-nums; }
+    a { color:var(--ink-800); text-decoration:none; text-underline-offset:.18em; }
+    a:hover { color:var(--ink-950); text-decoration:underline; }
+    h1,h2,h3,h4 { margin:0; font-family:var(--font-sans); color:var(--text-strong); text-wrap:balance; }
+    p { margin:0; }
+    ::placeholder { color:var(--text-muted); }
+    :focus-visible { outline:0; box-shadow:var(--ring); }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+
+    /* ---------- shell: a pale tiled rail, the current room marked in ink ---------- */
+    .app { display:grid; grid-template-columns:244px minmax(0,1fr); min-height:100%; }
+    .sb { background:var(--sb-bg); border-right:1px solid var(--sb-edge); display:flex; flex-direction:column;
+      color:var(--sb-text); }
+    .sb-brand { display:flex; align-items:center; padding:18px 20px 12px; }
+    .sb-brand img { display:block; height:30px; width:auto; }
+    .sb-nav { flex:1 1 auto; display:flex; flex-direction:column; gap:1px; padding:4px 12px; overflow:hidden; }
+    .sb-group { margin:12px 8px 4px; font-size:11px; font-weight:600; color:var(--sb-label); }
+    .sb-link { display:flex; align-items:center; gap:11px; min-height:32px; padding:6px 10px; border-radius:var(--r-edge);
+      color:var(--sb-text); font-size:13px; font-weight:500; position:relative; }
+    .sb-link span { flex:1 1 auto; min-width:0; }
+    .sb-link:hover { background:var(--tile-shadow); color:var(--text-strong); text-decoration:none; }
+    .sb-link--on { background:var(--sb-on); color:var(--tile-glaze); }
+    .sb-link--on svg { color:var(--brick-400); }
+    .sb-badge { min-width:19px; height:18px; padding:0 6px; border-radius:var(--r-pill); background:var(--ink-800);
+      color:#fff; font-size:11px; font-weight:600; line-height:18px; text-align:center; flex:0 0 auto; }
+    .sb-link--on .sb-badge { background:var(--tile-glaze); color:var(--ink-900); }
+    .sb-badge--warn { background:var(--warning-700); }
+    .sb-me { display:flex; align-items:center; gap:10px; margin:8px 12px 14px; padding:9px 10px;
+      border-radius:var(--r-panel); border:1px solid var(--joint); background:var(--tile-glaze); }
+    .sb-av { display:grid; place-items:center; width:31px; height:31px; border-radius:var(--r-pill);
+      background:var(--ink-900); color:#fff; font-size:11px; font-weight:600; flex:0 0 auto; }
+    .sb-me-text { display:grid; gap:1px; min-width:0; }
+    .sb-me-text b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .sb-me-text em { font-size:11px; font-style:normal; color:var(--text-muted); }
+
+    .main { display:flex; flex-direction:column; min-width:0; }
+    .top { display:flex; align-items:center; gap:12px; height:56px; flex:0 0 56px; padding:0 24px;
+      background:var(--tile-glaze); border-bottom:1px solid var(--joint); }
+    .top-search { display:flex; align-items:center; gap:8px; height:36px; width:430px; padding:0 12px;
+      border:1px solid var(--border-control); border-radius:var(--r-edge); background:var(--surface); color:var(--text-muted); }
+    .top-search input { flex:1 1 auto; min-width:0; border:0; outline:0; background:transparent;
+      font:400 13px var(--font-sans); color:var(--text-body); }
+    .top-search kbd { font:500 11px var(--font-sans); color:var(--text-muted);
+      border:1px solid var(--joint); border-radius:var(--r-edge); padding:2px 5px; }
+    .top-health { display:flex; align-items:center; gap:7px; margin-left:auto; height:30px; padding:0 11px;
+      border-radius:var(--r-pill); font-size:13px; font-weight:600; }
+    .top-health--warn { background:var(--warning-50); color:var(--warning-700); }
+    .top-health--ok { background:var(--success-50); color:var(--success-600); }
+    .top-av { display:grid; place-items:center; width:34px; height:34px; border-radius:var(--r-pill); border:0;
+      background:var(--ink-900); color:#fff; font:600 11px var(--font-sans); cursor:pointer; }
+    .scroll { flex:1 1 auto; padding:20px 24px 24px; min-width:0; }
+
+    /* ---------- section sub-nav: a row of tabs on a grout line ---------- */
+    .subnav { display:flex; gap:20px; margin-bottom:16px; border-bottom:1px solid var(--joint); }
+    .subnav__i { display:inline-flex; align-items:center; gap:7px; height:36px; padding:0 2px; margin-bottom:-1px;
+      border-bottom:2px solid transparent; font-size:13px; font-weight:600; color:var(--text-muted); white-space:nowrap; }
+    .subnav__i:hover { color:var(--text-strong); text-decoration:none; }
+    .subnav__i--on { color:var(--text-strong); border-bottom-color:var(--ink-900); }
+
+    /* ---------- primitives ---------- */
+    .btn { display:inline-flex; align-items:center; gap:7px; height:36px; padding:0 14px; border-radius:var(--r-edge);
+      border:1px solid var(--border-control); background:var(--surface); color:var(--text-strong);
+      font:600 13px var(--font-sans); cursor:pointer; white-space:nowrap; }
+    .btn:hover { background:var(--sunken); text-decoration:none; }
+    .btn--primary { background:var(--ink-900); border-color:var(--ink-900); color:#fff; }
+    .btn--primary:hover { background:var(--ink-950); }
+    .btn--accent { background:var(--brick-600); border-color:var(--brick-600); color:#fff; }
+    .btn--accent:hover { background:var(--brick-700); }
+    .btn--danger { background:var(--surface); border-color:var(--danger-600); color:var(--danger-600); }
+    .btn--ghost { border-color:transparent; background:transparent; color:var(--text-muted); }
+    .btn--sm { height:32px; padding:0 11px; font-size:13px; }
+    .btn--lg { height:44px; padding:0 18px; font-size:16px; }
+    .btn[data-disabled] { opacity:.5; cursor:not-allowed; }
+    .btn[data-focus] { box-shadow:var(--ring); }
+
+    .ph { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:20px; }
+    .ph h1 { font-size:22px; font-weight:600; letter-spacing:-.01em; }
+    .ph p { margin-top:4px; font-size:13px; color:var(--text-muted); max-width:64ch; }
+    .ph-actions { display:flex; align-items:center; gap:10px; }
+
+    .seg { display:inline-flex; gap:0; border:1px solid var(--border-control); border-radius:var(--r-edge);
+      background:var(--surface); overflow:hidden; }
+    .seg button { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border:0;
+      border-right:1px solid var(--joint); background:transparent; color:var(--text-muted);
+      font:600 13px var(--font-sans); cursor:pointer; white-space:nowrap; }
+    .seg button:last-child { border-right:0; }
+    .seg button[data-on] { background:var(--ink-900); color:#fff; }
+    .seg em { font-style:normal; font-weight:600; opacity:.7; }
+
+    /* A panel is a room, not a card: it sits flat on the tile, separated by
+       grout, with no shadow. Nothing sits inside a panel that is itself a panel. */
+    .panel { background:var(--surface); border:1px solid var(--joint); border-radius:var(--r-panel); overflow:hidden; }
+    .panel .panel { border:0; border-radius:0; }
+    .panel-hd { display:flex; align-items:center; justify-content:space-between; gap:12px;
+      min-height:var(--row); padding:0 20px; border-bottom:1px solid var(--joint); }
+    .panel-hd h2 { font-size:16px; font-weight:600; }
+    .panel-hd .sub { font-size:13px; color:var(--text-muted); font-weight:400; }
+    .sect { padding:16px 20px; border-bottom:1px solid var(--joint); }
+    .sect:last-child { border-bottom:0; }
+    .sect > h3 { font-size:13px; font-weight:600; margin-bottom:10px; display:flex; align-items:center;
+      justify-content:space-between; gap:10px; }
+
+    .pill { display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 9px; border-radius:var(--r-pill);
+      font-size:11px; font-weight:600; white-space:nowrap; }
+    .pill i { width:6px; height:6px; border-radius:var(--r-pill); background:currentColor; flex:0 0 auto; }
+    .pill--danger { color:var(--danger-600); background:var(--danger-50); }
+    .pill--warn { color:var(--warning-700); background:var(--warning-50); }
+    .pill--ok { color:var(--success-600); background:var(--success-50); }
+    .pill--sea { color:var(--spring-800); background:var(--spring-50); }
+    .pill--ink { color:var(--ink-800); background:var(--ink-50); }
+    .pill--sand { color:var(--marble-700); background:var(--tile-deep); }
+    .pill--ai { color:var(--brick-700); background:var(--brick-50); }
+
+    .mono { font-family:var(--font-sans); font-variant-numeric:tabular-nums; font-size:11px; color:var(--text-muted);
+      white-space:nowrap; letter-spacing:.01em; }
+    .muted { color:var(--text-muted); }
+    .price { font-weight:600; color:var(--text-strong); font-variant-numeric:tabular-nums; }
+    .av { display:grid; place-items:center; width:26px; height:26px; border-radius:var(--r-pill);
+      background:var(--tile-deep); color:var(--marble-700); font-size:11px; font-weight:600; flex:0 0 auto; }
+
+    /* The witness. Every fact carries who verified it and when. A filled square
+       is a signed seal; an outlined one is a fact nobody has confirmed. The two
+       differ in silhouette, so they still read at 11px. */
+    .wit { display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--marble-700);
+      font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .wit::before { content:''; width:9px; height:9px; background:var(--ink-900); flex:0 0 auto;
+      animation:wit-seal .24s cubic-bezier(.2,.8,.2,1) both; }
+    .wit b { font-weight:600; color:var(--text-strong); }
+    .wit--none { color:var(--warning-700); }
+    .wit--none::before { background:transparent; border:1.5px solid currentColor; animation:none; }
+    @keyframes wit-seal { from { transform:scale(.4); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+    /* ---------- table: rows on grout, 44px tall ---------- */
+    .toolbar { display:flex; align-items:center; gap:8px; min-height:var(--row); padding:0 14px;
+      border-bottom:1px solid var(--joint); background:var(--surface); }
+    .find { display:flex; align-items:center; gap:7px; width:260px; height:32px; padding:0 10px;
+      border:1px solid var(--border-control); border-radius:var(--r-edge); background:var(--surface);
+      color:var(--text-muted); font-size:13px; }
+    table { width:100%; border-collapse:separate; border-spacing:0; }
+    th { text-align:left; height:36px; padding:0 12px; border-bottom:1px solid var(--joint); background:var(--tile);
+      font-size:11px; font-weight:600; color:var(--text-muted); white-space:nowrap; }
+    td { height:var(--row); padding:12px 12px; border-bottom:1px solid var(--joint); font-size:13px; vertical-align:middle; }
+    tbody tr:hover td { background:var(--tile); }
+    tbody tr:last-child td { border-bottom:0; }
+    .t2 { display:grid; gap:1px; min-width:0; }
+    .t2 b { font-size:13px; font-weight:600; color:var(--text-strong); overflow:hidden;
+      text-overflow:ellipsis; white-space:nowrap; }
+    .t2 span { font-size:11px; color:var(--text-muted); }
+    .foot { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:var(--row);
+      padding:0 14px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--joint); }
+    .box { width:16px; height:16px; border-radius:var(--r-edge); border:1.5px solid var(--border-control);
+      background:var(--surface); flex:0 0 auto; }
+    .box[data-on] { background:var(--ink-900); border-color:var(--ink-900);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E");
+      background-size:11px 11px; background-position:center; background-repeat:no-repeat; }
+
+    /* ---------- forms ---------- */
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; padding:16px 20px; }
+    .field { display:grid; gap:6px; min-width:0; }
+    .field label { font-size:13px; font-weight:600; color:var(--text-body); }
+    .field label em { font-style:normal; color:var(--brick-600); }
+    .in { display:flex; align-items:center; height:40px; padding:0 11px; border:1px solid var(--border-control);
+      border-radius:var(--r-edge); background:var(--surface); font-size:13px; color:var(--text-strong); }
+    .in--empty { color:var(--text-muted); }
+    .in--area { height:auto; min-height:80px; align-items:flex-start; padding:10px 11px; line-height:1.5; }
+    .in--focus { border-color:var(--spring-700); box-shadow:var(--ring); }
+    .in--error { border-color:var(--danger-600); }
+    .hint { font-size:11px; color:var(--text-muted); }
+    .hint--error { color:var(--danger-600); font-weight:500; }
+    .full { grid-column:1 / -1; }
+    .toggle { width:40px; height:22px; border-radius:var(--r-pill); background:var(--border-control);
+      position:relative; flex:0 0 auto; }
+    .toggle i { position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:var(--r-pill);
+      background:#fff; }
+    .toggle[data-on] { background:var(--ink-900); }
+    .toggle[data-on] i { left:21px; }
+    .savebar { display:flex; align-items:center; gap:12px; min-height:var(--row); padding:8px 20px;
+      border-top:1px solid var(--joint); background:var(--tile); }
+    .sw { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px;
+      min-height:var(--row); padding:8px 20px; border-top:1px solid var(--joint); }
+    .sw b { display:block; font-size:13px; font-weight:600; color:var(--text-strong); }
+    .sw span { font-size:11px; color:var(--text-muted); }
+
+    /* ---------- misc ---------- */
+    .note { display:flex; align-items:flex-start; gap:8px; padding:10px 12px; border-radius:var(--r-edge);
+      font-size:13px; font-weight:500; }
+    .note--warn { background:var(--warning-50); color:var(--warning-700); }
+    .note--ai { background:var(--brick-50); color:var(--brick-700); }
+    .note--info { background:var(--spring-50); color:var(--spring-800); }
+    .kv { display:grid; gap:1px; background:var(--joint); border-bottom:1px solid var(--joint); }
+    .kv > div { background:var(--surface); padding:12px 20px; min-width:0; }
+    .kv dt { font-size:11px; color:var(--text-muted); margin-bottom:3px; }
+    .kv dd { margin:0; font-size:13px; font-weight:600; color:var(--text-strong);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .empty { display:grid; justify-items:center; gap:8px; padding:40px 20px; text-align:center; }
+    .empty svg { color:var(--text-ghost); }
+    .empty b { font-size:13px; font-weight:600; color:var(--text-strong); }
+    .empty p { font-size:13px; color:var(--text-muted); max-width:38ch; }
+    .tl-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:start;
+      padding:12px 0; border-bottom:1px solid var(--joint); }
+    .tl-row:last-child { border-bottom:0; }
+    .tl-row p { font-size:13px; }
+    .tl-row em { font-style:normal; color:var(--text-muted); }
+
+    .tabs { display:flex; gap:20px; border-bottom:1px solid var(--joint); }
+    .tabs a { padding:10px 0 11px; font-size:13px; font-weight:600; color:var(--text-muted);
+      border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; }
+    .tabs a:hover { text-decoration:none; color:var(--text-strong); }
+    .tabs a[data-on] { color:var(--text-strong); border-bottom-color:var(--ink-900); }
+    .crumbs { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--text-muted); margin-bottom:12px; }
+    .crumbs b { color:var(--text-strong); }
+    .prog { height:6px; border-radius:var(--r-pill); background:var(--tile-shadow); overflow:hidden; }
+    .prog i { display:block; height:100%; border-radius:var(--r-pill); background:var(--spring-700); }
+    .skel { border-radius:var(--r-edge);
+      background:linear-gradient(90deg,var(--tile-deep),var(--tile-shadow),var(--tile-deep)); }
+
+    /* Inline Hermes assist: the same one-click draft on every editable value,
+       and the same approval boundary. Brick, because it is the one thing on a
+       field that can act. */
+    .lblrow { display:flex; align-items:center; gap:8px; }
+    .lblrow > label, .lblrow > b { flex:1 1 auto; min-width:0; }
+    .assist { display:inline-flex; align-items:center; gap:5px; height:24px; padding:0 8px;
+      border-radius:var(--r-pill); border:1px solid var(--brick-300); background:var(--brick-50);
+      color:var(--brick-700); font:600 11px var(--font-sans); cursor:pointer; white-space:nowrap; flex:0 0 auto; }
+    .assist:hover { background:var(--brick-100); }
+    .assist--icon { padding:0; width:24px; justify-content:center; }
+    .assist[data-busy] { border-color:var(--border-control); background:var(--tile-deep); color:var(--text-muted); }
+    .assist-menu { display:grid; gap:1px; padding:5px; border-radius:var(--r-panel); background:var(--surface);
+      border:1px solid var(--joint); box-shadow:var(--e-float); width:230px; }
+    .assist-menu button { display:flex; align-items:center; gap:9px; width:100%; height:32px; padding:0 9px;
+      border:0; border-radius:var(--r-edge); background:transparent; color:var(--text-body);
+      font:500 13px var(--font-sans); cursor:pointer; text-align:left; }
+    .assist-menu button:hover { background:var(--tile-deep); }
+    .assist-menu hr { border:0; border-top:1px solid var(--joint); margin:4px 0; }
+    .assist-menu small { display:block; padding:5px 9px 3px; font-size:11px; color:var(--text-muted); }
+    .drafted { border-color:var(--brick-300); background:var(--brick-50); }
+    .drafted-bar { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--r-edge);
+      background:var(--brick-50); border:1px solid var(--brick-300); font-size:11px; font-weight:600;
+      color:var(--brick-700); }
+
+    .kvline { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13px; }
+    .toast { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:11px; align-items:center;
+      padding:12px 14px; border-radius:var(--r-panel); background:var(--ink-900); color:#fff; box-shadow:var(--e-float); }
+    .toast b { font-size:13px; font-weight:600; display:block; }
+    .toast span { font-size:11px; color:rgba(255,255,255,.7); }
+    .toast a { color:#fff; font-size:13px; font-weight:600; text-decoration:underline; }
+
+    /* Public field: deep spring water. One band owns a page's first viewport. */
+    .band { background:var(--field); color:var(--field-text); }
+    .band a { color:var(--field-text); }
+    .band .muted { color:var(--field-muted); }
+    .band .btn { background:var(--tile); border-color:var(--tile); color:var(--ink-900); }
+    .band .btn--ghost { background:transparent; border-color:var(--field-muted); color:var(--field-text); }
+    .display { font-family:var(--font-display); font-weight:800; letter-spacing:-.02em; line-height:1.02; }
+
+    .app { --text-subtle:var(--text-muted); }
+    .subtle { color:var(--text-muted); }
+
+  .cv { display:grid; gap:24px; }
+  .cv h1 { font-size:22px; font-weight:600; }
+  .cv h2 { font-size:16px; }
+  .cv-hd,.cv-section { display:grid; gap:12px; }
+  .cv p { max-width:1080px; }
+  .cv-table { table-layout:fixed; border-collapse:collapse; }
+  .cv-table th { font-size:13px; }
+  .cv-table td { height:44px; font-size:13px; padding:12px; vertical-align:top; border-bottom:1px solid var(--joint); white-space:normal; overflow-wrap:anywhere; }
+  .cv-table th:nth-child(1) { width:160px; }
+  .cv-table th:nth-child(2) { width:320px; }
+  .cv-table th:nth-child(3) { width:256px; }
+  .cv-table td code { font-size:11px; }
+  .cv-section { padding-top:24px; border-top:1px solid var(--joint); }
+  .cv-facts { display:grid; grid-template-columns:200px minmax(0,1fr); gap:12px 24px; margin:0; }
+  .cv-facts dd { margin:0; }
+  .cv-facts dt { color:var(--text-muted); }
+  .cv a { display:inline-flex; width:fit-content; align-items:center; min-height:44px; }
+  .cv a:focus-visible { outline:2px solid var(--spring-700); outline-offset:2px; }
+
+  </style>
+</helmet>
+<!--
+THESIS: Every fact carries its witness. A property portal shows facts; this one shows who verified each fact and when, and refuses the card-and-sidebar dashboard the category ships.
+OWN-WORLD: Sandanski's thermal bath house. Glazed tile ground (#F6F5F1), grout-line rules instead of card chrome, three radii (2 / 6 / pill), two elevations (rest on tile, float), one action colour (the logo's brick), deep spring water (#163E3B) as the public field. Commissioner for every word; Sofia Sans Semi Condensed only where the public site speaks up. Figures are tabular, never monospaced.
+STORY: A buyer sees the number and the name beside it and trusts it; a broker sees the next task and the seal it is waiting for.
+FIRST VIEWPORT: Workspace: pale rail left, one 22px title, one primary action top right, then rows on grout at 44px. Public: a full-width spring band with one sentence, one search, one photograph of the actual place.
+FORM: the register of witnessed facts.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<div style="width:1560px; min-height:0px; background:var(--canvas); padding:40px">
+<div class="cv"><header class="cv-hd"><h1>Design, source and delivery evidence</h1><p>50 artboards are mapped below. The generator reads 23 admin page declarations and 135 method-and-path declarations from the current source catalogue. These are declarations, not a count of verified working screens.</p><span class="wit wit--none">Live adoption not verified</span></header><table class="cv-table"><thead><tr><th>Surface</th><th>Artboards</th><th>Declared admin page</th><th>Boundary to verify</th></tr></thead><tbody><tr><td><b>System examples</b></td><td>Foundations, Components, Interaction</td><td>No catalogue page mapped</td><td>Shared design contracts and interaction states.</td></tr><tr><td><b>Today</b></td><td>Main, Mobile</td><td><code>/admin/today</code></td><td>Current task and queue composition.</td></tr><tr><td><b>Lead inbox</b></td><td>LeadInbox, MobileLead</td><td><code>/admin/leads</code></td><td>Assignment, draft review, snooze and delivery remain distinct.</td></tr><tr><td><b>Pipeline</b></td><td>Pipeline</td><td><code>/admin/pipeline</code></td><td>Qualification and source outcomes.</td></tr><tr><td><b>Viewings</b></td><td>Viewings</td><td><code>/admin/viewings</code></td><td>Booking and external calendar receipts remain distinct.</td></tr><tr><td><b>Tasks</b></td><td>Tasks</td><td><code>/admin/tasks</code></td><td>Authored tasks and work derived from owning records.</td></tr><tr><td><b>Requests</b></td><td>Requests</td><td><code>/admin/requests</code></td><td>Saved searches, language and viewing-trip requests.</td></tr><tr><td><b>Contacts</b></td><td>Contacts</td><td><code>/admin/contacts</code></td><td>Identity, purpose and private contact access.</td></tr><tr><td><b>Consent</b></td><td>Consent</td><td><code>/admin/consents</code></td><td>A purpose-specific grant or withdrawal.</td></tr><tr><td><b>Transaction cases</b></td><td>Cases, CaseDetail, MobileCase</td><td><code>/admin/cases</code></td><td>Step evidence and condition decisions.</td></tr><tr><td><b>Document records</b></td><td>Documents, DocumentEditor</td><td><code>/admin/documents/records</code></td><td>Document records and revisions; a record does not prove a signature.</td></tr><tr><td><b>Listings</b></td><td>Listings, ListingEditor</td><td><code>/admin/listings</code></td><td>Source facts and listing decisions.</td></tr><tr><td><b>Translations</b></td><td>Translations</td><td><code>/admin/translations</code></td><td>Draft, review and publication boundaries.</td></tr><tr><td><b>Website pages</b></td><td>SitePages, PageEditor</td><td>No catalogue page mapped</td><td>Canvas editor concept; route and persistence integration need verification.</td></tr><tr><td><b>Media</b></td><td>Media, MediaEditor, MediaStates</td><td><code>/admin/media</code></td><td>Media records and review states.</td></tr><tr><td><b>SEO and redirects</b></td><td>SeoRedirects</td><td><code>/admin/migration/review</code></td><td>Recorded legacy decisions; live parity needs separate evidence.</td></tr><tr><td><b>Hermes</b></td><td>Hermes, HermesRun</td><td><code>/admin/hermes</code></td><td>Registered surface does not establish a live worker or run-history interface.</td></tr><tr><td><b>Integrations</b></td><td>Integrations, IntegrationCatalogue</td><td><code>/admin/connect</code></td><td>Provider definitions do not establish authorisation or a successful sync.</td></tr><tr><td><b>Automations</b></td><td>Automations</td><td>No catalogue page mapped</td><td>The separate draft PR #173 is not integrated here.</td></tr><tr><td><b>Settings</b></td><td>Settings</td><td><code>/admin/settings</code></td><td>Workspace settings and approval boundaries.</td></tr><tr><td><b>Team</b></td><td>Team</td><td><code>/admin/team</code></td><td>Account roles and access.</td></tr><tr><td><b>Reports</b></td><td>Reports</td><td><code>/admin/reports</code></td><td>Metrics require their source, scope and reporting period.</td></tr><tr><td><b>Activity</b></td><td>Activity</td><td><code>/admin/activity</code></td><td>Recorded actions remain distinct from external outcomes.</td></tr><tr><td><b>Launch readiness</b></td><td>LaunchReadiness</td><td>No catalogue page mapped</td><td>Saved launch report; fresh gate evidence remains required.</td></tr><tr><td><b>Sign-in</b></td><td>SignIn</td><td>No catalogue page mapped</td><td>Authentication composition; not an admin catalogue page.</td></tr><tr><td><b>Public home</b></td><td>PublicHome</td><td>No catalogue page mapped</td><td>Public composition; not an admin catalogue page.</td></tr><tr><td><b>Public search</b></td><td>PublicSearch, PublicMobileSearch</td><td>No catalogue page mapped</td><td>Search composition with explicit empty and failure states.</td></tr><tr><td><b>Public listing</b></td><td>PublicListing, PublicMobileListing, PublicMobileHebrew</td><td>No catalogue page mapped</td><td>Source facts and unknown availability; Hebrew preview is unapproved.</td></tr><tr><td><b>Location guide</b></td><td>PublicLocation</td><td>No catalogue page mapped</td><td>Reading layout; no invented local facts or legal advice.</td></tr><tr><td><b>Seller enquiry</b></td><td>PublicSeller</td><td>No catalogue page mapped</td><td>Initial contact is separate from authorising a listing.</td></tr><tr><td><b>Contact</b></td><td>PublicContact</td><td>No catalogue page mapped</td><td>Enquiry permission is separate from marketing consent.</td></tr><tr><td><b>Flows and coverage</b></td><td>FlowLead, FlowPublish, Coverage</td><td>No catalogue page mapped</td><td>Design evidence maps; not runtime completion reports.</td></tr></tbody></table><section class="cv-section"><h2>Evidence is specific to its layer</h2><dl class="cv-facts"><dt>Canvas</dt><dd>Generated composition, measured frames and individual review verdicts. A visual control does not prove an implemented action.</dd><dt>Source</dt><dd>Trace the rendered route, its action handler, capability check and persistence path. Catalogue membership alone is insufficient.</dd><dt>Local checks</dt><dd>Run focused tests, validation, build and smoke against the revision being considered. A fixture is not a live service report.</dd><dt>Pull request</dt><dd>Check the current head, draft state, CI and release conditions. PR #182 stays draft and unmerged; its listing-URL change is not included by implication.</dd><dt>Production</dt><dd>Verify the deployed revision, public and authenticated routes, external receipts and current launch gates. A successful upload is not a complete release.</dd></dl></section><section class="cv-section"><h2>Saved launch authority</h2><p>The saved report was generated at <bdi dir="ltr">2026-08-27T14:16:20.632Z</bdi>. It reports <b>blocked</b>: 4 of 12 gates are not passing. This is a historical file read, not a fresh production check.</p><dl class="cv-facts"><dt>live services</dt><dd>Run live Postgres sync/query and Hermes draft worker commands after provisioning.</dd><dt>monitoring rollback</dt><dd>Monitoring evidence, an automated rollback report, and rollback steps are required before launch.</dd><dt>payload runtime</dt><dd>Payload runtime report must pass before final production readiness.</dd><dt>production recovery</dt><dd>Encrypted off-site backup and isolated production restore evidence are required before launch.</dd></dl><a href="LaunchReadiness.html">Inspect the saved gate evidence</a></section><section class="cv-section"><h2>Approval remains with a person</h2><p>Hermes may draft. It does not publish pages, send customer messages, mark translations indexable or approve legal claims. Bulgarian is the source locale; the seven public languages and three admin languages keep their separate approval and layout requirements.</p><p>Detailed composition verdicts are recorded in REVIEW-2026-09-04.md. They identify what was reviewed and what was not verified.</p></section></div>
+</div>
+</x-dc>
+</body>
+</html>

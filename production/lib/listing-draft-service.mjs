@@ -13,6 +13,7 @@ import {
 } from "./listing-fact-review.mjs";
 import { derivePrimaryAreaSqm } from "./listing-facts.mjs";
 import {
+  listingDraftRevision,
   loadPayloadCmsImportRuntime,
   projectPayloadCmsSeed,
   readPayloadCmsSnapshot,
@@ -82,6 +83,17 @@ function unavailableError(message, cause = null) {
   error.code = "payload_draft_unavailable";
   if (cause) error.cause = cause;
   return error;
+}
+
+function draftConflictError(message = "This listing or its shared property has changed. Keep your edits and reload the listing before saving again.") {
+  return Object.assign(new Error(message), { status: 409, code: "listing_draft_conflict" });
+}
+
+export function browserListingRevisionRequired(headers) {
+  const header = (name) => typeof headers?.get === "function"
+    ? headers.get(name) || ""
+    : Object.entries(headers || {}).find(([key]) => key.toLowerCase() === name)?.[1] || "";
+  return Boolean(header("sec-fetch-site")) || /application\/x-www-form-urlencoded|multipart\/form-data/i.test(header("content-type"));
 }
 
 function notFoundError(message) {
@@ -462,30 +474,14 @@ export async function projectListingDraftSeed(
 
 export async function saveListingDraft(
   seed,
-  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString(), requestChannel = "admin" } = {},
+  { env = process.env, payload = null, principal, input, editedAt = new Date().toISOString(), requestChannel = "admin", requireRevision = false } = {},
 ) {
   const listingId = listingIdFor(input?.listingId || input?.listing_id);
   const patch = listingDraftPatchFromInput(input);
-  const listing = seed.records.find((record) => record.collection === "listings" && record.id === listingId);
-  if (!listing) throw notFoundError("Known listingId is required");
-  const factReview = factReviewInput(seed, listing, patch, input, editedAt);
-  const scoped = Object.keys(factReview.propertyPatch).length > 0;
-  const validated = createListingEdit(
-    seed,
-    {
-      listingId,
-      editor: requiredText(principal?.id, "Authenticated operator id", 64),
-      ...(scoped
-        ? {
-            propertyPatch: factReview.propertyPatch,
-            propertyFactVerification: factReview.propertyFactVerification,
-            listingPatch: factReview.listingPatch || patch,
-          }
-        : { patch: factReview.listingPatch || patch }),
-    },
-    [],
-    editedAt,
-  );
+  const expectedRevision = String(input?.draftRevision ?? "").trim();
+  if ((requireRevision || Object.hasOwn(input || {}, "draftRevision")) && !/^[a-f0-9]{64}$/.test(expectedRevision)) {
+    throw draftConflictError("The listing version is missing. Keep your edits and reload the listing before saving.");
+  }
 
   let runtime;
   try {
@@ -511,6 +507,28 @@ export async function saveListingDraft(
           req,
         })
       : null;
+    if (expectedRevision && expectedRevision !== listingDraftRevision(current, currentProperty)) throw draftConflictError();
+    const currentSeed = await projectListingDraftSeed(seed, { payload: runtime, req });
+    const listing = currentSeed.records.find((record) => record.collection === "listings" && record.id === listingId);
+    if (!listing) throw notFoundError("Known listingId is required");
+    const factReview = factReviewInput(currentSeed, listing, patch, input, editedAt);
+    const scoped = Object.keys(factReview.propertyPatch).length > 0;
+    const validated = createListingEdit(
+      currentSeed,
+      {
+        listingId,
+        editor: requiredText(principal?.id, "Authenticated operator id", 64),
+        ...(scoped
+          ? {
+              propertyPatch: factReview.propertyPatch,
+              propertyFactVerification: factReview.propertyFactVerification,
+              listingPatch: factReview.listingPatch || patch,
+            }
+          : { patch: factReview.listingPatch || patch }),
+      },
+      [],
+      editedAt,
+    );
     const propertyMutation = propertyMutationFromEdit(currentProperty, validated.edit);
     const mutation = mutationFromEdit(
       current,
@@ -568,10 +586,14 @@ export async function saveListingDraft(
       verifiedFactFields: factReview.promotion.editor_fields,
       idempotent: mutation.idempotent && propertyMutation.idempotent,
       listingId,
+      draftRevision: projectedSeed.records.find((record) => record.id === listingId)?.draft_revision,
       patch: clone(patch),
       staleTranslations,
       projectedSeed,
     };
+  }).catch((error) => {
+    if ([error?.code, error?.cause?.code, error?.data?.code].includes("40001")) throw draftConflictError();
+    throw error;
   });
 }
 

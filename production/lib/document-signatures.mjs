@@ -1,3 +1,4 @@
+import { verifyStoredDocumentBytes } from "./document-storage.mjs";
 import { randomUUID } from "node:crypto";
 import {
   documentCollectionAccess,
@@ -612,9 +613,13 @@ export async function readDocument({ payload = null, principal, documentId } = {
   return documentRow(row);
 }
 
-export async function createDocument({ payload = null, principal, input = {}, recordedAt = null } = {}) {
+export async function createDocument({ payload = null, principal, input = {}, recordedAt = null, storage = null } = {}) {
   const runtime = await runtimePayload(payload);
   const normalized = documentInput(input, principal, recordedAt);
+  // With a store in hand the reference must be real: bytes present, size and
+  // digest as claimed. Without one (library callers, fixtures) the row is
+  // metadata as before.
+  if (storage) await verifyStoredDocumentBytes({ storage, ...normalized.revision });
   return withTransaction(runtime, async (req) => {
     const existing = await findOne(runtime, DOCUMENT_COLLECTION, workspaceWhere(normalized.workspace_id, {
       idempotency_key: { equals: normalized.idempotency_key },
@@ -695,7 +700,7 @@ export async function readDocumentRevisions({ payload = null, principal, documen
   return rows.sort((left, right) => Number(left.revision_number) - Number(right.revision_number)).map(revisionRow);
 }
 
-export async function createDocumentRevision({ payload = null, principal, documentId, input = {}, recordedAt = null } = {}) {
+export async function createDocumentRevision({ payload = null, principal, documentId, input = {}, recordedAt = null, storage = null } = {}) {
   const runtime = await runtimePayload(payload);
   assertReferences(input, "revision request");
   const actor = assertActor(principal);
@@ -716,6 +721,7 @@ export async function createDocumentRevision({ payload = null, principal, docume
       return { document: documentRow(document), revision: revisionRow(existing), idempotent: true };
     }
     const revision = inputRevision(input, document);
+    if (storage) await verifyStoredDocumentBytes({ storage, ...revision });
     const nextNumber = Number(document.current_revision_number) + 1;
     if (requestedRevision !== undefined && Number(requestedRevision) !== nextNumber) {
       throw failure(`revision_number must be ${nextNumber}`, 409, "revision_conflict");

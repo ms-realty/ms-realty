@@ -187,7 +187,7 @@ test("public API search exposes the canonical intent and returns bad requests fo
   assert.equal(enabled.response.status, 200);
   assert.equal(enabled.body.search.intent.schema_version, 1);
   assert.equal(enabled.body.search.intent.exact_reference, "MS-CRAWL-0114");
-  assert.deepEqual(enabled.body.search.natural_language, { enabled: true, mode: "exact_reference" });
+  assert.deepEqual(enabled.body.search.natural_language, { enabled: true, mode: "exact_reference", original_query: "Find MS-CRAWL-0114 in Sandanski" });
 
   const invalid = await searchResponse(searchConfig(), "locale=bg&unverified_filter=1");
   assert.equal(invalid.response.status, 400);

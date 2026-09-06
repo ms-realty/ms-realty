@@ -8,6 +8,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { readListingEdits } from "../lib/listing-edits.mjs";
 import { buildListingPublicationScheduleQueue, readListingPublicationSchedules } from "../lib/listing-publication-schedules.mjs";
+import { projectListingDraftSeed } from "../lib/listing-draft-service.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 
 function tempWorkspace(prefix) {
@@ -355,3 +356,44 @@ test("HTTP adapter preserves repeated form selections for bulk listing status ch
     assert.equal(readAuditLog(paths.audit).length, 2);
   });
 });
+
+
+for (const adapter of ["Next", "HTTP"]) {
+  test(`${adapter} listing editor carries revisions and refuses stale or missing browser versions`, async () => {
+    await withNamedOperator(async (auth) => {
+      const paths = tempWorkspace(`listing-revision-${adapter}`);
+      const seed = loadCmsSeed();
+      const runtime = createPayloadDraftRuntime(seed);
+      const options = { listingEditLedgerPath: paths.listingEdits, translationLedgerPath: paths.translations,
+        auditLogPath: paths.audit, payloadListingRuntime: runtime.payload };
+      const config = { ...appAdminConfigFromEnv({}), ...options };
+      const app = adapter === "HTTP" ? createHttpApp(options) : null;
+      const send = async (url, input = null) => {
+        const headers = { ...auth, "sec-fetch-site": "same-origin", "content-type": "application/json", accept: input ? "application/json" : "text/html" };
+        if (adapter === "HTTP") return dispatchHttp(app, { url, headers, method: input ? "POST" : "GET", body: input });
+        const response = await renderAppAdminResponse(new Request(`https://example.test${url}`, {
+          headers, method: input ? "POST" : "GET", ...(input ? { body: JSON.stringify(input) } : {}),
+        }), { config });
+        return { status: response.status, body: input ? await response.json() : await response.text() };
+      };
+      const projected = await projectListingDraftSeed(seed, { payload: runtime.payload });
+      const revision = projected.records.find((row) => row.id === "MS-CRAWL-0001").draft_revision;
+      const page = await send("/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en");
+      assert.equal(page.status, 200);
+      assert.ok(page.body.includes(`name="draftRevision" value="${revision}"`));
+      const input = { listingId: "MS-CRAWL-0001", title: "Revision-aware title" };
+      assert.equal((await send("/api/admin/listings/edit", input)).status, 409);
+      const saved = await send("/api/admin/listings/edit", { ...input, draftRevision: revision });
+      assert.equal(saved.status, 201);
+      assert.match(saved.body.draft_revision, /^[a-f0-9]{64}$/);
+      assert.notEqual(saved.body.draft_revision, revision);
+      const writes = runtime.payload.calls.update.length;
+      const stale = await send("/api/admin/listings/edit", { ...input, title: "Stale competing title", draftRevision: revision });
+      assert.equal(stale.status, 409);
+      assert.equal(stale.body.kind, "listing_draft_conflict");
+      assert.equal(runtime.payload.calls.update.length, writes);
+      assert.equal(saved.body.draft_only, true);
+      assert.equal(saved.body.publication_approval_changed, false);
+    });
+  });
+}

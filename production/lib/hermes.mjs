@@ -1,5 +1,6 @@
+import { framesInlandPlaceAsSea } from "./sea-claims.mjs";
+
 const MUTATING_ACTIONS = new Set(["publish", "send_message", "mark_indexable", "change_price", "change_redirect"]);
-const SANDANSKI_SEA_TOKENS = ["sea", "seaside", "coast", "coastal", "beach", "море", "морски", "плаж", "θάλασσα", "παραλία", "ים", "חוף"];
 const LEGAL_CLAIM_TOKENS = ["tax", "legal", "mortgage", "financing", "visa", "residency", "notary", "данък", "ипотека", "правн", "налог", "ипотек", "юрид", "φόρος", "νομικ", "משכנת", "מס", "חוק"];
 const DEFAULT_TONE_RULES = ["Professional real-estate broker tone.", "Factual and concise; no hype or unverifiable claims."];
 const FORBIDDEN_CLAIMS = [
@@ -77,7 +78,7 @@ export function validateHermesTranslationDraft({ draft, propertyFacts = {}, sour
 
   const text = draftText(draft);
   if (!text) throw new Error("Hermes draft requires translated text");
-  if (/sandanski/i.test(text) && hasToken(text, SANDANSKI_SEA_TOKENS)) {
+  if (framesInlandPlaceAsSea(text)) {
     throw new Error("Hermes draft must not frame Sandanski as a sea destination");
   }
   for (const value of factValues(propertyFacts)) {
@@ -129,7 +130,7 @@ export function validateHermesReplyDraft({ draft, lead, prompt }) {
       ? draft.trim()
       : String(draft.text || draft.body || draft.message || draft.draft || "").trim();
   if (!text) throw new Error("Hermes reply draft requires text");
-  if (/sandanski/i.test(text) && hasToken(text, SANDANSKI_SEA_TOKENS)) {
+  if (framesInlandPlaceAsSea(text)) {
     throw new Error("Hermes reply draft must not frame Sandanski as a sea destination");
   }
   if (hasToken(text, LEGAL_CLAIM_TOKENS) && prompt.approved_legal_content !== true) {
@@ -144,5 +145,113 @@ export function validateHermesReplyDraft({ draft, lead, prompt }) {
     citations,
     broker_approval_required: true,
     can_send_without_approval: false,
+  };
+}
+
+// Listing copy is the one place Hermes writes rather than translates, so the
+// rule is the mirror image of the translation rule: a translation must carry
+// every approved fact through, a description must not introduce a figure the
+// catalogue never approved. "Five minutes from the centre" and "built in 1998"
+// are exactly the sentences a broker would otherwise have to catch by reading.
+export const HERMES_LISTING_COPY_FIELDS = Object.freeze(["description", "seo_title", "meta_description", "alt_text", "caption"]);
+
+const LISTING_COPY_LIMITS = Object.freeze({
+  description: { min: 40, max: 1800 },
+  seo_title: { min: 10, max: 60 },
+  meta_description: { min: 120, max: 160 },
+  alt_text: { min: 5, max: 160 },
+  caption: { min: 5, max: 200 },
+});
+
+function assertListingCopyField(field) {
+  if (!HERMES_LISTING_COPY_FIELDS.includes(field)) {
+    throw new Error(`Hermes listing copy field must be one of: ${HERMES_LISTING_COPY_FIELDS.join(", ")}`);
+  }
+  return field;
+}
+
+// 68 000 €, 68,000 and 68000 are the same figure written three ways.
+function digitRuns(text) {
+  return [...String(text).matchAll(/\d[\d\u00a0\u202f .,]*\d|\d/gu)]
+    .map((match) => match[0].replace(/[^\d]/gu, ""))
+    .filter(Boolean);
+}
+
+export function listingCopyPrompt({
+  field,
+  locale,
+  listingReference = null,
+  sourceUrl = null,
+  propertyFacts = {},
+  sourceText = "",
+  toneRules = DEFAULT_TONE_RULES,
+  seoTargets = DEFAULT_SEO_TARGETS,
+}) {
+  assertListingCopyField(field);
+  if (!locale) throw new Error("locale is required for Hermes listing copy drafts");
+  if (!Object.keys(propertyFacts).length) {
+    throw new Error("Hermes listing copy drafts require approved property facts to draw from");
+  }
+  assertHermesActionAllowed("draft_listing_copy");
+  const limits = LISTING_COPY_LIMITS[field];
+  return {
+    role: "listing_copy_draft",
+    field,
+    locale,
+    listingReference,
+    sourceUrl,
+    propertyFacts,
+    sourceText,
+    toneRules: [...toneRules],
+    forbiddenClaims: [...FORBIDDEN_CLAIMS],
+    seoTargets: { ...DEFAULT_SEO_TARGETS, ...seoTargets },
+    limits,
+    capabilities: {
+      can_publish: false,
+      can_mark_indexable: false,
+      can_change_price: false,
+      requires_human_approval: true,
+    },
+    rules: [
+      "Draft only; never publish.",
+      "Use only the approved property facts supplied. State no figure that is not among them.",
+      "Do not describe Sandanski as a sea destination.",
+      "Legal, tax, financing, and valuation claims require approved CMS source content.",
+      `Return between ${limits.min} and ${limits.max} characters.`,
+    ],
+  };
+}
+
+export function validateHermesListingCopyDraft({ draft, field, propertyFacts = {}, sourceSnapshot = {} }) {
+  assertListingCopyField(field);
+  if (!draft) throw new Error("Hermes listing copy draft output is required");
+  const text = typeof draft === "string" ? draft.trim() : String(draft.text || draft.body || draft.draft || "").trim();
+  if (!text) throw new Error("Hermes listing copy draft requires text");
+
+  const limits = LISTING_COPY_LIMITS[field];
+  if (text.length < limits.min || text.length > limits.max) {
+    throw new Error(`Hermes ${field} draft must be between ${limits.min} and ${limits.max} characters`);
+  }
+  if (framesInlandPlaceAsSea(text)) {
+    throw new Error("Hermes listing copy draft must not frame Sandanski as a sea destination");
+  }
+  if (hasToken(text, LEGAL_CLAIM_TOKENS) && sourceSnapshot.approved_legal_content !== true) {
+    throw new Error("Hermes listing copy legal/tax/process claims require approved source content");
+  }
+
+  const approved = new Set(factValues(propertyFacts).flatMap(digitRuns));
+  for (const value of digitRuns(text)) {
+    if (!approved.has(value)) throw new Error(`Hermes listing copy draft states an unapproved figure: ${value}`);
+  }
+
+  return {
+    status: "hermes_drafted",
+    field,
+    text,
+    citations: Array.isArray(draft?.citations) && draft.citations.length ? draft.citations : [{ source: "listing_facts" }],
+    human_approval_required: true,
+    can_publish: false,
+    public_indexable: false,
+    source_snapshot: sourceSnapshot,
   };
 }
