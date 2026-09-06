@@ -1166,6 +1166,9 @@ test("seller valuation page degrades to a phone CTA when lead writes are disable
   assert.doesNotMatch(disabledHtml, /data-seller-intake="true"/);
   assert.doesNotMatch(disabledHtml, /action="\/api\/leads"/);
   assert.match(disabledHtml, /data-form-unavailable="true"/);
+  // The fallback modal says why the form is gone and can be dismissed from the keyboard.
+  assert.match(disabledHtml, /data-enquiry-unavailable-note="true">[^<]{20,}<\/p>/);
+  assert.match(disabledHtml, /data-form-unavailable="true"[\s\S]*?data-enquiry-close="true"/);
   assert.match(disabledHtml, /href="tel:\+359879696870"/);
 
   // And the working path is unchanged when the durable store is available.

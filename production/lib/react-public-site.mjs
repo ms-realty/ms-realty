@@ -559,7 +559,17 @@ function EnquiryDialog({ page, labels, copy }) {
     return h(
       "dialog",
       { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-modal": "true", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry", "data-form-unavailable": "true" },
-      h("div", { className: "mk-enquiry__heading" }, h("h2", null, labels.inquiry)),
+      h(
+        "div",
+        { className: "mk-enquiry__heading" },
+        h("h2", null, labels.inquiry),
+        h(
+          "button",
+          { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-enquiry-close": "true", "aria-label": copy.close },
+          h(Icon, { name: "x", size: 20 }),
+        ),
+      ),
+      page.chrome?.form_unavailable ? h("p", { "data-enquiry-unavailable-note": "true" }, page.chrome.form_unavailable) : null,
       contact.phone
         ? h(
             Btn,
