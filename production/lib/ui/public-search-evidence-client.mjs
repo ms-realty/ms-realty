@@ -36,10 +36,10 @@ export function initPublicSearchEvidence() {
     var statuses={matched:copy.matched,not_matched:copy.different,unknown:copy.unknown,unsupported:copy.unsupported};
     body.comparisons.forEach(function(row){var section=add(result,'section');add(section,'h3',label(row.field));add(section,'p',copy.criteria+': '+textValue(row.requested));add(section,'strong',statuses[row.status]||copy.unsupported);if(row.evidence)add(section,'p',textValue(row.evidence.value));if(row.reason==='literal_words_only')add(section,'p',copy.literal);if(row.reason==='stated_area_only')add(section,'p',copy.areaOnly);});
     sourceDetails(body.source,result);sourceHash=body.source&&body.source.source_hash;sourceChanged=false;
-    status.textContent=copy.matchNote;
+    status.textContent='';
   }
   function renderAlternative(body){
-    status.textContent=body.status==='unavailable'?(body.message||copy.failure):body.status==='no_supported_alternative'?copy.noAlternative:copy.alternativesNote;
+    status.textContent=body.status==='unavailable'?(body.message||copy.failure):body.status==='no_supported_alternative'?copy.noAlternative:'';
     if(body.status==='unavailable')return;
     body.alternatives.forEach(function(item){
       var section=add(result,'section');add(section,'h3',label(item.change.field));add(section,'p',copy.before+': '+textValue(item.change.before)+' → '+copy.after+': '+textValue(item.change.after));
