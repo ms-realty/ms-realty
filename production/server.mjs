@@ -410,6 +410,12 @@ export async function startProductionServer(config = productionServerConfig()) {
     await close(server);
     process.exit(0);
   };
+  // A dependency may reject a promise nobody awaits (Payload's Postgres
+  // bootstrap does when the database is unreachable). Node would exit on it,
+  // taking every other route down with the one that failed; log and stay up.
+  process.on("unhandledRejection", (reason) => {
+    console.error(JSON.stringify({ kind: "unhandled_rejection", message: reason instanceof Error ? reason.message : String(reason) }));
+  });
   process.once("SIGTERM", shutdown);
   process.once("SIGINT", shutdown);
   return { server, address };
