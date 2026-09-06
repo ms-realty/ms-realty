@@ -32,11 +32,11 @@ test("home hero has responsive local imagery and a lean, accessible search contr
 
   assert.match(html, /id="home-hero-search-form" class="hp-search" action="\/en\/search" method="get" role="search" aria-label="Search" data-hero-search="true"/);
   const form = html.slice(html.indexOf('id="home-hero-search-form"'), html.indexOf("</form>", html.indexOf('id="home-hero-search-form"')));
-  // Buy / Rent is the first decision, so it sits above the card as a radio group.
+  // Buy / Rent remains one radio group shared by the bar and drawer.
   assert.match(form, /<fieldset class="hp-search__intent" data-search-intent="true"><legend class="mk-sr-only">Offer<\/legend>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="sale" checked><span>Buy<\/span><\/label>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="rent"><span>Rent<\/span><\/label>/);
-  // One row: Location, Type, Max price, Bedrooms, Search.
+  // Primary controls stay in the bar; the drawer exposes numeric bounds.
   assert.match(form, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"[^>]*data-geography-locale="en"/);
   assert.match(form, /<label class="hp-search__label" for="home-search-q">Location<\/label>/);
   assert.match(form, /id="home-search-q" name="location" type="search" class="hp-search__input mk-searchbar__input" autocomplete="off" placeholder="City, town or region" role="combobox"/);
@@ -49,11 +49,12 @@ test("home hero has responsive local imagery and a lean, accessible search contr
     assert.match(form, new RegExp(`<option value="${family}">`));
   }
   assert.match(form, /<option value="agricultural_land">Agricultural land<\/option>/);
-  assert.match(form, /<label class="hp-search__label" for="home-search-price-max">Max price<\/label>/);
+  assert.match(form, /<label class="hp-search__label" for="home-search-price-max">Max price, €<\/label>/);
   assert.match(form, /<input id="home-search-price-max" name="price_max" type="number" min="0" step="any" inputmode="decimal"/);
   assert.match(form, /<datalist id="home-search-price-max-suggestions" data-price-presets="true"[^>]*data-price-sale="50000\|€50,000;75000\|€75,000;/);
   assert.match(form, /data-price-rent="300\|€300 per month;/);
-  assert.equal((form.match(/type="submit"/g) || []).length, 1);
+  assert.equal((form.match(/type="submit"/g) || []).length, 2, "the hero and drawer submit the same form");
+  assert.match(form, /data-hero-filter-dialog="true" aria-labelledby="home-filter-title"/);
   assert.match(form, /class="hp-search__go mk-search__go" type="submit">[\s\S]*?<span>Search<\/span><\/button>/);
   // Secondary filters are disclosed natively, without JavaScript.
   assert.match(form, /<details class="hp-search__more" data-hero-more-filters="true"><summary class="hp-search__more-summary">/);
@@ -179,18 +180,12 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /html\[data-theme="dark"\]:has\(main\[data-react-public-ui\]\) \{[^}]*color-scheme: dark;/);
   assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:not\(\[data-theme="light"\]\):has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
   assert.match(css, /html\[data-theme="dark"\]:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;[\s\S]*?--canvas: #12110f;/);
-  // The rail carries two approved guides, so it is two columns wide and a
-  // snap-scrolling carousel on a phone; a third column would leave a hole.
   const pagesCss = readFileSync(new URL("../lib/ui/adapter-public-pages.css", import.meta.url), "utf8");
-  assert.match(pagesCss, /\.hp-guides__rail \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
-  assert.match(pagesCss, /@media \(max-width: 760px\) \{[\s\S]*?\.hp-guides__rail \{[\s\S]*?scroll-snap-type: inline mandatory;/);
   assert.match(pagesCss, /\.hp-featured:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
   assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 96px - var\(--space-6\)\);[\s\S]*?overflow-y: auto;/);
   assert.match(css, /\.site-mobile-tabs a \{[\s\S]*?color: var\(--text-body\);/);
-  assert.match(pagesCss, /\.hp-guide p \{[\s\S]*?color: var\(--text-body\);/);
   assert.match(pagesCss, /\.hp-rail-empty \.mk-empty__text \{[^}]*color: var\(--text-body\);/);
-    const listingCss = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
+  const listingCss = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
   assert.match(listingCss, /dl\[data-listing-facts="true"\] dt \{ color: var\(--text-body\);/);
-  
-    assert.match(listingCss, /\.ld-trust__row \{[^}]*color: var\(--text-body\);/);
+  assert.match(listingCss, /\.ld-trust__row \{[^}]*color: var\(--text-body\);/);
 });

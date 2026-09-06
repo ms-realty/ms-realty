@@ -1447,6 +1447,9 @@
         bedrooms[i].disabled = nonResidential;
         if (nonResidential) bedrooms[i].value = "";
       }
+      form.querySelectorAll("[data-drawer-family]").forEach(function (button) {
+        button.setAttribute("aria-pressed", button.getAttribute("data-drawer-family") === family.value ? "true" : "false");
+      });
     }
     form.addEventListener("change", function (event) {
       if (event.target && event.target.name === "offer_type") applyPricePresets();
@@ -1462,6 +1465,61 @@
       var label = more.querySelector("[data-more-label]");
       more.addEventListener("toggle", function () {
         if (label) label.textContent = more.open ? label.getAttribute("data-fewer-label") : label.getAttribute("data-more-label");
+      });
+    }
+    var drawer = form.querySelector("[data-hero-filter-dialog]");
+    if (more && drawer && typeof drawer.showModal === "function") {
+      var trigger = more.querySelector("summary");
+      var slots = [
+        ["intent", ".hp-search__intent"], ["location", ".hp-search__seg--location"],
+        ["type", ".hp-search__seg--type"], ["price-min", "#home-search-price-min"],
+        ["price-max", "#home-search-price-max"], ["more", ".hp-search__more-grid"]
+      ].map(function (entry) {
+        var node = form.querySelector(entry[1]);
+        if (entry[0].indexOf("price-") === 0) node = node.parentElement;
+        var marker = document.createComment(entry[0]);
+        node.before(marker);
+        return { node: node, marker: marker, slot: drawer.querySelector('[data-drawer-slot="' + entry[0] + '"]') };
+      });
+      // Move the existing controls: one form, one value per filter, no mirrored state.
+      trigger.addEventListener("click", function (event) {
+        event.preventDefault();
+        more.open = false;
+        slots.forEach(function (entry) {
+          entry.placeholder = entry.node.cloneNode(true);
+          entry.placeholder.inert = true;
+          entry.placeholder.setAttribute("aria-hidden", "true");
+          [entry.placeholder].concat(Array.from(entry.placeholder.querySelectorAll("*"))).forEach(function (node) {
+            ["id", "name", "for", "list"].forEach(function (attribute) { node.removeAttribute(attribute); });
+            if ("disabled" in node) node.disabled = true;
+          });
+          entry.node.before(entry.placeholder);
+          entry.slot.prepend(entry.node);
+        });
+        drawer.showModal();
+        syncPublicDialogState();
+      });
+      form.addEventListener("invalid", function (event) {
+        if (!drawer.open && more.contains(event.target)) trigger.click();
+      }, true);
+      drawer.querySelector("[data-hero-filter-close]").addEventListener("click", function () { drawer.close(); });
+      drawer.querySelectorAll("[data-drawer-family]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          family.value = button.getAttribute("data-drawer-family");
+          family.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
+      drawer.addEventListener("click", function (event) {
+        var rect = drawer.getBoundingClientRect();
+        if (event.target === drawer && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) drawer.close();
+      });
+      drawer.addEventListener("close", function () {
+        slots.forEach(function (entry) {
+          entry.marker.after(entry.node);
+          if (entry.placeholder) entry.placeholder.remove();
+        });
+        syncPublicDialogState();
+        trigger.focus({ preventScroll: true });
       });
     }
     // Empty controls stay out of the results URL; pageshow restores them for bfcache returns.
@@ -2662,7 +2720,8 @@
      var enquiry = document.getElementById("mk-enquiry");
      var contactOptions = document.querySelector("[data-mobile-contact-options]");
      var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
-     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
+     var filters = document.querySelector("[data-hero-filter-dialog]");
+     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open) || (filters && filters.open));
      document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
    }
   // The desktop language menu is a native <details>; it still needs to close

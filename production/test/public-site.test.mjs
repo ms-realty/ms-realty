@@ -1018,7 +1018,6 @@ test("English home makes every approved buyer guide discoverable without expandi
     ["/en/guides/buying-process", "/en/guides/foreign-buyers"],
   );
   assert.ok(en.body.guides.links.every((guide) => guide.reviewer === "editor_bg"));
-  assert.match(html, /data-home-guides="true" data-approved-source="cms"/);
   assert.match(html, /href="\/en\/guides\/buying-process"/);
   assert.match(html, /href="\/en\/guides\/foreign-buyers"/);
   assert.match(html, /Foreign buyers and Bulgarian land ownership/);

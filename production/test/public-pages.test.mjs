@@ -291,8 +291,6 @@ test("interactive parts of the new pages declare hover, focus, disabled and curr
   const states = [
     /\.hp-resort:hover \{/,
     /\.hp-resort:focus-visible \{ outline: none; box-shadow: var\(--shadow-focus\)/,
-    /\.hp-guide:hover \{/,
-    /\.hp-guide:focus-visible \{/,
     /\.ct-office__links a:hover \{/,
     /\.ct-office__links a:focus-visible \{/,
     /\.guide-toc a:hover \{/,
@@ -331,7 +329,7 @@ test("the public stylesheet carries no admin CRM chrome", () => {
 });
 
 test("the page styles are part of the built design bundle and use logical properties for RTL", () => {
-  for (const selector of [".flow-steps__item", ".hp-trust__in", ".ut-card", ".ct-office", ".guide-toc", ".sell-steps__num"]) {
+  for (const selector of [".flow-steps__item", ".hp-filter-drawer", ".ut-card", ".ct-office", ".guide-toc", ".sell-steps__num"]) {
     assert.ok(vendorCss.includes(selector), `${selector} is built into public/vendor/ms-realty-public.css`);
   }
   assert.match(pagesCss, /\[dir="rtl"\] \.ico-dir \{ transform: scaleX\(-1\); \}/);

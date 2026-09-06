@@ -165,14 +165,6 @@
   .hp-resort__t { padding: var(--space-4); }
 }
 
-/* ---- Home: how buying works ---- */
-.hp-how { padding-top: 0; }
-.hp-how__steps { padding-top: var(--space-2); }
-@media (max-width: 560px) {
-  .hp-how .hp-sec__head { gap: var(--space-4); }
-  .hp-how .hp-sec__head .mk-btn { order: 2; }
-}
-
 /* ---- Home: featured listings ---- */
 /* One section rhythm down the page: each block owns its bottom padding only. */
 .hp-featured { padding-top: 0; }
@@ -182,85 +174,6 @@ main[data-kind="home"] .hp-grid { grid-template-columns: repeat(3, minmax(0, 1fr
 }
 @media (max-width: 760px) {
   main[data-kind="home"] .hp-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
-}
-
-/* ---- Home: buyer guides rail (each card is a reviewed document) ---- */
-.hp-guides { padding-top: 0; }
-.hp-guides__rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
-.hp-guide {
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: var(--space-3);
-  min-width: 0;
-  padding: var(--space-6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-  box-shadow: var(--shadow-xs);
-  color: var(--text-strong);
-  text-decoration: none;
-  transition: border-color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-base) var(--ease-out);
-}
-.hp-guide:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); text-decoration: none; }
-.hp-guide:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
-.hp-guide__meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
-.hp-guide__arrow { flex: none; color: var(--text-muted); transition: transform var(--dur-fast) var(--ease-out); }
-.hp-guide:hover .hp-guide__arrow { transform: translateX(3px); }
-[dir="rtl"] .hp-guide:hover .hp-guide__arrow { transform: translateX(-3px) scaleX(-1); }
-.hp-guide h3 { font-size: var(--text-xl); line-height: var(--lh-snug); letter-spacing: var(--tracking-tight); }
-.hp-guide p {
-  display: -webkit-box;
-  margin: 0;
-  overflow: hidden;
-  color: var(--text-body);
-  font-size: var(--text-base);
-  line-height: var(--lh-normal);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-@media (max-width: 760px) {
-  .hp-guides__rail {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: min(84vw, 340px);
-    gap: var(--space-3);
-    margin-inline: calc(-1 * var(--gutter));
-    padding: 0 var(--gutter) var(--space-2);
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scroll-padding-inline: var(--gutter);
-    scroll-snap-type: inline mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .hp-guides__rail::-webkit-scrollbar { display: none; }
-  .hp-guide { padding: var(--space-5); scroll-snap-align: start; }
-  .hp-guide h3 { overflow-wrap: anywhere; }
-}
-
-/* ---- Home: quiet trust strip ---- */
-.hp-trust { border-block: 1px solid var(--border); background: var(--surface); }
-.hp-trust__in {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-6);
-  max-width: var(--container-2xl);
-  margin: 0 auto;
-  padding: var(--space-6) var(--gutter);
-  list-style: none;
-}
-.hp-trust__in li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  min-width: 0;
-  color: var(--text-body);
-  font-size: var(--text-base);
-  line-height: var(--lh-normal);
-}
-.hp-trust__in .mk-icon { flex: none; margin-top: 2px; color: var(--text-muted); }
-@media (max-width: 760px) {
-  .hp-trust__in { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding-block: var(--space-5); }
 }
 
 /* ---- Home: sell band ---- */
