@@ -2945,6 +2945,88 @@ ${THEME_SWITCH_JS}
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  function initListingSourceQuestions() {
+    document.querySelectorAll("[data-listing-question-form]").forEach(function (form) {
+      var copy = JSON.parse(form.getAttribute("data-question-copy"));
+      var input = form.elements.question;
+      var button = form.querySelector('[type="submit"]');
+      var status = form.querySelector("[data-question-status]");
+      var result = form.querySelector("[data-question-result]");
+      var generation = 0;
+      var controller = null;
+      form.hidden = false;
+      input.addEventListener("input", function () {
+        generation += 1;
+        if (controller) controller.abort();
+        result.replaceChildren();
+        status.textContent = "";
+        button.disabled = false;
+        form.removeAttribute("aria-busy");
+      });
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (form.getAttribute("aria-busy") === "true" || !form.reportValidity()) return;
+        var question = input.value.trim();
+        if (!question) return;
+        var ownGeneration = ++generation;
+        controller = new AbortController();
+        var listingId = form.elements.listingId.value;
+        var locale = form.elements.locale.value;
+        result.replaceChildren();
+        status.textContent = copy[4];
+        form.setAttribute("aria-busy", "true");
+        button.disabled = true;
+        fetch(form.action, { method: "POST", credentials: "same-origin", signal: controller.signal,
+          headers: { "content-type": "application/json", accept: "application/json" },
+          body: JSON.stringify({ listingId: listingId, locale: locale, question: question }) })
+          .then(function (response) {
+            if (!response.ok) throw new Error(response.status === 429 ? copy[11] : copy[7]);
+            return response.json();
+          })
+          .then(function (body) {
+            if (ownGeneration !== generation) return;
+            if (!body || body.kind !== "listing_source_passages" || body.listing_id !== listingId || body.locale !== locale || body.question !== question) throw new Error(copy[7]);
+            if (body.status === "no_answer") { status.textContent = copy[6]; return; }
+            if (body.status !== "related_source" || !Array.isArray(body.passages) || !body.passages.length ||
+                !/^[a-f0-9]{64}$/.test(body.source_hash || "") || !body.reviewer || !body.reviewed_at ||
+                typeof body.canonical_url !== "string" || body.canonical_url.indexOf("/" + locale + "/") !== 0) throw new Error(copy[7]);
+            body.passages.forEach(function (passage) {
+              if (typeof passage.quote !== "string" || passage.source_hash !== body.source_hash) throw new Error(copy[7]);
+              var quote = document.createElement("blockquote");
+              quote.textContent = passage.quote;
+              quote.dir = "auto";
+              quote.lang = locale;
+              result.appendChild(quote);
+            });
+            var link = document.createElement("a");
+            link.href = body.canonical_url;
+            link.textContent = listingId;
+            link.style.minHeight = "44px";
+            link.style.display = "inline-flex";
+            link.style.alignItems = "center";
+            result.appendChild(link);
+            var witness = document.createElement("p");
+            witness.textContent = copy[8] + ": " + body.reviewer + " · " + copy[9] + ": " + body.reviewed_at;
+            result.appendChild(witness);
+            var version = document.createElement("p");
+            version.textContent = copy[10] + ": " + body.source_hash;
+            result.appendChild(version);
+            status.textContent = copy[5];
+          })
+          .catch(function (error) {
+            if (ownGeneration !== generation) return;
+            result.replaceChildren();
+            status.textContent = error.message === copy[11] ? copy[11] : copy[7];
+          })
+          .finally(function () {
+            if (ownGeneration !== generation) return;
+            button.disabled = false;
+            form.removeAttribute("aria-busy");
+          });
+      });
+    });
+  }
+  initListingSourceQuestions();
   initStartFlow();
   initCompareLinks();
   initComparePage();

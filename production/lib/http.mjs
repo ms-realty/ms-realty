@@ -1,3 +1,4 @@
+import { LISTING_QUESTION_PATH, LISTING_QUESTION_MAX_BYTES, publicListingQuestion } from "./public-listing-questions.mjs";
 import { searchPath } from "./seo.mjs";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -557,6 +558,7 @@ const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
 const PUBLIC_WRITE_PATHS = new Set([
+  LISTING_QUESTION_PATH,
   "/api/leads",
   "/api/events",
   "/api/language-requests",
@@ -2639,7 +2641,7 @@ export function createHttpApp({
       };
     }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
-    if (request.method === "POST" && url.pathname === "/api/leads") {
+    if (request.method === "POST" && ["/api/leads", LISTING_QUESTION_PATH].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
       const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
@@ -4801,6 +4803,18 @@ export function createHttpApp({
         "application/json; charset=utf-8",
         { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" },
       );
+    }
+
+    if (request.method === "POST" && url.pathname === LISTING_QUESTION_PATH) {
+      if (Buffer.byteLength(request.body || "", "utf8") > LISTING_QUESTION_MAX_BYTES) return privateJson(413, { kind: "body_too_large" });
+      let input;
+      try { input = parseBody(request); } catch { return privateJson(400, { kind: "invalid_listing_question" }); }
+      try {
+        const context = await currentPublicContext();
+        return privateJson(200, publicListingQuestion({ registry: context.registry, seed: context.seed, input }));
+      } catch (error) {
+        return privateJson(error.status || 503, { kind: error.code || "listing_source_unavailable", message: error.status === 400 || error.status === 404 ? error.message : "The listing source is unavailable. Try again later." });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/search") {

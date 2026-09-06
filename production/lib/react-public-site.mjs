@@ -3498,6 +3498,37 @@ function ListingPurchaseCosts({ page }) {
   );
 }
 
+const LISTING_QUESTION_COPY = {
+  bg: ["Проверете текста на обявата", "Показваме точни откъси от одобрения текст, свързани с вашите думи. Това не е съвет или потвърждение на условия извън текста.", "Вашият въпрос", "Намерете откъс", "Проверяваме одобрения текст…", "Свързан текст от обявата", "Няма подходящ одобрен откъс. Свържете се с нас за проверка.", "Текстът не е достъпен. Опитайте отново или се свържете с нас.", "Прегледал", "Дата на прегледа", "Версия на източника", "Направени са твърде много заявки. Изчакайте и опитайте отново."],
+  en: ["Check the listing source", "We show exact passages from approved wording related to your words. This is not advice or confirmation of conditions beyond the text.", "Your question", "Find source wording", "Checking approved wording…", "Related wording from the listing", "No related approved passage is available. Contact us to check.", "The source is unavailable. Try again or contact us.", "Reviewed by", "Reviewed at", "Source version", "Too many requests. Wait before trying again."],
+  ru: ["Проверьте текст объявления", "Показываем точные отрывки из одобренного текста, связанные с вашими словами. Это не совет и не подтверждение условий за пределами текста.", "Ваш вопрос", "Найти отрывок", "Проверяем одобренный текст…", "Связанный текст объявления", "Подходящего одобренного отрывка нет. Свяжитесь с нами для проверки.", "Источник недоступен. Повторите попытку или свяжитесь с нами.", "Проверил", "Дата проверки", "Версия источника", "Слишком много запросов. Подождите перед повторной попыткой."],
+  de: ["Anzeigentext prüfen", "Wir zeigen genaue Auszüge aus freigegebenem Text, die zu Ihren Worten passen. Dies ist keine Beratung oder Bestätigung von Bedingungen außerhalb des Textes.", "Ihre Frage", "Textstelle finden", "Freigegebenen Text prüfen…", "Passender Text aus der Anzeige", "Kein passender freigegebener Auszug verfügbar. Kontaktieren Sie uns zur Prüfung.", "Die Quelle ist nicht verfügbar. Versuchen Sie es erneut oder kontaktieren Sie uns.", "Geprüft von", "Geprüft am", "Quellenversion", "Zu viele Anfragen. Warten Sie vor dem nächsten Versuch."],
+  nl: ["Controleer de advertentietekst", "We tonen exacte passages uit goedgekeurde tekst die bij uw woorden passen. Dit is geen advies of bevestiging van voorwaarden buiten de tekst.", "Uw vraag", "Tekstpassage zoeken", "Goedgekeurde tekst controleren…", "Bijpassende advertentietekst", "Er is geen passende goedgekeurde passage. Neem contact op voor controle.", "De bron is niet beschikbaar. Probeer opnieuw of neem contact op.", "Gecontroleerd door", "Gecontroleerd op", "Bronversie", "Te veel verzoeken. Wacht voordat u het opnieuw probeert."],
+  el: ["Ελέγξτε το κείμενο της αγγελίας", "Εμφανίζουμε ακριβή αποσπάσματα από εγκεκριμένο κείμενο που σχετίζονται με τις λέξεις σας. Δεν αποτελούν συμβουλή ή επιβεβαίωση όρων πέρα από το κείμενο.", "Η ερώτησή σας", "Βρείτε απόσπασμα", "Έλεγχος εγκεκριμένου κειμένου…", "Σχετικό κείμενο από την αγγελία", "Δεν υπάρχει σχετικό εγκεκριμένο απόσπασμα. Επικοινωνήστε μαζί μας για έλεγχο.", "Η πηγή δεν είναι διαθέσιμη. Δοκιμάστε ξανά ή επικοινωνήστε μαζί μας.", "Ελέγχθηκε από", "Ημερομηνία ελέγχου", "Έκδοση πηγής", "Πάρα πολλά αιτήματα. Περιμένετε πριν δοκιμάσετε ξανά."],
+  he: ["בדיקת נוסח המודעה", "מוצגים קטעים מדויקים מנוסח מאושר הקשורים למילים שלך. אין כאן ייעוץ או אישור לתנאים שאינם בטקסט.", "השאלה שלך", "חיפוש קטע מהמקור", "בודקים את הנוסח המאושר…", "נוסח קשור מתוך המודעה", "לא נמצא קטע מאושר מתאים. אפשר לפנות אלינו לבדיקה.", "המקור אינו זמין. אפשר לנסות שוב או לפנות אלינו.", "נבדק על ידי", "מועד הבדיקה", "גרסת המקור", "יותר מדי בקשות. יש להמתין לפני ניסיון נוסף."],
+};
+
+function ListingSourceQuestion({ page }) {
+  const copy = LISTING_QUESTION_COPY[page.locale];
+  if (!copy) return null;
+  const id = "listing-source-question";
+  return h("details", { className: "ld-sec", "data-listing-source-lookup": "true" },
+    h("summary", { style: { minHeight: 44, display: "flex", alignItems: "center" } }, copy[0]),
+    h("p", { id: `${id}-note` }, copy[1]),
+    h("form", { className: "ct-form", action: "/api/listings/question", method: "post", hidden: true,
+      "data-listing-question-form": "true", "data-question-copy": JSON.stringify(copy) },
+      h("input", { type: "hidden", name: "listingId", defaultValue: page.body.facts.id }),
+      h("input", { type: "hidden", name: "locale", defaultValue: page.locale }),
+      h("label", { htmlFor: id }, copy[2]),
+      h("textarea", { id, name: "question", rows: 3, maxLength: 240, required: true, dir: "auto", "aria-describedby": `${id}-note`, style: { minHeight: 88, width: "100%" } }),
+      h(Btn, { type: "submit", variant: "secondary", size: "md", style: { minHeight: 44 } }, copy[3]),
+      h("p", { role: "status", "aria-live": "polite", "data-question-status": "true" }),
+      h("div", { "data-question-result": "true", style: { overflowWrap: "anywhere" } }),
+    ),
+    page.chrome?.contact?.path ? h("a", { href: page.chrome.contact.path, style: { minHeight: 44, display: "inline-flex", alignItems: "center" } }, page.chrome.contact.label) : null,
+  );
+}
+
 function ListingBody({ page }) {
   const labels = uiLabels(page);
   const ui = uiCopyFor(page.locale);
@@ -4100,6 +4131,7 @@ function ListingBody({ page }) {
               ? h("p", { className: "ld-desc", "data-listing-description": "true", lang: contentLocale }, page.body.description)
               : h("p", { className: "ld-desc ld-desc--empty", "data-listing-description": "true", lang: contentLocale }, labels.reviewRequired),
           ),
+          h(ListingSourceQuestion, { page }),
           hasFactRows
             ? h(
                 "section",
