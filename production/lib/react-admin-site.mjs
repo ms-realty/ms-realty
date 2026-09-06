@@ -7,6 +7,7 @@ import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 import { deriveLeadQueueState, deriveSourceTasks, sortTasks } from "./tasks.mjs";
+import { DailyWorkspace, DailyTaskStatus, DailyTaskActor, dailyCopy } from "./admin-daily.mjs";
 
 function adminCopy(page) {
   return page.workspace?.copy || {};
@@ -4321,43 +4322,30 @@ function ViewingsBody({ page }) {
         ),
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
       ),
-      h(StatGrid, { metrics }),
+      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
       weekLayout ? h(ViewingWeekPanel, { page, copy, ui }) : null,
-      h(
-        Panel,
-        { title: label(copy, "upcomingViewings", "Upcoming viewings"), "data-viewing-schedule": "true" },
-        viewings.length
-          ? h(
-              "ul",
-              { className: "adm-task-list" },
-              ...viewings.map((viewing) =>
-                h(
-                  "li",
-                  { key: viewing.id, "data-viewing-schedule-row": viewing.id },
-                  h(
-                    "div",
-                    { className: "adm-task-list__body" },
-                    h("strong", null, viewing.listing_reference || viewing.lead_id),
-                    h(
-                      "span",
-                      { className: "adm-viewing-list__meta" },
-                      h("span", null, `${label(copy, "broker", "Broker")}: ${brokerProfileText(page, viewing.broker)}`),
-                      viewing.channel ? h("span", null, valueText(ui, viewing.channel)) : null,
-                      h("code", { className: "crm-mono" }, viewing.id),
-                    ),
-                  ),
-                  h(
-                    "div",
-                    { className: "adm-task-list__actions" },
-                    h(StatusPill, { tone: viewing.status === "booked" ? "sea" : "success" }, statusText(ui, viewing.status)),
-                    h("time", { dateTime: viewing.starts_at, title: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)),
-                  ),
-                ),
-              ),
-            )
-          : h(EmptyState, { icon: "calendar-days" }, label(copy, "noUpcomingViewings", "No upcoming viewings.")),
-      ),
-      h(ViewingFollowUpQueue, { page, copy, ui }),
+      h(DailyWorkspace, {
+        scope: "viewing", page, title: label(copy, "upcomingViewings", "Upcoming viewings"),
+        rows: viewings.map(viewing => ({ ...viewing, tags: viewing.status })),
+        empty: h(EmptyState, { icon: "calendar-days" }, label(copy, "noUpcomingViewings", "No upcoming viewings.")),
+        renderRow: viewing => h("span", { "data-viewing-schedule-row": viewing.id },
+          h("strong", null, viewing.listing_reference || viewing.lead_id),
+          h("small", null, brokerProfileText(page, viewing.broker)),
+          h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)),
+          h(StatusPill, { tone: viewing.status === "booked" ? "sea" : "success" }, statusText(ui, viewing.status))),
+        renderDetail: viewing => h("div", { className: "adm-daily-record", "data-viewing-schedule": "true" },
+          h("h2", null, viewing.listing_reference || viewing.lead_id),
+          h("dl", { className: "adm-daily-facts" },
+            h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, brokerProfileText(page, viewing.broker))),
+            h("div", null, h("dt", null, label(copy, "viewings", "Viewings")), h("dd", null, h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)))),
+            h("div", null, h("dt", null, label(copy, "status", "Status")), h("dd", null, statusText(ui, viewing.status)))),
+          h("p", { className: "adm-daily-note" }, [viewing.channel ? valueText(ui, viewing.channel) : null, viewing.id].filter(Boolean).join(" · ")),
+          h("p", { className: "adm-daily-note" }, dailyCopy(page).calendar),
+          h(ViewingFollowUpQueue, { page: { ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: (page.viewingFollowUpQueue?.rows || []).filter(row => row.viewing_id === viewing.id) } }, copy, ui })),
+      }),
+      (page.viewingFollowUpQueue?.rows || []).some(row => !viewings.some(viewing => viewing.id === row.viewing_id))
+        ? h(ViewingFollowUpQueue, { page: { ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: page.viewingFollowUpQueue.rows.filter(row => !viewings.some(viewing => viewing.id === row.viewing_id)) } }, copy, ui }) : null,
+
     ],
   });
 }
@@ -7593,7 +7581,7 @@ function LeadInboxBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(StatGrid, { metrics }),
+      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
       h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
@@ -8756,8 +8744,9 @@ function TaskRow({ page, row, copy, na }) {
   const kindLabel = row.origin === "authored" ? na.kinds.authored : na.kinds[row.kind];
   const delegated = row.completion.mode === "delegated";
   return h(
-    "li",
+    "div",
     {
+      className: "adm-daily-record",
       key: row.task_id,
       "data-task": row.task_id,
       "data-task-origin": row.origin,
@@ -8781,8 +8770,11 @@ function TaskRow({ page, row, copy, na }) {
             )
           : null,
       ),
-      h("strong", null, row.subject_ref || kindLabel),
+      h("h2", null, row.subject_ref || row.task_id || kindLabel),
       row.origin === "authored" && row.note ? h("small", { className: "adm-lead-context" }, row.note) : null,
+      h("dl", { className: "adm-daily-facts" },
+        h("div", null, h("dt", null, copy.owner), h("dd", null, row.owner || workbenchCopy(page).notSet)),
+        h("div", null, h("dt", null, copy.taskType), h("dd", null, row.origin === "authored" ? row.kind.replaceAll("_", " ") : kindLabel))),
       delegated ? h("small", { className: "adm-lead-context" }, copy.delegated) : null,
     ),
     h(
@@ -8796,7 +8788,9 @@ function TaskRow({ page, row, copy, na }) {
             { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.completion.route, page) },
             h("span", null, copy.openThere),
           )
-        : h(TaskCompletionForm, { page, row, copy }),
+        : pageCan(page, "operations:write") && durableRuntimeMutationAvailable(page, "/api/admin/tasks/action")
+          ? h("details", { className: "adm-daily-action" }, h("summary", { className: "mk-btn mk-btn--primary" }, copy.complete), h(TaskCompletionForm, { page, row, copy }))
+          : h("p", { role: "status" }, dailyCopy(page).unavailable),
     ),
   );
 }
@@ -8809,14 +8803,16 @@ function TaskCompletionForm({ page, row, copy }) {
     h("input", { type: "hidden", name: "taskId", value: row.task_id }),
     h("input", { type: "hidden", name: "action", value: "task_completed" }),
     h("label", { htmlFor: `${id}-note` }, copy.evidence),
-    h("input", { id: `${id}-note`, name: "note", type: "text", maxLength: 1000 }),
+    h("input", { id: `${id}-note`, name: "note", type: "text", maxLength: 1000, required: true }),
     h(
       "label",
       { className: "adm-check", htmlFor: `${id}-confirm` },
       h("input", { id: `${id}-confirm`, name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
       h("span", null, copy.confirm),
     ),
+    h(DailyTaskActor, { page }),
     h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.complete),
+    h(DailyTaskStatus, { page }),
   );
 }
 
@@ -8826,6 +8822,7 @@ function TasksBody({ page }) {
   const na = ui.workspaceSettings.nextActions;
   const queue = page.taskQueue;
   const summary = page.summary;
+  const writable = pageCan(page, "operations:write") && durableRuntimeMutationAvailable(page, "/api/admin/tasks");
   return adminShell(page, {
     title: copy.title,
     mainAttrs: {
@@ -8838,34 +8835,38 @@ function TasksBody({ page }) {
       "data-task-completable": String(summary.completable),
     },
     children: [
-      h(PageHeader, { title: copy.title, subtitle: copy.description }),
+      h(PageHeader, { title: copy.title, subtitle: copy.description },
+        writable ? h("a", { className: "mk-btn mk-btn--secondary", href: "#task-create" }, copy.addTitle) : null),
       h(
         SummaryStrip,
         {
           cards: [
-            { key: "total", label: copy.title, value: String(summary.total) },
-            { key: "overdue", label: na.overdue, value: String(summary.overdue) },
-            { key: "own", label: copy.ownWork, value: String(summary.authored) },
-            { key: "completable", label: copy.completable.replace("{count}", ""), value: String(summary.completable) },
+            { id: "total", title: copy.title, value: String(summary.total) },
+            { id: "overdue", title: na.overdue, value: String(summary.overdue) },
+            { id: "own", title: copy.ownWork, value: String(summary.authored) },
+            { id: "completable", title: copy.completable.replace("{count}", ""), value: String(summary.completable) },
           ],
         },
       ),
-      h(
-        Panel,
-        { title: copy.title, "data-task-queue": "true" },
-        // Said once, at the top, rather than repeated on every delegated row.
-        h("p", { className: "adm-next-actions__intro", "data-task-delegated-note": "true" }, copy.delegatedNote),
-        queue.rows.length
-          ? h("ol", { className: "adm-next-actions" }, ...queue.rows.map((row) => h(TaskRow, { page, row, copy, na })))
-          : h("p", { className: "adm-empty", "data-task-empty": "true" }, copy.empty),
-      ),
-      h(
-        Panel,
-        { title: copy.addTitle, "data-task-open": "true" },
+      h("p", { className: "adm-daily-note", "data-task-delegated-note": "true" }, copy.delegatedNote),
+      h(DailyWorkspace, {
+        scope: "task", page, title: copy.title,
+        rows: queue.rows.map(row => ({ ...row, id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),
+        filters: [{ value: "overdue", label: na.overdue }, { value: "authored", label: dailyCopy(page).authored }],
+        empty: h("p", { className: "adm-empty", "data-task-empty": "true" }, copy.empty),
+        renderRow: row => h("span", null,
+          h("strong", null, row.subject_ref || row.task_id || na.kinds[row.kind]),
+          h("small", null, [row.owner, row.origin === "authored" ? dailyCopy(page).authored : na.kinds[row.kind]].filter(Boolean).join(" · ")),
+          row.due_at ? h("time", { dateTime: row.due_at }, `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.due_at, page.workspace.locale)}`) : null),
+        renderDetail: row => h(TaskRow, { page, row, copy, na }),
+      }),
+      writable ? h("details", { id: "task-create", className: "adm-daily-create" },
+        h("summary", null, copy.addTitle),
+        h(Panel, { title: copy.addTitle, "data-task-open": "true" },
         h("p", { className: "adm-next-actions__intro" }, copy.evidenceNote),
         h(
           "form",
-          { method: "post", action: "/api/admin/tasks", className: "adm-task-open" },
+          { method: "post", action: "/api/admin/tasks", className: "adm-task-open", "data-task-form": "new" },
           h("label", { htmlFor: "task-new-id" }, copy.subject),
           h("input", { id: "task-new-id", name: "taskId", type: "text", required: true, maxLength: 160 }),
           h("label", { htmlFor: "task-new-type" }, copy.taskType),
@@ -8882,9 +8883,11 @@ function TasksBody({ page }) {
             h("input", { id: "task-new-confirm", name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
             h("span", null, copy.confirm),
           ),
+          h(DailyTaskActor, { page }),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.addTitle),
+          h(DailyTaskStatus, { page }),
         ),
-      ),
+      )) : null,
     ],
   });
 }

@@ -63,6 +63,7 @@ export const THEME_SWITCH_JS = `
 
 import { initPublicSearchAssistant } from "./public-search-assistant-client.mjs";
 import { initPublicSearchEvidence } from "./public-search-evidence-client.mjs";
+import { ADMIN_DAILY_JS } from "./admin-daily.mjs";
 
 export const PUBLIC_APP_JS = `(function () {
   "use strict";
@@ -3208,6 +3209,7 @@ export const ADMIN_APP_JS = `(function () {
   "use strict";
 ${COPY_BLOCK_JS}
 ${THEME_SWITCH_JS}
+${ADMIN_DAILY_JS}
   function syncAdminShellOffsets() {
     var topbar = document.querySelector(".crm-top");
     var editorTabs = document.querySelector("[data-editor-tabs]");

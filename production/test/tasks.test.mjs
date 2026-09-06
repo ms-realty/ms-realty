@@ -310,3 +310,22 @@ test("deriveSourceTasks skips work another screen has already closed", () => {
   };
   assert.deepEqual(deriveSourceTasks(page).map((row) => row.task_id), ["viewing:V-2:feedback"]);
 });
+
+test('equal timestamps retain ledger order through open, completion, reopening and completion', () => {
+  const filePath = ledger();
+  open(filePath, { eventId: 'z-open' });
+  const action = (name, eventId, fields = {}) => appendTaskAction({
+    taskId: 'chase-notary-plan', action: name, eventId,
+    actor: 'Ivan P.', humanConfirmed: true, ...fields,
+  }, { filePath, recordedAt: AT });
+  assert.equal(action('task_completed', 'a-first-completion', { note: 'First review complete.' }).task.status, 'completed');
+  assert.equal(action('task_reopened', 'm-reopen', { reasonCode: 'further_review' }).task.status, 'open');
+  assert.equal(action('task_completed', 'b-final-completion', { note: 'Further review complete.' }).task.status, 'completed');
+  const events = readTaskEvents(filePath);
+  const task = deriveTasks(events)[0];
+  assert.equal(task.status, 'completed');
+  assert.equal(task.resolution_note, 'Further review complete.');
+  assert.deepEqual(task.history.map(event => event.id), ['z-open', 'a-first-completion', 'm-reopen', 'b-final-completion']);
+  assert.equal(buildTaskQueue({ events, now: AT }).summary.completable, 0);
+  assert.equal(assertTaskEvents(events), true);
+});

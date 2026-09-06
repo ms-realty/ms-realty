@@ -302,8 +302,10 @@ function parseStoredEvent(raw) {
 }
 
 export function deriveTasks(events = []) {
+  // Ledger reads follow append sequence. Stable sorting preserves that causal
+  // order when timestamps tie; caller-supplied event IDs are not a clock.
   const parsed = events.map(parseStoredEvent).sort((left, right) =>
-    Date.parse(left.recorded_at) - Date.parse(right.recorded_at) || left.id.localeCompare(right.id),
+    Date.parse(left.recorded_at) - Date.parse(right.recorded_at),
   );
   const tasks = new Map();
   for (const event of parsed) {
