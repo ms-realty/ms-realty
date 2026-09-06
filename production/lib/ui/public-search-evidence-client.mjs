@@ -34,7 +34,7 @@ export function initPublicSearchEvidence() {
     if(['unavailable','source_changed'].includes(body.status)){sourceChanged=body.status==='source_changed';status.textContent=body.status==='source_changed'?copy.sourceChanged:body.message||copy.failure;sourceDetails(body.source,result);var href=opener&&safeLink(opener.dataset.listingHref,false);if(href){var link=add(result,'a',copy.readListing);link.href=href;}return;}
     if(body.status==='no_criteria'){status.textContent=copy.noCriteria;var a=add(result,'a',copy.entry);a.href=dialog.dataset.searchPath;return;}
     var statuses={matched:copy.matched,not_matched:copy.different,unknown:copy.unknown,unsupported:copy.unsupported};
-    body.comparisons.forEach(function(row){var section=add(result,'section');add(section,'h3',label(row.field));add(section,'p',copy.criteria+': '+textValue(row.requested));add(section,'strong',statuses[row.status]||copy.unsupported);if(row.evidence)add(section,'p',textValue(row.evidence.value));});
+    body.comparisons.forEach(function(row){var section=add(result,'section');add(section,'h3',label(row.field));add(section,'p',copy.criteria+': '+textValue(row.requested));add(section,'strong',statuses[row.status]||copy.unsupported);if(row.evidence)add(section,'p',textValue(row.evidence.value));if(row.reason==='literal_words_only')add(section,'p',copy.literal);if(row.reason==='stated_area_only')add(section,'p',copy.areaOnly);});
     sourceDetails(body.source,result);sourceHash=body.source&&body.source.source_hash;sourceChanged=false;
     status.textContent=copy.matchNote;
   }
