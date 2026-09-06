@@ -58,22 +58,35 @@ function residualWords(text, candidates) {
 }
 
 export function interpretPublicSearch({ registry, input }) {
-  validateInput(registry, input, ["locale", "text", "current"]);
+  validateInput(registry, input, ["locale", "text", "current", "reviewed_fields"]);
   if (typeof input.text !== "string" || !input.text.trim() || input.text.trim().length > 240 || /[\u0000-\u001F]/u.test(input.text)) throw fail("invalid_search_text", input.locale, ["text"]);
   const text = input.text.trim();
   const current = criteriaRequest(input.current || {}, input.locale);
   const base = { ...responseBase("search_interpretation", input.locale, current), original_query: text, mode: null, proposed_intent: null, proposed_url: null, inferred: [], unresolved: [], ambiguities: [] };
-  let parsed, candidates;
+  const rawCurrent = input.current || {};
+  const object = (value) => typeof value === "string" ? JSON.parse(value) : value || {};
+  const selected = object(rawCurrent.search_intent ?? rawCurrent.intent);
+  const reviewed = input.reviewed_fields || [];
+  const choiceFields = Object.keys(current.intent).filter((field) => !["schema_version", "locale", "sort", "page", "page_size", "mandatory_filters"].includes(field));
+  if (!Array.isArray(reviewed) || reviewed.some((field) => !choiceFields.includes(field))) throw fail("invalid_reviewed_fields", input.locale, ["reviewed_fields"]);
+  const missingChoices = reviewed.filter((field) => ![rawCurrent, object(rawCurrent.filters), selected].some((layer) => Object.hasOwn(layer, field)));
+  if (missingChoices.length) throw fail("reviewed_field_value_required", input.locale, missingChoices);
+  let parsed, candidates, parseIssue = null;
   try {
-    parsed = parseNaturalLanguageSearchIntent(text, { defaultLocale: input.locale });
     candidates = naturalLanguageSearchCandidates(text);
+    parsed = parseNaturalLanguageSearchIntent(text, { defaultLocale: input.locale });
   } catch (error) {
-    return { ...base, status: "needs_clarification", code: "interpretation_unavailable", fields: error.fields || [], unresolved: [{ text, reason: "not_interpreted" }] };
+    if (error.fields?.length && error.fields.every((field) => reviewed.includes(field))) {
+      parseIssue = { field: "text", reason: "invalid_range", required_fields: [...error.fields], options: [] };
+      parsed = { intent: normalizeSearchIntent({ locale: input.locale }), mode: "reviewed" };
+    } else {
+      return { ...base, status: "needs_clarification", code: "interpretation_unavailable", fields: error.fields || [], ambiguities: error.fields?.length ? [{ field: "text", reason: "invalid_range", required_fields: [...error.fields], options: [] }] : [], unresolved: [{ text, reason: "not_interpreted" }] };
+    }
   }
   const fields = [...new Set(candidates.map((row) => row.field))];
-  const ambiguities = fields.flatMap((field) => {
+  let ambiguities = fields.flatMap((field) => {
     const options = [...new Map(candidates.filter((row) => row.field === field).map((row) => [JSON.stringify(row.value), row.value])).values()];
-    return options.length > 1 ? [{ field, reason: "multiple_values", options }] : [];
+    return options.length > 1 ? [{ field, reason: "multiple_values", required_fields: [field], options }] : [];
   });
   // The small parser does not understand negation, non-EUR amounts or units.
   // Refuse those inferred comparisons instead of treating a nearby number as a price.
@@ -86,13 +99,15 @@ export function interpretPublicSearch({ registry, input }) {
   const inferredIntent = { ...parsed.intent };
   if (semanticRisk) {
     for (const row of candidates) inferredIntent[row.field] = Array.isArray(row.value) ? [] : null;
-    ambiguities.push({ field: "text", reason: "unsupported_relation_or_unit", options: [] });
+    ambiguities.push({ field: "text", reason: "unsupported_relation_or_unit", required_fields: fields.length ? fields : ["text_query"], options: [] });
   }
   for (const row of ambiguities) if (Object.hasOwn(inferredIntent, row.field)) inferredIntent[row.field] = Array.isArray(inferredIntent[row.field]) ? [] : null;
+  if (parseIssue) ambiguities.push(parseIssue);
+  const resolvedAmbiguities = ambiguities.filter((row) => row.required_fields.every((field) => reviewed.includes(field)));
+  ambiguities = ambiguities.filter((row) => !resolvedAmbiguities.includes(row));
+  // A reviewed choice overrides an inference; it does not confirm the original
+  // relation or any missing property fact. Unsupported wording stays visible.
   // Explicit current filters win, including cleared values and equivalent aliases.
-  const rawCurrent = input.current || {};
-  const object = (value) => typeof value === "string" ? JSON.parse(value) : value || {};
-  const selected = object(rawCurrent.search_intent ?? rawCurrent.intent);
   const currentFields = Object.fromEntries(Object.entries(rawCurrent).filter(([key]) => SEARCH_INTENT_INPUT_FIELDS.includes(key)));
   let proposed;
   try {
@@ -103,7 +118,7 @@ export function interpretPublicSearch({ registry, input }) {
   const inferred = candidates.map((row) => ({ ...row, included: !semanticRisk && !ambiguities.some((issue) => issue.field === row.field) && equal(proposed.intent[row.field], row.value), proposed_value: proposed.intent[row.field] }));
   const unresolved = (semanticRisk ? [text] : residualWords(text, candidates.filter((row) => inferred.some((item) => item.start === row.start && item.included))))
     .map((text) => ({ text, reason: "not_applied_as_filter" }));
-  return { ...base, status: ambiguities.length ? "needs_clarification" : unresolved.length ? "review_with_unresolved" : "ready_for_review", code: ambiguities.length ? "ambiguous_search" : parsed.mode === "lexical_fallback" ? "lexical_fallback" : "review_required", mode: parsed.mode, inferred, unresolved, ambiguities,
+  return { ...base, status: ambiguities.length ? "needs_clarification" : unresolved.length ? "review_with_unresolved" : "ready_for_review", code: ambiguities.length ? "ambiguous_search" : parsed.mode === "lexical_fallback" ? "lexical_fallback" : "review_required", mode: parsed.mode, inferred, unresolved, ambiguities, resolved_ambiguities: resolvedAmbiguities, reviewed_fields: [...new Set(reviewed)],
     proposed_intent: proposed.intent, proposed_url: ambiguities.length ? null : searchUrl(registry, proposed.intent, text) };
 }
 

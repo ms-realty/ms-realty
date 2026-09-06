@@ -246,3 +246,51 @@ test("number units, upper bedroom bounds and billing periods cannot silently bec
   assert.equal(supported.proposed_intent.price_max, 120000);
   assert.equal(supported.proposed_intent.bedrooms_min, 3);
 });
+
+
+test("explicit reviewed choices resolve conflicting inferences while inherited values do not", () => {
+  const text = "apartment or house in Sandanski with a lift";
+  const current = { property_families: ["house"], location_ids: ["Sandanski"] };
+  const unresolved = interpret(text, current);
+  assert.equal(unresolved.status, "needs_clarification");
+  assert.deepEqual(unresolved.ambiguities[0].required_fields, ["property_families"]);
+  const result = interpretPublicSearch({ registry, input: { locale, text, current, reviewed_fields: ["property_families"] } });
+  assert.equal(result.status, "review_with_unresolved");
+  assert.deepEqual(result.proposed_intent.property_families, ["house"]);
+  assert.ok(result.proposed_url);
+  assert.equal(result.original_query, text);
+  assert.ok(result.unresolved.some((row) => /lift/.test(row.text)));
+  assert.equal(result.resolved_ambiguities.length, 1);
+});
+
+test("reviewing an unrelated field cannot resolve an ambiguous choice or missing explicit value", () => {
+  const text = "apartment or house in Sandanski";
+  const result = interpretPublicSearch({ registry, input: { locale, text, current: { price_max: 120000 }, reviewed_fields: ["price_max"] } });
+  assert.equal(result.proposed_url, null);
+  assert.throws(() => interpretPublicSearch({ registry, input: { locale, text, current: {}, reviewed_fields: ["property_families"] } }), (error) => error.code === "reviewed_field_value_required");
+  assert.throws(() => interpretPublicSearch({ registry, input: { locale, text, current: {}, reviewed_fields: ["mandatory_filters"] } }), (error) => error.code === "invalid_reviewed_fields");
+});
+
+test("reviewed numeric fields can correct a reversed range without rewriting original words", () => {
+  const text = "apartment above 200000 below 100000";
+  const current = { price_min: 90000, price_max: 150000 };
+  const result = interpretPublicSearch({ registry, input: { locale, text, current, reviewed_fields: ["price_min", "price_max"] } });
+  assert.ok(result.proposed_url);
+  assert.equal(result.proposed_intent.price_min, 90000);
+  assert.equal(result.proposed_intent.price_max, 150000);
+  assert.equal(result.original_query, text);
+  assert.equal(result.resolved_ambiguities[0].reason, "invalid_range");
+  assert.equal(interpretPublicSearch({ registry, input: { locale, text, current, reviewed_fields: ["price_min"] } }).proposed_url, null);
+});
+
+test("explicit choices replace conflicting units but never confirm those units or a billing period", () => {
+  const text = "apartment under 3 bedrooms";
+  const current = { property_families: ["apartment"], price_max: null, bedrooms_min: null, bedrooms_max: 3 };
+  const result = interpretPublicSearch({ registry, input: { locale, text, current, reviewed_fields: ["property_families", "price_max", "bedrooms_min", "bedrooms_max"] } });
+  assert.ok(result.proposed_url);
+  assert.equal(result.proposed_intent.price_max, null);
+  assert.equal(result.proposed_intent.bedrooms_max, 3);
+  assert.deepEqual(result.unresolved, [{ text, reason: "not_applied_as_filter" }]);
+  assert.ok(result.inferred.every((row) => !row.included));
+  assert.equal(result.proposed_intent.price_period, null);
+});
