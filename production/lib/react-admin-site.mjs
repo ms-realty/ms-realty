@@ -135,6 +135,7 @@ const ADMIN_UI_COPY = {
     preflightReports: "Проверки преди пускане",
     seoPreflight: "SEO проверка",
     liveServices: "Работещи услуги",
+    hermesSourceReviewOnly: "Hermes избира откъси от одобрения източник за преглед. Преводът не е валидиран; необходим е човешки преглед.",
     liveProvisioning: "Настройка на услуги",
     payloadRuntime: "Payload среда",
     payloadBootstrap: "Payload начална настройка",
@@ -923,6 +924,7 @@ const ADMIN_UI_COPY = {
     preflightReports: "Предпусковые проверки",
     seoPreflight: "SEO-проверка",
     liveServices: "Рабочие сервисы",
+    hermesSourceReviewOnly: "Hermes выбирает отрывки из одобренного источника для проверки. Перевод не проверен; требуется проверка человеком.",
     liveProvisioning: "Настройка сервисов",
     payloadRuntime: "Среда Payload",
     payloadBootstrap: "Начальная настройка Payload",
@@ -1711,6 +1713,7 @@ const ADMIN_UI_COPY = {
     preflightReports: "Preflight reports",
     seoPreflight: "SEO preflight",
     liveServices: "Live services",
+    hermesSourceReviewOnly: "Hermes evidence covers source passage selection only. Translation has not been validated; human review is still required.",
     liveProvisioning: "Live service provisioning",
     payloadRuntime: "Payload runtime",
     payloadBootstrap: "Payload runtime bootstrap",
@@ -11388,6 +11391,9 @@ function MigrationReviewBody({ page }) {
           ),
         ),
       ),
+      page.launchBlockers?.hermes?.capability === "source_review"
+        ? h("p", { className: "mk-alert mk-alert--warning", "data-hermes-capability": "source_review" }, ui.hermesSourceReviewOnly)
+        : null,
       h(StatGrid, { metrics }),
       h(
         Panel,

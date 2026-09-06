@@ -2750,3 +2750,42 @@ test("launch input checklist reports complete R2 coverage without stale backfill
   assert.doesNotMatch(markdown, /none recorded until a listing report is mounted/);
   assert.doesNotMatch(markdown, /Backfill every public missing key/);
 });
+
+test("source-review capability remains explicit in aggregate evidence and the operator summary", async () => {
+  const { liveServiceReports, launchBlockerSummary } = await import("../lib/launch-readiness.mjs");
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-source-review-evidence-`);
+  const generatedAt = new Date().toISOString();
+  const paths = writeLiveReportFixtures(directory, generatedAt);
+  const worker = JSON.parse(fs.readFileSync(paths.hermesReportPath, "utf8"));
+  worker.capability = "source_review";
+  worker.translation_status = "not_validated";
+  worker.persisted = [{ id: "review-1", task_type: "source_review", status: "open", source_hash: "a".repeat(64), public_indexable: false, human_approved: false, durable_readback: true }];
+  fs.writeFileSync(paths.hermesReportPath, JSON.stringify(worker));
+  const reports = liveServiceReports(paths);
+  const hermes = reports.find((row) => row.source === "hermes_draft_worker");
+  assert.equal(hermes.status, "pass");
+  assert.equal(hermes.evidence.capability, "source_review");
+  assert.equal(hermes.evidence.translation_status, "not_validated");
+  const readiness = buildLaunchReadinessReport({ generatedAt, liveServices: reports });
+  const summary = launchBlockerSummary(readiness);
+  assert.deepEqual(summary.hermes, { capability: "source_review", translation_status: "not_validated", status: "pass" });
+  const { createHttpApp, dispatchHttp } = await import("../lib/http.mjs");
+  const { loadLocaleRegistry } = await import("../lib/locales.mjs");
+  const oldCredentials = process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+  process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([{ id: "fixture_operator", token: "source-review-fixture-token-0123456789", roles: ["admin"] }]);
+  try {
+    const app = createHttpApp({ registry: loadLocaleRegistry(), hermesWorkerReportPath: paths.hermesReportPath, searchSyncReportPath: paths.syncReportPath, searchQueryReportPath: paths.queryReportPath });
+    for (const [locale, expected] of [["en", /Translation has not been validated/], ["bg", /Преводът не е валидиран/], ["ru", /Перевод не проверен/]]) {
+      const response = await dispatchHttp(app, { url: `/admin/migration/review?locale=${locale}`, headers: { authorization: "Bearer source-review-fixture-token-0123456789" } });
+      assert.equal(response.status, 200);
+      assert.match(response.body, /data-hermes-capability="source_review"/);
+      assert.match(response.body, expected);
+    }
+  } finally {
+    if (oldCredentials === undefined) delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+    else process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = oldCredentials;
+  }
+  worker.translation_status = "validated";
+  fs.writeFileSync(paths.hermesReportPath, JSON.stringify(worker));
+  assert.equal(liveServiceReports(paths).find((row) => row.source === "hermes_draft_worker").status, "invalid_report");
+});

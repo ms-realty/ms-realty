@@ -956,3 +956,58 @@ test("Importer context helper marks backfill writes as side-effect-suppressed", 
   assert.equal(payloadCmsImportContextEnabled({ context: {} }), false);
   assert.equal(payloadCmsImportContextEnabled({}), false);
 });
+
+test("approved Payload source restores only the exact hash-bound seed shape", async () => {
+  const { contentHash } = await import("../lib/translations.mjs");
+  const registry = minimalRegistry();
+  const seed = minimalSeed();
+  seed.records[0].facts.source_stated_facts = [];
+  const source = seed.records[0].translations.find((row) => row.locale === "bg");
+  source.source_hash = contentHash(seed.records[0].facts);
+  source.human_approved = true;
+  const target = fakePayload();
+  await runPayloadCmsImport({ payload: target.payload, registry, seed, validateRegistry: false, validateSeed: false });
+  delete target.rows.listings[0].facts.source_stated_facts;
+  target.rows.listings[0].facts.listing_status = null;
+  const snapshot = await readPayloadCmsSnapshot({ payload: target.payload });
+  const before = JSON.stringify(snapshot.listing_translations.docs);
+  const projected = projectPayloadCmsSeed(seed, snapshot).records[0];
+  assert.deepEqual(projected.facts, seed.records[0].facts);
+  assert.equal(contentHash(projected.facts), source.source_hash);
+  assert.equal(JSON.stringify(snapshot.listing_translations.docs), before, "approval and hash bytes are untouched");
+  assert.equal(projected.facts.thumbnail_url, seed.records[0].facts.thumbnail_url);
+});
+
+for (const [field, value] of [["price_eur", 90000], ["location", "Other settlement"], ["description", "Edited description"], ["price_eur", null], ["listing_status", "available"], ["area_sqm", null], ["thumbnail_alt", "Different metadata"]]) {
+  test(`Payload edit ${field}=${value} is never repaired with seed values`, async () => {
+    const { contentHash } = await import("../lib/translations.mjs");
+    const seed = minimalSeed();
+    const source = seed.records[0].translations.find((row) => row.locale === "bg");
+    source.source_hash = contentHash(seed.records[0].facts);
+    source.human_approved = true;
+    const target = fakePayload();
+    await runPayloadCmsImport({ payload: target.payload, registry: minimalRegistry(), seed, validateRegistry: false, validateSeed: false });
+    target.rows.listings[0].facts[field] = value;
+    const snapshot = await readPayloadCmsSnapshot({ payload: target.payload });
+    const projected = projectPayloadCmsSeed(seed, snapshot).records[0];
+    assert.equal(projected.facts[field], value);
+    assert.notEqual(contentHash(projected.facts), source.source_hash);
+    assert.equal(projected.translations.find((row) => row.locale === "bg").source_hash, source.source_hash);
+  });
+}
+
+test("a changed seed or unapproved source cannot restore omitted metadata", async () => {
+  const { contentHash } = await import("../lib/translations.mjs");
+  for (const changed of ["seed", "approval"]) {
+    const seed = minimalSeed();
+    const source = seed.records[0].translations.find((row) => row.locale === "bg");
+    source.source_hash = contentHash(seed.records[0].facts);
+    source.human_approved = true;
+    const target = fakePayload();
+    await runPayloadCmsImport({ payload: target.payload, registry: minimalRegistry(), seed, validateRegistry: false, validateSeed: false });
+    if (changed === "seed") seed.records[0].facts.thumbnail_alt = "Changed seed metadata";
+    else target.rows.listing_translations.find((row) => row.human_approved).human_approved = false;
+    const projected = projectPayloadCmsSeed(seed, await readPayloadCmsSnapshot({ payload: target.payload })).records[0];
+    assert.equal(projected.facts.thumbnail_alt, undefined);
+  }
+});
