@@ -428,7 +428,7 @@ test("the approved content state filter narrows the rows on show and keeps the c
   assert.match(ready.body, /data-approved-record="hotovo-bg"/);
 });
 
-test("approved content sits under CMS in the workbench navigation and speaks the three workbench languages", async () => {
+test("approved content sits with Records in Atlas navigation and speaks the three workbench languages", async () => {
   const english = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en", headers: auth });
   assert.match(english.body, /<a class="crm-nav crm-nav--on" href="\/admin\/approved-content" aria-current="page"/);
   assert.match(english.body, /Approved content/);
@@ -440,9 +440,10 @@ test("approved content sits under CMS in the workbench navigation and speaks the
     assert.match(page.body, /build-approved-content\.mjs/, locale);
     assert.doesNotMatch(page.body, /Example record, not real content/, locale);
   }
-  // It sits in the CMS group, right after translation review.
-  const cmsGroup = english.body.slice(english.body.indexOf("/admin/listings"), english.body.indexOf("/admin/migration/review"));
-  assert.ok(cmsGroup.indexOf("/admin/translations") < cmsGroup.indexOf("/admin/approved-content"), "after translation review");
+  const recordsGroup = english.body.match(/data-admin-nav-group="records"([\s\S]*?)(?=data-admin-nav-group="management")/)?.[1] || "";
+  for (const route of ["listings", "media", "approved-content", "translations"]) {
+    assert.ok(recordsGroup.includes(`/admin/${route}`), `${route} remains accessible under Records`);
+  }
 });
 
 test("approved content styles ship in the CMS adapter and reach the generated sheet", () => {
