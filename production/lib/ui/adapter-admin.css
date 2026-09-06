@@ -1174,6 +1174,12 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   font-weight: var(--fw-semibold);
 }
 .adm-drafted-bar svg { flex: none; }
+.adm-drafted-bar[hidden] { display: none; }
+.adm-hermes-proposal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); min-width: 0; }
+.adm-hermes-proposal label { display: grid; gap: var(--space-1); min-width: 0; }
+.adm-hermes-proposal textarea { width: 100%; resize: vertical; }
+.adm-hermes-proposal__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+@media (max-width: 600px) { .adm-hermes-proposal { grid-template-columns: minmax(0, 1fr); } }
 .adm-filterbar input,
 .adm-filterbar select { width: 100%; min-width: 0; height: 40px; min-height: 40px; padding-block: 0; font-size: var(--text-sm); }
 .adm-filterbar .mk-btn { flex: none; }

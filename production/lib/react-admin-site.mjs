@@ -261,6 +261,13 @@ const ADMIN_UI_COPY = {
     hermesUnavailableOwner: "Hermes не е настроен в тази среда.",
     assistDraft: "Чернова",
     assistPending: "Hermes пише чернова…",
+    assistCurrent: "Текущ текст",
+    assistProposed: "Предложена чернова",
+    assistApply: "Използвайте черновата",
+    assistDiscard: "Запазете моя текст",
+    assistReview: "Сравнете черновата с вашия текст, преди да я използвате.",
+    assistChanged: "Текстът ви е променен. Прегледайте обновеното сравнение, преди да използвате черновата.",
+    assistApplied: "Черновата е добавена в полето. Запишете промените, когато сте готови.",
     assistFailed: "Hermes не успя да напише чернова.",
     assistUnavailable: "Hermes не е настроен в тази среда. Напишете текста сами.",
     assistDrafted: "Чернова от Hermes по {source}. Нищо не се публикува, докато вие не я одобрите.",
@@ -1039,6 +1046,13 @@ const ADMIN_UI_COPY = {
     hermesUnavailableOwner: "Hermes не настроен в этой среде.",
     assistDraft: "Черновик",
     assistPending: "Hermes пишет черновик…",
+    assistCurrent: "Текущий текст",
+    assistProposed: "Предложенный черновик",
+    assistApply: "Использовать черновик",
+    assistDiscard: "Оставить мой текст",
+    assistReview: "Сравните черновик со своим текстом перед использованием.",
+    assistChanged: "Ваш текст изменился. Проверьте обновлённое сравнение перед использованием черновика.",
+    assistApplied: "Черновик добавлен в поле. Сохраните изменения, когда будете готовы.",
     assistFailed: "Hermes не смог написать черновик.",
     assistUnavailable: "Hermes не настроен в этой среде. Напишите текст сами.",
     assistDrafted: "Черновик Hermes по {source}. Ничего не публикуется, пока вы не одобрите.",
@@ -1817,6 +1831,13 @@ const ADMIN_UI_COPY = {
     hermesUnavailableOwner: "Hermes is not configured in this environment.",
     assistDraft: "Draft",
     assistPending: "Hermes is drafting…",
+    assistCurrent: "Current text",
+    assistProposed: "Proposed draft",
+    assistApply: "Use draft",
+    assistDiscard: "Keep my text",
+    assistReview: "Compare the draft with your text before using it.",
+    assistChanged: "Your text has changed. Review the updated comparison before using this draft.",
+    assistApplied: "Draft added to the field. Save your changes when you are ready.",
     assistFailed: "Hermes could not draft this.",
     assistUnavailable: "Hermes is not configured in this environment. Write the text yourself.",
     assistDrafted: "Hermes draft from {source}. Nothing is published until you approve it.",
@@ -9692,9 +9713,8 @@ function editorField(copy, ui, field, value, disabled = false, assist = null) {
   return assistedEditorField(copy, ui, field, value, disabled, assist);
 }
 
-// One draft, one approval boundary, one shape. The button never writes anything
-// public: it fills the box the broker is already looking at and says where the
-// words came from, and the value is saved by the same form as any other edit.
+// The button proposes text for review. Only the operator can put it into the
+// field, which is saved by the same form as any other edit.
 // The button and the bar, so any editable value can carry the same control
 // rather than each screen growing its own.
 function hermesAssistButton(ui, { assist, hermesField, targetId, barId, disabled = false, payload = null, reveal = null, describedBy = null }) {
@@ -9716,6 +9736,14 @@ function hermesAssistButton(ui, { assist, hermesField, targetId, barId, disabled
       "data-hermes-assist-target": targetId,
       "data-hermes-assist-bar": barId,
       "data-hermes-assist-pending": ui.assistPending,
+      "data-hermes-assist-current": ui.assistCurrent,
+      "data-hermes-assist-proposed": ui.assistProposed,
+      "data-hermes-assist-apply": ui.assistApply,
+      "data-hermes-assist-discard": ui.assistDiscard,
+      "data-hermes-assist-review": ui.assistReview,
+      "data-hermes-assist-changed": ui.assistChanged,
+      "data-hermes-assist-applied": ui.assistApplied,
+      "data-hermes-assist-source-note": fillTemplate(ui.assistDrafted, { source: assist.source }),
       "data-hermes-assist-failure": ui.assistFailed,
       "data-hermes-assist-unavailable": ui.assistUnavailable,
     },

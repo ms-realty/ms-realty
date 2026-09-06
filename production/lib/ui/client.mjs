@@ -3586,6 +3586,13 @@ ${THEME_SWITCH_JS}
       var pending = button.getAttribute("data-hermes-assist-pending") || "Drafting…";
       var failure = button.getAttribute("data-hermes-assist-failure") || "Could not draft this.";
       var unavailable = button.getAttribute("data-hermes-assist-unavailable") || failure;
+      var previousProposal = host && host.querySelector("[data-hermes-proposal]");
+      if (previousProposal) previousProposal.remove();
+      if (host) host.removeAttribute("data-hermes-error");
+      if (bar) {
+        bar.hidden = true;
+        bar.removeAttribute("data-hermes-drafted-state");
+      }
       button.disabled = true;
       button.setAttribute("data-busy", "true");
       button.textContent = pending;
@@ -3620,19 +3627,66 @@ ${THEME_SWITCH_JS}
           // Listing copy says human_approval_required; a reply says
           // broker_approval_required. Neither may claim it can go out.
           var approvalRequired = draft.human_approval_required === true || draft.broker_approval_required === true;
-          if (!draft.text || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
+          if (typeof draft.text !== "string" || !draft.text.trim() || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
             throw new Error("invalid Hermes draft response");
           }
-          target.value = draft.text;
-          target.dispatchEvent(new Event("input", { bubbles: true }));
-          if (host) host.setAttribute("data-hermes-drafted", "true");
-          // On the field itself as well, so the styling rule can sit beside the
-          // bare-field rule it has to outrank rather than fight it from a
-          // component selector that always loses.
-          target.setAttribute("data-hermes-drafted", "true");
-          if (bar) bar.hidden = false;
-          // Some values are edited inside a disclosure. Filling one the reader
-          // cannot see is the same as not filling it.
+          if (!host || !bar) throw new Error("draft review unavailable");
+          var proposal = document.createElement("div");
+          proposal.className = "adm-hermes-proposal";
+          proposal.setAttribute("data-hermes-proposal", "true");
+          var comparison = [];
+          [
+            ["current", "Current text", target.value],
+            ["proposed", "Proposed draft", draft.text],
+          ].forEach(function (entry) {
+            var label = document.createElement("label");
+            label.textContent = button.getAttribute("data-hermes-assist-" + entry[0]) || entry[1];
+            var box = document.createElement("textarea");
+            box.readOnly = true;
+            box.rows = 4;
+            box.value = entry[2];
+            label.appendChild(box);
+            proposal.appendChild(label);
+            comparison.push(box);
+          });
+          var actions = document.createElement("div");
+          actions.className = "adm-hermes-proposal__actions";
+          var apply = document.createElement("button");
+          apply.type = "button";
+          apply.className = "mk-btn mk-btn--primary";
+          apply.textContent = button.getAttribute("data-hermes-assist-apply") || "Use draft";
+          var discard = document.createElement("button");
+          discard.type = "button";
+          discard.className = "mk-btn";
+          discard.textContent = button.getAttribute("data-hermes-assist-discard") || "Keep my text";
+          actions.appendChild(apply);
+          actions.appendChild(discard);
+          proposal.appendChild(actions);
+          var sourceNote = button.getAttribute("data-hermes-assist-source-note") || "";
+          bar.textContent = (button.getAttribute("data-hermes-assist-review") || "Compare the draft with your text before using it.") + " " + sourceNote;
+          bar.hidden = false;
+          host.appendChild(proposal);
+          apply.addEventListener("click", function () {
+            if (target.disabled || target.readOnly) return;
+            if (target.value !== comparison[0].value) {
+              comparison[0].value = target.value;
+              bar.textContent = button.getAttribute("data-hermes-assist-changed") || "Your text has changed. Review the updated comparison before using this draft.";
+              comparison[0].focus();
+              return;
+            }
+            target.value = draft.text;
+            target.dispatchEvent(new Event("input", { bubbles: true }));
+            host.setAttribute("data-hermes-drafted", "true");
+            target.setAttribute("data-hermes-drafted", "true");
+            bar.textContent = button.getAttribute("data-hermes-assist-applied") || "Draft added to the field. Save your changes when you are ready.";
+            proposal.remove();
+            target.focus();
+          });
+          discard.addEventListener("click", function () {
+            proposal.remove();
+            bar.hidden = true;
+            target.focus();
+          });
           var reveal = button.getAttribute("data-hermes-assist-reveal");
           var panel = reveal ? document.getElementById(reveal) : target.closest("details");
           if (panel && panel.tagName === "DETAILS") panel.open = true;
