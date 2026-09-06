@@ -3439,18 +3439,32 @@ function adminNavigationGroups(page) {
       items,
     };
   };
+  // Paper groups routes by the work people do. The existing registry still
+  // supplies labels, paths and capabilities, so reorganising the rail cannot
+  // grant access or silently drop a secondary destination.
+  const groupLabels = {
+    bg: ["Работа", "Записи", "Управление"],
+    ru: ["Работа", "Записи", "Управление"],
+    en: ["Work", "Records", "Management"],
+  }[page.workspace?.locale] || ["Work", "Records", "Management"];
+  const shortLabels = {
+    bg: { lead_inbox: "Запитвания", lead_pipeline: "Сделки", viewings: "Огледи", requests: "Заявки", contacts: "Контакти", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
+    ru: { lead_inbox: "Обращения", lead_pipeline: "Сделки", viewings: "Просмотры", requests: "Заявки", contacts: "Контакты", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
+    en: { lead_inbox: "Lead inbox", lead_pipeline: "Pipeline", viewings: "Viewings", requests: "Requests", contacts: "Contacts", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
+  }[page.workspace?.locale] || {};
+  const visible = destinations.map(visibleDestination).filter(Boolean);
+  const routes = new Map(visible.flatMap((destination) =>
+    [destination.route, ...destination.children].map((route) => [route.id, {
+      ...destination, id: route.id, route: { ...route, label: shortLabels[route.id] || route.label }, children: [],
+      primary: route.id === destination.route.id,
+    }])));
   const groups = [
-    { id: "today", label: owner.groups.today, destinations: destinations.filter((destination) => destination.group === "today") },
-    { id: "crm", label: owner.groups.crm, destinations: destinations.filter((destination) => destination.group === "crm") },
-    { id: "cms", label: owner.groups.cms, destinations: destinations.filter((destination) => destination.group === "cms") },
-    { id: "hermes", label: owner.groups.hermes, destinations: destinations.filter((destination) => destination.group === "hermes") },
-    { id: "workspace", label: owner.groups.workspace, destinations: destinations.filter((destination) => destination.group === "workspace") },
+    { id: "work", label: groupLabels[0], ids: ["today", "lead_inbox", "lead_pipeline", "viewings", "tasks", "requests"] },
+    { id: "records", label: groupLabels[1], ids: ["contacts", "consents", "realty_cases", "documents", "document_records", "listing_manager", "media_library", "approved_content", "translation_queue"] },
+    { id: "management", label: groupLabels[2], ids: ["hermes", "reports", "connections", "settings", "team", "locale_rollout", "migration_review", "activity"] },
   ];
   return groups
-    .map((group) => ({
-      ...group,
-      destinations: group.destinations.map(visibleDestination).filter(Boolean),
-    }))
+    .map((group) => ({ ...group, destinations: group.ids.map((id) => routes.get(id)).filter(Boolean) }))
     .filter((group) => group.destinations.length);
 }
 
@@ -3485,7 +3499,7 @@ function navigationDestination(destination, page, { mobile = false } = {}) {
   return h(
     "div",
     { key: `${mobile ? "mobile-" : ""}destination-${destination.id}`, className: mobile ? "adm-mobile-nav__destination" : "crm-sb__destination" },
-    navigationLink(destination.route, page, { mobile, primary: true, key: `${mobile ? "mobile-" : ""}primary-${destination.id}` }),
+    navigationLink(destination.route, page, { mobile, primary: destination.primary !== false, key: `${mobile ? "mobile-" : ""}primary-${destination.id}` }),
     ...(destination.children || []).map((item) =>
       navigationLink(item, page, { mobile, key: `${mobile ? "mobile-" : ""}${item.id}` })),
   );
