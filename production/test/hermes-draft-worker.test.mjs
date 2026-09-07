@@ -8,6 +8,7 @@ import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
   providerRequestBody,
+  agentRuntimeMetadata,
   readReusableHermesDraftWorkerReport,
   runHermesDraftWorker,
   taskFromHermesDraft,
@@ -24,6 +25,7 @@ import {
   HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
 } from "../lib/hermes-draft-dispatch.mjs";
 import { fromRoot, repoRelativePath } from "../lib/paths.mjs";
+import { openTask } from "../lib/tasks.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
 function dispatchRow() {
@@ -233,6 +235,38 @@ test("live capture reuses only validated desktop subscription reports", async ()
 
   fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, summary: { attempted: 0, persisted: 0, rejected: 0 } })}\n`);
   assert.throws(() => readReusableHermesDraftWorkerReport(reportPath), /attempt at least one draft/);
+});
+
+test("live capture reuses a self-hosted source review only while its task reads back", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-source-review-reuse-`);
+  const reportPath = `${dir}/hermes-draft-worker-report.json`;
+  const ledger = `${dir}/task-events.jsonl`;
+  const sourceHash = "a".repeat(64);
+  openTask(
+    { taskId: "source-review-evidence-1", taskType: "source_review", subjectRef: "MS-CRAWL-0002", owner: "agency_admin",
+      note: "Source review draft (bg). Human review pending; no translation performed.", reference: `source-review:${sourceHash}`,
+      actor: "Ivan P.", humanConfirmed: true },
+    { filePath: ledger, recordedAt: new Date().toISOString() },
+  );
+  const report = {
+    generated_at: new Date().toISOString(), capability: "source_review", translation_status: "not_validated",
+    agent_runtime: agentRuntimeMetadata(),
+    provider: { mode: "self_hosted", model: "qwen3.5:0.8b", endpoint: "http://hermes-agent:8642/v1/chat/completions", tool_call_parser: "hermes", sensitive_data_allowed: true },
+    ledger_path: ledger, audit_log_path: `${dir}/audit-log.jsonl`, audit_log_rows: 1,
+    summary: { attempted: 1, persisted: 1, rejected: 0 },
+    persisted: [{ id: "source-review-evidence-1", task_type: "source_review", status: "open", source_hash: sourceHash, public_indexable: false, human_approved: false, durable_readback: true }],
+    rejected: [],
+  };
+  fs.writeFileSync(reportPath, `${JSON.stringify(report)}\n`);
+  assert.deepEqual(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: ledger }), report);
+  // No ledger, a foreign ledger, or a report for a task the ledger never opened: not evidence.
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: null }), null);
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: `${dir}/missing.jsonl` }), null);
+  fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, persisted: [{ ...report.persisted[0], id: "source-review-evidence-2" }] })}\n`);
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: ledger }), null);
+  // A self-hosted translation report still never reuses.
+  fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, capability: undefined })}\n`);
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: ledger }), null);
 });
 
 test("Hermes draft worker report rejects no-op launch evidence", () => {
