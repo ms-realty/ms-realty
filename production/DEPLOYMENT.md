@@ -175,6 +175,45 @@ Examples and smoke fixtures document schemas; they never clear a runtime gate.
 Private reports stay ignored and are mounted only where the launch materializer
 can validate them.
 
+## Email
+
+All mail runs through `ms.realty.bg@gmail.com`. Inbound addresses on
+`makler-realty.com` forward there; outbound mail leaves through Cloudflare
+Email Workers from `noreply@makler-realty.com`, and the `send_email` binding is
+pinned to that one destination. Payload (password resets, verification) and
+operator notifications use the same path; without the credential Payload
+keeps writing mail to its log, which is the "No email adapter provided"
+warning.
+
+Cloudflare dashboard, zone `makler-realty.com` → Email → Email Routing:
+
+1. Enable Email Routing and let it add the MX and SPF records.
+2. Destination addresses: add `ms.realty.bg@gmail.com` and confirm the
+   verification mail it receives.
+3. Routing rules: catch-all → forward to `ms.realty.bg@gmail.com`; add
+   `contact@`, `info@`, `office@` explicitly if the dashboard asks for them.
+4. Email Workers sends only to verified destinations, so keep the destination
+   verified; the binding refuses anything else by configuration.
+
+Worker (Cloudflare → Workers → `ms-realty` → Settings → Variables):
+
+- `MS_REALTY_EMAIL_SEND_SECRET` (secret): a random 32-byte hex value. The same
+  value goes into `/opt/ms-realty/shared/.env.production-review` on the origin
+  host so the container can call the edge.
+- `MS_REALTY_EMAIL_FROM`, `MS_REALTY_EMAIL_FROM_NAME`, `MS_REALTY_EMAIL_SEND_URL`
+  are plain vars in `wrangler.jsonc`.
+
+Smoke after the next release:
+
+```bash
+curl --fail --silent --show-error -X POST "https://ms-realty.ms-realty-bg.workers.dev/__email/send" \
+  -H "authorization: Bearer $MS_REALTY_EMAIL_SEND_SECRET" -H "content-type: application/json" \
+  -d '{"to":"ms.realty.bg@gmail.com","subject":"MS Realty edge mail smoke","text":"Delivered through Email Workers."}'
+```
+
+Expected: `202 {"kind":"email_accepted",...}` and the message in the Gmail
+inbox. A `502 email_rejected` means the destination is not verified yet.
+
 ## Admin and integrations
 
 `/admin/login` is the only public admin sign-in entry. Payload's internal admin

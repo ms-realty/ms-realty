@@ -23,6 +23,8 @@ import {
 } from "./origin-proxy.mjs";
 import { edgeCacheHit, edgeCacheKey, requestMayUseEdgeCache, storeInEdgeCache } from "./edge-cache.mjs";
 import { INGEST_PREFIX, ingestMedia } from "./media-ingest-boundary.mjs";
+import { EMAIL_SEND_PATH, sendEmail } from "./email-send-boundary.mjs";
+import { EmailMessage } from "cloudflare:email";
 
 // The MS Realty runtime runs inside a container because the app is a real Node
 // process that reads the filesystem — the CMS seed and (for now) the JSONL
@@ -81,6 +83,10 @@ export class MsRealtyContainer extends Container {
     MS_REALTY_PROVIDER_OAUTH_STATE_SECRET: this.env.MS_REALTY_PROVIDER_OAUTH_STATE_SECRET ?? "",
     MS_REALTY_GOOGLE_OAUTH_CLIENT_ID: this.env.MS_REALTY_GOOGLE_OAUTH_CLIENT_ID ?? "",
     MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET: this.env.MS_REALTY_GOOGLE_OAUTH_CLIENT_SECRET ?? "",
+    MS_REALTY_EMAIL_SEND_URL: this.env.MS_REALTY_EMAIL_SEND_URL ?? "",
+    MS_REALTY_EMAIL_SEND_SECRET: this.env.MS_REALTY_EMAIL_SEND_SECRET ?? "",
+    MS_REALTY_EMAIL_FROM: this.env.MS_REALTY_EMAIL_FROM ?? "",
+    MS_REALTY_EMAIL_FROM_NAME: this.env.MS_REALTY_EMAIL_FROM_NAME ?? "",
     MS_REALTY_GITHUB_OAUTH_CLIENT_ID: this.env.MS_REALTY_GITHUB_OAUTH_CLIENT_ID ?? "",
     MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET: this.env.MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET ?? "",
     MS_REALTY_META_APP_ID: this.env.MS_REALTY_META_APP_ID ?? "",
@@ -264,6 +270,7 @@ export default {
     if (preview && isPublicAdminPath(url.pathname)) return payloadPrivateResponse();
     if (isPayloadPrivatePath(url.pathname)) return payloadPrivateResponse();
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
+    if (url.pathname === EMAIL_SEND_PATH) return sendEmail(request, env, { EmailMessage });
     if (preview && url.pathname === "/robots.txt") return previewRobotsResponse();
     if (url.pathname.startsWith(MEDIA_PREFIX) || url.pathname.startsWith(OWNED_MEDIA_PREFIX)) {
       // Media paths are static bytes: only GET/HEAD mean anything here, and a
