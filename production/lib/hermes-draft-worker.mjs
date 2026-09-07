@@ -15,6 +15,7 @@ import {
 } from "./hermes-provider-provisioning.mjs";
 import { appendTranslationTask, auditPathFor, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { fromRoot, repoRelativePath } from "./paths.mjs";
+import { deriveTasks, readTaskEvents } from "./tasks.mjs";
 
 export const DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-report.json");
 export const DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-smoke.json");
@@ -511,12 +512,30 @@ export function assertHermesDraftWorkerReport(report) {
   return true;
 }
 
-export function readReusableHermesDraftWorkerReport(filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH) {
+// A self-hosted source review is reusable only while every task it persisted
+// still reads back from the operator task ledger as the open source-review
+// task it claims to be. That readback, not the file, is the evidence.
+function sourceReviewReadsBack(report, taskLedgerPath) {
+  if (!taskLedgerPath || !fs.existsSync(taskLedgerPath)) return false;
+  const tasks = deriveTasks(readTaskEvents(taskLedgerPath));
+  return report.persisted.every((row) => {
+    const task = tasks.find((candidate) => candidate.task_id === row.id);
+    return Boolean(task) && task.kind === "source_review" && task.status === "open" &&
+      task.reference === `source-review:${row.source_hash}`;
+  });
+}
+
+export function readReusableHermesDraftWorkerReport(
+  filePath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+  { taskLedgerPath = process.env.MS_REALTY_TASK_LEDGER_PATH } = {},
+) {
   if (!fs.existsSync(filePath)) return null;
   const report = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  if (report.provider?.mode !== "desktop_subscription") return null;
+  const selfHostedSourceReview = report.provider?.mode === "self_hosted" && report.capability === "source_review";
+  if (report.provider?.mode !== "desktop_subscription" && !selfHostedSourceReview) return null;
   assertHermesDraftWorkerReport(report);
   if (evidenceFreshness("live_services", report.generated_at).status !== "fresh") return null;
+  if (selfHostedSourceReview && !sourceReviewReadsBack(report, taskLedgerPath)) return null;
   return report;
 }
 

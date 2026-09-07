@@ -98,6 +98,33 @@ Do not infer live readiness from the committed baseline alone. Do not infer an
 exact release from a green process check alone. The markers, ready response,
 and deployment run must agree.
 
+### Hermes live-service evidence
+
+The `live_services` gate needs a Hermes worker report that attempted and
+persisted at least one model output through the self-hosted provider. When the
+translation dispatch is empty, the release capture cannot produce one, so an
+operator opens a source-review task once per evidence window (seven days) from
+the newest release directory on the origin host. The task is a real operator
+task; confirming it approves nothing and publishes nothing.
+
+```bash
+release=/opt/ms-realty/releases/<40-character release SHA>
+cd "$release"
+docker compose --env-file /opt/ms-realty/shared/.env.production-review \
+  -f production/docker-compose.local-production.yml \
+  -f production/docker-compose.production-review.yml \
+  run --rm --no-deps app node production/scripts/run-hermes-source-review.mjs \
+  --listing MS-CRAWL-0002 --task "source-review-$(date -u +%Y%m%d)" \
+  --actor "<operator name>" --owner agency_admin \
+  --reason "Release evidence: Hermes source passage review" \
+  --report /runtime-evidence/hermes-draft-worker-report.json --confirm-task
+```
+
+The report path is the one the app reads (`MS_REALTY_HERMES_WORKER_REPORT_PATH`).
+The script refuses to overwrite: move the previous report to a dated name first.
+The next release capture reuses the report only while the task it opened still
+reads back from `/runtime-data/task-events.jsonl` as an open source-review task.
+
 ## Routine release
 
 1. Open a focused pull request from a task branch.
