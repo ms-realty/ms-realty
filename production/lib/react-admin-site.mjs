@@ -9889,6 +9889,9 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
+  // The topbar already names the screen. The page heading names the listing,
+  // so an operator with several editor tabs open can tell them apart.
+  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
   // One descriptor, so the button is the same control on every field it
@@ -9965,7 +9968,7 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: page.listing.id,
+          title: listingName,
           subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),

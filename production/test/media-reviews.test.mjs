@@ -107,7 +107,7 @@ test("media review notes survive reload and distinguish a changed decision from 
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const filePath = `${directory}/reviews.jsonl`;
   const { seed, assetId } = fixture();
-  const input = { listingId: "MS-CRAWL-0037", assetId, kind: "floor_plan", decision: "keep_private", reviewer: "media_editor", reviewConfirmed: true, reviewNote: "  Client details are visible; await a redacted replacement.  " };
+  const input = { listingId: "MS-00719", assetId, kind: "floor_plan", decision: "keep_private", reviewer: "media_editor", reviewConfirmed: true, reviewNote: "  Client details are visible; await a redacted replacement.  " };
   const review = createMediaReview(seed, input);
   const first = appendMediaReview(review, { filePath });
   assert.equal(first.review_note, input.reviewNote.trim());

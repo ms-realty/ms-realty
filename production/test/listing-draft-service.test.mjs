@@ -465,7 +465,7 @@ test("a stale browser revision refuses a competing listing edit before any write
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed);
   const initial = await projectListingDraftSeed(seed, { payload: runtime.payload });
-  const listingId = "MS-CRAWL-0001";
+  const listingId = "MS-00815";
   const draftRevision = initial.records.find((record) => record.id === listingId).draft_revision;
   assert.match(draftRevision, /^[a-f0-9]{64}$/);
   const first = await saveListingDraft(seed, { payload: runtime.payload, principal, requireRevision: true,
@@ -486,7 +486,7 @@ test("a stale browser revision refuses a competing listing edit before any write
 test("shared property changes invalidate the editor even when the listing is unchanged", async () => {
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed);
-  const listingId = "MS-CRAWL-0003";
+  const listingId = "MS-00922";
   const initial = await projectListingDraftSeed(seed, { payload: runtime.payload });
   const listing = initial.records.find((record) => record.id === listingId);
   const transactionID = await runtime.payload.db.beginTransaction({ isolationLevel: "serializable" });
@@ -504,7 +504,7 @@ test("shared property changes invalidate the editor even when the listing is unc
 test("browser saves require a revision while trusted MCP callers validate supplied revisions", async () => {
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed);
-  const input = { listingId: "MS-CRAWL-0001", patch: { title: "Trusted draft" } };
+  const input = { listingId: "MS-00815", patch: { title: "Trusted draft" } };
   for (const draftRevision of [undefined, "", "bad-revision"]) {
     await assert.rejects(() => saveListingDraft(seed, { payload: runtime.payload, principal, requireRevision: true,
       input: { ...input, draftRevision } }), (error) => error.status === 409);
@@ -522,7 +522,7 @@ test("serializable commit conflicts roll back and return a recoverable conflict"
   const before = runtime.currentRows();
   runtime.payload.db.commitTransaction = async () => { throw Object.assign(new Error("concurrent update"), { code: "40001" }); };
   await assert.rejects(() => saveListingDraft(seed, { payload: runtime.payload, principal,
-    input: { listingId: "MS-CRAWL-0001", patch: { title: "Not committed" } } }),
+    input: { listingId: "MS-00815", patch: { title: "Not committed" } } }),
     (error) => error.status === 409 && error.code === "listing_draft_conflict");
   assert.deepEqual(runtime.currentRows(), before);
   assert.equal(runtime.payload.calls.rollback, 1);
@@ -531,7 +531,7 @@ test("serializable commit conflicts roll back and return a recoverable conflict"
 test("trusted saves validate against the transaction projection rather than the original seed", async () => {
   const seed = loadCmsSeed();
   const runtime = createPayloadDraftRuntime(seed);
-  const listingId = "MS-CRAWL-0001";
+  const listingId = "MS-00815";
   await saveListingDraft(seed, { payload: runtime.payload, principal,
     input: { listingId, patch: { title: "Current durable title" } } });
   const first = runtime.currentRows().listings.find((row) => row.id === listingId);

@@ -86,7 +86,7 @@ test("custom listing editor preserves explicit empty-string form clears for dura
   process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   const app = createHttpApp({ payloadListingRuntime: runtime.payload });
   const editor = await dispatchHttp(app, {
-    url: "/admin/listings/edit?listingId=MS-CRAWL-0001",
+    url: "/admin/listings/edit?listingId=MS-00815",
     headers: auth,
   });
   assert.equal(editor.status, 200);

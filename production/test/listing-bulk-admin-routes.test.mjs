@@ -377,11 +377,11 @@ for (const adapter of ["Next", "HTTP"]) {
         return { status: response.status, body: input ? await response.json() : await response.text() };
       };
       const projected = await projectListingDraftSeed(seed, { payload: runtime.payload });
-      const revision = projected.records.find((row) => row.id === "MS-CRAWL-0001").draft_revision;
-      const page = await send("/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en");
+      const revision = projected.records.find((row) => row.id === "MS-00815").draft_revision;
+      const page = await send("/admin/listings/edit?listingId=MS-00815&locale=en");
       assert.equal(page.status, 200);
       assert.ok(page.body.includes(`name="draftRevision" value="${revision}"`));
-      const input = { listingId: "MS-CRAWL-0001", title: "Revision-aware title" };
+      const input = { listingId: "MS-00815", title: "Revision-aware title" };
       assert.equal((await send("/api/admin/listings/edit", input)).status, 409);
       const saved = await send("/api/admin/listings/edit", { ...input, draftRevision: revision });
       assert.equal(saved.status, 201);

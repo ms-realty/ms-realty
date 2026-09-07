@@ -139,11 +139,6 @@ export function locationPath(registry, localeCode, location) {
   return `/${locale.code}/${locale.route_segments.location || "locations"}/${locationSlug(location)}`;
 }
 
-export function searchPath(registry, localeCode) {
-  const locale = getLocale(registry, localeCode);
-  return `/${locale.code}/${locale.route_segments.search}`;
-}
-
 // The eight search facets that are allowed into the index: one canonical
 // property family or one offer type, never both and never with anything else.
 // Every other query on the search route is a private utility view and stays
