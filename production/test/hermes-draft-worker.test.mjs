@@ -7,6 +7,8 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
+  providerRequestBody,
+  agentRuntimeMetadata,
   readReusableHermesDraftWorkerReport,
   runHermesDraftWorker,
   taskFromHermesDraft,
@@ -23,6 +25,7 @@ import {
   HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
 } from "../lib/hermes-draft-dispatch.mjs";
 import { fromRoot, repoRelativePath } from "../lib/paths.mjs";
+import { openTask } from "../lib/tasks.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
 function dispatchRow() {
@@ -232,6 +235,38 @@ test("live capture reuses only validated desktop subscription reports", async ()
 
   fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, summary: { attempted: 0, persisted: 0, rejected: 0 } })}\n`);
   assert.throws(() => readReusableHermesDraftWorkerReport(reportPath), /attempt at least one draft/);
+});
+
+test("live capture reuses a self-hosted source review only while its task reads back", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-source-review-reuse-`);
+  const reportPath = `${dir}/hermes-draft-worker-report.json`;
+  const ledger = `${dir}/task-events.jsonl`;
+  const sourceHash = "a".repeat(64);
+  openTask(
+    { taskId: "source-review-evidence-1", taskType: "source_review", subjectRef: "MS-CRAWL-0002", owner: "agency_admin",
+      note: "Source review draft (bg). Human review pending; no translation performed.", reference: `source-review:${sourceHash}`,
+      actor: "Ivan P.", humanConfirmed: true },
+    { filePath: ledger, recordedAt: new Date().toISOString() },
+  );
+  const report = {
+    generated_at: new Date().toISOString(), capability: "source_review", translation_status: "not_validated",
+    agent_runtime: agentRuntimeMetadata(),
+    provider: { mode: "self_hosted", model: "qwen3.5:0.8b", endpoint: "http://hermes-agent:8642/v1/chat/completions", tool_call_parser: "hermes", sensitive_data_allowed: true },
+    ledger_path: ledger, audit_log_path: `${dir}/audit-log.jsonl`, audit_log_rows: 1,
+    summary: { attempted: 1, persisted: 1, rejected: 0 },
+    persisted: [{ id: "source-review-evidence-1", task_type: "source_review", status: "open", source_hash: sourceHash, public_indexable: false, human_approved: false, durable_readback: true }],
+    rejected: [],
+  };
+  fs.writeFileSync(reportPath, `${JSON.stringify(report)}\n`);
+  assert.deepEqual(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: ledger }), report);
+  // No ledger, a foreign ledger, or a report for a task the ledger never opened: not evidence.
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: null }), null);
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: `${dir}/missing.jsonl` }), null);
+  fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, persisted: [{ ...report.persisted[0], id: "source-review-evidence-2" }] })}\n`);
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: ledger }), null);
+  // A self-hosted translation report still never reuses.
+  fs.writeFileSync(reportPath, `${JSON.stringify({ ...report, capability: undefined })}\n`);
+  assert.equal(readReusableHermesDraftWorkerReport(reportPath, { taskLedgerPath: ledger }), null);
 });
 
 test("Hermes draft worker report rejects no-op launch evidence", () => {
@@ -445,11 +480,72 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
   assert.equal(request.body.max_tokens, 1024);
   assert.equal(request.body.reasoning_effort, "none");
+  assert.deepEqual(request.body.model_options, { reasoning: { enabled: false } });
   assert.equal(request.body.response_format.type, "json_object");
   assert.ok(request.options.signal instanceof AbortSignal);
   assert.equal(request.body.tools, undefined);
   assert.equal(request.body.tool_choice, "none");
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
+});
+
+test("Hermes request preserves exact protected values without adding missing facts", () => {
+  const row = dispatchRow();
+  row.prompt.propertyFacts = {
+    id: "MS-CRAWL-0069", location: "Leshnitsa", price_eur: 9000,
+    area_sqm: 8000, bedrooms: 0, source_url: "https://makler-realty.com/listing/example/",
+    unknown_floor: null, unknown_condition: "", available: false,
+  };
+  const original = structuredClone(row);
+  const request = providerRequestBody(row, "qwen3.5:0.8b");
+  const prompt = JSON.parse(request.messages[1].content);
+  assert.deepEqual(prompt.immutableFacts, [
+    { field: "id", value: "MS-CRAWL-0069" },
+    { field: "location", value: "Leshnitsa" },
+    { field: "price_eur", value: "9000" },
+    { field: "area_sqm", value: "8000" },
+    { field: "bedrooms", value: "0" },
+    { field: "source_url", value: "https://makler-realty.com/listing/example/" },
+  ]);
+  assert.equal(prompt.sourceText, original.prompt.sourceText);
+  assert.deepEqual(prompt.propertyFacts, original.prompt.propertyFacts);
+  assert.deepEqual(row, original);
+  assert.match(request.messages[0].content, /Include every immutableFacts value verbatim in body/);
+});
+
+test("Hosted provider requests keep gateway-only reasoning options out", async () => {
+  let body;
+  const provider = openAiCompatibleHermesProvider({
+    env: { HERMES_PROVIDER_MODE: "openrouter", HERMES_API_KEY: "test-key" },
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    fetchImpl: async (_url, options) => {
+      body = JSON.parse(options.body);
+      return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(validDraft()) } }] }) };
+    },
+  });
+  await provider(dispatchRow());
+  assert.equal(body.model_options, undefined);
+  assert.equal(body.reasoning_effort, "none");
+});
+
+test("A model response that omits the reference is rejected without repair or persistence", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-missing-reference-`);
+  const filePath = `${dir}/translations.jsonl`;
+  const modelOutput = { title: "Sandanski apartment", body: "Sandanski 50000", seo_title: "Sandanski", meta_description: "Sandanski 50000", citations: [] };
+  const provider = openAiCompatibleHermesProvider({
+    env: { HERMES_API_KEY: "test-key" },
+    endpoint: "https://hermes.local/v1/chat/completions",
+    fetchImpl: async () => ({ ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(modelOutput) } }] }) }),
+  });
+  const report = await runHermesDraftWorker({
+    dispatch: isolatedDispatch(), provider, filePath,
+    auditPath: `${dir}/hermes-audit.jsonl`, auditLogPath: `${dir}/audit-log.jsonl`,
+    providerMetadata: { mode: "self_hosted", model: "qwen3.5:0.8b", sensitiveDataAllowed: true },
+  });
+  assert.deepEqual(report.summary, { attempted: 1, persisted: 0, rejected: 1 });
+  assert.match(report.rejected[0].error, /changed or omitted property fact: MS-TEST-1/);
+  assert.equal(fs.existsSync(filePath), false);
+  assert.equal(modelOutput.body, "Sandanski 50000");
+  assert.throws(() => assertHermesDraftWorkerReport(report), /persist at least one draft/);
 });
 
 test("OpenAI-compatible Hermes provider rejects non-empty tool-call draft arguments", async () => {

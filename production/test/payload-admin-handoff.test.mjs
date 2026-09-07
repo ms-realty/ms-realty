@@ -85,6 +85,13 @@ test("custom listing editor preserves explicit empty-string form clears for dura
   const previousAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
   process.env.MS_REALTY_ADMIN_ACTOR = "editor_bg";
   const app = createHttpApp({ payloadListingRuntime: runtime.payload });
+  const editor = await dispatchHttp(app, {
+    url: "/admin/listings/edit?listingId=MS-CRAWL-0001",
+    headers: auth,
+  });
+  assert.equal(editor.status, 200);
+  const draftRevision = editor.body.match(/name="draftRevision" value="([a-f0-9]{64})"/)?.[1];
+  assert.ok(draftRevision, "the editor supplies the current durable draft revision");
   const response = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/listings/edit",
@@ -92,6 +99,7 @@ test("custom listing editor preserves explicit empty-string form clears for dura
     body: new URLSearchParams({
       listingId: "MS-00815",
       seo_canonical: "",
+      draftRevision,
     }).toString(),
   });
   if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;

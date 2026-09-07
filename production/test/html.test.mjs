@@ -125,7 +125,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /role="search"/);
   assert.match(homeHtml, /data-action="seller"/);
   assert.match(homeHtml, /data-hero-media="approved"/);
-  assert.match(homeHtml, /data-location-media="approved"/);
+  assert.match(homeHtml, /class="hp-town__photo"/);
+  assert.match(homeHtml, /src="\/hero\/sandanski-1280\.webp"/);
   assert.match(homeHtml, /aria-label="נכסים מובילים"/);
   assert.match(homeHtml, /data-card-thumbnail="true"/);
   assert.equal(assertHtmlPage(notFoundHtml, { lang: "he", dir: "rtl", kind: "not-found" }), true);
@@ -187,10 +188,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /name="offer_type"/);
   assert.match(searchHtml, /name="price_min"/);
   assert.match(searchHtml, /name="bedrooms_min"/);
-  // Area is not published for any listing in this catalogue, so the range is
-  // not offered; the panel keeps the filters the inventory can answer.
-  assert.doesNotMatch(searchHtml, /name="area_min"/);
-  assert.doesNotMatch(searchHtml, /name="area_max"/);
+  // Visitors can enter area bounds even when catalogue facts are incomplete.
+  assert.match(searchHtml, /name="area_min"[^>]*type="number"/);
+  assert.match(searchHtml, /name="area_max"[^>]*type="number"/);
   assert.match(searchHtml, /id="sr-geography-options"/);
   assert.match(searchHtml, /id="sr-mobile-geography-options"/);
   assert.match(searchHtml, /data-geography-endpoint="\/api\/geography"/);

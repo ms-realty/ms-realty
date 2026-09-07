@@ -30,7 +30,9 @@ function activationRows(registry, requests) {
         fallback_locale: fallbackLocale,
         public_indexable: false,
         status: "needs_locale_approval",
-        admin_path: `/admin/locales?locale=${encodeURIComponent(code)}`,
+        // `locale` is the admin interface language everywhere else in the
+        // workspace, so the language under review travels as `language`.
+        admin_path: `/admin/locales?language=${encodeURIComponent(code)}`,
         task: {
           id: `activate-locale-${code}`,
           owner,

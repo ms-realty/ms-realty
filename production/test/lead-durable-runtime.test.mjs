@@ -114,6 +114,8 @@ test("requested durable storage fails closed when its runtime is incomplete", as
     assert.equal(response.status, 503);
     assert.deepEqual(await response.json(), {
       kind: "lead_store_unavailable",
+      // Nothing was persisted, so the receipt says so instead of "unknown".
+      intake_status: "rejected",
       message: "Lead storage is temporarily unavailable",
     });
   }

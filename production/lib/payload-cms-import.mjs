@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
+import { contentHash } from "./translations.mjs";
 import { assertCmsSeed } from "./cms-seed.mjs";
 import { assertLocaleRegistry, loadLocaleRegistry } from "./locales.mjs";
 import { mediaWorkflow } from "./media.mjs";
@@ -684,6 +686,7 @@ function projectedMedia(document) {
     source: document.source || null,
     media_reviewer: document.reviewer || null,
     media_reviewed_at: document.reviewed_at || null,
+    media_review_note: document.review_history?.at(-1)?.review_note || null,
     thumbnail_url: document.rendition?.storage_key
       ? `/api/admin/media/uploads/${assetId}?rendition=${encodeURIComponent(document.rendition.kind || "thumb")}`
       : null,
@@ -705,7 +708,36 @@ function projectedTour(document) {
   };
 }
 
-function projectedListingRecord(document, snapshot) {
+// The editor precondition covers the draft and its shared property. Hash the
+// authoritative documents, not a public source hash that omits workflow/SEO.
+export function listingDraftRevision(document, property = null) {
+  return createHash("sha256").update(JSON.stringify(normalize({ listing: document, property }))).digest("hex");
+}
+
+function approvedSourceFacts(document, sourceRecord, translations, sourceLocale) {
+  const current = clone(document.facts || {});
+  if (!sourceRecord || document.id !== sourceRecord.id || document.source_url !== sourceRecord.source_url ||
+      document.source_domain !== sourceRecord.source_domain || sourceLocale !== sourceRecord.source_locale ||
+      relationId(document.property) !== relationId(sourceRecord.property)) return current;
+  const approved = translations.find((row) => row.locale === sourceLocale && row.source_locale === sourceLocale && row.listing === document.id && row.status === "published" && row.human_approved === true);
+  if (!approved || approved.source_hash !== contentHash(sourceRecord.facts)) return current;
+  // Payload deliberately omits crawl metadata from the facts group. Restore
+  // only the exact approved seed shape, and only when every stored business
+  // field still matches. Never merge a seed value over an operator edit.
+  const omitted = [...LISTING_FACT_SOURCE_FIELDS, "source_stated_facts"];
+  for (const field of omitted) {
+    if (Object.hasOwn(current, field) && !isDeepStrictEqual(current[field], sourceRecord.facts[field])) return current;
+  }
+  const expected = withoutFields(sourceRecord.facts, omitted);
+  const actual = withoutFields(current, omitted);
+  // The nullable select is materialised as null by Payload when the import
+  // source did not contain it. No other null/empty coercion is accepted.
+  if (!Object.hasOwn(expected, "listing_status") && actual.listing_status === null) delete actual.listing_status;
+  if (!isDeepStrictEqual(actual, expected)) return current;
+  return clone(sourceRecord.facts);
+}
+
+function projectedListingRecord(document, snapshot, sourceRecord = null) {
   const translationDocs = relationId(document.translations || [])
     .map((id) => snapshot.listing_translations.byId.get(id))
     .filter(Boolean)
@@ -727,12 +759,13 @@ function projectedListingRecord(document, snapshot) {
       url: String(entry?.url || ""),
     })),
     merged_into: document.merged_into ?? null,
+    draft_revision: listingDraftRevision(document, snapshot.properties.byId.get(relationId(document.property)) || null),
     collection: "listings",
     cms_status: document.cms_status,
     source_locale: localeCode(document.source_locale, snapshot),
     source_domain: document.source_domain,
     source_url: document.source_url,
-    facts: clone(document.facts || {}),
+    facts: approvedSourceFacts(document, sourceRecord, translationDocs, localeCode(document.source_locale, snapshot)),
     workflow: clone(document.workflow || {}),
     property: relationId(document.property) || null,
     location: relationId(document.location) || null,
@@ -759,8 +792,9 @@ function countTranslationLocales(records) {
 
 export function projectPayloadCmsSeed(seed, snapshot) {
   const payloadListingIds = new Set(snapshot.listings.docs.map((doc) => doc.id));
-  const payloadRecords = new Map(snapshot.listings.docs.map((doc) => [doc.id, projectedListingRecord(doc, snapshot)]));
   const baseRecords = Array.isArray(seed.records) ? seed.records : [];
+  const sourceById = new Map(baseRecords.map((record) => [record.id, record]));
+  const payloadRecords = new Map(snapshot.listings.docs.map((doc) => [doc.id, projectedListingRecord(doc, snapshot, sourceById.get(doc.id))]));
   const records = [
     ...baseRecords.map((record) => payloadRecords.get(record.id) || clone(record)),
     ...snapshot.listings.docs.filter((doc) => !baseRecords.some((record) => record.id === doc.id)).map((doc) => projectedListingRecord(doc, snapshot)),

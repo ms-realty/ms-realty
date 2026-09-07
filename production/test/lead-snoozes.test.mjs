@@ -135,13 +135,13 @@ test("the snooze ledger validates its own input and refuses a second open deferr
   assert.throws(() => createLeadSnooze(leads, [], { leadId: "lead-1", until: "2026-08-01T00:00:00Z", reason: "", actor: "a" }, NOW), /Snooze reason is required/);
   assert.throws(() => createLeadSnooze(leads, [], { leadId: "lead-1", until: "2026-08-01T00:00:00Z", reason: "x", actor: "" }, NOW), /Snooze actor is required/);
 
-  const first = createLeadSnooze(leads, [], { leadId: "lead-1", until: "2026-08-01T00:00:00Z", reason: "Waiting.", actor: "a" }, NOW);
+  const first = createLeadSnooze(leads, [], { leadId: "lead-1", until: "2026-08-01T00:00:00Z", reason: "Waiting.", actor: "a", humanConfirmed: true }, NOW);
   const stored = { ...first, id: "lead-snooze-lead-1" };
   // The same deferral twice is the same deferral.
-  assert.equal(createLeadSnooze(leads, [stored], { leadId: "lead-1", until: "2026-08-01T00:00:00.000Z", reason: "Waiting.", actor: "a" }, NOW), stored);
+  assert.equal(createLeadSnooze(leads, [stored], { leadId: "lead-1", until: "2026-08-01T00:00:00.000Z", reason: "Waiting.", actor: "a", humanConfirmed: true }, NOW), stored);
   // A different deferral on top of an open one is refused.
   assert.throws(
-    () => createLeadSnooze(leads, [stored], { leadId: "lead-1", until: "2026-08-02T00:00:00Z", reason: "Other.", actor: "a" }, NOW),
+    () => createLeadSnooze(leads, [stored], { leadId: "lead-1", until: "2026-08-02T00:00:00Z", reason: "Other.", actor: "a", humanConfirmed: true }, NOW),
     /already has an open snooze/,
   );
   assert.throws(() => createLeadUnsnooze(leads, [], { leadId: "lead-1", reason: "x", actor: "a" }, NOW), /no open snooze/);
@@ -152,7 +152,15 @@ test("the snooze ledger validates its own input and refuses a second open deferr
 
 test("POST /api/admin/leads/snooze records one audited, idempotent deferral", async () => {
   const { app, leadSnoozeLedgerPath, auditLogPath } = workspace();
-  const body = { leadId: "lead-snooze-1", until: "2026-07-20T09:00:00.000Z", reason: "Customer asked for a call after the valuation.", actor: "operations_lead" };
+  const body = { leadId: "lead-snooze-1", until: "2026-07-20T09:00:00.000Z", reason: "Customer asked for a call after the valuation.", actor: "operations_lead", humanConfirmed: true };
+
+  for (const humanConfirmed of [undefined, false, "false"]) {
+    const refused = await post(app, "/api/admin/leads/snooze", { ...body, humanConfirmed });
+    assert.equal(refused.status, 400);
+    assert.match(refused.body.message, /explicit human confirmation/);
+  }
+  assert.equal(readLeadSnoozes(leadSnoozeLedgerPath).length, 0);
+  assert.equal(readAuditLog(auditLogPath).length, 0);
 
   const created = await post(app, "/api/admin/leads/snooze", body);
   assert.equal(created.status, 201);
@@ -184,9 +192,14 @@ test("POST /api/admin/leads/snooze records one audited, idempotent deferral", as
 
 test("POST /api/admin/leads/unsnooze restores the clock and refuses when nothing is open", async () => {
   const { app, auditLogPath } = workspace();
-  await post(app, "/api/admin/leads/snooze", { leadId: "lead-snooze-1", until: "2026-07-20T09:00:00.000Z", reason: "Waiting for the notary.", actor: "operations_lead" });
+  await post(app, "/api/admin/leads/snooze", { leadId: "lead-snooze-1", until: "2026-07-20T09:00:00.000Z", reason: "Waiting for the notary.", actor: "operations_lead", humanConfirmed: true });
 
-  const restored = await post(app, "/api/admin/leads/unsnooze", { leadId: "lead-snooze-1", reason: "Customer called back early.", actor: "operations_lead" });
+  const refused = await post(app, "/api/admin/leads/unsnooze", { leadId: "lead-snooze-1", reason: "Customer called back early.", actor: "operations_lead" });
+  assert.equal(refused.status, 400);
+  assert.match(refused.body.message, /explicit human confirmation/);
+  assert.equal(readAuditLog(auditLogPath).filter((entry) => entry.action === "lead_unsnoozed").length, 0);
+
+  const restored = await post(app, "/api/admin/leads/unsnooze", { leadId: "lead-snooze-1", reason: "Customer called back early.", actor: "operations_lead", humanConfirmed: true });
   assert.equal(restored.status, 201);
   assert.equal(restored.body.kind, "lead_unsnooze");
 
@@ -247,6 +260,7 @@ test("a named operator owns the deferral and a mismatched actor is refused", asy
       leadId: "lead-snooze-1",
       until: "2026-07-20T09:00:00.000Z",
       reason: "Waiting for the survey.",
+      humanConfirmed: true,
     });
     assert.equal(bound.status, 201);
     assert.equal(bound.body.actor, "operations_lead");

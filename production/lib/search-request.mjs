@@ -62,6 +62,7 @@ const SEARCH_REQUEST_FIELDS = new Set([
   "search_intent",
   "intent",
   "nl",
+  "nl_context",
   "saved",
   "format",
   "print",
@@ -90,6 +91,35 @@ const LOCATION_RULES = [
   ["Hotovo", /(?:\bhotovo\b|хотово)/iu],
   ["Sveti Vlas", /(?:\bsveti vlas\b|свети влас)/iu],
 ];
+
+const OFFER_RULES = [
+  ["rent", /(?:\b(?:for rent|rent)\b|наем|под наем)/iu],
+  ["sale", /(?:\b(?:for sale|buy|sale)\b|продажба|за продажба)/iu],
+];
+const BEDROOM_RULE = /(?:\b(\d+)\s*bed(?:room)?s?\b|(\d+)\s*спални)/iu;
+const PRICE_MAX_RULE = /(?:\b(?:under|below|up to|maximum|max)\b|до|под)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu;
+const PRICE_MIN_RULE = /(?:\b(?:over|above|from|minimum|min)\b|над|от)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu;
+
+// Evidence for the interpretation review uses the parser's own vocabulary.
+// Every span is retained, including competing choices the legacy parser picks
+// between. Public assistance can therefore ask for a choice rather than guess.
+export function naturalLanguageSearchCandidates(value) {
+  const text = String(value || "").trim();
+  const candidates = [];
+  const collect = (field, pattern, convert) => {
+    for (const match of text.matchAll(new RegExp(pattern.source, `${pattern.flags}g`))) {
+      candidates.push({ field, value: convert(match), text: match[0], start: match.index, end: match.index + match[0].length });
+    }
+  };
+  collect("exact_reference", EXACT_REFERENCE, (match) => match[0].toUpperCase());
+  for (const [value, pattern] of PROPERTY_RULES) collect("property_families", pattern, () => [value]);
+  for (const [value, pattern] of LOCATION_RULES) collect("location_ids", pattern, () => [value]);
+  for (const [value, pattern] of OFFER_RULES) collect("offer_type", pattern, () => value);
+  collect("bedrooms_min", BEDROOM_RULE, (match) => Number(match[1] || match[2]));
+  collect("price_max", PRICE_MAX_RULE, parseAmount);
+  collect("price_min", PRICE_MIN_RULE, parseAmount);
+  return candidates;
+}
 
 function objectInput(input) {
   if (input instanceof URLSearchParams) return Object.fromEntries(input);
@@ -183,24 +213,24 @@ export function parseNaturalLanguageSearchIntent(value, { defaultLocale = "bg" }
       break;
     }
   }
-  if (/(?:\b(?:for rent|rent)\b|наем|под наем)/iu.test(text)) {
+  if (OFFER_RULES[0][1].test(text)) {
     fields.offer_type = "rent";
     structured = true;
-  } else if (/(?:\b(?:for sale|buy|sale)\b|продажба|за продажба)/iu.test(text)) {
+  } else if (OFFER_RULES[1][1].test(text)) {
     fields.offer_type = "sale";
     structured = true;
   }
-  const bedrooms = text.match(/(?:\b(\d+)\s*bed(?:room)?s?\b|(\d+)\s*спални)/iu);
+  const bedrooms = text.match(BEDROOM_RULE);
   if (bedrooms) {
     fields.bedrooms_min = Number(bedrooms[1] || bedrooms[2]);
     structured = true;
   }
-  const priceMax = text.match(/(?:\b(?:under|below|up to|maximum|max)\b|до|под)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu);
+  const priceMax = text.match(PRICE_MAX_RULE);
   if (priceMax) {
     fields.price_max = parseAmount(priceMax);
     structured = true;
   }
-  const priceMin = text.match(/(?:\b(?:over|above|from|minimum|min)\b|над|от)\s*(?:€|eur)?\s*([\d\s.,]+)\s*(k)?\b/iu);
+  const priceMin = text.match(PRICE_MIN_RULE);
   if (priceMin) {
     fields.price_min = parseAmount(priceMin);
     structured = true;
@@ -230,6 +260,36 @@ export function searchParamsFromUrl(searchParams) {
   return known;
 }
 
+// Clear equivalent names before applying a later layer. Otherwise a parsed
+// canonical value (including an empty array) can mask a user's form alias.
+const INPUT_ALIAS_GROUPS = [
+  ["text_query", "q", "query"],
+  ["exact_reference", "listing_reference"],
+  ["property_families", "property_family", "property_type"],
+  ["property_subtypes", "property_subtype"],
+  ["listing_status", "status"],
+  ["price_currency", "currency"],
+  ["parking_kinds", "parking_kind"],
+  ["construction_statuses", "construction_status"],
+  ["location_ids", "location_id", "location"],
+  ["page_size", "per_page"],
+  ["primary_area_min", "area_min"],
+  ["primary_area_max", "area_max"],
+];
+
+export function mergeSearchInputs(...layers) {
+  const merged = {};
+  for (const layer of layers) {
+    for (const aliases of INPUT_ALIAS_GROUPS) {
+      if (aliases.some((key) => Object.hasOwn(layer, key))) {
+        for (const key of aliases) delete merged[key];
+      }
+    }
+    Object.assign(merged, layer);
+  }
+  return merged;
+}
+
 export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLanguageEnabled = false } = {}) {
   const raw = objectInput(input);
   assertKnownFields(raw, SEARCH_REQUEST_FIELDS, "search request");
@@ -244,24 +304,22 @@ export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLan
     assertMandatoryFilters(encodedIntent, raw.locale || defaultLocale);
   }
   const naturalLanguage = String(raw.nl || "").trim();
-  if (naturalLanguage && naturalLanguageEnabled) {
-    const parsed = parseNaturalLanguageSearchIntent(naturalLanguage, { defaultLocale: raw.locale || defaultLocale });
-    return {
-      intent: parsed.intent,
-      query: parsed.intent.text_query,
-      filters: compactFilters(searchIntentToQueryFilters(parsed.intent)),
-      sort: parsed.intent.sort,
-      page: parsed.intent.page,
-      natural_language: { enabled: true, mode: parsed.mode },
-    };
-  }
+  // Context survives filter edits but is never parsed or sent as a lexical
+  // query. Keeping the complete words avoids claiming semantic understanding
+  // of wishes that this deliberately small parser cannot evaluate.
+  const originalQuery = naturalLanguage || String(raw.nl_context || "").trim();
+  if (originalQuery.length > 240) throw new Error("natural language search text must be 240 characters or fewer");
+  const parsed = naturalLanguage && naturalLanguageEnabled
+    ? parseNaturalLanguageSearchIntent(naturalLanguage, { defaultLocale: raw.locale || defaultLocale })
+    : null;
+  const explicit = Object.fromEntries(Object.entries(raw).filter(([key]) => SEARCH_INTENT_FIELD_SET.has(key)));
   const intent = normalizeSearchIntent(
-    {
-      ...filters,
-      ...Object.fromEntries(Object.entries(encodedIntent || {}).filter(([key]) => key !== "mandatory_filters")),
-      ...Object.fromEntries(Object.entries(raw).filter(([key]) => SEARCH_INTENT_FIELD_SET.has(key))),
-      ...(naturalLanguage && !raw.q && !raw.query && !raw.text_query ? { text_query: naturalLanguage } : {}),
-    },
+    mergeSearchInputs(
+      parsed?.intent || (naturalLanguage ? { text_query: naturalLanguage } : {}),
+      filters,
+      Object.fromEntries(Object.entries(encodedIntent || {}).filter(([key]) => key !== "mandatory_filters")),
+      explicit,
+    ),
     { defaultLocale },
   );
   return {
@@ -270,6 +328,10 @@ export function normalizeSearchRequest(input, { defaultLocale = "bg", naturalLan
     filters: compactFilters(searchIntentToQueryFilters(intent)),
     sort: intent.sort,
     page: intent.page,
-    natural_language: naturalLanguage ? { enabled: false, mode: "lexical_fallback" } : null,
+    natural_language: originalQuery ? {
+      enabled: naturalLanguageEnabled,
+      mode: parsed?.mode || (naturalLanguage ? "lexical_fallback" : "reviewed"),
+      original_query: originalQuery,
+    } : null,
   };
 }

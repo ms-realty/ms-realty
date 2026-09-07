@@ -1,0 +1,78 @@
+/* Paper Daily: Tasks 54L-0, Lead review 33T-0, Viewings 4CN-0.
+   State catalogues describe individual states, not one runtime page. */
+.crm-app .adm-daily-workspace { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.crm-app .adm-daily-workspace > * { min-width: 0; }
+.crm-app .adm-daily-queue { border: 1px solid var(--atlas-line); border-radius: 16px; overflow: clip; }
+.crm-app .adm-daily-tools { display: grid; gap: 12px; padding: 16px; }
+.crm-app .adm-daily-tools label { font-size: 14px; line-height: 20px; font-weight: 600; }
+.crm-app .adm-daily-tools input { width: 100%; }
+.crm-app .adm-daily-tools .crm-seg { flex-wrap: wrap; }
+.crm-app .adm-daily-rows { list-style: none; padding: 0; margin: 0; max-height: 560px; overflow: auto; }
+.crm-app .adm-daily-rows li { border-top: 1px solid var(--atlas-line); }
+.crm-app .adm-daily-rows a { display: flex; min-height: 96px; align-items: center; padding: 16px; text-decoration: none; color: var(--atlas-text); }
+.crm-app .adm-daily-rows a[aria-current="true"], .crm-app .adm-daily-rows a:hover { background: var(--atlas-tint); }
+.crm-app .adm-daily-rows a > span { display: grid; gap: 6px; min-width: 0; }
+.crm-app .adm-daily-rows strong { font-size: 16px; line-height: 20px; overflow-wrap: anywhere; }
+.crm-app .adm-daily-rows :is(small,time) { color: var(--atlas-muted); font-size: 14px; line-height: 20px; }
+.crm-app .adm-daily-record { background: var(--atlas-surface); border-radius: 16px; padding: 24px; display: grid; gap: 20px; min-width: 0; }
+.crm-app main .adm-daily-record h2 { font-size: 24px; line-height: 28px; margin: 0; overflow-wrap: anywhere; }
+.crm-app .adm-daily-facts { display: grid; gap: 12px; margin: 16px 0; font-size: 14px; line-height: 20px; }
+.crm-app .adm-daily-facts > div { display: grid; grid-template-columns: minmax(90px, .65fr) minmax(0, 1fr); gap: 16px; }
+.crm-app .adm-daily-facts dt { color: var(--atlas-muted); }
+.crm-app .adm-daily-facts dd { margin: 0; overflow-wrap: anywhere; }
+.crm-app .adm-daily-note { color: var(--atlas-muted); font-size: 14px; line-height: 20px; margin: 0; }
+.crm-app .adm-daily-action > summary { display: inline-flex; cursor: pointer; }
+.crm-app .adm-daily-action form { display: grid; gap: 12px; margin-top: 20px; }
+.crm-app .adm-daily-record .adm-next-actions__action { display: block; min-width: 0; }
+.crm-app .adm-daily-record .adm-next-actions__body { min-width: 0; }
+.crm-app .adm-daily-record .adm-next-actions__meta { margin-bottom: 16px; }
+.crm-app .adm-daily-record .crm-panel { background: transparent; border: 0; }
+.crm-app .adm-daily-record .crm-panel__hd { padding-inline: 0; }
+.crm-app .adm-daily-create { scroll-margin-top: 80px; }
+.crm-app .adm-daily-workspace [hidden] { display: none; }
+.crm-app .adm-daily-workspace:not([data-daily-enhanced]) [data-daily-detail]:not(:first-child) { display: none; }
+.crm-app .adm-daily-workspace:not([data-daily-enhanced]):has([data-daily-detail]:target) [data-daily-detail]:not(:target) { display: none; }
+.crm-app .adm-daily-workspace:not([data-daily-enhanced]) [data-daily-detail]:target { display: block; }
+.crm-app [data-daily-detail] { scroll-margin-top: 80px; }
+.crm-app .adm-daily-workspace :is(a,button,input,summary):focus-visible { outline: 2px solid var(--atlas-control); outline-offset: 3px; }
+.crm-app main[data-react-admin-ui="lead-inbox"] .adm-inbox { grid-template-columns: 300px minmax(0, 1fr); }
+.crm-app main[data-react-admin-ui="lead-inbox"] .adm-inbox__row { min-height: 72px; }
+.crm-app main[data-react-admin-ui="lead-inbox"] .adm-lead-detail__facts { padding: 20px; background: var(--atlas-surface); border-radius: 16px; }
+.crm-app main[data-react-admin-ui="lead-inbox"] .adm-lead-detail__head h2 { font-size: 24px; line-height: 28px; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="lead-inbox"] .adm-lead-detail__section { margin: 0; }
+.crm-app main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { border-top: 1px solid var(--atlas-line); padding-top: 20px; }
+@media (max-width: 1100px) {
+  .crm-app .adm-daily-workspace { grid-template-columns: minmax(0, 1fr); }
+  .crm-app main[data-react-admin-ui="lead-inbox"] .adm-inbox { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .crm-app .adm-daily-record { padding: 20px; }
+  .crm-app .adm-daily-facts > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .crm-app .adm-daily-rows { max-height: 380px; }
+  .crm-app .adm-daily-action > summary { width: 100%; justify-content: center; }
+}
+.crm-app main[data-react-admin-ui="tasks"] .adm-check { min-height: 44px; padding-block: 10px; }
+.crm-app main[data-react-admin-ui="tasks"] .mk-btn:disabled { opacity: 1; color: var(--atlas-muted); background: var(--atlas-surface); border: 1px solid var(--atlas-control); }
+.crm-app main[data-react-admin-ui="tasks"] :is(input,textarea) { line-height: 20px; }
+.crm-app .adm-daily-save p { font-size: 14px; line-height: 20px; }
+.crm-app .adm-daily-save [hidden] { display: none; }
+.crm-app main .adm-daily-facts { grid-template-columns: minmax(0, 1fr); }
+.crm-app main .adm-daily-record table[data-viewing-follow-up-table] { display: block; width: 100%; }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] tbody { display: grid; gap: 16px; }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] tr { display: grid; padding: 16px; border: 1px solid var(--atlas-line); border-radius: 12px; background: var(--atlas-canvas); }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] td { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; width: auto; padding: 8px 0; overflow: visible; border: 0; white-space: normal; word-break: normal; }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] td::before { content: attr(data-label); font-weight: 600; color: var(--atlas-muted); }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] td[data-viewing-column="action"] { display: block; }
+.crm-app .adm-daily-record table[data-viewing-follow-up-table] td[data-viewing-column="action"]::before { content: none; }
+.crm-app .adm-daily-record .adm-scroll-x { overflow: visible; }
+.crm-app .adm-daily-create > summary { min-height: 44px; display: flex; padding: 16px; align-items: center; cursor: pointer; border: 1px solid var(--atlas-control); border-radius: 12px; font-size: 16px; line-height: 20px; font-weight: 600; }
+.crm-app .adm-daily-create .adm-task-open { display: grid; gap: 12px; padding: 20px; }
+.crm-app .adm-daily-create .adm-task-open > input { margin-bottom: 4px; }
+.crm-app .adm-daily-create .adm-task-open > button { justify-self: start; }
+.crm-app .adm-daily-workspace .crm-pill { justify-self: start; font-size: 14px; line-height: 20px; color: var(--atlas-text); background: var(--atlas-tint); }
+@media (max-width: 600px) {
+  .crm-app main:is([data-react-admin-ui="tasks"],[data-react-admin-ui="viewings"],[data-react-admin-ui="lead-inbox"]) .adm-summary-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .crm-app main:is([data-react-admin-ui="tasks"],[data-react-admin-ui="viewings"],[data-react-admin-ui="lead-inbox"]) .adm-summary-card { padding: 16px; min-width: 0; }
+  .crm-app main:is([data-react-admin-ui="tasks"],[data-react-admin-ui="viewings"],[data-react-admin-ui="lead-inbox"]) .adm-summary-card__title { font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+}

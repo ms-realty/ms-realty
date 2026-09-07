@@ -328,6 +328,8 @@ function liveServiceEvidenceSnapshot(source, report) {
   }
   if (source === HERMES_DRAFT_WORKER_SOURCE) {
     return {
+      ...(report.capability ? { capability: report.capability } : {}),
+      ...(report.translation_status ? { translation_status: report.translation_status } : {}),
       provider: {
         mode: report.provider?.mode,
         endpoint: report.provider?.endpoint,
@@ -825,6 +827,9 @@ function assertLiveServiceHermesProviderEvidence(item) {
   if (item.evidence?.audit_log_rows !== item.summary?.attempted) {
     throw new Error("Launch readiness live services require Hermes audit coverage evidence");
   }
+  if (item.evidence?.capability === "source_review" && item.evidence.translation_status !== "not_validated") {
+    throw new Error("Hermes source-review evidence cannot establish translation validation");
+  }
 }
 
 function assertLiveServiceReportDetailedEvidence(item) {
@@ -1070,7 +1075,9 @@ export function publicLaunchReadinessPayload(report) {
 
 export function launchBlockerSummary(report) {
   const blockedGates = (report.gates || []).filter((item) => item.status === "blocked");
+  const hermes = report.live_services?.find((item) => item.source === HERMES_DRAFT_WORKER_SOURCE);
   return {
+    ...(hermes?.evidence?.capability ? { hermes: { capability: hermes.evidence.capability, translation_status: hermes.evidence.translation_status, status: hermes.status } } : {}),
     status: report.launch_ready ? "ready" : "blocked",
     launch_ready: report.launch_ready,
     blockers: report.blockers || blockedGates.map((item) => item.id),
@@ -1125,6 +1132,7 @@ function reportStatus(source, filePath, assertReport, now) {
         generated_at: report.generated_at,
         path: repoRelativePath(filePath),
         summary: report.summary,
+        evidence: liveServiceEvidenceSnapshot(source, report),
         freshness,
       };
     }

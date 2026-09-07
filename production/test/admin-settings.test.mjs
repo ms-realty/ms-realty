@@ -6,6 +6,7 @@ import { readAuditLog } from "../lib/audit-log.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readLeadLedger } from "../lib/lead-ledger.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
+import { OWNER_CONSOLE_NAV_DESTINATIONS } from "../lib/owner-operator-catalog.mjs";
 import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
   WORKSPACE_SETTINGS_DEFAULTS,
@@ -322,7 +323,7 @@ test("settings screen renders working sections and an in-flow owner overview", a
   });
 });
 
-test("settings screen speaks Bulgarian and Russian and uses the five owner navigation groups", async () => {
+test("settings screen speaks Bulgarian and Russian and uses the three Atlas navigation groups", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const bulgarian = await dispatchHttp(app, { url: "/admin/settings?locale=bg", headers: HEADERS });
@@ -330,15 +331,15 @@ test("settings screen speaks Bulgarian and Russian and uses the five owner navig
     assert.match(bulgarian.body, /lang="bg"/);
     assert.match(bulgarian.body, /Профил на агенцията/);
     assert.match(bulgarian.body, /Работно пространство/);
-    for (const group of ["Работа", "Имоти и съдържание", "Система"]) assert.match(bulgarian.body, new RegExp(`>${group}<`));
+    for (const group of ["Работа", "Записи", "Управление"]) assert.match(bulgarian.body, new RegExp(`>${group}<`));
     const russian = await dispatchHttp(app, { url: "/admin/settings?locale=ru", headers: HEADERS });
     assert.match(russian.body, /Профиль агентства/);
     assert.match(russian.body, /Сроки ответа|Заявки и сроки/);
-    for (const group of ["Работа", "Объекты и контент", "Система"]) assert.match(russian.body, new RegExp(`>${group}<`));
+    for (const group of ["Работа", "Записи", "Управление"]) assert.match(russian.body, new RegExp(`>${group}<`));
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    for (const group of ["Today", "Work", "Properties &amp; Content", "Hermes", "System"]) assert.match(today.body, new RegExp(`>${group}<`));
+    for (const group of ["Work", "Records", "Management"]) assert.match(today.body, new RegExp(`>${group}<`));
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
@@ -611,7 +612,7 @@ test("a manual broker override still beats the workspace default broker", () => 
   assert.equal(routed.broker_assignment.method, "workspace_default");
 });
 
-test("Today leads with a source-backed briefing, Hermes entry, and one ranked priority list", async () => {
+test("Today exposes every ranked task with a source-backed detail and Hermes entry", async () => {
   await withAdmin(async () => {
     const config = paths();
     const app = createHttpApp(config);
@@ -626,19 +627,32 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     assert.match(empty.body, /data-hermes-open="today"/);
     assert.match(empty.body, /name="prompt"/);
     assert.match(empty.body, /<form class="adm-today-briefing__hermes" method="get" action="\/admin\/hermes" data-hermes-entry="today">/);
+    assert.match(empty.body, /<details class="adm-today-assist"><summary>[\s\S]*?<\/summary><form class="adm-today-briefing__hermes"/);
     assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
     assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
-    assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 10, "five groups in desktop and mobile navigation");
+    assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 6, "three product groups in desktop and mobile navigation");
     assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
     assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 7);
-    for (const destination of ["Today", "Leads", "Listings", "Translations", "Hermes", "Integrations", "Settings"]) {
+    for (const destination of ["Today", "Lead inbox", "Listings", "Translations", "Hermes", "Integrations", "Settings"]) {
       assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
-    for (const drilldown of ["leads", "translations", "settings"]) {
-      assert.match(empty.body, new RegExp(`data-admin-nav-drilldown="${drilldown}"`), drilldown);
-    }
-    // Legacy destinations remain reachable through grouped disclosures.
+    // The rail is flat: no disclosure hides a destination behind a second click.
+    assert.doesNotMatch(empty.body, /data-admin-nav-drilldown=/, "no grouped disclosures remain");
+    const rail = empty.body.slice(empty.body.indexOf('class="crm-sb__nav"'), empty.body.indexOf('class="crm-sb__me"'));
+    assert.equal((rail.match(/<details/g) || []).length, 0, "the desktop rail carries no disclosure");
+    // Not a count: the rail must carry exactly the destinations the operator
+    // catalog says this operator can reach, each once, each at one depth. A
+    // number would have to be bumped whenever one is added, and would pass
+    // just as happily if one were swapped for another.
+    const reachable = OWNER_CONSOLE_NAV_DESTINATIONS.flatMap((destination) => [destination.primary, ...destination.children]);
+    assert.deepEqual(
+      [...rail.matchAll(/data-admin-nav-route="([^"]+)"/g)].map((match) => match[1]).sort(),
+      [...reachable].sort(),
+      "every catalogued destination is a link at one depth, and nothing else is",
+    );
+    // Every destination is reachable directly, including the ten that used to
+    // sit behind "More in ...".
     for (const route of ["contacts", "consents", "documents", "cases", "pipeline", "requests", "viewings", "reports", "approved-content", "migration/review", "team", "activity"]) {
       assert.match(empty.body, new RegExp(`href="/admin/${route}"`), route);
     }
@@ -673,12 +687,12 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
-    assert.equal((populated.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the ranked task is the only page-primary action");
+    assert.equal((populated.body.match(/class="mk-btn mk-btn--accent(?:\s|\")/g) || []).length, 2, "each selectable task has one primary action in its own detail");
     assert.match(populated.body, /name="prompt"[\s\S]*?Prepare a safe plan for today's priority task:/);
-    assert.doesNotMatch(populated.body, /data-next-action="lead"/);
+    assert.match(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
-    assert.match(populated.body, /data-next-action-count="1" data-next-action-total="2" data-next-action-visible="1"/);
-    assert.match(populated.body, /data-today-briefing="true" data-today-primary-action="lead" data-today-priority-count="2" data-today-priority-total="2"/);
+    assert.match(populated.body, /data-next-action-count="2" data-next-action-total="2" data-next-action-visible="2"/);
+    assert.match(populated.body, /data-today-briefing="true" data-today-primary-action="lead" data-today-priority-count="1" data-today-priority-total="2"/);
     assert.doesNotMatch(populated.body, /data-today-toolbar="true"/);
     assert.doesNotMatch(populated.body, /data-list-filter="next-actions"/);
     assert.doesNotMatch(populated.body, /data-list-item="next-actions"/);
@@ -712,9 +726,9 @@ test("Today leads with a source-backed briefing, Hermes entry, and one ranked pr
       });
     }
     const capped = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
-    assert.match(capped.body, /data-today-priority-count="7" data-today-priority-total="8"/);
-    assert.match(capped.body, /data-next-action-count="6" data-next-action-total="8" data-next-action-visible="6"/);
-    assert.equal((capped.body.match(/data-next-action="/g) || []).length, 6, "one briefing action plus six ranked rows");
+    assert.match(capped.body, /data-today-priority-count="1" data-today-priority-total="8"/);
+    assert.match(capped.body, /data-next-action-count="8" data-next-action-total="8" data-next-action-visible="8"/);
+    assert.equal((capped.body.match(/data-next-action="/g) || []).length, 8, "every ranked task is selectable, including the first");
 
     const json = await dispatchHttp(app, { url: "/api/admin/today", headers: HEADERS });
     assert.equal(json.status, 200);

@@ -1,3 +1,7 @@
+import { PUBLIC_LEAD_STATUS_PATH, publicLeadReceipt, publicLeadStatus } from "./public-lead-receipts.mjs";
+import { PUBLIC_SEARCH_ASSISTANT_PATHS, PUBLIC_SEARCH_ASSISTANT_MAX_BYTES, publicSearchAssistant, publicSearchAssistantFailure } from "./public-search-assistant.mjs";
+import { LISTING_QUESTION_PATH, LISTING_QUESTION_MAX_BYTES, publicListingQuestion } from "./public-listing-questions.mjs";
+import { searchPath } from "./seo.mjs";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { buildAgencyReviewQueue } from "./agency-review-queue.mjs";
@@ -119,9 +123,11 @@ import {
   renderAdminRuntimeUnavailablePayload,
   renderAdminWorkspaceSettingsPayload,
   renderAdminRealtyCasesPayload,
+  renderAdminTaskQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
+import { appendTaskAction, buildTaskQueue, openTask, readTaskEvents } from "./tasks.mjs";
 import {
   DocumentStoreUnavailableError,
   createDocument,
@@ -219,6 +225,10 @@ import {
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderOriginUnavailablePage, renderRuntimePath, renderSearchUnavailablePage, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
+import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
+import { renderAdminDocumentRecordsPayload } from "./document-records.mjs";
+import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
 import { publicSeedFor } from "./public-inventory.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
@@ -237,6 +247,7 @@ import {
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   buildLegacyRouteDecisions,
+  buildLegacyRouteReviewState,
   approvedLaunchFreezeRouteArtifact,
   importRedirectApprovalsCsv,
   readRedirectApprovals,
@@ -260,7 +271,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
-import { projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { browserListingRevisionRequired, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
@@ -403,10 +414,11 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
-import { seedForPostgresSearchHits } from "./public-search.mjs";
+import { seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
+import { searchFilterQueryKeys } from "./search-intent.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 // Package B2: approved content.
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -491,7 +503,8 @@ import {
 } from "./operator-views.mjs";
 // B4 media upload
 import { createMediaUploadStorage, mediaUploadStorageConfigFromEnv } from "./media-upload-storage.mjs";
-import { applyMediaUploads, mediaUploadLimitsFromEnv, mediaUploadRequestBytes, readMediaUploads } from "./media-uploads.mjs";
+import { applyMediaUploads, mediaUploadLimitsFromEnv, mediaUploadRequestBytes, parseMediaUploadRequest, readMediaUploads } from "./media-uploads.mjs";
+import { storeDocumentBytes } from "./document-storage.mjs";
 import {
   ADMIN_MEDIA_UPLOAD_PATH,
   SELLER_PHOTO_UPLOAD_PATH,
@@ -547,7 +560,10 @@ const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
 const PUBLIC_WRITE_PATHS = new Set([
+  LISTING_QUESTION_PATH,
+  ...PUBLIC_SEARCH_ASSISTANT_PATHS,
   "/api/leads",
+  PUBLIC_LEAD_STATUS_PATH,
   "/api/events",
   "/api/language-requests",
   "/api/saved-searches",
@@ -898,13 +914,14 @@ function renderMigrationReviewPayload(
   seoEvidence,
   listingQuality,
   launchReadiness,
-  { listingVerification, translationCoverage, brokerContacts, brokerProfiles = [] } = {},
+  { listingVerification, translationCoverage, brokerContacts, brokerProfiles = [], contractDecisions = [] } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
-  const decisions = buildLegacyRouteDecisions(routes, approvals);
-  const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
-  const sourceReviewRequired = routes.filter((route) => route.review_required);
-  const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const reviewState = buildLegacyRouteReviewState(routes, approvals, contractDecisions);
+  const decisions = reviewState.workspaceDecisions;
+  const decidedOldUrls = reviewState.workspaceDecidedUrls;
+  const sourceReviewRequired = reviewState.sourceReviewRequired;
+  const reviewRequired = reviewState.pending;
   const reviewSelection = filterMigrationReviewRoutes(
     attachMigrationReviewEvidence(reviewRequired, loadMigrationRecords()),
     {
@@ -912,6 +929,7 @@ function renderMigrationReviewPayload(
       type: url.searchParams.get("routeType"),
       domain: url.searchParams.get("routeDomain"),
     },
+    { vocabulary: reviewState.sourceReviewRequired },
   );
   // Keep human review batches deliberately small. Ten decisions are enough for
   // a focused operator session on a phone without turning the launch queue into
@@ -945,6 +963,8 @@ function renderMigrationReviewPayload(
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
       terminalDecisionsReviewed: decisions.length,
+      contractDecided: reviewState.contractOnly.length,
+      contractApprovalIds: reviewState.contractApprovalIds,
       pendingSample: pendingRoutesWithEvidence,
       filters: reviewSelection.filters,
       filterOptions: reviewSelection.filterOptions,
@@ -1071,6 +1091,7 @@ export function createHttpApp({
   sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
   documentChecklistLedgerPath = null,
+  taskLedgerPath = null,
   realtyCaseLedgerPath = null,
   realtyCaseConditionLedgerPath = null,
   realtyCaseRequestProjectionEnabled = false,
@@ -1149,6 +1170,7 @@ export function createHttpApp({
   leadSlaGeneratedAt,
   leadSnoozeAt,
   hermesReplyProvider = null,
+  hermesListingCopyProvider = null,
   hermesOwnerCommandProvider = null,
   hermesEnv = process.env,
   hermesAgentFetch = fetch,
@@ -2055,6 +2077,10 @@ export function createHttpApp({
       status: url.searchParams.get("status") || "",
       sourceLocale: url.searchParams.get("sourceLocale") || "",
       propertyFamily: url.searchParams.get("propertyFamily") || "",
+      priceMin: url.searchParams.get("priceMin") || "",
+      priceMax: url.searchParams.get("priceMax") || "",
+      areaMin: url.searchParams.get("areaMin") || "",
+      areaMax: url.searchParams.get("areaMax") || "",
       page: url.searchParams.get("page") || 1,
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
@@ -2544,7 +2570,7 @@ export function createHttpApp({
               : {}),
             },
           );
-    return withSearchBackend(result, engineResult);
+    return withSearchRequest(withSearchBackend(result, engineResult), engineResult, searchRequest);
   };
   const searchResultOrUnavailable = async (searchRequest, options) => {
     try {
@@ -2619,7 +2645,7 @@ export function createHttpApp({
       };
     }
     if (url.pathname === "/api/hermes/chat") return privateJson(404, { kind: "not_found" });
-    if (request.method === "POST" && url.pathname === "/api/leads") {
+    if (request.method === "POST" && ["/api/leads", PUBLIC_LEAD_STATUS_PATH, LISTING_QUESTION_PATH, ...PUBLIC_SEARCH_ASSISTANT_PATHS].includes(url.pathname)) {
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
       const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
@@ -4783,6 +4809,34 @@ export function createHttpApp({
       );
     }
 
+    if (request.method === "POST" && PUBLIC_SEARCH_ASSISTANT_PATHS.includes(url.pathname)) {
+      if (Buffer.byteLength(request.body || "", "utf8") > PUBLIC_SEARCH_ASSISTANT_MAX_BYTES) return privateJson(413, { kind: "body_too_large" });
+      let input;
+      try { input = parseBody(request); } catch {
+        const failure = publicSearchAssistantFailure({ status: 400, code: "invalid_search_assistant_input" });
+        return privateJson(failure.status, failure.body);
+      }
+      try {
+        const context = url.pathname.endsWith("/interpret") ? { registry: activeRegistry, seed: null } : await currentPublicContext();
+        return privateJson(200, publicSearchAssistant({ pathname: url.pathname, registry: context.registry, seed: context.seed, input }));
+      } catch (error) {
+        const failure = publicSearchAssistantFailure(error, input?.locale);
+        return privateJson(failure.status, failure.body);
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === LISTING_QUESTION_PATH) {
+      if (Buffer.byteLength(request.body || "", "utf8") > LISTING_QUESTION_MAX_BYTES) return privateJson(413, { kind: "body_too_large" });
+      let input;
+      try { input = parseBody(request); } catch { return privateJson(400, { kind: "invalid_listing_question" }); }
+      try {
+        const context = await currentPublicContext();
+        return privateJson(200, publicListingQuestion({ registry: context.registry, seed: context.seed, input }));
+      } catch (error) {
+        return privateJson(error.status || 503, { kind: error.code || "listing_source_unavailable", message: error.status === 400 || error.status === 404 ? error.message : "The listing source is unavailable. Try again later." });
+      }
+    }
+
     if (request.method === "GET" && url.pathname === "/api/search") {
       let searchRequest;
       try {
@@ -4805,20 +4859,40 @@ export function createHttpApp({
 
     if (request.method === "GET") {
       const normalized = url.pathname.replace(/\/$/, "");
-      const searchLocale = activeRegistry.locales.find(
-        (locale) => locale.route_segments?.search && `/${locale.code}/${locale.route_segments.search}` === normalized,
-      );
+      const searchLocale = activeRegistry.locales.find((locale) => {
+        try {
+          return searchPath(activeRegistry, locale.code) === normalized;
+        } catch {
+          return false;
+        }
+      });
       if (searchLocale) {
         let searchRequest;
-        try {
-          // A page URL carries whatever the referrer appended to it; only
-          // /api/search above holds its callers to the exact field list.
-          searchRequest = normalizeSearchRequest(searchParamsFromUrl(url.searchParams), {
+        // A reversed or non-numeric range is the visitor's typing, not a broken
+        // request; answering the PAGE with JSON strands them with no way back
+        // to their search. The offending values are dropped and named instead.
+        let filterNotice = null;
+        const searchUrl = new URL(url.toString());
+        const normalizeFor = (params) =>
+          normalizeSearchRequest(searchParamsFromUrl(params), {
             defaultLocale: searchLocale.code,
             naturalLanguageEnabled: naturalLanguageSearchEnabled,
           });
+        try {
+          // A page URL carries whatever the referrer appended to it; only
+          // /api/search above holds its callers to the exact field list.
+          searchRequest = normalizeFor(searchUrl.searchParams);
         } catch (error) {
-          return json(400, { kind: "bad_request", message: error.message });
+          const invalidKeys = searchFilterQueryKeys(error?.fields || []);
+          if (!invalidKeys.length) return json(400, { kind: "bad_request", message: error.message });
+          const typed = Object.fromEntries(invalidKeys.map((key) => [key, searchUrl.searchParams.get(key) ?? ""]));
+          for (const key of invalidKeys) searchUrl.searchParams.delete(key);
+          try {
+            searchRequest = normalizeFor(searchUrl.searchParams);
+          } catch {
+            return json(400, { kind: "bad_request", message: error.message });
+          }
+          filterNotice = { reason: error.fields.length > 1 ? "range" : "value", fields: invalidKeys, values: typed };
         }
         const { intent, query, filters, sort, page } = searchRequest;
         const savedView = url.searchParams.get("saved") === "1";
@@ -4834,7 +4908,11 @@ export function createHttpApp({
           return publicResponse(request, url, renderSearchUnavailablePage({ registry: activeRegistry, localeCode: searchLocale.code }));
         }
         recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
-        return publicResponse(request, url, outcome.result);
+        return publicResponse(
+          request,
+          url,
+          filterNotice ? { ...outcome.result, search: { ...outcome.result.search, filter_notice: filterNotice } } : outcome.result,
+        );
       }
     }
 
@@ -5284,8 +5362,34 @@ export function createHttpApp({
             }),
           });
         }
+        const documentStorage = () =>
+          mediaUploadStorage || createMediaUploadStorage(mediaUploadStorageConfig || mediaUploadStorageConfigFromEnv());
+        if (request.method === "POST" && url.pathname === "/api/admin/documents/bytes") {
+          if (!principal?.id) {
+            return adminJson(403, { kind: "operator_identity_required", message: "Document bytes require a named authenticated operator" });
+          }
+          // Bytes first, row second. The triple this returns is the only kind
+          // of storage_ref the document routes will accept from now on.
+          const upload = parseMediaUploadRequest(request, { limits: mediaUploadLimits || mediaUploadLimitsFromEnv(), fileField: "document" });
+          const file = upload.files[0];
+          if (!file) return adminJson(400, { kind: "document_bytes_required", message: "Attach the document as the \"document\" file field" });
+          const stored = await storeDocumentBytes({
+            storage: documentStorage(),
+            workspaceId: upload.fields.workspace_id || upload.fields.workspaceId || url.searchParams.get("workspace_id") || "",
+            bytes: file.bytes,
+            mimeType: file.contentType || upload.fields.mime_type || upload.fields.mimeType,
+          });
+          recordAudit({
+            action: "document_bytes_stored",
+            actor: principal.id,
+            objectType: "document_bytes",
+            objectId: stored.content_digest,
+            metadata: { byte_size: stored.byte_size, mime_type: stored.mime_type },
+          }, recordedAt);
+          return adminJson(201, { kind: "document_bytes", ...stored });
+        }
         if (request.method === "POST" && url.pathname === "/api/admin/documents") {
-          const result = await createDocument({ payload: servicePayload, principal, input: parseBody(request), recordedAt });
+          const result = await createDocument({ payload: servicePayload, principal, input: parseBody(request), recordedAt, storage: documentStorage() });
           if (!result.idempotent) {
             recordAudit({
               action: "document_created",
@@ -5325,6 +5429,7 @@ export function createHttpApp({
               documentId,
               input: parseBody(request),
               recordedAt,
+              storage: documentStorage(),
             });
             if (!result.idempotent) {
               recordAudit({
@@ -5477,6 +5582,52 @@ export function createHttpApp({
       return adminJson(200, payload);
     }
 
+    if (request.method === "GET" && ["/api/admin/tasks", "/admin/tasks"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      // Built from the Today payload, so the two screens read one set of
+      // queues and cannot disagree about what is outstanding.
+      const todayPayload = await currentTodayPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
+      const taskQueue = buildTaskQueue({
+        page: todayPayload,
+        events: readTaskEvents(taskLedgerPath || undefined),
+        now: receivedAt || new Date().toISOString(),
+      });
+      const payload = renderAdminTaskQueuePayload(activeRegistry, adminLocaleParam(url), taskQueue, principal);
+      if (url.pathname === "/admin/tasks" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "POST" && ["/api/admin/tasks", "/api/admin/tasks/action"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = reviewedAt || receivedAt || new Date().toISOString();
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const options = { filePath: taskLedgerPath || undefined, recordedAt };
+        const opening = url.pathname === "/api/admin/tasks";
+        const result = opening ? openTask(input, options) : appendTaskAction(input, options);
+        if (!result.idempotent) {
+          recordAudit({
+            action: opening ? "task_opened" : "task_updated",
+            actor: result.event.actor,
+            objectType: "task",
+            objectId: result.task.task_id,
+            metadata: {
+              action: result.event.action,
+              task_type: result.task.kind,
+              status: result.task.status,
+              owner: result.task.owner,
+              has_reference: Boolean(result.event.reference),
+            },
+          }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, { kind: "task", ...result });
+      } catch (error) {
+        return adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = await currentPipelinePayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
@@ -5599,6 +5750,70 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "GET" && url.pathname === "/admin/documents/records") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      // The store is Payload on Postgres and is genuinely absent in local
+      // development. That is a state the screen renders, not an error: a broker
+      // who opens this page without a database should see the page and the
+      // reason, not a 503 body.
+      let documents = [];
+      let signatureRequests = [];
+      let unavailable = null;
+      try {
+        documents = await readDocuments({ payload: payloadListingRuntime || null, principal });
+        signatureRequests = await readSignatureRequests({ payload: payloadListingRuntime || null, principal });
+      } catch (error) {
+        if (error instanceof DocumentStoreUnavailableError || error?.code === "document_store_unavailable") {
+          unavailable = { code: "document_store_unavailable", message: error.message };
+        } else if (error?.status === 403) {
+          return adminForbidden(error.code || "documents:read");
+        } else {
+          throw error;
+        }
+      }
+      const payload = renderAdminDocumentRecordsPayload(activeRegistry, adminLocaleParam(url), {
+        documents,
+        signatureRequests,
+        unavailable,
+        query: url.searchParams.get("q") || "",
+        status: url.searchParams.get("status") || "",
+        documentType: url.searchParams.get("documentType") || "",
+        caseId: url.searchParams.get("caseId") || "",
+        awaiting: url.searchParams.get("awaiting") || false,
+        operatorId: principal || null,
+        generatedAt: reviewedAt || new Date().toISOString(),
+      });
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/media") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = renderAdminMediaLibraryPayload(activeRegistry, adminLocaleParam(url), {
+        seed: currentSeed(),
+        query: url.searchParams.get("q") || "",
+        issue: url.searchParams.get("issue") || "",
+        listing: url.searchParams.get("listing") || "",
+        kind: url.searchParams.get("kind") || "",
+        page: url.searchParams.get("page") || 1,
+        operatorId: principal || null,
+        generatedAt: reviewedAt || new Date().toISOString(),
+      });
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/locales") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = renderAdminLocaleRolloutPayload(activeRegistry, adminLocaleParam(url), {
+        seed: currentSeed(),
+        translationTasks: latestTranslationTasks(currentTranslationTasks()),
+        languageRequests: readLanguageRequests(languageRequestPath || undefined),
+        generatedAt: reviewedAt || new Date().toISOString(),
+        operatorId: principal?.id || null,
+        focus: url.searchParams.get("focus") || url.searchParams.get("language") || "",
+      });
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+    }
+
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = adminLocaleParam(url);
@@ -5644,6 +5859,7 @@ export function createHttpApp({
           translationCoverage: currentTranslationCoverage(),
           brokerContacts: currentBrokerContacts(),
           brokerProfiles: await currentBrokerProfiles(payloadSession),
+          contractDecisions: activeLegacyDecisions,
         },
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -5666,6 +5882,7 @@ export function createHttpApp({
           translationCoverage: currentTranslationCoverage(),
           brokerContacts: currentBrokerContacts(),
           brokerProfiles: await currentBrokerProfiles(payloadSession),
+          contractDecisions: activeLegacyDecisions,
         },
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -6326,6 +6543,7 @@ export function createHttpApp({
           payload: payloadListingRuntime,
           principal,
           input: listingEditInput(request),
+          requireRevision: browserListingRevisionRequired(request.headers),
           editedAt,
         });
         if (!result.idempotent) {
@@ -6342,6 +6560,7 @@ export function createHttpApp({
         }
         return adminJson(result.idempotent ? 200 : 201, {
           kind: "listing_draft_saved",
+          draft_revision: result.draftRevision,
           listing_id: result.listingId,
           changed_fields: result.changedFields,
           staleTranslations: result.staleTranslations,
@@ -7329,6 +7548,21 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/copy/draft") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!canAdminAccess(principal, "content:write")) return adminForbidden("content:write");
+      try {
+        const draft = await createHermesListingCopyDraft(currentSeed(), parseJsonBody(request), {
+          auditLogPath: auditLogPath || undefined,
+          provider: hermesListingCopyProvider || undefined,
+          recordedAt: reviewedAt || editedAt || receivedAt,
+        });
+        return adminJson(201, draft);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
@@ -7529,8 +7763,16 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === PUBLIC_LEAD_STATUS_PATH) {
+      let input;
+      try { input = parseBody(request); } catch { return privateJson(400, { kind: "lead_status_invalid" }); }
+      const result = await publicLeadStatus(input, { store: leadDurableStore, payload: leadDurablePayload });
+      return privateJson(result.status, result.body);
+    }
+
     if (request.method === "POST" && url.pathname === "/api/leads") {
-      try {
+      let persistenceStarted = false;
+  try {
         const input = parseBody(request);
         const context = await currentPublicContext();
         const workspaceSettings =
@@ -7549,6 +7791,7 @@ export function createHttpApp({
         if (durableRequested && !isLeadDurableStoreEnabled(leadDurableStore)) {
           throw new LeadStoreUnavailableError("Durable lead store is enabled but not fully configured");
         }
+        persistenceStarted = true;
         const durable = durableRequested
           ? await persistLeadIntake({
               lead,
@@ -7595,15 +7838,15 @@ export function createHttpApp({
             action: lead.lead?.source,
           });
         }
-        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline });
+        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(ledger, { retrySafe: Boolean(durable) }) });
       } catch (error) {
         if (error instanceof WorkspaceSettingsStoreUnavailableError) {
           return privateJson(error.status || 503, { kind: error.code, message: "Workspace settings are temporarily unavailable" });
         }
         if (error instanceof LeadStoreUnavailableError) {
-          return privateJson(503, { kind: error.code, message: "Lead storage is temporarily unavailable" });
+          return privateJson(503, { kind: error.code, intake_status: persistenceStarted ? "unknown" : "rejected", message: "Lead storage is temporarily unavailable" });
         }
-        return privateJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", intake_status: persistenceStarted ? "unknown" : "rejected", message: error.message });
       }
     }
 
@@ -8143,8 +8386,14 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.launchInputChecklistEndpoint !== "/api/admin/launch-input-checklist" ||
     smoke.adminMigrationReview.body.cmsCollectionsEndpoint !== "/api/admin/cms-collections" ||
     smoke.adminMigrationReview.body.payloadCollectionsEndpoint !== "/api/admin/payload-collections" ||
-    smoke.adminMigrationReview.body.routeMap.pendingSample?.length < 1 ||
-    !smoke.adminMigrationReview.body.routeMap.pendingSample[0].source_evidence?.title
+    // Every legacy URL is decided: 165 in this workspace, 292 in the sealed
+    // launch contract. This used to demand at least one pending row, which
+    // pinned the screen ignoring the contract the runtime serves from.
+    smoke.adminMigrationReview.body.routeMap.reviewRequired !== 0 ||
+    smoke.adminMigrationReview.body.routeMap.terminalDecisionsReviewed !== 165 ||
+    smoke.adminMigrationReview.body.routeMap.contractDecided !== 292 ||
+    !smoke.adminMigrationReview.body.routeMap.contractApprovalIds?.includes("MSR-LAUNCH-FREEZE-1") ||
+    smoke.adminMigrationReview.body.routeMap.pendingSample?.length !== 0
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
   }
@@ -8152,8 +8401,8 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReviewHtml?.status !== 200 ||
     smoke.adminMigrationReviewHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-source-evidence=\"true\"") ||
+    smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-contract-route-count=\"292\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-export-endpoint=\"/api/admin/deployable-redirects/export\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||

@@ -113,6 +113,94 @@
     syncThemeSwitches(readThemeChoice());
   }
 
+(function initAdminDaily(rootDocument = document, rootWindow = window) {
+  rootDocument.querySelectorAll('[data-daily-workspace]').forEach(root => {
+    const rows = Array.from(root.querySelectorAll('[data-daily-row]'));
+    const details = Array.from(root.querySelectorAll('[data-daily-detail]'));
+    const filters = Array.from(root.querySelectorAll('[data-daily-filter]'));
+    const search = root.querySelector('[data-daily-search]');
+    let filter = 'all';
+    function apply() {
+      const query = search.value.trim().toLocaleLowerCase();
+      let wanted = '';
+      try { wanted = decodeURIComponent(rootWindow.location.hash.slice(1)); } catch {}
+      const visible = rows.filter(row => {
+        const matches = (!query || row.textContent.toLocaleLowerCase().includes(query)) &&
+          (filter === 'all' || row.getAttribute('data-daily-tags').split(' ').includes(filter));
+        row.hidden = !matches;
+        return matches;
+      });
+      const selected = visible.find(row => row.querySelector('[data-daily-select]').getAttribute('data-daily-select') === wanted) || visible[0];
+      const id = selected?.querySelector('[data-daily-select]').getAttribute('data-daily-select');
+      rows.forEach(row => {
+        const link = row.querySelector('[data-daily-select]');
+        if (row === selected) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      });
+      details.forEach(detail => { detail.hidden = detail.id !== id; });
+      root.querySelector('[data-daily-empty]').hidden = visible.length > 0 || rows.length === 0;
+      filters.forEach(button => {
+        const on = button.getAttribute('data-daily-filter') === filter;
+        button.setAttribute('aria-pressed', String(on));
+        button.setAttribute('data-on', on ? '1' : '0');
+      });
+    }
+    search.addEventListener('input', apply);
+    filters.forEach(button => button.addEventListener('click', () => { filter = button.getAttribute('data-daily-filter'); apply(); }));
+    rootWindow.addEventListener('hashchange', apply);
+    root.setAttribute('data-daily-enhanced', 'true');
+    apply();
+  });
+})();(function initDailyTaskForms(rootDocument = document) {
+  function openCreate() {
+    if (window.location.hash === '#task-create') {
+      const create = rootDocument.getElementById('task-create');
+      if (create) create.open = true;
+    }
+  }
+  window.addEventListener('hashchange', openCreate);
+  openCreate();
+  rootDocument.querySelectorAll('[data-task-form]').forEach(form => {
+    const status = form.querySelector('[data-daily-task-status]');
+    if (!status) return;
+    const submit = form.querySelector('[type="submit"]');
+    let locked = false;
+    function sync() { submit.disabled = locked || !form.checkValidity(); }
+    form.addEventListener('input', sync);
+    form.addEventListener('change', sync);
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (locked || !form.reportValidity()) return;
+      locked = true;
+      sync();
+      form.setAttribute('aria-busy', 'true');
+      const note = status.querySelector('p');
+      note.textContent = status.getAttribute('data-saving');
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      try {
+        const response = await fetch(form.getAttribute('action'), { method: 'POST', signal: controller.signal, credentials: 'same-origin', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+        if (!response.ok && response.status < 500) {
+          note.textContent = status.getAttribute('data-failed');
+          locked = false;
+        } else {
+          const result = await response.json();
+          if (!response.ok || result.kind !== 'task' || !result.task || !result.event) throw new Error('unconfirmed result');
+          note.textContent = status.getAttribute('data-saved');
+          status.querySelector('a').hidden = false;
+        }
+      } catch {
+        note.textContent = status.getAttribute('data-unknown');
+        status.querySelector('a').hidden = false;
+      } finally {
+        clearTimeout(timeout);
+        form.removeAttribute('aria-busy');
+        sync();
+      }
+    });
+    sync();
+  });
+})();
   function syncAdminShellOffsets() {
     var topbar = document.querySelector(".crm-top");
     var editorTabs = document.querySelector("[data-editor-tabs]");
@@ -144,6 +232,44 @@
     // An empty queue says so instead of leaving a bare table header.
     var empty = document.querySelector("[data-lead-queue-empty]");
     if (empty) empty.hidden = visible > 0 || rows.length === 0;
+  }
+  function initTodayWorkspace() {
+    var root = document.querySelector("[data-today-workspace]");
+    if (!root) return;
+    var search = root.querySelector("[data-today-search]");
+    var rows = Array.from(root.querySelectorAll("[data-next-action]"));
+    var details = Array.from(root.querySelectorAll("[data-today-detail]"));
+    var buttons = root.querySelectorAll("[data-today-filter]");
+    var activeFilter = "all";
+    function apply() {
+      var query = (search.value || "").trim().toLocaleLowerCase();
+      var wanted = "";
+      try { wanted = decodeURIComponent(window.location.hash.slice(1)); } catch (error) {}
+      var visible = rows.filter(function (row) {
+        var match = (activeFilter === "all" || (activeFilter === "overdue" ? row.getAttribute("data-overdue") === "true" : row.getAttribute("data-next-action") === activeFilter)) && row.textContent.toLocaleLowerCase().indexOf(query) >= 0;
+        row.hidden = !match;
+        return match;
+      });
+      var selected = visible.find(function (row) { return row.querySelector("[data-today-select]").getAttribute("data-today-select") === wanted; }) || visible[0];
+      var selectedId = selected ? selected.querySelector("[data-today-select]").getAttribute("data-today-select") : "";
+      rows.forEach(function (row) {
+        var link = row.querySelector("[data-today-select]");
+        if (row === selected) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      });
+      details.forEach(function (detail) { detail.hidden = detail.id !== selectedId; });
+      root.querySelector("[data-today-no-matches]").hidden = visible.length > 0 || rows.length === 0;
+      Array.from(buttons).forEach(function (button) {
+        var on = button.getAttribute("data-today-filter") === activeFilter;
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+        button.setAttribute("data-on", on ? "1" : "0");
+      });
+    }
+    search.addEventListener("input", apply);
+    Array.from(buttons).forEach(function (button) { button.addEventListener("click", function () { activeFilter = button.getAttribute("data-today-filter"); apply(); }); });
+    window.addEventListener("hashchange", apply);
+    root.setAttribute("data-today-enhanced", "true");
+    apply();
   }
   function initAdminListFilters() {
     var navs = document.querySelectorAll("[data-list-filter]");
@@ -623,6 +749,144 @@
         });
     });
   }
+  // One behaviour for every field-level Hermes draft. The button knows its
+  // endpoint, the box it fills and the bar that names the source; nothing here
+  // is listing-specific, so the next assisted field needs no new code.
+  function initHermesAssist() {
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-hermes-assist]") : null;
+      if (!button || button.disabled) return;
+      event.preventDefault();
+      var target = document.getElementById(button.getAttribute("data-hermes-assist-target") || "");
+      var bar = document.getElementById(button.getAttribute("data-hermes-assist-bar") || "");
+      if (!target) return;
+      var host = button.closest("[data-hermes-assist-for]");
+      var original = button.innerHTML;
+      var pending = button.getAttribute("data-hermes-assist-pending") || "Drafting…";
+      var failure = button.getAttribute("data-hermes-assist-failure") || "Could not draft this.";
+      var unavailable = button.getAttribute("data-hermes-assist-unavailable") || failure;
+      var previousProposal = host && host.querySelector("[data-hermes-proposal]");
+      if (previousProposal) previousProposal.remove();
+      if (host) host.removeAttribute("data-hermes-error");
+      if (bar) {
+        bar.hidden = true;
+        bar.removeAttribute("data-hermes-drafted-state");
+      }
+      button.disabled = true;
+      button.setAttribute("data-busy", "true");
+      button.textContent = pending;
+      fetch(button.getAttribute("data-hermes-assist-endpoint"), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        // Every assisted value posts what its own endpoint needs. The button
+        // carries that as one payload attribute, so a second kind of draft is
+        // a markup change rather than a second copy of this behaviour.
+        body: JSON.stringify(
+          Object.assign(
+            {
+              listingId: button.getAttribute("data-hermes-assist-listing"),
+              field: button.getAttribute("data-hermes-assist-field"),
+              locale: button.getAttribute("data-hermes-assist-locale"),
+              sourceText: target.value || "",
+            },
+            JSON.parse(button.getAttribute("data-hermes-assist-payload") || "{}"),
+          ),
+        ),
+      })
+        .then(function (response) {
+          return response.json().then(function (payload) {
+            if (!response.ok) throw new Error(payload && payload.message ? payload.message : failure);
+            return payload;
+          });
+        })
+        .then(function (draft) {
+          // A draft that claims it may act on its own is not a draft. Refuse it
+          // rather than putting it in front of a broker as if it were reviewed.
+          // Listing copy says human_approval_required; a reply says
+          // broker_approval_required. Neither may claim it can go out.
+          var approvalRequired = draft.human_approval_required === true || draft.broker_approval_required === true;
+          if (typeof draft.text !== "string" || !draft.text.trim() || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
+            throw new Error("invalid Hermes draft response");
+          }
+          if (!host || !bar) throw new Error("draft review unavailable");
+          var proposal = document.createElement("div");
+          proposal.className = "adm-hermes-proposal";
+          proposal.setAttribute("data-hermes-proposal", "true");
+          var comparison = [];
+          [
+            ["current", "Current text", target.value],
+            ["proposed", "Proposed draft", draft.text],
+          ].forEach(function (entry) {
+            var label = document.createElement("label");
+            label.textContent = button.getAttribute("data-hermes-assist-" + entry[0]) || entry[1];
+            var box = document.createElement("textarea");
+            box.readOnly = true;
+            box.rows = 4;
+            box.value = entry[2];
+            label.appendChild(box);
+            proposal.appendChild(label);
+            comparison.push(box);
+          });
+          var actions = document.createElement("div");
+          actions.className = "adm-hermes-proposal__actions";
+          var apply = document.createElement("button");
+          apply.type = "button";
+          apply.className = "mk-btn mk-btn--primary";
+          apply.textContent = button.getAttribute("data-hermes-assist-apply") || "Use draft";
+          var discard = document.createElement("button");
+          discard.type = "button";
+          discard.className = "mk-btn";
+          discard.textContent = button.getAttribute("data-hermes-assist-discard") || "Keep my text";
+          actions.appendChild(apply);
+          actions.appendChild(discard);
+          proposal.appendChild(actions);
+          var sourceNote = button.getAttribute("data-hermes-assist-source-note") || "";
+          bar.textContent = (button.getAttribute("data-hermes-assist-review") || "Compare the draft with your text before using it.") + " " + sourceNote;
+          bar.hidden = false;
+          host.appendChild(proposal);
+          apply.addEventListener("click", function () {
+            if (target.disabled || target.readOnly) return;
+            if (target.value !== comparison[0].value) {
+              comparison[0].value = target.value;
+              bar.textContent = button.getAttribute("data-hermes-assist-changed") || "Your text has changed. Review the updated comparison before using this draft.";
+              comparison[0].focus();
+              return;
+            }
+            target.value = draft.text;
+            target.dispatchEvent(new Event("input", { bubbles: true }));
+            host.setAttribute("data-hermes-drafted", "true");
+            target.setAttribute("data-hermes-drafted", "true");
+            bar.textContent = button.getAttribute("data-hermes-assist-applied") || "Draft added to the field. Save your changes when you are ready.";
+            proposal.remove();
+            target.focus();
+          });
+          discard.addEventListener("click", function () {
+            proposal.remove();
+            bar.hidden = true;
+            target.focus();
+          });
+          var reveal = button.getAttribute("data-hermes-assist-reveal");
+          var panel = reveal ? document.getElementById(reveal) : target.closest("details");
+          if (panel && panel.tagName === "DETAILS") panel.open = true;
+          button.innerHTML = original;
+        })
+        .catch(function (error) {
+          var missing = /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY|not configured/i.test(String((error && error.message) || ""));
+          button.innerHTML = original;
+          if (host) host.setAttribute("data-hermes-error", missing ? unavailable : (error && error.message) || failure);
+          if (bar) {
+            bar.hidden = false;
+            bar.setAttribute("data-hermes-drafted-state", "error");
+            bar.textContent = missing ? unavailable : (error && error.message) || failure;
+          }
+        })
+        .then(function () {
+          button.removeAttribute("data-busy");
+          button.disabled = false;
+        });
+    });
+  }
   function initReplyForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -823,8 +1087,9 @@
     var reset = savebar.querySelector("[data-editor-reset]");
     var note = savebar.querySelector("[data-editor-dirty-note]");
     savebar.setAttribute("data-dirty", dirty ? "true" : "false");
-    if (save) save.disabled = !dirty;
-    if (reset) reset.disabled = !dirty;
+    var busy = form.getAttribute("aria-busy") === "true";
+    if (save) save.disabled = busy || !dirty;
+    if (reset) reset.disabled = busy || !dirty;
     if (note) {
       note.textContent = dirty
         ? form.getAttribute("data-editor-dirty-message") || "Unsaved changes"
@@ -834,29 +1099,43 @@
   }
   function editorFormState(form) {
     var fields = [];
-    var data = new FormData(form);
-    data.forEach(function (value, key) {
-      fields.push(key + "=" + String(value));
+    new FormData(form).forEach(function (value, key) {
+      if (key !== "draftRevision") fields.push([key, String(value)]);
     });
-    return fields.join("&");
+    return JSON.stringify(fields);
   }
-  function commitEditorFormState(form) {
-    var elements = form.elements;
-    for (var i = 0; i < elements.length; i += 1) {
-      var field = elements[i];
-      if (!field || !field.name) continue;
+  function snapshotEditorFormState(form) {
+    return {
+      state: editorFormState(form),
+      fields: Array.prototype.filter.call(form.elements, function (field) { return field && field.name; }).map(function (field) {
+        return { field: field, value: field.value, checked: field.checked,
+          selected: field instanceof HTMLSelectElement ? Array.prototype.map.call(field.options, function (option) { return option.selected; }) : null };
+      }),
+    };
+  }
+  function commitEditorFormState(form, snapshot) {
+    snapshot = snapshot || snapshotEditorFormState(form);
+    snapshot.fields.forEach(function (saved) {
+      var field = saved.field;
+      if (field.name === "draftRevision") return;
+      // Updating reset defaults must not alter text or selections made while
+      // the request was pending, including controls still carrying defaults.
+      var value = field.value;
+      var checked = field.checked;
+      var selected = field instanceof HTMLSelectElement ? Array.prototype.map.call(field.options, function (option) { return option.selected; }) : null;
       if (field instanceof HTMLInputElement && (field.type === "checkbox" || field.type === "radio")) {
-        field.defaultChecked = field.checked;
+        field.defaultChecked = saved.checked;
+        field.checked = checked;
       } else if ("defaultValue" in field) {
-        field.defaultValue = field.value;
+        field.defaultValue = saved.value;
+        field.value = value;
       }
-      if (field instanceof HTMLSelectElement) {
-        for (var j = 0; j < field.options.length; j += 1) {
-          field.options[j].defaultSelected = field.options[j].selected;
-        }
+      if (selected) {
+        for (var j = 0; j < field.options.length; j += 1) field.options[j].defaultSelected = Boolean(saved.selected[j]);
+        for (var k = 0; k < field.options.length; k += 1) field.options[k].selected = selected[k];
       }
-    }
-    form.setAttribute("data-editor-initial-state", editorFormState(form));
+    });
+    form.setAttribute("data-editor-initial-state", snapshot.state);
     syncEditorSavebar(form);
   }
   function initEditorForms() {
@@ -1275,6 +1554,18 @@
     });
     return pairs.sort().join("&");
   }
+  function initSettingsSectionLinks() {
+    var open = function () {
+      var id = (window.location.hash || "").replace(/^#/, "");
+      if (!id) return;
+      var section = document.getElementById(id);
+      if (section && section.tagName === "DETAILS") section.open = true;
+    };
+    if (!document.querySelector("[data-settings-index-row]")) return;
+    window.addEventListener("hashchange", open);
+    open();
+  }
+
   function initWorkspaceSettingsForms() {
     var forms = document.querySelectorAll("[data-workspace-settings-form]");
     for (var i = 0; i < forms.length; i += 1) {
@@ -1351,6 +1642,14 @@
   // instant, so the browser resolves it before the request leaves.
   function adminMutationPayload(form) {
     var payload = tourPayload(form);
+    if (form.hasAttribute("data-editor-form")) {
+      payload = {};
+      new FormData(form).forEach(function (value, key) {
+        if (!(key in payload)) payload[key] = value;
+        else if (Array.isArray(payload[key])) payload[key].push(value);
+        else payload[key] = [payload[key], value];
+      });
+    }
     var stamps = form.querySelectorAll('input[type="datetime-local"]');
     for (var i = 0; i < stamps.length; i += 1) {
       var field = stamps[i];
@@ -1582,6 +1881,9 @@
       var form = event.target;
       if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-admin-mutation-form")) return;
       event.preventDefault();
+      if (form.getAttribute("aria-busy") === "true") return;
+      var editorSnapshot = form.hasAttribute("data-editor-form") ? snapshotEditorFormState(form) : null;
+      var mutationPayload = adminMutationPayload(form);
       var buttons = form.querySelectorAll('[type="submit"]');
       var status = form.querySelector("[data-admin-mutation-status]");
       var saving = form.getAttribute("data-admin-mutation-saving") || "Saving…";
@@ -1589,16 +1891,21 @@
       var failure = form.getAttribute("data-admin-mutation-failure") || "Could not save.";
       for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
       form.setAttribute("aria-busy", "true");
+      if (editorSnapshot) syncEditorSavebar(form);
       if (status) { status.textContent = saving; status.setAttribute("data-state", "saving"); }
       fetch(form.getAttribute("action"), {
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify(adminMutationPayload(form)),
+        body: JSON.stringify(mutationPayload),
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
-            if (!response.ok && response.status !== 207) throw new Error(payload.message || failure);
+            if (!response.ok && response.status !== 207) {
+              throw new Error(payload.kind === "listing_draft_conflict"
+                ? form.getAttribute("data-editor-conflict-message") || payload.message || failure
+                : payload.message || failure);
+            }
             return payload;
           });
         })
@@ -1606,11 +1913,24 @@
           // A batch that refused some enquiries is not a success: the strip
           // says how many landed and how many did not.
           var partial = payload && payload.kind === "lead_bulk_action" && payload.refused > 0;
+          if (editorSnapshot) {
+            var revision = form.querySelector('[name="draftRevision"]');
+            if (revision && (payload.kind !== "listing_draft_saved"
+              || !/^[a-f0-9]{64}$/.test(payload.draft_revision || "")
+              || typeof mutationPayload.listingId !== "string" || !mutationPayload.listingId
+              || payload.listing_id !== mutationPayload.listingId || payload.draft_only !== true)) {
+              throw new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+            }
+            if (revision) revision.value = revision.defaultValue = payload.draft_revision;
+            commitEditorFormState(form, editorSnapshot);
+          }
           if (status) {
-            status.textContent = partial ? bulkOutcomeText(form, payload) : success;
+            var laterEdits = editorSnapshot && editorFormState(form) !== editorSnapshot.state;
+            status.textContent = partial ? bulkOutcomeText(form, payload) : laterEdits
+              ? form.getAttribute("data-editor-later-edits-message") || "Submitted changes saved. Your newer edits are still unsaved."
+              : success;
             status.setAttribute("data-state", partial ? "error" : "success");
           }
-          if (form.hasAttribute("data-editor-form")) commitEditorFormState(form);
           if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
         })
         .catch(function (error) {
@@ -1619,6 +1939,7 @@
         .then(function () {
           form.removeAttribute("aria-busy");
           for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+          if (editorSnapshot) syncEditorSavebar(form);
       });
     });
   }
@@ -1823,6 +2144,7 @@
     initMediaUploadForm(mediaUploadForms[mediaUploadIndex]);
   }
   initWorkspaceOnboarding();
+  initSettingsSectionLinks();
   initWorkspaceSettingsForms();
   initLeadBulkForm();
   initSavedViews();
@@ -1833,7 +2155,9 @@
   initTranslationWorkflowForms();
   initReplyDeliveryForms();
   initReplyForms();
+  initHermesAssist();
   initCommunicationTemplates();
+  initTodayWorkspace();
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();

@@ -489,7 +489,9 @@ test("the stylesheet carries the touch, motion and print rules the package promi
 });
 
 test("the client registers the package inits without disturbing the existing order", () => {
-  assert.match(PUBLIC_APP_JS, /markSaved\(\);\s+initStartFlow\(\);/);
+  assert.match(PUBLIC_APP_JS, /^  markSaved\(\);$/m);
+  assert.ok(PUBLIC_APP_JS.lastIndexOf("\n  markSaved();") < PUBLIC_APP_JS.indexOf("\n  initListingSourceQuestions();"));
+  assert.match(PUBLIC_APP_JS, /initListingSourceQuestions\(\);\s+initStartFlow\(\);/);
   assert.match(PUBLIC_APP_JS, /initCompareLinks\(\);\s+initComparePage\(\);\s+initAlertsPage\(\);/);
   assert.match(PUBLIC_APP_JS, /function initCompareLinks\(\)/);
   assert.match(PUBLIC_APP_JS, /function initAlertsPage\(\)/);

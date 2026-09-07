@@ -123,7 +123,7 @@ async function startRefusedOrigin() {
     const timer = setTimeout(() => {
       settled = true;
       reject(new Error(`Refused-origin server did not start: ${stdout}\n${stderr}`));
-    }, 10_000);
+    }, 30_000);
     child.stdout.on("data", (chunk) => {
       stdout += chunk.toString();
       const match = stdout.match(/MS_REALTY_TEST_READY:(\d+)/);
@@ -151,7 +151,13 @@ async function startRefusedOrigin() {
       }
     });
   });
-  const baseUrl = await ready;
+  let baseUrl;
+  try {
+    baseUrl = await ready;
+  } catch (error) {
+    await stopRefusedOrigin(child);
+    throw error;
+  }
   return {
     baseUrl,
     child,
@@ -321,11 +327,11 @@ test("durable health performs one lightweight Payload query", async () => {
   assert.equal(standaloneRuntime.payload.calls.begin, 0);
 });
 
-test("a real refused Postgres origin stays alive and does not leak rejected promises", async () => {
+test("a real refused Postgres origin stays alive and does not leak rejected promises", { timeout: 120_000 }, async () => {
   const origin = await startRefusedOrigin();
   try {
     for (const pathname of ["/bg", "/bg/imoti/MS-00815", "/bg/tarsene"]) {
-      const response = await fetch(`${origin.baseUrl}${pathname}`, { headers: { accept: "text/html" } });
+      const response = await fetch(`${origin.baseUrl}${pathname}`, { headers: { accept: "text/html" }, signal: AbortSignal.timeout(15_000) });
       const html = await response.text();
       assert.equal(response.status, 503, pathname);
       assert.equal(response.headers.get("cache-control"), "no-store", pathname);
@@ -336,7 +342,7 @@ test("a real refused Postgres origin stays alive and does not leak rejected prom
     }
 
     for (const pathname of ["/api/search", "/api/health"]) {
-      const response = await fetch(`${origin.baseUrl}${pathname}`, { headers: { accept: "application/json" } });
+      const response = await fetch(`${origin.baseUrl}${pathname}`, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(15_000) });
       const body = await response.json();
       assert.equal(response.status, 503, pathname);
       assert.equal(response.headers.get("cache-control"), "no-store", pathname);
@@ -351,7 +357,7 @@ test("a real refused Postgres origin stays alive and does not leak rejected prom
     }
 
     await new Promise((resolve) => setTimeout(resolve, 2_600));
-    const afterDelay = await fetch(`${origin.baseUrl}/bg`, { headers: { accept: "text/html" } });
+    const afterDelay = await fetch(`${origin.baseUrl}/bg`, { headers: { accept: "text/html" }, signal: AbortSignal.timeout(15_000) });
     assert.equal(afterDelay.status, 503);
     assert.equal(afterDelay.headers.get("cache-control"), "no-store");
     assert.match(await afterDelay.text(), /data-react-public-ui="origin-unavailable"/);

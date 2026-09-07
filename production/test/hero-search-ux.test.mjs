@@ -14,15 +14,14 @@ const listings = loadListings();
 test("home hero has responsive local imagery and a lean, accessible search contract", () => {
   const html = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
 
-  assert.match(html, /data-hero-gallery="true"[^>]*data-hero-gallery-interval="7000"[^>]*aria-roledescription="carousel"/);
-  assert.equal((html.match(/data-hero-gallery-slide=/g) || []).length, 4);
-  assert.match(html, /media="\(max-width: 679px\)" type="image\/avif" srcSet="\/hero\/sandanski-640\.avif 640w, \/hero\/sandanski-1280\.avif 1280w" sizes="100vw"/);
-  assert.match(html, /type="image\/webp" srcSet="\/hero\/sozopol-town-1280\.webp 1280w, \/hero\/sozopol-town-1920\.webp 1920w" sizes="100vw"/);
-  assert.match(html, /data-hero-gallery-slide="2"[^>]*hidden/);
-  assert.match(html, /data-hero-gallery-status="true">Gallery 1 \/ 4<\/span>/);
-  assert.doesNotMatch(html, /data-hero-gallery-(?:previous|next)/);
-  assert.match(html, /data-hero-gallery-slide="1"[^>]*style="--hero-object-position:50% 54%;--hero-mobile-object-position:54% 50%"/);
-  assert.equal((html.match(/data-hero-mobile-only="true"/g) || []).length, 1);
+  assert.match(html, /data-atlas-public="home"/);
+  assert.ok(html.indexOf('class="hp-hero"') < html.indexOf('data-hero-search="true"'), "the photograph-backed hero contains search");
+  assert.match(html, /Find your place\.<br>In Sandanski\./);
+  assert.match(html, /src="\/hero\/sandanski-town-1920\.webp"[^>]*fetchPriority="high"/);
+  assert.match(html, /src="\/hero\/sandanski-1280\.webp"/);
+  assert.doesNotMatch(html, /data-hero-gallery|sozopol-town|belogradchik/);
+  assert.match(html, /Bovlad62 \/ Wikimedia Commons/);
+  assert.match(html, /Town life\. A little closer to nature\./);
   assert.match(LOGO_URL, /^\/vendor\/ms-realty-logo-[a-f0-9]{12}\.png$/);
   assert.match(LOGO_URL_REVERSED, /^\/vendor\/ms-realty-logo-reversed-[a-f0-9]{12}\.png$/);
   assert.equal(existsSync(new URL(`../../public${LOGO_URL}`, import.meta.url)), true);
@@ -33,11 +32,11 @@ test("home hero has responsive local imagery and a lean, accessible search contr
 
   assert.match(html, /id="home-hero-search-form" class="hp-search" action="\/en\/search" method="get" role="search" aria-label="Search" data-hero-search="true"/);
   const form = html.slice(html.indexOf('id="home-hero-search-form"'), html.indexOf("</form>", html.indexOf('id="home-hero-search-form"')));
-  // Buy / Rent is the first decision, so it sits above the card as a radio group.
+  // Buy / Rent remains one radio group shared by the bar and drawer.
   assert.match(form, /<fieldset class="hp-search__intent" data-search-intent="true"><legend class="mk-sr-only">Offer<\/legend>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="sale" checked><span>Buy<\/span><\/label>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="rent"><span>Rent<\/span><\/label>/);
-  // One row: Location, Type, Max price, Search.
+  // Primary controls stay in the bar; the drawer exposes numeric bounds.
   assert.match(form, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"[^>]*data-geography-locale="en"/);
   assert.match(form, /<label class="hp-search__label" for="home-search-q">Location<\/label>/);
   assert.match(form, /id="home-search-q" name="location" type="search" class="hp-search__input mk-searchbar__input" autocomplete="off" placeholder="City, town or region" role="combobox"/);
@@ -50,20 +49,21 @@ test("home hero has responsive local imagery and a lean, accessible search contr
     assert.match(form, new RegExp(`<option value="${family}">`));
   }
   assert.match(form, /<option value="agricultural_land">Agricultural land<\/option>/);
-  assert.match(form, /<label class="hp-search__label" for="home-search-price-max">Max price<\/label>/);
-  assert.match(form, /<select id="home-search-price-max" name="price_max" class="hp-search__input" data-price-presets="true" data-price-any="Any" data-price-sale="50000\|€50,000;75000\|€75,000;[^"]*1000000\|€1,000,000" data-price-rent="300\|€300 per month;[^"]*2000\|€2,000 per month">/);
-  assert.match(form, /<option value="">Any<\/option><option value="50000">€50,000<\/option>/);
-  assert.equal((form.match(/type="submit"/g) || []).length, 1);
+  assert.match(form, /<label class="hp-search__label" for="home-search-price-max">Max price, €<\/label>/);
+  assert.match(form, /<input id="home-search-price-max" name="price_max" type="number" min="0" step="any" inputmode="decimal"/);
+  assert.match(form, /<datalist id="home-search-price-max-suggestions" data-price-presets="true"[^>]*data-price-sale="50000\|€50,000;75000\|€75,000;/);
+  assert.match(form, /data-price-rent="300\|€300 per month;/);
+  assert.equal((form.match(/type="submit"/g) || []).length, 2, "the hero and drawer submit the same form");
+  assert.match(form, /data-hero-filter-dialog="true" aria-labelledby="home-filter-title"/);
   assert.match(form, /class="hp-search__go mk-search__go" type="submit">[\s\S]*?<span>Search<\/span><\/button>/);
   // Secondary filters are disclosed natively, without JavaScript.
   assert.match(form, /<details class="hp-search__more" data-hero-more-filters="true"><summary class="hp-search__more-summary">/);
   assert.match(form, /<span data-more-label="More filters" data-fewer-label="Fewer filters">More filters<\/span>/);
-  assert.match(form, /<select id="home-search-bedrooms-min" name="bedrooms_min" data-hero-bedrooms="true"><option value="">Any<\/option><option value="1">1\+<\/option>/);
-  assert.match(form, /<select id="home-search-price-min" name="price_min" data-price-presets="true"/);
-  // No listing in this catalogue publishes an area, so the hero does not offer
-  // a control that can only return an empty results page.
-  assert.doesNotMatch(form, /name="area_min"/);
-  assert.doesNotMatch(form, /name="area_max"/);
+  assert.match(form, /<input id="home-search-bedrooms-min" name="bedrooms_min" type="number" min="0" step="1"/);
+  assert.match(form, /<input id="home-search-bedrooms-max" name="bedrooms_max" type="number" min="0" step="1"/);
+  assert.match(form, /<input id="home-search-price-min" name="price_min" type="number" min="0" step="any"/);
+  assert.match(form, /name="area_min" type="number"/);
+  assert.match(form, /name="area_max" type="number"/);
   assert.match(form, /<button class="mk-btn mk-btn--ghost mk-btn--sm" type="reset">/);
   // Administrative geography, keyword, sort and view controls belong to the results page.
   for (const name of ["q", "country_code", "region_id", "municipality", "district", "sort", "view", "property_type"]) {
@@ -91,30 +91,24 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   assert.match(attribution, /CC BY-SA 3\.0/);
 });
 
-test("the hero offers a facet again as soon as the catalogue can answer it", () => {
+test("typed area bounds stay available when current catalogue facts are incomplete", () => {
   const withArea = listings.map((listing, index) =>
     index === 0 ? { ...listing, property_type: "apartment", area_sqm: 82, primary_area_sqm: 82 } : listing,
   );
   const withoutArea = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
   const restored = renderReactPublicBody(renderHomePage({ registry, listings: withArea, localeCode: "en" }));
 
-  assert.doesNotMatch(withoutArea, /name="area_min"/);
+  assert.match(withoutArea, /name="area_min" type="number"/);
   assert.match(restored, /id="home-search-area-min" name="area_min" type="number" min="0" step="any" inputmode="decimal"/);
   assert.match(restored, /id="home-search-area-max" name="area_max" type="number"/);
 });
 
-test("hero enhancement pauses for motion preference, hover, and focus while the search card stays usable without JavaScript", () => {
+test("hero search keeps geography and numeric controls usable after the static-photo redesign", () => {
   const css = readFileSync(new URL("../lib/ui/adapter-public.css", import.meta.url), "utf8");
   const adapterCss = readFileSync(new URL("../lib/ui/adapter.css", import.meta.url), "utf8");
 
-  assert.match(PUBLIC_APP_JS, /function initHeroGallery\(\)/);
   assert.match(PUBLIC_APP_JS, /prefers-reduced-motion: reduce/);
   assert.match(PUBLIC_APP_JS, /window\.matchMedia\("\(max-width: 679px\)"\)/);
-  assert.match(PUBLIC_APP_JS, /function availableSlides\(\)/);
-  assert.match(PUBLIC_APP_JS, /gallery\.addEventListener\("pointerenter"/);
-  assert.match(PUBLIC_APP_JS, /gallery\.addEventListener\("focusin"/);
-  assert.match(PUBLIC_APP_JS, /document\.addEventListener\("visibilitychange", schedule\)/);
-  assert.doesNotMatch(PUBLIC_APP_JS, /data-hero-gallery-(?:previous|next)/);
   assert.match(PUBLIC_APP_JS, /function initGeographyComboboxes\(\)/);
   assert.match(PUBLIC_APP_JS, /document\.querySelectorAll\("\[data-geography-combobox\]"\)/);
   assert.match(PUBLIC_APP_JS, /function initGeographyCombobox\(combobox\)/);
@@ -123,7 +117,7 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(PUBLIC_APP_JS, /function applyPricePresets\(\)/);
   assert.match(PUBLIC_APP_JS, /offerType\(\) === "rent" \? "data-price-rent" : "data-price-sale"/);
   assert.match(PUBLIC_APP_JS, /function syncBedrooms\(\)/);
-  assert.match(PUBLIC_APP_JS, /bedrooms\.disabled = nonResidential/);
+  assert.match(PUBLIC_APP_JS, /bedrooms\[i\]\.disabled = nonResidential/);
   assert.match(PUBLIC_APP_JS, /more\.addEventListener\("toggle"/);
   assert.match(PUBLIC_APP_JS, /function initSearchToolbar\(\)/);
   assert.match(PUBLIC_APP_JS, /form\.requestSubmit\(view && view\.value === "map" \? view : undefined\)/);
@@ -135,11 +129,8 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(PUBLIC_APP_JS, /event\.key === "Enter" && activeIndex >= 0/);
   assert.match(PUBLIC_APP_JS, /geographyId\.value = ""/);
   assert.match(PUBLIC_APP_JS, /setFreeTextEnabled\(false\)/);
-  assert.match(css, /\.hp-hero__slide\[hidden\] \{ display: none; \}/);
   assert.match(css, /\.hp-hero \{[^}]*overflow-anchor: none;/);
   assert.match(css, /object-fit: cover/);
-  assert.match(css, /object-position: var\(--hero-object-position, 50% 50%\)/);
-  assert.match(css, /\.hp-hero__search \{ position: relative; z-index: 5; max-width: 920px; \}/);
   assert.match(css, /\.hp-search__intent \{[\s\S]*?border-radius: var\(--radius-full\);[\s\S]*?backdrop-filter: blur\(12px\);/);
   assert.match(css, /@media \(prefers-reduced-transparency: reduce\)/);
   assert.match(css, /\.hp-search__tab:has\(input:checked\) span \{ background: var\(--surface\); color: var\(--brand\);/);
@@ -156,12 +147,9 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /\.hp-search__more-grid \{[\s\S]*?grid-template-columns: repeat\(auto-fit, minmax\(150px, 1fr\)\);/);
   assert.match(PUBLIC_APP_JS, /function emptyControls\(\)/);
   assert.match(PUBLIC_APP_JS, /window\.addEventListener\("pageshow"/);
-  assert.match(css, /\.hp-search:has\(\[data-hero-family\] option\[value="plot"\]:checked\) \.hp-search__more-field--bedrooms/);
   assert.match(adapterCss, /main input:focus-visible:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\):not\(\.mk-input__field\):not\(\.mk-searchbar__input\)/);
   assert.match(css, /@media \(max-width: 899px\) \{[\s\S]*?\.hp-search__bar \{ grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\) auto; \}[\s\S]*?\.hp-search__seg--location \{ grid-column: 1 \/ -1; \}/);
   assert.match(css, /@media \(max-width: 679px\) \{[\s\S]*?\.hp-search__intent \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); width: 100%; \}[\s\S]*?\.hp-search__go \{ grid-column: 1 \/ -1; width: 100%;/);
-  assert.match(css, /@media \(max-width: 679px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6\.5rem, 20svh, 10rem\) var\(--space-8\); \}/);
-  assert.match(css, /@media \(min-width: 680px\) \{[\s\S]*?\.hp-hero \{ align-items: flex-start; \}[\s\S]*?\.hp-hero__in \{ padding-block: clamp\(6rem, 8vw, 7rem\) var\(--space-8\); \}[\s\S]*?data-hero-mobile-only/);
   assert.doesNotMatch(css, /hp-hero__advanced|hp-hero__families|hp-hero__search-form/);
   // The seller, location and not-found layouts were rebuilt here and are
   // covered by public-pages.test.mjs against this branch's own markup.
@@ -180,18 +168,11 @@ test("hero enhancement pauses for motion preference, hover, and focus while the 
   assert.match(css, /html\[data-theme="dark"\]:has\(main\[data-react-public-ui\]\) \{[^}]*color-scheme: dark;/);
   assert.match(css, /@media \(prefers-color-scheme: dark\) \{[\s\S]*?html:not\(\[data-theme="light"\]\):has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;/);
   assert.match(css, /html\[data-theme="dark"\]:has\(main\[data-react-public-ui\]\) \{[\s\S]*?color-scheme: dark;[\s\S]*?--canvas: #12110f;/);
-  // The rail carries two approved guides, so it is two columns wide and a
-  // snap-scrolling carousel on a phone; a third column would leave a hole.
   const pagesCss = readFileSync(new URL("../lib/ui/adapter-public-pages.css", import.meta.url), "utf8");
-  assert.match(pagesCss, /\.hp-guides__rail \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
-  assert.match(pagesCss, /@media \(max-width: 760px\) \{[\s\S]*?\.hp-guides__rail \{[\s\S]*?scroll-snap-type: inline mandatory;/);
   assert.match(pagesCss, /\.hp-featured:has\(\[data-featured-empty\]\) \{ padding-bottom: var\(--space-8\); \}/);
   assert.match(css, /@media \(min-width: 1081px\) \{[\s\S]*?\.sr-filters--desktop \{[\s\S]*?max-height: calc\(100svh - 96px - var\(--space-6\)\);[\s\S]*?overflow-y: auto;/);
   assert.match(css, /\.site-mobile-tabs a \{[\s\S]*?color: var\(--text-body\);/);
-  assert.match(pagesCss, /\.hp-guide p \{[\s\S]*?color: var\(--text-body\);/);
-  assert.match(pagesCss, /\.hp-rail-empty \.mk-empty__text \{[^}]*color: var\(--text-body\);/);
-    const listingCss = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
+  const listingCss = readFileSync(new URL("../lib/ui/adapter-public-listing.css", import.meta.url), "utf8");
   assert.match(listingCss, /dl\[data-listing-facts="true"\] dt \{ color: var\(--text-body\);/);
-  
-    assert.match(listingCss, /\.ld-trust__row \{[^}]*color: var\(--text-body\);/);
+  assert.match(listingCss, /\.ld-trust__row \{[^}]*color: var\(--text-body\);/);
 });

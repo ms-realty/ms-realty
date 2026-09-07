@@ -155,6 +155,9 @@ const ACTION_LABELS = {
     priceMin: "Мин. цена (EUR)",
     priceMax: "Макс. цена (EUR)",
     clearFilters: "Изчисти филтрите",
+    filterRangeInvalid: "Минимумът е по-голям от максимума, затова показваме резултатите без този филтър.",
+    filterValueInvalid: "Приемаме само число, затова показваме резултатите без този филтър.",
+    widenHint: "Опитайте с по-широко условие:",
     any: "Всички",
     sort: "Сортиране",
     view: "Изглед",
@@ -337,6 +340,9 @@ const ACTION_LABELS = {
     priceMin: "Min. price (EUR)",
     priceMax: "Max. price (EUR)",
     clearFilters: "Clear filters",
+    filterRangeInvalid: "The minimum is above the maximum, so these results ignore that filter.",
+    filterValueInvalid: "Only a number works here, so these results ignore that filter.",
+    widenHint: "Try widening one of these:",
     any: "Any",
     sort: "Sort",
     view: "View",
@@ -519,6 +525,9 @@ const ACTION_LABELS = {
     priceMin: "Mindestpreis (EUR)",
     priceMax: "Höchstpreis (EUR)",
     clearFilters: "Filter löschen",
+    filterRangeInvalid: "Das Minimum liegt über dem Maximum, deshalb zeigen wir die Ergebnisse ohne diesen Filter.",
+    filterValueInvalid: "Hier ist nur eine Zahl möglich, deshalb zeigen wir die Ergebnisse ohne diesen Filter.",
+    widenHint: "Erweitern Sie eines dieser Kriterien:",
     any: "Alle",
     sort: "Sortieren",
     view: "Ansicht",
@@ -701,6 +710,9 @@ const ACTION_LABELS = {
     priceMin: "Min. prijs (EUR)",
     priceMax: "Max. prijs (EUR)",
     clearFilters: "Filters wissen",
+    filterRangeInvalid: "Het minimum ligt boven het maximum, daarom tonen we de resultaten zonder dit filter.",
+    filterValueInvalid: "Hier kan alleen een getal, daarom tonen we de resultaten zonder dit filter.",
+    widenHint: "Verruim een van deze criteria:",
     any: "Alle",
     sort: "Sorteren",
     view: "Weergave",
@@ -883,6 +895,9 @@ const ACTION_LABELS = {
     priceMin: "Мин. цена (EUR)",
     priceMax: "Макс. цена (EUR)",
     clearFilters: "Очистить фильтры",
+    filterRangeInvalid: "Минимум больше максимума, поэтому показываем результаты без этого фильтра.",
+    filterValueInvalid: "Здесь принимается только число, поэтому показываем результаты без этого фильтра.",
+    widenHint: "Попробуйте расширить одно из условий:",
     any: "Любые",
     sort: "Сортировка",
     view: "Вид",
@@ -1065,6 +1080,9 @@ const ACTION_LABELS = {
     priceMin: "Ελάχ. τιμή (EUR)",
     priceMax: "Μέγ. τιμή (EUR)",
     clearFilters: "Εκκαθάριση φίλτρων",
+    filterRangeInvalid: "Το ελάχιστο ξεπερνά το μέγιστο, γι᾽ αυτό τα αποτελέσματα αγνοούν αυτό το φίλτρο.",
+    filterValueInvalid: "Εδώ δέχεται μόνο αριθμό, γι᾽ αυτό τα αποτελέσματα αγνοούν αυτό το φίλτρο.",
+    widenHint: "Δοκιμάστε να διευρύνετε ένα από αυτά:",
     any: "Όλα",
     sort: "Ταξινόμηση",
     view: "Προβολή",
@@ -1247,6 +1265,9 @@ const ACTION_LABELS = {
     priceMin: "מחיר מינימום (EUR)",
     priceMax: "מחיר מקסימום (EUR)",
     clearFilters: "ניקוי מסננים",
+    filterRangeInvalid: "המינימום גבוה מהמקסימום, ולכן התוצאות מוצגות ללא המסנן הזה.",
+    filterValueInvalid: "כאן אפשר להזין רק מספר, ולכן התוצאות מוצגות ללא המסנן הזה.",
+    widenHint: "נסו להרחיב אחד מהתנאים:",
     any: "הכול",
     sort: "מיון",
     view: "תצוגה",
@@ -3654,6 +3675,17 @@ export function renderListingPage({
   };
 }
 
+// Every numeric range the public filter bar can carry. Dropping a pair is the
+// smallest correction that can bring an empty result set back to life.
+const RANGE_FILTER_PAIRS = Object.freeze([
+  ["price_min", "price_max"],
+  ["area_min", "area_max"],
+  ["land_area_min", "land_area_max"],
+  ["bedrooms_min", "bedrooms_max"],
+  ["floor_min", "floor_max"],
+  ["storeys_min", "storeys_max"],
+]);
+
 export function renderSearchPage({
   registry,
   localeCode,
@@ -3820,6 +3852,24 @@ export function renderSearchPage({
   const requestedPageSize = savedView || pageSize === null ? Math.max(sortedListings.length, 1) : Number(pageSize);
   const normalizedPageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0 ? Math.min(requestedPageSize, 1000) : 12;
   const matchedTotal = databasePage ? totalMatches : sortedListings.length;
+  // "0 matches" tells a visitor who typed six numbers nothing about which of
+  // them emptied the page. Each typed range is re-run with that one pair
+  // dropped, so the empty state can name the filter that is doing the
+  // excluding and say what dropping it would return.
+  const widenRanges =
+    matchedTotal === 0 && !databasePage && !savedView
+      ? RANGE_FILTER_PAIRS.filter((pair) => pair.some((key) => intentFilters[key] !== undefined && intentFilters[key] !== ""))
+          .map((pair) => {
+            const without = { ...intentFilters };
+            for (const key of pair) delete without[key];
+            const matches = searchableListings.filter((listing) =>
+              matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, without),
+            ).length;
+            return { fields: pair, matches };
+          })
+          .filter((suggestion) => suggestion.matches > 0)
+          .sort((left, right) => right.matches - left.matches)
+      : [];
   const totalPages = Math.max(1, Math.ceil(matchedTotal / normalizedPageSize));
   const currentPage = databasePage ? normalizedPage : Math.min(normalizedPage, totalPages);
   const offset = (currentPage - 1) * normalizedPageSize;
@@ -3954,6 +4004,7 @@ export function renderSearchPage({
         area_maps: selectedView === "map" ? officialAreaMaps(filterViews, intentFilters) : [],
         area_map_source: AREA_MAP.source,
         applicable_filter_fields: applicableFilterFields,
+        widen_ranges: widenRanges,
       },
       fallback: {
         enabled: true,
@@ -4242,6 +4293,7 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
         title: doc.title,
         facts: doc.facts,
         reviewer: doc.reviewer,
+        ...(doc.approved_at ? { approved_at: doc.approved_at } : {}),
         sources_label: doc.sources_label || "",
         sources: doc.sources || [],
       })),
@@ -6281,8 +6333,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "Запазване...",
     savedChange: "Промяната е запазена.",
     failedChange: "Промяната не бе запазена. Опитайте отново.",
-    deleteConfirm: "Да изтрием ли това известие? Няма да ви пишем повече.",
-    deleted: "Известието е изтрито. Няма да ви пишем повече.",
+    deleteConfirm: "Да изтрием ли това известие?",
+    deleted: "Известието е изтрито.",
     localTitle: "Запазени в този браузър",
     localIntro: "Търсения, които сте запазили на това устройство. Отворете изпратената връзка за управление, за да промените или спрете някое от тях.",
     localControlsNote:
@@ -6308,8 +6360,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "Saving...",
     savedChange: "Change saved.",
     failedChange: "That change was not saved. Try again.",
-    deleteConfirm: "Delete this alert? We will not write to you again.",
-    deleted: "This alert is deleted. We will not write to you again.",
+    deleteConfirm: "Delete this alert?",
+    deleted: "This alert is deleted.",
     localTitle: "Saved in this browser",
     localIntro: "Searches you saved on this device. Open the manage link we sent you to change or stop one of them.",
     localControlsNote:
@@ -6335,8 +6387,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "Wird gespeichert...",
     savedChange: "Änderung gespeichert.",
     failedChange: "Die Änderung wurde nicht gespeichert. Versuchen Sie es erneut.",
-    deleteConfirm: "Diese Benachrichtigung löschen? Wir schreiben Ihnen dann nicht mehr.",
-    deleted: "Diese Benachrichtigung ist gelöscht. Wir schreiben Ihnen nicht mehr.",
+    deleteConfirm: "Diese Benachrichtigung löschen?",
+    deleted: "Diese Benachrichtigung ist gelöscht.",
     localTitle: "In diesem Browser gespeichert",
     localIntro: "Suchen, die Sie auf diesem Gerät gespeichert haben. Öffnen Sie den gesendeten Verwaltungslink, um eine davon zu ändern oder zu stoppen.",
     localControlsNote:
@@ -6362,8 +6414,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "Bezig met bewaren...",
     savedChange: "Wijziging bewaard.",
     failedChange: "Die wijziging is niet bewaard. Probeer het opnieuw.",
-    deleteConfirm: "Deze melding verwijderen? Wij schrijven u dan niet meer.",
-    deleted: "Deze melding is verwijderd. Wij schrijven u niet meer.",
+    deleteConfirm: "Deze melding verwijderen?",
+    deleted: "Deze melding is verwijderd.",
     localTitle: "Bewaard in deze browser",
     localIntro: "Zoekopdrachten die u op dit apparaat hebt bewaard. Open de toegestuurde beheerlink om er een te wijzigen of te stoppen.",
     localControlsNote:
@@ -6389,8 +6441,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "Сохранение...",
     savedChange: "Изменение сохранено.",
     failedChange: "Изменение не сохранено. Попробуйте ещё раз.",
-    deleteConfirm: "Удалить эту подписку? Мы больше не будем вам писать.",
-    deleted: "Подписка удалена. Мы больше не будем вам писать.",
+    deleteConfirm: "Удалить эту подписку?",
+    deleted: "Подписка удалена.",
     localTitle: "Сохранено в этом браузере",
     localIntro: "Поиски, сохранённые на этом устройстве. Откройте присланную ссылку управления, чтобы изменить или остановить любой из них.",
     localControlsNote:
@@ -6416,8 +6468,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "Αποθήκευση...",
     savedChange: "Η αλλαγή αποθηκεύτηκε.",
     failedChange: "Η αλλαγή δεν αποθηκεύτηκε. Προσπαθήστε ξανά.",
-    deleteConfirm: "Διαγραφή αυτής της ειδοποίησης; Δεν θα σας ξαναγράψουμε.",
-    deleted: "Η ειδοποίηση διαγράφηκε. Δεν θα σας ξαναγράψουμε.",
+    deleteConfirm: "Διαγραφή αυτής της ειδοποίησης;",
+    deleted: "Η ειδοποίηση διαγράφηκε.",
     localTitle: "Αποθηκευμένα σε αυτό το πρόγραμμα περιήγησης",
     localIntro: "Αναζητήσεις που αποθηκεύσατε σε αυτή τη συσκευή. Ανοίξτε τον σύνδεσμο διαχείρισης που σας στείλαμε για να αλλάξετε ή να σταματήσετε κάποια.",
     localControlsNote:
@@ -6443,8 +6495,8 @@ const P4_ALERTS_MANAGE_COPY = {
     saving: "שומר...",
     savedChange: "השינוי נשמר.",
     failedChange: "השינוי לא נשמר. נסו שוב.",
-    deleteConfirm: "למחוק את ההתראה הזו? לא נכתוב לכם שוב.",
-    deleted: "ההתראה נמחקה. לא נכתוב לכם שוב.",
+    deleteConfirm: "למחוק את ההתראה הזו?",
+    deleted: "ההתראה נמחקה.",
     localTitle: "נשמרו בדפדפן הזה",
     localIntro: "חיפושים ששמרתם במכשיר הזה. פתחו את קישור הניהול ששלחנו כדי לשנות או לעצור אחד מהם.",
     localControlsNote:

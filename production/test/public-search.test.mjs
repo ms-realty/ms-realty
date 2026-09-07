@@ -16,7 +16,8 @@ import {
   PublicSearchUnavailableError,
 } from "../lib/public-search.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "../lib/runtime.mjs";
-import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
+import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { approvedPublicSeedFixtureOptions, approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
@@ -403,4 +404,64 @@ test("Postgres cards keep database-only listings and database-updated facts auth
   assert.equal(result.cards[1].path, "/bg/imoti/db-only-listing");
   assert.equal(result.cards[1].price_eur, 950);
   assert.equal(result.cards[1].bedrooms, 3);
+});
+
+
+test("public HTML and API retain unchecked wishes through filter edits and navigation", async () => {
+  const words = "Apartment in Sandanski under 150000 with step-free access";
+  const search = { ...searchConfig(async () => response({ found: 1, hits: [{ document: hit }] })), naturalLanguageEnabled: true };
+  const routerConfig = { ...appRouterConfigFromEnv({ NODE_ENV: "test", ...approvedPublicSeedFixtureEnv() }), search };
+  const params = new URLSearchParams({ locale: "en", nl: words, price_max: "180000" });
+  const apiResponse = await renderAppApiResponse(new Request(`https://example.test/api/search?${params}`), { config: apiConfig(search) });
+  const api = await apiResponse.json();
+  const page = await renderAppSearchRoute({ pathname: "/en/search", url: `https://example.test/en/search?${params}`, config: routerConfig });
+  assert.equal(apiResponse.status, 200);
+  assert.equal(page.status, 200);
+  assert.equal(api.search.intent.price_max, 180000);
+  assert.deepEqual(page.rendered.search.natural_language, api.search.natural_language);
+  assert.match(page.html, /data-search-interpretation="true"/);
+  assert.ok(page.html.includes(words));
+  assert.match(page.html, /Other wishes in your request have not been checked/);
+  assert.match(page.html, /name="nl_context"/);
+  assert.doesNotMatch(page.html, /name="nl"/);
+  assert.match(page.html, /nl_context=/);
+
+  const editedParams = new URLSearchParams({ locale: "en", nl_context: words, property_family: "house", price_max: "" });
+  const edited = await renderAppSearchRoute({ pathname: "/en/search", url: `https://example.test/en/search?${editedParams}`, config: routerConfig });
+  assert.equal(edited.status, 200);
+  assert.equal(edited.rendered.search.intent.price_max, null);
+  assert.deepEqual(edited.rendered.search.intent.property_families, ["house"]);
+  assert.equal(edited.rendered.search.query, "");
+  assert.ok(edited.html.includes(words));
+});
+
+test("retained query text is escaped and supports RTL without being interpreted", async () => {
+  const words = '<img src=x onerror="alert(1)"> דירה שקטה';
+  const search = searchConfig(async () => response({ found: 1, hits: [{ document: hit }] }));
+  const params = new URLSearchParams({ locale: "he", nl_context: words });
+  const page = await renderAppSearchRoute({ pathname: "/he/search", url: `https://example.test/he/search?${params}`, config: { ...appRouterConfigFromEnv({ NODE_ENV: "test", ...approvedPublicSeedFixtureEnv() }), search } });
+  assert.equal(page.status, 200);
+  assert.match(page.html, /dir="rtl"/);
+  assert.match(page.html, /dir="auto"/);
+  assert.match(page.html, /&lt;img/);
+  assert.doesNotMatch(page.html, /<img src=x/);
+  assert.equal(page.rendered.search.query, "");
+  assert.equal(page.rendered.search.natural_language.original_query, words);
+});
+
+
+test("Node HTML and API use the same retained interpretation after explicit edits", async () => {
+  const words = "Apartment in Sandanski under 150000 with step-free access";
+  const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-nl-events-`)}/events.jsonl`;
+  const app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), naturalLanguageSearchEnabled: true, eventLedgerPath });
+  const params = new URLSearchParams({ locale: "bg", nl: words, price_max: "180000" });
+  const api = await dispatchHttp(app, { url: `/api/search?${params}` });
+  const page = await dispatchHttp(app, { url: `/bg/tarsene?${params}`, headers: { accept: "text/html" } });
+  assert.equal(api.status, 200);
+  assert.equal(page.status, 200);
+  assert.equal(api.body.search.intent.price_max, 180000);
+  assert.equal(api.body.search.natural_language.original_query, words);
+  assert.match(page.body, /data-search-interpretation="true"/);
+  assert.ok(page.body.includes(words));
+  assert.match(page.body, /name="nl_context"/);
 });

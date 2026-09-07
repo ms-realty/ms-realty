@@ -181,6 +181,7 @@ jobs:
   deploy_origin:
     name: Deploy durable origin
     if: >-
+      vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD != 'true' &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' ||
       (github.event_name == 'repository_dispatch' &&
@@ -298,6 +299,7 @@ jobs:
   deploy:
     name: Deploy production
     if: >-
+      vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD != 'true' &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' ||
       (github.event_name == 'repository_dispatch' &&

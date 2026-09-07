@@ -104,6 +104,7 @@ export function workspaceScopedAccess({ allowRoles = ["admin", "broker"], field 
 // may read and update THEIR OWN record (name, etc.) but not role or others.
 export const adminsCollectionAccess = {
   create: isAdmin,
+  unlock: isAdmin,
   delete: isAdmin,
   read: ({ req }) => {
     if (roleOf(req?.user) === "admin") return true;

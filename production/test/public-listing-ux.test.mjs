@@ -43,7 +43,7 @@ function richListingPage(localeCode = "en", { related = true, broker = false } =
   return page;
 }
 
-test("listing detail leads with the decision: price block, facts bar, and a five-photo gallery", () => {
+test("listing detail leads with price and one photograph while retaining the full gallery", () => {
   const page = richListingPage("en");
   const labels = labelsFor("en");
   const html = renderReactPublicBody(page);
@@ -59,11 +59,27 @@ test("listing detail leads with the decision: price block, facts bar, and a five
   for (const fact of ["bedrooms", "area", "land", "floor", "availability"]) {
     assert.match(html, new RegExp(`data-listing-fact="${fact}"`), fact);
   }
-  assert.match(html, /data-gallery-layout="quad"/);
+  assert.match(html, /data-gallery-layout="single"/);
   assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 9);
   assert.match(html, /data-listing-gallery-all="true"/);
   assert.match(html, new RegExp(labels.allPhotos.replace("{count}", "9")));
   assert.match(html, /class="ld-g ld-g--main[^"]*"[^>]*data-has-photo="true"/);
+});
+
+test("availability witness needs both its recorded reviewer and date in every public locale", () => {
+  for (const locale of PUBLIC_LOCALES) {
+    const page = richListingPage(locale);
+    page.body.verification.availability_verified_by = "Mariya <reviewer>";
+    let html = renderReactPublicBody(page);
+    assert.match(html, /data-availability-witness="signed"><span>[^<]*Mariya &lt;reviewer&gt;<\/span><time dateTime="2026-07-19T11:30:00Z">/);
+    page.body.verification.availability_verified_by = " ";
+    html = renderReactPublicBody(page);
+    assert.match(html, /data-availability-witness="missing"/);
+    assert.doesNotMatch(html, /data-availability-witness="signed"/);
+    page.body.verification.availability_verified_by = "Mariya";
+    page.body.verification.availability_verified_at = null;
+    assert.match(renderReactPublicBody(page), /data-availability-witness="missing"/);
+  }
 });
 
 test("listing facts are grouped and the pending capabilities stay visible but inert", () => {
@@ -168,7 +184,8 @@ test("location landing opens with the area, its sub-areas, guides, and a seller 
   assert.equal(page.body.sub_areas[0].href.startsWith("/bg/tarsene?region_id="), true);
   assert.equal(page.body.search_href, "/bg/tarsene?region_id=BG%3Amunicipality%3ABLG40");
   assert.equal(page.body.seller.path, "/bg/prodai");
-  assert.match(html, /class="loc-head"/);
+  assert.match(html, /class="loc-hero"/);
+  assert.match(html, /class="loc-story__photo"/);
   assert.match(html, /data-location-count="\d+"/);
   assert.match(html, /data-location-areas="true"/);
   assert.match(html, /data-location-area="BG:settlement:65334"/);
@@ -265,7 +282,12 @@ test("the listing sheet keeps hover, focus, active, disabled, and empty states i
   assert.match(css, /\.ld-photo-viewer__nav:disabled \{ visibility: hidden; \}/);
   assert.match(css, /\.ld-soon \{[\s\S]*?border: 1px dashed var\(--border-strong\)/);
   assert.match(css, /\.ld-similar__empty \{[\s\S]*?border: 1px dashed var\(--border-strong\)/);
-  assert.match(css, /\.loc-guide:focus-visible \{[^}]*box-shadow: var\(--shadow-focus\)/);
+  // On phones the related listings are one horizontal rail. A second
+  // max-width:760px rule used to reset the template to 1fr while the rail kept
+  // grid-auto-flow: column, which collapsed the first card to ~96px.
+  assert.equal((css.match(/\.ld-similar__grid \{ grid-template-columns: 1fr/g) || []).length, 0);
+  assert.match(css, /\.ld-similar__grid \{\s*grid-template-columns: none;\s*grid-auto-flow: column;/);
+  assert.match(css, /\.loc-guide:focus-visible \{[^}]*outline: 2px solid var\(--text-strong\)/);
   assert.match(css, /\.sr-saved__search summary:focus-visible \{[^}]*box-shadow: var\(--shadow-focus\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });

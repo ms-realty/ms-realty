@@ -1,3 +1,4 @@
+import { submitPublicEnquiry } from "./public-enquiry-submit.mjs";
 // Progressive-enhancement scripts emitted as versioned local assets by
 // build-design-assets.mjs. Pages stay fully server-rendered; this layer wires
 // saved listings, enquiries, the 360 viewer, and admin filters.
@@ -60,6 +61,10 @@ export const THEME_SWITCH_JS = `
     syncThemeSwitches(readThemeChoice());
   }
 `;
+
+import { initPublicSearchAssistant } from "./public-search-assistant-client.mjs";
+import { initPublicSearchEvidence } from "./public-search-evidence-client.mjs";
+import { ADMIN_DAILY_JS } from "./admin-daily.mjs";
 
 export const PUBLIC_APP_JS = `(function () {
   "use strict";
@@ -284,6 +289,9 @@ ${THEME_SWITCH_JS}
     if (warn) warn.remove();
   }
   function submitJson(form, onDone) {
+    if (form.getAttribute("action") === "/api/leads") {
+      return (${submitPublicEnquiry.toString()})(form, nestFormData(form), onDone, showFormError);
+    }
     var submit = form.querySelector('[type="submit"]');
     if (submit) {
       submit.setAttribute("data-loading", "");
@@ -515,6 +523,7 @@ ${THEME_SWITCH_JS}
   function configureEnquiryDialog(dialog, lead) {
     var form = dialog.querySelector("form");
     if (!form) return;
+    if (form.__publicEnquirySubmission) return;
     var intent = lead.getAttribute("data-lead-intent") || "inquiry";
     if (intent === "request_viewing") intent = "viewing";
     var title = lead.getAttribute("data-lead-title") || lead.textContent.trim();
@@ -1051,7 +1060,9 @@ ${THEME_SWITCH_JS}
         })
         .then(function (data) {
           if (payload.action === "delete") {
+            if (managed && feedback) managed.insertAdjacentElement("afterend", feedback);
             if (managed) managed.hidden = true;
+            if (localEmpty) localEmpty.hidden = readSavedSearches().length > 0;
             say("deleted");
             return;
           }
@@ -1426,7 +1437,7 @@ ${THEME_SWITCH_JS}
     if (!form) return;
     var priceSelects = form.querySelectorAll("[data-price-presets]");
     var family = form.querySelector("[data-hero-family]");
-    var bedrooms = form.querySelector("[data-hero-bedrooms]");
+    var bedrooms = form.querySelectorAll("[data-hero-bedrooms]");
     var more = form.querySelector("[data-hero-more-filters]");
     function offerType() {
       var checked = form.querySelector('input[name="offer_type"]:checked');
@@ -1459,8 +1470,13 @@ ${THEME_SWITCH_JS}
     function syncBedrooms() {
       if (!family || !bedrooms) return;
       var nonResidential = NON_RESIDENTIAL_FAMILIES.indexOf(family.value) >= 0;
-      bedrooms.disabled = nonResidential;
-      if (nonResidential) bedrooms.value = "";
+      for (var i = 0; i < bedrooms.length; i += 1) {
+        bedrooms[i].disabled = nonResidential;
+        if (nonResidential) bedrooms[i].value = "";
+      }
+      form.querySelectorAll("[data-drawer-family]").forEach(function (button) {
+        button.setAttribute("aria-pressed", button.getAttribute("data-drawer-family") === family.value ? "true" : "false");
+      });
     }
     form.addEventListener("change", function (event) {
       if (event.target && event.target.name === "offer_type") applyPricePresets();
@@ -1476,6 +1492,61 @@ ${THEME_SWITCH_JS}
       var label = more.querySelector("[data-more-label]");
       more.addEventListener("toggle", function () {
         if (label) label.textContent = more.open ? label.getAttribute("data-fewer-label") : label.getAttribute("data-more-label");
+      });
+    }
+    var drawer = form.querySelector("[data-hero-filter-dialog]");
+    if (more && drawer && typeof drawer.showModal === "function") {
+      var trigger = more.querySelector("summary");
+      var slots = [
+        ["intent", ".hp-search__intent"], ["location", ".hp-search__seg--location"],
+        ["type", ".hp-search__seg--type"], ["price-min", "#home-search-price-min"],
+        ["price-max", "#home-search-price-max"], ["more", ".hp-search__more-grid"]
+      ].map(function (entry) {
+        var node = form.querySelector(entry[1]);
+        if (entry[0].indexOf("price-") === 0) node = node.parentElement;
+        var marker = document.createComment(entry[0]);
+        node.before(marker);
+        return { node: node, marker: marker, slot: drawer.querySelector('[data-drawer-slot="' + entry[0] + '"]') };
+      });
+      // Move the existing controls: one form, one value per filter, no mirrored state.
+      trigger.addEventListener("click", function (event) {
+        event.preventDefault();
+        more.open = false;
+        slots.forEach(function (entry) {
+          entry.placeholder = entry.node.cloneNode(true);
+          entry.placeholder.inert = true;
+          entry.placeholder.setAttribute("aria-hidden", "true");
+          [entry.placeholder].concat(Array.from(entry.placeholder.querySelectorAll("*"))).forEach(function (node) {
+            ["id", "name", "for", "list"].forEach(function (attribute) { node.removeAttribute(attribute); });
+            if ("disabled" in node) node.disabled = true;
+          });
+          entry.node.before(entry.placeholder);
+          entry.slot.prepend(entry.node);
+        });
+        drawer.showModal();
+        syncPublicDialogState();
+      });
+      form.addEventListener("invalid", function (event) {
+        if (!drawer.open && more.contains(event.target)) trigger.click();
+      }, true);
+      drawer.querySelector("[data-hero-filter-close]").addEventListener("click", function () { drawer.close(); });
+      drawer.querySelectorAll("[data-drawer-family]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          family.value = button.getAttribute("data-drawer-family");
+          family.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
+      drawer.addEventListener("click", function (event) {
+        var rect = drawer.getBoundingClientRect();
+        if (event.target === drawer && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) drawer.close();
+      });
+      drawer.addEventListener("close", function () {
+        slots.forEach(function (entry) {
+          entry.marker.after(entry.node);
+          if (entry.placeholder) entry.placeholder.remove();
+        });
+        syncPublicDialogState();
+        trigger.focus({ preventScroll: true });
       });
     }
     // Empty controls stay out of the results URL; pageshow restores them for bfcache returns.
@@ -2024,7 +2095,7 @@ ${THEME_SWITCH_JS}
       }
     }
     function currentStepIsValid() {
-      var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
+      var fields = panels[currentIndex].querySelectorAll("input, select, textarea");
       for (var i = 0; i < fields.length; i += 1) {
         if (fields[i].checkValidity()) continue;
         // Mark the field so it also reads as an error visually, not only in
@@ -2035,6 +2106,11 @@ ${THEME_SWITCH_JS}
       }
       return true;
     }
+    form.addEventListener("invalid", function (event) {
+      var panel = event.target.closest("[data-seller-step]");
+      var index = Array.prototype.indexOf.call(panels, panel);
+      if (index >= 0 && index !== currentIndex) showStep(index, false);
+    }, true);
     form.addEventListener("input", function (event) {
       var field = event.target;
       if (field && field.getAttribute && field.getAttribute("aria-invalid") === "true" && field.checkValidity && field.checkValidity()) {
@@ -2676,7 +2752,8 @@ ${THEME_SWITCH_JS}
      var enquiry = document.getElementById("mk-enquiry");
      var contactOptions = document.querySelector("[data-mobile-contact-options]");
      var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
-     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
+     var filters = document.querySelector("[data-hero-filter-dialog]");
+     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open) || (filters && filters.open));
      document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
    }
   // The desktop language menu is a native <details>; it still needs to close
@@ -2945,6 +3022,90 @@ ${THEME_SWITCH_JS}
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  (${initPublicSearchAssistant.toString()})();
+  (${initPublicSearchEvidence.toString()})();
+  function initListingSourceQuestions() {
+    document.querySelectorAll("[data-listing-question-form]").forEach(function (form) {
+      var copy = JSON.parse(form.getAttribute("data-question-copy"));
+      var input = form.elements.question;
+      var button = form.querySelector('[type="submit"]');
+      var status = form.querySelector("[data-question-status]");
+      var result = form.querySelector("[data-question-result]");
+      var generation = 0;
+      var controller = null;
+      form.hidden = false;
+      input.addEventListener("input", function () {
+        generation += 1;
+        if (controller) controller.abort();
+        result.replaceChildren();
+        status.textContent = "";
+        button.disabled = false;
+        form.removeAttribute("aria-busy");
+      });
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (form.getAttribute("aria-busy") === "true" || !form.reportValidity()) return;
+        var question = input.value.trim();
+        if (!question) return;
+        var ownGeneration = ++generation;
+        controller = new AbortController();
+        var listingId = form.elements.listingId.value;
+        var locale = form.elements.locale.value;
+        result.replaceChildren();
+        status.textContent = copy[4];
+        form.setAttribute("aria-busy", "true");
+        button.disabled = true;
+        fetch(form.action, { method: "POST", credentials: "same-origin", signal: controller.signal,
+          headers: { "content-type": "application/json", accept: "application/json" },
+          body: JSON.stringify({ listingId: listingId, locale: locale, question: question }) })
+          .then(function (response) {
+            if (!response.ok) throw new Error(response.status === 429 ? copy[11] : copy[7]);
+            return response.json();
+          })
+          .then(function (body) {
+            if (ownGeneration !== generation) return;
+            if (!body || body.kind !== "listing_source_passages" || body.listing_id !== listingId || body.locale !== locale || body.question !== question) throw new Error(copy[7]);
+            if (body.status === "no_answer") { status.textContent = copy[6]; return; }
+            if (body.status !== "related_source" || !Array.isArray(body.passages) || !body.passages.length ||
+                !/^[a-f0-9]{64}$/.test(body.source_hash || "") || !body.reviewer || !body.reviewed_at ||
+                typeof body.canonical_url !== "string" || body.canonical_url.indexOf("/" + locale + "/") !== 0) throw new Error(copy[7]);
+            body.passages.forEach(function (passage) {
+              if (typeof passage.quote !== "string" || passage.source_hash !== body.source_hash) throw new Error(copy[7]);
+              var quote = document.createElement("blockquote");
+              quote.textContent = passage.quote;
+              quote.dir = "auto";
+              quote.lang = locale;
+              result.appendChild(quote);
+            });
+            var link = document.createElement("a");
+            link.href = body.canonical_url;
+            link.textContent = listingId;
+            link.style.minHeight = "44px";
+            link.style.display = "inline-flex";
+            link.style.alignItems = "center";
+            result.appendChild(link);
+            var witness = document.createElement("p");
+            witness.textContent = copy[8] + ": " + body.reviewer + " · " + copy[9] + ": " + body.reviewed_at;
+            result.appendChild(witness);
+            var version = document.createElement("p");
+            version.textContent = copy[10] + ": " + body.source_hash;
+            result.appendChild(version);
+            status.textContent = copy[5];
+          })
+          .catch(function (error) {
+            if (ownGeneration !== generation) return;
+            result.replaceChildren();
+            status.textContent = error.message === copy[11] ? copy[11] : copy[7];
+          })
+          .finally(function () {
+            if (ownGeneration !== generation) return;
+            button.disabled = false;
+            form.removeAttribute("aria-busy");
+          });
+      });
+    });
+  }
+  initListingSourceQuestions();
   initStartFlow();
   initCompareLinks();
   initComparePage();
@@ -3060,6 +3221,7 @@ export const ADMIN_APP_JS = `(function () {
   "use strict";
 ${COPY_BLOCK_JS}
 ${THEME_SWITCH_JS}
+${ADMIN_DAILY_JS}
   function syncAdminShellOffsets() {
     var topbar = document.querySelector(".crm-top");
     var editorTabs = document.querySelector("[data-editor-tabs]");
@@ -3091,6 +3253,44 @@ ${THEME_SWITCH_JS}
     // An empty queue says so instead of leaving a bare table header.
     var empty = document.querySelector("[data-lead-queue-empty]");
     if (empty) empty.hidden = visible > 0 || rows.length === 0;
+  }
+  function initTodayWorkspace() {
+    var root = document.querySelector("[data-today-workspace]");
+    if (!root) return;
+    var search = root.querySelector("[data-today-search]");
+    var rows = Array.from(root.querySelectorAll("[data-next-action]"));
+    var details = Array.from(root.querySelectorAll("[data-today-detail]"));
+    var buttons = root.querySelectorAll("[data-today-filter]");
+    var activeFilter = "all";
+    function apply() {
+      var query = (search.value || "").trim().toLocaleLowerCase();
+      var wanted = "";
+      try { wanted = decodeURIComponent(window.location.hash.slice(1)); } catch (error) {}
+      var visible = rows.filter(function (row) {
+        var match = (activeFilter === "all" || (activeFilter === "overdue" ? row.getAttribute("data-overdue") === "true" : row.getAttribute("data-next-action") === activeFilter)) && row.textContent.toLocaleLowerCase().indexOf(query) >= 0;
+        row.hidden = !match;
+        return match;
+      });
+      var selected = visible.find(function (row) { return row.querySelector("[data-today-select]").getAttribute("data-today-select") === wanted; }) || visible[0];
+      var selectedId = selected ? selected.querySelector("[data-today-select]").getAttribute("data-today-select") : "";
+      rows.forEach(function (row) {
+        var link = row.querySelector("[data-today-select]");
+        if (row === selected) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      });
+      details.forEach(function (detail) { detail.hidden = detail.id !== selectedId; });
+      root.querySelector("[data-today-no-matches]").hidden = visible.length > 0 || rows.length === 0;
+      Array.from(buttons).forEach(function (button) {
+        var on = button.getAttribute("data-today-filter") === activeFilter;
+        button.setAttribute("aria-pressed", on ? "true" : "false");
+        button.setAttribute("data-on", on ? "1" : "0");
+      });
+    }
+    search.addEventListener("input", apply);
+    Array.from(buttons).forEach(function (button) { button.addEventListener("click", function () { activeFilter = button.getAttribute("data-today-filter"); apply(); }); });
+    window.addEventListener("hashchange", apply);
+    root.setAttribute("data-today-enhanced", "true");
+    apply();
   }
   function initAdminListFilters() {
     var navs = document.querySelectorAll("[data-list-filter]");
@@ -3570,6 +3770,144 @@ ${THEME_SWITCH_JS}
         });
     });
   }
+  // One behaviour for every field-level Hermes draft. The button knows its
+  // endpoint, the box it fills and the bar that names the source; nothing here
+  // is listing-specific, so the next assisted field needs no new code.
+  function initHermesAssist() {
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-hermes-assist]") : null;
+      if (!button || button.disabled) return;
+      event.preventDefault();
+      var target = document.getElementById(button.getAttribute("data-hermes-assist-target") || "");
+      var bar = document.getElementById(button.getAttribute("data-hermes-assist-bar") || "");
+      if (!target) return;
+      var host = button.closest("[data-hermes-assist-for]");
+      var original = button.innerHTML;
+      var pending = button.getAttribute("data-hermes-assist-pending") || "Drafting…";
+      var failure = button.getAttribute("data-hermes-assist-failure") || "Could not draft this.";
+      var unavailable = button.getAttribute("data-hermes-assist-unavailable") || failure;
+      var previousProposal = host && host.querySelector("[data-hermes-proposal]");
+      if (previousProposal) previousProposal.remove();
+      if (host) host.removeAttribute("data-hermes-error");
+      if (bar) {
+        bar.hidden = true;
+        bar.removeAttribute("data-hermes-drafted-state");
+      }
+      button.disabled = true;
+      button.setAttribute("data-busy", "true");
+      button.textContent = pending;
+      fetch(button.getAttribute("data-hermes-assist-endpoint"), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        // Every assisted value posts what its own endpoint needs. The button
+        // carries that as one payload attribute, so a second kind of draft is
+        // a markup change rather than a second copy of this behaviour.
+        body: JSON.stringify(
+          Object.assign(
+            {
+              listingId: button.getAttribute("data-hermes-assist-listing"),
+              field: button.getAttribute("data-hermes-assist-field"),
+              locale: button.getAttribute("data-hermes-assist-locale"),
+              sourceText: target.value || "",
+            },
+            JSON.parse(button.getAttribute("data-hermes-assist-payload") || "{}"),
+          ),
+        ),
+      })
+        .then(function (response) {
+          return response.json().then(function (payload) {
+            if (!response.ok) throw new Error(payload && payload.message ? payload.message : failure);
+            return payload;
+          });
+        })
+        .then(function (draft) {
+          // A draft that claims it may act on its own is not a draft. Refuse it
+          // rather than putting it in front of a broker as if it were reviewed.
+          // Listing copy says human_approval_required; a reply says
+          // broker_approval_required. Neither may claim it can go out.
+          var approvalRequired = draft.human_approval_required === true || draft.broker_approval_required === true;
+          if (typeof draft.text !== "string" || !draft.text.trim() || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
+            throw new Error("invalid Hermes draft response");
+          }
+          if (!host || !bar) throw new Error("draft review unavailable");
+          var proposal = document.createElement("div");
+          proposal.className = "adm-hermes-proposal";
+          proposal.setAttribute("data-hermes-proposal", "true");
+          var comparison = [];
+          [
+            ["current", "Current text", target.value],
+            ["proposed", "Proposed draft", draft.text],
+          ].forEach(function (entry) {
+            var label = document.createElement("label");
+            label.textContent = button.getAttribute("data-hermes-assist-" + entry[0]) || entry[1];
+            var box = document.createElement("textarea");
+            box.readOnly = true;
+            box.rows = 4;
+            box.value = entry[2];
+            label.appendChild(box);
+            proposal.appendChild(label);
+            comparison.push(box);
+          });
+          var actions = document.createElement("div");
+          actions.className = "adm-hermes-proposal__actions";
+          var apply = document.createElement("button");
+          apply.type = "button";
+          apply.className = "mk-btn mk-btn--primary";
+          apply.textContent = button.getAttribute("data-hermes-assist-apply") || "Use draft";
+          var discard = document.createElement("button");
+          discard.type = "button";
+          discard.className = "mk-btn";
+          discard.textContent = button.getAttribute("data-hermes-assist-discard") || "Keep my text";
+          actions.appendChild(apply);
+          actions.appendChild(discard);
+          proposal.appendChild(actions);
+          var sourceNote = button.getAttribute("data-hermes-assist-source-note") || "";
+          bar.textContent = (button.getAttribute("data-hermes-assist-review") || "Compare the draft with your text before using it.") + " " + sourceNote;
+          bar.hidden = false;
+          host.appendChild(proposal);
+          apply.addEventListener("click", function () {
+            if (target.disabled || target.readOnly) return;
+            if (target.value !== comparison[0].value) {
+              comparison[0].value = target.value;
+              bar.textContent = button.getAttribute("data-hermes-assist-changed") || "Your text has changed. Review the updated comparison before using this draft.";
+              comparison[0].focus();
+              return;
+            }
+            target.value = draft.text;
+            target.dispatchEvent(new Event("input", { bubbles: true }));
+            host.setAttribute("data-hermes-drafted", "true");
+            target.setAttribute("data-hermes-drafted", "true");
+            bar.textContent = button.getAttribute("data-hermes-assist-applied") || "Draft added to the field. Save your changes when you are ready.";
+            proposal.remove();
+            target.focus();
+          });
+          discard.addEventListener("click", function () {
+            proposal.remove();
+            bar.hidden = true;
+            target.focus();
+          });
+          var reveal = button.getAttribute("data-hermes-assist-reveal");
+          var panel = reveal ? document.getElementById(reveal) : target.closest("details");
+          if (panel && panel.tagName === "DETAILS") panel.open = true;
+          button.innerHTML = original;
+        })
+        .catch(function (error) {
+          var missing = /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY|not configured/i.test(String((error && error.message) || ""));
+          button.innerHTML = original;
+          if (host) host.setAttribute("data-hermes-error", missing ? unavailable : (error && error.message) || failure);
+          if (bar) {
+            bar.hidden = false;
+            bar.setAttribute("data-hermes-drafted-state", "error");
+            bar.textContent = missing ? unavailable : (error && error.message) || failure;
+          }
+        })
+        .then(function () {
+          button.removeAttribute("data-busy");
+          button.disabled = false;
+        });
+    });
+  }
   function initReplyForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -3770,8 +4108,9 @@ ${THEME_SWITCH_JS}
     var reset = savebar.querySelector("[data-editor-reset]");
     var note = savebar.querySelector("[data-editor-dirty-note]");
     savebar.setAttribute("data-dirty", dirty ? "true" : "false");
-    if (save) save.disabled = !dirty;
-    if (reset) reset.disabled = !dirty;
+    var busy = form.getAttribute("aria-busy") === "true";
+    if (save) save.disabled = busy || !dirty;
+    if (reset) reset.disabled = busy || !dirty;
     if (note) {
       note.textContent = dirty
         ? form.getAttribute("data-editor-dirty-message") || "Unsaved changes"
@@ -3781,29 +4120,43 @@ ${THEME_SWITCH_JS}
   }
   function editorFormState(form) {
     var fields = [];
-    var data = new FormData(form);
-    data.forEach(function (value, key) {
-      fields.push(key + "=" + String(value));
+    new FormData(form).forEach(function (value, key) {
+      if (key !== "draftRevision") fields.push([key, String(value)]);
     });
-    return fields.join("&");
+    return JSON.stringify(fields);
   }
-  function commitEditorFormState(form) {
-    var elements = form.elements;
-    for (var i = 0; i < elements.length; i += 1) {
-      var field = elements[i];
-      if (!field || !field.name) continue;
+  function snapshotEditorFormState(form) {
+    return {
+      state: editorFormState(form),
+      fields: Array.prototype.filter.call(form.elements, function (field) { return field && field.name; }).map(function (field) {
+        return { field: field, value: field.value, checked: field.checked,
+          selected: field instanceof HTMLSelectElement ? Array.prototype.map.call(field.options, function (option) { return option.selected; }) : null };
+      }),
+    };
+  }
+  function commitEditorFormState(form, snapshot) {
+    snapshot = snapshot || snapshotEditorFormState(form);
+    snapshot.fields.forEach(function (saved) {
+      var field = saved.field;
+      if (field.name === "draftRevision") return;
+      // Updating reset defaults must not alter text or selections made while
+      // the request was pending, including controls still carrying defaults.
+      var value = field.value;
+      var checked = field.checked;
+      var selected = field instanceof HTMLSelectElement ? Array.prototype.map.call(field.options, function (option) { return option.selected; }) : null;
       if (field instanceof HTMLInputElement && (field.type === "checkbox" || field.type === "radio")) {
-        field.defaultChecked = field.checked;
+        field.defaultChecked = saved.checked;
+        field.checked = checked;
       } else if ("defaultValue" in field) {
-        field.defaultValue = field.value;
+        field.defaultValue = saved.value;
+        field.value = value;
       }
-      if (field instanceof HTMLSelectElement) {
-        for (var j = 0; j < field.options.length; j += 1) {
-          field.options[j].defaultSelected = field.options[j].selected;
-        }
+      if (selected) {
+        for (var j = 0; j < field.options.length; j += 1) field.options[j].defaultSelected = Boolean(saved.selected[j]);
+        for (var k = 0; k < field.options.length; k += 1) field.options[k].selected = selected[k];
       }
-    }
-    form.setAttribute("data-editor-initial-state", editorFormState(form));
+    });
+    form.setAttribute("data-editor-initial-state", snapshot.state);
     syncEditorSavebar(form);
   }
   function initEditorForms() {
@@ -4222,6 +4575,18 @@ ${THEME_SWITCH_JS}
     });
     return pairs.sort().join("&");
   }
+  function initSettingsSectionLinks() {
+    var open = function () {
+      var id = (window.location.hash || "").replace(/^#/, "");
+      if (!id) return;
+      var section = document.getElementById(id);
+      if (section && section.tagName === "DETAILS") section.open = true;
+    };
+    if (!document.querySelector("[data-settings-index-row]")) return;
+    window.addEventListener("hashchange", open);
+    open();
+  }
+
   function initWorkspaceSettingsForms() {
     var forms = document.querySelectorAll("[data-workspace-settings-form]");
     for (var i = 0; i < forms.length; i += 1) {
@@ -4298,6 +4663,14 @@ ${THEME_SWITCH_JS}
   // instant, so the browser resolves it before the request leaves.
   function adminMutationPayload(form) {
     var payload = tourPayload(form);
+    if (form.hasAttribute("data-editor-form")) {
+      payload = {};
+      new FormData(form).forEach(function (value, key) {
+        if (!(key in payload)) payload[key] = value;
+        else if (Array.isArray(payload[key])) payload[key].push(value);
+        else payload[key] = [payload[key], value];
+      });
+    }
     var stamps = form.querySelectorAll('input[type="datetime-local"]');
     for (var i = 0; i < stamps.length; i += 1) {
       var field = stamps[i];
@@ -4529,6 +4902,9 @@ ${THEME_SWITCH_JS}
       var form = event.target;
       if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-admin-mutation-form")) return;
       event.preventDefault();
+      if (form.getAttribute("aria-busy") === "true") return;
+      var editorSnapshot = form.hasAttribute("data-editor-form") ? snapshotEditorFormState(form) : null;
+      var mutationPayload = adminMutationPayload(form);
       var buttons = form.querySelectorAll('[type="submit"]');
       var status = form.querySelector("[data-admin-mutation-status]");
       var saving = form.getAttribute("data-admin-mutation-saving") || "Saving…";
@@ -4536,16 +4912,21 @@ ${THEME_SWITCH_JS}
       var failure = form.getAttribute("data-admin-mutation-failure") || "Could not save.";
       for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
       form.setAttribute("aria-busy", "true");
+      if (editorSnapshot) syncEditorSavebar(form);
       if (status) { status.textContent = saving; status.setAttribute("data-state", "saving"); }
       fetch(form.getAttribute("action"), {
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify(adminMutationPayload(form)),
+        body: JSON.stringify(mutationPayload),
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
-            if (!response.ok && response.status !== 207) throw new Error(payload.message || failure);
+            if (!response.ok && response.status !== 207) {
+              throw new Error(payload.kind === "listing_draft_conflict"
+                ? form.getAttribute("data-editor-conflict-message") || payload.message || failure
+                : payload.message || failure);
+            }
             return payload;
           });
         })
@@ -4553,11 +4934,24 @@ ${THEME_SWITCH_JS}
           // A batch that refused some enquiries is not a success: the strip
           // says how many landed and how many did not.
           var partial = payload && payload.kind === "lead_bulk_action" && payload.refused > 0;
+          if (editorSnapshot) {
+            var revision = form.querySelector('[name="draftRevision"]');
+            if (revision && (payload.kind !== "listing_draft_saved"
+              || !/^[a-f0-9]{64}$/.test(payload.draft_revision || "")
+              || typeof mutationPayload.listingId !== "string" || !mutationPayload.listingId
+              || payload.listing_id !== mutationPayload.listingId || payload.draft_only !== true)) {
+              throw new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+            }
+            if (revision) revision.value = revision.defaultValue = payload.draft_revision;
+            commitEditorFormState(form, editorSnapshot);
+          }
           if (status) {
-            status.textContent = partial ? bulkOutcomeText(form, payload) : success;
+            var laterEdits = editorSnapshot && editorFormState(form) !== editorSnapshot.state;
+            status.textContent = partial ? bulkOutcomeText(form, payload) : laterEdits
+              ? form.getAttribute("data-editor-later-edits-message") || "Submitted changes saved. Your newer edits are still unsaved."
+              : success;
             status.setAttribute("data-state", partial ? "error" : "success");
           }
-          if (form.hasAttribute("data-editor-form")) commitEditorFormState(form);
           if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
         })
         .catch(function (error) {
@@ -4566,6 +4960,7 @@ ${THEME_SWITCH_JS}
         .then(function () {
           form.removeAttribute("aria-busy");
           for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+          if (editorSnapshot) syncEditorSavebar(form);
       });
     });
   }
@@ -4770,6 +5165,7 @@ ${THEME_SWITCH_JS}
     initMediaUploadForm(mediaUploadForms[mediaUploadIndex]);
   }
   initWorkspaceOnboarding();
+  initSettingsSectionLinks();
   initWorkspaceSettingsForms();
   initLeadBulkForm();
   initSavedViews();
@@ -4780,7 +5176,9 @@ ${THEME_SWITCH_JS}
   initTranslationWorkflowForms();
   initReplyDeliveryForms();
   initReplyForms();
+  initHermesAssist();
   initCommunicationTemplates();
+  initTodayWorkspace();
   initAdminListFilters();
   initPipelineBoard();
   initLeadInboxPanes();

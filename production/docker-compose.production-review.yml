@@ -20,7 +20,9 @@ services:
       MS_REALTY_LEAD_OPS_DURABLE_STORE_ENABLED: "true"
       MS_REALTY_DEPLOYMENT_SCOPE: production
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/production-launch-readiness.json
-      MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: /app/production/data/r2-media-coverage-report.json
+      MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH: /runtime-evidence/r2-media-coverage-report.json
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: /runtime-evidence/hermes-draft-worker-report.json
+      MS_REALTY_TASK_LEDGER_PATH: /runtime-data/task-events.jsonl
       MS_REALTY_MCP_DURABLE_LISTING_WRITES: "1"
       MS_REALTY_ORIGIN_TOKEN: ${MS_REALTY_ORIGIN_TOKEN:?MS_REALTY_ORIGIN_TOKEN is required}
       MS_REALTY_MEDIA_UPLOAD_DRIVER: r2
