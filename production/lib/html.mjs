@@ -2,6 +2,7 @@ import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor, labelsFor, localizedListingValue, uiCopyFor } from "./public-site.mjs";
 import { absolutePublicUrl, FALLBACK_PUBLIC_ORIGIN, isAbsoluteHttpUrl } from "./public-origin.mjs";
+import { PRODUCTION_PUBLIC_ORIGIN } from "../../workers/preview-host.mjs";
 import {
   ADMIN_CLIENT_HASH,
   ADMIN_CSS_HASH,
@@ -1064,9 +1065,23 @@ function clientScript(page, options = {}) {
   return `<script defer src="/vendor/ms-realty-public.js?v=${PUBLIC_CLIENT_HASH}" data-ms-realty-public-client data-request-sent="${escapeHtml(copy.requestSent)}" data-request-failed="${escapeHtml(copy.requestFailed || "")}" data-share-copied="${escapeHtml(copy.shareCopied || "")}"></script>`;
 }
 
+// Owned media records name the operational workers.dev origin, and the Worker
+// serves the same /media/* and /wp-content/uploads/* objects on every host it
+// answers for. A document rendered for another public origin (the canonical
+// domain) therefore points its media at that origin: the canonical site must
+// never publish the operational one, and the release probe refuses a page that
+// does. Records and reports keep the operational URL; only the document changes.
+export function rewriteOperationalMediaOrigin(html, origin) {
+  const target = String(origin || "").replace(/\/+$/, "");
+  if (!target || target === PRODUCTION_PUBLIC_ORIGIN) return html;
+  return html
+    .replaceAll(`${PRODUCTION_PUBLIC_ORIGIN}/media/`, `${target}/media/`)
+    .replaceAll(`${PRODUCTION_PUBLIC_ORIGIN}/wp-content/uploads/`, `${target}/wp-content/uploads/`);
+}
+
 export function renderHtmlPage(page, options = {}) {
   const body = options.bodyHtml || renderBody(page, options);
-  return `<!doctype html>
+  const html = `<!doctype html>
 <html lang="${escapeHtml(page.lang || page.locale || "en")}" dir="${escapeHtml(page.dir || "ltr")}">
 <head>
 ${meta(page, options)}
@@ -1076,6 +1091,7 @@ ${body}
 ${clientScript(page, options)}
 </body>
 </html>`;
+  return rewriteOperationalMediaOrigin(html, options.origin);
 }
 
 // Every URL a search engine or a share card resolves must be fully qualified.
