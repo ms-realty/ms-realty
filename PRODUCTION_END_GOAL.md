@@ -556,3 +556,45 @@ Blocked for the agent (classifier or credentials), handed to the owner in
 `OWNER_RUNBOOK_2026-09-07.md`: SSH to the origin host, the Hermes
 source-review task, force-pushes over PR branches, undrafting PRs, PR edits,
 bulk branch/worktree/stash deletion, repository settings, Cloudflare and DNS.
+
+### 2026-09-08, second pass
+
+Owner actions completed: the Hermes source-review task was opened on the
+origin from the `4e336a9b` release image (report at
+`/runtime-evidence/hermes-draft-worker-report.json`, attempted 1, persisted 1);
+#178 and #197 were undrafted and merged; #177 and #173 were closed; #194 was
+retitled to its remaining Email Workers change; #182 was force-updated to the
+merged-and-green tree (`claude/pr182-merged-main`) and returned to draft until a
+release is live.
+
+Releases, in order:
+- `fa83ae1f` (#178): rolled back at Hermes evidence, captured eight minutes
+  before the report existed.
+- `4576bf3d` (#197): Hermes evidence accepted; rolled back at
+  `r2_media_coverage` because the origin reads the evidence volume, which still
+  held the `db7cd103` report. The deploy also rewrote the Worker routes to the
+  sixteen declared patterns and dropped the two zone wildcards, so every
+  unprefixed canonical path (sitemap, admin, media, legacy URLs) answered a
+  cPanel suspended page.
+- `d9f7538d` (#200, wildcards declared + exact-release R2 adoption): Worker
+  verified with `launch_ready: true` and no blockers for the first time. Rolled
+  back only because the canonical journey probe ran once, seconds before the
+  zone routes converged. The wildcards stayed: `/sitemap.xml` and `/admin/login`
+  answer 200 on the canonical domain again.
+- #202 gives the two canonical probes a convergence window; #201 lands the
+  task-queue wording fix. Their releases are the next candidates to go live.
+
+Screen audit: 264 local renders (25 admin routes × bg/ru/en × 1440 light, 1440
+dark, 390 light, plus ten public routes) with no overflow, no page errors and
+no raw `undefined`/`NaN` text. One systematic defect found and fixed in #201:
+the task queue named rows by ledger id. `/admin/team` answers 403 to the smoke
+bearer by design; `/bg/start` is not a route in this build.
+
+Paper: the file's semantic tokens (`--canvas`, `--surface`, `--sunken`,
+`--border`, `--text-*`, `--accent`, `--field`, `--sb-*`, `--r-edge`,
+`--r-panel`) and the `--dark-*` set now alias the Atlas values shipped by
+`adapter-admin-workspace.css` and `adapter-public-z-atlas.css`. Foundations
+light and dark carry the Atlas palette, re-measured contrast (13 pairs each,
+all pass), Atlas radii and the 216px rail; Components and Interaction inherit
+the flip. The Coverage index row for Foundations records this. Still open on
+that page: a pass over Components and Interaction control radii and copy.
