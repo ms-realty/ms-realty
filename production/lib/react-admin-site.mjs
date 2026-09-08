@@ -3697,8 +3697,16 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
   // The selection is the task queue's; Today only puts words on it. Reading
   // the queues here again is exactly how the two screens would drift.
-  const decorate = (task) => {
+  return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map((task) => describeSourceTask(task, { page, copy, ui, na, inboxHref }));
+}
+
+// Words for a derived task: what it is about and where it stands, from the
+// source row it was derived from. Today and the task queue share this so a
+// lead never shows up as its ledger id on one screen and as a person on the
+// other.
+function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
     const row = task.source_row || {};
+    const source = task.source || {};
     const base = {
       key: task.task_id,
       kind: task.kind,
@@ -3709,12 +3717,12 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       reference: task.subject_ref,
     };
     if (task.kind === "integrity") {
-      const gap = task.source.tracking_gap;
+      const gap = source.tracking_gap;
       return {
         ...base,
         title: na.trackingTitle,
         context:
-          task.source.tracking_status === "unavailable"
+          source.tracking_status === "unavailable"
             ? na.trackingUnavailable
             : (gap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(gap))),
         href: `${adminHref("/admin/reports", page)}#website-funnel`,
@@ -3722,7 +3730,7 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       };
     }
     if (task.kind === "lead") {
-      const { sla_status: slaStatus, delivery_status: deliveryStatus } = task.source;
+      const { sla_status: slaStatus, delivery_status: deliveryStatus } = source;
       const action =
         deliveryStatus === "failed"
           ? na.actions.requeue
@@ -3786,8 +3794,6 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       href: adminHref("/admin/pipeline", page),
       action: na.actions.opportunity,
     };
-  };
-  return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map(decorate);
 }
 
 function TodayBriefingPanel({ page, rows, total, detailId }) {
@@ -8766,8 +8772,9 @@ function TaskRow({ page, row, copy, na }) {
             )
           : null,
       ),
-      h("h2", null, row.subject_ref || row.task_id || kindLabel),
-      row.origin === "authored" && row.note ? h("small", { className: "adm-lead-context" }, row.note) : null,
+      h("h2", null, row.subject_title || kindLabel),
+      row.subject_context ? h("small", { className: "adm-lead-context" }, row.subject_context) : null,
+      h("code", { className: "crm-mono adm-id-caption" }, row.subject_ref || row.task_id),
       h("dl", { className: "adm-daily-facts" },
         h("div", null, h("dt", null, copy.owner), h("dd", null, row.owner || workbenchCopy(page).notSet)),
         h("div", null, h("dt", null, copy.taskType), h("dd", null, row.origin === "authored" ? row.kind.replaceAll("_", " ") : kindLabel))),
@@ -8812,6 +8819,19 @@ function TaskCompletionForm({ page, row, copy }) {
   );
 }
 
+// The queue row and its detail name the work in words. An authored task keeps
+// the note the operator wrote; a derived task borrows Today's description of
+// its source row. The ledger id stays available as a caption, never as the
+// heading: PRODUCT.md forbids raw keys as UI text.
+function taskWords(row, page, ui, na) {
+  if (row.origin === "authored") {
+    // The operator chose the subject when opening the task; the note is context.
+    return { subject_title: row.task_id, subject_context: row.note || "" };
+  }
+  const words = describeSourceTask(row, { page, copy: adminCopy(page), ui, na, inboxHref: adminHref("/admin/leads", page) });
+  return { subject_title: words.title || na.kinds[row.kind], subject_context: words.context || "" };
+}
+
 function TasksBody({ page }) {
   const ui = workbenchCopy(page);
   const copy = ui.workspaceSettings.tasks;
@@ -8847,12 +8867,12 @@ function TasksBody({ page }) {
       h("p", { className: "adm-daily-note", "data-task-delegated-note": "true" }, copy.delegatedNote),
       h(DailyWorkspace, {
         scope: "task", page, title: copy.title,
-        rows: queue.rows.map(row => ({ ...row, id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),
+        rows: queue.rows.map(row => ({ ...row, ...taskWords(row, page, ui, na), id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),
         filters: [{ value: "overdue", label: na.overdue }, { value: "authored", label: dailyCopy(page).authored }],
         empty: h("p", { className: "adm-empty", "data-task-empty": "true" }, copy.empty),
         renderRow: row => h("span", null,
-          h("strong", null, row.subject_ref || row.task_id || na.kinds[row.kind]),
-          h("small", null, [row.owner, row.origin === "authored" ? dailyCopy(page).authored : na.kinds[row.kind]].filter(Boolean).join(" · ")),
+          h("strong", null, row.subject_title),
+          h("small", null, [row.origin === "authored" ? dailyCopy(page).authored : na.kinds[row.kind], row.subject_context, row.owner].filter(Boolean).join(" · ")),
           row.due_at ? h("time", { dateTime: row.due_at }, `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.due_at, page.workspace.locale)}`) : null),
         renderDetail: row => h(TaskRow, { page, row, copy, na }),
       }),
