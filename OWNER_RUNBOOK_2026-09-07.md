@@ -24,7 +24,7 @@ The translation dispatch is empty, so the only honest attempt is a
 source-review task, and opening one needs a human `--confirm-task`.
 
 ```bash
-ssh <your-deploy-user>@157.230.109.185
+ssh root@157.230.109.185
 release="$(readlink -f /opt/ms-realty/current)"
 cd "$release"
 docker compose --env-file /opt/ms-realty/shared/.env.production-review \
@@ -192,7 +192,7 @@ Measured today: first byte 13.4 s on `/bg` with `cf-cache-status: DYNAMIC`,
 origin:
 
 ```bash
-ssh <your-deploy-user>@157.230.109.185
+ssh root@157.230.109.185
 for i in 1 2 3; do curl -s -o /dev/null -w 'origin ttfb %{time_starttransfer}s\n' -H 'Accept: text/html' http://127.0.0.1:3200/bg; done
 docker stats --no-stream
 docker compose --env-file /opt/ms-realty/shared/.env.production-review \
