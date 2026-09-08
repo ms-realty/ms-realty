@@ -467,3 +467,37 @@ export function r2MediaCoverageState(reportPath = DEFAULT_R2_MEDIA_COVERAGE_REPO
     return { status: "invalid_report", path: normalizedPath, error: error.message, next_actions: [...R2_MEDIA_COVERAGE_NEXT_ACTIONS] };
   }
 }
+
+// The release archive carries the exact-release coverage report that CI
+// captured and verified, but the runtime reads the report from the shared
+// evidence volume, where the previous release's copy otherwise stays behind
+// and fails the release-SHA check. Adopt the release copy when it names the
+// running build; leave the volume alone when it does not, so a stale or
+// foreign report can never be promoted by accident.
+export function adoptReleaseR2MediaCoverageReport({ sourcePath, targetPath, expectedReleaseSha } = {}) {
+  if (!sourcePath || !targetPath || !expectedReleaseSha || expectedReleaseSha === "unversioned") return { adopted: false, reason: "not_applicable" };
+  const source = path.resolve(sourcePath);
+  const target = path.resolve(targetPath);
+  if (source === target) return { adopted: false, reason: "same_path" };
+  if (!fs.existsSync(source)) return { adopted: false, reason: "missing_source" };
+  let report;
+  try {
+    report = JSON.parse(fs.readFileSync(source, "utf8"));
+  } catch (error) {
+    return { adopted: false, reason: "unreadable_source", error: error.message };
+  }
+  if (report?.release_sha !== expectedReleaseSha) return { adopted: false, reason: "release_sha_mismatch", release_sha: report?.release_sha ?? null };
+  if (fs.existsSync(target)) {
+    try {
+      const current = JSON.parse(fs.readFileSync(target, "utf8"));
+      if (current?.release_sha === expectedReleaseSha && current?.generated_at === report.generated_at) return { adopted: false, reason: "already_current" };
+    } catch {
+      // An unreadable target is replaced below.
+    }
+  }
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const staging = `${target}.${process.pid}.tmp`;
+  fs.writeFileSync(staging, JSON.stringify(report, null, 2) + "\n", { mode: 0o644 });
+  fs.renameSync(staging, target);
+  return { adopted: true, reason: "adopted", release_sha: expectedReleaseSha, generated_at: report.generated_at };
+}

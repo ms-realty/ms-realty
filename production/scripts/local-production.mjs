@@ -9,6 +9,8 @@ import {
   writeLaunchReadinessReport,
 } from "../lib/launch-readiness.mjs";
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
+import { adoptReleaseR2MediaCoverageReport } from "../lib/r2-media-coverage.mjs";
+import { readBuildMarker } from "../lib/build-marker.mjs";
 import {
   LOCAL_BACKUP_COMPONENTS,
   assertSafeArchiveEntries,
@@ -197,6 +199,15 @@ function materializeReadiness(env = process.env) {
   const outPath = String(env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || "").trim();
   if (!outPath) throw new Error("production readiness materialization requires MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH");
   const generatedAt = env.MS_REALTY_GENERATED_AT || new Date().toISOString();
+  // CI verified this release's own R2 coverage report and shipped it in the
+  // archive; the runtime reads the evidence volume, which still holds the
+  // previous release's report until the exact-release copy replaces it.
+  const adoption = adoptReleaseR2MediaCoverageReport({
+    sourcePath: path.join(root, "production", "data", "r2-media-coverage-report.json"),
+    targetPath: env.MS_REALTY_R2_MEDIA_COVERAGE_REPORT_PATH,
+    expectedReleaseSha: readBuildMarker(),
+  });
+  process.stdout.write(`R2 media coverage report: ${adoption.reason}${adoption.release_sha ? ` (${adoption.release_sha})` : ""}\n`);
   const report = buildLaunchReadinessReport({ ...launchReadinessInputsFromEnv(env), generatedAt });
   return { outPath: writeLaunchReadinessReport(report, outPath), report };
 }
