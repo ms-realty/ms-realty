@@ -388,11 +388,12 @@ test("the production Worker owns every canonical public route", () => {
 
   for (const host of ["makler-realty.com", "www.makler-realty.com"]) {
     assert.ok(patterns.includes(`${host}/`), `${host} site root must route to this Worker`);
+    assert.ok(patterns.includes(`${host}/*`), `${host} unprefixed paths (admin, api, SEO files, media, legacy URLs) must route to this Worker`);
     for (const locale of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
       assert.ok(patterns.includes(`${host}/${locale}*`), `${host} ${locale} pages must route to this Worker`);
     }
   }
-  assert.equal(patterns.length, 16, "no route beyond the canonical site root and its seven locales");
+  assert.equal(patterns.length, 18, "site root, zone wildcard and seven locale prefixes per host, nothing else");
   for (const route of config.routes) assert.equal(route.zone_name, "makler-realty.com");
 
   // makler-realty.ru stays off this Worker until publicOriginForHost answers
