@@ -482,11 +482,22 @@ jobs:
           done
           exit 1
 
+      # The Worker is verified on workers.dev above; the canonical zone routes
+      # it re-asserts take a few seconds longer to answer for makler-realty.com.
+      # Run 34252720734 probed too early, read the legacy host's HTML at
+      # /api/health, and rolled back an otherwise ready release. Give the zone
+      # five minutes to converge before calling the release broken.
       - name: Verify canonical production journeys
         env:
           MS_REALTY_EXPECTED_BUILD_MARKER: ${{ github.sha }}
           MS_REALTY_PRODUCTION_URL: https://makler-realty.com
-        run: node production/scripts/probe-production-journeys.mjs
+        run: |
+          for attempt in $(seq 1 15); do
+            if node production/scripts/probe-production-journeys.mjs; then exit 0; fi
+            echo "Canonical journeys attempt $attempt/15 did not pass; retrying in 20s."
+            sleep 20
+          done
+          exit 1
 
       # The journey probe proves production is alive in eight checks. This
       # proves the site is usable: every public page type in every public
@@ -497,7 +508,13 @@ jobs:
       - name: Verify the whole public site on the canonical domain
         env:
           MS_REALTY_PUBLIC_URL: https://makler-realty.com
-        run: node production/scripts/probe-canonical-site.mjs
+        run: |
+          for attempt in $(seq 1 6); do
+            if node production/scripts/probe-canonical-site.mjs; then exit 0; fi
+            echo "Canonical site attempt $attempt/6 did not pass; retrying in 30s."
+            sleep 30
+          done
+          exit 1
 
       - name: Roll back failed deployment
         if: failure() && needs.deploy_origin.outputs.previous_release != ''
