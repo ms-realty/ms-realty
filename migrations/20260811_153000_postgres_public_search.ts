@@ -66,9 +66,21 @@ const INDEX_GEOGRAPHY_PATH_SQL = (listing = "l.") =>
 
 const PUBLISHABLE = (field: string) => sql.raw(PUBLISHABLE_FACT_SQL(field))
 
-type PublicSearchViewOptions = { localizedTranslations?: boolean }
+type PublicSearchViewOptions = { localizedTranslations?: boolean; sourceStatedPrice?: boolean }
 
-export async function up({ db }: MigrateUpArgs, { localizedTranslations = false }: PublicSearchViewOptions = {}): Promise<void> {
+export async function up(
+  { db }: MigrateUpArgs,
+  { localizedTranslations = false, sourceStatedPrice = false }: PublicSearchViewOptions = {},
+): Promise<void> {
+  // The public listing page and the in-memory search projection publish the
+  // source-stated price with its verification state beside it; only this view
+  // hid the price until a broker verified it, so every price filter on the
+  // live site returned nothing while 134 of 165 listings carry a price.
+  const priceVerified = `l."workflow_price_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_verified_by", '') <> ''`
+  const priceGate = sourceStatedPrice ? `true` : priceVerified
+  const priceOnRequestGate = sourceStatedPrice
+    ? `true`
+    : `l."workflow_price_on_request_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_on_request_verified_by", '') <> ''`
   const locale = localizedTranslations ? 'target_locale' : 'source_locale'
   const title = localizedTranslations
     ? `NULLIF(lt."title", '')`
@@ -160,18 +172,18 @@ export async function up({ db }: MigrateUpArgs, { localizedTranslations = false 
         ${sql.raw(PUBLIC_LOCATION_SQL('geography_id', `NULLIF(l."facts_geography_id", '')`))} AS "geography_id",
         ${sql.raw(PUBLIC_GEOGRAPHY_PATH_SQL())} AS "geography_path",
         CASE
-          WHEN l."workflow_price_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_verified_by", '') <> '' AND l."facts_price_on_request" IS DISTINCT FROM true
+          WHEN ${sql.raw(priceGate)} AND l."facts_price_on_request" IS DISTINCT FROM true
             THEN l."facts_price_eur"
           ELSE NULL
         END AS "price_amount",
         CASE
-          WHEN l."workflow_price_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_verified_by", '') <> '' AND l."facts_price_on_request" IS DISTINCT FROM true AND l."facts_price_eur" IS NOT NULL
+          WHEN ${sql.raw(priceGate)} AND l."facts_price_on_request" IS DISTINCT FROM true AND l."facts_price_eur" IS NOT NULL
             THEN 'EUR'
           ELSE NULL
         END AS "price_currency",
         NULL::varchar AS "price_period",
         CASE
-          WHEN l."workflow_price_on_request_verified_at" IS NOT NULL AND COALESCE(l."workflow_price_on_request_verified_by", '') <> '' AND l."facts_price_on_request" = true
+          WHEN ${sql.raw(priceOnRequestGate)} AND l."facts_price_on_request" = true
             THEN true
           ELSE NULL
         END AS "price_on_request",
