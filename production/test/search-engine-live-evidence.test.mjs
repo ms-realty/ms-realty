@@ -150,7 +150,7 @@ test("live query evidence proves zero approved results without a hardcoded listi
   assert.equal(report.expectation.projected_documents, 0);
   assert.equal(report.expectation.sample_document_id, null);
   assert.equal(report.summary.total_hits, 0);
-  assert.ok(calls.every(({ url, options }) => !`${url} ${options.body || ""}`.includes("MS-CRAWL-0001")));
+  assert.ok(calls.every(({ url, options }) => !`${url} ${options.body || ""}`.includes("MS-00815")));
 });
 
 test("live query evidence uses the first current Payload document as its dynamic sample", async () => {

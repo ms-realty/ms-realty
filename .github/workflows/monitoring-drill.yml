@@ -119,10 +119,17 @@ jobs:
           const config = fs.readFileSync(configPath, "utf8");
           if (config.split(placeholder).length !== 3) throw new Error("Expected edge and Container image marker placeholders");
           if (config.split(productionWorkerName).length !== 2) throw new Error("Expected the production Worker name exactly once");
+          // The isolated drill Worker lives on workers.dev only. The canonical
+          // zone routes belong to ms-realty; deploying them under another name
+          // is refused by the Cloudflare API and has failed every drill since
+          // the wildcards were declared.
+          const routesBlock = /"routes": \[[\s\S]*?\]/;
+          if (!routesBlock.test(config)) throw new Error("Expected the canonical routes block");
           fs.writeFileSync(
             configPath,
             config
               .replace(productionWorkerName, `"name": "${process.env.DRILL_WORKER}"`)
+              .replace(routesBlock, '"routes": []')
               .replaceAll(placeholder, marker),
           );
           NODE

@@ -156,6 +156,23 @@ test("Payload projection treats zero approved listings as a valid authoritative 
   });
 });
 
+test("Payload search matches source-stated SQL prices without inventing broker verification", async () => {
+  for (const [facts, expected] of [
+    [{ price_eur: 38000 }, { price_amount: 38000, price_currency: "EUR", price_on_request: undefined }],
+    [{ price_eur: 0, price_on_request: false }, { price_amount: 0, price_currency: "EUR", price_on_request: undefined }],
+    [{ price_eur: null }, { price_amount: undefined, price_currency: undefined, price_on_request: undefined }],
+    [{ price_eur: 38000, price_on_request: true }, { price_amount: undefined, price_currency: undefined, price_on_request: true }],
+  ]) {
+    const listing = approvedListing({ facts, workflow: { publish_approved: true } });
+    const rows = payloadListingSearchRows([listing]);
+    assert.equal(rows[0].approval.fact_verification.some((entry) => entry.field.startsWith("price_") && entry.state === "broker_verified"), false);
+    const projection = await buildPayloadApprovedSearchProjection({ find: async () => ({ docs: [listing], totalPages: 1 }) }, { publicationEvidence: null });
+    const { price_amount, price_currency, price_on_request } = projection.documents[0];
+    assert.deepEqual({ price_amount, price_currency, price_on_request }, expected);
+    assert.equal(projection.documents[0].public_latitude, undefined);
+  }
+});
+
 test("Payload projection preserves property bedroom and floor facts until listing values override them", async () => {
   const baseFacts = approvedListing().facts;
   const payload = {
@@ -206,7 +223,7 @@ test("a published row the approval does not name is skipped, not fatal", () => {
   const registry = loadLocaleRegistry();
   const listing = approvedListing({ id: "MS-CRAWL-0127" });
   const evidence = {
-    listing_ids: ["MS-CRAWL-0001"],
+    listing_ids: ["MS-00815"],
     excluded_listings: [{ id: "MS-CRAWL-0127", reason: "no location relation and an empty title" }],
   };
   const skipped = [];

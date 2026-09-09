@@ -198,7 +198,7 @@ test("the admin week view carries days, slots, viewings and the follow-ups due",
       {
         id: "viewing-week-1",
         lead_id: "lead-week-1",
-        listing_reference: "MS-CRAWL-0001",
+        listing_reference: "MS-00815",
         original_language: "en",
         admin_locale: "en",
         broker: "broker_bg",
@@ -266,7 +266,7 @@ test("the public slot route stays confirmation-required without an approved brok
   const app = createHttpApp(space.options);
 
   const slots = await dispatchHttp(app, {
-    url: "/api/viewing-slots?listing=MS-CRAWL-0001&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
+    url: "/api/viewing-slots?listing=MS-00815&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
   });
   assert.equal(slots.status, 200);
   assert.equal(slots.body.kind, "viewing_slots");
@@ -286,7 +286,7 @@ test("the public slot route stays confirmation-required without an approved brok
 
 test("the public slot route offers a listing broker's real free slots and never books", async () => {
   const space = workspace();
-  seedApprovedBrokerContact(space, "MS-CRAWL-0001");
+  seedApprovedBrokerContact(space, "MS-00815");
   const app = createHttpApp(space.options);
   await dispatchHttp(app, {
     method: "POST",
@@ -296,7 +296,7 @@ test("the public slot route offers a listing broker's real free slots and never 
   });
 
   const slots = await dispatchHttp(app, {
-    url: "/api/viewing-slots?listing=MS-CRAWL-0001&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
+    url: "/api/viewing-slots?listing=MS-00815&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
   });
   assert.equal(slots.status, 200);
   assert.equal(slots.body.kind, "viewing_slots");
@@ -327,13 +327,13 @@ test("the public slot route offers a listing broker's real free slots and never 
 
 test("a booked viewing disappears from the slots the public route offers", async () => {
   const space = workspace();
-  seedApprovedBrokerContact(space, "MS-CRAWL-0001");
+  seedApprovedBrokerContact(space, "MS-00815");
   fs.writeFileSync(
     space.at("viewings.jsonl"),
     JSON.stringify({
       id: "viewing-taken",
       lead_id: "lead-taken",
-      listing_reference: "MS-CRAWL-0002",
+      listing_reference: "MS-00907",
       original_language: "bg",
       admin_locale: "bg",
       broker: "broker_bg",
@@ -354,7 +354,7 @@ test("a booked viewing disappears from the slots the public route offers", async
   });
 
   const slots = await dispatchHttp(app, {
-    url: "/api/viewing-slots?listing=MS-CRAWL-0001&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
+    url: "/api/viewing-slots?listing=MS-00815&locale=bg&from=2026-08-25&to=2026-08-25&limit=50",
   });
   const offered = slots.body.slots.map((slot) => slot.local_start);
   assert.ok(!offered.includes("09:00"), "the booked hour is gone");
@@ -370,7 +370,7 @@ test("a viewing trip is a request that reaches the admin queue with its own voca
     arrivalDate: "2026-10-05",
     departureDate: "2026-10-08",
     areas: ["Sandanski", "Petrich"],
-    listingReferences: ["MS-CRAWL-0001", "MS-CRAWL-0002"],
+    listingReferences: ["MS-00815", "MS-00907"],
     partySize: 2,
     note: "Flying in on the Monday.",
     contact: { name: "Trip Visitor", phone: "+31612345678" },
@@ -432,7 +432,7 @@ test("a viewing trip is a request that reaches the admin queue with its own voca
   assert.ok(row, "the trip lands in the same queue as the other public requests");
   assert.equal(row.request_id, created.body.id);
   assert.equal(row.trip.arrival_date, "2026-10-05");
-  assert.deepEqual(row.trip.listing_references, ["MS-CRAWL-0001", "MS-CRAWL-0002"]);
+  assert.deepEqual(row.trip.listing_references, ["MS-00815", "MS-00907"]);
   assert.equal(queue.body.publicRequestQueue.summary.viewing_trip_open, 1);
 
   // Its own outcome vocabulary: the saved-search verbs do not apply.

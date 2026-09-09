@@ -1,0 +1,80 @@
+{
+  "MS-CRAWL-0008": {
+    "lot_number": 662,
+    "action": "assign_legacy",
+    "confidence": "high",
+    "reason": "Bulgarian .com post was hard-deleted between the 2026-07-04 crawl and the 2026-08-28 dump (Yoast sitemap partition sitemap-pt-listings-2024-02.html puts its post_date in 2024-02). All 13 crawled images are 662-*.jpg and every 662-* attachment on .com has post_parent=0, i.e. orphaned by the deletion. The surviving Russian twin, post 7229 on makler-realty.ru, carries wtf_pid=662, wtf_price=350 matching the seed price exactly, and the same 13 filenames with post_parent=7229; that post is MS-CRAWL-0147. Rejected alternates: lot 731 (post 8282, live, images 731-*) and lot 876 (post 11246, live, wtf_price=230)."
+  },
+  "MS-CRAWL-0027": {
+    "lot_number": null,
+    "action": "assign_new",
+    "confidence": "high",
+    "reason": "A genuinely separate apartment whose post was hard-deleted, taking its wtf_pid with it. It shares lot 911's photo set (911-1..5.jpg, Jaccard 1.0), title and building blurb with MS-CRAWL-0007, but the descriptions diverge on the identifying details: third residential floor unit D-A 14 versus first floor, built area 50.67 versus 50.65 sq m, total area 59.23 versus 59.21 sq m, and it has a separate bedroom. Both seed prices are exactly total area times 900 EUR/sq m (59.23*900=53307 for this record, 59.21*900=53289 for MS-CRAWL-0007), which independently confirms two distinct units. Lot 911 belongs to the surviving post 11740 and must not be reused here. Sitemap partition sitemap-pt-listings-2025-09.html dates the deleted post to September 2025, the same month as post 11740; the agency was issuing 908 and 911 then, so the lost number was most likely 909, 910 or 912 (912 has since been reissued to post 12248). Needs an agency decision."
+  },
+  "MS-3000": {
+    "lot_number": 356,
+    "action": "assign_legacy",
+    "confidence": "medium",
+    "reason": "Bulgarian half of a cross-domain pair with MS-CRAWL-0165: identical 4-photo set PHOTO-2025-06-03-13-42-17{,_1,_2,_3}.jpg, identical EUR 38000 price, same village, same offer type. Those attachments are orphaned on .com in /2025/03/, matching the sitemap-pt-listings-2025-03.html partition for the deleted post. The 2014 Yoast sitemap cached in ms_options maps makler-realty.com/listing/uchastok-strumiani/ to 356-6.jpg, so .com did host a lot-356 plot at that slug before it was renamed to the '3000 kv m' slug. Graded medium rather than high because the .com post's own wtf_pid is gone, no 356-* attachment survives on .com, and the number is inherited from the Russian twin; cross-domain lot numbers agree in 30 of 36 image-linked pairs but not universally. Rejected alternates: lot 286 (post 973 on both domains, images 286-*, live and mapped) and lot 470 (posts 7194 / 4264, images 470-dron-new.jpg, live and mapped). The MS-3000 reference itself is a crawl-id artefact taken from '3000 kv m' in the slug and carries no legacy meaning."
+  },
+  "MS-CRAWL-0085": {
+    "lot_number": 851,
+    "action": "assign_legacy",
+    "confidence": "high",
+    "reason": "Documented deletion: crawl-delta.md for artifact 20260710-211919 lists this URL under Removed URLs with probe status=404, so the post was deleted between 2026-07-04 and 2026-07-10. Six of its seven crawled photos are 851-1..6 (the seventh is 850-7.jpg) and every 851-* attachment on .com is orphaned, in two upload batches, 2021/11 and 2023/02; the 2023/02 batch matches the sitemap-pt-listings-2023-02.html partition for the deleted post exactly. No surviving post on either domain carries wtf_pid=851, and MS-CRAWL-0085 is the only record in the catalog whose page references 851-* or 850-7. The German slug apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten was the canonical post_name in all seven languages per the crawler's hreflang block, not a language variant. Rejected alternates: lot 731 (post 8282, live, wtf_price=350) and lot 760 (post 8980, trashed, _wp_desired_post_slug already claimed by MS-CRAWL-0109)."
+  },
+  "MS-CRAWL-0165": {
+    "lot_number": 356,
+    "action": "assign_legacy",
+    "confidence": "high",
+    "reason": "The crawled page carries 356-plan.jpg and 356-4..8.jpg, all orphaned .ru attachments from /2014/06/, alongside the newer PHOTO-2025-06-03-* set. The 2014 Yoast sitemap cached in ms_options maps makler-realty.ru/listing/uchastok-strumiani/ (lastmod 2014-06-16) to 356-6.jpg, and distinguishes it from uchastok-v-poselke-strumiani (lot 286, image 286-2.jpg) and uchastok-v-strumiani (221-2). A property-specific site plan, 356-plan.jpg, settles it. wtf_pid=356 is used by no surviving post on either domain. Forms a cross-domain pair with MS-3000, which must take the same number. Rejected alternates: lot 286 (post 973, wtf_price=25000, live and mapped to MS-CRAWL-0153) and lot 470 (post 4264, wtf_total_area=677, live and mapped to MS-CRAWL-0154)."
+  },
+  "MS-CRAWL-0020": {
+    "lot_number": 890,
+    "action": "keep",
+    "confidence": "high",
+    "reason": "Office for rent, 18 sq m at EUR 83/month, .com post 11373, published 2025-02-07 09:52:17 and never modified since. It is the oldest published, non-trashed holder of lot 890. Its photos 890-1.jpeg and 890-2.jpeg were uploaded 2025-02-07 09:51, four months before the colliding house photos 890-1.jpg through 890-15.jpg on 2025-06-24 (the .jpeg versus .jpg split is what let the second property occupy the same numeric name). 890 also fits the agency's own issuing sequence for February 2025, between 876 (2025-01-10) and 891 (2025-04-03)."
+  },
+  "MS-CRAWL-0026": {
+    "lot_number": null,
+    "action": "reassign_new",
+    "confidence": "high",
+    "reason": "House of 313 sq m on a 760 sq m plot at EUR 225000, .com post 11585, published 2025-06-24, four months after the office that legitimately holds 890. Its photo family was uploaded 2025-06-24 06:37, after the office family. A post created 2025-06-24 should have drawn a number near 894 to 897 (894 on 2025-05-22, 895 on 2025-06-04, 896 and 897 on 2025-06-13), so this post is the mis-numbered one. Must be renumbered to the same new value as its Russian twin MS-CRAWL-0125. Options: the agency's own suffix convention 890-1, precedented by wtf_pid 567-1 on post 12192, or the next free integer (990 or 991; free values above 960 are 961, 962, 964-986, 988, 990-998)."
+  },
+  "MS-CRAWL-0125": {
+    "lot_number": null,
+    "action": "reassign_new",
+    "confidence": "high",
+    "reason": "Russian face of the same house as MS-CRAWL-0026: .ru post 9571, published 2025-06-25, with identical wtf_price 225000, wtf_area 313, wtf_total_area 760 and photo set. A shared lot number across the two domains is normal in this dataset (36 such pairs), so this record is not itself a collision; it simply follows MS-CRAWL-0026 and must receive the same new number at the same time."
+  },
+  "MS-CRAWL-0043": {
+    "lot_number": 987,
+    "action": "keep",
+    "confidence": "high",
+    "reason": "Three-storey villa in Eretria-Kotroni, Greece, 300 sq m on 5000 sq m at EUR 950000, .com post 10982, published 2024-04-12 09:53:57 and never modified since. Oldest published, non-trashed holder of lot 987 by more than two years. Its photo family 987-1.jpg through 987-14.jpg was uploaded 2024-04-12 09:52 to 09:53 and is attached to post 10982. 987 also sits naturally beside the agency's other April 2024 issue, 999 on post 10922 (2024-04-06)."
+  },
+  "MS-CRAWL-0010": {
+    "lot_number": null,
+    "action": "reassign_new",
+    "confidence": "high",
+    "reason": "Apartment of 55 sq m in central Sandanski at EUR 130000, .com post 12221, published 2026-06-29, an entirely unrelated property to the Greek villa that holds 987. Its photo family 987-1.jpeg through 987-21.jpeg was uploaded 2024-05-08, less than a month after the villa's, and all 21 files are orphaned (post_parent=0), showing the apartment's original 2024 post was deleted and post 12221 is a 2026 re-listing that reattached the old files plus a new 987-main-1.jpg. The collision therefore originates on the apartment side, in May 2024. 987 is also far out of sequence for June 2026, when the agency was issuing 959 (2026-06-16) and 960 (2026-06-25). Options for the replacement: 987-1 following the 567-1 precedent, or a free integer such as 990 or 991."
+  },
+  "MS-CRAWL-0054": {
+    "lot_number": 432,
+    "action": "keep",
+    "confidence": "high",
+    "reason": "Fuzzy slug-prefix match CONFIRMED. Matched .com post 10916 is trashed, so WordPress truncated post_name to fit __trashed within the 200-byte cap; its _wp_desired_post_slug decodes to prodava-panoramen-dvustaen-apartame, byte-for-byte identical to the crawled slug. Titles are identical (Prodava panoramen dvustaen apartament v Sandanski), thumbnail 333-2.jpeg matches on both sides, all 15 gallery filenames 333-* are identical, and wtf_price 89000 equals the seed price."
+  },
+  "MS-CRAWL-0066": {
+    "lot_number": 893,
+    "action": "keep",
+    "confidence": "high",
+    "reason": "Fuzzy slug-prefix match CONFIRMED. Matched .com post 11521 is trashed; its _wp_desired_post_slug decodes to prodava-tristaen-apartament-v-ofrini, byte-for-byte identical to the crawled slug. Titles are identical (Prodava tristaen apartament v Paraliya Ofrinio, Gartsiya), thumbnail 893-1-2.jpg matches, and all 23 gallery filenames match including the property-specific plan-ofrinio.jpg. The seed price 139000 versus wtf_price 135000 is a later edit (post_modified 2026-08-06, a month after the crawl) and does not affect identity."
+  },
+  "MS-CRAWL-0077": {
+    "lot_number": 959,
+    "action": "keep",
+    "confidence": "high",
+    "reason": "Fuzzy slug-prefix match CONFIRMED. Matched .com post 12199 is trashed; its _wp_desired_post_slug decodes to svetal-yuzhen-apartament-do-parka-na-gr-s, byte-for-byte identical to the crawled slug. Titles are identical (Svetal yuzhen apartament do parka na gr. Sandanski), thumbnail 959-2.jpg matches, all 8 gallery filenames 959-* are identical, and wtf_price 62000 equals the seed price."
+  }
+}

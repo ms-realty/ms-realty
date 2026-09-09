@@ -14,9 +14,9 @@
     },
     "pending_review_sample": [
       {
-        "listing_id": "MS-CRAWL-0001",
-        "target_path": "/bg/imoti/MS-CRAWL-0001",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
+        "listing_id": "MS-00815",
+        "target_path": "/bg/imoti/MS-00815",
+        "editor_path": "/admin/listings/edit?listingId=MS-00815",
         "issues": [
           "missing_area"
         ],
@@ -31,9 +31,9 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0002",
-        "target_path": "/bg/imoti/MS-CRAWL-0002",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
+        "listing_id": "MS-00907",
+        "target_path": "/bg/imoti/MS-00907",
+        "editor_path": "/admin/listings/edit?listingId=MS-00907",
         "issues": [
           "missing_area",
           "thin_public_gallery"
@@ -49,9 +49,9 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0003",
-        "target_path": "/bg/imoti/MS-CRAWL-0003",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
+        "listing_id": "MS-00922",
+        "target_path": "/bg/imoti/MS-00922",
+        "editor_path": "/admin/listings/edit?listingId=MS-00922",
         "issues": [
           "missing_area"
         ],
@@ -66,9 +66,9 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0004",
-        "target_path": "/bg/imoti/MS-CRAWL-0004",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
+        "listing_id": "MS-00905",
+        "target_path": "/bg/imoti/MS-00905",
+        "editor_path": "/admin/listings/edit?listingId=MS-00905",
         "issues": [
           "missing_area"
         ],
@@ -83,9 +83,9 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0005",
-        "target_path": "/bg/imoti/MS-CRAWL-0005",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
+        "listing_id": "MS-00899",
+        "target_path": "/bg/imoti/MS-00899",
+        "editor_path": "/admin/listings/edit?listingId=MS-00899",
         "issues": [
           "missing_area"
         ],
@@ -100,9 +100,9 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0006",
-        "target_path": "/bg/imoti/MS-CRAWL-0006",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
+        "listing_id": "MS-00443",
+        "target_path": "/bg/imoti/MS-00443",
+        "editor_path": "/admin/listings/edit?listingId=MS-00443",
         "issues": [
           "missing_area",
           "thin_public_gallery"
@@ -115,9 +115,9 @@
         "public_gallery_sample": []
       },
       {
-        "listing_id": "MS-CRAWL-0007",
-        "target_path": "/bg/imoti/MS-CRAWL-0007",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
+        "listing_id": "MS-00911",
+        "target_path": "/bg/imoti/MS-00911",
+        "editor_path": "/admin/listings/edit?listingId=MS-00911",
         "issues": [
           "missing_area"
         ],
@@ -132,26 +132,26 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0008",
-        "target_path": "/bg/imoti/MS-CRAWL-0008",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
+        "listing_id": "MS-00662",
+        "target_path": "/bg/imoti/MS-00662",
+        "editor_path": "/admin/listings/edit?listingId=MS-00662",
         "issues": [
           "missing_area"
         ],
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 17,
+        "public_gallery_assets": 30,
         "public_gallery_sample": [
           "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-          "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-          "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/07/662.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
+          "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2018/07/662-800x600.jpg [alt: Посуточная аренда в центре города Сандански]",
+          "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0009",
-        "target_path": "/bg/imoti/MS-CRAWL-0009",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
+        "listing_id": "MS-00957",
+        "target_path": "/bg/imoti/MS-00957",
+        "editor_path": "/admin/listings/edit?listingId=MS-00957",
         "issues": [
           "missing_area"
         ],
@@ -166,9 +166,9 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0010",
-        "target_path": "/bg/imoti/MS-CRAWL-0010",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
+        "listing_id": "MS-01000",
+        "target_path": "/bg/imoti/MS-01000",
+        "editor_path": "/admin/listings/edit?listingId=MS-01000",
         "issues": [
           "missing_area"
         ],
@@ -199,7 +199,7 @@
       "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
-      "thin_public_gallery": 18,
+      "thin_public_gallery": 17,
       "tour_review_pending": 0
     }
   },

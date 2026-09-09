@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { crossOriginWriteRejection } from "../lib/request-guard.mjs";
+import { publicWriteRejection, sameOriginWriteRejection, crossOriginWriteRejection } from "../lib/request-guard.mjs";
 
 const HOST = { host: "review.ms-realty.example" };
 
@@ -88,4 +88,23 @@ test("Headers objects work, not just plain header maps", () => {
 
 test("a malformed Origin is rejected rather than parsed loosely", () => {
   assert.equal(crossOriginWriteRejection("POST", { ...HOST, origin: "not a url" }), "invalid_origin");
+});
+
+test("a public write forwarded by the Worker is same-origin for the public host or the internal origin it dialled", () => {
+  const headers = new Headers({
+    host: "origin.internal:3000",
+    "x-forwarded-host": "makler-realty.com",
+    "x-forwarded-proto": "https",
+    origin: "https://origin.internal:3000",
+  });
+  const publicUrl = "https://makler-realty.com/api/leads";
+  const internalUrl = "http://origin.internal:3000/api/leads";
+  assert.equal(sameOriginWriteRejection("POST", headers, { requestUrl: publicUrl }), "cross_origin_request", "the old check refused the rewritten Origin");
+  assert.equal(publicWriteRejection("POST", headers, { requestUrls: [publicUrl, internalUrl] }), null);
+  const browser = new Headers({ ...Object.fromEntries(headers), origin: "https://makler-realty.com" });
+  assert.equal(publicWriteRejection("POST", browser, { requestUrls: [publicUrl, internalUrl] }), null);
+  const foreign = new Headers({ ...Object.fromEntries(headers), origin: "https://evil.example" });
+  assert.equal(publicWriteRejection("POST", foreign, { requestUrls: [publicUrl, internalUrl], env: {} }), "cross_origin_request");
+  assert.equal(publicWriteRejection("POST", new Headers({ host: "a" }), { requestUrls: [publicUrl] }), "missing_origin");
+  assert.equal(publicWriteRejection("GET", foreign, { requestUrls: [publicUrl] }), null);
 });

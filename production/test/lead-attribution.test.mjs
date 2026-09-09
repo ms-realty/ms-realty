@@ -48,7 +48,7 @@ test("a channel is one of a closed list, defaulted from the source contract", ()
 test("a first-touch path keeps the route and drops everything that could identify a visitor", () => {
   // A query string is where campaign and visitor ids live, so it never lands.
   assert.equal(normalizeFirstTouchPath("/en/properties?utm_source=x&visitor=42"), "/en/properties");
-  assert.equal(normalizeFirstTouchPath("/en/properties/MS-CRAWL-0001#gallery"), "/en/properties/MS-CRAWL-0001");
+  assert.equal(normalizeFirstTouchPath("/en/properties/MS-00815#gallery"), "/en/properties/MS-00815");
   assert.equal(normalizeFirstTouchPath("/bg/"), "/bg");
   assert.equal(normalizeFirstTouchPath("/"), "/");
   assert.equal(normalizeFirstTouchPath(""), null);
@@ -220,7 +220,8 @@ test("the admin lead payload carries Hermes availability, and the button renders
   // The composer already knows on first paint, before any draft request.
   assert.match(unavailable, /data-hermes-state="unavailable"/);
   assert.match(unavailable, /data-hermes-reason="not_configured"/);
-  assert.match(unavailable, /Hermes is not configured in this environment\. Missing: HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY\./);
+  assert.match(unavailable, /Hermes is not configured in this environment\.</);
+  assert.doesNotMatch(unavailable, /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/);
 
   const ready = renderReactAdminBody({ ...payload.body, hermes: { available: true, reason_key: "available", reason: "ok", missing: [] } });
   assert.doesNotMatch(ready, /data-hermes-state="unavailable"/);

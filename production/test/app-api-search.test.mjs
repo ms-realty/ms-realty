@@ -7,10 +7,10 @@ import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapte
 import { approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const hit = {
-  id: "MS-CRAWL-0001:bg",
-  source_listing_id: "MS-CRAWL-0001",
+  id: "MS-00815:bg",
+  source_listing_id: "MS-00815",
   locale: "bg",
-  locale_path: "/bg/imoti/MS-CRAWL-0001",
+  locale_path: "/bg/imoti/MS-00815",
   title: "Reviewed Sandanski listing",
 };
 
@@ -87,7 +87,7 @@ test("public API search uses Typesense results and keeps local locale and filter
     assert.equal(body.search.backend.mode, "primary");
     assert.deepEqual(body.search.backend.locale_codes, ["en", "bg"]);
     assert.equal(body.search.backend.indexed_matches, 1);
-    assert.deepEqual(body.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
+    assert.deepEqual(body.cards.map((card) => card.id), ["MS-00815"]);
     assert.equal(calls.length, 1);
     assert.equal(new URL(`http://search.test${calls[0].url}`).searchParams.get("filter_by").includes("locale:=`en` || locale:=`bg`"), true);
     assert.equal(JSON.stringify(body).includes("typesense-test"), false);
@@ -107,7 +107,7 @@ test("public API keeps engine-ranked typo hits without a second local text filte
     assert.equal(response.status, 200);
     assert.deepEqual(body.search.engines, ["typesense"]);
     assert.equal(body.search.query, "Sndanski");
-    assert.deepEqual(body.cards.map((card) => card.id), ["MS-CRAWL-0001"]);
+    assert.deepEqual(body.cards.map((card) => card.id), ["MS-00815"]);
   });
 });
 

@@ -468,6 +468,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Смени файла",
     replaceMediaFile: "Избери нов файл",
     mediaReplacementHint: "Текущият файл остава активен, докато човек не одобри замяната.",
+    mediaAssetPosition: "{kind} {index} от {total}",
+    mediaReviewerSignedIn: "Влезлият оператор",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourProvider: "Визуализатор на обиколката",
@@ -550,6 +552,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Изтегли CSV по източници",
     privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
     readOnlyAccess: "Достъп само за преглед за тази роля.",
+    gaps: { location_missing: "Липсва локация", area_missing: "Липсва площ", price_missing: "Липсва цена", description_missing: "Липсва описание", no_public_photos: "Няма публични снимки", search_markup_missing: "Липсва разметка за търсачки" },
+    noGaps: "Нищо не липсва",
+    noThumbnail: "Още няма снимка",
+    applyFilters: "Приложи",
+    publishingStatus: "Преди публикуване",
+    nothingBlocksPublishing: "Нищо не пречи на публикуването.",
+    blockerMissing: "Липсва: {field}",
+    availabilityNotVerified: "Наличността не е проверена",
+    searchMarkup: "Разметка за търсачки",
+    staleTranslationsLine: "{count} остарели превода",
+    reviewQueues: "Опашки за преглед",
     viewingFollowUpReadOnly: "Записването е скрито, докато надеждната история на действията не бъде включена.",
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
@@ -573,7 +586,7 @@ const ADMIN_UI_COPY = {
       qualify: "Квалифициране", book_viewing: "Насрочване на оглед", complete_viewing: "Провеждане на оглед", record_offer: "Записване на оферта", start_due_diligence: "Начало на проверка", sign_contract: "Подписване на договор", record_application: "Записване на кандидатура", sign_lease: "Подписване на наем", close_deal: "Затваряне на сделка",
       cash: "В брой", mortgage: "Ипотека", preapproved: "Предварително одобрено", not_applicable: "Не е приложимо",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
-      unverified: "Непроверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
+      unverified: "Още не е проверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
       public_enabled: "Публично включен", indexable: "Индексируем", fallback_locale: "Резервен език", object_id: "Идентификатор на обект", public_indexable: "Публично индексируем", can_mark_indexable: "Може да се маркира за индекс", lead_id: "Номер на запитване", listing_id: "Референция на обява", approved_imported_photo: "Одобрена снимка от източника", reviewed_private: "Прегледана, непублична", needs_media_review: "Чака преглед на медията", instant: "Веднага", daily: "Ежедневно", weekly: "Седмично", broker_international: "Международен брокер",
@@ -1257,6 +1270,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Заменить файл",
     replaceMediaFile: "Выберите новый файл",
     mediaReplacementHint: "Текущий файл останется активным, пока человек не одобрит замену.",
+    mediaAssetPosition: "{kind} {index} из {total}",
+    mediaReviewerSignedIn: "Текущий оператор",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourProvider: "Просмотр тура",
@@ -1339,6 +1354,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Скачать CSV по источникам",
     privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
     readOnlyAccess: "Для этой роли доступен только просмотр.",
+    gaps: { location_missing: "Нет локации", area_missing: "Нет площади", price_missing: "Нет цены", description_missing: "Нет описания", no_public_photos: "Нет публичных фото", search_markup_missing: "Нет разметки для поисковиков" },
+    noGaps: "Ничего не пропущено",
+    noThumbnail: "Фото пока нет",
+    applyFilters: "Применить",
+    publishingStatus: "Перед публикацией",
+    nothingBlocksPublishing: "Публикации ничего не мешает.",
+    blockerMissing: "Не указано: {field}",
+    availabilityNotVerified: "Доступность не проверена",
+    searchMarkup: "Разметка для поисковиков",
+    staleTranslationsLine: "{count} устаревших переводов",
+    reviewQueues: "Очереди на проверку",
     viewingFollowUpReadOnly: "Запись скрыта, пока не включено надежное хранение истории действий.",
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
@@ -1362,7 +1388,7 @@ const ADMIN_UI_COPY = {
       qualify: "Квалифицировать", book_viewing: "Назначить просмотр", complete_viewing: "Провести просмотр", record_offer: "Записать предложение", start_due_diligence: "Начать проверку", sign_contract: "Подписать договор", record_application: "Записать заявку", sign_lease: "Подписать аренду", close_deal: "Закрыть сделку",
       cash: "Наличные", mortgage: "Ипотека", preapproved: "Предварительно одобрено", not_applicable: "Не применимо",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
-      unverified: "Не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
+      unverified: "Ещё не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
       public_enabled: "Публично включено", indexable: "Индексируемый", fallback_locale: "Резервный язык", object_id: "Идентификатор объекта", public_indexable: "Публично индексируемый", can_mark_indexable: "Можно отметить для индекса", lead_id: "Номер заявки", listing_id: "Ссылка объекта", approved_imported_photo: "Одобренное фото из источника", reviewed_private: "Проверено, непубличное", needs_media_review: "Ожидает проверки медиа", instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно", broker_international: "Международный брокер",
@@ -2046,6 +2072,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Replace file",
     replaceMediaFile: "Choose replacement file",
     mediaReplacementHint: "The current file stays live until a person approves the replacement.",
+    mediaAssetPosition: "{kind} {index} of {total}",
+    mediaReviewerSignedIn: "Signed-in operator",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourProvider: "Tour viewer",
@@ -2128,6 +2156,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Download source CSV",
     privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
     readOnlyAccess: "This role has read-only access.",
+    gaps: { location_missing: "Location missing", area_missing: "Area missing", price_missing: "Price missing", description_missing: "No description", no_public_photos: "No public photos", search_markup_missing: "Search markup missing" },
+    noGaps: "Nothing missing",
+    noThumbnail: "No photo yet",
+    applyFilters: "Apply",
+    publishingStatus: "Before publishing",
+    nothingBlocksPublishing: "Nothing blocks publishing.",
+    blockerMissing: "{field} missing",
+    availabilityNotVerified: "Availability not verified",
+    searchMarkup: "Search engine markup",
+    staleTranslationsLine: "{count} translations out of date",
+    reviewQueues: "Review queues",
     viewingFollowUpReadOnly: "Recording is hidden until durable action history is enabled.",
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
@@ -2151,7 +2190,7 @@ const ADMIN_UI_COPY = {
       qualify: "Qualify", book_viewing: "Book viewing", complete_viewing: "Complete viewing", record_offer: "Record offer", start_due_diligence: "Start due diligence", sign_contract: "Sign contract", record_application: "Record application", sign_lease: "Sign lease", close_deal: "Close deal",
       cash: "Cash", mortgage: "Mortgage", preapproved: "Pre-approved", not_applicable: "Not applicable",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
-      unverified: "Unverified", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
+      unverified: "Not yet checked", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
       public_enabled: "Publicly enabled", indexable: "Indexable", fallback_locale: "Fallback locale", object_id: "Object ID", public_indexable: "Publicly indexable", can_mark_indexable: "Can mark indexable", lead_id: "Enquiry ID", listing_id: "Listing reference", approved_imported_photo: "Approved imported photo", reviewed_private: "Reviewed, private", needs_media_review: "Awaiting media review", instant: "As soon as possible", daily: "Daily", weekly: "Weekly", broker_international: "International broker",
@@ -2509,6 +2548,23 @@ function fieldText(copy, field) {
   return copy.fields[field] || String(field || "").replaceAll("_", " ");
 }
 
+// A quality issue about a missing field reads "{field} missing"; the media
+// and tour gates already have a sentence of their own.
+function listingBlockerText(ui, issue) {
+  const missingField = ["missing_price", "missing_area", "missing_bedrooms", "missing_location", "missing_description"].includes(issue);
+  const text = listingQualityIssueText(ui, issue);
+  return missingField ? String(ui.blockerMissing || "{field} missing").replace("{field}", text) : text;
+}
+
+function listingPublishBlockers(ui, { workflow = {}, qualityReview = null, schemaPresent = false, staleCount = 0 } = {}) {
+  const blockers = (qualityReview?.issues || []).map((issue) => ({ key: issue, text: listingBlockerText(ui, issue) }));
+  if (!workflow.availability_verified_at) blockers.push({ key: "availability_unverified", text: ui.availabilityNotVerified });
+  if (!workflow.publish_approved) blockers.push({ key: "publish_not_approved", text: `${ui.publishApproval}: ${ui.notApprovedForPublishing}` });
+  if (!schemaPresent) blockers.push({ key: "search_markup_missing", text: ui.gaps?.search_markup_missing || "Search markup missing" });
+  if (staleCount) blockers.push({ key: "stale_translations", text: String(ui.staleTranslationsLine || "{count} translations out of date").replace("{count}", String(staleCount)) });
+  return blockers;
+}
+
 function listingQualityIssueText(ui, issue) {
   const fieldByIssue = {
     missing_price: "price_eur",
@@ -2529,6 +2585,39 @@ function listingPriceText(ui, row) {
   if (row.price_on_request) return statusText(ui, "price_on_request");
   if (row.price_eur === null || row.price_eur === undefined || row.price_eur === "") return ui.notSet;
   return `€${Number(row.price_eur).toLocaleString("en")}`;
+}
+
+// The list names a listing the way a broker would on the phone: what it is,
+// where it is, what it costs. The crawled headline and the reference stay on
+// the card as captions; neither is the first thing the eye lands on.
+function listingShortTitle(ui, row) {
+  const parts = [row.property_family ? statusText(ui, row.property_family) : "", row.location || ""].filter(Boolean);
+  if (!parts.length) {
+    const fallback = String(row.title || "").trim();
+    parts.push(fallback && !/^MS-/iu.test(fallback) ? fallback : ui.listing);
+  }
+  if (row.price_on_request || (row.price_eur !== null && row.price_eur !== undefined && row.price_eur !== "")) parts.push(listingPriceText(ui, row));
+  return parts.join(" · ");
+}
+
+// The crawled headline is worth a caption only when the short title does not
+// already say the same thing.
+function listingSourceTitle(row) {
+  const title = String(row.title || "").trim();
+  return title && !/^MS-/iu.test(title) ? title : "";
+}
+
+function listingGapLine(ui, row) {
+  const gaps = Array.isArray(row.gaps) ? row.gaps : [];
+  if (!gaps.length) return ui.noGaps;
+  return gaps.map((gap) => ui.gaps?.[gap] || gap.replaceAll("_", " ")).join(" · ");
+}
+
+function listingThumbnail(ui, row) {
+  if (row.thumbnail_url) {
+    return h("img", { className: "adm-listing-thumb", src: row.thumbnail_url, alt: "", width: 96, height: 72, loading: "lazy", decoding: "async" });
+  }
+  return h("span", { className: "adm-listing-thumb adm-listing-thumb--empty", role: "img", "aria-label": ui.noThumbnail }, h(Icon, { name: "camera", size: 18 }));
 }
 
 function listingLocaleText(row) {
@@ -2743,11 +2832,11 @@ function SummaryStrip({ cards, className = "", ...attrs }) {
   );
 }
 
-function PageHeader({ title, subtitle, children }) {
+function PageHeader({ title, subtitle, meta, children }) {
   return h(
     "div",
     { className: "crm-ph" },
-    h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null),
+    h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null, meta ? h("small", { className: "crm-ph__meta" }, meta) : null),
     children ? h("div", { className: "crm-ph__actions" }, children) : null,
   );
 }
@@ -3411,11 +3500,11 @@ function adminNavigationGroups(page) {
     if (copyKey) return label(copy, copyKey.key, copyKey.fallback);
     return screenLabel(item.group, item.id, item.id);
   };
+  // Badges only on Leads and Viewings: two counts a broker acts on today. A
+  // third badge competes with them rather than adding information.
   const routeBadge = (item) => {
     if (item.id === "lead_inbox" && page.kind === "admin_lead_inbox") return page.summary?.leads;
-    if (item.id === "realty_cases") return page.realtyCaseQueue?.summary?.open;
-    if (item.id === "lead_pipeline") return page.leadPipelineQueue?.summary?.open;
-    if (item.id === "requests") return page.publicRequestQueue?.summary?.open;
+    if (item.id === "viewings") return page.summary?.viewingFollowUpsOpen || undefined;
     return undefined;
   };
   const decorateRoute = (item, destinationId = null) => ({
@@ -3440,46 +3529,58 @@ function adminNavigationGroups(page) {
       items,
     };
   };
-  // Paper groups routes by the work people do. The existing registry still
-  // supplies labels, paths and capabilities, so reorganising the rail cannot
-  // grant access or silently drop a secondary destination.
-  const groupLabels = {
-    bg: ["Работа", "Записи", "Управление"],
-    ru: ["Работа", "Записи", "Управление"],
-    en: ["Work", "Records", "Management"],
-  }[page.workspace?.locale] || ["Work", "Records", "Management"];
+  // Eight destinations a broker works from, then one collapsed "Advanced"
+  // disclosure for the owner's operating and setup screens. The registry still
+  // supplies paths and capabilities, so reorganising the rail cannot grant
+  // access; every route stays reachable by URL, and Pipeline and Requests are
+  // linked from the Leads screen rather than listed a second time here.
+  const locale = ["bg", "ru", "en"].includes(page.workspace?.locale) ? page.workspace.locale : "en";
+  const advancedLabel = { bg: "Разширени", ru: "Дополнительно", en: "Advanced" }[locale];
   const shortLabels = {
-    bg: { lead_inbox: "Запитвания", lead_pipeline: "Сделки", viewings: "Огледи", requests: "Заявки", contacts: "Контакти", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
-    ru: { lead_inbox: "Обращения", lead_pipeline: "Сделки", viewings: "Просмотры", requests: "Заявки", contacts: "Контакты", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
-    en: { lead_inbox: "Lead inbox", lead_pipeline: "Pipeline", viewings: "Viewings", requests: "Requests", contacts: "Contacts", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
-  }[page.workspace?.locale] || {};
+    bg: { viewings: "Огледи", contacts: "Контакти", realty_cases: "Сделки", approved_content: "Съдържание", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
+    ru: { viewings: "Просмотры", contacts: "Контакты", realty_cases: "Сделки", approved_content: "Контент", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
+    en: { viewings: "Viewings", contacts: "Contacts", realty_cases: "Deals", approved_content: "Content", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
+  }[locale];
+  // The Leads item stays lit on the two screens it links to, so an operator on
+  // Pipeline or Requests still sees where they are in the rail.
+  const extraKinds = { lead_inbox: ["admin_lead_pipeline", "admin_requests"] };
   const visible = destinations.map(visibleDestination).filter(Boolean);
   const routes = new Map(visible.flatMap((destination) =>
     [destination.route, ...destination.children].map((route) => [route.id, {
-      ...destination, id: route.id, route: { ...route, label: shortLabels[route.id] || route.label }, children: [],
-      primary: route.id === destination.route.id,
+      ...destination,
+      id: route.id,
+      route: { ...route, label: shortLabels[route.id] || route.label, kinds: [route.kind, ...(extraKinds[route.id] || [])] },
+      children: [],
     }])));
-  const groups = [
-    { id: "work", label: groupLabels[0], ids: ["today", "lead_inbox", "lead_pipeline", "viewings", "tasks", "requests"] },
-    { id: "records", label: groupLabels[1], ids: ["contacts", "consents", "realty_cases", "documents", "document_records", "listing_manager", "media_library", "approved_content", "translation_queue"] },
-    { id: "management", label: groupLabels[2], ids: ["hermes", "reports", "connections", "settings", "team", "locale_rollout", "migration_review", "activity"] },
-  ];
-  return groups
-    .map((group) => ({ ...group, destinations: group.ids.map((id) => routes.get(id)).filter(Boolean) }))
-    .filter((group) => group.destinations.length);
+  // Content is publishing work: it needs the editor's or owner's write
+  // capability, not the read capability every broker holds.
+  if (!pageCan(page, "content:write")) routes.delete("approved_content");
+  const primaryIds = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
+  const advancedIds = ["migration_review", "translation_queue", "media_library", "locale_rollout", "document_records", "hermes", "connections", "reports", "activity", "tasks", "consents", "documents", "team"];
+  const pick = (ids, primary) => ids.map((id) => routes.get(id)).filter(Boolean).map((destination) => ({ ...destination, primary }));
+  const groups = [{ id: "primary", label: null, destinations: pick(primaryIds, true) }];
+  if (pageCan(page, "administration:read")) {
+    groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });
+  }
+  return groups.filter((group) => group.destinations.length);
+}
+
+function navigationCurrent(item, page) {
+  return item.kinds ? item.kinds.includes(page.kind) : page.kind === item.kind;
 }
 
 function navigationLink(item, page, { mobile = false, primary = false, key } = {}) {
+  const current = navigationCurrent(item, page);
   const className = mobile
-    ? `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`
-    : `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`;
+    ? `adm-mobile-nav__link${current ? " adm-mobile-nav__link--on" : ""}`
+    : `crm-nav${current ? " crm-nav--on" : ""}`;
   return h(
     "a",
     {
       key,
       className,
       href: adminHref(item.path, page),
-      "aria-current": page.kind === item.kind ? "page" : undefined,
+      "aria-current": current ? "page" : undefined,
       "data-admin-nav-route": item.id,
       "data-admin-nav-primary": primary && !mobile ? "true" : undefined,
       "data-admin-nav-primary-mobile": primary && mobile ? "true" : undefined,
@@ -3490,12 +3591,11 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
   );
 }
 
-// The rail is flat. Every destination the operator can reach is one link at
-// one depth, because the previous shape hid ten of nineteen routes behind three
-// "More in ..." disclosures -- Pipeline, Viewings, Contacts, Requests and
-// Reports were all two clicks and a guess away from a screen that exists to
-// lead with the next action. Grouping still carries the meaning; the disclosure
-// only carried the hiding.
+// Eight primary destinations at one depth, then one "Advanced" disclosure for
+// the owner's setup and operating screens. The earlier flat rail of 23 put the
+// migration console and the Hermes runtime next to Viewings; the earlier
+// grouped rail hid Viewings behind "More in ...". Brokers now see only the
+// screens they work from, and nothing a broker needs sits behind the disclosure.
 function navigationDestination(destination, page, { mobile = false } = {}) {
   return h(
     "div",
@@ -3507,11 +3607,65 @@ function navigationDestination(destination, page, { mobile = false } = {}) {
 }
 
 function navigationGroup(group, page, { mobile = false } = {}) {
+  const prefix = mobile ? "mobile-" : "";
+  const links = group.destinations.map((destination) => navigationDestination(destination, page, { mobile }));
+  if (group.collapsible) {
+    // Collapsed by default; open when the current screen lives inside it, so
+    // the lit destination is never hidden from the operator standing on it.
+    const holdsCurrent = group.destinations.some((destination) => navigationCurrent(destination.route, page));
+    return h(
+      "details",
+      {
+        key: `${prefix}group-${group.id}`,
+        className: mobile ? "adm-mobile-nav__group-wrap adm-mobile-nav__advanced" : "crm-sb__group-wrap crm-sb__advanced",
+        "data-admin-nav-group": group.id,
+        "data-admin-nav-disclosure": "true",
+        open: holdsCurrent ? true : undefined,
+      },
+      h(
+        "summary",
+        { className: mobile ? "adm-mobile-nav__group adm-mobile-nav__group--summary" : "crm-sb__group crm-sb__group--summary" },
+        h(Icon, { name: "chevron-right", size: 16 }),
+        h("span", null, group.label),
+      ),
+      ...links,
+    );
+  }
   return h(
     "section",
-    { key: `${mobile ? "mobile-" : ""}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
-    h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label),
-    ...group.destinations.map((destination) => navigationDestination(destination, page, { mobile })),
+    { key: `${prefix}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
+    group.label ? h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label) : null,
+    ...links,
+  );
+}
+
+// The workspace language is a per-person preference, so it lives with the
+// profile at the foot of the rail (and in the phone drawer), not in the header
+// of every screen. Two copies, like the theme switch: the stylesheet shows one.
+function LocaleSwitch({ page, variant }) {
+  const copy = adminCopy(page);
+  const locales = page.workspace?.interface_locales || [];
+  if (!locales.length) return null;
+  return h(
+    "nav",
+    {
+      className: `crm-seg adm-locales adm-locales--${variant}`,
+      "aria-label": label(copy, "language", "Language"),
+      "data-admin-locales": variant,
+    },
+    ...locales.map((code) =>
+      h(
+        "a",
+        {
+          key: code,
+          href: adminLocaleHref(page, code),
+          "data-on": code === page.workspace?.locale ? "1" : "0",
+          "aria-current": code === page.workspace?.locale ? "page" : undefined,
+          lang: code,
+        },
+        code.toUpperCase(),
+      ),
+    ),
   );
 }
 
@@ -3535,14 +3689,28 @@ function Sidebar({ page }) {
       { className: "crm-sb__nav", "aria-label": page.workspace?.title || "Admin" },
       ...visibleGroups.map((group) => navigationGroup(group, page)),
     ),
-    h("div", { className: "crm-sb__me" }, h(OwnerIdentity, { page })),
+    h(
+      "div",
+      { className: "crm-sb__me" },
+      h(OwnerIdentity, { page }),
+      // Language and palette are the operator's own preferences, so they sit
+      // with the profile rather than in the header of every screen.
+      h(
+        "div",
+        { className: "crm-sb__prefs", "data-admin-preferences": "rail" },
+        h(LocaleSwitch, { page, variant: "rail" }),
+        h(ThemeSwitch, { ui: workbenchCopy(page), variant: "top" }),
+      ),
+    ),
   );
 }
 
 // The workbench half of the palette control: follow the operating system,
-// light, or dark, with system the default and always returnable. Two copies,
-// because the top bar has no room for a second group on a phone and the
-// navigation drawer does; the stylesheet shows exactly one of them.
+// light, or dark, with system the default and always returnable. Two copies:
+// one in the rail's profile block on desktop, one in the navigation drawer on
+// a phone; the stylesheet shows exactly one of them. The desktop copy keeps
+// its "admin-top" switch id from the days it sat in the header, so the browser
+// checks that address it by that id keep finding it.
 const ADMIN_THEME_OPTIONS = Object.freeze([
   { value: "system", icon: "monitor" },
   { value: "light", icon: "sun" },
@@ -3554,7 +3722,7 @@ function ThemeSwitch({ ui, variant }) {
   return h(
     "div",
     {
-      className: variant === "top" ? "crm-seg adm-theme adm-theme--top" : "adm-theme adm-theme--drawer",
+      className: variant === "top" ? "crm-seg adm-theme adm-theme--rail" : "adm-theme adm-theme--drawer",
       role: "group",
       "aria-label": ui.themeLabel,
       "data-theme-switch": `admin-${variant}`,
@@ -3626,15 +3794,20 @@ function MobileNavigation({ page }) {
         ...visibleGroups.map((group) => navigationGroup(group, page, { mobile: true })),
       ),
       h(OwnerIdentity, { page, mobile: true }),
-      h(ThemeSwitch, { ui, variant: "drawer" }),
+      h(
+        "div",
+        { className: "adm-mobile-nav__prefs", "data-admin-preferences": "drawer" },
+        h(LocaleSwitch, { page, variant: "drawer" }),
+        h(ThemeSwitch, { ui, variant: "drawer" }),
+      ),
     ),
   );
 }
 
-function Topbar({ page, title, titleAsHeading = false }) {
-  const copy = adminCopy(page);
-  const ui = workbenchCopy(page);
-  const locales = page.workspace?.interface_locales || [];
+// Title, the phone menu, and at most one primary action. Language and theme
+// controls used to ride here on every screen; they belong to the operator, not
+// to the page, so they moved to the profile block in the rail and the drawer.
+function Topbar({ page, title, titleAsHeading = false, action = null }) {
   return h(
     "header",
     { className: "crm-top" },
@@ -3645,27 +3818,11 @@ function Topbar({ page, title, titleAsHeading = false }) {
       h("div", { className: "crm-top__sub" }, title),
     ),
     h(MobileNavigation, { page }),
-    h(
-      "nav",
-      { className: "crm-seg adm-locales", "aria-label": label(copy, "language", "Language") },
-      ...locales.map((code) =>
-        h(
-          "a",
-          {
-            key: code,
-            href: adminLocaleHref(page, code),
-            "data-on": code === page.workspace?.locale ? "1" : "0",
-            "aria-current": code === page.workspace?.locale ? "page" : undefined,
-          },
-          code.toUpperCase(),
-        ),
-      ),
-    ),
-    h(ThemeSwitch, { ui, variant: "top" }),
+    action ? h("div", { className: "crm-top__action", "data-admin-primary-action": "true" }, action) : null,
   );
 }
 
-function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }) {
+function adminShell(page, { title, titleAsHeading = false, action = null, mainAttrs, children }) {
   const ui = workbenchCopy(page);
   return [
     h("a", { key: "skip", className: "skip-link", href: "#main" }, ui.skipToContent),
@@ -3676,7 +3833,7 @@ function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }
       h(
         "div",
         { className: "crm-main" },
-        h(Topbar, { page, title, titleAsHeading }),
+        h(Topbar, { page, title, titleAsHeading, action }),
         h("main", { id: "main", tabIndex: -1, className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
       ),
     ),
@@ -3697,8 +3854,39 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
   const na = workbenchCopy(page).workspaceSettings.nextActions;
   // The selection is the task queue's; Today only puts words on it. Reading
   // the queues here again is exactly how the two screens would drift.
-  const decorate = (task) => {
+  return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map((task) => describeSourceTask(task, { page, copy, ui, na, inboxHref }));
+}
+
+// Words for a derived task: what it is about and where it stands, from the
+// source row it was derived from. Today and the task queue share this so a
+// lead never shows up as its ledger id on one screen and as a person on the
+// other.
+// The person behind a queue row, in the words a broker recognises: the
+// contact name when one is on file, otherwise the enquiry type. Channel,
+// language and how long they have waited follow as a second line. Ids never
+// reach these labels; the ledger keeps them.
+function leadForRow(page, leadId) {
+  return leadId ? (page.leads || []).find((lead) => lead.lead_id === leadId) || null : null;
+}
+
+function personLabel(lead, ui, fallback) {
+  return lead ? leadTitle(lead, ui) : fallback;
+}
+
+function personMeta(lead, ui, copy, now) {
+  if (!lead) return [];
+  const age = formatRelativeAge(lead.received_at, ui, now);
+  return [
+    lead.contact_preference ? valueText(ui, lead.contact_preference) : null,
+    lead.original_language ? String(lead.original_language).toUpperCase() : null,
+    age ? label(copy, "waitingFor", "waiting {age}").replace("{age}", age) : null,
+  ].filter(Boolean);
+}
+
+function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
     const row = task.source_row || {};
+    const source = task.source || {};
+    const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
     const base = {
       key: task.task_id,
       kind: task.kind,
@@ -3709,12 +3897,12 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       reference: task.subject_ref,
     };
     if (task.kind === "integrity") {
-      const gap = task.source.tracking_gap;
+      const gap = source.tracking_gap;
       return {
         ...base,
         title: na.trackingTitle,
         context:
-          task.source.tracking_status === "unavailable"
+          source.tracking_status === "unavailable"
             ? na.trackingUnavailable
             : (gap > 0 ? na.trackingMissing : na.trackingOrphaned).replace("{count}", String(Math.abs(gap))),
         href: `${adminHref("/admin/reports", page)}#website-funnel`,
@@ -3722,7 +3910,7 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       };
     }
     if (task.kind === "lead") {
-      const { sla_status: slaStatus, delivery_status: deliveryStatus } = task.source;
+      const { sla_status: slaStatus, delivery_status: deliveryStatus } = source;
       const action =
         deliveryStatus === "failed"
           ? na.actions.requeue
@@ -3734,26 +3922,36 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
       return {
         ...base,
         title: leadTitle(row, ui),
-        context: [row.listing_reference, row.property?.location, statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus)].filter(Boolean).join(" · "),
+        context: [
+          row.listing_reference,
+          row.property?.location,
+          ...personMeta(row, ui, copy, now),
+          statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus),
+        ]
+          .filter(Boolean)
+          .join(" · "),
         href: `${inboxHref}#lead-${encodeURIComponent(row.lead_id)}`,
         action,
       };
     }
     if (task.kind === "viewing") {
       const kindLabel = row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up");
+      const lead = leadForRow(page, row.lead_id);
       return {
         ...base,
-        title: row.listing_reference || kindLabel,
-        context: `${kindLabel} · ${statusText(ui, row.viewing_status)}`,
+        title: [personLabel(lead, ui, kindLabel), row.listing_reference].filter(Boolean).join(" · "),
+        context: [kindLabel, lead?.property?.location, ...personMeta(lead, ui, copy, now), statusText(ui, row.viewing_status)].filter(Boolean).join(" · "),
         href: adminHref("/admin/viewings", page),
         action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
       };
     }
     if (task.kind === "seller") {
+      const lead = leadForRow(page, row.lead_id);
+      const location = row.property?.location || lead?.property?.location;
       return {
         ...base,
-        title: row.property?.location || na.actions.sellerStep,
-        context: statusText(ui, row.stage),
+        title: [personLabel(lead, ui, na.kinds.seller), location].filter(Boolean).join(" · "),
+        context: [...personMeta(lead, ui, copy, now), statusText(ui, row.stage)].filter(Boolean).join(" · "),
         href: adminHref("/admin/viewings", page),
         action: na.actions.sellerStep,
       };
@@ -3779,28 +3977,27 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
         action: na.actions.outcome,
       };
     }
+    const lead = leadForRow(page, row.lead_id);
     return {
       ...base,
-      title: `${statusText(ui, row.lead_type)} · ${statusText(ui, row.stage)}`,
-      context: row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      title: [personLabel(lead, ui, statusText(ui, row.lead_type)), row.listing_reference].filter(Boolean).join(" · "),
+      context: [
+        lead ? statusText(ui, row.lead_type) : null,
+        lead?.property?.location,
+        ...personMeta(lead, ui, copy, now),
+        statusText(ui, row.stage),
+        row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      ]
+        .filter(Boolean)
+        .join(" · "),
       href: adminHref("/admin/pipeline", page),
       action: na.actions.opportunity,
     };
-  };
-  return sortTasks(deriveSourceTasks(page, { leadQueue: queue })).map(decorate);
 }
 
 function TodayBriefingPanel({ page, rows, total, detailId }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
-  const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
-  const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
-  const prompt = first
-    ? hermesCopy.todayPrompt
-        .replace("{action}", first.action)
-        .replace("{title}", first.title)
-        .replace("{context}", first.context)
-    : "";
   return h(
     Panel,
     {
@@ -3848,34 +4045,6 @@ function TodayBriefingPanel({ page, rows, total, detailId }) {
         )
       : null,
     h("p", { className: "adm-today-briefing__source" }, copy.source),
-    h(
-      "details",
-      { className: "adm-today-assist" },
-      h("summary", null, h(Icon, { name: "sparkles", size: 18 }), h("span", null, hermes.title)),
-      h(
-        "form",
-        { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
-        h("p", { className: "adm-hermes-entry__description" }, hermes.description),
-        h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
-        h("label", { htmlFor: `${detailId || "today"}-hermes-prompt` }, hermesCopy.commandLabel),
-        h("textarea", {
-          id: `${detailId || "today"}-hermes-prompt`,
-          name: "prompt",
-          rows: 2,
-          maxLength: 2000,
-          required: true,
-          defaultValue: prompt,
-          placeholder: hermesCopy.commandPlaceholder,
-          autoComplete: "off",
-        }),
-        h(
-          "button",
-          { className: "mk-btn mk-btn--secondary mk-btn--sm", type: "submit", "data-hermes-open": "today" },
-          h(Icon, { name: "sparkles", size: 18 }),
-          h("span", null, hermesCopy.preparePlan),
-        ),
-      ),
-    ),
   );
 }
 
@@ -4082,7 +4251,6 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
         "div",
         { className: "adm-rail-actions" },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/leads", page) }, h(Icon, { name: "inbox", size: 16 }), label(copy, "viewLeadInbox", "Open lead inbox")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/reports", page) }, h(Icon, { name: "bar-chart-3", size: 16 }), ui.operationsReports),
       ),
     ),
   );
@@ -4136,7 +4304,7 @@ function TodayBody({ page }) {
           })) : [h(TodayBriefingPanel, { key: "empty", page, rows: [], total: 0 })])),
       ),
       h("details", { className: "adm-workbench-disclosure" },
-        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), ui.operationsReports),
+        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), label(copy, "queuesAndSetup", "Queues and setup")),
         h(TodayReadinessRail, {
           page,
           copy,
@@ -4243,8 +4411,8 @@ function ViewingWeekPanel({ page, copy, ui }) {
                     "li",
                     { key: viewing.id, "data-week-viewing": viewing.id },
                     h("time", { dateTime: viewing.starts_at }, viewing.local_start),
-                    h("span", null, viewing.listing_reference || viewing.lead_id),
-                    h("small", null, brokerProfileText(page, viewing.broker)),
+                    h("span", null, viewingPlaceText(page, viewing, copy)),
+                    h("small", null, `${viewingClientText(page, viewing, copy, ui)} · ${brokerProfileText(page, viewing.broker)}`),
                   ),
                 ),
               )
@@ -4281,26 +4449,64 @@ function ViewingWeekPanel({ page, copy, ui }) {
   );
 }
 
+// A viewing is an appointment between a client and a property; the ledger id
+// that stores it never becomes a label. The lead behind the viewing carries the
+// client's name (when consent left one) and the property's location.
+function viewingLead(page, viewing) {
+  return (page.leads || []).find((lead) => lead.lead_id === (viewing.lead_id || null)) || null;
+}
+
+function viewingClientText(page, viewing, copy, ui) {
+  const lead = viewingLead(page, viewing);
+  const name = String(lead?.contact?.name || "").trim();
+  if (name && !looksLikeGeneratedContactId(name)) return name;
+  const language = String(lead?.original_language || viewing.original_language || "").toUpperCase();
+  const channel = lead?.contact_preference || viewing.feedback_request?.channel || null;
+  return [label(copy, "unnamedContact", "Unnamed"), language || null, channel ? valueText(ui, channel) : null].filter(Boolean).join(" · ");
+}
+
+function viewingPlaceText(page, viewing, copy) {
+  const lead = viewingLead(page, viewing);
+  const location = String(lead?.property?.location || lead?.requirements?.locations?.[0] || "").trim();
+  const reference = String(viewing.listing_reference || "").trim();
+  return [reference || label(copy, "viewingPlace", "Property"), location || null].filter(Boolean).join(" · ");
+}
+
+function viewingDayLabel(value, locale) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
+  return new Intl.DateTimeFormat(language, { weekday: "long", day: "numeric", month: "long", timeZone: activeDisplaySettings.timezone }).format(date);
+}
+
+function viewingDayKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "unknown";
+  return new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: activeDisplaySettings.timezone }).format(date);
+}
+
+function viewingClockText(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: activeDisplaySettings.timezone }).format(date);
+}
+
 function ViewingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const locale = page.workspace.locale;
   const title = label(copy, "viewingsWorkspace", "Viewings and follow-ups");
   const viewings = [...(page.viewings || [])].sort((left, right) => Date.parse(left.starts_at) - Date.parse(right.starts_at));
   const weekLayout = page.viewingLayout === "week" && Boolean(page.viewingWeek);
-  const metrics = [
-    [label(copy, "viewings", "Viewings"), page.summary?.viewings || 0, "calendar-days", "sea"],
-    [label(copy, "openFollowUps", "Open follow-ups"), page.summary?.viewingFollowUpsOpen || 0, "calendar-check", "sun"],
-    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary?.viewingFollowUpsOverdue || 0, "triangle-alert", "brick"],
-    [statusText(ui, "completed"), page.viewingFollowUpQueue?.summary?.completed || 0, "check-circle-2", "success"],
-    ...(page.viewingWeek ? [[ui.freeSlots, page.viewingWeek.summary.open_slots, "clock", "sea"]] : []),
-  ];
+  const queueFor = (predicate) => ({ ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: (page.viewingFollowUpQueue?.rows || []).filter(predicate) } });
+  const unmatchedRows = (page.viewingFollowUpQueue?.rows || []).filter((row) => !viewings.some((viewing) => viewing.id === row.viewing_id));
   return adminShell(page, {
     title,
     mainAttrs: {
       "data-kind": "admin-viewings",
       "data-react-admin-ui": "viewings",
       "data-admin-workbench": "crm",
-      "data-admin-locale": page.workspace.locale,
+      "data-admin-locale": locale,
     },
     children: [
       h(
@@ -4320,32 +4526,30 @@ function ViewingsBody({ page }) {
             ui.weekView,
           ),
         ),
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
+        // The caveat about calendar delivery is a tooltip on the one control it concerns.
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true, title: dailyCopy(page).calendar }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
       ),
-      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
       weekLayout ? h(ViewingWeekPanel, { page, copy, ui }) : null,
       h(DailyWorkspace, {
         scope: "viewing", page, title: label(copy, "upcomingViewings", "Upcoming viewings"),
         rows: viewings.map(viewing => ({ ...viewing, tags: viewing.status })),
+        group: viewing => ({ id: viewingDayKey(viewing.starts_at), label: viewingDayLabel(viewing.starts_at, locale) }),
         empty: h(EmptyState, { icon: "calendar-days" }, label(copy, "noUpcomingViewings", "No upcoming viewings.")),
-        renderRow: viewing => h("span", { "data-viewing-schedule-row": viewing.id },
-          h("strong", null, viewing.listing_reference || viewing.lead_id),
-          h("small", null, brokerProfileText(page, viewing.broker)),
-          h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)),
+        renderRow: viewing => h("span", { className: "adm-viewing-row", "data-viewing-schedule-row": viewing.id },
+          h("time", { className: "adm-viewing-row__time", dateTime: viewing.starts_at }, viewingClockText(viewing.starts_at)),
+          h("strong", null, viewingPlaceText(page, viewing, copy)),
+          h("small", null, `${viewingClientText(page, viewing, copy, ui)} · ${brokerProfileText(page, viewing.broker)}`),
           h(StatusPill, { tone: viewing.status === "booked" ? "sea" : "success" }, statusText(ui, viewing.status))),
-        renderDetail: viewing => h("div", { className: "adm-daily-record", "data-viewing-schedule": "true" },
-          h("h2", null, viewing.listing_reference || viewing.lead_id),
+        renderDetail: viewing => h("div", { className: "adm-daily-record adm-viewing-record", "data-viewing-schedule": "true" },
+          h("h2", null, viewingPlaceText(page, viewing, copy)),
           h("dl", { className: "adm-daily-facts" },
+            h("div", null, h("dt", null, label(copy, "viewingTime", "When")), h("dd", null, h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, locale)))),
+            h("div", null, h("dt", null, label(copy, "client", "Client")), h("dd", null, viewingClientText(page, viewing, copy, ui), leadContactActions(viewingLead(page, viewing) || {}, ui))),
             h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, brokerProfileText(page, viewing.broker))),
-            h("div", null, h("dt", null, label(copy, "viewings", "Viewings")), h("dd", null, h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)))),
             h("div", null, h("dt", null, label(copy, "status", "Status")), h("dd", null, statusText(ui, viewing.status)))),
-          h("p", { className: "adm-daily-note" }, [viewing.channel ? valueText(ui, viewing.channel) : null, viewing.id].filter(Boolean).join(" · ")),
-          h("p", { className: "adm-daily-note" }, dailyCopy(page).calendar),
-          h(ViewingFollowUpQueue, { page: { ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: (page.viewingFollowUpQueue?.rows || []).filter(row => row.viewing_id === viewing.id) } }, copy, ui })),
+          h(ViewingFollowUpQueue, { page: queueFor(row => row.viewing_id === viewing.id), copy, ui })),
       }),
-      (page.viewingFollowUpQueue?.rows || []).some(row => !viewings.some(viewing => viewing.id === row.viewing_id))
-        ? h(ViewingFollowUpQueue, { page: { ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: page.viewingFollowUpQueue.rows.filter(row => !viewings.some(viewing => viewing.id === row.viewing_id)) } }, copy, ui }) : null,
-
+      unmatchedRows.length ? h(ViewingFollowUpQueue, { page: queueFor(row => !viewings.some(viewing => viewing.id === row.viewing_id)), copy, ui }) : null,
     ],
   });
 }
@@ -5205,7 +5409,7 @@ function PipelinePrimaryAction({ page, state }) {
     return h(
       "details",
       { className: "adm-pipeline-action" },
-      h("summary", null, label(copy, "qualification", "Qualification")),
+      h("summary", null, label(copy, "qualifyLead", "Qualify lead")),
       h(
         PipelineOutcomeForm,
         { page, state, action: "qualify", submitLabel: label(copy, "qualifyLead", "Qualify lead") },
@@ -5333,7 +5537,52 @@ function PipelineCard({ page, state, lead }) {
   const intake = state.intake_requirements;
   const inventoryMatch = (page.leadMatching?.rows || []).find((row) => row.lead_id === state.lead_id);
   const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
-  const contactName = lead?.contact?.name;
+  const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
+  // Title = who and which property. The lead type stays in the meta line when
+  // a name is on file, and stands in for the name when none is.
+  const person = personLabel(lead, ui, statusText(ui, state.lead_type));
+  const meta = [
+    lead && leadTitle(lead, ui) !== statusText(ui, state.lead_type) ? statusText(ui, state.lead_type) : null,
+    lead?.property?.location,
+    ...personMeta(lead, ui, copy, now),
+  ].filter(Boolean);
+  const inventoryList = inventoryMatch
+    ? h(
+        "details",
+        { className: "adm-pipeline-inventory", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
+        h(
+          "summary",
+          { className: "adm-disclosure-chevron" },
+          h(Icon, { name: "building-2", size: 15 }),
+          h("span", null, label(copy, "matchingInventory", "Matching inventory")),
+          h("span", { className: "adm-seg-count", title: label(copy, "matches", "Matches") }, inventoryMatch.match_count),
+        ),
+        inventoryMatch.matches.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...inventoryMatch.matches.map((match) =>
+                h(
+                  "li",
+                  { key: match.listing_id, "data-inventory-match": match.listing_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("strong", null, match.title),
+                    h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
+                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
+      )
+    : null;
   return h(
     "article",
     {
@@ -5349,16 +5598,10 @@ function PipelineCard({ page, state, lead }) {
       h(
         "div",
         null,
-        contactName ? h("small", { className: "t-eyebrow" }, statusText(ui, state.lead_type)) : null,
-        h("h3", null, contactName || statusText(ui, state.lead_type)),
-        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
+        h("h3", null, [person, state.listing_reference].filter(Boolean).join(" · ")),
+        meta.length ? h("small", { className: "adm-lead-context", "data-pipeline-person-meta": "true" }, meta.join(" · ")) : null,
       ),
-      h(
-        "div",
-        { className: "adm-pipeline-card__status" },
-        h(StatusPill, { tone: stageTone }, statusText(ui, state.stage)),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
-      ),
+      h("div", { className: "adm-pipeline-card__status" }, h(StatusPill, { tone: stageTone }, statusText(ui, state.stage))),
     ),
     leadContactActions(lead || {}, ui),
     h(
@@ -5393,48 +5636,20 @@ function PipelineCard({ page, state, lead }) {
           intake.timeline ? h("span", null, intake.timeline) : null,
         )
       : null,
-    inventoryMatch
-      ? h(
-          "details",
-          { className: "adm-pipeline-inventory", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
-          h(
-            "summary",
-            { className: "adm-disclosure-chevron" },
-            h(Icon, { name: "building-2", size: 15 }),
-            h("span", null, label(copy, "matchingInventory", "Matching inventory")),
-            h("span", { className: "adm-seg-count", title: label(copy, "matches", "Matches") }, inventoryMatch.match_count),
-          ),
-          inventoryMatch.matches.length
-            ? h(
-                "ul",
-                { className: "adm-task-list" },
-                ...inventoryMatch.matches.map((match) =>
-                  h(
-                    "li",
-                    { key: match.listing_id, "data-inventory-match": match.listing_id },
-                    h(
-                      "div",
-                      { className: "adm-task-list__body" },
-                      h("strong", null, match.title),
-                      h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
-                    ),
-                    h(
-                      "div",
-                      { className: "adm-task-list__actions" },
-                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
-                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
-                    ),
-                  ),
-                ),
-              )
-            : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
-        )
-      : null,
+    // One primary control: the card's next action. Everything else, the
+    // matching shortlist, history and the outcome forms, waits in one menu.
     state.status === "open" ? h("div", { className: "adm-pipeline-card__primary" }, h(PipelinePrimaryAction, { page, state })) : null,
     h(
       "details",
-      { className: "adm-pipeline-secondary" },
+      { className: "adm-pipeline-secondary", "data-pipeline-overflow": "true" },
       h("summary", null, label(copy, "moreActions", "More actions")),
+      inventoryList,
+      h(
+        "div",
+        { className: "adm-task-list__actions" },
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
+      ),
       state.status === "lost"
         ? h(PipelineOutcomeForm, { page, state, action: "reopen", submitLabel: label(copy, "reopenLead", "Reopen lead"), variant: "secondary" })
         : null,
@@ -6172,12 +6387,7 @@ function LeadPipelineBody({ page }) {
   const openById = new Map((queue.rows || []).map((state) => [state.lead_id, state]));
   const states = (queue.states || []).map((state) => openById.get(state.lead_id) || state);
   const title = label(copy, "pipelineWorkspace", "Buyers and renters");
-  const metrics = [
-    [label(copy, "openPipeline", "Open opportunities"), queue.summary?.open || 0, "kanban-square", "sea"],
-    [label(copy, "buyerPipeline", "Buyers"), queue.summary?.buyers_open || 0, "users", "ink"],
-    [label(copy, "renterPipeline", "Renters"), queue.summary?.renters_open || 0, "key", "sand"],
-    [statusText(ui, "overdue"), queue.summary?.overdue || 0, "triangle-alert", "brick"],
-  ];
+  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
   const count = (predicate) => states.filter(predicate).length;
   return adminShell(page, {
     title,
@@ -6190,7 +6400,6 @@ function LeadPipelineBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(StatGrid, { metrics }),
       h(
         PageToolbar,
         null,
@@ -6228,6 +6437,9 @@ function LeadPipelineBody({ page }) {
             h("p", { className: "adm-empty", role: "status" }, ui.noPipelineMatches),
           )
         : null,
+      // Sellers are a pipeline too; their valuation queue lives here, not in
+      // the inbox, and each row names the owner and the property.
+      sellerQueue.rows?.length ? h(SellerPipelineQueue, { page, copy: { ...ui, ...copy }, ui }) : null,
     ],
   });
 }
@@ -6606,9 +6818,24 @@ function ConsentWithdrawalForm({ page, row, copy }) {
   );
 }
 
+// The register names a permission by what it covers, in which language, and
+// when it was given: "Language notification · FR · 4 Jul 2026". The subject id
+// stays on the row as data for support and for the withdrawal form.
+function consentSubjectText(row, copy, locale) {
+  return [label(copy, row.consent_type, row.consent_type), String(row.locale || "").toUpperCase() || null, formatAdminDate(row.recorded_at, locale) || null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function formatAdminDate(value, locale) {
+  const text = formatAdminDateTime(value, locale);
+  return text.replace(/,\s*\d{1,2}:\d{2}$/, "");
+}
+
 function ConsentsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const locale = page.workspace?.locale;
   const columns = {
     subject: label(copy, "consentSubject", "Enquiry or subscription"),
     purpose: label(copy, "consentPurpose", "Purpose"),
@@ -6616,11 +6843,6 @@ function ConsentsBody({ page }) {
     recordedAt: label(copy, "consentRecordedAt", "Recorded"),
     action: label(copy, "action", "Action"),
   };
-  const metrics = [
-    [label(copy, "consentGranted", "Active permissions"), page.summary.granted, "shield-check", "success"],
-    [label(copy, "consentWithdrawn", "Withdrawn"), page.summary.withdrawn, "x", "brick"],
-    [label(copy, "marketingOptIns", "Marketing opt-ins"), page.summary.marketing_opt_in, "mail", "sand"],
-  ];
   const title = label(copy, "consentsWorkspace", "Consent and preferences");
   const rows = page.consentStates;
   const filterOptions = [
@@ -6640,7 +6862,6 @@ function ConsentsBody({ page }) {
     children: [
       h(PageHeader, { title, subtitle: page.metadata.description }),
       h("p", { className: "adm-inline-alert", "data-consent-guardrail": "true" }, label(copy, "consentGuardrail", "Withdrawal stops this purpose. New consent requires a new explicit customer action.")),
-      h(StatGrid, { metrics }),
       rows.length ? h(PageToolbar, null, h(ListFilterTabs, { scope: "consents", label: title, options: filterOptions })) : null,
       h(
         Panel,
@@ -6677,13 +6898,19 @@ function ConsentsBody({ page }) {
                           key: row.id,
                           "data-consent-row": "true",
                           "data-consent-state": row.granted ? "granted" : "withdrawn",
+                          "data-consent-subject": row.subject_id || row.contact_reference || undefined,
                           "data-list-item": "consents",
                           "data-filter-tags": [row.granted ? "active" : "withdrawn", row.marketing_opt_in ? "marketing" : ""].filter(Boolean).join(" "),
                         },
-                        h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || ui.notSet), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
+                        h(
+                          "td",
+                          { "data-consent-column": "subject", "data-label": columns.subject },
+                          h("strong", null, consentSubjectText(row, copy, locale)),
+                          h("small", { className: "adm-lead-context" }, valueText(ui, row.source)),
+                        ),
                         h("td", { "data-consent-column": "purpose", "data-label": columns.purpose }, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
                         h("td", { "data-consent-column": "state", "data-label": columns.state }, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
-                        h("td", { className: "crm-tbl__muted", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, h("time", { dateTime: row.recorded_at, title: row.recorded_at }, formatAdminDateTime(row.recorded_at, page.workspace?.locale))),
+                        h("td", { className: "crm-tbl__muted", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, h("time", { dateTime: row.recorded_at, title: row.recorded_at }, formatAdminDateTime(row.recorded_at, locale))),
                         h("td", { "data-consent-column": "action", "data-label": columns.action }, h(ConsentWithdrawalForm, { page, row, copy })),
                       ),
                     ),
@@ -6805,69 +7032,158 @@ function looksLikeGeneratedContactId(value) {
 }
 
 // A contact is named by a person or an address; the key the system minted for
-// it is evidence, and evidence belongs in the caption underneath.
-function contactTitle(contact, ui) {
+// it is evidence, and evidence belongs in the History caption underneath.
+// Without a name the label says what is known: "Unnamed · HE · WhatsApp".
+function contactTitle(contact, ui, copy = null) {
   const display = String(contact.display_name || "").trim();
   if (display && display !== contact.id && !looksLikeGeneratedContactId(display)) return display;
   const person = String(contact.contact?.name || "").trim();
   if (person && !looksLikeGeneratedContactId(person)) return person;
   const email = String(contact.contact?.email || "").trim();
   if (email) return email;
-  const types = (contact.lead_types || []).map((type) => statusText(ui, type)).filter(Boolean);
-  return types.length ? types.join(", ") : contact.id;
+  const unnamed = copy ? label(copy, "unnamedContact", "Unnamed") : "Unnamed";
+  return [unnamed, (contact.languages || []).join(", ").toUpperCase() || null, contact.preferred_channel ? valueText(ui, contact.preferred_channel) : null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+// Call / WhatsApp / Email built from the channels the record already exposes.
+function contactChannelActions(contact, copy, ui) {
+  const channels = contact.contact || {};
+  const number = (value) => String(value || "").replace(/[^\d+]/g, "");
+  const actions = [
+    channels.phone ? { channel: "phone", href: `tel:${number(channels.phone)}`, icon: "phone", text: label(copy, "callAction", "Call") } : null,
+    channels.whatsapp ? { channel: "whatsapp", href: `https://wa.me/${number(channels.whatsapp).replace(/^\+/, "")}`, icon: "message-circle", text: valueText(ui, "whatsapp") } : null,
+    channels.viber ? { channel: "viber", href: `viber://chat?number=${encodeURIComponent(number(channels.viber))}`, icon: "message-circle", text: valueText(ui, "viber") } : null,
+    channels.email ? { channel: "email", href: `mailto:${channels.email}`, icon: "mail", text: valueText(ui, "email") } : null,
+  ].filter(Boolean);
+  if (!actions.length) return h("p", { className: "adm-contact-actions__none", "data-contact-no-channels": "true" }, label(copy, "noContactChannels", "No phone or email on this record."));
+  return h(
+    "div",
+    { className: "adm-contact-actions", "data-private-contact": "true" },
+    ...actions.map((action, index) =>
+      h(
+        "a",
+        {
+          key: action.channel,
+          href: action.href,
+          className: `mk-btn ${index === 0 ? "mk-btn--primary" : "mk-btn--secondary"} mk-btn--sm`,
+          "data-private-contact-channel": action.channel,
+          title: String(channels[action.channel]),
+        },
+        h(Icon, { name: action.icon, size: 16 }),
+        h("span", null, action.text),
+      ),
+    ),
+  );
 }
 
 function ContactsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const locale = page.workspace?.locale;
   const title = label(copy, "contactsWorkspace", "Contacts and accounts");
-  const metrics = [
-    [label(copy, "contactRecords", "Customer contacts"), page.summary.contacts, "users", "sea"],
-    [label(copy, "accounts", "Accounts"), page.summary.accounts, "building-2", "sand"],
-    [label(copy, "duplicateEnquiries", "Linked repeat enquiries"), page.summary.duplicate_leads, "link", "sun"],
-    [label(copy, "communicationEvents", "Communication events"), page.summary.communication_events, "messages-square", "sea"],
-  ];
   const withAccount = page.contacts.filter((contact) => contact.account_id).length;
   const filterOptions = [
     { value: "all", label: label(copy, "all", "All"), count: page.contacts.length },
     { value: "no_account", label: ui.withoutAccount, count: page.contacts.length - withAccount },
     { value: "with_account", label: ui.withAccount, count: withAccount },
   ];
+  const propertiesOfInterest = (contact) => [...(contact.listing_references || []), ...(contact.locations || [])].join(" · ");
   const renderContact = (contact) => h(
-                "article",
-                {
-                  key: contact.id,
-                  className: "adm-contact-card",
-                  "data-contact-record": contact.id,
-                  "data-list-item": "contacts",
-                  "data-filter-tags": contact.account_id ? "with_account" : "no_account",
-                },
-                h(
-                  "header",
-                  null,
-                  h("div", null, h("h3", null, contactTitle(contact, ui)), h("code", { className: "crm-mono adm-id-caption" }, contact.id)),
-                  contact.account_id
-                    ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
-                    : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
-                ),
-                leadContactActions({ contact: contact.contact, contact_preference: contact.preferred_channel }, ui),
-                h(
-                  "dl",
-                  { className: "adm-contact-facts" },
-                  h("div", null, h("dt", null, label(copy, "leads", "Enquiries")), h("dd", null, contact.lead_count)),
-                  h("div", null, h("dt", null, label(copy, "duplicateEnquiries", "Linked repeats")), h("dd", null, contact.duplicate_leads)),
-                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.map((broker) => brokerProfileText(page, broker)).join(", ") || ui.notSet)),
-                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || ui.notSet)),
-                  h("div", null, h("dt", null, label(copy, "communicationEvents", "Communication events")), h("dd", null, contact.communication_event_count)),
-                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : ui.notSet)),
-                ),
-                h(
-                  "div",
-                  { className: "adm-contact-card__leads" },
-                  ...contact.lead_ids.map((leadId) => h("a", { key: leadId, href: adminHref(`/admin/leads?locale=${page.workspace.locale}#lead-${encodeURIComponent(leadId)}`, page) }, leadId)),
-                ),
-                h(AccountLinkForm, { page, contact, copy }),
-              );
+    "article",
+    {
+      key: contact.id,
+      className: "adm-contact-card",
+      "data-contact-record": contact.id,
+      "data-list-item": "contacts",
+      "data-filter-tags": contact.account_id ? "with_account" : "no_account",
+    },
+    h(
+      "header",
+      null,
+      h(
+        "div",
+        null,
+        h("h3", null, contactTitle(contact, ui, copy)),
+        h("p", { className: "adm-contact-card__meta" }, [
+          (contact.languages || []).join(", ").toUpperCase() || null,
+          contact.preferred_channel ? valueText(ui, contact.preferred_channel) : null,
+          (contact.lead_types || []).map((type) => statusText(ui, type)).join(", ") || null,
+        ].filter(Boolean).join(" · ")),
+      ),
+      contact.account_id
+        ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
+        : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
+    ),
+    contactChannelActions(contact, copy, ui),
+    h(
+      "dl",
+      { className: "adm-contact-facts" },
+      h(
+        "div",
+        { "data-contact-fact": "latest_message" },
+        h("dt", null, label(copy, "latestMessage", "Latest message")),
+        h(
+          "dd",
+          null,
+          contact.latest_message ? h("q", { className: "adm-contact-quote" }, contact.latest_message) : h("span", { className: "crm-tbl__muted" }, label(copy, "noMessageBody", "No message body was provided.")),
+          contact.latest_message_at || contact.latest_received_at
+            ? h("time", { dateTime: contact.latest_message_at || contact.latest_received_at }, formatAdminDateTime(contact.latest_message_at || contact.latest_received_at, locale))
+            : null,
+        ),
+      ),
+      h(
+        "div",
+        { "data-contact-fact": "properties" },
+        h("dt", null, label(copy, "propertiesOfInterest", "Properties of interest")),
+        h("dd", null, propertiesOfInterest(contact) || ui.notSet),
+      ),
+      h(
+        "div",
+        { "data-contact-fact": "next_follow_up" },
+        h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
+        h(
+          "dd",
+          null,
+          contact.next_follow_up_at ? h("time", { dateTime: contact.next_follow_up_at }, formatAdminDateTime(contact.next_follow_up_at, locale)) : ui.notSet,
+        ),
+      ),
+      h(
+        "div",
+        { "data-contact-fact": "owners" },
+        h("dt", null, label(copy, "owners", "Owners")),
+        h("dd", null, (contact.assigned_brokers || []).map((broker) => brokerProfileText(page, broker)).join(", ") || ui.notSet),
+      ),
+    ),
+    h(
+      "div",
+      { className: "adm-contact-card__leads" },
+      ...(contact.lead_ids || []).map((leadId, index) =>
+        h(
+          "a",
+          { key: leadId, href: adminHref(`/admin/leads?locale=${locale}#lead-${encodeURIComponent(leadId)}`, page), "data-contact-lead": leadId },
+          `${label(copy, "openEnquiry", "Open enquiry")}${contact.lead_ids.length > 1 ? ` ${index + 1}` : ""}`,
+        ),
+      ),
+    ),
+    h(AccountLinkForm, { page, contact, copy }),
+    h(
+      "details",
+      { className: "adm-contact-history", "data-contact-history": "true" },
+      h("summary", null, h(Icon, { name: "clock", size: 16 }), h("span", null, label(copy, "contactHistory", "History"))),
+      h(
+        "p",
+        { className: "crm-tbl__muted" },
+        [
+          `${contact.lead_count} ${label(copy, "leads", "Enquiries")}`,
+          `${contact.communication_event_count} ${label(copy, "communicationEvents", "Communication events")}`,
+          contact.latest_received_at ? `${label(copy, "latestEnquiry", "Latest enquiry")}: ${formatAdminDateTime(contact.latest_received_at, locale)}` : null,
+        ].filter(Boolean).join(" · "),
+      ),
+      h("code", { className: "crm-mono adm-id-caption" }, contact.id),
+    ),
+  );
   return adminShell(page, {
     title,
     mainAttrs: { "data-kind": "admin-contacts", "data-react-admin-ui": "contacts", "data-contact-count": page.summary.contacts, "data-account-count": page.summary.accounts, "data-task-led": "true" },
@@ -6882,13 +7198,14 @@ function ContactsBody({ page }) {
         filters: filterOptions.filter(option => option.value !== "all"),
         empty: h(EmptyState, { icon: "users", "data-empty-contacts": "true" }, ui.noContacts),
         renderRow: contact => h("div", { className: "adm-contact-directory-row" },
-          h("strong", null, contactTitle(contact, ui)),
-          h("span", null, contact.id),
-          h("span", null, contact.account_label || ui.withoutAccount),
-          h("small", null, `${contact.lead_count} ${label(copy, "leads", "Enquiries")} · ${contact.languages.join(", ").toUpperCase() || ui.notSet}`)),
+          h("strong", null, contactTitle(contact, ui, copy)),
+          h("span", null, [contact.account_label || ui.withoutAccount, propertiesOfInterest(contact) || null].filter(Boolean).join(" · ")),
+          h("small", null, [
+            `${contact.lead_count} ${label(copy, "leads", "Enquiries")}`,
+            contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, locale) : null,
+          ].filter(Boolean).join(" · "))),
         renderDetail: renderContact,
       }),
-      h(SummaryStrip, { cards: metrics.map(([title, value], index) => ({ id: `contacts-${index}`, title, value })), "data-summary-kind": "contacts" }),
       h("details", { className: "adm-contact-accounts", "data-contact-accounts": "true" },
         h("summary", null, h(Icon, { name: "building-2", size: 18 }), label(copy, "accounts", "Accounts"), ` · ${page.accounts.length}`, h(Icon, { name: "chevron-down", size: 16 })),
         page.accounts.length ? h(
@@ -6898,7 +7215,7 @@ function ContactsBody({ page }) {
                   h(
                     "li",
                     { key: account.id, "data-account-record": account.id },
-                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono" }, account.id)),
+                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono adm-id-caption" }, account.id)),
                     h(StatusPill, { tone: account.type === "company" ? "sea" : "sand" }, label(copy, account.type, account.type)),
                     h("span", null, `${account.contact_count} ${label(copy, "contactRecords", "contacts")}`),
                   ),
@@ -7019,29 +7336,23 @@ function LeadBrief({ brief, intake, copy, ui, locale, open = false }) {
       h(
         "span",
         { className: "adm-lead-brief__readiness" },
-        h("strong", null, `${brief.readiness_score}%`),
+        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
         h(StatusPill, { tone }, readinessLabel),
       ),
     ),
+    // One sentence in place of a score: what is still missing to qualify,
+    // and that the reply is where to ask for it.
     h(
       "div",
       { className: "adm-lead-brief__body" },
       h(
-        "div",
-        { className: "adm-lead-brief__score" },
-        h("span", null, label(copy, "leadReadiness", "Readiness")),
-        h("strong", null, `${brief.readiness_score}%`),
-        h("progress", { value: brief.readiness_score, max: 100, "aria-label": `${label(copy, "leadReadiness", "Readiness")}: ${brief.readiness_score}%` }),
-        missingFields.length ? h("small", null, `${label(copy, "missingFields", "Missing fields")}: ${missingFields.join(", ")}`) : null,
+        "p",
+        { className: "adm-lead-brief__missing", "data-lead-missing-fields": String(missingFields.length) },
+        missingFields.length
+          ? `${label(copy, "missingToQualify", "Missing to qualify")}: ${missingFields.join(", ")}. ${label(copy, "askInReply", "Ask in the reply")}.`
+          : label(copy, "qualificationComplete", "Qualification complete"),
+        brief.match_count ? h("small", null, ` ${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
       ),
-      h(
-        "div",
-        { className: "adm-lead-brief__action" },
-        h("span", null, label(copy, "qualificationDetails", "Qualification evidence")),
-        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
-        brief.match_count ? h("small", null, `${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
-      ),
-      h("small", { className: "adm-lead-brief__guardrail" }, label(copy, "deterministicDecision", "Calculated from workflow evidence; Hermes may only suggest a draft.")),
     ),
   );
 }
@@ -7110,6 +7421,14 @@ function LeadInboxRow({ page, row, ui, locale }) {
   const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age, snooze } = row;
   const selectable = page?.leadOperations?.bulkWritable === true;
   const repliesUnavailable = adminDataUnavailable(page, "replies");
+  // Channel and language on the row, so the broker knows how to answer
+  // before opening the detail.
+  const channelLine = [
+    lead.contact_preference ? valueText(ui, lead.contact_preference) : null,
+    lead.original_language ? String(lead.original_language).toUpperCase() : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return h(
     "li",
     {
@@ -7135,6 +7454,7 @@ function LeadInboxRow({ page, row, ui, locale }) {
       age ? h("time", { className: "adm-inbox__age", dateTime: lead.received_at, title: formatAdminDateTime(lead.received_at, locale) }, age) : null,
       leadContext ? h("small", { className: "adm-inbox__context", "data-lead-context": "true" }, leadContext) : null,
       requestDetails ? h("small", { className: "adm-inbox__context", "data-lead-request-details": "true" }, requestDetails) : null,
+      channelLine ? h("small", { className: "adm-inbox__context", "data-lead-channel": "true" }, channelLine) : null,
       h(
         "span",
         { className: "adm-inbox__tags" },
@@ -7226,13 +7546,10 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
   // hermes-availability builds a reason that names the missing environment
-  // variables. That is the right sentence for whoever can set them, and the
-  // wrong one for a broker with a lead open: HERMES_API_KEY is not something
-  // they can do anything about. The env detail goes to the operator who can
-  // act on it; everyone else is told who to ask.
-  const hermesReason = pageCan(page, "settings:manage")
-    ? page.hermes?.reason || ui.hermesUnavailableOwner
-    : ui.hermesUnavailableBroker;
+  // variables. That detail belongs on the Hermes screen, next to where it is
+  // set; with a lead open, everyone gets one plain sentence. The owner's says
+  // it is not configured, the broker's says who can connect it.
+  const hermesReason = pageCan(page, "settings:manage") ? ui.hermesUnavailableOwner : ui.hermesUnavailableBroker;
   return h(
     "article",
     {
@@ -7437,9 +7754,6 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         },
         h(Icon, { name: "info", size: 15 }),
         h("span", null, hermesReason),
-        pageCan(page, "settings:manage")
-          ? h("a", { href: adminHref("/admin/connect", page) }, label(copy, "connections", "Integrations"))
-          : null,
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
     ),
@@ -7481,12 +7795,6 @@ function LeadInboxBody({ page }) {
   const copy = { ...ui, ...adminCopy(page) };
   const runtimeCopy = ownerConsoleCopy(page).runtime;
   const locale = page.workspace?.locale;
-  const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
-  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
-  const secondaryPanels = [
-    viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { key: "viewings", page, copy, ui }) : null,
-    sellerQueue.rows?.length ? h(SellerPipelineQueue, { key: "seller", page, copy, ui }) : null,
-  ].filter(Boolean);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -7536,12 +7844,6 @@ function LeadInboxBody({ page }) {
     };
   });
   const slaCount = rows.filter((row) => row.slaStatus === "reminder_required" || row.slaStatus === "manager_escalation_required").length;
-  const metrics = [
-    [label(copy, "needsReply", "Needs reply"), repliesUnavailable ? runtimeCopy.unavailable : needsReply.length, "messages-square", "sea"],
-    [label(copy, "repliesQueued", "Replies queued"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesQueued, "send", "sun"],
-    [statusText(ui, "failed"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesFailed, "triangle-alert", "brick"],
-    [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
-  ];
   const title = label(copy, "leadInbox", "Lead inbox");
   const leadColumns = {
     lead: label(copy, "lead", "Lead"),
@@ -7563,8 +7865,23 @@ function LeadInboxBody({ page }) {
       "data-task-led": "true",
     },
     children: [
-      h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
+      // Pipeline and Requests left the rail; the Leads screen is their door.
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page), "data-lead-screen-link": "pipeline" },
+          h(Icon, { name: "kanban-square", size: 15 }),
+          h("span", null, label(copy, "pipelineWorkspace", "Buyers and renters")),
+        ),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page), "data-lead-screen-link": "requests" },
+          h(Icon, { name: "bell", size: 15 }),
+          h("span", null, label(copy, "publicRequests", "Website requests")),
+        ),
+      ),
       h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
@@ -7601,13 +7918,6 @@ function LeadInboxBody({ page }) {
           h("p", { className: "adm-inbox__hint" }, ui.selectLead),
         ),
       ),
-      secondaryPanels.length
-        ? h(
-            "section",
-            { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
-            ...secondaryPanels,
-          )
-        : null,
     ],
   });
 }
@@ -7678,7 +7988,12 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-viewing-column": "viewing", "data-label": columns.viewing },
-                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.viewing_id), h("small", { className: "adm-lead-context" }, row.listing_reference || row.lead_id)),
+                    h(
+                      "div",
+                      { className: "adm-lead-identity", "data-viewing-follow-up-viewing": row.viewing_id },
+                      h("strong", null, viewingPlaceText(page, row, copy)),
+                      h("small", { className: "adm-lead-context" }, [viewingClientText(page, row, copy, ui), row.starts_at ? formatAdminDateTime(row.starts_at, page.workspace?.locale) : null].filter(Boolean).join(" · ")),
+                    ),
                   ),
                   h("td", { "data-viewing-column": "task", "data-label": columns.task }, row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
                   h(
@@ -7699,7 +8014,7 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                       ? h(
                       "details",
                       { className: "adm-reply", "data-viewing-follow-up-actions": "true" },
-                      h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record"))),
+                      h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record outcome"))),
                       h(
                         "form",
                         {
@@ -7786,6 +8101,7 @@ function sellerPipelinePrimaryAction(row, copy) {
 
 function SellerPipelineQueue({ page, copy, ui }) {
   const queue = page.sellerPipelineQueue || { rows: [] };
+  const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
   const columns = {
     seller: label(copy, "sellerRequest", "Seller request"),
     task: label(copy, "task", "Task"),
@@ -7828,6 +8144,12 @@ function SellerPipelineQueue({ page, copy, ui }) {
                 const needsAppraisalSchedule = isAppraisal && row.stage !== "appraisal_scheduled";
                 const primary = sellerPipelinePrimaryAction(row, copy);
                 const primaryAction = primary?.[0] || null;
+                const lead = leadForRow(page, row.lead_id);
+                const location = row.property?.location || lead?.property?.location;
+                const sellerMeta = [
+                  location,
+                  ...(lead ? personMeta(lead, ui, copy, now) : [row.original_language ? String(row.original_language).toUpperCase() : null]),
+                ].filter(Boolean);
                 return h(
                   "tr",
                   {
@@ -7840,7 +8162,12 @@ function SellerPipelineQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-seller-pipeline-column": "seller", "data-label": columns.seller },
-                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.seller_pipeline_id), h("small", { className: "adm-lead-context" }, row.property?.location || row.lead_id)),
+                    h(
+                      "div",
+                      { className: "adm-lead-identity" },
+                      h("strong", null, personLabel(lead, ui, statusText(ui, "seller"))),
+                      sellerMeta.length ? h("small", { className: "adm-lead-context" }, sellerMeta.join(" · ")) : null,
+                    ),
                   ),
                   h("td", { "data-seller-pipeline-column": "task", "data-label": columns.task }, statusText(ui, row.task)),
                   h(
@@ -8422,7 +8749,9 @@ function ListingManagerBody({ page }) {
       h("section", { className: "adm-catalogue-records", "aria-label": label(copy, "results", "Results") },
       h(
         "form",
-        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
+        // Selects and the search box apply themselves once the client hook runs;
+        // the Apply button below is the no-script path and is hidden after that.
+        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true", "data-auto-submit": "true" },
         filterLocaleInput(page),
         h(
           "div",
@@ -8485,7 +8814,7 @@ function ListingManagerBody({ page }) {
               ),
             )
           : null,
-        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--md adm-filterbar__submit", "data-filter-submit": "true" }, ui.applyFilters),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),
       h(
@@ -8567,26 +8896,38 @@ function ListingManagerBody({ page }) {
                       h(
                         "td",
                         { "data-label": columns.listing, "data-listing-column": "listing" },
-                        h("div", { className: "adm-lead-identity adm-listing-identity__desktop" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, listingPriceText(ui, row))),
+                        h(
+                          "div",
+                          { className: "adm-listing-card adm-listing-identity__desktop" },
+                          listingThumbnail(ui, row),
+                          h(
+                            "div",
+                            { className: "adm-listing-card__body" },
+                            h("strong", { className: "adm-listing-card__title" }, listingShortTitle(ui, row)),
+                            h("small", { className: "adm-listing-card__gaps", "data-listing-gaps": String((row.gaps || []).length) }, listingGapLine(ui, row)),
+                            listingSourceTitle(row) ? h("small", { className: "adm-listing-card__source", title: row.title }, row.title) : null,
+                            h("code", { className: "crm-mono adm-id-caption" }, row.id),
+                          ),
+                        ),
                         h(
                           "div",
                           { className: "adm-listing-mobile-summary", "data-listing-mobile-summary": "true" },
                           h(
                             "div",
                             { className: "adm-listing-mobile-summary__topline" },
-                            h("code", { className: "crm-mono" }, row.id),
                             h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status)),
+                            h("code", { className: "crm-mono adm-id-caption" }, row.id),
                           ),
-                          h("strong", null, row.title),
                           h(
-                            "small",
-                            { className: "adm-listing-mobile-summary__meta" },
-                            [
-                              row.location || ui.notSet,
-                              row.property_family ? statusText(ui, row.property_family) : ui.notSet,
-                              listingPriceText(ui, row),
-                              `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`,
-                            ].join(" · "),
+                            "div",
+                            { className: "adm-listing-card" },
+                            listingThumbnail(ui, row),
+                            h(
+                              "div",
+                              { className: "adm-listing-card__body" },
+                              h("strong", { className: "adm-listing-card__title" }, listingShortTitle(ui, row)),
+                              h("small", { className: "adm-listing-mobile-summary__meta" }, listingGapLine(ui, row)),
+                            ),
                           ),
                         ),
                       ),
@@ -8594,7 +8935,7 @@ function ListingManagerBody({ page }) {
                       h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : ui.notSet),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, listingLocaleText(row))),
-                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", { className: "adm-listing-gaps" }, listingGapLine(ui, row))),
                       h(
                         "td",
                         { "data-label": columns.action, "data-listing-column": "action" },
@@ -8617,7 +8958,7 @@ function ListingManagerBody({ page }) {
                             h("div", null, h("dt", null, columns.propertyFamily), h("dd", null, row.property_family ? statusText(ui, row.property_family) : ui.notSet)),
                             h("div", null, h("dt", null, columns.status), h("dd", null, statusText(ui, row.listing_status))),
                             h("div", null, h("dt", null, columns.locale), h("dd", null, `${String(row.source_locale || "").toUpperCase() || ui.notSet} · ${listingLocaleText(row)}`)),
-                            h("div", null, h("dt", null, columns.quality), h("dd", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()} · ${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                            h("div", null, h("dt", null, columns.quality), h("dd", null, listingGapLine(ui, row))),
                           ),
                           page.runtime_data_mode === "durable_only"
                             ? null
@@ -8641,8 +8982,11 @@ function ListingManagerBody({ page }) {
       ),
       h(Pagination, { page, path: "/admin/listings" }),
       ),
-      h("aside", { className: "adm-catalogue-review", "aria-label": ui.reviewRequired },
-        h("h2", null, ui.reviewRequired),
+      // The review queues (facts to confirm, duplicate pairs, area checks) are
+      // supporting work, not a second dashboard: one closed disclosure under
+      // the list, open only when a queue filter is in the URL.
+      h("details", { className: "adm-catalogue-review-queues", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review-queues": "true" },
+        h("summary", null, h(Icon, { name: "eye", size: 16 }), h("span", null, `${ui.reviewQueues} · ${factReviewSummary.unchecked_figures || 0}`)),
         h("details", { className: "adm-catalogue-review-section", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review": "facts" },
           h("summary", null, factReviewCopy.title || "Facts to confirm", ` · ${factReviewSummary.unchecked_figures || 0}`),
 h(
@@ -8654,7 +8998,7 @@ h(
         h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
         h(
           "form",
-          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
+          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true", "data-auto-submit": "true" },
           filterLocaleInput(page),
           h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
           h(
@@ -8668,7 +9012,7 @@ h(
               ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
             ),
           ),
-          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
+          h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm adm-filterbar__submit", "data-filter-submit": "true" }, ui.applyFilters),
           h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
         ),
         h(
@@ -8766,12 +9110,13 @@ function TaskRow({ page, row, copy, na }) {
             )
           : null,
       ),
-      h("h2", null, row.subject_ref || row.task_id || kindLabel),
-      row.origin === "authored" && row.note ? h("small", { className: "adm-lead-context" }, row.note) : null,
+      // A delegated task's title is the way to the screen that owns it.
+      h("h2", null, delegated ? h("a", { href: adminHref(row.completion.route, page), "data-task-owner-link": row.kind }, row.subject_title || kindLabel) : row.subject_title || kindLabel),
+      row.subject_context ? h("small", { className: "adm-lead-context" }, row.subject_context) : null,
+      h("code", { className: "crm-mono adm-id-caption" }, row.subject_ref || row.task_id),
       h("dl", { className: "adm-daily-facts" },
         h("div", null, h("dt", null, copy.owner), h("dd", null, row.owner || workbenchCopy(page).notSet)),
         h("div", null, h("dt", null, copy.taskType), h("dd", null, row.origin === "authored" ? row.kind.replaceAll("_", " ") : kindLabel))),
-      delegated ? h("small", { className: "adm-lead-context" }, copy.delegated) : null,
     ),
     h(
       "div",
@@ -8812,6 +9157,22 @@ function TaskCompletionForm({ page, row, copy }) {
   );
 }
 
+// The queue row and its detail name the work in words. An authored task keeps
+// the note the operator wrote; a derived task borrows Today's description of
+// its source row. The ledger id stays available as a caption, never as the
+// heading: PRODUCT.md forbids raw keys as UI text.
+function taskWords(row, page, ui, na) {
+  if (row.origin === "authored") {
+    // The operator named the task with a stable code when opening it; read
+    // as words, then the object it is for. The note is context.
+    const words = String(row.task_id || "").replace(/[-_:]+/g, " ").trim();
+    const title = words ? words.charAt(0).toUpperCase() + words.slice(1) : na.kinds.authored;
+    return { subject_title: [title, row.subject_ref].filter(Boolean).join(" · "), subject_context: row.note || "" };
+  }
+  const words = describeSourceTask(row, { page, copy: adminCopy(page), ui, na, inboxHref: adminHref("/admin/leads", page) });
+  return { subject_title: words.title || na.kinds[row.kind], subject_context: words.context || "" };
+}
+
 function TasksBody({ page }) {
   const ui = workbenchCopy(page);
   const copy = ui.workspaceSettings.tasks;
@@ -8844,15 +9205,14 @@ function TasksBody({ page }) {
           ],
         },
       ),
-      h("p", { className: "adm-daily-note", "data-task-delegated-note": "true" }, copy.delegatedNote),
       h(DailyWorkspace, {
         scope: "task", page, title: copy.title,
-        rows: queue.rows.map(row => ({ ...row, id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),
+        rows: queue.rows.map(row => ({ ...row, ...taskWords(row, page, ui, na), id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),
         filters: [{ value: "overdue", label: na.overdue }, { value: "authored", label: dailyCopy(page).authored }],
         empty: h("p", { className: "adm-empty", "data-task-empty": "true" }, copy.empty),
         renderRow: row => h("span", null,
-          h("strong", null, row.subject_ref || row.task_id || na.kinds[row.kind]),
-          h("small", null, [row.owner, row.origin === "authored" ? dailyCopy(page).authored : na.kinds[row.kind]].filter(Boolean).join(" · ")),
+          h("strong", null, row.subject_title),
+          h("small", null, [row.origin === "authored" ? dailyCopy(page).authored : na.kinds[row.kind], row.subject_context, row.owner].filter(Boolean).join(" · ")),
           row.due_at ? h("time", { dateTime: row.due_at }, `${row.overdue ? na.overdue : na.due}: ${formatAdminDateTime(row.due_at, page.workspace.locale)}`) : null),
         renderDetail: row => h(TaskRow, { page, row, copy, na }),
       }),
@@ -9627,7 +9987,7 @@ function TranslationQueueBody({ page }) {
                       "a",
                       {
                         className: "mk-btn mk-btn--ghost mk-btn--sm",
-                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}#listing-translations`,
+                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}&tab=translations`,
                         "aria-label": `${label(copy, "openEditor", "Open editor")} \u00b7 ${String(row.target_locale || "").toUpperCase()}`,
                       },
                       label(copy, "openEditor", "Open editor"),
@@ -9694,7 +10054,7 @@ function editorInputFor(ui, field, value, disabled = false, id = undefined) {
     ]);
   }
   if (["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field)) return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
-  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-CRAWL-0001" });
+  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-00815" });
   return h("input", shared);
 }
 
@@ -9828,6 +10188,21 @@ function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, fact
   );
 }
 
+const LISTING_EDITOR_TAB_KEYS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
+
+// The form column belongs to the Facts and SEO tabs; the three review panels
+// (quality, translations, media) are built in that order and the active tab
+// picks one. Building all three keeps the panel markup where it is; only the
+// choice of which reaches the page changed.
+function editorMainColumn(activeTab, attrs, panel) {
+  return activeTab === "facts" || activeTab === "seo" ? h("div", attrs, panel) : null;
+}
+
+function editorSupportSection(activeTab, attrs, qualityPanel, translationsPanel, mediaPanel) {
+  const panel = { quality: qualityPanel, translations: translationsPanel, media: mediaPanel }[activeTab];
+  return panel ? h("section", attrs, panel) : null;
+}
+
 function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null, assist = null } = {}) {
   if (!fields.length) return null;
   return h(
@@ -9889,8 +10264,13 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
+  // The topbar already names the screen. The page heading names the listing
+  // the way a broker would say it (reference, type, place); the crawled
+  // headline is the second line, so several open editors still tell apart.
+  const listingName = String(facts.title || facts.h1 || "").trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
+  const listingHeading = [page.listing.id, family ? statusText(ui, family) : "", facts.location || ""].filter(Boolean).join(" · ");
   // One descriptor, so the button is the same control on every field it
   // appears on and every field names the same source and the same boundary.
   const hermesAssist = {
@@ -9914,38 +10294,28 @@ function ListingEditorBody({ page }) {
       listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
-  const listingSummaryCards = [
-    {
-      id: "cms-status",
-      title: label(copy, "qualityStatus", "CMS status"),
-      value: statusText(ui, page.listing.cms_status),
-      meta: `${page.listing.source_domain} · ${page.listing.source_locale.toUpperCase()} · ${page.listing.id}`,
-      tone: PILL_TONES[page.listing.cms_status] || "ink",
-      status: { tone: PILL_TONES[page.listing.cms_status] || "ink", label: statusText(ui, page.listing.cms_status) },
-    },
-    {
-      id: "publish-approval",
-      title: ui.publishApproval,
-      value: workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing,
-      meta: workflow.availability_verified_at ? `${ui.availabilityVerification}: ${formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale)}` : ui.notVerified,
-      tone: workflow.publish_approved ? "success" : "sun",
-      status: { tone: workflow.publish_approved ? "success" : "sun", label: workflow.publish_approved ? statusText(ui, "approved") : statusText(ui, "review_required") },
-    },
-    {
-      id: "translations",
-      title: label(copy, "translationState", "Translation state"),
-      value: String(translationStates.length),
-      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : translationStates.length ? translationStates.map((translation) => `${String(translation.locale).toUpperCase()}: ${statusText(ui, translation.status)}`).join(" · ") : ui.notSet,
-      tone: staleTranslations.length ? "brick" : "sea",
-    },
-    {
-      id: "media",
-      title: label(copy, "media", "Media"),
-      value: String((page.listing.media || []).length),
-      meta: `${ui.tourStatus}: ${statusText(ui, tourStatus)}`,
-      tone: reviewableMedia.length ? "ink" : "sand",
-    },
-  ];
+  // One section per request: the server renders the tab in ?tab= (Facts by
+  // default), so a phone gets one form, not a five-section scroll.
+  const activeTab = LISTING_EDITOR_TAB_KEYS.includes(page.editorTab) ? page.editorTab : "facts";
+  const editorTabHref = (tab) => adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}`, page);
+  const editorTabLink = (tab, text, icon, ariaLabel = text) =>
+    h(
+      "a",
+      {
+        className: "mk-tab",
+        href: editorTabHref(tab),
+        "data-editor-tab": tab,
+        "aria-current": activeTab === tab ? "page" : undefined,
+        "data-active": activeTab === tab ? "" : undefined,
+        "aria-label": ariaLabel,
+        title: ariaLabel,
+      },
+      h(Icon, { name: icon, size: 16 }),
+      h("span", { className: "adm-editor-tab__label" }, text),
+    );
+  // What still stands between this listing and the public site, one line
+  // each, in the words a broker uses. The Quality tab keeps the detail.
+  const publishBlockers = listingPublishBlockers(ui, { workflow, qualityReview, schemaPresent: Boolean(page.listing.seo?.schema_present), staleCount: staleTranslations.length });
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -9965,8 +10335,9 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: page.listing.id,
-          subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
+          title: listingHeading,
+          subtitle: listingName || undefined,
+          meta: `${title} · ${page.listing.source_domain} · ${String(page.listing.source_locale || "").toUpperCase()}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
         page.runtime_data_mode === "durable_only"
@@ -9974,27 +10345,32 @@ function ListingEditorBody({ page }) {
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(DataAvailabilityNotice, { page }),
-      h("details", { className: "adm-editor-overview" },
-        h("summary", null, statusText(ui, page.listing.cms_status), " · ", ui.listingChecks),
-        h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" })),
+      h(
+        "section",
+        { className: "adm-editor-status", "aria-label": ui.publishingStatus, "data-editor-status": String(publishBlockers.length), "data-summary-kind": "listing-editor" },
+        h("h2", null, ui.publishingStatus),
+        publishBlockers.length
+          ? h("ul", null, ...publishBlockers.map((blocker) => h("li", { key: blocker.key, "data-editor-blocker": blocker.key }, blocker.text)))
+          : h("p", null, ui.nothingBlocksPublishing),
+      ),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
-        h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
-        h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
-        h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
-        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, "SEO")),
-        h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
+        editorTabLink("facts", label(copy, "facts", "Facts"), "pencil"),
+        editorTabLink("translations", label(copy, "translations", "Translations"), "languages"),
+        editorTabLink("media", label(copy, "media", "Media"), "camera"),
+        editorTabLink("seo", "SEO", "search", ui.seoSettings),
+        editorTabLink("quality", label(copy, "quality", "Quality"), "shield-check"),
       ),
       h(
         "div",
-        { className: "adm-editor-shell", "data-editor-shell": "true" },
-        h(
-          "div",
+        { className: "adm-editor-shell", "data-editor-shell": "true", "data-editor-tab": activeTab },
+        editorMainColumn(
+          activeTab,
           { className: "adm-editor-main" },
           h(
             Panel,
-            { title: label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
+            { title: activeTab === "seo" ? ui.seoSettings : label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
             h(
               "form",
               {
@@ -10022,18 +10398,20 @@ function ListingEditorBody({ page }) {
                 defaultValue: currentOperatorId(page, ""),
                 "data-editor-name": "true",
               }),
-              page.factReview?.rows?.length
+              activeTab === "facts" && page.factReview?.rows?.length
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
-              h(
-                "section",
-                { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
-              ),
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }) : null,
+              activeTab === "seo"
+                ? h(
+                    "section",
+                    { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
+                    editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
+                  )
+                : null,
               canEditContent
                 ? [
                     h(
@@ -10091,8 +10469,8 @@ function ListingEditorBody({ page }) {
             ),
           ),
         ),
-        h(
-          "section",
+        editorSupportSection(
+          activeTab,
           { className: "adm-editor-support", "data-editor-readiness-rail": "true" },
           h(
             Panel,
@@ -10127,7 +10505,7 @@ function ListingEditorBody({ page }) {
               { className: "adm-editor-facts", "data-editor-readiness": "true" },
               ...[
                 [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), PILL_TONES[page.listing.cms_status] || "ink"],
-                [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
+                [ui.searchMarkup, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
                 [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, workflow.availability_verified_at ? "success" : "sun"],
                 [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, workflow.publish_approved ? "success" : "sun"],
               ].map(([factLabel, value, tone]) =>
@@ -10243,8 +10621,18 @@ function ListingEditorBody({ page }) {
               "section",
               { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
               reviewableMedia.length
-                ? reviewableMedia.map((item) => {
+                ? reviewableMedia.map((item, index) => {
                     const sourceUrl = item.source_url || item.url || item.asset_url || "";
+                    // The heading names the asset the way a person counts it
+                    // ("Photo 3 of 17"); the generated id is evidence and goes
+                    // in the caption, as on the pipeline and contact cards.
+                    const sameKind = reviewableMedia.filter((other) => other.kind === item.kind);
+                    const assetLabel = fillTemplate(ui.mediaAssetPosition, {
+                      kind: fieldText(ui, `media_kind_${item.kind}`),
+                      index: sameKind.indexOf(item) + 1,
+                      total: sameKind.length,
+                    });
+                    const operatorId = currentOperatorId(page, "");
                     // The preview box is a small 16:10 card. Painting a 2560px
                     // photo into it downloads the whole photograph to draw a
                     // thumbnail, which is what the 640px rendition exists to
@@ -10266,7 +10654,7 @@ function ListingEditorBody({ page }) {
                       h(
                         "header",
                         { className: "adm-media-asset__header" },
-                        h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
+                        h("div", null, h("strong", null, assetLabel), h("code", { className: "crm-mono adm-id-caption" }, item.asset_id)),
                         h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
                       ),
                       // Every asset gets a deliberate state: loading and failed
@@ -10303,7 +10691,7 @@ function ListingEditorBody({ page }) {
                       canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
                         ? h(
                             "details",
-                            { className: "adm-media-review", "data-media-replacement": item.asset_id },
+                            { className: "adm-media-review adm-media-replacement", "data-media-replacement": item.asset_id },
                             h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
                             h(
                               "form",
@@ -10311,7 +10699,7 @@ function ListingEditorBody({ page }) {
                                 method: "post",
                                 action: "/api/admin/media/uploads",
                                 enctype: "multipart/form-data",
-                                className: "adm-form adm-media-upload",
+                                className: "adm-form adm-media-upload adm-media-replacement__form",
                                 "data-media-upload-form": "replacement",
                                 "data-media-upload-pending": ui.mediaUploadPending,
                                 "data-media-upload-success": ui.mediaUploadSuccess,
@@ -10411,7 +10799,19 @@ function ListingEditorBody({ page }) {
                                   ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
                                   : null,
                                 h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
-                                h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
+                                // The signed-in operator is the reviewer of record; the
+                                // form carries the id, the screen shows a witness line
+                                // with the id as a caption rather than an editable key.
+                                operatorId
+                                  ? h(
+                                      "div",
+                                      { className: "adm-media-review__reviewer", "data-media-reviewer": operatorId },
+                                      h("input", { type: "hidden", name: "reviewer", value: operatorId }),
+                                      h("span", { className: "adm-media-review__reviewer-label" }, label(copy, "reviewer", "Reviewer")),
+                                      h("span", { className: "adm-media-review__reviewer-name" }, ui.mediaReviewerSignedIn),
+                                      h("code", { className: "crm-mono adm-id-caption" }, operatorId),
+                                    )
+                                  : h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
                                 h(
                                   "label",
                                   { className: "adm-check" },

@@ -81,3 +81,9 @@ test("monitoring drill closes the alert and runtime evidence loop", () => {
   assert.match(workflow, /docker exec --user 1001:1001 "\$container" sh -c 'node production\/scripts\/validate-monitoring-rollback-report\.mjs && node production\/scripts\/build-launch-readiness\.mjs'/);
   assert.match(workflow, /blockers\.includes\("monitoring_rollback"\)/);
 });
+
+test("the isolated drill Worker never carries the canonical zone routes", () => {
+  const stamps = workflow.split("Expected the production Worker name exactly once").length - 1;
+  assert.ok(stamps >= 1, "the drill stamps the release marker into the config");
+  assert.equal(workflow.split(`.replace(routesBlock, '"routes": []')`).length - 1, stamps, "every stamped config drops the routes block");
+});

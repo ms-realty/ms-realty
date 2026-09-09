@@ -517,23 +517,26 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
    and a dark well in the dark one. Naming the ramp step directly, as this rule
    used to, left a cream track under dark type once the palette flipped. */
 .crm-seg { padding: 3px; gap: 2px; border-radius: var(--radius-full); background: var(--surface-sunken); }
-.crm-seg.adm-locales { margin-left: auto; flex: none; }
-[dir="rtl"] .crm-seg.adm-locales { margin-left: 0; margin-right: auto; }
+/* Language switch: one copy in the rail's profile block, one in the phone
+   drawer. The drawer copy is hidden until the drawer exists (max-width: 1023px). */
+.crm-seg.adm-locales { flex: none; }
+.adm-locales--drawer { display: none; }
 
 /* ---- Theme switch: system · light · dark ----
    The workbench twin of the public site's control, riding the same segmented
-   track as the language switcher it sits beside. Both copies ship hidden and
-   the head script reveals them by stamping data-theme-ready on the root, so an
-   operator without JavaScript is never shown a control that cannot act. The
-   selected target paints from the root attribute rather than from aria-pressed
-   so it is correct in the first frame, before the deferred script runs. */
+   track as the language switcher it sits above in the rail's profile block.
+   Both copies ship hidden and the head script reveals them by stamping
+   data-theme-ready on the root, so an operator without JavaScript is never
+   shown a control that cannot act. The selected target paints from the root
+   attribute rather than from aria-pressed so it is correct in the first frame,
+   before the deferred script runs. */
 .adm-theme,
 .crm-seg.adm-theme { display: none; }
-html[data-theme-ready] .crm-seg.adm-theme--top { display: inline-flex; }
+html[data-theme-ready] .crm-seg.adm-theme--rail { display: inline-flex; }
 .adm-theme button { width: 36px; min-width: 36px; padding: 0; }
-html:not([data-theme]) .adm-theme--top button[data-theme-option="system"],
-html[data-theme="light"] .adm-theme--top button[data-theme-option="light"],
-html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
+html:not([data-theme]) .adm-theme--rail button[data-theme-option="system"],
+html[data-theme="light"] .adm-theme--rail button[data-theme-option="light"],
+html[data-theme="dark"] .adm-theme--rail button[data-theme-option="dark"] {
   background: var(--surface);
   color: var(--text-strong);
   box-shadow: var(--shadow-xs);
@@ -1502,7 +1505,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 @media (max-width: 599px) {
   .adm-editor-tab__label { display: none; }
 }
-.adm-editor-tabs .mk-tab[aria-current="location"] {
+.adm-editor-tabs .mk-tab[aria-current="location"],
+.adm-editor-tabs .mk-tab[aria-current="page"] {
   border-bottom-color: var(--ink-800);
   color: var(--text-strong);
 }
@@ -1550,17 +1554,30 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-editor-support [data-translation-panel] .adm-translations { padding-inline: var(--space-5); padding-bottom: var(--space-5); }
 .adm-editor-support [data-translation-panel] .adm-translations li + li { margin-top: var(--space-2); }
 
-.adm-media-manager { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-4); padding: 0 var(--space-5) var(--space-5); }
-.adm-media-asset { display: grid; min-width: 0; gap: var(--space-3); }
-.adm-media-asset__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+/* Cards sit at their own height: one open review panel must not stretch
+   every neighbour in the row into a tall card with a blank lower half. */
+.adm-media-manager { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-4); align-items: start; padding: 0 var(--space-5) var(--space-5); }
+.adm-media-asset { display: grid; min-width: 0; gap: var(--space-3); align-self: start; }
+/* Title, id caption and status stack: a 275px card cannot seat "Photo 5 of
+   19" beside a long status pill without breaking the title letter by letter. */
+.adm-media-asset__header { display: grid; align-items: start; gap: var(--space-1); }
 .adm-media-asset__header > div { display: grid; min-width: 0; gap: 3px; }
-.adm-media-asset__header small { overflow: hidden; text-overflow: ellipsis; }
+.adm-media-asset__header .crm-pill { width: fit-content; max-width: 100%; white-space: normal; }
 .adm-media-asset__source { width: max-content; max-width: 100%; color: var(--adm-media-source); font-size: var(--text-sm); text-decoration: none; }
 .adm-media-review { min-width: 0; border-top: 1px solid var(--border); }
 .adm-media-review > summary { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--text-link); cursor: pointer; font-size: var(--text-sm); font-weight: var(--fw-semibold); list-style: none; }
 .adm-media-review > summary::-webkit-details-marker { display: none; }
 .adm-media-review[open] > summary { margin-bottom: var(--space-3); }
+/* The replacement panel inherits the two-column .adm-form grid; inside a
+   320px card that left the hint a one-character column. One full-width
+   column with a floor on its width keeps the file input and the hint legible. */
+.adm-media-replacement__form { grid-template-columns: minmax(0, 1fr); min-width: min(100%, 16rem); margin-bottom: 0; }
+.adm-media-replacement__form > label:not(.adm-check) > input[type="file"] { max-width: 100%; }
+.adm-media-replacement__form .adm-note { min-width: 0; overflow-wrap: anywhere; }
 .adm-media-review-form { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+.adm-media-review__reviewer { display: grid; min-width: 0; gap: 4px; align-content: start; }
+.adm-media-review__reviewer-label { color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-media-review__reviewer-name { color: var(--text-strong); font-size: var(--text-sm); }
 .adm-media-review-form label { display: grid; min-width: 0; gap: 6px; color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
 .adm-media-review-form label:has(> textarea),
 .adm-media-review-form .adm-check,
@@ -1824,7 +1841,38 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .crm-scroll { padding: var(--space-5); }
   .adm-mobile-nav { order: 1; display: block; margin: 0; }
   [dir="rtl"] .adm-mobile-nav { margin: 0 0 0 auto; }
-  .crm-seg.adm-locales { order: 3; margin-inline-start: auto; }
+  /* The rail is gone on a phone, so its language switch goes with it; the
+     drawer carries its own copy under the profile, in the drawer's idiom. */
+  .adm-locales--rail { display: none; }
+  .adm-mobile-nav__prefs { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border-inverse); }
+  .adm-mobile-nav__prefs .crm-seg.adm-locales--drawer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+  .adm-locales--drawer a {
+    display: grid;
+    min-height: 44px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: var(--radius-button);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.76);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+    box-shadow: none;
+  }
+  .adm-locales--drawer a:hover { background: rgba(255, 255, 255, 0.16); color: #fff; text-decoration: none; }
+  .adm-locales--drawer a:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+  /* Outranks the Atlas segmented-track selection tint, which would paint a
+     pale pill on the ink drawer. */
+  .crm-app .adm-locales--drawer a[data-on="1"] { border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.2); color: #fff; box-shadow: none; }
+  .crm-app .adm-owner-identity--mobile .adm-owner-identity__copy strong { color: #fff; }
+  .crm-app .adm-owner-identity--mobile .adm-owner-identity__copy small,
+  .crm-app .adm-owner-identity--mobile .adm-owner-identity__role { color: rgba(255, 255, 255, 0.7); }
   .adm-mobile-nav__summary {
     display: grid;
     width: 44px;
@@ -1841,7 +1889,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-mobile-nav__panel {
     position: fixed;
     z-index: 30;
-    inset: 64px 0 0;
+    inset: var(--adm-shell-top-offset, 64px) 0 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: var(--space-3) var(--space-4) var(--space-5);
@@ -1886,7 +1934,26 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
     letter-spacing: var(--tracking-caps);
     text-transform: uppercase;
   }
-  .adm-mobile-nav__destination { display: grid; gap: 2px; min-width: 0; }  .adm-owner-identity--mobile { margin-top: var(--space-4); border: 1px solid var(--border-inverse); background: var(--ink-800); }
+  .adm-mobile-nav__destination { display: grid; gap: 2px; min-width: 0; }
+  /* Advanced in the drawer: the same native disclosure as the rail, closed by
+     default so the eight primary destinations and the profile fit one screen. */
+  .adm-mobile-nav__advanced { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--border-inverse); }
+  .adm-mobile-nav__group--summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    margin: 0;
+    padding: var(--space-2);
+    border-radius: var(--radius-button);
+    list-style: none;
+    cursor: pointer;
+  }
+  .adm-mobile-nav__group--summary::-webkit-details-marker { display: none; }
+  .adm-mobile-nav__group--summary:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+  .adm-mobile-nav__group--summary:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+  .adm-mobile-nav__advanced[open] > .adm-mobile-nav__group--summary svg { transform: rotate(90deg); }
+  .adm-owner-identity--mobile { margin-top: var(--space-4); border: 1px solid var(--border-inverse); background: var(--ink-800); }
   .adm-mobile-nav__link {
     display: flex;
     min-width: 0;
@@ -1905,19 +1972,14 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-mobile-nav__link--on { background: rgba(255, 255, 255, 0.1); color: #fff; }
   .adm-mobile-nav__link--on .mk-icon { color: var(--brick-400); }
   .adm-mobile-nav__link .crm-nav__badge { flex: none; }
-  /* The top bar already holds the menu button and the language switcher; a
-     third group overflows a 375px viewport, so the theme switch moves into the
-     drawer. The drawer is an inverse surface in both palettes, so this copy is
+  /* The rail copy of the theme switch leaves with the rail; the drawer copy is
      painted in the drawer's own white-on-ink idiom rather than on the pale
-     segmented track. */
-  html[data-theme-ready] .crm-seg.adm-theme--top { display: none; }
+     segmented track, because the drawer is an inverse surface in both palettes. */
+  html[data-theme-ready] .crm-seg.adm-theme--rail { display: none; }
   html[data-theme-ready] .adm-theme--drawer {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border-inverse);
   }
   .adm-theme--drawer button {
     display: grid;
@@ -3287,27 +3349,31 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Catalogue: Paper 05.01–05.02 puts records first and review beside the work.
-   Existing forms and evidence queues remain in their owning sections. */
+/* Catalogue: records first; the review queues (facts, duplicates, areas) sit
+   under the list as one closed disclosure rather than a second column. */
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-workspace {
-  display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start;
 }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records {
   display: grid; gap: 20px; min-width: 0;
 }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review {
-  background: var(--atlas-surface); border-radius: 24px; padding: 20px; min-width: 0;
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues {
+  background: var(--atlas-surface); border-radius: 24px; padding: 4px 20px; min-width: 0;
 }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review h2 { margin: 0 0 16px; font-size: 20px; line-height: 24px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues > summary {
+  display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 12px 0; cursor: pointer;
+  font-size: 16px; line-height: 24px; font-weight: 600; color: var(--text-strong);
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues[open] > summary { margin-bottom: 4px; }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-section { border-block-start: 1px solid var(--atlas-line); }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-section > summary {
   min-height: 52px; padding: 12px 0; cursor: pointer; font-size: 16px; line-height: 24px; font-weight: 600;
 }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .crm-panel { border: 0; box-shadow: none; background: transparent; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review :is(.adm-filterbar,.adm-report-grid) { grid-template-columns: minmax(0, 1fr); }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list > li { flex-wrap: wrap; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list__body { min-width: 0; overflow-wrap: anywhere; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list__actions { flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .crm-panel { border: 0; box-shadow: none; background: transparent; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-report-grid { grid-template-columns: minmax(0, 1fr); }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-task-list > li { flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-task-list__body { min-width: 0; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-task-list__actions { flex-wrap: wrap; }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-filterbar__summary { grid-column: 1 / -1; }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table { display: block; min-width: 0; width: 100%; }
@@ -3330,8 +3396,11 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-select-hit { min-width: 44px; min-height: 44px; }
 .crm-app main[data-react-admin-ui="listing-manager"] :is(input:not([type="checkbox"]), select, button, .mk-btn),
 .crm-app main[data-react-admin-ui="listing-editor"] :is(input:not([type="hidden"]):not([type="checkbox"]), select, button, .mk-btn) { min-height: 44px; }
-.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 { font-size: 32px; line-height: 36px; }
-.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p { font-size: 14px; line-height: 20px; }
+/* Dense product UI: the editor heading is a 21px line naming the listing,
+   the crawled title sits under it at body size, the source facts as a caption. */
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 { font-size: 21px; line-height: 28px; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p { font-size: 14px; line-height: 20px; color: var(--text-muted); }
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph__meta { display: block; margin-top: 2px; color: var(--text-subtle); font-size: 12px; line-height: 16px; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell { grid-template-columns: minmax(0,1fr) 360px; gap: 24px; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-main { grid-column: 1; grid-row: 1 / span 2; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support { display: contents; }
@@ -3339,6 +3408,14 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-quality-panel] { grid-column: 2; grid-row: 1; background: var(--atlas-surface); }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-translation-panel] { grid-column: 2; grid-row: 2; background: var(--atlas-surface); }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-media-review-panel] { grid-column: 1 / -1; }
+/* One tab at a time: the shell is a single column and the form keeps a
+   readable measure instead of stretching across a 1440px canvas. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] { grid-template-columns: minmax(0,1fr); }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] .adm-editor-main { grid-column: 1; grid-row: auto; max-width: 920px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] .adm-editor-support { display: grid; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] .adm-editor-support > * { grid-column: 1; grid-row: auto; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab="quality"] .adm-editor-support,
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab="translations"] .adm-editor-support { max-width: 920px; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-facts { display: grid; grid-template-columns: 1fr; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-savebar { background: var(--atlas-canvas); border-color: var(--atlas-control); }
 .crm-app main[data-react-admin-ui="listing-editor"] :is(input,select,textarea,button):disabled { opacity: 1; border-color: var(--atlas-control); color: var(--atlas-muted); }
@@ -3352,7 +3429,7 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table tr { grid-template-columns: 44px minmax(0,1fr); padding: 12px; }
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="listing"] { padding: 0; }
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="action"] { grid-column: 1 / -1; }
-  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review { padding: 16px; }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues { padding: 0 16px; }
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-summary-strip,
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-summary-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs { display: flex; flex-wrap: wrap; }
@@ -3377,8 +3454,7 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: minmax(0,1fr); }
 }
 
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-identity__desktop strong { white-space: normal; overflow: visible; text-overflow: clip; font-size: 16px; line-height: 20px; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-identity__desktop code { font-size: 14px; line-height: 20px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-card__title { white-space: normal; overflow: visible; text-overflow: clip; font-size: 16px; line-height: 20px; }
 @media (max-width: 1100px) {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-quality-panel],
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-translation-panel],
@@ -3393,7 +3469,7 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="contacts"] .adm-contact-directory-row { display: grid; gap: 8px; width: 100%; min-width: 0; }
 .crm-app main[data-react-admin-ui="contacts"] .adm-contact-directory-row span { font-size: 14px; line-height: 20px; color: var(--atlas-muted); overflow-wrap: anywhere; }
 .crm-app main[data-react-admin-ui="contacts"] .adm-contact-card { border: 0; border-inline-start: 1px solid var(--atlas-line); border-radius: 0; box-shadow: none; padding: 20px; }
-.crm-app main[data-react-admin-ui="contacts"] .adm-contact-card h3 { font-size: 24px; line-height: 28px; }
+.crm-app main[data-react-admin-ui="contacts"] .adm-contact-card h3 { font-size: 20px; line-height: 24px; }
 .crm-app main[data-react-admin-ui="contacts"] .adm-contact-facts { grid-template-columns: 1fr; background: var(--atlas-surface); border-radius: 16px; padding: 16px; gap: 16px; }
 .crm-app main[data-react-admin-ui="contacts"] .adm-contact-facts > div { padding: 0; background: transparent; }
 .crm-app main[data-react-admin-ui="contacts"] .adm-contact-facts :is(dt,dd) { font-size: 14px; line-height: 20px; }

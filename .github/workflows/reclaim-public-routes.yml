@@ -17,6 +17,11 @@ on:
         required: false
         default: false
         type: boolean
+      release_construction_hold:
+        description: Point every canonical public route back at the production Worker
+        required: false
+        default: false
+        type: boolean
       detach_foreign_routes:
         description: >-
           Type the name of the Worker whose canonical .com routes should be
@@ -111,6 +116,24 @@ jobs:
         with:
           name: public-hold-routes
           path: public-hold-*.json
+          if-no-files-found: warn
+
+      - name: Release the public construction hold
+        if: ${{ inputs.release_construction_hold }}
+        env:
+          ZONE_ID: ${{ steps.zone.outputs.id }}
+        run: |
+          test -z "$DETACH_WORKER"
+          test "$MS_REALTY_PUBLIC_CONSTRUCTION_HOLD" != "true"
+          node production/scripts/release-public-hold.mjs
+          MS_REALTY_PUBLIC_URL=https://makler-realty.com node production/scripts/probe-canonical-site.mjs
+
+      - name: Preserve released route receipts
+        if: ${{ always() && inputs.release_construction_hold }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-release-routes
+          path: public-release-*.json
           if-no-files-found: warn
 
       - name: Detach the named Worker from the canonical public routes

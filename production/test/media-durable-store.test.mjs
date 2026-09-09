@@ -23,7 +23,7 @@ import { loadCmsSeed } from "../lib/runtime.mjs";
 import { createPayloadDraftRuntime } from "./payload-draft-runtime.fixture.mjs";
 import { photoJpegWithGpsExif } from "./image-upload.fixture.mjs";
 
-const LISTING_ID = "MS-CRAWL-0001";
+const LISTING_ID = "MS-00815";
 const MEDIA_HOST = "ms-realty.ms-realty-bg.workers.dev";
 const LIVE_ENV = {
   NODE_ENV: "production",
@@ -315,7 +315,7 @@ test("durable media review promotes private bytes and rendition, persists public
   assert.equal(persisted.human_confirmed, true);
   assert.equal(persisted.review_history.length, 1);
   assert.equal(persisted.review_history[0].review_note, review.review_note);
-  assert.match(persisted.storage_key, /\/wp-content\/uploads\/2026\/09\/listings\/MS-CRAWL-0001\//);
+  assert.match(persisted.storage_key, /\/wp-content\/uploads\/2026\/09\/listings\/MS-00815\//);
   assert.equal(objects.has(record.storage_key), false);
   assert.equal(objects.has(record.rendition.storage_key), false);
   assert.deepEqual(objects.get(persisted.storage_key), Buffer.from("review-media-bytes"));
@@ -403,7 +403,7 @@ test("durable replacement keeps the source private and exposes the reviewed chil
   assert.equal(sourceDocument.is_public, false);
   assert.equal(sourceDocument.review_status, "reviewed_private");
   assert.equal(sourceDocument.replacement_asset_id, childUpload.asset_id);
-  assert.match(sourceDocument.storage_key, /\/wp-content\/private\/listings\/MS-CRAWL-0001\//);
+  assert.match(sourceDocument.storage_key, /\/wp-content\/private\/listings\/MS-00815\//);
   assert.equal(mediaStorage.objects.has(sourcePublicKey), false);
   assert.deepEqual(mediaStorage.objects.get(sourceDocument.storage_key), Buffer.from("source"));
   assert.equal(childDocument.is_public, true);
@@ -701,7 +701,7 @@ test("Node and Next admin adapters read the same durable media projection and ke
     assert.equal((await nextReview.json()).review_status, "approved_by_human");
     assert.equal(rawMedia(harness, routeAsset.asset_id).is_public, true);
     const editor = await renderAppAdminResponse(
-      new Request(`https://live.test/admin/listings/edit?listingId=${LISTING_ID}&locale=en`),
+      new Request(`https://live.test/admin/listings/edit?listingId=${LISTING_ID}&locale=en&tab=media`),
       { config },
     );
     assert.equal(editor.status, 200);

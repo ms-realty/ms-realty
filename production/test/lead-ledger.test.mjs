@@ -23,7 +23,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
         source: "website_listing_detail",
         intent: "inquiry",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { email: "Noa@example.com" },
         request_details: { callback_time: "After 14:00" },
         requirements: {
@@ -54,7 +54,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
         source: "website_viewing_request",
         intent: "viewing",
         leadType: "buyer",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { email: "noa@example.com" },
       },
       hermes_reply_draft: { broker_approval_required: true },

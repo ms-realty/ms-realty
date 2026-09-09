@@ -114,7 +114,7 @@ docker compose --env-file /opt/ms-realty/shared/.env.production-review \
   -f production/docker-compose.local-production.yml \
   -f production/docker-compose.production-review.yml \
   run --rm --no-deps app node production/scripts/run-hermes-source-review.mjs \
-  --listing MS-CRAWL-0002 --task "source-review-$(date -u +%Y%m%d)" \
+  --listing MS-00907 --task "source-review-$(date -u +%Y%m%d)" \
   --actor "<operator name>" --owner agency_admin \
   --reason "Release evidence: Hermes source passage review" \
   --report /runtime-evidence/hermes-draft-worker-report.json --confirm-task

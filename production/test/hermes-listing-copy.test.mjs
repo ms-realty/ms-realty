@@ -15,7 +15,7 @@ import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const AUTH = { authorization: "Bearer local-admin-smoke", "content-type": "application/json" };
-const LISTING = "MS-CRAWL-0001";
+const LISTING = "MS-00815";
 
 function harness({ provider } = {}) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-copy-"));
@@ -107,8 +107,15 @@ test("the endpoint refuses a field that is not listing copy", async () => {
 
 test("the same control appears on every field it can draft", async () => {
   const { app } = harness({ provider: async () => ({ text: "unused" }) });
-  const page = await dispatchHttp(app, { url: `/admin/listings/edit?listingId=${LISTING}&locale=en`, headers: { authorization: AUTH.authorization } });
-  assert.equal(page.status, 200);
+  // The editor renders one tab per request; the assisted values live on the
+  // Facts, SEO and Media tabs, so the contract reads all three.
+  const pages = [];
+  for (const tab of ["facts", "seo", "media"]) {
+    const tabPage = await dispatchHttp(app, { url: `/admin/listings/edit?listingId=${LISTING}&locale=en&tab=${tab}`, headers: { authorization: AUTH.authorization } });
+    assert.equal(tabPage.status, 200, tab);
+    pages.push(tabPage.body);
+  }
+  const page = { status: 200, body: pages.join("\n") };
 
   const buttons = [...page.body.matchAll(/<button[^>]*data-hermes-assist="true"[^>]*>/g)].map((match) => match[0]);
   const fields = buttons.map((button) => button.match(/data-hermes-assist-field="([^"]+)"/)[1]);
@@ -171,7 +178,7 @@ test("the browser refuses a draft response that claims it may publish", () => {
 // two values outside the listing editor that now carry the same control.
 test("the media alt text a publication is blocked on carries the same control", async () => {
   const { app } = harness({ provider: async () => ({ text: "unused" }) });
-  const page = await dispatchHttp(app, { url: `/admin/listings/edit?listingId=${LISTING}&locale=en`, headers: { authorization: AUTH.authorization } });
+  const page = await dispatchHttp(app, { url: `/admin/listings/edit?listingId=${LISTING}&locale=en&tab=media`, headers: { authorization: AUTH.authorization } });
   assert.equal(page.status, 200);
 
   const alt = [...page.body.matchAll(/<button[^>]*data-hermes-assist="true"[^>]*data-hermes-assist-field="alt_text"[^>]*>/g)];

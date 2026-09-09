@@ -130,6 +130,14 @@ const GROUP_FIELDS = {
 };
 
 function arrayFieldsFor(field) {
+  // Old URLs that pointed at this lot on either legacy domain. Plain text,
+  // not Payload's url type, which the manifest adaptation rejects.
+  if (field.name === "legacy_urls") {
+    return [
+      { name: "domain", type: "text", required: true },
+      { name: "url", type: "text", required: true },
+    ];
+  }
   if (field.name === "fallback_gallery") {
     return [
       { name: "url", type: "text" },
@@ -250,6 +258,21 @@ export function assertPayloadCollections(config) {
     if (hasUnadaptedManifestField) {
       throw new Error(`Payload collection contains unadapted manifest fields: ${collection.slug}`);
     }
+  }
+  const listings = config.collections.find((collection) => collection.slug === "listings");
+  const listingFields = new Map((listings?.fields || []).map((field) => [field.name, field]));
+  if (listingFields.get("lot_number")?.type !== "number" || listingFields.get("lot_number")?.required !== true) {
+    throw new Error("Payload listings require a required numeric lot_number");
+  }
+  if (listingFields.get("migration_id")?.type !== "text" || listingFields.get("migration_id")?.unique !== true) {
+    throw new Error("Payload listings require a unique migration_id");
+  }
+  const legacyUrls = listingFields.get("legacy_urls");
+  if (
+    legacyUrls?.type !== "array" ||
+    !["domain", "url"].every((name) => legacyUrls.fields?.some((item) => item.name === name && item.type === "text"))
+  ) {
+    throw new Error("Payload listings require legacy_urls rows of domain and url text");
   }
   const translations = config.collections.find((collection) => collection.slug === "listing_translations");
   const translationFields = new Map((translations?.fields || []).map((field) => [field.name, field]));

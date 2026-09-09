@@ -18,7 +18,7 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
 const listings = loadListings();
-const listing = findListingById(listings, "MS-CRAWL-0001");
+const listing = findListingById(listings, "MS-00815");
 const guidePath = "/en/guides/foreign-buyers";
 const guideDocuments = approvedContentDocumentsForPath(readApprovedCmsContent(), guidePath);
 

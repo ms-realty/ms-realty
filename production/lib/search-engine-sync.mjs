@@ -1556,7 +1556,7 @@ export async function queryTypesense({
   queryApiKey = process.env.TYPESENSE_QUERY_API_KEY,
   collectionName = process.env.TYPESENSE_COLLECTION || "ms_realty_listings",
   q = "Sandanski",
-  filterBy = "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
+  filterBy = "translation_indexable:=true && locale:=bg && source_listing_id:=MS-00815",
   perPage = 5,
   exactReference = null,
   sortBy = null,
@@ -1614,7 +1614,7 @@ export async function queryMeilisearch({
   queryApiKey = process.env.MEILI_QUERY_API_KEY,
   indexName = process.env.MEILI_INDEX || "ms_realty_listings",
   q = "Sandanski",
-  filter = 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
+  filter = 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-00815"',
   limit = 5,
   fetchImpl = globalThis.fetch,
   lookupImpl,
@@ -1782,7 +1782,9 @@ async function queryPostgres({
       sql`(d."listing_reference" = ${normalized.exact_reference} OR d."source_listing_id" = ${normalized.exact_reference})`,
     );
   } else {
-    const tokens = foldedTokens(normalized?.text_query || q);
+    // An intent has already had its filter vocabulary and reference lifted
+    // out of the text; the raw q must not put those words back.
+    const tokens = foldedTokens(normalized ? normalized.text_query : q);
     if (tokens.length) {
       conditions.push(
         sql`(${sql.join(
@@ -2094,8 +2096,15 @@ export async function queryPublicSearch({
   fetchImpl = globalThis.fetch,
 } = {}) {
   const normalizedLocales = normalizedLocaleCodes(localeCodes);
-  const normalizedIntent = backendIntent(intent || (Object.keys(filters).length ? filters : null), normalizedLocales);
-  const query = normalizedIntent?.exact_reference || normalizedIntent?.text_query || q;
+  // A caller without an intent still gets one, built from its filters and raw
+  // text, so references and filter vocabulary are read the same way here as
+  // in the in-memory engine.
+  const lexical = String(q || "").trim();
+  const normalizedIntent = backendIntent(
+    intent || (Object.keys(filters).length || lexical ? { ...filters, ...(lexical ? { text_query: lexical } : {}) } : null),
+    normalizedLocales,
+  );
+  const query = normalizedIntent ? normalizedIntent.exact_reference || normalizedIntent.text_query : "";
   const typesenseFilter = typesenseFilterForIntent(normalizedIntent, normalizedLocales);
   const meilisearchFilter = meilisearchFilterForIntent(normalizedIntent, normalizedLocales);
   const typesenseSort = typesenseSortFor(normalizedIntent);

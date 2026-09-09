@@ -17,8 +17,12 @@
   // re-asserts ownership: a second Worker can only take a public URL by being
   // deployed with a more specific route, which is a visible act rather than an
   // accident. The site root plus the seven locale prefixes is the whole public
-  // site (locales/registry.json url_strategy = locale_prefix); /admin, /api,
-  // media and the SEO files travel on the same Worker anyway.
+  // site (locales/registry.json url_strategy = locale_prefix). The zone
+  // wildcards carry everything without a locale prefix: /admin, /api, the
+  // SEO files, /wp-content media and all 457 legacy URL decisions. A deploy
+  // rewrites this Worker's routes to exactly this list, so a wildcard that
+  // only lives in the Cloudflare dashboard is dropped by the next release and
+  // those paths fall through to the suspended legacy host (2026-09-08).
   //
   // makler-realty.ru is deliberately absent: the app does not yet publish that
   // host's canonical origin, so claiming its traffic would publish workers.dev
@@ -26,6 +30,7 @@
   // answers for it.
   "routes": [
     { "pattern": "makler-realty.com/", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/*", "zone_name": "makler-realty.com" },
     { "pattern": "makler-realty.com/bg*", "zone_name": "makler-realty.com" },
     { "pattern": "makler-realty.com/en*", "zone_name": "makler-realty.com" },
     { "pattern": "makler-realty.com/de*", "zone_name": "makler-realty.com" },
@@ -34,6 +39,7 @@
     { "pattern": "makler-realty.com/el*", "zone_name": "makler-realty.com" },
     { "pattern": "makler-realty.com/he*", "zone_name": "makler-realty.com" },
     { "pattern": "www.makler-realty.com/", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/*", "zone_name": "makler-realty.com" },
     { "pattern": "www.makler-realty.com/bg*", "zone_name": "makler-realty.com" },
     { "pattern": "www.makler-realty.com/en*", "zone_name": "makler-realty.com" },
     { "pattern": "www.makler-realty.com/de*", "zone_name": "makler-realty.com" },

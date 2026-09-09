@@ -38,8 +38,8 @@ const DURABLE_ENV = Object.freeze({
   DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
 });
 const ENQUIRY_ID = "lead-draft-11111111-2222-3333-4444-555555555555";
-const LISTING_ID = "MS-CRAWL-0001";
-const LISTING_PATH = "/en/properties/MS-CRAWL-0001";
+const LISTING_ID = "MS-00815";
+const LISTING_PATH = "/en/properties/MS-00815";
 
 function workspace(extra = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-upload-routes-"));
@@ -162,7 +162,7 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(JSON.stringify(pending.body).includes(asset.asset_id), false);
 
   // The reviewer sees it in the media manager.
-  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}`, headers: ADMIN });
+  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}&tab=media`, headers: ADMIN });
   assert.equal(editor.status, 200);
   assert.ok(editor.body.includes(`data-media-asset="${asset.asset_id}"`));
   assert.ok(editor.body.includes('data-media-upload-form="true"'));
@@ -257,7 +257,7 @@ test("an approved reupload replaces one public asset without a publication gap",
   assert.ok(publishedUrls.includes(replacement.asset_url));
   assert.ok(!publishedUrls.includes(replaced.asset_url));
 
-  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}`, headers: ADMIN });
+  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}&tab=media`, headers: ADMIN });
   assert.match(editor.body, new RegExp(`data-media-replacement="${replacement.asset_id}"`));
   assert.match(editor.body, /name="replacesAssetId"/);
 });

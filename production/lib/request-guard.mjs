@@ -127,3 +127,43 @@ export function sameOriginWriteRejection(method, headers, { requestUrl } = {}) {
     return "invalid_origin";
   }
 }
+
+// A public write reaches the app through the Worker, which forwards the
+// public host in x-forwarded-host and rewrites the browser's Origin to the
+// internal origin it dials (scheme included, which differs from the plain
+// http URL the app sees). The request therefore has two legitimate hosts: the
+// public one the browser saw and the internal one the Worker presented. The
+// Worker has already enforced that the browser's Origin equals the public URL
+// scheme and all, so the app compares hosts. Anything else is refused exactly
+// as before. The 403 that blocked every enquiry form on makler-realty.com came
+// from comparing the rewritten Origin against only the forwarded public URL.
+export function publicWriteRejection(method, headers, { requestUrls = [], env = process.env } = {}) {
+  if (SAFE_METHODS.has(String(method || "GET").toUpperCase())) return null;
+  const fetchSite = readHeader(headers, "sec-fetch-site").trim().toLowerCase();
+  if (fetchSite && fetchSite !== "same-origin") return "cross_site_request";
+  const origin = readHeader(headers, "origin").trim();
+  if (!origin) return "missing_origin";
+  if (origin.toLowerCase() === "null") return "opaque_origin";
+  let source;
+  try {
+    source = new URL(origin);
+  } catch {
+    return "invalid_origin";
+  }
+  if (source.username || source.password || source.pathname !== "/" || source.search || source.hash || !["http:", "https:"].includes(source.protocol)) {
+    return "invalid_origin";
+  }
+  const originHost = canonicalWriteHost(source.host);
+  const hosts = new Set();
+  for (const candidate of requestUrls.filter(Boolean)) {
+    try {
+      const target = new URL(String(candidate));
+      if (["http:", "https:"].includes(target.protocol)) hosts.add(canonicalWriteHost(target.host));
+    } catch {
+      // an unparsable candidate simply cannot match
+    }
+  }
+  if (!hosts.size) return "unknown_host";
+  if (hosts.has(originHost)) return null;
+  return trustedWriteHosts(env).has(originHost) ? null : "cross_origin_request";
+}
