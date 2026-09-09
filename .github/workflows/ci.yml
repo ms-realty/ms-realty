@@ -289,8 +289,14 @@ jobs:
           # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'"
           chmod 0600 "$local_report"
-          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight
-          echo "valid=true" >> "$GITHUB_OUTPUT"
+          # An expired or invalid prior report means there is nothing worth
+          # preserving for a rollback; it is not a reason to refuse the release.
+          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Prior monitoring report did not validate; no report will be preserved for rollback."
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Preserve validated monitoring evidence for rollback
         if: steps.previous_monitoring.outputs.valid == 'true'
