@@ -27,11 +27,11 @@ function encodeHeaderText(value) {
   const text = String(value || "").trim();
   if (!text || HEADER_UNSAFE.test(text)) return null;
   // eslint-disable-next-line no-control-regex -- ASCII check for the encoded-word decision
-  return /^[ -~]*$/.test(text) ? text : `=?UTF-8?B?${btoa(String.fromCharCode(...new TextEncoder().encode(text)))}?=`;
+  return /^[ -~]*$/.test(text) ? text : `=?UTF-8?B?${btoa(Array.from(new TextEncoder().encode(text), (byte) => String.fromCharCode(byte)).join(""))}?=`;
 }
 
 function base64Lines(text) {
-  const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+  const encoded = btoa(Array.from(new TextEncoder().encode(text), (byte) => String.fromCharCode(byte)).join(""));
   return encoded.replace(/(.{76})/g, "$1\r\n");
 }
 
@@ -74,14 +74,28 @@ export async function sendEmail(request, env, { EmailMessage } = {}) {
 
   let body;
   try {
-    body = await request.json();
+    const reader = request.body?.getReader();
+    if (!reader) return json(400, { kind: "email_invalid" });
+    const chunks = [];
+    let size = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_BODY_BYTES) {
+        await reader.cancel();
+        return json(413, { kind: "email_too_large" });
+      }
+      chunks.push(value);
+    }
+    body = JSON.parse(await new Blob(chunks).text());
   } catch {
     return json(400, { kind: "email_invalid" });
   }
   const to = addressList(body?.to);
   const text = String(body?.text || "").trim();
   const html = body?.html ? String(body.html) : "";
-  if (!to || !text || text.length > MAX_BODY_BYTES || html.length > MAX_BODY_BYTES) return json(400, { kind: "email_invalid" });
+  if (!to || (!text && !html.trim()) || text.length > MAX_BODY_BYTES || html.length > MAX_BODY_BYTES) return json(400, { kind: "email_invalid" });
 
   const messageId = crypto.randomUUID();
   let raw;

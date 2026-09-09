@@ -177,23 +177,18 @@ can validate them.
 
 ## Email
 
-All mail runs through `ms.realty.bg@gmail.com`. Inbound addresses on
-`makler-realty.com` forward there; outbound mail leaves through Cloudflare
-Email Workers from `noreply@makler-realty.com`, and the `send_email` binding is
-pinned to that one destination. Payload (password resets, verification) and
-operator notifications use the same path; without the credential Payload
-keeps writing mail to its log, which is the "No email adapter provided"
-warning.
+Website mail uses Cloudflare Email Workers from
+`noreply@notifications.makler-realty.com`. The `send_email` binding permits
+only `ms.realty.bg@gmail.com`; password resets to other broker addresses are
+not supported by this restricted configuration.
 
-Cloudflare dashboard, zone `makler-realty.com` → Email → Email Routing:
+Verified in the agency Cloudflare account on 2026-09-09:
 
-1. Enable Email Routing and let it add the MX and SPF records.
-2. Destination addresses: add `ms.realty.bg@gmail.com` and confirm the
-   verification mail it receives.
-3. Routing rules: catch-all → forward to `ms.realty.bg@gmail.com`; add
-   `contact@`, `info@`, `office@` explicitly if the dashboard asks for them.
-4. Email Workers sends only to verified destinations, so keep the destination
-   verified; the binding refuses anything else by configuration.
+- `ms.realty.bg@gmail.com` is a verified destination.
+- `notifications.makler-realty.com` Email Sending is enabled with DNS configured.
+- Root-domain mail still uses SuperHosting (`mail.makler-realty.com`). Preserve
+  its MX/SPF records; do not enable catch-all routing or replace root mail DNS.
+- The sending subdomain has separate bounce MX, SPF, DKIM and DMARC records.
 
 Worker (Cloudflare → Workers → `ms-realty` → Settings → Variables):
 
@@ -203,7 +198,7 @@ Worker (Cloudflare → Workers → `ms-realty` → Settings → Variables):
 - `MS_REALTY_EMAIL_FROM`, `MS_REALTY_EMAIL_FROM_NAME`, `MS_REALTY_EMAIL_SEND_URL`
   are plain vars in `wrangler.jsonc`.
 
-Smoke after the next release:
+With explicit authorization to send this test message, smoke after release:
 
 ```bash
 curl --fail --silent --show-error -X POST "https://ms-realty.ms-realty-bg.workers.dev/__email/send" \
@@ -212,7 +207,8 @@ curl --fail --silent --show-error -X POST "https://ms-realty.ms-realty-bg.worker
 ```
 
 Expected: `202 {"kind":"email_accepted",...}` and the message in the Gmail
-inbox. A `502 email_rejected` means the destination is not verified yet.
+inbox. A `502 email_rejected` requires inspecting the provider reason; it does not
+by itself prove a destination-verification problem.
 
 ## Admin and integrations
 

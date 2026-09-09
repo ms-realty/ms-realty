@@ -48,7 +48,7 @@ test("the email boundary is invisible without its credential and sender, and ref
   assert.equal((await sendEmail(request(undefined, { method: "GET" }), env, { EmailMessage: FakeEmailMessage })).status, 405);
   assert.equal((await sendEmail(request({ ...message, to: "nobody" }), env, { EmailMessage: FakeEmailMessage })).status, 400);
   assert.equal((await sendEmail(request({ ...message, subject: "Split\r\nBcc: x@y.z" }), env, { EmailMessage: FakeEmailMessage })).status, 400);
-  assert.equal((await sendEmail(request({ ...message, text: "" }), env, { EmailMessage: FakeEmailMessage })).status, 400);
+  assert.equal((await sendEmail(request({ ...message, text: "", html: "" }), env, { EmailMessage: FakeEmailMessage })).status, 400);
 });
 
 test("an accepted message is one RFC 5322 envelope per recipient with UTF-8 encoded parts", async () => {
@@ -82,4 +82,16 @@ test("a plain-text message has no multipart wrapper and a refused envelope surfa
   const response = await sendEmail(request(message), env, { EmailMessage: FakeEmailMessage });
   assert.equal(response.status, 502);
   assert.equal((await response.json()).kind, "email_rejected");
+});
+
+
+test("HTML-only Payload mail and large UTF-8 bodies work; unbounded bodies are rejected", async () => {
+  const { env, sent } = harness();
+  assert.equal((await sendEmail(request({ ...message, text: "", html: "<p>Reset link</p>" }), env, { EmailMessage: FakeEmailMessage })).status, 202);
+  const text = "я".repeat(80000);
+  assert.equal((await sendEmail(request({ ...message, text, html: "" }), env, { EmailMessage: FakeEmailMessage })).status, 202);
+  const encoded = sent[1].raw.split("Content-Transfer-Encoding: base64\r\n\r\n")[1].replace(/\r\n/g, "");
+  assert.equal(Buffer.from(encoded, "base64").toString("utf8"), text);
+  assert.equal((await sendEmail(request({ ...message, text: "я".repeat(140000) }), env, { EmailMessage: FakeEmailMessage })).status, 413);
+  assert.equal(sent.length, 2);
 });
