@@ -1782,7 +1782,9 @@ async function queryPostgres({
       sql`(d."listing_reference" = ${normalized.exact_reference} OR d."source_listing_id" = ${normalized.exact_reference})`,
     );
   } else {
-    const tokens = foldedTokens(normalized?.text_query || q);
+    // An intent has already had its filter vocabulary and reference lifted
+    // out of the text; the raw q must not put those words back.
+    const tokens = foldedTokens(normalized ? normalized.text_query : q);
     if (tokens.length) {
       conditions.push(
         sql`(${sql.join(
@@ -2094,8 +2096,15 @@ export async function queryPublicSearch({
   fetchImpl = globalThis.fetch,
 } = {}) {
   const normalizedLocales = normalizedLocaleCodes(localeCodes);
-  const normalizedIntent = backendIntent(intent || (Object.keys(filters).length ? filters : null), normalizedLocales);
-  const query = normalizedIntent?.exact_reference || normalizedIntent?.text_query || q;
+  // A caller without an intent still gets one, built from its filters and raw
+  // text, so references and filter vocabulary are read the same way here as
+  // in the in-memory engine.
+  const lexical = String(q || "").trim();
+  const normalizedIntent = backendIntent(
+    intent || (Object.keys(filters).length || lexical ? { ...filters, ...(lexical ? { text_query: lexical } : {}) } : null),
+    normalizedLocales,
+  );
+  const query = normalizedIntent ? normalizedIntent.exact_reference || normalizedIntent.text_query : "";
   const typesenseFilter = typesenseFilterForIntent(normalizedIntent, normalizedLocales);
   const meilisearchFilter = meilisearchFilterForIntent(normalizedIntent, normalizedLocales);
   const typesenseSort = typesenseSortFor(normalizedIntent);

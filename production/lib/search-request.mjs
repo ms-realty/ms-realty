@@ -70,7 +70,7 @@ const SEARCH_REQUEST_FIELDS = new Set([
 ]);
 const SEARCH_INTENT_FIELD_SET = new Set(SEARCH_INTENT_INPUT_FIELDS);
 const SERIALIZED_SEARCH_INTENT_FIELD_SET = new Set([...SEARCH_INTENT_INPUT_FIELDS, "mandatory_filters"]);
-const EXACT_REFERENCE = /\bMS-CRAWL-\d{4,}\b/iu;
+const EXACT_REFERENCE = /\bMS-(?:CRAWL-)?\d+\b/iu;
 const UNSAFE_NL = /(?:<[^>]+>|\b(?:ignore|override|system|developer|prompt|instruction|tool|hermes|assistant|chat|publish|send)\b|https?:\/\/|javascript:)/iu;
 const PROPERTY_RULES = [
   ["apartment", /(?:\b(?:apartment|apartments)\b|апартамент(?:и)?)/iu],
