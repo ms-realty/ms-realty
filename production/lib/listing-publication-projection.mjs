@@ -37,7 +37,7 @@
 // Everything else is refused per record with a reason, and the run says so.
 //
 // The one exception is the mirror of an apply: when the approval explicitly
-// EXCLUDES a listing (excluded_listings names it with a reason) and the
+// EXCLUDES a listing, or the seed archives it into an approved survivor, and the
 // database row was published by this projector under the same approval
 // authority (workflow.publish_approved_by matches the approval's approved_by),
 // the row is reverted to the importer's pre-publication state. That undoes
@@ -360,6 +360,8 @@ function emptySummary() {
 export function buildListingPublicationSyncPlan({
   currentListings = [],
   currentTranslations = [],
+  publishedListings = currentListings,
+  publishedTranslations = currentTranslations,
   seedRecords = [],
   approval = null,
 } = {}) {
@@ -370,7 +372,9 @@ export function buildListingPublicationSyncPlan({
   const approvedIds = new Set(approval.listing_ids.map((id) => text(id)));
   const excludedReasons = new Map((approval.excluded_listings || []).map((row) => [text(row?.id), text(row?.reason)]));
   const listingsById = new Map(currentListings.map((row) => [text(row?.id), row]));
-  const seedIds = new Set(seedRecords.map((record) => text(record?.id)));
+  const seedById = new Map(seedRecords.map((record) => [text(record?.id), record]));
+  const seedIds = new Set(seedById.keys());
+  const publishedById = new Map(publishedListings.map((row) => [text(row?.id), row]));
 
   const entries = [];
   const summary = emptySummary();
@@ -382,18 +386,23 @@ export function buildListingPublicationSyncPlan({
   // would leave the owner's withdrawal unexecuted forever - so that one narrow
   // case becomes a revert to the importer's pre-publication state instead.
   const revertOrRefuse = (record, listingId, reason) => {
-    const exclusionReason = excludedReasons.get(listingId) || null;
+    const survivor = seedById.get(text(record?.merged_into));
+    const merged = record?.cms_status === "archived" && survivor && survivor.id !== listingId
+      && approvedIds.has(listingId) && approvedIds.has(text(survivor.id))
+      && seedPublicationStateFor(survivor).ok;
+    const exclusionReason = excludedReasons.get(listingId)
+      || (merged ? `merged into ${survivor.id} by the committed seed` : null);
     const refusal = { listing_id: listingId, action: "refuse", reason, detail: exclusionReason };
     if (!exclusionReason) return refusal;
 
-    const current = listingsById.get(listingId);
+    const current = publishedById.get(listingId);
     const currentWorkflow = isRecord(current?.workflow) ? current.workflow : {};
     const approvedBy = text(approval.approved_by);
     if (!current || currentWorkflow.publish_approved !== true) return refusal;
     if (!approvedBy || text(currentWorkflow.publish_approved_by) !== approvedBy) return refusal;
 
     const listingPatch = listingRevertPatchFor(current);
-    const translationRow = sourceTranslationRow(current, currentTranslations);
+    const translationRow = sourceTranslationRow(current, publishedTranslations);
     const translationPatch = translationRow ? translationRevertPatchFor(translationRow, seedSourceTranslation(record)) : null;
     if (!listingPatch && !translationPatch) return refusal;
 
@@ -522,11 +531,11 @@ function retryableTransactionError(error) {
   return /could not serialize|serialization failure|deadlock detected|duplicate key/i.test(String(error?.message || error));
 }
 
-async function findAll(payload, collection, req) {
+async function findAll(payload, collection, req, draft = true) {
   const result = await payload.find({
     collection,
     depth: 0,
-    draft: true,
+    draft,
     overrideAccess: true,
     pagination: false,
     req,
@@ -540,6 +549,9 @@ export async function readPublicationRows(payload, req) {
   return {
     currentListings: await findAll(payload, "listings", req),
     currentTranslations: await findAll(payload, "listing_translations", req),
+    // Imported drafts can hide an older published row that needs withdrawal.
+    publishedListings: await findAll(payload, "listings", req, false),
+    publishedTranslations: await findAll(payload, "listing_translations", req, false),
   };
 }
 
