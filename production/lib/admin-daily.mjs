@@ -10,8 +10,22 @@ export function dailyRecordId(scope, id) { return `${scope}-${id}`; }
 
 // Queue rows and details are rendered from the same records. Anchors also work
 // without the enhancement; filtering never changes or completes a record.
-export function DailyWorkspace({ scope, page, title, rows, filters = [], empty, renderRow, renderDetail }) {
+// `group(row)` may return { id, label } to gather consecutive rows under a
+// heading (viewings by day); the row hooks stay identical for the enhancement.
+export function DailyWorkspace({ scope, page, title, rows, filters = [], empty, renderRow, renderDetail, group = null }) {
   const copy = dailyCopy(page);
+  const rowItem = row => h('li', {
+    key: row.id, 'data-daily-row': true, 'data-daily-tags': row.tags || '',
+  }, h('a', { href: `#${encodeURIComponent(dailyRecordId(scope, row.id))}`, 'data-daily-select': dailyRecordId(scope, row.id) }, renderRow(row)));
+  const groups = [];
+  if (group) {
+    for (const row of rows) {
+      const key = group(row);
+      const last = groups.at(-1);
+      if (last && last.id === key.id) last.rows.push(row);
+      else groups.push({ id: key.id, label: key.label, rows: [row] });
+    }
+  }
   return h('section', { className: 'adm-daily-workspace', 'data-daily-workspace': scope, 'aria-label': title },
     h('div', { className: 'adm-daily-queue' },
       h('div', { className: 'adm-daily-tools' },
@@ -19,9 +33,13 @@ export function DailyWorkspace({ scope, page, title, rows, filters = [], empty, 
         h('input', { id: `${scope}-search`, type: 'search', placeholder: copy.search, 'data-daily-search': true }),
         filters.length ? h('div', { className: 'crm-seg', role: 'group', 'aria-label': title },
           ...[{ value: 'all', label: copy.all }, ...filters].map(f => h('button', { key: f.value, type: 'button', 'data-daily-filter': f.value, 'aria-pressed': f.value === 'all', 'data-on': f.value === 'all' ? '1' : '0' }, f.label))) : null),
-      rows.length ? h('ol', { className: 'adm-daily-rows' }, ...rows.map(row => h('li', {
-        key: row.id, 'data-daily-row': true, 'data-daily-tags': row.tags || '',
-      }, h('a', { href: `#${encodeURIComponent(dailyRecordId(scope, row.id))}`, 'data-daily-select': dailyRecordId(scope, row.id) }, renderRow(row))))) : empty,
+      rows.length
+        ? group
+          ? h('ol', { className: 'adm-daily-rows adm-daily-rows--grouped' }, ...groups.map(entry => h('li', { key: entry.id, className: 'adm-daily-group', 'data-daily-group': entry.id },
+              h('h3', { className: 'adm-daily-group__label' }, entry.label),
+              h('ol', null, ...entry.rows.map(rowItem)))))
+          : h('ol', { className: 'adm-daily-rows' }, ...rows.map(rowItem))
+        : empty,
       h('p', { className: 'adm-empty', role: 'status', 'data-daily-empty': true, hidden: true }, copy.empty)),
     h('div', { className: 'adm-daily-details' }, ...rows.map(row => h('article', {
       key: row.id, id: dailyRecordId(scope, row.id), 'data-daily-detail': true, tabIndex: -1,
