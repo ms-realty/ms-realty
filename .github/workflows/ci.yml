@@ -557,6 +557,10 @@ jobs:
           fi
           [[ "$previous_origin" =~ ^[0-9a-f]{40}$ ]]
           ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
+          # Reconcile IDs with the previous seed before starting older code;
+          # relationships and operator edits survive this reverse rekey.
+          # shellcheck disable=SC2029
+          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml node '/opt/ms-realty/releases/$GITHUB_SHA/production/scripts/local-production.mjs' identities '/opt/ms-realty/releases/$previous_origin/production/data/cms-seed.json'"
           # Validated release and run identifiers expand on the runner.
           # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; release='$previous_origin'; target='/opt/ms-realty/releases/$previous_origin'; test -f \"\$target/.ms-realty-release-sha\"; test \"\$(cat \"\$target/.ms-realty-release-sha\")\" = \"\$release\"; link='/opt/ms-realty/.current-rollback-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}'; ln -s \"\$target\" \"\$link\"; mv -Tf \"\$link\" /opt/ms-realty/current; cd \"\$target\"; MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml MS_REALTY_BUILD_MARKER=\"\$release\" npm run docker:up; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\""

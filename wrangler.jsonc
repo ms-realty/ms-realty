@@ -56,6 +56,9 @@
     "MS_REALTY_WORKSPACE_ID": "workspace-sandanski",
     "MS_REALTY_ORIGIN_URL": "https://ms-realty-review.157-230-109-185.sslip.io",
     "MS_REALTY_WORKER_PUBLIC_ORIGIN": "https://ms-realty.ms-realty-bg.workers.dev",
+    "MS_REALTY_EMAIL_FROM": "noreply@notifications.makler-realty.com",
+    "MS_REALTY_EMAIL_FROM_NAME": "MS Realty",
+    "MS_REALTY_EMAIL_SEND_URL": "https://ms-realty.ms-realty-bg.workers.dev/__email/send",
     "MS_REALTY_EDGE_BUILD_MARKER": "__MS_REALTY_BUILD_MARKER__"
   },
 
@@ -74,6 +77,10 @@
   // Legacy uploads live in R2, not in the image: they are 453MB that change
   // monthly, and baking them in made every deploy re-push them.
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "ms-realty-media" }],
+
+  // Outbound mail for Payload and operator notifications leaves through Email
+  // Workers from a verified sender on the zone; see DEPLOYMENT.md "Email".
+  "send_email": [{ "name": "EMAIL", "allowed_destination_addresses": ["ms.realty.bg@gmail.com"] }],
 
   "durable_objects": {
     "bindings": [{ "name": "MS_REALTY", "class_name": "MsRealtyContainer" }]

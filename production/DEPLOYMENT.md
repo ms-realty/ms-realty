@@ -175,6 +175,55 @@ Examples and smoke fixtures document schemas; they never clear a runtime gate.
 Private reports stay ignored and are mounted only where the launch materializer
 can validate them.
 
+## Listing identity changes and rollback
+
+The production overwrite-import path reconciles listing IDs by their unique
+source URL before activating the new app. Related property and generated
+fact-review task IDs, foreign keys, version parents, and current lead/viewing
+references follow in one transaction. Content, approvals and historical audit
+or funnel events are not rewritten by this identity step. Occupied or ambiguous
+targets abort the transaction.
+
+Both deployment rollback paths run the same reconciler against the previous
+release's CMS seed before starting older code. This preserves current rows and
+operator changes rather than restoring an old database snapshot. Do not bypass
+the coordinated rollback when crossing a listing-identity release boundary.
+
+## Email
+
+Website mail uses Cloudflare Email Workers from
+`noreply@notifications.makler-realty.com`. The `send_email` binding permits
+only `ms.realty.bg@gmail.com`; password resets to other broker addresses are
+not supported by this restricted configuration.
+
+Verified in the agency Cloudflare account on 2026-09-09:
+
+- `ms.realty.bg@gmail.com` is a verified destination.
+- `notifications.makler-realty.com` Email Sending is enabled with DNS configured.
+- Root-domain mail still uses SuperHosting (`mail.makler-realty.com`). Preserve
+  its MX/SPF records; do not enable catch-all routing or replace root mail DNS.
+- The sending subdomain has separate bounce MX, SPF, DKIM and DMARC records.
+
+Worker (Cloudflare → Workers → `ms-realty` → Settings → Variables):
+
+- `MS_REALTY_EMAIL_SEND_SECRET` (secret): a random 32-byte hex value. The same
+  value goes into `/opt/ms-realty/shared/.env.production-review` on the origin
+  host so the container can call the edge.
+- `MS_REALTY_EMAIL_FROM`, `MS_REALTY_EMAIL_FROM_NAME`, `MS_REALTY_EMAIL_SEND_URL`
+  are plain vars in `wrangler.jsonc`.
+
+With explicit authorization to send this test message, smoke after release:
+
+```bash
+curl --fail --silent --show-error -X POST "https://ms-realty.ms-realty-bg.workers.dev/__email/send" \
+  -H "authorization: Bearer $MS_REALTY_EMAIL_SEND_SECRET" -H "content-type: application/json" \
+  -d '{"to":"ms.realty.bg@gmail.com","subject":"MS Realty edge mail smoke","text":"Delivered through Email Workers."}'
+```
+
+Expected: `202 {"kind":"email_accepted",...}` and the message in the Gmail
+inbox. A `502 email_rejected` requires inspecting the provider reason; it does not
+by itself prove a destination-verification problem.
+
 ## Admin and integrations
 
 `/admin/login` is the only public admin sign-in entry. Payload's internal admin

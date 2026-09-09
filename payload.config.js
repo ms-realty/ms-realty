@@ -6,6 +6,7 @@ import { bg } from "@payloadcms/translations/languages/bg";
 import { en } from "@payloadcms/translations/languages/en";
 import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
+import { cloudflareEmailAdapter, cloudflareEmailConfigFromEnv } from "./production/lib/payload-email.mjs";
 import { LEAD_COLLECTIONS } from "./production/lib/lead-collections.mjs";
 import { LEAD_OPERATION_COLLECTION } from "./production/lib/lead-ops-durable-store.mjs";
 import { FUNNEL_EVENT_COLLECTION } from "./production/lib/event-durable-store.mjs";
@@ -378,6 +379,8 @@ const durableLeadSideEffectCollections = [
   },
 ];
 
+const emailConfig = cloudflareEmailConfigFromEnv();
+
 export default buildConfig({
   admin: { user: "admins" },
   graphQL: { disable: true, disablePlaygroundInProduction: true },
@@ -386,6 +389,8 @@ export default buildConfig({
   ...(publicOrigin ? { serverURL: publicOrigin } : {}),
   // ponytail: explicit local fallbacks keep development importable; production fails closed above.
   secret: runtimeConfig.secret,
+  // Without the edge mail credential Payload keeps writing mail to its log.
+  ...(emailConfig ? { email: cloudflareEmailAdapter(emailConfig) } : {}),
   i18n: {
     fallbackLanguage: "en",
     supportedLanguages: { bg, ru, en },

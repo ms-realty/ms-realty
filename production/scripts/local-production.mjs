@@ -11,6 +11,7 @@ import {
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 import { adoptReleaseR2MediaCoverageReport } from "../lib/r2-media-coverage.mjs";
 import { readBuildMarker } from "../lib/build-marker.mjs";
+import { listingIdentityRekeySql } from "../lib/listing-identity-rekey.mjs";
 import {
   LOCAL_BACKUP_COMPONENTS,
   assertSafeArchiveEntries,
@@ -134,6 +135,14 @@ function composeCapture(args, { input, encoding = "utf8", envOverrides = {} } = 
 
 function configured(value) {
   return Boolean(String(value || "").trim()) && !/replace-with|change-me|example/i.test(String(value));
+}
+
+function reconcileListingIdentities(seedPath = path.join(root, "production/data/cms-seed.json")) {
+  const seed = JSON.parse(fs.readFileSync(seedPath, "utf8"));
+  process.stdout.write(composeCapture([
+    "exec", "-T", "postgres", "sh", "-c",
+    'exec psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"',
+  ], { input: listingIdentityRekeySql(seed) }));
 }
 
 function hermesAgentEnvironment(env) {
@@ -446,6 +455,8 @@ async function start(env, { withHermes = false } = {}) {
   compose(["run", "--rm", "runtime-init"], { envOverrides });
   compose(["run", "--rm", "payload-migrate"], { envOverrides });
 
+  if (importArgs.includes("--overwrite-existing")) reconcileListingIdentities();
+
   // A rebuilt tag alone does not make Compose replace an already-running app
   // container. Recreate it explicitly so local verification uses this build.
   compose([...profile, "up", "--detach", "--wait", "--no-deps", "--force-recreate", "app"], { envOverrides });
@@ -508,6 +519,10 @@ try {
   } else {
     const env = ensureEnvFile();
     switch (command) {
+      case "identities":
+        if (commandArgs.length !== 1) throw new Error("identities requires the target release CMS seed path");
+        reconcileListingIdentities(path.resolve(commandArgs[0]));
+        break;
       case "up":
         await start(env);
         break;

@@ -44,6 +44,10 @@ contains further changes; recheck the live endpoints after it completes.
   draft reads to fail during deployment. A production schema-only copy reproduced
   the failure; applying the migration made the same Payload probe pass. PostgreSQL
   repeat-run and history-preservation checks passed. Full CI passed before merge.
+- #194 also repairs the subsequent source-URL collision: deployment reconciles
+  listings, properties and enrichment-task identities in place before import.
+  Both origin and Worker rollback reconcile back to the previous seed. Actual
+  PostgreSQL and Payload tests passed in both directions; release proof is pending.
 - #217 preserves and completes the interrupted deals/documents/team/languages
   work. Seventy-four targeted checks passed on the integrated source; browser
   checks found and corrected deal-form layout and language-save feedback.
