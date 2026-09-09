@@ -22,12 +22,12 @@ function isolatedEligibleDispatch() {
     translationCoverage: {
       rows: [
         {
-          listing_id: "MS-CRAWL-0001",
+          listing_id: "MS-00815",
           target_locale: "he",
           task_type: "hermes_draft_required",
           provider_mode: "hermes_draft",
-          admin_path: "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=he",
-          task: { id: "translation-MS-CRAWL-0001-he" },
+          admin_path: "/admin/translations?objectType=listing&objectId=MS-00815&locale=he",
+          task: { id: "translation-MS-00815-he" },
         },
       ],
     },

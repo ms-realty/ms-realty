@@ -1,4 +1,6 @@
+import { CANONICAL_PROPERTY_FAMILIES } from "./listing-facts.mjs";
 import { getLocale, publicIndexableLocales } from "./locales.mjs";
+import { SEARCH_OFFER_TYPES } from "./search-intent.mjs";
 
 const PUBLIC_TRANSLATION_STATES = new Set(["approved", "published"]);
 const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
@@ -137,6 +139,25 @@ export function locationPath(registry, localeCode, location) {
   return `/${locale.code}/${locale.route_segments.location || "locations"}/${locationSlug(location)}`;
 }
 
+// The eight search facets that are allowed into the index: one canonical
+// property family or one offer type, never both and never with anything else.
+// Every other query on the search route is a private utility view and stays
+// noindex (see renderSearchPage). The catalogue lives here so the canonical,
+// the hreflang cluster, the sitemap and the route manifest can never disagree
+// about which facet URLs exist.
+export const SEARCH_FACETS = Object.freeze([
+  ...CANONICAL_PROPERTY_FAMILIES.map((value) => Object.freeze({ param: "property_family", value })),
+  ...SEARCH_OFFER_TYPES.map((value) => Object.freeze({ param: "offer_type", value })),
+]);
+
+export function searchFacetFor(param, value) {
+  return SEARCH_FACETS.find((facet) => facet.param === param && facet.value === value) || null;
+}
+
+export function searchFacetPath(registry, localeCode, facet) {
+  return `${searchPath(registry, localeCode)}?${facet.param}=${facet.value}`;
+}
+
 export function hreflangForSeller(registry) {
   return [
     ...publicIndexableLocales(registry).map((locale) => ({
@@ -200,6 +221,16 @@ export function hreflangForHome(registry) {
       href: homePath(registry, locale.code),
     })),
     { hreflang: "x-default", href: homePath(registry, registry.source_locale) },
+  ];
+}
+
+export function hreflangForSearchFacet(registry, facet) {
+  return [
+    ...publicIndexableLocales(registry).map((locale) => ({
+      hreflang: locale.code,
+      href: searchFacetPath(registry, locale.code, facet),
+    })),
+    { hreflang: "x-default", href: searchFacetPath(registry, registry.source_locale, facet) },
   ];
 }
 
@@ -307,6 +338,23 @@ export function sitemapEntriesForSeller(registry) {
     loc: sellerPath(registry, locale.code),
     hreflang,
   }));
+}
+
+// One entry per facet per public locale: 8 facets x 7 locales = 56. The
+// facets are registry-driven, not inventory-driven, so an empty facet still
+// exists as a page (it renders the empty state) and the count never moves with
+// the catalogue.
+export function sitemapEntriesForSearchFacets(registry) {
+  return SEARCH_FACETS.flatMap((facet) => {
+    const hreflang = hreflangForSearchFacet(registry, facet);
+    return publicIndexableLocales(registry).map((locale) => ({
+      type: "search_facet",
+      locale: locale.code,
+      loc: searchFacetPath(registry, locale.code, facet),
+      facet: { param: facet.param, value: facet.value },
+      hreflang,
+    }));
+  });
 }
 
 export function sitemapEntriesForGuides(registry, guideGroups) {

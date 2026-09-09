@@ -97,11 +97,11 @@ def main() -> int:
     ):
         raise SystemExit("Search import must contain only indexable source-language documents")
 
-    reviewed_source = next((doc for doc in source_docs if doc["id"] == "MS-CRAWL-0001"), None)
+    reviewed_source = next((doc for doc in source_docs if doc["id"] == "MS-00815"), None)
     if reviewed_source is None:
         raise SystemExit("Reviewed source listing is missing from search imports")
     reviewed_description = str(reviewed_source["description"])
-    reviewed_docs = [doc for doc in index_docs if doc["source_listing_id"] == "MS-CRAWL-0001"]
+    reviewed_docs = [doc for doc in index_docs if doc["source_listing_id"] == "MS-00815"]
     if {doc["locale"] for doc in reviewed_docs} != {"bg"}:
         raise SystemExit("Reviewed listing must export only its Bulgarian source search document")
     if any(doc["description"] != reviewed_description or reviewed_description not in doc["search_text"] for doc in reviewed_docs):
@@ -115,16 +115,16 @@ def main() -> int:
 
     property_types = {doc["id"]: doc["property_type"] for doc in source_docs}
     expected_types = {
-        "MS-CRAWL-0001": "commercial",
-        "MS-CRAWL-0002": "multi_unit",
-        "MS-CRAWL-0006": "commercial",
-        "MS-CRAWL-0013": "multi_unit",
-        "MS-CRAWL-0019": "commercial",
-        "MS-CRAWL-0070": "commercial",
-        "MS-CRAWL-0111": "commercial",
+        "MS-00815": "commercial",
+        "MS-00907": "multi_unit",
+        "MS-00443": "commercial",
+        "MS-00567-1": "multi_unit",
+        "MS-00812": "commercial",
+        "MS-00456": "commercial",
+        "MS-00444": "commercial",
         "MS-CRAWL-0151": "commercial",
-        "MS-CRAWL-0059": "land",
-        "MS-CRAWL-0158": "land",
+        "MS-00945": "land",
+        "MS-00046": "land",
     }
     for listing_id, property_type in expected_types.items():
         if property_types.get(listing_id) != property_type:
@@ -132,9 +132,9 @@ def main() -> int:
 
     bedrooms = {doc["id"]: doc["bedrooms"] for doc in source_docs}
     expected_bedrooms = {
-        "MS-CRAWL-0003": 2,
-        "MS-CRAWL-0007": 1,
-        "MS-CRAWL-0029": 0,
+        "MS-00922": 2,
+        "MS-00911": 1,
+        "MS-00903": 0,
     }
     for listing_id, bedroom_count in expected_bedrooms.items():
         if bedrooms.get(listing_id) != bedroom_count:
@@ -145,21 +145,21 @@ def main() -> int:
         raise SystemExit("Search imports must include deterministic Cyrillic transliteration variants")
 
     reviewed_locations = {doc["id"]: doc for doc in source_docs}
-    if reviewed_locations["MS-CRAWL-0033"]["location"] != "Polenitsa" or reviewed_locations["MS-CRAWL-0033"]["settlement_ekatte"] != "57176":
+    if reviewed_locations["MS-00865"]["location"] != "Polenitsa" or reviewed_locations["MS-00865"]["settlement_ekatte"] != "57176":
         raise SystemExit("Search imports must use reviewed official settlement data")
-    if reviewed_locations["MS-CRAWL-0033"]["district"] != "Blagoevgrad" or reviewed_locations["MS-CRAWL-0033"]["district_code"] != "BLG":
+    if reviewed_locations["MS-00865"]["district"] != "Blagoevgrad" or reviewed_locations["MS-00865"]["district_code"] != "BLG":
         raise SystemExit("Search imports must derive the reviewed official Bulgarian district")
     if "district" not in settings["filterableAttributes"] or "district_code" not in settings["filterableAttributes"]:
         raise SystemExit("Search imports must expose reviewed Bulgarian districts as engine facets")
-    if reviewed_locations["MS-CRAWL-0072"]["location"] != "Logari" or reviewed_locations["MS-CRAWL-0072"]["country_code"] != "GR":
+    if reviewed_locations["MS-00930"]["location"] != "Logari" or reviewed_locations["MS-00930"]["country_code"] != "GR":
         raise SystemExit("Search imports must not label Greek listings as Sandanski")
-    if reviewed_locations["MS-CRAWL-0072"]["geography_id"] != "GR:settlement:EL52:1202020404":
+    if reviewed_locations["MS-00930"]["geography_id"] != "GR:settlement:EL52:1202020404":
         raise SystemExit("Search imports must anchor Logari to the official Greek settlement")
-    if "GR:region:EL52" not in reviewed_locations["MS-CRAWL-0072"]["geography_path"]:
+    if "GR:region:EL52" not in reviewed_locations["MS-00930"]["geography_path"]:
         raise SystemExit("Search imports must preserve official Greek region ancestry")
-    if reviewed_locations["MS-CRAWL-0050"]["geography_id"] != "GR:municipality:EL52:1303":
+    if reviewed_locations["MS-00100"]["geography_id"] != "GR:municipality:EL52:1303":
         raise SystemExit("Imprecise Elani-Sani source content must remain municipality-anchored")
-    if reviewed_locations["MS-CRAWL-0043"]["location_precision"] != "approximate":
+    if reviewed_locations["MS-00987"]["location_precision"] != "approximate":
         raise SystemExit("Kotroni must remain a locality label anchored to official Eretria")
     if "geography_path" not in settings["filterableAttributes"]:
         raise SystemExit("Search imports must expose official geography ancestry as an engine facet")

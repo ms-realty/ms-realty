@@ -627,13 +627,14 @@ test("Today exposes every ranked task with a source-backed detail and Hermes ent
     assert.match(empty.body, /data-next-action-count="0" data-next-action-total="0" data-next-action-visible="0"/);
     assert.match(empty.body, /Nothing is waiting\./);
     assert.match(empty.body, /data-today-briefing="true" data-today-primary-action="none" data-today-priority-count="0"/);
-    assert.match(empty.body, /data-hermes-entry="today"/);
-    assert.match(empty.body, /data-hermes-open="today"/);
-    assert.match(empty.body, /name="prompt"/);
-    assert.match(empty.body, /<form class="adm-today-briefing__hermes" method="get" action="\/admin\/hermes" data-hermes-entry="today">/);
-    assert.match(empty.body, /<details class="adm-today-assist"><summary>[\s\S]*?<\/summary><form class="adm-today-briefing__hermes"/);
+    // Hermes meets the broker inside the task (the inbox draft button), not
+    // as a separate destination at the foot of Today.
+    assert.doesNotMatch(empty.body, /data-hermes-entry="today"/);
+    assert.doesNotMatch(empty.body, /data-hermes-open="today"/);
+    assert.doesNotMatch(empty.body, /adm-today-assist/);
+    const todayMain = empty.body.slice(empty.body.indexOf('data-today-workspace="true"'), empty.body.indexOf("</main>"));
+    assert.doesNotMatch(todayMain, /href="\/admin\/reports(?:\?[^"]*)?"/);
     assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
-    assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
     // Two groups, primary and Advanced, in desktop and mobile navigation.
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 4, "primary and Advanced in desktop and mobile navigation");
@@ -702,7 +703,7 @@ test("Today exposes every ranked task with a source-backed detail and Hermes ent
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
     assert.equal((populated.body.match(/class="mk-btn mk-btn--accent(?:\s|\")/g) || []).length, 2, "each selectable task has one primary action in its own detail");
-    assert.match(populated.body, /name="prompt"[\s\S]*?Prepare a safe plan for today's priority task:/);
+    assert.doesNotMatch(populated.body, /name="prompt"/);
     assert.match(populated.body, /data-next-action="lead"/);
     assert.match(populated.body, /data-next-action="pipeline"/);
     assert.match(populated.body, /data-next-action-count="2" data-next-action-total="2" data-next-action-visible="2"/);

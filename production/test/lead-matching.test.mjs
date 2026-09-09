@@ -18,7 +18,7 @@ test("lead matching report creates broker inventory tasks from buyer listing ref
       {
         lead_id: "lead-buyer-he",
         lead_type: "buyer",
-        listing_reference: "MS-CRAWL-0001",
+        listing_reference: "MS-00815",
         original_language: "he",
         admin_locale: "en",
         assigned_broker: "broker_international",
@@ -26,7 +26,7 @@ test("lead matching report creates broker inventory tasks from buyer listing ref
       {
         lead_id: "lead-seller-el",
         lead_type: "seller",
-        listing_reference: "MS-CRAWL-0001",
+        listing_reference: "MS-00815",
         original_language: "el",
         admin_locale: "en",
         assigned_broker: "broker_international",
@@ -40,7 +40,7 @@ test("lead matching report creates broker inventory tasks from buyer listing ref
   assert.equal(report.summary.open_broker_tasks, 1);
   assert.equal(report.rows[0].criteria.location, "Sandanski");
   assert.equal(report.rows[0].criteria.property_type, "commercial");
-  assert.equal(report.rows[0].matches.some((match) => match.listing_id === "MS-CRAWL-0001"), false);
+  assert.equal(report.rows[0].matches.some((match) => match.listing_id === "MS-00815"), false);
   assert.equal(report.rows[0].broker_task.owner, "broker_international");
 });
 

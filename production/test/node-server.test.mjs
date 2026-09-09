@@ -252,7 +252,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           body: JSON.stringify({
             leadType: "buyer",
             language: "he",
-            listingReference: "MS-CRAWL-0001",
+            listingReference: "MS-00815",
             contact: { name: "Noa Levi", whatsapp: "+359880000001" },
             contact_preference: "whatsapp",
           }),
@@ -265,7 +265,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             source: "website_viewing_request",
             leadType: "buyer",
             language: "he",
-            listingReference: "MS-CRAWL-0001",
+            listingReference: "MS-00815",
             contact: { name: "Noa Levi", phone: "+359880000001" },
             contact_preference: "phone",
             request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
@@ -316,45 +316,45 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         homeHtml: await textFetch(baseUrl, "/he/", {
           headers: { accept: "text/html" },
         }),
-        listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
-        listingHtml: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001", {
+        listing: await jsonFetch(baseUrl, "/he/properties/MS-00815"),
+        listingHtml: await textFetch(baseUrl, "/he/properties/MS-00815", {
           headers: { accept: "text/html" },
         }),
-        listingPrint: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001?print=1"),
+        listingPrint: await textFetch(baseUrl, "/he/properties/MS-00815?print=1"),
         brokerContact: await jsonFetch(baseUrl, "/api/admin/broker-contacts", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
             id: "node-server-broker-contact-test",
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             broker: "broker_ru",
             phone: "+447700900001",
             reviewer: "owner",
-            sourceReference: "test://broker-contact/MS-CRAWL-0001",
+            sourceReference: "test://broker-contact/MS-00815",
             validationStatus: "broker_verified",
             approved: true,
           }),
         }),
-        listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+        listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-00815"),
         tourApproval: await jsonFetch(baseUrl, "/api/admin/tours/approve", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
             id: "node-server-tour-approval-test",
-            listingId: "MS-CRAWL-0001",
-            panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-            accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+            listingId: "MS-00815",
+            panoramaUrl: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+            accessibilityCaption: "Reviewed 360 panorama for MS-00815.",
             reviewer: "media_editor",
             reviewConfirmed: true,
           }),
         }),
-        listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+        listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-00815"),
         slugChange: await jsonFetch(baseUrl, "/api/admin/listings/slug", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
             id: "node-server-slug-change-test",
-            listingId: "MS-CRAWL-0001",
+            listingId: "MS-00815",
             locale: "he",
             oldPath: "/he/properties/old-sandanski-slug",
             editor: "editor_bg",
@@ -538,19 +538,19 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         headers: { authorization: "Bearer local-admin-smoke" },
         body: JSON.stringify({
           objectType: "listing",
-          objectId: "MS-CRAWL-0001",
+          objectId: "MS-00815",
           sourceLocale: "bg",
           targetLocale: "el",
           sourceContent: {
             title: "Reviewed listing title",
             description: "Reviewed listing description for Sandanski.",
           },
-          propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+          propertyFacts: { id: "MS-00815", location: "Sandanski" },
           draftOutput: {
-            title: "MS-CRAWL-0001 Sandanski el",
-            body: "MS-CRAWL-0001 Sandanski reviewed el translation draft",
-            seo_title: "MS-CRAWL-0001 Sandanski",
-            meta_description: "MS-CRAWL-0001 Sandanski reviewed el translation draft for approved MS Realty listing content.",
+            title: "MS-00815 Sandanski el",
+            body: "MS-00815 Sandanski reviewed el translation draft",
+            seo_title: "MS-00815 Sandanski",
+            meta_description: "MS-00815 Sandanski reviewed el translation draft for approved MS Realty listing content.",
             citations: [{ source: "cms", field: "title" }],
           },
         }),
@@ -577,21 +577,21 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         method: "POST",
         headers: { authorization: "Bearer local-admin-smoke" },
         body: JSON.stringify({
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           patch: { description: "Updated approved source description." },
         }),
       });
       if (previousAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
       else process.env.MS_REALTY_ADMIN_ACTOR = previousAdminActor;
-      smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-CRAWL-0001");
+      smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-00815");
       smoke.staleSearch = await jsonFetch(baseUrl, "/api/search?locale=el&q=Sandanski");
       smoke.ctaClick = await jsonFetch(baseUrl, "/api/events", {
         method: "POST",
         body: JSON.stringify({
           type: "cta_click",
-          path: "/he/properties/MS-CRAWL-0001",
+          path: "/he/properties/MS-00815",
           locale: "he",
-          listingReference: "MS-CRAWL-0001",
+          listingReference: "MS-00815",
           action: "sticky_inquiry",
         }),
       });
@@ -643,7 +643,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.tourApproval.body.is_public, true);
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
-      assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
+      assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-00815");
       assert.equal(smoke.location.body.cards.length > 0, true);
       assert.equal(smoke.hermesChatDisabled.status, 404);
       assert.equal(smoke.hermesChatDisabled.body.kind, "not_found");

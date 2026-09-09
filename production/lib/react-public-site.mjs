@@ -2862,7 +2862,9 @@ function SearchBody({ page }) {
           h(
             "div",
             { className: "sr-results__head" },
-            h(savedView ? "h1" : "h2", null, savedView ? labels.savedListings : labels.searchResults),
+            // A facet page carries its own localized H1; every other search
+            // keeps the results heading as an H2 under the page hero.
+            h(savedView || page.body?.h1 ? "h1" : "h2", null, savedView ? labels.savedListings : page.body?.h1 || labels.searchResults),
             h(
               "p",
               {

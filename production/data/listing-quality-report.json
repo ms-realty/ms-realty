@@ -11,7 +11,7 @@
       "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
-      "thin_public_gallery": 18,
+      "thin_public_gallery": 17,
       "tour_review_pending": 0
     },
     "by_source_locale": {
@@ -25,11 +25,11 @@
   },
   "rows": [
     {
-      "listing_id": "MS-CRAWL-0001",
+      "listing_id": "MS-00815",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0001",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
+      "target_path": "/bg/imoti/MS-00815",
+      "editor_path": "/admin/listings/edit?listingId=MS-00815",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -57,7 +57,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -89,11 +89,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0002",
+      "listing_id": "MS-00907",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0002",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
+      "target_path": "/bg/imoti/MS-00907",
+      "editor_path": "/admin/listings/edit?listingId=MS-00907",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -154,11 +154,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0003",
+      "listing_id": "MS-00922",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0003",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
+      "target_path": "/bg/imoti/MS-00922",
+      "editor_path": "/admin/listings/edit?listingId=MS-00922",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -186,7 +186,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -220,11 +220,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0004",
+      "listing_id": "MS-00905",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0004",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
+      "target_path": "/bg/imoti/MS-00905",
+      "editor_path": "/admin/listings/edit?listingId=MS-00905",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -252,7 +252,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -286,11 +286,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0005",
+      "listing_id": "MS-00899",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0005",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
+      "target_path": "/bg/imoti/MS-00899",
+      "editor_path": "/admin/listings/edit?listingId=MS-00899",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -318,7 +318,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -352,11 +352,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0006",
+      "listing_id": "MS-00443",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0006",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
+      "target_path": "/bg/imoti/MS-00443",
+      "editor_path": "/admin/listings/edit?listingId=MS-00443",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -382,7 +382,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -414,11 +414,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0007",
+      "listing_id": "MS-00911",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0007",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
+      "target_path": "/bg/imoti/MS-00911",
+      "editor_path": "/admin/listings/edit?listingId=MS-00911",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -446,7 +446,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -480,11 +480,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0008",
+      "listing_id": "MS-00662",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0008",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
+      "target_path": "/bg/imoti/MS-00662",
+      "editor_path": "/admin/listings/edit?listingId=MS-00662",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -500,11 +500,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/07/662.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2018/07/662-800x600.jpg [alt: Посуточная аренда в центре города Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -546,11 +546,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0009",
+      "listing_id": "MS-00957",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0009",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
+      "target_path": "/bg/imoti/MS-00957",
+      "editor_path": "/admin/listings/edit?listingId=MS-00957",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -578,7 +578,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -612,11 +612,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0010",
+      "listing_id": "MS-01000",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0010",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
+      "target_path": "/bg/imoti/MS-01000",
+      "editor_path": "/admin/listings/edit?listingId=MS-01000",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -644,7 +644,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -678,11 +678,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0011",
+      "listing_id": "MS-00858",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0011",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0011",
+      "target_path": "/bg/imoti/MS-00858",
+      "editor_path": "/admin/listings/edit?listingId=MS-00858",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -710,7 +710,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "gross_floor_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -740,11 +740,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0012",
+      "listing_id": "MS-00895",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0012",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0012",
+      "target_path": "/bg/imoti/MS-00895",
+      "editor_path": "/admin/listings/edit?listingId=MS-00895",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -772,7 +772,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "gross_floor_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -802,11 +802,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0013",
+      "listing_id": "MS-00567-1",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0013",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0013",
+      "target_path": "/bg/imoti/MS-00567-1",
+      "editor_path": "/admin/listings/edit?listingId=MS-00567-1",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -834,7 +834,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -866,11 +866,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0014",
+      "listing_id": "MS-00876",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0014",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0014",
+      "target_path": "/bg/imoti/MS-00876",
+      "editor_path": "/admin/listings/edit?listingId=MS-00876",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -898,7 +898,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -932,11 +932,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0015",
+      "listing_id": "MS-00942",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0015",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0015",
+      "target_path": "/bg/imoti/MS-00942",
+      "editor_path": "/admin/listings/edit?listingId=MS-00942",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -964,7 +964,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -996,11 +996,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0016",
+      "listing_id": "MS-00803",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0016",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0016",
+      "target_path": "/bg/imoti/MS-00803",
+      "editor_path": "/admin/listings/edit?listingId=MS-00803",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1028,7 +1028,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1060,11 +1060,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0017",
+      "listing_id": "MS-00938",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0017",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0017",
+      "target_path": "/bg/imoti/MS-00938",
+      "editor_path": "/admin/listings/edit?listingId=MS-00938",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1092,7 +1092,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1126,11 +1126,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0018",
+      "listing_id": "MS-00814",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0018",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0018",
+      "target_path": "/bg/imoti/MS-00814",
+      "editor_path": "/admin/listings/edit?listingId=MS-00814",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1158,7 +1158,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -1190,11 +1190,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0019",
+      "listing_id": "MS-00812",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0019",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0019",
+      "target_path": "/bg/imoti/MS-00812",
+      "editor_path": "/admin/listings/edit?listingId=MS-00812",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1254,11 +1254,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0020",
+      "listing_id": "MS-00890",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0020",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0020",
+      "target_path": "/bg/imoti/MS-00890",
+      "editor_path": "/admin/listings/edit?listingId=MS-00890",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1286,7 +1286,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -1318,11 +1318,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0021",
+      "listing_id": "MS-00944",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0021",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0021",
+      "target_path": "/bg/imoti/MS-00944",
+      "editor_path": "/admin/listings/edit?listingId=MS-00944",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1350,7 +1350,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1384,11 +1384,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0022",
+      "listing_id": "MS-00756",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0022",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0022",
+      "target_path": "/bg/imoti/MS-00756",
+      "editor_path": "/admin/listings/edit?listingId=MS-00756",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1404,11 +1404,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 24,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/05/756-8-680x510.jpg [alt: Дава под наем производствено помещение в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/05/756-1.jpg [alt: Дава под наем производствено помещение в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/05/756-2.jpg [alt: Дава под наем производствено помещение в Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/756-19-680x510.jpg [alt: Сдается производственное помещение в Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/756-2-680x510.jpg [alt: Сдается производственное помещение в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -1448,11 +1448,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0023",
+      "listing_id": "MS-00833",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0023",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0023",
+      "target_path": "/bg/imoti/MS-00833",
+      "editor_path": "/admin/listings/edit?listingId=MS-00833",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1468,11 +1468,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 26,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/833-new-6-1-680x510.jpg [alt: Прекрасна къща в близост до СПА курорт Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/833-new-6-1.jpg [alt: продава къща около сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/833-new-5-1.jpg [alt: Прекрасна къща в близост до СПА курорт Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2025/06/833-new-6-800x600.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/833-new-6-1.jpg [alt: продава къща около сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -1480,7 +1480,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1512,11 +1512,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0024",
+      "listing_id": "MS-00101",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0024",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0024",
+      "target_path": "/bg/imoti/MS-00101",
+      "editor_path": "/admin/listings/edit?listingId=MS-00101",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1544,7 +1544,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1578,11 +1578,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0025",
+      "listing_id": "MS-00956",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0025",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0025",
+      "target_path": "/bg/imoti/MS-00956",
+      "editor_path": "/admin/listings/edit?listingId=MS-00956",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1610,7 +1610,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1642,11 +1642,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0026",
+      "listing_id": "MS-01001",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0026",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0026",
+      "target_path": "/bg/imoti/MS-01001",
+      "editor_path": "/admin/listings/edit?listingId=MS-01001",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1662,11 +1662,11 @@
       "area_sqm": null,
       "bedrooms": 4,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 26,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/06/890-3-680x510.jpg [alt: Продава голяма къща в близост до гр.Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/06/890-3.jpg [alt: Продава голяма къща в близост до гр.Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/06/890-1.jpg [alt: Продава голяма къща в близост до гр.Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2025/06/890-3-800x600.jpg [alt: Продажа большого дома недалеко от города Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/06/890-3.jpg [alt: Продава голяма къща в близост до гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -1674,7 +1674,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1706,11 +1706,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0027",
+      "listing_id": "MS-01002",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0027",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0027",
+      "target_path": "/bg/imoti/MS-01002",
+      "editor_path": "/admin/listings/edit?listingId=MS-01002",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1772,11 +1772,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0028",
+      "listing_id": "MS-00924",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0028",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0028",
+      "target_path": "/bg/imoti/MS-00924",
+      "editor_path": "/admin/listings/edit?listingId=MS-00924",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1804,7 +1804,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1838,11 +1838,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0029",
+      "listing_id": "MS-00903",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0029",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0029",
+      "target_path": "/bg/imoti/MS-00903",
+      "editor_path": "/admin/listings/edit?listingId=MS-00903",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1870,7 +1870,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1904,11 +1904,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0030",
+      "listing_id": "MS-00943",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0030",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0030",
+      "target_path": "/bg/imoti/MS-00943",
+      "editor_path": "/admin/listings/edit?listingId=MS-00943",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -1936,7 +1936,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -1970,11 +1970,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0031",
+      "listing_id": "MS-00940",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0031",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0031",
+      "target_path": "/bg/imoti/MS-00940",
+      "editor_path": "/admin/listings/edit?listingId=MS-00940",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2002,7 +2002,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2034,11 +2034,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0032",
+      "listing_id": "MS-00932",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0032",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0032",
+      "target_path": "/bg/imoti/MS-00932",
+      "editor_path": "/admin/listings/edit?listingId=MS-00932",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2054,11 +2054,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/11/932-1-680x510.jpg [alt: Продава етаж от къща в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/11/932-1.jpg [alt: продава етаж от къща в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/11/932-2.jpg [alt: Продава етаж от къща в Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2026/02/932-1-680x510.jpg [alt: Этаж дома с участком в г.Сандански — продажа]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2026/02/932-2-680x510.jpg [alt: Продава етаж от къща в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -2066,7 +2066,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2100,11 +2100,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0033",
+      "listing_id": "MS-00865",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0033",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0033",
+      "target_path": "/bg/imoti/MS-00865",
+      "editor_path": "/admin/listings/edit?listingId=MS-00865",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2132,7 +2132,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2164,11 +2164,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0034",
+      "listing_id": "MS-00963",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0034",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0034",
+      "target_path": "/bg/imoti/MS-00963",
+      "editor_path": "/admin/listings/edit?listingId=MS-00963",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2196,7 +2196,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2230,11 +2230,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0035",
+      "listing_id": "MS-00774",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0035",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0035",
+      "target_path": "/bg/imoti/MS-00774",
+      "editor_path": "/admin/listings/edit?listingId=MS-00774",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2250,11 +2250,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 18,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/09/774-1-1-680x510.jpg [alt: Продава етаж от къща с парцел в с.Левуново]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/09/774-1-1.jpg [alt: Продава етаж от къща с парцел в с.Левуново]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/09/774-2.jpg [alt: Продава етаж от къща с парцел в с.Левуново]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2021/04/774-1-1-680x510.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2021/04/774-2-680x510.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -2262,7 +2262,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2296,11 +2296,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0036",
+      "listing_id": "MS-00897",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0036",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0036",
+      "target_path": "/bg/imoti/MS-00897",
+      "editor_path": "/admin/listings/edit?listingId=MS-00897",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2329,7 +2329,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -2361,11 +2361,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0037",
+      "listing_id": "MS-00719",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0037",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0037",
+      "target_path": "/bg/imoti/MS-00719",
+      "editor_path": "/admin/listings/edit?listingId=MS-00719",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2381,11 +2381,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/08/719-1-680x510.jpg [alt: Продава земя на Е79 в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/08/719-1.jpg [alt: продава имот на е79 Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/08/719-2.jpg [alt: продава имот на е79 Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2019/10/719-1-800x600.jpg [alt: Продажа участка на международной трассе София — Салоники]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/08/719-1.jpg [alt: продава имот на е79 Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -2394,7 +2394,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -2426,11 +2426,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0038",
+      "listing_id": "MS-00873",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0038",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0038",
+      "target_path": "/bg/imoti/MS-00873",
+      "editor_path": "/admin/listings/edit?listingId=MS-00873",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2449,8 +2449,8 @@
       "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/873-10-680x510.jpeg [alt: Продава имение в района на гр. Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/873-10.jpeg [alt: Продава имение в района на гр. Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/873-14.jpeg [alt: Продава имение в района на гр. Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2023/12/873-10-800x600.jpeg [alt: Продается особняк в районе города Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/873-10.jpeg [alt: Продава имение в района на гр. Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -2474,11 +2474,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0039",
+      "listing_id": "MS-00906",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0039",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0039",
+      "target_path": "/bg/imoti/MS-00906",
+      "editor_path": "/admin/listings/edit?listingId=MS-00906",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -2508,7 +2508,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -2540,31 +2540,30 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0040",
+      "listing_id": "MS-00555",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0040",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0040",
-      "review_status": "needs_facts_and_media_review",
+      "target_path": "/bg/imoti/MS-00555",
+      "editor_path": "/admin/listings/edit?listingId=MS-00555",
+      "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "area_sqm",
-        "public_gallery"
+        "area_sqm"
       ],
       "title": "Продава имот в с.Ласкарево",
       "location": "Laskarevo",
       "description": "Имота се намира в новия район на с.Ласкарево. Невероятен изглед във всички посоки. Статута на земята е нива, но всичките съседни имоти са с променено предназначение – урбанизирана територия, застроени с еднофамилни къщи.",
       "issues": [
-        "missing_area",
-        "thin_public_gallery"
+        "missing_area"
       ],
       "price_eur": 18000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 2,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2024/03/laskarevo-680x382.jpg [alt: Продава имот в с.Ласкарево]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2024/03/laskarevo-680x382.jpg [alt: Продажа недвижимости в селе Ласкарево, г.Сандански]",
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2024/03/laskarevo.jpg [alt: продава имот в с.Ласкарево]"
       ],
       "missing_alt_text_assets": 0,
@@ -2574,7 +2573,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -2606,11 +2605,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0041",
+      "listing_id": "MS-00788",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0041",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0041",
+      "target_path": "/bg/imoti/MS-00788",
+      "editor_path": "/admin/listings/edit?listingId=MS-00788",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2626,11 +2625,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": true,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2021/02/788-1-680x510.jpg [alt: Продава имот в центъра на с.Левуново]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2021/02/788-1.jpg [alt: Продава имот в центъра на с.Левуново]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2021/02/788-2.jpg [alt: Продава имот в центъра на с.Левуново]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2021/07/788-1-680x510.jpg [alt: Продажа недвижимости в центре села Левуново, Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2021/07/788-2-680x510.jpg [alt: Продажа недвижимости в центре села Левуново]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -2639,7 +2638,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -2671,11 +2670,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0042",
+      "listing_id": "MS-00811",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0042",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0042",
+      "target_path": "/bg/imoti/MS-00811",
+      "editor_path": "/admin/listings/edit?listingId=MS-00811",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2704,7 +2703,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -2736,11 +2735,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0043",
+      "listing_id": "MS-00987",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0043",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0043",
+      "target_path": "/bg/imoti/MS-00987",
+      "editor_path": "/admin/listings/edit?listingId=MS-00987",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2768,7 +2767,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2800,11 +2799,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0044",
+      "listing_id": "MS-00345",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0044",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0044",
+      "target_path": "/bg/imoti/MS-00345",
+      "editor_path": "/admin/listings/edit?listingId=MS-00345",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2832,7 +2831,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2864,11 +2863,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0045",
+      "listing_id": "MS-00908",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0045",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0045",
+      "target_path": "/bg/imoti/MS-00908",
+      "editor_path": "/admin/listings/edit?listingId=MS-00908",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2896,7 +2895,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2928,11 +2927,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0046",
+      "listing_id": "MS-00941",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0046",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0046",
+      "target_path": "/bg/imoti/MS-00941",
+      "editor_path": "/admin/listings/edit?listingId=MS-00941",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -2960,7 +2959,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -2992,11 +2991,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0047",
+      "listing_id": "MS-00927",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0047",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0047",
+      "target_path": "/bg/imoti/MS-00927",
+      "editor_path": "/admin/listings/edit?listingId=MS-00927",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3012,11 +3011,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 15,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/11/927-4-680x510.jpg [alt: Продава къща в с. Спатово, община Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/11/927-1.jpg [alt: Продава къща в с. Спатово, община Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/11/927-2.jpg [alt: Продава къща в с. Спатово, община Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2026/02/927-2-680x510.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2026/02/927-1-680x510.jpg [alt: Продава къща в с. Спатово, община Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -3024,7 +3023,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -3056,11 +3055,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0048",
+      "listing_id": "MS-00904",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0048",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0048",
+      "target_path": "/bg/imoti/MS-00904",
+      "editor_path": "/admin/listings/edit?listingId=MS-00904",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3088,7 +3087,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -3120,11 +3119,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0049",
+      "listing_id": "MS-00931",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0049",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0049",
+      "target_path": "/bg/imoti/MS-00931",
+      "editor_path": "/admin/listings/edit?listingId=MS-00931",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -3150,7 +3149,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -3182,11 +3181,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0050",
+      "listing_id": "MS-00100",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0050",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0050",
+      "target_path": "/bg/imoti/MS-00100",
+      "editor_path": "/admin/listings/edit?listingId=MS-00100",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3214,7 +3213,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -3248,11 +3247,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0051",
+      "listing_id": "MS-00816",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0051",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0051",
+      "target_path": "/bg/imoti/MS-00816",
+      "editor_path": "/admin/listings/edit?listingId=MS-00816",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3280,7 +3279,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -3312,11 +3311,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0052",
+      "listing_id": "MS-00657",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0052",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0052",
+      "target_path": "/bg/imoti/MS-00657",
+      "editor_path": "/admin/listings/edit?listingId=MS-00657",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3332,11 +3331,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/06/657-11-680x510.jpg [alt: Продава оранжерия в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/06/657-1-1.jpg [alt: продава оранжерия в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/06/657-2-1.jpg [alt: продава оранжерия в Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2018/07/657-11-680x510.jpg [alt: Продается теплица в городе Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2018/07/657-5-1-680x510.jpg [alt: продажа теплицы в сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -3344,7 +3343,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -3376,11 +3375,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0053",
+      "listing_id": "MS-00766",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0053",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0053",
+      "target_path": "/bg/imoti/MS-00766",
+      "editor_path": "/admin/listings/edit?listingId=MS-00766",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3408,7 +3407,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -3440,11 +3439,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0054",
+      "listing_id": "MS-00432",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0054",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0054",
+      "target_path": "/bg/imoti/MS-00432",
+      "editor_path": "/admin/listings/edit?listingId=MS-00432",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3472,7 +3471,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -3506,11 +3505,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0055",
+      "listing_id": "MS-00770",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0055",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0055",
+      "target_path": "/bg/imoti/MS-00770",
+      "editor_path": "/admin/listings/edit?listingId=MS-00770",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3539,7 +3538,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -3571,11 +3570,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0056",
+      "listing_id": "MS-00321",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0056",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0056",
+      "target_path": "/bg/imoti/MS-00321",
+      "editor_path": "/admin/listings/edit?listingId=MS-00321",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -3605,7 +3604,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -3637,11 +3636,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0057",
+      "listing_id": "MS-00898",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0057",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0057",
+      "target_path": "/bg/imoti/MS-00898",
+      "editor_path": "/admin/listings/edit?listingId=MS-00898",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3670,7 +3669,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -3702,11 +3701,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0058",
+      "listing_id": "MS-00749",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0058",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0058",
+      "target_path": "/bg/imoti/MS-00749",
+      "editor_path": "/admin/listings/edit?listingId=MS-00749",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3722,11 +3721,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/749-1-680x383.jpg [alt: Продава парцел в с.Поленица]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/749-1.jpg [alt: продава парцел в поленица]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/749-2.jpg [alt: продава парцел в поленица]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/749-1-680x383.jpg [alt: Продажа участка с видом на Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/749-3-680x383.jpg [alt: Продава парцел в с.Поленица]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -3735,7 +3734,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -3767,11 +3766,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0059",
+      "listing_id": "MS-00945",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0059",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0059",
+      "target_path": "/bg/imoti/MS-00945",
+      "editor_path": "/admin/listings/edit?listingId=MS-00945",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3800,7 +3799,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -3832,11 +3831,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0060",
+      "listing_id": "MS-00234",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0060",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0060",
+      "target_path": "/bg/imoti/MS-00234",
+      "editor_path": "/admin/listings/edit?listingId=MS-00234",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3865,7 +3864,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -3897,11 +3896,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0061",
+      "listing_id": "MS-00470",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0061",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0061",
+      "target_path": "/bg/imoti/MS-00470",
+      "editor_path": "/admin/listings/edit?listingId=MS-00470",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3917,11 +3916,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 26,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/01/470-dron-new-680x383.jpg [alt: Продава парцел за строителство в с.Струмяни]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/09/470-2.jpg [alt: продава парцел в струмяни]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/09/470-4.jpg [alt: Продава парцел за строителство в с.Струмяни]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/01/470-dron-new-1000x563.jpg [alt: Продажа участка в поселке Струмяни. Недвижимость в районе Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/09/470-2.jpg [alt: продава парцел в струмяни]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -3930,7 +3929,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -3962,11 +3961,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0062",
+      "listing_id": "MS-00894",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0062",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0062",
+      "target_path": "/bg/imoti/MS-00894",
+      "editor_path": "/admin/listings/edit?listingId=MS-00894",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -3994,7 +3993,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -4026,11 +4025,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0063",
+      "listing_id": "MS-00960",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0063",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0063",
+      "target_path": "/bg/imoti/MS-00960",
+      "editor_path": "/admin/listings/edit?listingId=MS-00960",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4058,7 +4057,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -4090,11 +4089,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0064",
+      "listing_id": "MS-00567",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0064",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0064",
+      "target_path": "/bg/imoti/MS-00567",
+      "editor_path": "/admin/listings/edit?listingId=MS-00567",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4122,7 +4121,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4154,11 +4153,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0065",
+      "listing_id": "MS-00937",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0065",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0065",
+      "target_path": "/bg/imoti/MS-00937",
+      "editor_path": "/admin/listings/edit?listingId=MS-00937",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4174,11 +4173,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2026/01/%D1%81%D0%B0%D0%BF%D1%84%D0%B8%D1%80-%D1%80%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%81-%D0%B1%D0%B0%D0%BD%D1%81%D0%BA%D0%BE-680x510.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2026/01/937-1.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2026/01/937-2.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2026/02/PHOTO-2026-01-22-15-21-29-680x510.jpg [alt: Продажа меблированной студии в жилом комплексе Сапфир в Банско]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2026/02/937-1-680x510.jpg [alt: продажа однокомнатной квартиры в Банско]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -4186,7 +4185,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4220,11 +4219,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0066",
+      "listing_id": "MS-00893",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0066",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0066",
+      "target_path": "/bg/imoti/MS-00893",
+      "editor_path": "/admin/listings/edit?listingId=MS-00893",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4240,11 +4239,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 24,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/05/893-1-2-680x395.jpg [alt: Продава тристаен апартамент в Паралия Офринио, Гърция]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/05/893-1-2.jpg [alt: продава апартамент паралия офринио]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/05/893-3-1.jpg [alt: Продава тристаен апартамент в Паралия Офринио, Гърция]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2025/06/893-1-1000x581.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2025/06/plan-ofrinio-680x650.jpg [alt: Продава тристаен апартамент в Паралия Офринио, Гърция]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -4252,7 +4251,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4286,11 +4285,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0067",
+      "listing_id": "MS-00902",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0067",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0067",
+      "target_path": "/bg/imoti/MS-00902",
+      "editor_path": "/admin/listings/edit?listingId=MS-00902",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4318,7 +4317,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4352,11 +4351,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0068",
+      "listing_id": "MS-00720",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0068",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0068",
+      "target_path": "/bg/imoti/MS-00720",
+      "editor_path": "/admin/listings/edit?listingId=MS-00720",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -4383,7 +4382,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -4415,11 +4414,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0069",
+      "listing_id": "MS-00744",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0069",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0069",
+      "target_path": "/bg/imoti/MS-00744",
+      "editor_path": "/admin/listings/edit?listingId=MS-00744",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4435,11 +4434,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 3,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/02/744-2-680x383.jpg [alt: Продава 8дка земя в землището на с.Лешница]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/02/744-1.jpg [alt: Landwirtschaftliche Grundstücke zum Verkauf in der Nähe von Sandanski]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/02/744-2.jpg [alt: Продава 8дка земя в землището на с.Лешница]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/744-1-680x383.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/744-2-680x383.jpg [alt: Продава 8дка земя в землището на с.Лешница]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -4448,7 +4447,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -4480,11 +4479,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0070",
+      "listing_id": "MS-00456",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0070",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0070",
+      "target_path": "/bg/imoti/MS-00456",
+      "editor_path": "/admin/listings/edit?listingId=MS-00456",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -4510,7 +4509,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -4542,11 +4541,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0071",
+      "listing_id": "MS-00499",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0071",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0071",
+      "target_path": "/bg/imoti/MS-00499",
+      "editor_path": "/admin/listings/edit?listingId=MS-00499",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4562,11 +4561,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2016/01/499-680x382.jpg [alt: Продажба на 38дка земя в близост до минерална вода]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2016/01/499-map.jpg [alt: Продажба на 38дка земя в близост до минерална вода]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2016/01/499-%D1%81%D0%BA%D0%B8%D1%86%D0%B0-%D1%85%D0%BE%D1%82%D0%BE%D0%B2%D0%BE.jpg [alt: Продажба на 38дка земя в близост до минерална вода]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2016/01/499-1000x562.jpg [alt: Продажа большого участка рядом с мин.водой]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2016/01/499-map.jpg [alt: Продажба на 38дка земя в близост до минерална вода]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -4575,7 +4574,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -4607,11 +4606,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0072",
+      "listing_id": "MS-00930",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0072",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0072",
+      "target_path": "/bg/imoti/MS-00930",
+      "editor_path": "/admin/listings/edit?listingId=MS-00930",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4639,7 +4638,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4673,11 +4672,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0073",
+      "listing_id": "MS-00860",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0073",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0073",
+      "target_path": "/bg/imoti/MS-00860",
+      "editor_path": "/admin/listings/edit?listingId=MS-00860",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4693,11 +4692,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 11,
       "public_gallery_sample": [
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2025/06/2-1000x563.jpg [alt: Продажа новостройки в Сандански]",
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/IMG_20260325_172443-680x356.jpg [alt: Продажба на апартаменти в гр.Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/2-1.jpg [alt: sunset home sandanski]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/E2_4-1.jpg [alt: sunset homes sandanski]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/2-1.jpg [alt: sunset home sandanski]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -4737,11 +4736,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0074",
+      "listing_id": "MS-00939",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0074",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0074",
+      "target_path": "/bg/imoti/MS-00939",
+      "editor_path": "/admin/listings/edit?listingId=MS-00939",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4769,7 +4768,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4801,11 +4800,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0075",
+      "listing_id": "MS-00852",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0075",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0075",
+      "target_path": "/bg/imoti/MS-00852",
+      "editor_path": "/admin/listings/edit?listingId=MS-00852",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4833,7 +4832,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -4865,11 +4864,11 @@
       }
     },
     {
-      "listing_id": "MS-3000",
+      "listing_id": "MS-00356",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-3000",
-      "editor_path": "/admin/listings/edit?listingId=MS-3000",
+      "target_path": "/bg/imoti/MS-00356",
+      "editor_path": "/admin/listings/edit?listingId=MS-00356",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4885,7 +4884,7 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 15,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/PHOTO-2025-06-03-13-42-17_1-680x383.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]",
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/PHOTO-2025-06-03-13-42-17_1.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]",
@@ -4930,11 +4929,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0077",
+      "listing_id": "MS-00959",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0077",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0077",
+      "target_path": "/bg/imoti/MS-00959",
+      "editor_path": "/admin/listings/edit?listingId=MS-00959",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -4962,7 +4961,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -4996,11 +4995,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0078",
+      "listing_id": "MS-00900",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0078",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0078",
+      "target_path": "/bg/imoti/MS-00900",
+      "editor_path": "/admin/listings/edit?listingId=MS-00900",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5028,7 +5027,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -5062,11 +5061,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0079",
+      "listing_id": "MS-00242",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0079",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0079",
+      "target_path": "/bg/imoti/MS-00242",
+      "editor_path": "/admin/listings/edit?listingId=MS-00242",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5094,7 +5093,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -5128,11 +5127,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0080",
+      "listing_id": "MS-00955",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0080",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0080",
+      "target_path": "/bg/imoti/MS-00955",
+      "editor_path": "/admin/listings/edit?listingId=MS-00955",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5160,7 +5159,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -5194,11 +5193,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0081",
+      "listing_id": "MS-00286",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0081",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0081",
+      "target_path": "/bg/imoti/MS-00286",
+      "editor_path": "/admin/listings/edit?listingId=MS-00286",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5214,11 +5213,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 12,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2013/11/286-dron-680x510.jpg [alt: Недвижими имоти в Сандански. Продава парцел в с.Струмяни]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2013/11/286-1.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2013/11/286-2.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2013/11/286-dron-800x600.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2013/11/286-1.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5227,7 +5226,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -5259,11 +5258,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0082",
+      "listing_id": "MS-00394",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0082",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0082",
+      "target_path": "/bg/imoti/MS-00394",
+      "editor_path": "/admin/listings/edit?listingId=MS-00394",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -5290,7 +5289,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -5322,11 +5321,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0083",
+      "listing_id": "MS-00891",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0083",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0083",
+      "target_path": "/bg/imoti/MS-00891",
+      "editor_path": "/admin/listings/edit?listingId=MS-00891",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5342,11 +5341,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/891-2-680x510.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/891-1.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/891-2.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2025/04/891-2-800x600.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/04/891-1.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5354,7 +5353,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -5386,11 +5385,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0084",
+      "listing_id": "MS-00869",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0084",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0084",
+      "target_path": "/bg/imoti/MS-00869",
+      "editor_path": "/admin/listings/edit?listingId=MS-00869",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5418,7 +5417,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -5452,11 +5451,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0085",
+      "listing_id": "MS-00851",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0085",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0085",
+      "target_path": "/bg/imoti/MS-00851",
+      "editor_path": "/admin/listings/edit?listingId=MS-00851",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5518,11 +5517,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0086",
+      "listing_id": "MS-00191",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0086",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0086",
+      "target_path": "/bg/imoti/MS-00191",
+      "editor_path": "/admin/listings/edit?listingId=MS-00191",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5538,7 +5537,7 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 20,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2013/11/191-1.jpg [alt: Продава апартаменти в Парк Хотел Пирин]",
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2013/11/191-2.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]",
@@ -5582,11 +5581,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0087",
+      "listing_id": "MS-00791",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0087",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0087",
+      "target_path": "/bg/imoti/MS-00791",
+      "editor_path": "/admin/listings/edit?listingId=MS-00791",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5602,11 +5601,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 15,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2021/03/791-1-680x383.jpg [alt: Продава земя и сгради в близост до Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2021/03/791-1.jpg [alt: Big plot of land and buildings for sale]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2021/03/791-2.jpg [alt: Großes Grundstück und Gebäude zum Verkauf]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2021/03/791-1-680x383.jpg [alt: Земля и здания на продажу недалеко от Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2021/03/791-2-680x383.jpg [alt: Продава земя и сгради в близост до Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5615,7 +5614,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -5647,11 +5646,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0088",
+      "listing_id": "MS-00734",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0088",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0088",
+      "target_path": "/bg/imoti/MS-00734",
+      "editor_path": "/admin/listings/edit?listingId=MS-00734",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5667,11 +5666,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 3,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/12/734-dron-680x382.jpg [alt: Продава парцел в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/12/734-dron-1.jpg [alt: Land for sale in Sandanski. MS Realty company]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/12/734-dron.jpg [alt: Land for sale in Sandanski. MS Realty company]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/01/734-dron-1000x562.jpg [alt: Продажа большого, панорамного участка в Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/12/734-dron-1.jpg [alt: Land for sale in Sandanski. MS Realty company]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5680,7 +5679,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -5712,11 +5711,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0089",
+      "listing_id": "MS-00707",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0089",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0089",
+      "target_path": "/bg/imoti/MS-00707",
+      "editor_path": "/admin/listings/edit?listingId=MS-00707",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5732,11 +5731,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 24,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/03/707-1-680x510.jpg [alt: Продава двустаен апартамент в ПАРК ХОТЕЛ ПИРИН САНДАНСКИ]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/03/707-1.jpg [alt: Ein-Zimmer-Wohnung zum Verkauf im Park Hotel Pirin Sandanski]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/03/707-6.jpg [alt: One bedroom apartment for sale in Park Hotel Pirin Sandanski]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2019/03/707-1-800x600.jpg [alt: Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/03/707-1.jpg [alt: Ein-Zimmer-Wohnung zum Verkauf im Park Hotel Pirin Sandanski]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5744,7 +5743,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -5778,11 +5777,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0090",
+      "listing_id": "MS-00543",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0090",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0090",
+      "target_path": "/bg/imoti/MS-00543",
+      "editor_path": "/admin/listings/edit?listingId=MS-00543",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5810,7 +5809,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -5844,11 +5843,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0091",
+      "listing_id": "MS-00872",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0091",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0091",
+      "target_path": "/bg/imoti/MS-00872",
+      "editor_path": "/admin/listings/edit?listingId=MS-00872",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5864,11 +5863,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 25,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/870-2-680x510.jpeg [alt: Продава къща в с.Виногради, 3 км от Мелник]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/870-4.jpeg [alt: Haus zu vermieten im Dorf Vinogradi, 3 km von Melnik entfernt]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/870-3.jpeg [alt: Haus zu vermieten im Dorf Vinogradi, 3 km von Melnik entfernt]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2024/02/870-1-800x600.jpeg [alt: Продажа дома в поселке Виногради ( Мелник)]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2023/11/870-4.jpeg [alt: Haus zu vermieten im Dorf Vinogradi, 3 km von Melnik entfernt]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5876,7 +5875,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -5908,11 +5907,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0092",
+      "listing_id": "MS-00671",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0092",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0092",
+      "target_path": "/bg/imoti/MS-00671",
+      "editor_path": "/admin/listings/edit?listingId=MS-00671",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -5928,11 +5927,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 27,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/08/671-new-1-680x510.jpg [alt: Продава къща в парка на Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/08/671-7.jpg [alt: Продава къща в парка на Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/08/671-8.jpg [alt: Продава къща в парка на Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2018/08/671-new-1-800x600.jpg [alt: Продажа дома в Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/08/671-7.jpg [alt: Продава къща в парка на Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -5940,7 +5939,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -5972,11 +5971,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0093",
+      "listing_id": "MS-00190",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0093",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0093",
+      "target_path": "/bg/imoti/MS-00190",
+      "editor_path": "/admin/listings/edit?listingId=MS-00190",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6004,7 +6003,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6036,11 +6035,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0094",
+      "listing_id": "MS-00619",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0094",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0094",
+      "target_path": "/bg/imoti/MS-00619",
+      "editor_path": "/admin/listings/edit?listingId=MS-00619",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6068,7 +6067,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -6100,11 +6099,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0095",
+      "listing_id": "MS-00699",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0095",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0095",
+      "target_path": "/bg/imoti/MS-00699",
+      "editor_path": "/admin/listings/edit?listingId=MS-00699",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6120,11 +6119,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 18,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/02/699-dron-7-680x383.jpg [alt: Продава индустриална сграда. Община Петрич]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/02/699-dron-1.jpg [alt: индустриална сграда в община петрич]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/02/699-dron-2.jpg [alt: Industriegebäude zu verkaufen. Petrich Gemeinde]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2019/03/699-dron-5-1000x563.jpg [alt: Продается производственное здание oколо г. Петрич]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/02/699-dron-1.jpg [alt: индустриална сграда в община петрич]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -6132,7 +6131,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -6164,11 +6163,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0096",
+      "listing_id": "MS-00758",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0096",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0096",
+      "target_path": "/bg/imoti/MS-00758",
+      "editor_path": "/admin/listings/edit?listingId=MS-00758",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6196,7 +6195,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -6228,11 +6227,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0097",
+      "listing_id": "MS-00751",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0097",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0097",
+      "target_path": "/bg/imoti/MS-00751",
+      "editor_path": "/admin/listings/edit?listingId=MS-00751",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6260,7 +6259,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -6292,11 +6291,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0098",
+      "listing_id": "MS-00750",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0098",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0098",
+      "target_path": "/bg/imoti/MS-00750",
+      "editor_path": "/admin/listings/edit?listingId=MS-00750",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6312,11 +6311,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 15,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/750-outside-2-680x510.jpg [alt: Продава индустриална база около Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/750-5.jpg [alt: Продава индустриална база около Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/750-1.jpg [alt: Продава индустриална база около Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/05/750-outside-1-800x600.jpg [alt: Продажа производственной базы около Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/04/750-5.jpg [alt: Продава индустриална база около Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -6324,7 +6323,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -6356,11 +6355,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0099",
+      "listing_id": "MS-00666",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0099",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0099",
+      "target_path": "/bg/imoti/MS-00666",
+      "editor_path": "/admin/listings/edit?listingId=MS-00666",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6376,7 +6375,7 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 21,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2014/10/400-6.jpg [alt: Продава луксозна къща в Сандански]",
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2014/10/400.jpg [alt: Аренда домов в Сандански]",
@@ -6388,7 +6387,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6420,11 +6419,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0100",
+      "listing_id": "MS-00695",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0100",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0100",
+      "target_path": "/bg/imoti/MS-00695",
+      "editor_path": "/admin/listings/edit?listingId=MS-00695",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6452,7 +6451,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -6486,11 +6485,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0101",
+      "listing_id": "MS-00731",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0101",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0101",
+      "target_path": "/bg/imoti/MS-00731",
+      "editor_path": "/admin/listings/edit?listingId=MS-00731",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6506,11 +6505,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 19,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/11/731-1-680x505.jpg [alt: Двустаен апартамент под наем в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/11/731-19.jpg [alt: нов апартамент за дългосрочен и краткосрочен наем]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/11/731-18.jpg [alt: Двустаен апартамент под наем в Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2019/11/731-4-899x600.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2019/11/731-19.jpg [alt: нов апартамент за дългосрочен и краткосрочен наем]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -6518,7 +6517,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6552,11 +6551,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0102",
+      "listing_id": "MS-00879",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0102",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0102",
+      "target_path": "/bg/imoti/MS-00879",
+      "editor_path": "/admin/listings/edit?listingId=MS-00879",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6584,7 +6583,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6618,11 +6617,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0103",
+      "listing_id": "MS-00123",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0103",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0103",
+      "target_path": "/bg/imoti/MS-00123",
+      "editor_path": "/admin/listings/edit?listingId=MS-00123",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6650,7 +6649,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6684,11 +6683,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0104",
+      "listing_id": "MS-00999",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0104",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0104",
+      "target_path": "/bg/imoti/MS-00999",
+      "editor_path": "/admin/listings/edit?listingId=MS-00999",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6716,7 +6715,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6748,11 +6747,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0105",
+      "listing_id": "MS-00739",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0105",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0105",
+      "target_path": "/bg/imoti/MS-00739",
+      "editor_path": "/admin/listings/edit?listingId=MS-00739",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6771,8 +6770,8 @@
       "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/01/IMG_6227-680x453.jpg [alt: Продава СПА Хотел в гр.Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/01/1.jpg [alt: SPA Hotel mit Mineralwasser zum Verkauf in Sandanski, Bulgarien]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/01/1%D0%92%D0%90-%D0%A1%D0%A2%D0%90%D0%AF.jpg [alt: SPA Hotel mit Mineralwasser zum Verkauf in Sandanski, Bulgarien]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/01/739-32-900x600.jpg [alt: Продажа СПА Отеля в г.Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/01/1.jpg [alt: SPA Hotel mit Mineralwasser zum Verkauf in Sandanski, Bulgarien]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -6780,7 +6779,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "gross_floor_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -6810,11 +6809,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0106",
+      "listing_id": "MS-00635",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0106",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0106",
+      "target_path": "/bg/imoti/MS-00635",
+      "editor_path": "/admin/listings/edit?listingId=MS-00635",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6842,7 +6841,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6876,11 +6875,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0107",
+      "listing_id": "MS-00933",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0107",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0107",
+      "target_path": "/bg/imoti/MS-00933",
+      "editor_path": "/admin/listings/edit?listingId=MS-00933",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6908,7 +6907,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -6942,11 +6941,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0108",
+      "listing_id": "MS-00870",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0108",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0108",
+      "target_path": "/bg/imoti/MS-00870",
+      "editor_path": "/admin/listings/edit?listingId=MS-00870",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -6962,11 +6961,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/870-3-680x510.jpg [alt: Продава вила в Малешевска планина]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/870-3.jpg [alt: villa for sale in the mountains. Blagoevgrad region]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/870-1.jpg [alt: villa for sale in the mountains. Blagoevgrad region]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2024/02/870-2-800x600.jpeg [alt: Сдается дом в селе Виногради, 3 км от Мельника]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2025/03/870-3.jpg [alt: villa for sale in the mountains. Blagoevgrad region]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -7006,11 +7005,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0109",
+      "listing_id": "MS-00760",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0109",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0109",
+      "target_path": "/bg/imoti/MS-00760",
+      "editor_path": "/admin/listings/edit?listingId=MS-00760",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -7026,11 +7025,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/06/760-1-680x510.jpg [alt: Двустаен апартамент под наем в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/06/760-1.jpg [alt: Двустаен апартамент под наем в Сандански]",
-        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2020/06/760-2.jpg [alt: Двустаен апартамент под наем в Сандански]"
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/07/760-1-680x510.jpg [alt: Аренда панорамной двушки в Сандански]",
+        "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.ru/wp-content/uploads/2020/07/760-2-680x510.jpg [alt: Двустаен апартамент под наем в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0,
@@ -7038,7 +7037,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -7072,11 +7071,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0110",
+      "listing_id": "MS-00651",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0110",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0110",
+      "target_path": "/bg/imoti/MS-00651",
+      "editor_path": "/admin/listings/edit?listingId=MS-00651",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -7104,7 +7103,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -7138,11 +7137,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0111",
+      "listing_id": "MS-00444",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0111",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
+      "target_path": "/bg/imoti/MS-00444",
+      "editor_path": "/admin/listings/edit?listingId=MS-00444",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -7170,7 +7169,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -7202,11 +7201,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0112",
+      "listing_id": "MS-00896",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0112",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0112",
+      "target_path": "/bg/imoti/MS-00896",
+      "editor_path": "/admin/listings/edit?listingId=MS-00896",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -7235,7 +7234,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -7267,11 +7266,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0113",
+      "listing_id": "MS-00778",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0113",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0113",
+      "target_path": "/bg/imoti/MS-00778",
+      "editor_path": "/admin/listings/edit?listingId=MS-00778",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -7287,7 +7286,7 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 20,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]",
         "https://ms-realty.ms-realty-bg.workers.dev/media/makler-realty.com/wp-content/uploads/2018/03/778-3-1.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]",
@@ -7299,7 +7298,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -7429,7 +7428,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -7496,7 +7495,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -7560,7 +7559,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -7592,11 +7591,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0118",
+      "listing_id": "MS-00935",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0118",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0118",
+      "target_path": "/ru/properties/MS-00935",
+      "editor_path": "/admin/listings/edit?listingId=MS-00935",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -7624,7 +7623,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -7688,7 +7687,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -7722,11 +7721,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0120",
+      "listing_id": "MS-00382",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0120",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0120",
+      "target_path": "/ru/properties/MS-00382",
+      "editor_path": "/admin/listings/edit?listingId=MS-00382",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -7754,7 +7753,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "gross_floor_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -7814,7 +7813,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -7926,7 +7925,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -7990,7 +7989,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -8054,7 +8053,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -8119,7 +8118,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -8184,7 +8183,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -8216,11 +8215,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0128",
+      "listing_id": "MS-00697",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0128",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0128",
+      "target_path": "/ru/properties/MS-00697",
+      "editor_path": "/admin/listings/edit?listingId=MS-00697",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -8249,7 +8248,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -8361,7 +8360,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -8393,11 +8392,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0131",
+      "listing_id": "MS-00280",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0131",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0131",
+      "target_path": "/ru/properties/MS-00280",
+      "editor_path": "/admin/listings/edit?listingId=MS-00280",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -8425,7 +8424,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -8491,7 +8490,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -8553,7 +8552,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -8617,7 +8616,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -8683,7 +8682,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -8750,7 +8749,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -8815,7 +8814,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -8943,7 +8942,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9007,7 +9006,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "gross_floor_area_sqm",
           "price_on_request",
           "availability_verified_at",
           "seo_human_approved"
@@ -9037,11 +9036,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0141",
+      "listing_id": "MS-00645",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0141",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0141",
+      "target_path": "/ru/properties/MS-00645",
+      "editor_path": "/admin/listings/edit?listingId=MS-00645",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -9070,7 +9069,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9102,11 +9101,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0142",
+      "listing_id": "MS-00920",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0142",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0142",
+      "target_path": "/ru/properties/MS-00920",
+      "editor_path": "/admin/listings/edit?listingId=MS-00920",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -9135,7 +9134,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9200,7 +9199,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9265,7 +9264,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9297,11 +9296,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0145",
+      "listing_id": "MS-00628",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0145",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0145",
+      "target_path": "/ru/properties/MS-00628",
+      "editor_path": "/admin/listings/edit?listingId=MS-00628",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -9328,7 +9327,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9360,11 +9359,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0146",
+      "listing_id": "MS-00340",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0146",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0146",
+      "target_path": "/ru/properties/MS-00340",
+      "editor_path": "/admin/listings/edit?listingId=MS-00340",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -9390,7 +9389,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "gross_floor_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9452,7 +9451,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -9518,7 +9517,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -9647,7 +9646,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9711,7 +9710,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9743,11 +9742,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0152",
+      "listing_id": "MS-00296",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0152",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0152",
+      "target_path": "/ru/properties/MS-00296",
+      "editor_path": "/admin/listings/edit?listingId=MS-00296",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -9776,7 +9775,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9841,7 +9840,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9906,7 +9905,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -9938,11 +9937,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0155",
+      "listing_id": "MS-00232",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0155",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0155",
+      "target_path": "/ru/properties/MS-00232",
+      "editor_path": "/admin/listings/edit?listingId=MS-00232",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -9971,7 +9970,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -10003,11 +10002,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0156",
+      "listing_id": "MS-00362",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0156",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0156",
+      "target_path": "/ru/properties/MS-00362",
+      "editor_path": "/admin/listings/edit?listingId=MS-00362",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -10036,7 +10035,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -10068,11 +10067,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0157",
+      "listing_id": "MS-00074",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0157",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0157",
+      "target_path": "/ru/properties/MS-00074",
+      "editor_path": "/admin/listings/edit?listingId=MS-00074",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "area_sqm",
@@ -10101,7 +10100,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -10133,11 +10132,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0158",
+      "listing_id": "MS-00046",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0158",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0158",
+      "target_path": "/ru/properties/MS-00046",
+      "editor_path": "/admin/listings/edit?listingId=MS-00046",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -10166,7 +10165,7 @@
         "blocking_fields": [
           "property_family",
           "location_id",
-          "primary_area_sqm",
+          "land_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -10230,7 +10229,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "usable_area_sqm",
           "price_amount",
           "availability_verified_at",
           "seo_human_approved"
@@ -10294,7 +10293,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -10360,7 +10359,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_on_request",
           "availability_verified_at",
@@ -10426,7 +10425,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -10460,11 +10459,11 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0163",
+      "listing_id": "MS-00696",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0163",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0163",
+      "target_path": "/ru/properties/MS-00696",
+      "editor_path": "/admin/listings/edit?listingId=MS-00696",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
         "area_sqm"
@@ -10492,7 +10491,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",
@@ -10558,7 +10557,7 @@
         "ready": false,
         "blocking_fields": [
           "location_id",
-          "primary_area_sqm",
+          "built_area_sqm",
           "bedrooms_count",
           "price_amount",
           "availability_verified_at",

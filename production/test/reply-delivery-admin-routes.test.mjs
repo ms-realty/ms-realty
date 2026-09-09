@@ -19,7 +19,7 @@ function fixture() {
     received_at: "2026-07-18T10:00:00.000Z",
     source: "website_listing_detail",
     lead_type: "buyer",
-    listing_reference: "MS-CRAWL-0001",
+    listing_reference: "MS-00815",
     original_language: "ru",
     admin_locale: "ru",
     message_original: "Please contact me.",

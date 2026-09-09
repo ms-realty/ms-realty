@@ -61,21 +61,21 @@ test("Next listing manager bulk status changes are selected, attributed, audited
     };
 
     const page = await renderAppAdminResponse(
-      new Request("https://example.test/admin/listings?q=MS-CRAWL-0001", { headers: auth }),
+      new Request("https://example.test/admin/listings?q=MS-00815", { headers: auth }),
       { config },
     );
     const html = await page.text();
     assert.equal(page.status, 200);
     assert.match(html, /data-listing-bulk-form="true"/);
     assert.match(html, /action="\/api\/admin\/listings\/status"/);
-    assert.match(html, /name="listingIds" value="MS-CRAWL-0001"/);
+    assert.match(html, /name="listingIds" value="MS-00815"/);
 
     const spoofed = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/listings/status", {
         method: "POST",
         headers: { ...auth, "content-type": "application/json" },
         body: JSON.stringify({
-          listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002"],
+          listingIds: ["MS-00815", "MS-00907"],
           targetStatus: "reserved",
           editor: "somebody_else",
         }),
@@ -90,7 +90,7 @@ test("Next listing manager bulk status changes are selected, attributed, audited
         new Request("https://example.test/api/admin/listings/status", {
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
-          body: JSON.stringify({ listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002"], targetStatus: "reserved" }),
+          body: JSON.stringify({ listingIds: ["MS-00815", "MS-00907"], targetStatus: "reserved" }),
         }),
         { config },
       );
@@ -100,8 +100,8 @@ test("Next listing manager bulk status changes are selected, attributed, audited
     assert.equal(firstBody.updated, 2);
     assert.equal(firstBody.edits.every((edit) => edit.editor === "listing_operations"), true);
     assert.equal(readListingEdits(paths.listingEdits).length, 0);
-    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "reserved");
-    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "reserved");
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.listing_status, "reserved");
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00907").facts.listing_status, "reserved");
     assert.equal(readAuditLog(paths.audit).length, 2);
     assert.equal(readAuditLog(paths.audit).every((row) => row.actor === "listing_operations"), true);
 
@@ -114,7 +114,7 @@ test("Next listing manager bulk status changes are selected, attributed, audited
     assert.equal(readAuditLog(paths.audit).length, 2);
 
     const json = await renderAppAdminResponse(
-      new Request("https://example.test/api/admin/listings?q=MS-CRAWL-0001", { headers: auth }),
+      new Request("https://example.test/api/admin/listings?q=MS-00815", { headers: auth }),
       { config },
     );
     assert.equal((await json.json()).listings[0].listing_status, "reserved");
@@ -142,7 +142,7 @@ test("production listing edits keep a durable Payload receipt when supplemental 
       new Request("https://example.test/api/admin/listings/edit", {
         method: "POST",
         headers: { ...auth, "content-type": "application/json" },
-        body: JSON.stringify({ listingId: "MS-CRAWL-0001", patch: { condition: "Production-reviewed condition" } }),
+        body: JSON.stringify({ listingId: "MS-00815", patch: { condition: "Production-reviewed condition" } }),
       }),
       { config },
     );
@@ -158,19 +158,19 @@ test("production listing edits keep a durable Payload receipt when supplemental 
       new Request("https://example.test/api/admin/listings/status", {
         method: "POST",
         headers: { ...auth, "content-type": "application/json" },
-        body: JSON.stringify({ listingIds: ["MS-CRAWL-0002"], targetStatus: "reserved" }),
+        body: JSON.stringify({ listingIds: ["MS-00907"], targetStatus: "reserved" }),
       }),
       { config },
     );
     assert.equal(status.status, 201);
     assert.equal(readAuditLog(paths.audit).length, 0);
 
-    const editReceipt = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").workflow.last_edit_event;
+    const editReceipt = runtime.currentRows().listings.find((row) => row.id === "MS-00815").workflow.last_edit_event;
     assert.deepEqual(
       { actor: editReceipt.actor_id, source: editReceipt.auth_source, channel: editReceipt.channel, fields: editReceipt.changed_fields },
       { actor: "listing_operations", source: "credential_registry", channel: "admin", fields: ["condition"] },
     );
-    const statusReceipt = runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").workflow.last_edit_event;
+    const statusReceipt = runtime.currentRows().listings.find((row) => row.id === "MS-00907").workflow.last_edit_event;
     assert.deepEqual(
       { actor: statusReceipt.actor_id, source: statusReceipt.auth_source, channel: statusReceipt.channel, fields: statusReceipt.changed_fields },
       { actor: "listing_operations", source: "credential_registry", channel: "admin", fields: ["listing_status"] },
@@ -191,7 +191,7 @@ test("Next listing manager schedules and executes retained-archive publication c
       });
 
     const initialPage = await renderAppAdminResponse(
-      new Request("https://example.test/admin/listings?q=MS-CRAWL-0001", { headers: auth }),
+      new Request("https://example.test/admin/listings?q=MS-00815", { headers: auth }),
       { config: configAt("2026-07-19T08:00:00.000Z") },
     );
     assert.match(await initialPage.text(), /data-publication-schedule-panel="true"/);
@@ -202,7 +202,7 @@ test("Next listing manager schedules and executes retained-archive publication c
         headers: { ...auth, "content-type": "application/json" },
         body: JSON.stringify({
           id: "next-publication-unpublish-1",
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           action: "unpublish",
           scheduledAt: "2026-07-19T09:00:00.000Z",
         }),
@@ -219,7 +219,7 @@ test("Next listing manager schedules and executes retained-archive publication c
         headers: { ...auth, "content-type": "application/json" },
         body: JSON.stringify({
           id: "next-publication-unpublish-1",
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           action: "unpublish",
           scheduledAt: "2026-07-19T09:00:00.000Z",
         }),
@@ -286,7 +286,7 @@ test("HTTP listing publication schedule can be cancelled before it changes inven
       headers: auth,
       body: {
         id: "http-publication-unpublish-1",
-        listingId: "MS-CRAWL-0002",
+        listingId: "MS-00907",
         action: "unpublish",
         scheduledAt: "2026-07-20T09:00:00.000Z",
       },
@@ -342,8 +342,8 @@ test("HTTP adapter preserves repeated form selections for bulk listing status ch
       url: "/api/admin/listings/status",
       headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams([
-        ["listingIds", "MS-CRAWL-0001"],
-        ["listingIds", "MS-CRAWL-0002"],
+        ["listingIds", "MS-00815"],
+        ["listingIds", "MS-00907"],
         ["targetStatus", "sold"],
       ]).toString(),
     });
@@ -351,8 +351,8 @@ test("HTTP adapter preserves repeated form selections for bulk listing status ch
     assert.equal(response.body.requested, 2);
     assert.equal(response.body.updated, 2);
     assert.equal(readListingEdits(paths.listingEdits).length, 0);
-    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0001").facts.listing_status, "sold");
-    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-CRAWL-0002").facts.listing_status, "sold");
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00815").facts.listing_status, "sold");
+    assert.equal(runtime.currentRows().listings.find((row) => row.id === "MS-00907").facts.listing_status, "sold");
     assert.equal(readAuditLog(paths.audit).length, 2);
   });
 });
@@ -377,11 +377,11 @@ for (const adapter of ["Next", "HTTP"]) {
         return { status: response.status, body: input ? await response.json() : await response.text() };
       };
       const projected = await projectListingDraftSeed(seed, { payload: runtime.payload });
-      const revision = projected.records.find((row) => row.id === "MS-CRAWL-0001").draft_revision;
-      const page = await send("/admin/listings/edit?listingId=MS-CRAWL-0001&locale=en");
+      const revision = projected.records.find((row) => row.id === "MS-00815").draft_revision;
+      const page = await send("/admin/listings/edit?listingId=MS-00815&locale=en");
       assert.equal(page.status, 200);
       assert.ok(page.body.includes(`name="draftRevision" value="${revision}"`));
-      const input = { listingId: "MS-CRAWL-0001", title: "Revision-aware title" };
+      const input = { listingId: "MS-00815", title: "Revision-aware title" };
       assert.equal((await send("/api/admin/listings/edit", input)).status, 409);
       const saved = await send("/api/admin/listings/edit", { ...input, draftRevision: revision });
       assert.equal(saved.status, 201);

@@ -21,7 +21,7 @@ import { durableLeadStoreFixtureEnv } from "./approved-public-seed.fixture.mjs";
 Object.assign(process.env, durableLeadStoreFixtureEnv());
 const registry = loadLocaleRegistry();
 const listings = loadListings();
-const listing = findListingById(listings, "MS-CRAWL-0001");
+const listing = findListingById(listings, "MS-00815");
 const seed = loadCmsSeed();
 
 test("HTML renderer honors reviewed Open Graph listing fields", () => {
@@ -66,10 +66,10 @@ test("print brochure prefers full-resolution WordPress media without repeating t
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
-  const runtimeListingHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"));
+  const runtimeListingHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-00815"));
   const listingPrintPage = renderListingPage({ registry, listing, localeCode: "he" });
   const listingPrintHtml = renderHtmlPage(listingPrintPage, { print: true });
-  const runtimeListingPrintHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"), { print: true });
+  const runtimeListingPrintHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-00815"), { print: true });
   const approvedListingHtml = renderHtmlPage(
     renderListingPage({
       registry,
@@ -80,7 +80,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
         broker: "broker_ru",
         phone: "+447700900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001",
+        sourceReference: "test://broker-contact/MS-00815",
         validationStatus: "broker_verified",
         approved: true,
       }),
@@ -96,7 +96,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
         broker: "broker_ru",
         phone: "+447700900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001/print",
+        sourceReference: "test://broker-contact/MS-00815/print",
         validationStatus: "broker_verified",
         approved: true,
       }),
@@ -148,7 +148,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-listing-action="back_to_results"/);
   assert.match(listingHtml, /href="\/he\/search"/);
   assert.match(listingHtml, /data-listing-action="print"/);
-  assert.match(listingHtml, /data-client-save-listing="MS-CRAWL-0001"/);
+  assert.match(listingHtml, /data-client-save-listing="MS-00815"/);
   assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/media\/makler-realty\.com\/wp-content\/uploads\//);
   assert.match(listingHtml, /<meta name="robots" content="noindex,follow">/);
   assert.doesNotMatch(listingHtml, /hreflang=/);
@@ -216,7 +216,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /<button(?=[^>]*data-view-mode="list")(?=[^>]*aria-pressed="true")[^>]*>/);
   assert.match(searchHtml, /<button[^>]*data-view-mode="map"[^>]*>/);
   assert.doesNotMatch(searchHtml, /verified inventory/);
-  assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
+  assert.match(searchHtml, /data-client-save-listing="MS-0\d{4}/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
   assert.match(locationHtml, /<h1>נכסים ב-סנדנסקי<\/h1>/);
@@ -349,7 +349,8 @@ test("admin viewing follow-up queue formats due dates and keeps action header di
       summary: { total_viewings: 1, open: 1, overdue: 0, booked: 0, completed: 0, rescheduled: 0, no_show: 0 },
     },
   });
-  const html = renderHtmlPage(page);
+  // Follow-ups render on the Viewings screen; the inbox no longer carries the table.
+  const html = renderHtmlPage({ ...page, kind: "admin_viewings", path: "/admin/viewings" });
   const dueCell = html.match(/data-viewing-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
   assert.match(dueCell, /<time dateTime="2026-07-06T12:00:00.000Z"/);
   assert.doesNotMatch(dueCell.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
@@ -387,7 +388,9 @@ test("admin seller valuation queue renders native broker outcome controls", () =
     deals: [],
     leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
   });
-  const html = renderHtmlPage(page);
+  // The seller valuation queue is pipeline work; the inbox no longer carries it.
+  assert.doesNotMatch(renderHtmlPage(page), /data-seller-pipeline-queue="true"/);
+  const html = renderHtmlPage({ ...page, kind: "admin_lead_pipeline", path: "/admin/pipeline" });
 
   assert.match(html, /data-seller-pipeline-row="true"/);
   assert.match(html, /action="\/api\/admin\/seller-pipeline\/outcome"/);
@@ -425,7 +428,8 @@ test("admin seller controls continue from listing publication through offer and 
     deals: [],
     leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
   });
-  const html = renderHtmlPage(page);
+  // Seller work renders on the pipeline screen, not in the inbox.
+  const html = renderHtmlPage({ ...page, kind: "admin_lead_pipeline", path: "/admin/pipeline" });
 
   assert.match(html, /name="action" value="listing_published"/);
   assert.match(html, /name="publicPath" required/);
