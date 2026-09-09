@@ -139,6 +139,10 @@ rollback() {
   set +e
   if [[ "$switched" == true && -n "$previous" ]]; then
     echo "deployment failed; restoring $previous" >&2
+    # The coordinator from this release understands rekeying even when the
+    # rollback target predates lot IDs. Preserve rows; never restore an old DB.
+    MS_REALTY_ENV_FILE="$env_file" MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml \
+      node "$release/production/scripts/local-production.mjs" identities "$previous/production/data/cms-seed.json" || exit "$status"
     if activate "$previous"; then
       run_stack "$previous" docker:up "$(basename "$previous")" || true
     else
