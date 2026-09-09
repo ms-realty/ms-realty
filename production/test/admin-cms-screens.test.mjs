@@ -470,7 +470,7 @@ test("the approved content state filter narrows the rows on show and keeps the c
   assert.match(ready.body, /data-approved-record="hotovo-bg"/);
 });
 
-test("approved content sits with Records in Atlas navigation and speaks the three workbench languages", async () => {
+test("approved content is the Content destination in the primary rail and speaks the three workbench languages", async () => {
   const english = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en", headers: auth });
   assert.match(english.body, /<a class="crm-nav crm-nav--on" href="\/admin\/approved-content" aria-current="page"/);
   assert.match(english.body, /Approved content/);
@@ -482,10 +482,17 @@ test("approved content sits with Records in Atlas navigation and speaks the thre
     assert.match(page.body, /build-approved-content\.mjs/, locale);
     assert.doesNotMatch(page.body, /Example record, not real content/, locale);
   }
-  const recordsGroup = english.body.match(/data-admin-nav-group="records"([\s\S]*?)(?=data-admin-nav-group="management")/)?.[1] || "";
-  for (const route of ["listings", "media", "approved-content", "translations"]) {
-    assert.ok(recordsGroup.includes(`/admin/${route}`), `${route} remains accessible under Records`);
+  // Listings and Content are primary; the media library and the translation
+  // queue sit in the owner's Advanced disclosure.
+  const primaryGroup = english.body.match(/data-admin-nav-group="primary"([\s\S]*?)(?=data-admin-nav-group="advanced")/)?.[1] || "";
+  const advancedGroup = english.body.match(/data-admin-nav-group="advanced"([\s\S]*?)(?=class="crm-sb__me")/)?.[1] || "";
+  for (const route of ["listings", "approved-content"]) {
+    assert.ok(primaryGroup.includes(`href="/admin/${route}"`), `${route} is a primary destination`);
   }
+  for (const route of ["media", "translations"]) {
+    assert.ok(advancedGroup.includes(`href="/admin/${route}"`), `${route} remains accessible under Advanced`);
+  }
+  assert.match(primaryGroup, />Content</);
 });
 
 test("approved content styles ship in the CMS adapter and reach the generated sheet", () => {
