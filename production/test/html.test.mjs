@@ -296,7 +296,7 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.match(ADMIN_APP_JS, /data-viewing-follow-up-form/);
   assert.match(ADMIN_APP_JS, /data-seller-pipeline-outcome-form/);
   assert.match(ADMIN_APP_JS, /commitEditorFormState\(form\)/);
-  assert.doesNotMatch(ADMIN_APP_JS, /window\.location\.reload/);
+  assert.match(ADMIN_APP_JS, /if \(form\.hasAttribute\("data-locale-form"\)\) window\.location\.reload\(\)/);
   assert.doesNotMatch(html, />website_listing_detail</);
   assert.doesNotMatch(html, />manager escalation required</);
 });
