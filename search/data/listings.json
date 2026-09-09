@@ -1,6 +1,18 @@
 [
   {
-    "id": "MS-CRAWL-0001",
+    "id": "MS-00815",
+    "lot_number": 815,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0001",
+    "legacy_lot_id": "815",
+    "legacy_post_id": "11324",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
     "canonical": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
     "domain": "makler-realty.com",
@@ -49,7 +61,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0002",
+    "id": "MS-00907",
+    "lot_number": 907,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0002",
+    "legacy_lot_id": "907",
+    "legacy_post_id": "11684",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/",
     "canonical": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/",
     "domain": "makler-realty.com",
@@ -98,7 +122,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0003",
+    "id": "MS-00922",
+    "lot_number": 922,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0003",
+    "legacy_lot_id": "922",
+    "legacy_post_id": "11764",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
     "canonical": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
     "domain": "makler-realty.com",
@@ -147,7 +183,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0004",
+    "id": "MS-00905",
+    "lot_number": 905,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0004",
+    "legacy_lot_id": "905",
+    "legacy_post_id": "11670",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -196,7 +244,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0005",
+    "id": "MS-00899",
+    "lot_number": 899,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0005",
+    "legacy_lot_id": "899",
+    "legacy_post_id": "11612",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -245,7 +305,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0006",
+    "id": "MS-00443",
+    "lot_number": 443,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0006",
+    "legacy_lot_id": "443",
+    "legacy_post_id": "4081",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
     "domain": "makler-realty.com",
@@ -294,7 +366,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0007",
+    "id": "MS-00911",
+    "lot_number": 911,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0007",
+    "legacy_lot_id": "911",
+    "legacy_post_id": "11740",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -343,7 +427,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0008",
+    "id": "MS-00662",
+    "lot_number": 662,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0008",
+    "legacy_lot_id": "662",
+    "legacy_post_id": null,
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b0-%d1%81%d0%b0-2/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
     "canonical": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
     "domain": "makler-realty.com",
@@ -392,7 +492,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0009",
+    "id": "MS-00957",
+    "lot_number": 957,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0009",
+    "legacy_lot_id": "957",
+    "legacy_post_id": "12165",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/",
     "domain": "makler-realty.com",
@@ -441,7 +553,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0010",
+    "id": "MS-01000",
+    "lot_number": 1000,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0010",
+    "legacy_lot_id": "987",
+    "legacy_post_id": "12221",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
     "canonical": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
     "domain": "makler-realty.com",
@@ -490,7 +614,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0011",
+    "id": "MS-00858",
+    "lot_number": 858,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0011",
+    "legacy_lot_id": "858",
+    "legacy_post_id": "10320",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
     "canonical": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
     "domain": "makler-realty.com",
@@ -539,7 +675,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0012",
+    "id": "MS-00895",
+    "lot_number": 895,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0012",
+    "legacy_lot_id": "895",
+    "legacy_post_id": "11560",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -588,7 +736,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0013",
+    "id": "MS-00567-1",
+    "lot_number": 567,
+    "lot_suffix": "1",
+    "migration_id": "MS-CRAWL-0013",
+    "legacy_lot_id": "567-1",
+    "legacy_post_id": "12192",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
     "canonical": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
     "domain": "makler-realty.com",
@@ -637,7 +797,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0014",
+    "id": "MS-00876",
+    "lot_number": 876,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0014",
+    "legacy_lot_id": "876",
+    "legacy_post_id": "11246",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -686,7 +858,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0015",
+    "id": "MS-00942",
+    "lot_number": 942,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0015",
+    "legacy_lot_id": "942",
+    "legacy_post_id": "12061",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -735,7 +919,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0016",
+    "id": "MS-00803",
+    "lot_number": 803,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0016",
+    "legacy_lot_id": "803",
+    "legacy_post_id": "9283",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -784,7 +980,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0017",
+    "id": "MS-00938",
+    "lot_number": 938,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0017",
+    "legacy_lot_id": "938",
+    "legacy_post_id": "11977",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
     "canonical": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
     "domain": "makler-realty.com",
@@ -833,7 +1041,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0018",
+    "id": "MS-00814",
+    "lot_number": 814,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0018",
+    "legacy_lot_id": "814",
+    "legacy_post_id": "11293",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -882,7 +1102,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0019",
+    "id": "MS-00812",
+    "lot_number": 812,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0019",
+    "legacy_lot_id": "812",
+    "legacy_post_id": "11264",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -931,7 +1163,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0020",
+    "id": "MS-00890",
+    "lot_number": 890,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0020",
+    "legacy_lot_id": "890",
+    "legacy_post_id": "11373",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -980,7 +1224,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0021",
+    "id": "MS-00944",
+    "lot_number": 944,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0021",
+    "legacy_lot_id": "944",
+    "legacy_post_id": "12092",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
     "domain": "makler-realty.com",
@@ -1029,7 +1285,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0022",
+    "id": "MS-00756",
+    "lot_number": 756,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0022",
+    "legacy_lot_id": "756",
+    "legacy_post_id": "8719",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
     "domain": "makler-realty.com",
@@ -1078,7 +1350,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0023",
+    "id": "MS-00833",
+    "lot_number": 833,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0023",
+    "legacy_lot_id": "833",
+    "legacy_post_id": "11498",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1127,7 +1415,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0024",
+    "id": "MS-00101",
+    "lot_number": 101,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0024",
+    "legacy_lot_id": "101",
+    "legacy_post_id": "10771",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
     "domain": "makler-realty.com",
@@ -1178,7 +1478,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0025",
+    "id": "MS-00956",
+    "lot_number": 956,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0025",
+    "legacy_lot_id": "956",
+    "legacy_post_id": "12152",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%bf%d0%bb%d0%b0%d0%bd%d0%b8%d0%bd%d0%b0/",
     "domain": "makler-realty.com",
@@ -1227,7 +1539,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0026",
+    "id": "MS-01001",
+    "lot_number": 1001,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0026",
+    "legacy_lot_id": "890",
+    "legacy_post_id": "11585",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1276,7 +1604,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0027",
+    "id": "MS-01002",
+    "lot_number": 1002,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0027",
+    "legacy_lot_id": null,
+    "legacy_post_id": null,
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
     "domain": "makler-realty.com",
@@ -1325,7 +1665,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0028",
+    "id": "MS-00924",
+    "lot_number": 924,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0028",
+    "legacy_lot_id": "924",
+    "legacy_post_id": "11795",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
     "domain": "makler-realty.com",
@@ -1374,7 +1726,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0029",
+    "id": "MS-00903",
+    "lot_number": 903,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0029",
+    "legacy_lot_id": "903",
+    "legacy_post_id": "11662",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/",
     "domain": "makler-realty.com",
@@ -1423,7 +1787,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0030",
+    "id": "MS-00943",
+    "lot_number": 943,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0030",
+    "legacy_lot_id": "943",
+    "legacy_post_id": "12082",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
     "domain": "makler-realty.com",
@@ -1472,7 +1848,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0031",
+    "id": "MS-00940",
+    "lot_number": 940,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0031",
+    "legacy_lot_id": "940",
+    "legacy_post_id": "12014",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1521,7 +1909,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0032",
+    "id": "MS-00932",
+    "lot_number": 932,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0032",
+    "legacy_lot_id": "932",
+    "legacy_post_id": "11894",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d1%80%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1570,7 +1974,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0033",
+    "id": "MS-00865",
+    "lot_number": 865,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0033",
+    "legacy_lot_id": "865",
+    "legacy_post_id": "10463",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
     "domain": "makler-realty.com",
@@ -1619,7 +2035,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0034",
+    "id": "MS-00963",
+    "lot_number": 963,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0034",
+    "legacy_lot_id": "963",
+    "legacy_post_id": "11205",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/",
     "domain": "makler-realty.com",
@@ -1668,7 +2096,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0035",
+    "id": "MS-00774",
+    "lot_number": 774,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0035",
+    "legacy_lot_id": "774",
+    "legacy_post_id": "8970",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/",
     "domain": "makler-realty.com",
@@ -1717,7 +2161,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0036",
+    "id": "MS-00897",
+    "lot_number": 897,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0036",
+    "legacy_lot_id": "897",
+    "legacy_post_id": "11565",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -1766,7 +2222,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0037",
+    "id": "MS-00719",
+    "lot_number": 719,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0037",
+    "legacy_lot_id": "719",
+    "legacy_post_id": "8077",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b5%d0%b6%d0%b4%d1%83%d0%bd%d0%b0%d1%80%d0%be%d0%b4%d0%bd%d0%be%d0%b9-%d1%82%d1%80%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1815,7 +2287,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0038",
+    "id": "MS-00873",
+    "lot_number": 873,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0038",
+    "legacy_lot_id": "873",
+    "legacy_post_id": "10594",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%be%d1%81%d0%be%d0%b1%d0%bd%d1%8f%d0%ba-%d0%b3%d0%be%d1%80%d0%be%d0%b4-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1864,7 +2352,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0039",
+    "id": "MS-00906",
+    "lot_number": 906,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0039",
+    "legacy_lot_id": "906",
+    "legacy_post_id": "11682",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -1913,7 +2413,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0040",
+    "id": "MS-00555",
+    "lot_number": 555,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0040",
+    "legacy_lot_id": "555",
+    "legacy_post_id": "10914",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -1962,7 +2478,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0041",
+    "id": "MS-00788",
+    "lot_number": 788,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0041",
+    "legacy_lot_id": "788",
+    "legacy_post_id": "9116",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -2011,7 +2543,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0042",
+    "id": "MS-00811",
+    "lot_number": 811,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0042",
+    "legacy_lot_id": "811",
+    "legacy_post_id": "9427",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -2060,7 +2604,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0043",
+    "id": "MS-00987",
+    "lot_number": 987,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0043",
+    "legacy_lot_id": "987",
+    "legacy_post_id": "10982",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
     "domain": "makler-realty.com",
@@ -2111,7 +2667,19 @@
     "location_precision": "approximate"
   },
   {
-    "id": "MS-CRAWL-0044",
+    "id": "MS-00345",
+    "lot_number": 345,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0044",
+    "legacy_lot_id": "345",
+    "legacy_post_id": "10906",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/",
     "domain": "makler-realty.com",
@@ -2160,7 +2728,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0045",
+    "id": "MS-00908",
+    "lot_number": 908,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0045",
+    "legacy_lot_id": "908",
+    "legacy_post_id": "11688",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
     "domain": "makler-realty.com",
@@ -2209,7 +2789,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0046",
+    "id": "MS-00941",
+    "lot_number": 941,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0046",
+    "legacy_lot_id": "941",
+    "legacy_post_id": "12025",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
     "domain": "makler-realty.com",
@@ -2258,7 +2850,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0047",
+    "id": "MS-00927",
+    "lot_number": 927,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0047",
+    "legacy_lot_id": "927",
+    "legacy_post_id": "11848",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%b2-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b5-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0%d0%bb%d0%b8%d1%82%d0%b5%d1%82-%d1%81/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
     "domain": "makler-realty.com",
@@ -2307,7 +2915,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0048",
+    "id": "MS-00904",
+    "lot_number": 904,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0048",
+    "legacy_lot_id": "904",
+    "legacy_post_id": "11647",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%86%d0%b0%d0%bf%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -2356,7 +2976,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0049",
+    "id": "MS-00931",
+    "lot_number": 931,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0049",
+    "legacy_lot_id": "931",
+    "legacy_post_id": "11892",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -2405,7 +3041,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0050",
+    "id": "MS-00100",
+    "lot_number": 100,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0050",
+    "legacy_lot_id": "100",
+    "legacy_post_id": "10761",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/",
     "domain": "makler-realty.com",
@@ -2453,7 +3101,19 @@
     "location_precision": "approximate"
   },
   {
-    "id": "MS-CRAWL-0051",
+    "id": "MS-00816",
+    "lot_number": 816,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0051",
+    "legacy_lot_id": "816",
+    "legacy_post_id": "11350",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -2502,7 +3162,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0052",
+    "id": "MS-00657",
+    "lot_number": 657,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0052",
+    "legacy_lot_id": "657",
+    "legacy_post_id": "6913",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -2551,7 +3227,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0053",
+    "id": "MS-00766",
+    "lot_number": 766,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0053",
+    "legacy_lot_id": "766",
+    "legacy_post_id": "8866",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -2600,7 +3292,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0054",
+    "id": "MS-00432",
+    "lot_number": 432,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0054",
+    "legacy_lot_id": "432",
+    "legacy_post_id": "10916",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5/",
     "domain": "makler-realty.com",
@@ -2649,7 +3353,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0055",
+    "id": "MS-00770",
+    "lot_number": 770,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0055",
+    "legacy_lot_id": "770",
+    "legacy_post_id": "8927",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
     "domain": "makler-realty.com",
@@ -2698,7 +3414,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0056",
+    "id": "MS-00321",
+    "lot_number": 321,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0056",
+    "legacy_lot_id": "321",
+    "legacy_post_id": "10911",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -2747,7 +3475,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0057",
+    "id": "MS-00898",
+    "lot_number": 898,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0057",
+    "legacy_lot_id": "898",
+    "legacy_post_id": "11607",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -2796,7 +3536,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0058",
+    "id": "MS-00749",
+    "lot_number": 749,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0058",
+    "legacy_lot_id": "749",
+    "legacy_post_id": "8643",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%81-%d0%b2%d0%b8%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
     "domain": "makler-realty.com",
@@ -2845,7 +3601,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0059",
+    "id": "MS-00945",
+    "lot_number": 945,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0059",
+    "legacy_lot_id": "945",
+    "legacy_post_id": "12122",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -2894,7 +3662,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0060",
+    "id": "MS-00234",
+    "lot_number": 234,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0060",
+    "legacy_lot_id": "234",
+    "legacy_post_id": "10902",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/",
     "domain": "makler-realty.com",
@@ -2943,7 +3723,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0061",
+    "id": "MS-00470",
+    "lot_number": 470,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0061",
+    "legacy_lot_id": "470",
+    "legacy_post_id": "7194",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/",
     "domain": "makler-realty.com",
@@ -2992,7 +3788,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0062",
+    "id": "MS-00894",
+    "lot_number": 894,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0062",
+    "legacy_lot_id": "894",
+    "legacy_post_id": "11541",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
     "domain": "makler-realty.com",
@@ -3041,7 +3849,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0063",
+    "id": "MS-00960",
+    "lot_number": 960,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0063",
+    "legacy_lot_id": "960",
+    "legacy_post_id": "12209",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -3090,7 +3910,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0064",
+    "id": "MS-00567",
+    "lot_number": 567,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0064",
+    "legacy_lot_id": "567",
+    "legacy_post_id": "11257",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -3139,7 +3971,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0065",
+    "id": "MS-00937",
+    "lot_number": 937,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0065",
+    "legacy_lot_id": "937",
+    "legacy_post_id": "11945",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bc%d0%b5%d0%b1%d0%bb%d0%b8%d1%80%d0%be%d0%b2%d0%b0%d0%bd%d0%bd%d0%be%d0%b9-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%b8-%d0%b2-%d0%b6%d0%b8%d0%bb%d0%be%d0%bc/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be-%d0%b2-%d1%81%d0%b0%d0%bf%d1%84%d0%b8%d1%80-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
     "domain": "makler-realty.com",
@@ -3188,7 +4036,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0066",
+    "id": "MS-00893",
+    "lot_number": 893,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0066",
+    "legacy_lot_id": "893",
+    "legacy_post_id": "11521",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/paralia-ofrinio-kvartira/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8/",
     "domain": "makler-realty.com",
@@ -3239,7 +4103,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0067",
+    "id": "MS-00902",
+    "lot_number": 902,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0067",
+    "legacy_lot_id": "902",
+    "legacy_post_id": "11639",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
     "domain": "makler-realty.com",
@@ -3288,7 +4164,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0068",
+    "id": "MS-00720",
+    "lot_number": 720,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0068",
+    "legacy_lot_id": "720",
+    "legacy_post_id": "8089",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.com",
@@ -3337,7 +4225,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0069",
+    "id": "MS-00744",
+    "lot_number": 744,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0069",
+    "legacy_lot_id": "744",
+    "legacy_post_id": "8526",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b5%d0%bb%d1%8c%d1%85%d0%be%d0%b7-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b8-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
     "domain": "makler-realty.com",
@@ -3386,7 +4290,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0070",
+    "id": "MS-00456",
+    "lot_number": 456,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0070",
+    "legacy_lot_id": "456",
+    "legacy_post_id": "4142",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/",
     "domain": "makler-realty.com",
@@ -3435,7 +4351,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0071",
+    "id": "MS-00499",
+    "lot_number": 499,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0071",
+    "legacy_lot_id": "499",
+    "legacy_post_id": "4747",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
     "domain": "makler-realty.com",
@@ -3484,7 +4416,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0072",
+    "id": "MS-00930",
+    "lot_number": 930,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0072",
+    "legacy_lot_id": "930",
+    "legacy_post_id": "11879",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
     "domain": "makler-realty.com",
@@ -3535,7 +4479,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0073",
+    "id": "MS-00860",
+    "lot_number": 860,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0073",
+    "legacy_lot_id": "860",
+    "legacy_post_id": "11391",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -3584,7 +4544,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0074",
+    "id": "MS-00939",
+    "lot_number": 939,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0074",
+    "legacy_lot_id": "939",
+    "legacy_post_id": "11989",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bb%d1%83%d0%ba%d1%81%d0%be%d0%b7%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
     "domain": "makler-realty.com",
@@ -3633,7 +4605,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0075",
+    "id": "MS-00852",
+    "lot_number": 852,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0075",
+    "legacy_lot_id": "852",
+    "legacy_post_id": "10215",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
     "domain": "makler-realty.com",
@@ -3682,7 +4666,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-3000",
+    "id": "MS-00356",
+    "lot_number": 356,
+    "lot_suffix": null,
+    "migration_id": "MS-3000",
+    "legacy_lot_id": "356",
+    "legacy_post_id": null,
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/uchastok-strumiani/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
     "canonical": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
     "domain": "makler-realty.com",
@@ -3731,7 +4731,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0077",
+    "id": "MS-00959",
+    "lot_number": 959,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0077",
+    "legacy_lot_id": "959",
+    "legacy_post_id": "12199",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/",
     "canonical": "https://makler-realty.com/listing/%d1%81%d0%b2%d0%b5%d1%82%d1%8a%d0%bb-%d1%8e%d0%b6%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b4%d0%be-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81/",
     "domain": "makler-realty.com",
@@ -3780,7 +4792,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0078",
+    "id": "MS-00900",
+    "lot_number": 900,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0078",
+    "legacy_lot_id": "900",
+    "legacy_post_id": "11443",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -3829,7 +4853,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0079",
+    "id": "MS-00242",
+    "lot_number": 242,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0079",
+    "legacy_lot_id": "242",
+    "legacy_post_id": "11081",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
     "canonical": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
     "domain": "makler-realty.com",
@@ -3878,7 +4914,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0080",
+    "id": "MS-00955",
+    "lot_number": 955,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0080",
+    "legacy_lot_id": "955",
+    "legacy_post_id": "12126",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
     "domain": "makler-realty.com",
@@ -3927,7 +4975,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0081",
+    "id": "MS-00286",
+    "lot_number": 286,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0081",
+    "legacy_lot_id": "286",
+    "legacy_post_id": "973",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
     "domain": "makler-realty.com",
@@ -3976,7 +5040,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0082",
+    "id": "MS-00394",
+    "lot_number": 394,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0082",
+    "legacy_lot_id": "394",
+    "legacy_post_id": "3255",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.com",
@@ -4025,7 +5101,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0083",
+    "id": "MS-00891",
+    "lot_number": 891,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0083",
+    "legacy_lot_id": "891",
+    "legacy_post_id": "11466",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
     "canonical": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
     "domain": "makler-realty.com",
@@ -4074,7 +5166,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0084",
+    "id": "MS-00869",
+    "lot_number": 869,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0084",
+    "legacy_lot_id": "869",
+    "legacy_post_id": "10513",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
     "domain": "makler-realty.com",
@@ -4123,7 +5227,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0085",
+    "id": "MS-00851",
+    "lot_number": 851,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0085",
+    "legacy_lot_id": "851",
+    "legacy_post_id": null,
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
     "canonical": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
     "domain": "makler-realty.com",
@@ -4172,7 +5288,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0086",
+    "id": "MS-00191",
+    "lot_number": 191,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0086",
+    "legacy_lot_id": "191",
+    "legacy_post_id": "644",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
     "canonical": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
     "domain": "makler-realty.com",
@@ -4221,7 +5353,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0087",
+    "id": "MS-00791",
+    "lot_number": 791,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0087",
+    "legacy_lot_id": "791",
+    "legacy_post_id": "9145",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
     "canonical": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
     "domain": "makler-realty.com",
@@ -4270,7 +5418,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0088",
+    "id": "MS-00734",
+    "lot_number": 734,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0088",
+    "legacy_lot_id": "734",
+    "legacy_post_id": "8322",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/",
     "domain": "makler-realty.com",
@@ -4319,7 +5483,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0089",
+    "id": "MS-00707",
+    "lot_number": 707,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0089",
+    "legacy_lot_id": "707",
+    "legacy_post_id": "7746",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/ein-zimmer-wohnung-zum-verkauf-im-park-hotel-pirin-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/ein-zimmer-wohnung-zum-verkauf-im-park-hotel-pirin-sandanski/",
     "canonical": "https://makler-realty.com/listing/ein-zimmer-wohnung-zum-verkauf-im-park-hotel-pirin-sandanski/",
     "domain": "makler-realty.com",
@@ -4368,7 +5548,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0090",
+    "id": "MS-00543",
+    "lot_number": 543,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0090",
+    "legacy_lot_id": "543",
+    "legacy_post_id": "10998",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
     "canonical": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
     "domain": "makler-realty.com",
@@ -4419,7 +5611,23 @@
     "location_precision": "approximate"
   },
   {
-    "id": "MS-CRAWL-0091",
+    "id": "MS-00872",
+    "lot_number": 872,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0091",
+    "legacy_lot_id": "872",
+    "legacy_post_id": "10593",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/",
     "canonical": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/",
     "domain": "makler-realty.com",
@@ -4468,7 +5676,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0092",
+    "id": "MS-00671",
+    "lot_number": 671,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0092",
+    "legacy_lot_id": "671",
+    "legacy_post_id": "7109",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
     "canonical": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
     "domain": "makler-realty.com",
@@ -4517,7 +5741,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0093",
+    "id": "MS-00190",
+    "lot_number": 190,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0093",
+    "legacy_lot_id": "190",
+    "legacy_post_id": "11241",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/",
     "canonical": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/",
     "domain": "makler-realty.com",
@@ -4566,7 +5802,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0094",
+    "id": "MS-00619",
+    "lot_number": 619,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0094",
+    "legacy_lot_id": "619",
+    "legacy_post_id": "6425",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/industrial-building-for-rent-in-petrich/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/industrial-building-for-rent-in-petrich/",
     "canonical": "https://makler-realty.com/listing/industrial-building-for-rent-in-petrich/",
     "domain": "makler-realty.com",
@@ -4615,7 +5863,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0095",
+    "id": "MS-00699",
+    "lot_number": 699,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0095",
+    "legacy_lot_id": "699",
+    "legacy_post_id": "7665",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
     "canonical": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
     "domain": "makler-realty.com",
@@ -4663,7 +5927,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0096",
+    "id": "MS-00758",
+    "lot_number": 758,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0096",
+    "legacy_lot_id": "758",
+    "legacy_post_id": "8770",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
     "canonical": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
     "domain": "makler-realty.com",
@@ -4712,7 +5988,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0097",
+    "id": "MS-00751",
+    "lot_number": 751,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0097",
+    "legacy_lot_id": "751",
+    "legacy_post_id": "8661",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/",
     "canonical": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/",
     "domain": "makler-realty.com",
@@ -4761,7 +6049,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0098",
+    "id": "MS-00750",
+    "lot_number": 750,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0098",
+    "legacy_lot_id": "750",
+    "legacy_post_id": "8660",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
     "canonical": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
     "domain": "makler-realty.com",
@@ -4810,7 +6114,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0099",
+    "id": "MS-00666",
+    "lot_number": 666,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0099",
+    "legacy_lot_id": "666",
+    "legacy_post_id": "7062",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
     "domain": "makler-realty.com",
@@ -4859,7 +6179,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0100",
+    "id": "MS-00695",
+    "lot_number": 695,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0100",
+    "legacy_lot_id": "695",
+    "legacy_post_id": "7598",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/",
     "domain": "makler-realty.com",
@@ -4908,7 +6240,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0101",
+    "id": "MS-00731",
+    "lot_number": 731,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0101",
+    "legacy_lot_id": "731",
+    "legacy_post_id": "8282",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/a%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%b4%d0%b2%d1%83%d1%85%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%bd%d0%be%d0%b9-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
     "domain": "makler-realty.com",
@@ -4957,7 +6305,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0102",
+    "id": "MS-00879",
+    "lot_number": 879,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0102",
+    "legacy_lot_id": "879",
+    "legacy_post_id": "11382",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
     "canonical": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
     "domain": "makler-realty.com",
@@ -5006,7 +6366,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0103",
+    "id": "MS-00123",
+    "lot_number": 123,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0103",
+    "legacy_lot_id": "123",
+    "legacy_post_id": "10891",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/",
     "canonical": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/",
     "domain": "makler-realty.com",
@@ -5055,7 +6427,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0104",
+    "id": "MS-00999",
+    "lot_number": 999,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0104",
+    "legacy_lot_id": "999",
+    "legacy_post_id": "10922",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
     "canonical": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
     "domain": "makler-realty.com",
@@ -5106,7 +6490,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0105",
+    "id": "MS-00739",
+    "lot_number": 739,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0105",
+    "legacy_lot_id": "739",
+    "legacy_post_id": "8386",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%81%d0%bf%d0%b0-%d0%be%d1%82%d0%b5%d0%bb%d1%8f-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/",
     "canonical": "https://makler-realty.com/listing/spa-hotel-mit-mineralwasser-zum-verkauf-in-sandanski-bulgarien/",
     "domain": "makler-realty.com",
@@ -5155,7 +6555,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0106",
+    "id": "MS-00635",
+    "lot_number": 635,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0106",
+    "legacy_lot_id": "635",
+    "legacy_post_id": "11361",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
     "domain": "makler-realty.com",
@@ -5204,7 +6616,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0107",
+    "id": "MS-00933",
+    "lot_number": 933,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0107",
+    "legacy_lot_id": "933",
+    "legacy_post_id": "11899",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
     "canonical": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
     "domain": "makler-realty.com",
@@ -5253,7 +6677,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0108",
+    "id": "MS-00870",
+    "lot_number": 870,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0108",
+    "legacy_lot_id": "870",
+    "legacy_post_id": "11437",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/",
     "canonical": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/",
     "domain": "makler-realty.com",
@@ -5302,7 +6742,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0109",
+    "id": "MS-00760",
+    "lot_number": 760,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0109",
+    "legacy_lot_id": "760",
+    "legacy_post_id": "8980",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/wohnung-zu-vermieten-beim-aquasun-in-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b9-%d0%b4%d0%b2%d1%83%d1%88%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/wohnung-zu-vermieten-beim-aquasun-in-sandanski/",
     "canonical": "https://makler-realty.com/listing/wohnung-zu-vermieten-beim-aquasun-in-sandanski/",
     "domain": "makler-realty.com",
@@ -5351,7 +6807,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0110",
+    "id": "MS-00651",
+    "lot_number": 651,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0110",
+    "legacy_lot_id": "651",
+    "legacy_post_id": "7497",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/",
     "canonical": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/",
     "domain": "makler-realty.com",
@@ -5400,7 +6868,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0111",
+    "id": "MS-00444",
+    "lot_number": 444,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0111",
+    "legacy_lot_id": "444",
+    "legacy_post_id": "10869",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
     "canonical": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
     "domain": "makler-realty.com",
@@ -5449,7 +6929,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0112",
+    "id": "MS-00896",
+    "lot_number": 896,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0112",
+    "legacy_lot_id": "896",
+    "legacy_post_id": "11563",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
     "canonical": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
     "domain": "makler-realty.com",
@@ -5498,7 +6990,23 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0113",
+    "id": "MS-00778",
+    "lot_number": 778,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0113",
+    "legacy_lot_id": "778",
+    "legacy_post_id": "6814",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.com",
+        "url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/"
+      },
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d0%b0-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
     "canonical": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
     "domain": "makler-realty.com",
@@ -5548,6 +7056,18 @@
   },
   {
     "id": "MS-CRAWL-0114",
+    "lot_number": 191,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0114",
+    "legacy_lot_id": "191",
+    "legacy_post_id": "644",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/"
+      }
+    ],
+    "merged_into": "MS-00191",
     "url": "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
     "canonical": "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
     "domain": "makler-realty.ru",
@@ -5597,6 +7117,18 @@
   },
   {
     "id": "MS-CRAWL-0115",
+    "lot_number": 760,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0115",
+    "legacy_lot_id": "760",
+    "legacy_post_id": "8516",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b9-%d0%b4%d0%b2%d1%83%d1%88%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/"
+      }
+    ],
+    "merged_into": "MS-00760",
     "url": "https://makler-realty.ru/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b9-%d0%b4%d0%b2%d1%83%d1%88%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
     "canonical": "https://makler-realty.ru/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b9-%d0%b4%d0%b2%d1%83%d1%88%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
     "domain": "makler-realty.ru",
@@ -5646,6 +7178,18 @@
   },
   {
     "id": "MS-CRAWL-0116",
+    "lot_number": 791,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0116",
+    "legacy_lot_id": "791",
+    "legacy_post_id": "8672",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00791",
     "url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -5695,6 +7239,18 @@
   },
   {
     "id": "MS-CRAWL-0117",
+    "lot_number": 927,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0117",
+    "legacy_lot_id": "927",
+    "legacy_post_id": "9716",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%b2-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b5-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0%d0%bb%d0%b8%d1%82%d0%b5%d1%82-%d1%81/"
+      }
+    ],
+    "merged_into": "MS-00927",
     "url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%b2-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b5-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0%d0%bb%d0%b8%d1%82%d0%b5%d1%82-%d1%81/",
     "canonical": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%b2-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b5-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0%d0%bb%d0%b8%d1%82%d0%b5%d1%82-%d1%81/",
     "domain": "makler-realty.ru",
@@ -5743,7 +7299,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0118",
+    "id": "MS-00935",
+    "lot_number": 935,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0118",
+    "legacy_lot_id": "935",
+    "legacy_post_id": "9724",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b5%d1%82%d1%80%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b5%d1%82%d1%80%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0/",
     "canonical": "https://makler-realty.ru/listing/%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b5%d1%82%d1%80%d0%be%d0%b2%d0%be-%d0%bc%d1%83%d0%bd%d0%b8%d1%86%d0%b8%d0%bf%d0%b0/",
     "domain": "makler-realty.ru",
@@ -5793,6 +7361,18 @@
   },
   {
     "id": "MS-CRAWL-0119",
+    "lot_number": 778,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0119",
+    "legacy_lot_id": "778",
+    "legacy_post_id": "7117",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d0%b0-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00778",
     "url": "https://makler-realty.ru/listing/%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d0%b0-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d0%b0-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -5841,7 +7421,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0120",
+    "id": "MS-00382",
+    "lot_number": 382,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0120",
+    "legacy_lot_id": "382",
+    "legacy_post_id": "3137",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -5891,6 +7483,18 @@
   },
   {
     "id": "MS-CRAWL-0121",
+    "lot_number": 766,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0121",
+    "legacy_lot_id": "766",
+    "legacy_post_id": "8544",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00766",
     "url": "https://makler-realty.ru/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bd%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -5940,6 +7544,18 @@
   },
   {
     "id": "MS-CRAWL-0122",
+    "lot_number": 873,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0122",
+    "legacy_lot_id": "873",
+    "legacy_post_id": "9128",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%be%d1%81%d0%be%d0%b1%d0%bd%d1%8f%d0%ba-%d0%b3%d0%be%d1%80%d0%be%d0%b4-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00873",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%be%d1%81%d0%be%d0%b1%d0%bd%d1%8f%d0%ba-%d0%b3%d0%be%d1%80%d0%be%d0%b4-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%be%d1%81%d0%be%d0%b1%d0%bd%d1%8f%d0%ba-%d0%b3%d0%be%d1%80%d0%be%d0%b4-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -5989,6 +7605,18 @@
   },
   {
     "id": "MS-CRAWL-0123",
+    "lot_number": 699,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0123",
+    "legacy_lot_id": "699",
+    "legacy_post_id": "7722",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/"
+      }
+    ],
+    "merged_into": "MS-00699",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
     "domain": "makler-realty.ru",
@@ -6038,6 +7666,18 @@
   },
   {
     "id": "MS-CRAWL-0124",
+    "lot_number": 666,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0124",
+    "legacy_lot_id": "666",
+    "legacy_post_id": "7283",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/"
+      }
+    ],
+    "merged_into": "MS-00666",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
     "domain": "makler-realty.ru",
@@ -6087,6 +7727,18 @@
   },
   {
     "id": "MS-CRAWL-0125",
+    "lot_number": 1001,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0125",
+    "legacy_lot_id": "890",
+    "legacy_post_id": "9571",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-01001",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6136,6 +7788,18 @@
   },
   {
     "id": "MS-CRAWL-0126",
+    "lot_number": 734,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0126",
+    "legacy_lot_id": "734",
+    "legacy_post_id": "8227",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba/"
+      }
+    ],
+    "merged_into": "MS-00734",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%bd%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba/",
     "domain": "makler-realty.ru",
@@ -6185,6 +7849,18 @@
   },
   {
     "id": "MS-CRAWL-0127",
+    "lot_number": 499,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0127",
+    "legacy_lot_id": "499",
+    "legacy_post_id": "4574",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/"
+      }
+    ],
+    "merged_into": "MS-00499",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
     "domain": "makler-realty.ru",
@@ -6233,7 +7909,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0128",
+    "id": "MS-00697",
+    "lot_number": 697,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0128",
+    "legacy_lot_id": "697",
+    "legacy_post_id": "7623",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
     "domain": "makler-realty.ru",
@@ -6283,6 +7971,18 @@
   },
   {
     "id": "MS-CRAWL-0129",
+    "lot_number": 872,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0129",
+    "legacy_lot_id": "872",
+    "legacy_post_id": "9344",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/"
+      }
+    ],
+    "merged_into": "MS-00872",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
     "domain": "makler-realty.ru",
@@ -6332,6 +8032,18 @@
   },
   {
     "id": "MS-CRAWL-0130",
+    "lot_number": 671,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0130",
+    "legacy_lot_id": "671",
+    "legacy_post_id": "7289",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/"
+      }
+    ],
+    "merged_into": "MS-00671",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
     "domain": "makler-realty.ru",
@@ -6380,7 +8092,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0131",
+    "id": "MS-00280",
+    "lot_number": 280,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0131",
+    "legacy_lot_id": "280",
+    "legacy_post_id": "1015",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6430,6 +8154,18 @@
   },
   {
     "id": "MS-CRAWL-0132",
+    "lot_number": 833,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0132",
+    "legacy_lot_id": "833",
+    "legacy_post_id": "9585",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00833",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6479,6 +8215,18 @@
   },
   {
     "id": "MS-CRAWL-0133",
+    "lot_number": 931,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0133",
+    "legacy_lot_id": "931",
+    "legacy_post_id": "9711",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00931",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6528,6 +8276,18 @@
   },
   {
     "id": "MS-CRAWL-0134",
+    "lot_number": 707,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0134",
+    "legacy_lot_id": "707",
+    "legacy_post_id": "7779",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/"
+      }
+    ],
+    "merged_into": "MS-00707",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
     "domain": "makler-realty.ru",
@@ -6577,6 +8337,18 @@
   },
   {
     "id": "MS-CRAWL-0135",
+    "lot_number": 937,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0135",
+    "legacy_lot_id": "937",
+    "legacy_post_id": "9734",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bc%d0%b5%d0%b1%d0%bb%d0%b8%d1%80%d0%be%d0%b2%d0%b0%d0%bd%d0%bd%d0%be%d0%b9-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%b8-%d0%b2-%d0%b6%d0%b8%d0%bb%d0%be%d0%bc/"
+      }
+    ],
+    "merged_into": "MS-00937",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bc%d0%b5%d0%b1%d0%bb%d0%b8%d1%80%d0%be%d0%b2%d0%b0%d0%bd%d0%bd%d0%be%d0%b9-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%b8-%d0%b2-%d0%b6%d0%b8%d0%bb%d0%be%d0%bc/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bc%d0%b5%d0%b1%d0%bb%d0%b8%d1%80%d0%be%d0%b2%d0%b0%d0%bd%d0%bd%d0%be%d0%b9-%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%b8-%d0%b2-%d0%b6%d0%b8%d0%bb%d0%be%d0%bc/",
     "domain": "makler-realty.ru",
@@ -6626,6 +8398,18 @@
   },
   {
     "id": "MS-CRAWL-0136",
+    "lot_number": 788,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0136",
+    "legacy_lot_id": "788",
+    "legacy_post_id": "8821",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": "MS-00788",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
     "domain": "makler-realty.ru",
@@ -6675,6 +8459,18 @@
   },
   {
     "id": "MS-CRAWL-0137",
+    "lot_number": 555,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0137",
+    "legacy_lot_id": "555",
+    "legacy_post_id": "9359",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2/"
+      }
+    ],
+    "merged_into": "MS-00555",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d0%b8-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2/",
     "domain": "makler-realty.ru",
@@ -6724,6 +8520,18 @@
   },
   {
     "id": "MS-CRAWL-0138",
+    "lot_number": 860,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0138",
+    "legacy_lot_id": "860",
+    "legacy_post_id": "9598",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00860",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6773,6 +8581,18 @@
   },
   {
     "id": "MS-CRAWL-0139",
+    "lot_number": 750,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0139",
+    "legacy_lot_id": "750",
+    "legacy_post_id": "8426",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/"
+      }
+    ],
+    "merged_into": "MS-00750",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
     "domain": "makler-realty.ru",
@@ -6822,6 +8642,18 @@
   },
   {
     "id": "MS-CRAWL-0140",
+    "lot_number": 739,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0140",
+    "legacy_lot_id": "739",
+    "legacy_post_id": "8248",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%81%d0%bf%d0%b0-%d0%be%d1%82%d0%b5%d0%bb%d1%8f-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00739",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%81%d0%bf%d0%b0-%d0%be%d1%82%d0%b5%d0%bb%d1%8f-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%81%d0%bf%d0%b0-%d0%be%d1%82%d0%b5%d0%bb%d1%8f-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6870,7 +8702,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0141",
+    "id": "MS-00645",
+    "lot_number": 645,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0141",
+    "legacy_lot_id": "645",
+    "legacy_post_id": "7097",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%b4%d0%b5%d1%80%d0%b1%d0%b5%d1%80%d0%b5-%d1%81%d0%b0%d0%bd/",
     "domain": "makler-realty.ru",
@@ -6918,7 +8762,19 @@
     "location_precision": "approximate"
   },
   {
-    "id": "MS-CRAWL-0142",
+    "id": "MS-00920",
+    "lot_number": 920,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0142",
+    "legacy_lot_id": "920",
+    "legacy_post_id": "9653",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bb%d0%b8%d0%bb%d1%8f%d0%bd%d0%be%d0%b2%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bb%d0%b8%d0%bb%d1%8f%d0%bd%d0%be%d0%b2%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bb%d0%b8%d0%bb%d1%8f%d0%bd%d0%be%d0%b2%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -6968,6 +8824,18 @@
   },
   {
     "id": "MS-CRAWL-0143",
+    "lot_number": 719,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0143",
+    "legacy_lot_id": "719",
+    "legacy_post_id": "8033",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b5%d0%b6%d0%b4%d1%83%d0%bd%d0%b0%d1%80%d0%be%d0%b4%d0%bd%d0%be%d0%b9-%d1%82%d1%80%d0%b0/"
+      }
+    ],
+    "merged_into": "MS-00719",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b5%d0%b6%d0%b4%d1%83%d0%bd%d0%b0%d1%80%d0%be%d0%b4%d0%bd%d0%be%d0%b9-%d1%82%d1%80%d0%b0/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b5%d0%b6%d0%b4%d1%83%d0%bd%d0%b0%d1%80%d0%be%d0%b4%d0%bd%d0%be%d0%b9-%d1%82%d1%80%d0%b0/",
     "domain": "makler-realty.ru",
@@ -7017,6 +8885,18 @@
   },
   {
     "id": "MS-CRAWL-0144",
+    "lot_number": 749,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0144",
+    "legacy_lot_id": "749",
+    "legacy_post_id": "8422",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%81-%d0%b2%d0%b8%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00749",
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%81-%d0%b2%d0%b8%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%81-%d0%b2%d0%b8%d0%b4%d0%be%d0%bc-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -7065,7 +8945,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0145",
+    "id": "MS-00628",
+    "lot_number": 628,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0145",
+    "legacy_lot_id": "628",
+    "legacy_post_id": "6800",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-2-%d0%b3%d0%ba%d0%b0-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-2-%d0%b3%d0%ba%d0%b0-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
     "canonical": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-2-%d0%b3%d0%ba%d0%b0-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81/",
     "domain": "makler-realty.ru",
@@ -7114,7 +9006,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0146",
+    "id": "MS-00340",
+    "lot_number": 340,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0146",
+    "legacy_lot_id": "340",
+    "legacy_post_id": "2493",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd-%d1%81-%d0%be%d1%82%d0%b5%d0%bb%d0%b5%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd-%d1%81-%d0%be%d1%82%d0%b5%d0%bb%d0%b5%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd-%d1%81-%d0%be%d1%82%d0%b5%d0%bb%d0%b5%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -7164,6 +9068,18 @@
   },
   {
     "id": "MS-CRAWL-0147",
+    "lot_number": 662,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0147",
+    "legacy_lot_id": "662",
+    "legacy_post_id": "7229",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b0-%d1%81%d0%b0-2/"
+      }
+    ],
+    "merged_into": "MS-00662",
     "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b0-%d1%81%d0%b0-2/",
     "canonical": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b0-%d1%81%d0%b0-2/",
     "domain": "makler-realty.ru",
@@ -7213,6 +9129,18 @@
   },
   {
     "id": "MS-CRAWL-0148",
+    "lot_number": 870,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0148",
+    "legacy_lot_id": "870",
+    "legacy_post_id": "9357",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/"
+      }
+    ],
+    "merged_into": "MS-00870",
     "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
     "canonical": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
     "domain": "makler-realty.ru",
@@ -7262,6 +9190,18 @@
   },
   {
     "id": "MS-CRAWL-0149",
+    "lot_number": 756,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0149",
+    "legacy_lot_id": "756",
+    "legacy_post_id": "8478",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/"
+      }
+    ],
+    "merged_into": "MS-00756",
     "url": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
     "canonical": "https://makler-realty.ru/listing/%d1%81%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
     "domain": "makler-realty.ru",
@@ -7311,6 +9251,18 @@
   },
   {
     "id": "MS-CRAWL-0150",
+    "lot_number": 744,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0150",
+    "legacy_lot_id": "744",
+    "legacy_post_id": "8385",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%81%d0%b5%d0%bb%d1%8c%d1%85%d0%be%d0%b7-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b8-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86/"
+      }
+    ],
+    "merged_into": "MS-00744",
     "url": "https://makler-realty.ru/listing/%d1%81%d0%b5%d0%bb%d1%8c%d1%85%d0%be%d0%b7-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b8-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86/",
     "canonical": "https://makler-realty.ru/listing/%d1%81%d0%b5%d0%bb%d1%8c%d1%85%d0%be%d0%b7-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f-%d0%b2-%d1%80%d0%b0%d0%b9%d0%be%d0%bd%d0%b5-%d0%b4%d0%b5%d1%80%d0%b5%d0%b2%d0%bd%d0%b8-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86/",
     "domain": "makler-realty.ru",
@@ -7360,6 +9312,18 @@
   },
   {
     "id": "MS-CRAWL-0151",
+    "lot_number": 657,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0151",
+    "legacy_lot_id": "657",
+    "legacy_post_id": "7204",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00657",
     "url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -7408,7 +9372,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0152",
+    "id": "MS-00296",
+    "lot_number": 296,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0152",
+    "legacy_lot_id": "296",
+    "legacy_post_id": "969",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8%d1%86%d0%b0-%d1%80%d0%b0%d0%b9%d0%be%d0%bd-%d0%b3%d0%be%d1%80/",
     "domain": "makler-realty.ru",
@@ -7458,6 +9434,18 @@
   },
   {
     "id": "MS-CRAWL-0153",
+    "lot_number": 286,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0153",
+    "legacy_lot_id": "286",
+    "legacy_post_id": "973",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00286",
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
     "domain": "makler-realty.ru",
@@ -7507,6 +9495,18 @@
   },
   {
     "id": "MS-CRAWL-0154",
+    "lot_number": 470,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0154",
+    "legacy_lot_id": "470",
+    "legacy_post_id": "4264",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": "MS-00470",
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -7555,7 +9555,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0155",
+    "id": "MS-00232",
+    "lot_number": 232,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0155",
+    "legacy_lot_id": "232",
+    "legacy_post_id": "1206",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
     "domain": "makler-realty.ru",
@@ -7604,7 +9616,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0156",
+    "id": "MS-00362",
+    "lot_number": 362,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0156",
+    "legacy_lot_id": "362",
+    "legacy_post_id": "2788",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d0%b7%d0%b0%d1%81%d1%82%d1%80%d0%be%d0%b9%d0%ba%d1%83-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
     "domain": "makler-realty.ru",
@@ -7653,7 +9677,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0157",
+    "id": "MS-00074",
+    "lot_number": 74,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0157",
+    "legacy_lot_id": "74",
+    "legacy_post_id": "1255",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-%d0%be%d1%82%d0%b5%d0%bb%d1%8f/",
     "domain": "makler-realty.ru",
@@ -7702,7 +9738,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0158",
+    "id": "MS-00046",
+    "lot_number": 46,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0158",
+    "legacy_lot_id": "46",
+    "legacy_post_id": "1267",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/",
     "canonical": "https://makler-realty.ru/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%8c%d1%81%d1%82%d0%b2%d0%be-2/",
     "domain": "makler-realty.ru",
@@ -7752,6 +9800,18 @@
   },
   {
     "id": "MS-CRAWL-0159",
+    "lot_number": 891,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0159",
+    "legacy_lot_id": "891",
+    "legacy_post_id": "9518",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/"
+      }
+    ],
+    "merged_into": "MS-00891",
     "url": "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/",
     "canonical": "https://makler-realty.ru/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%80-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b8-%d1%80%d0%b5%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8%d0%b8-%d0%b8-%d0%ba%d0%be/",
     "domain": "makler-realty.ru",
@@ -7801,6 +9861,18 @@
   },
   {
     "id": "MS-CRAWL-0160",
+    "lot_number": 774,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0160",
+    "legacy_lot_id": "774",
+    "legacy_post_id": "8691",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/"
+      }
+    ],
+    "merged_into": "MS-00774",
     "url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/",
     "canonical": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b7%d0%b5%d0%bc%d0%b5%d0%bb%d1%8c%d0%bd%d1%8b%d0%bc-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d1%81%d0%b5%d0%bb%d0%b5-%d0%bb/",
     "domain": "makler-realty.ru",
@@ -7850,6 +9922,18 @@
   },
   {
     "id": "MS-CRAWL-0161",
+    "lot_number": 932,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0161",
+    "legacy_lot_id": "932",
+    "legacy_post_id": "9744",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d1%80%d0%be/"
+      }
+    ],
+    "merged_into": "MS-00932",
     "url": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d1%80%d0%be/",
     "canonical": "https://makler-realty.ru/listing/%d1%8d%d1%82%d0%b0%d0%b6-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d1%80%d0%be/",
     "domain": "makler-realty.ru",
@@ -7899,6 +9983,18 @@
   },
   {
     "id": "MS-CRAWL-0162",
+    "lot_number": 731,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0162",
+    "legacy_lot_id": "731",
+    "legacy_post_id": "8174",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/a%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%b4%d0%b2%d1%83%d1%85%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%bd%d0%be%d0%b9-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4/"
+      }
+    ],
+    "merged_into": "MS-00731",
     "url": "https://makler-realty.ru/listing/a%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%b4%d0%b2%d1%83%d1%85%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%bd%d0%be%d0%b9-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4/",
     "canonical": "https://makler-realty.ru/listing/a%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%b4%d0%b2%d1%83%d1%85%d0%ba%d0%be%d0%bc%d0%bd%d0%b0%d1%82%d0%bd%d0%be%d0%b9-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%8b-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4/",
     "domain": "makler-realty.ru",
@@ -7947,7 +10043,19 @@
     "location_precision": "area_only"
   },
   {
-    "id": "MS-CRAWL-0163",
+    "id": "MS-00696",
+    "lot_number": 696,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0163",
+    "legacy_lot_id": "696",
+    "legacy_post_id": "7622",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/arenda-dvuhkomnatnaia-kvartira-garazh-sandanski/"
+      }
+    ],
+    "merged_into": null,
     "url": "https://makler-realty.ru/listing/arenda-dvuhkomnatnaia-kvartira-garazh-sandanski/",
     "canonical": "https://makler-realty.ru/listing/arenda-dvuhkomnatnaia-kvartira-garazh-sandanski/",
     "domain": "makler-realty.ru",
@@ -7997,6 +10105,18 @@
   },
   {
     "id": "MS-CRAWL-0164",
+    "lot_number": 893,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0164",
+    "legacy_lot_id": "893",
+    "legacy_post_id": "9604",
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/paralia-ofrinio-kvartira/"
+      }
+    ],
+    "merged_into": "MS-00893",
     "url": "https://makler-realty.ru/listing/paralia-ofrinio-kvartira/",
     "canonical": "https://makler-realty.ru/listing/paralia-ofrinio-kvartira/",
     "domain": "makler-realty.ru",
@@ -8048,6 +10168,18 @@
   },
   {
     "id": "MS-CRAWL-0165",
+    "lot_number": 356,
+    "lot_suffix": null,
+    "migration_id": "MS-CRAWL-0165",
+    "legacy_lot_id": "356",
+    "legacy_post_id": null,
+    "legacy_urls": [
+      {
+        "domain": "makler-realty.ru",
+        "url": "https://makler-realty.ru/listing/uchastok-strumiani/"
+      }
+    ],
+    "merged_into": "MS-00356",
     "url": "https://makler-realty.ru/listing/uchastok-strumiani/",
     "canonical": "https://makler-realty.ru/listing/uchastok-strumiani/",
     "domain": "makler-realty.ru",

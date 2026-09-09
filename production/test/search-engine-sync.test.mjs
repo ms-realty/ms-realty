@@ -219,10 +219,10 @@ test("public search rejects oversized or over-broad engine responses", async () 
   );
 
   const hit = {
-    id: "MS-CRAWL-0001:bg",
-    source_listing_id: "MS-CRAWL-0001",
+    id: "MS-00815:bg",
+    source_listing_id: "MS-00815",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    locale_path: "/bg/imoti/MS-00815",
     title: "Reviewed listing",
   };
   await assert.rejects(
@@ -265,10 +265,10 @@ function runScript(script, env) {
 async function withSearchServer(fn, { typesenseStatus = 200, meilisearchStatus = 200 } = {}) {
   const calls = [];
   const hit = {
-    id: "MS-CRAWL-0001:bg",
-    source_listing_id: "MS-CRAWL-0001",
+    id: "MS-00815:bg",
+    source_listing_id: "MS-00815",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    locale_path: "/bg/imoti/MS-00815",
     title: "Reviewed listing",
   };
   const server = http.createServer((request, response) => {
@@ -321,7 +321,7 @@ test("public search queries Typesense first with only reviewed locale documents"
 
     assert.equal(result.engine, "typesense");
     assert.equal(result.total, 1);
-    assert.deepEqual(result.hits.map((hit) => hit.source_listing_id), ["MS-CRAWL-0001"]);
+    assert.deepEqual(result.hits.map((hit) => hit.source_listing_id), ["MS-00815"]);
     assert.deepEqual(result.unavailable_engines, ["postgres"]);
     assert.equal(calls.length, 1);
     const request = new URL(`http://search.test${calls[0].url}`);
@@ -352,7 +352,7 @@ test("selected Typesense receives the validated exact and structured intent", as
       q: "ignored lexical query",
       intent: {
         locale: "bg",
-        exact_reference: "MS-CRAWL-0001",
+        exact_reference: "MS-00815",
         property_family: "commercial",
         offer_type: "rent",
         price_max: 120000,
@@ -362,7 +362,7 @@ test("selected Typesense receives the validated exact and structured intent", as
 
     assert.equal(calls.length, 1);
     const request = new URL(`http://search.test${calls[0].url}`);
-    assert.equal(request.searchParams.get("q"), "MS-CRAWL-0001");
+    assert.equal(request.searchParams.get("q"), "MS-00815");
     assert.equal(request.searchParams.get("num_typos"), "0");
     assert.equal(request.searchParams.get("drop_tokens_threshold"), "0");
     const filter = request.searchParams.get("filter_by");
@@ -372,7 +372,7 @@ test("selected Typesense receives the validated exact and structured intent", as
     assert.match(filter, /offer_type:=`rent`/);
     assert.match(filter, /price_amount:<=120000/);
     assert.match(filter, /public_longitude:>=23/);
-    assert.match(filter, /listing_reference:=`MS-CRAWL-0001`/);
+    assert.match(filter, /listing_reference:=`MS-00815`/);
   });
 });
 
@@ -625,10 +625,10 @@ test("Postgres search migration keeps locale routing and index operators aligned
 
 test("approved search projection matches the Postgres view lexical and taxonomy fields", () => {
   const listing = {
-    id: "MS-CRAWL-0004",
-    listing_reference: "MS-CRAWL-0004",
+    id: "MS-00905",
+    listing_reference: "MS-00905",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0004",
+    locale_path: "/bg/imoti/MS-00905",
     title: "Apartment for rent in Sandanski",
     description: "Long-term rental in the centre.",
     property_family: "apartment",
@@ -1002,8 +1002,8 @@ test("benchmark bootstrap imports the declared corpus and waits for Meilisearch 
       "/tasks/12",
     ],
   );
-  assert.match(calls[3].options.body, /MS-CRAWL-0001:bg/);
-  assert.match(calls[6].options.body, /"meili_id":"MS-CRAWL-0001_bg"/);
+  assert.match(calls[3].options.body, /MS-00815:bg/);
+  assert.match(calls[6].options.body, /"meili_id":"MS-00815_bg"/);
 });
 
 test("benchmark bootstrap rejects failed or invalid Typesense JSONL results", async () => {
@@ -1080,11 +1080,11 @@ test("search engine sync snapshots the authoritative Postgres projection", async
   const calls = [];
   const documents = [
     {
-      id: "MS-CRAWL-0001:bg",
-      source_listing_id: "MS-CRAWL-0001",
-      listing_reference: "MS-CRAWL-0001",
+      id: "MS-00815:bg",
+      source_listing_id: "MS-00815",
+      listing_reference: "MS-00815",
       locale: "bg",
-      locale_path: "/bg/imoti/MS-CRAWL-0001",
+      locale_path: "/bg/imoti/MS-00815",
       title: "Reviewed listing",
     },
   ];
@@ -1290,7 +1290,7 @@ test("search fixture builder honors mounted locale registry and listing edits", 
   fs.writeFileSync(
     listingEditPath,
     `${JSON.stringify({
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       patch: { description: "Mounted search description." },
     })}\n`,
   );
@@ -1308,7 +1308,7 @@ test("search fixture builder honors mounted locale registry and listing edits", 
   assert.equal(result.status, 0, result.stderr);
   const docs = JSON.parse(fs.readFileSync(`${outDir}/index-listings.json`, "utf8"));
   const summary = JSON.parse(fs.readFileSync(`${outDir}/search-fixture-summary.json`, "utf8"));
-  const reviewed = docs.filter((doc) => doc.source_listing_id === "MS-CRAWL-0001");
+  const reviewed = docs.filter((doc) => doc.source_listing_id === "MS-00815");
 
   assert.equal(summary.locale_registry_path, registryPath);
   assert.equal(summary.listing_edits_path, listingEditPath);
@@ -1322,11 +1322,11 @@ test("search fixture builder honors mounted locale registry and listing edits", 
 test("search engine query smoke reports authoritative Postgres hits", async () => {
   const calls = [];
   const hit = {
-    id: "MS-CRAWL-0001:bg",
-    source_listing_id: "MS-CRAWL-0001",
-    listing_reference: "MS-CRAWL-0001",
+    id: "MS-00815:bg",
+    source_listing_id: "MS-00815",
+    listing_reference: "MS-00815",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    locale_path: "/bg/imoti/MS-00815",
     title: "Reviewed listing",
   };
   const report = await runSearchEngineQuerySmoke({
@@ -1443,11 +1443,11 @@ test("search engine query smoke reports authoritative Postgres hits", async () =
 
 test("search engine query validator rejects non-success postgres operation evidence", () => {
   const hit = {
-    id: "MS-CRAWL-0001:bg",
-    source_listing_id: "MS-CRAWL-0001",
-    listing_reference: "MS-CRAWL-0001",
+    id: "MS-00815:bg",
+    source_listing_id: "MS-00815",
+    listing_reference: "MS-00815",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    locale_path: "/bg/imoti/MS-00815",
     title: "Reviewed listing",
   };
   const report = {
@@ -1571,10 +1571,10 @@ test("a listing with no recorded status and no tour projects the same defaults a
   // Every listing in the committed catalogue is exactly this shape: the crawl
   // recorded no facts.listing_status, and most carry a tour that is not public.
   const listing = {
-    id: "MS-3000",
-    listing_reference: "MS-3000",
+    id: "MS-00356",
+    listing_reference: "MS-00356",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-3000",
+    locale_path: "/bg/imoti/MS-00356",
     title: "Plot in Strumyani",
     property_family: "land",
   };

@@ -18,7 +18,7 @@ const OFFER_TYPES = Object.freeze(["sale", "rent"]);
 
 // Crawl-era ids (MS-CRAWL-0013), pre-rekey short ids (MS-3000) and lot
 // numbers (MS-00815) all share the MS- prefix and a digit tail.
-export const SEARCH_REFERENCE_PATTERN = /^MS-(?:CRAWL-)?\d+$/iu;
+export const SEARCH_REFERENCE_PATTERN = /^MS-(?:CRAWL-\d+|\d+(?:-\d{1,3})?)$/iu;
 
 export function searchReferenceFromText(value) {
   const text = String(value ?? "").trim();

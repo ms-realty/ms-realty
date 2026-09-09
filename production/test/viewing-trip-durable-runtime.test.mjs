@@ -23,7 +23,7 @@ function tripInput() {
     arrivalDate: "2026-10-05",
     departureDate: "2026-10-08",
     areas: ["Sandanski", "Petrich"],
-    listingReferences: ["MS-CRAWL-0001"],
+    listingReferences: ["MS-00815"],
     partySize: 2,
     note: "Controlled durable-store test.",
     contact: { name: "Trip Visitor", phone: "+31612345678" },

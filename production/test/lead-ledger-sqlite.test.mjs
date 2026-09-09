@@ -29,7 +29,7 @@ function leadFixture(id, email) {
       source: "website_listing_detail",
       intent: "inquiry",
       leadType: "buyer",
-      listingReference: "MS-CRAWL-0001",
+      listingReference: "MS-00815",
       contact: { email },
       requirements: { locations: ["Sandanski"], property_types: ["apartment"] },
       intake: { complete: true, missing_fields: [], captured_fields: ["locations"] },

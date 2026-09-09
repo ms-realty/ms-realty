@@ -185,6 +185,7 @@ test("a typed listing reference becomes an exact reference in every id shape", (
     ["  ms-crawl-0013 ", "MS-CRAWL-0013"],
     ["MS-3000", "MS-3000"],
     ["ms-00815", "MS-00815"],
+    ["ms-00567-1", "MS-00567-1"],
   ]) {
     const { intent } = normalizeSearchRequest({ locale: "en", q: typed });
     assert.equal(intent.exact_reference, expected, typed);

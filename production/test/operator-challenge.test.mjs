@@ -6,7 +6,7 @@ import {
 } from "../lib/operator-challenge.mjs";
 
 const SECRET = "operator-challenge-test-secret-longer-than-thirty-two-characters";
-const INPUT = { input: { listingIds: ["MS-CRAWL-0001"], targetStatus: "reserved" }, query: {} };
+const INPUT = { input: { listingIds: ["MS-00815"], targetStatus: "reserved" }, query: {} };
 const BASE = {
   operatorId: "mcp_editor",
   sessionId: "session-a",

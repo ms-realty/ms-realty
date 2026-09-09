@@ -25,7 +25,7 @@ import {
   crossOriginWriteRejection,
   readHeader,
   requestHost,
-  sameOriginWriteRejection,
+  publicWriteRejection, sameOriginWriteRejection,
 } from "./request-guard.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
@@ -271,7 +271,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
-import { browserListingRevisionRequired, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { browserListingRevisionRequired, invalidateListingProjection, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
@@ -2585,7 +2585,7 @@ export function createHttpApp({
       };
     }
   };
-  return async function handle(request) {
+  const handle = async function handle(request) {
    const url = new URL(request.url, "http://localhost");
    const mcpMetadataRoute =
      url.pathname === "/.well-known/oauth-protected-resource" ||
@@ -2649,7 +2649,7 @@ export function createHttpApp({
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
       const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
-      const sameOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl });
+      const sameOrigin = publicWriteRejection(request.method, request.headers, { requestUrls: [requestUrl, request.url] });
       if (sameOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: sameOrigin });
     }
     // Runs after /mcp, which keeps its own MS_REALTY_MCP_ALLOWED_ORIGINS allowlist
@@ -3934,7 +3934,7 @@ export function createHttpApp({
         request.url,
         `${["http", "https"].includes(photoProtocol) ? photoProtocol : "http"}://${requestHost(request.headers) || "localhost"}`,
       );
-      const photoCrossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl: photoRequestUrl });
+      const photoCrossOrigin = publicWriteRejection(request.method, request.headers, { requestUrls: [photoRequestUrl, request.url] });
       if (photoCrossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: photoCrossOrigin });
       if (publicWriteLimiter) {
         const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
@@ -8031,6 +8031,25 @@ export function createHttpApp({
     }
     return publicResponse(request, url, rendered);
   };
+  return invalidatesProjectionAfterAdminWrites(handle);
+}
+
+// Any admin write may change what the shared listing projection reads
+// (listing drafts, media documents, reviews, translations, publication), and
+// most of those writers live outside listing-draft-service. Rather than teach
+// every handler about the cache, drop the projection after each successful
+// mutating admin request; the write path's own in-transaction reads are never
+// cached, so this only shortens the read-side window.
+function invalidatesProjectionAfterAdminWrites(handle) {
+  return async function handleAdminAware(request, ...rest) {
+    const response = await handle(request, ...rest);
+    const method = String(request?.method || "GET").toUpperCase();
+    const pathname = (() => { try { return new URL(request.url, "http://localhost").pathname; } catch { return ""; } })();
+    if (!["GET", "HEAD", "OPTIONS"].includes(method) && response && response.status < 400 && (pathname.startsWith("/api/admin/") || pathname.startsWith("/admin/"))) {
+      invalidateListingProjection();
+    }
+    return response;
+  };
 }
 
 export async function dispatchHttp(app, { method = "GET", url, body, headers, remoteAddress } = {}) {
@@ -8079,16 +8098,16 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must fail readiness with public launch gate details while blockers remain");
   }
-  if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
+  if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-00815") {
     throw new Error("HTTP smoke must serve approved legacy redirect");
   }
   if (
     smoke.slugChange?.status !== 201 ||
     smoke.slugChange.body.status !== 301 ||
     smoke.slugChange.body.old_path !== "/he/properties/old-sandanski-slug" ||
-    smoke.slugChange.body.new_path !== "/he/properties/MS-CRAWL-0001" ||
+    smoke.slugChange.body.new_path !== "/he/properties/MS-00815" ||
     smoke.slugRedirect?.status !== 301 ||
-    smoke.slugRedirect.headers.location !== "/he/properties/MS-CRAWL-0001"
+    smoke.slugRedirect.headers.location !== "/he/properties/MS-00815"
   ) {
     throw new Error("HTTP smoke must create path-only slug-change 301 redirects");
   }
@@ -8290,7 +8309,7 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must expose BG, RU, EN admin workspaces and Greek/Hebrew website locales");
   }
-  const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
+  const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-00815");
   if (
     smoke.staleSearch.status !== 200 ||
     staleSearchCard?.translation_display !== "reviewed_translation" ||

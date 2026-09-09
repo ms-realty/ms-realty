@@ -127,10 +127,20 @@ test("seller admin route remains actionable from valuation through publication, 
       headers,
     });
     assert.equal(publishedQueue.body.sellerPipelineQueue.rows[0].task, "listing_offer");
-    const publishedPage = await dispatchHttp(appAt("2026-07-13T09:05:00.000Z"), {
+    // The seller valuation queue renders on the Pipeline screen; the inbox no
+    // longer carries it.
+    const inboxPage = await dispatchHttp(appAt("2026-07-13T09:05:00.000Z"), {
       url: "/admin/leads?locale=bg",
       headers,
     });
+    assert.equal(inboxPage.status, 200);
+    assert.doesNotMatch(inboxPage.body, /data-seller-pipeline-queue="true"/);
+    const publishedPage = await dispatchHttp(appAt("2026-07-13T09:05:00.000Z"), {
+      url: "/admin/pipeline?locale=bg",
+      headers,
+    });
+    assert.equal(publishedPage.status, 200);
+    assert.match(publishedPage.body, /data-seller-pipeline-queue="true"/);
     assert.match(publishedPage.body, /name="offerAmountEur"/);
 
     const prematureSale = await dispatchHttp(appAt("2026-07-13T09:10:00.000Z"), {

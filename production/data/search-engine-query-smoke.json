@@ -10,11 +10,11 @@
     "locale_codes": [
       "bg"
     ],
-    "digest": "8772eae6f4d8754b9218db96eafb03c39e3732f4b820c137379fd50e1346ea06"
+    "digest": "b5b6417b8da5a752090d2eeb362963c811a99b50ac8da1bc8a44868c695e8c16"
   },
   "expectation": {
     "projected_documents": 1,
-    "sample_document_id": "MS-CRAWL-0001:bg"
+    "sample_document_id": "MS-00815:bg"
   },
   "summary": {
     "engines": 1,
@@ -23,7 +23,7 @@
     },
     "total_hits": 1,
     "first_hit_ids": [
-      "MS-CRAWL-0001:bg"
+      "MS-00815:bg"
     ],
     "database_target": "postgres://db.ms-realty.bg:5432/ms_realty"
   },
@@ -32,7 +32,7 @@
       "engine": "postgres",
       "target": "ms_realty_public_search_documents",
       "database_target": "postgres://db.ms-realty.bg:5432/ms_realty",
-      "query": "MS-CRAWL-0001",
+      "query": "MS-00815",
       "operation": {
         "method": "SELECT",
         "status": 200,
@@ -42,11 +42,11 @@
       "total": 1,
       "hits": [
         {
-          "id": "MS-CRAWL-0001:bg",
-          "source_listing_id": "MS-CRAWL-0001",
-          "listing_reference": "MS-CRAWL-0001",
+          "id": "MS-00815:bg",
+          "source_listing_id": "MS-00815",
+          "listing_reference": "MS-00815",
           "locale": "bg",
-          "locale_path": "/bg/imoti/MS-CRAWL-0001",
+          "locale_path": "/bg/imoti/MS-00815",
           "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
         }
       ]
