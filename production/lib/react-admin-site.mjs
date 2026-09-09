@@ -4411,8 +4411,8 @@ function ViewingWeekPanel({ page, copy, ui }) {
                     "li",
                     { key: viewing.id, "data-week-viewing": viewing.id },
                     h("time", { dateTime: viewing.starts_at }, viewing.local_start),
-                    h("span", null, viewing.listing_reference || viewing.lead_id),
-                    h("small", null, brokerProfileText(page, viewing.broker)),
+                    h("span", null, viewingPlaceText(page, viewing, copy)),
+                    h("small", null, `${viewingClientText(page, viewing, copy, ui)} · ${brokerProfileText(page, viewing.broker)}`),
                   ),
                 ),
               )
@@ -4449,26 +4449,64 @@ function ViewingWeekPanel({ page, copy, ui }) {
   );
 }
 
+// A viewing is an appointment between a client and a property; the ledger id
+// that stores it never becomes a label. The lead behind the viewing carries the
+// client's name (when consent left one) and the property's location.
+function viewingLead(page, viewing) {
+  return (page.leads || []).find((lead) => lead.lead_id === (viewing.lead_id || null)) || null;
+}
+
+function viewingClientText(page, viewing, copy, ui) {
+  const lead = viewingLead(page, viewing);
+  const name = String(lead?.contact?.name || "").trim();
+  if (name && !looksLikeGeneratedContactId(name)) return name;
+  const language = String(lead?.original_language || viewing.original_language || "").toUpperCase();
+  const channel = lead?.contact_preference || viewing.feedback_request?.channel || null;
+  return [label(copy, "unnamedContact", "Unnamed"), language || null, channel ? valueText(ui, channel) : null].filter(Boolean).join(" · ");
+}
+
+function viewingPlaceText(page, viewing, copy) {
+  const lead = viewingLead(page, viewing);
+  const location = String(lead?.property?.location || lead?.requirements?.locations?.[0] || "").trim();
+  const reference = String(viewing.listing_reference || "").trim();
+  return [reference || label(copy, "viewingPlace", "Property"), location || null].filter(Boolean).join(" · ");
+}
+
+function viewingDayLabel(value, locale) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
+  return new Intl.DateTimeFormat(language, { weekday: "long", day: "numeric", month: "long", timeZone: activeDisplaySettings.timezone }).format(date);
+}
+
+function viewingDayKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "unknown";
+  return new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: activeDisplaySettings.timezone }).format(date);
+}
+
+function viewingClockText(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: activeDisplaySettings.timezone }).format(date);
+}
+
 function ViewingsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const locale = page.workspace.locale;
   const title = label(copy, "viewingsWorkspace", "Viewings and follow-ups");
   const viewings = [...(page.viewings || [])].sort((left, right) => Date.parse(left.starts_at) - Date.parse(right.starts_at));
   const weekLayout = page.viewingLayout === "week" && Boolean(page.viewingWeek);
-  const metrics = [
-    [label(copy, "viewings", "Viewings"), page.summary?.viewings || 0, "calendar-days", "sea"],
-    [label(copy, "openFollowUps", "Open follow-ups"), page.summary?.viewingFollowUpsOpen || 0, "calendar-check", "sun"],
-    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary?.viewingFollowUpsOverdue || 0, "triangle-alert", "brick"],
-    [statusText(ui, "completed"), page.viewingFollowUpQueue?.summary?.completed || 0, "check-circle-2", "success"],
-    ...(page.viewingWeek ? [[ui.freeSlots, page.viewingWeek.summary.open_slots, "clock", "sea"]] : []),
-  ];
+  const queueFor = (predicate) => ({ ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: (page.viewingFollowUpQueue?.rows || []).filter(predicate) } });
+  const unmatchedRows = (page.viewingFollowUpQueue?.rows || []).filter((row) => !viewings.some((viewing) => viewing.id === row.viewing_id));
   return adminShell(page, {
     title,
     mainAttrs: {
       "data-kind": "admin-viewings",
       "data-react-admin-ui": "viewings",
       "data-admin-workbench": "crm",
-      "data-admin-locale": page.workspace.locale,
+      "data-admin-locale": locale,
     },
     children: [
       h(
@@ -4488,32 +4526,30 @@ function ViewingsBody({ page }) {
             ui.weekView,
           ),
         ),
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
+        // The caveat about calendar delivery is a tooltip on the one control it concerns.
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true, title: dailyCopy(page).calendar }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
       ),
-      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
       weekLayout ? h(ViewingWeekPanel, { page, copy, ui }) : null,
       h(DailyWorkspace, {
         scope: "viewing", page, title: label(copy, "upcomingViewings", "Upcoming viewings"),
         rows: viewings.map(viewing => ({ ...viewing, tags: viewing.status })),
+        group: viewing => ({ id: viewingDayKey(viewing.starts_at), label: viewingDayLabel(viewing.starts_at, locale) }),
         empty: h(EmptyState, { icon: "calendar-days" }, label(copy, "noUpcomingViewings", "No upcoming viewings.")),
-        renderRow: viewing => h("span", { "data-viewing-schedule-row": viewing.id },
-          h("strong", null, viewing.listing_reference || viewing.lead_id),
-          h("small", null, brokerProfileText(page, viewing.broker)),
-          h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)),
+        renderRow: viewing => h("span", { className: "adm-viewing-row", "data-viewing-schedule-row": viewing.id },
+          h("time", { className: "adm-viewing-row__time", dateTime: viewing.starts_at }, viewingClockText(viewing.starts_at)),
+          h("strong", null, viewingPlaceText(page, viewing, copy)),
+          h("small", null, `${viewingClientText(page, viewing, copy, ui)} · ${brokerProfileText(page, viewing.broker)}`),
           h(StatusPill, { tone: viewing.status === "booked" ? "sea" : "success" }, statusText(ui, viewing.status))),
-        renderDetail: viewing => h("div", { className: "adm-daily-record", "data-viewing-schedule": "true" },
-          h("h2", null, viewing.listing_reference || viewing.lead_id),
+        renderDetail: viewing => h("div", { className: "adm-daily-record adm-viewing-record", "data-viewing-schedule": "true" },
+          h("h2", null, viewingPlaceText(page, viewing, copy)),
           h("dl", { className: "adm-daily-facts" },
+            h("div", null, h("dt", null, label(copy, "viewingTime", "When")), h("dd", null, h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, locale)))),
+            h("div", null, h("dt", null, label(copy, "client", "Client")), h("dd", null, viewingClientText(page, viewing, copy, ui), leadContactActions(viewingLead(page, viewing) || {}, ui))),
             h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, brokerProfileText(page, viewing.broker))),
-            h("div", null, h("dt", null, label(copy, "viewings", "Viewings")), h("dd", null, h("time", { dateTime: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)))),
             h("div", null, h("dt", null, label(copy, "status", "Status")), h("dd", null, statusText(ui, viewing.status)))),
-          h("p", { className: "adm-daily-note" }, [viewing.channel ? valueText(ui, viewing.channel) : null, viewing.id].filter(Boolean).join(" · ")),
-          h("p", { className: "adm-daily-note" }, dailyCopy(page).calendar),
-          h(ViewingFollowUpQueue, { page: { ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: (page.viewingFollowUpQueue?.rows || []).filter(row => row.viewing_id === viewing.id) } }, copy, ui })),
+          h(ViewingFollowUpQueue, { page: queueFor(row => row.viewing_id === viewing.id), copy, ui })),
       }),
-      (page.viewingFollowUpQueue?.rows || []).some(row => !viewings.some(viewing => viewing.id === row.viewing_id))
-        ? h(ViewingFollowUpQueue, { page: { ...page, viewingFollowUpQueue: { ...page.viewingFollowUpQueue, rows: page.viewingFollowUpQueue.rows.filter(row => !viewings.some(viewing => viewing.id === row.viewing_id)) } }, copy, ui }) : null,
-
+      unmatchedRows.length ? h(ViewingFollowUpQueue, { page: queueFor(row => !viewings.some(viewing => viewing.id === row.viewing_id)), copy, ui }) : null,
     ],
   });
 }
@@ -6782,9 +6818,24 @@ function ConsentWithdrawalForm({ page, row, copy }) {
   );
 }
 
+// The register names a permission by what it covers, in which language, and
+// when it was given: "Language notification · FR · 4 Jul 2026". The subject id
+// stays on the row as data for support and for the withdrawal form.
+function consentSubjectText(row, copy, locale) {
+  return [label(copy, row.consent_type, row.consent_type), String(row.locale || "").toUpperCase() || null, formatAdminDate(row.recorded_at, locale) || null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function formatAdminDate(value, locale) {
+  const text = formatAdminDateTime(value, locale);
+  return text.replace(/,\s*\d{1,2}:\d{2}$/, "");
+}
+
 function ConsentsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const locale = page.workspace?.locale;
   const columns = {
     subject: label(copy, "consentSubject", "Enquiry or subscription"),
     purpose: label(copy, "consentPurpose", "Purpose"),
@@ -6792,11 +6843,6 @@ function ConsentsBody({ page }) {
     recordedAt: label(copy, "consentRecordedAt", "Recorded"),
     action: label(copy, "action", "Action"),
   };
-  const metrics = [
-    [label(copy, "consentGranted", "Active permissions"), page.summary.granted, "shield-check", "success"],
-    [label(copy, "consentWithdrawn", "Withdrawn"), page.summary.withdrawn, "x", "brick"],
-    [label(copy, "marketingOptIns", "Marketing opt-ins"), page.summary.marketing_opt_in, "mail", "sand"],
-  ];
   const title = label(copy, "consentsWorkspace", "Consent and preferences");
   const rows = page.consentStates;
   const filterOptions = [
@@ -6816,7 +6862,6 @@ function ConsentsBody({ page }) {
     children: [
       h(PageHeader, { title, subtitle: page.metadata.description }),
       h("p", { className: "adm-inline-alert", "data-consent-guardrail": "true" }, label(copy, "consentGuardrail", "Withdrawal stops this purpose. New consent requires a new explicit customer action.")),
-      h(StatGrid, { metrics }),
       rows.length ? h(PageToolbar, null, h(ListFilterTabs, { scope: "consents", label: title, options: filterOptions })) : null,
       h(
         Panel,
@@ -6853,13 +6898,19 @@ function ConsentsBody({ page }) {
                           key: row.id,
                           "data-consent-row": "true",
                           "data-consent-state": row.granted ? "granted" : "withdrawn",
+                          "data-consent-subject": row.subject_id || row.contact_reference || undefined,
                           "data-list-item": "consents",
                           "data-filter-tags": [row.granted ? "active" : "withdrawn", row.marketing_opt_in ? "marketing" : ""].filter(Boolean).join(" "),
                         },
-                        h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || ui.notSet), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
+                        h(
+                          "td",
+                          { "data-consent-column": "subject", "data-label": columns.subject },
+                          h("strong", null, consentSubjectText(row, copy, locale)),
+                          h("small", { className: "adm-lead-context" }, valueText(ui, row.source)),
+                        ),
                         h("td", { "data-consent-column": "purpose", "data-label": columns.purpose }, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
                         h("td", { "data-consent-column": "state", "data-label": columns.state }, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
-                        h("td", { className: "crm-tbl__muted", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, h("time", { dateTime: row.recorded_at, title: row.recorded_at }, formatAdminDateTime(row.recorded_at, page.workspace?.locale))),
+                        h("td", { className: "crm-tbl__muted", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, h("time", { dateTime: row.recorded_at, title: row.recorded_at }, formatAdminDateTime(row.recorded_at, locale))),
                         h("td", { "data-consent-column": "action", "data-label": columns.action }, h(ConsentWithdrawalForm, { page, row, copy })),
                       ),
                     ),
@@ -6981,69 +7032,158 @@ function looksLikeGeneratedContactId(value) {
 }
 
 // A contact is named by a person or an address; the key the system minted for
-// it is evidence, and evidence belongs in the caption underneath.
-function contactTitle(contact, ui) {
+// it is evidence, and evidence belongs in the History caption underneath.
+// Without a name the label says what is known: "Unnamed · HE · WhatsApp".
+function contactTitle(contact, ui, copy = null) {
   const display = String(contact.display_name || "").trim();
   if (display && display !== contact.id && !looksLikeGeneratedContactId(display)) return display;
   const person = String(contact.contact?.name || "").trim();
   if (person && !looksLikeGeneratedContactId(person)) return person;
   const email = String(contact.contact?.email || "").trim();
   if (email) return email;
-  const types = (contact.lead_types || []).map((type) => statusText(ui, type)).filter(Boolean);
-  return types.length ? types.join(", ") : contact.id;
+  const unnamed = copy ? label(copy, "unnamedContact", "Unnamed") : "Unnamed";
+  return [unnamed, (contact.languages || []).join(", ").toUpperCase() || null, contact.preferred_channel ? valueText(ui, contact.preferred_channel) : null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+// Call / WhatsApp / Email built from the channels the record already exposes.
+function contactChannelActions(contact, copy, ui) {
+  const channels = contact.contact || {};
+  const number = (value) => String(value || "").replace(/[^\d+]/g, "");
+  const actions = [
+    channels.phone ? { channel: "phone", href: `tel:${number(channels.phone)}`, icon: "phone", text: label(copy, "callAction", "Call") } : null,
+    channels.whatsapp ? { channel: "whatsapp", href: `https://wa.me/${number(channels.whatsapp).replace(/^\+/, "")}`, icon: "message-circle", text: valueText(ui, "whatsapp") } : null,
+    channels.viber ? { channel: "viber", href: `viber://chat?number=${encodeURIComponent(number(channels.viber))}`, icon: "message-circle", text: valueText(ui, "viber") } : null,
+    channels.email ? { channel: "email", href: `mailto:${channels.email}`, icon: "mail", text: valueText(ui, "email") } : null,
+  ].filter(Boolean);
+  if (!actions.length) return h("p", { className: "adm-contact-actions__none", "data-contact-no-channels": "true" }, label(copy, "noContactChannels", "No phone or email on this record."));
+  return h(
+    "div",
+    { className: "adm-contact-actions", "data-private-contact": "true" },
+    ...actions.map((action, index) =>
+      h(
+        "a",
+        {
+          key: action.channel,
+          href: action.href,
+          className: `mk-btn ${index === 0 ? "mk-btn--primary" : "mk-btn--secondary"} mk-btn--sm`,
+          "data-private-contact-channel": action.channel,
+          title: String(channels[action.channel]),
+        },
+        h(Icon, { name: action.icon, size: 16 }),
+        h("span", null, action.text),
+      ),
+    ),
+  );
 }
 
 function ContactsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const locale = page.workspace?.locale;
   const title = label(copy, "contactsWorkspace", "Contacts and accounts");
-  const metrics = [
-    [label(copy, "contactRecords", "Customer contacts"), page.summary.contacts, "users", "sea"],
-    [label(copy, "accounts", "Accounts"), page.summary.accounts, "building-2", "sand"],
-    [label(copy, "duplicateEnquiries", "Linked repeat enquiries"), page.summary.duplicate_leads, "link", "sun"],
-    [label(copy, "communicationEvents", "Communication events"), page.summary.communication_events, "messages-square", "sea"],
-  ];
   const withAccount = page.contacts.filter((contact) => contact.account_id).length;
   const filterOptions = [
     { value: "all", label: label(copy, "all", "All"), count: page.contacts.length },
     { value: "no_account", label: ui.withoutAccount, count: page.contacts.length - withAccount },
     { value: "with_account", label: ui.withAccount, count: withAccount },
   ];
+  const propertiesOfInterest = (contact) => [...(contact.listing_references || []), ...(contact.locations || [])].join(" · ");
   const renderContact = (contact) => h(
-                "article",
-                {
-                  key: contact.id,
-                  className: "adm-contact-card",
-                  "data-contact-record": contact.id,
-                  "data-list-item": "contacts",
-                  "data-filter-tags": contact.account_id ? "with_account" : "no_account",
-                },
-                h(
-                  "header",
-                  null,
-                  h("div", null, h("h3", null, contactTitle(contact, ui)), h("code", { className: "crm-mono adm-id-caption" }, contact.id)),
-                  contact.account_id
-                    ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
-                    : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
-                ),
-                leadContactActions({ contact: contact.contact, contact_preference: contact.preferred_channel }, ui),
-                h(
-                  "dl",
-                  { className: "adm-contact-facts" },
-                  h("div", null, h("dt", null, label(copy, "leads", "Enquiries")), h("dd", null, contact.lead_count)),
-                  h("div", null, h("dt", null, label(copy, "duplicateEnquiries", "Linked repeats")), h("dd", null, contact.duplicate_leads)),
-                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.map((broker) => brokerProfileText(page, broker)).join(", ") || ui.notSet)),
-                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || ui.notSet)),
-                  h("div", null, h("dt", null, label(copy, "communicationEvents", "Communication events")), h("dd", null, contact.communication_event_count)),
-                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : ui.notSet)),
-                ),
-                h(
-                  "div",
-                  { className: "adm-contact-card__leads" },
-                  ...contact.lead_ids.map((leadId) => h("a", { key: leadId, href: adminHref(`/admin/leads?locale=${page.workspace.locale}#lead-${encodeURIComponent(leadId)}`, page) }, leadId)),
-                ),
-                h(AccountLinkForm, { page, contact, copy }),
-              );
+    "article",
+    {
+      key: contact.id,
+      className: "adm-contact-card",
+      "data-contact-record": contact.id,
+      "data-list-item": "contacts",
+      "data-filter-tags": contact.account_id ? "with_account" : "no_account",
+    },
+    h(
+      "header",
+      null,
+      h(
+        "div",
+        null,
+        h("h3", null, contactTitle(contact, ui, copy)),
+        h("p", { className: "adm-contact-card__meta" }, [
+          (contact.languages || []).join(", ").toUpperCase() || null,
+          contact.preferred_channel ? valueText(ui, contact.preferred_channel) : null,
+          (contact.lead_types || []).map((type) => statusText(ui, type)).join(", ") || null,
+        ].filter(Boolean).join(" · ")),
+      ),
+      contact.account_id
+        ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
+        : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
+    ),
+    contactChannelActions(contact, copy, ui),
+    h(
+      "dl",
+      { className: "adm-contact-facts" },
+      h(
+        "div",
+        { "data-contact-fact": "latest_message" },
+        h("dt", null, label(copy, "latestMessage", "Latest message")),
+        h(
+          "dd",
+          null,
+          contact.latest_message ? h("q", { className: "adm-contact-quote" }, contact.latest_message) : h("span", { className: "crm-tbl__muted" }, label(copy, "noMessageBody", "No message body was provided.")),
+          contact.latest_message_at || contact.latest_received_at
+            ? h("time", { dateTime: contact.latest_message_at || contact.latest_received_at }, formatAdminDateTime(contact.latest_message_at || contact.latest_received_at, locale))
+            : null,
+        ),
+      ),
+      h(
+        "div",
+        { "data-contact-fact": "properties" },
+        h("dt", null, label(copy, "propertiesOfInterest", "Properties of interest")),
+        h("dd", null, propertiesOfInterest(contact) || ui.notSet),
+      ),
+      h(
+        "div",
+        { "data-contact-fact": "next_follow_up" },
+        h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
+        h(
+          "dd",
+          null,
+          contact.next_follow_up_at ? h("time", { dateTime: contact.next_follow_up_at }, formatAdminDateTime(contact.next_follow_up_at, locale)) : ui.notSet,
+        ),
+      ),
+      h(
+        "div",
+        { "data-contact-fact": "owners" },
+        h("dt", null, label(copy, "owners", "Owners")),
+        h("dd", null, (contact.assigned_brokers || []).map((broker) => brokerProfileText(page, broker)).join(", ") || ui.notSet),
+      ),
+    ),
+    h(
+      "div",
+      { className: "adm-contact-card__leads" },
+      ...(contact.lead_ids || []).map((leadId, index) =>
+        h(
+          "a",
+          { key: leadId, href: adminHref(`/admin/leads?locale=${locale}#lead-${encodeURIComponent(leadId)}`, page), "data-contact-lead": leadId },
+          `${label(copy, "openEnquiry", "Open enquiry")}${contact.lead_ids.length > 1 ? ` ${index + 1}` : ""}`,
+        ),
+      ),
+    ),
+    h(AccountLinkForm, { page, contact, copy }),
+    h(
+      "details",
+      { className: "adm-contact-history", "data-contact-history": "true" },
+      h("summary", null, h(Icon, { name: "clock", size: 16 }), h("span", null, label(copy, "contactHistory", "History"))),
+      h(
+        "p",
+        { className: "crm-tbl__muted" },
+        [
+          `${contact.lead_count} ${label(copy, "leads", "Enquiries")}`,
+          `${contact.communication_event_count} ${label(copy, "communicationEvents", "Communication events")}`,
+          contact.latest_received_at ? `${label(copy, "latestEnquiry", "Latest enquiry")}: ${formatAdminDateTime(contact.latest_received_at, locale)}` : null,
+        ].filter(Boolean).join(" · "),
+      ),
+      h("code", { className: "crm-mono adm-id-caption" }, contact.id),
+    ),
+  );
   return adminShell(page, {
     title,
     mainAttrs: { "data-kind": "admin-contacts", "data-react-admin-ui": "contacts", "data-contact-count": page.summary.contacts, "data-account-count": page.summary.accounts, "data-task-led": "true" },
@@ -7058,13 +7198,14 @@ function ContactsBody({ page }) {
         filters: filterOptions.filter(option => option.value !== "all"),
         empty: h(EmptyState, { icon: "users", "data-empty-contacts": "true" }, ui.noContacts),
         renderRow: contact => h("div", { className: "adm-contact-directory-row" },
-          h("strong", null, contactTitle(contact, ui)),
-          h("span", null, contact.id),
-          h("span", null, contact.account_label || ui.withoutAccount),
-          h("small", null, `${contact.lead_count} ${label(copy, "leads", "Enquiries")} · ${contact.languages.join(", ").toUpperCase() || ui.notSet}`)),
+          h("strong", null, contactTitle(contact, ui, copy)),
+          h("span", null, [contact.account_label || ui.withoutAccount, propertiesOfInterest(contact) || null].filter(Boolean).join(" · ")),
+          h("small", null, [
+            `${contact.lead_count} ${label(copy, "leads", "Enquiries")}`,
+            contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, locale) : null,
+          ].filter(Boolean).join(" · "))),
         renderDetail: renderContact,
       }),
-      h(SummaryStrip, { cards: metrics.map(([title, value], index) => ({ id: `contacts-${index}`, title, value })), "data-summary-kind": "contacts" }),
       h("details", { className: "adm-contact-accounts", "data-contact-accounts": "true" },
         h("summary", null, h(Icon, { name: "building-2", size: 18 }), label(copy, "accounts", "Accounts"), ` · ${page.accounts.length}`, h(Icon, { name: "chevron-down", size: 16 })),
         page.accounts.length ? h(
@@ -7074,7 +7215,7 @@ function ContactsBody({ page }) {
                   h(
                     "li",
                     { key: account.id, "data-account-record": account.id },
-                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono" }, account.id)),
+                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono adm-id-caption" }, account.id)),
                     h(StatusPill, { tone: account.type === "company" ? "sea" : "sand" }, label(copy, account.type, account.type)),
                     h("span", null, `${account.contact_count} ${label(copy, "contactRecords", "contacts")}`),
                   ),
@@ -7847,7 +7988,12 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-viewing-column": "viewing", "data-label": columns.viewing },
-                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.viewing_id), h("small", { className: "adm-lead-context" }, row.listing_reference || row.lead_id)),
+                    h(
+                      "div",
+                      { className: "adm-lead-identity", "data-viewing-follow-up-viewing": row.viewing_id },
+                      h("strong", null, viewingPlaceText(page, row, copy)),
+                      h("small", { className: "adm-lead-context" }, [viewingClientText(page, row, copy, ui), row.starts_at ? formatAdminDateTime(row.starts_at, page.workspace?.locale) : null].filter(Boolean).join(" · ")),
+                    ),
                   ),
                   h("td", { "data-viewing-column": "task", "data-label": columns.task }, row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
                   h(
@@ -7868,7 +8014,7 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                       ? h(
                       "details",
                       { className: "adm-reply", "data-viewing-follow-up-actions": "true" },
-                      h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record"))),
+                      h("summary", { className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record outcome"))),
                       h(
                         "form",
                         {

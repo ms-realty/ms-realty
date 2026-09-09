@@ -178,3 +178,63 @@ test("retained words are passive through edits, pagination and disabled interpre
   assert.equal(lexicalEdit.query, "courtyard");
   assert.equal(lexicalEdit.natural_language.original_query, "a quiet garden");
 });
+
+test("a typed listing reference becomes an exact reference in every id shape", () => {
+  for (const [typed, expected] of [
+    ["MS-CRAWL-0013", "MS-CRAWL-0013"],
+    ["  ms-crawl-0013 ", "MS-CRAWL-0013"],
+    ["MS-3000", "MS-3000"],
+    ["ms-00815", "MS-00815"],
+    ["ms-00567-1", "MS-00567-1"],
+  ]) {
+    const { intent } = normalizeSearchRequest({ locale: "en", q: typed });
+    assert.equal(intent.exact_reference, expected, typed);
+    assert.deepEqual(intent.property_families, []);
+  }
+  // Words around a reference keep it lexical; only a bare reference is exact.
+  assert.equal(normalizeSearchRequest({ locale: "en", q: "MS-CRAWL-0013 garden" }).intent.exact_reference, null);
+  // An explicit reference is never overwritten by the text.
+  const explicit = normalizeSearchRequest({ locale: "en", q: "MS-3000", exact_reference: "MS-00815" }).intent;
+  assert.equal(explicit.exact_reference, "MS-00815");
+});
+
+test("property and offer words in any public locale become filters and leave the text", () => {
+  for (const [locale, typed] of [["en", "apartment"], ["de", "Wohnung"], ["ru", "квартира"], ["bg", "апартамент"], ["nl", "appartement"], ["el", "Διαμέρισμα"], ["he", "דירה"]]) {
+    const { intent, filters } = normalizeSearchRequest({ locale, q: typed });
+    assert.deepEqual(intent.property_families, ["apartment"], typed);
+    assert.equal(filters.property_family, "apartment");
+    assert.equal(intent.text_query, "");
+  }
+  for (const typed of ["rent", "под наем", "zur Miete", "te huur", "аренда", "להשכרה"]) {
+    const { intent } = normalizeSearchRequest({ locale: "en", q: typed });
+    assert.equal(intent.offer_type, "rent", typed);
+    assert.equal(intent.text_query, "");
+  }
+  const mixed = normalizeSearchRequest({ locale: "en", q: "apartment for rent in Sandanski" }).intent;
+  assert.deepEqual(mixed.property_families, ["apartment"]);
+  assert.equal(mixed.offer_type, "rent");
+  assert.equal(mixed.text_query, "in Sandanski");
+  // Longer phrases win over their tail word.
+  assert.deepEqual(normalizeSearchRequest({ locale: "en", q: "agricultural land" }).intent.property_families, ["agricultural_land"]);
+});
+
+test("a plain location word stays a text query and explicit filters are not overridden by words", () => {
+  const plain = normalizeSearchRequest({ locale: "en", q: "Sandanski" }).intent;
+  assert.equal(plain.text_query, "Sandanski");
+  assert.deepEqual(plain.property_families, []);
+  assert.equal(plain.offer_type, null);
+  assert.equal(plain.exact_reference, null);
+  // The form's family wins; a contradicting word remains a literal search term.
+  const contradicting = normalizeSearchRequest({ locale: "en", q: "apartment", property_family: "house" }).intent;
+  assert.deepEqual(contradicting.property_families, ["house"]);
+  assert.equal(contradicting.text_query, "apartment");
+  // A word naming the family already selected is simply redundant.
+  assert.equal(normalizeSearchRequest({ locale: "en", q: "house in Petrich", property_family: "house" }).intent.text_query, "in Petrich");
+  // A family the active filters cannot apply to is not adopted from the text.
+  const scoped = normalizeSearchRequest({ locale: "en", q: "plot Petrich", bedrooms_min: 2 }).intent;
+  assert.deepEqual(scoped.property_families, []);
+  assert.equal(scoped.text_query, "plot Petrich");
+  // Normalisation is stable when an intent is normalised again.
+  const once = normalizeSearchRequest({ locale: "en", q: "Wohnung Sandanski" }).intent;
+  assert.deepEqual(normalizeSearchRequest({ search_intent: once }).intent, once);
+});
