@@ -143,13 +143,22 @@ test("an empty translation queue says nothing is waiting rather than showing a b
 test("the listing editor names the listing, hides the operator field and carries every save state", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
   assert.equal(page.status, 200);
-  // The topbar names the screen; the heading names the listing.
-  assert.match(page.body, /<h1>Автор|<h1>[^<]{10,}<\/h1>/);
-  assert.match(page.body, /<p>Property editor · makler-realty\.com · bg · MS-00815<\/p>/);
+  // The topbar names the screen; the heading names the listing the short way
+  // (reference, type, place), the crawled title is the second line and the
+  // source facts a caption.
+  assert.match(page.body, /<h1>MS-00815 · [^<]+ · Sandanski<\/h1>/);
+  assert.match(page.body, /<h1>MS-00815 · [^<]+<\/h1><p>Автор[^<]+<\/p>/);
+  assert.match(page.body, /<small class="crm-ph__meta">Property editor · makler-realty\.com · BG<\/small>/);
+  // What blocks publishing is one plain line per blocker, not a card strip
+  // and not "Schema Missing".
   assert.match(page.body, /data-summary-kind="listing-editor"/);
-  for (const card of ["cms-status", "publish-approval", "translations", "media"]) {
-    assert.match(page.body, new RegExp(`data-summary-card="${card}"`), `${card} summary`);
-  }
+  assert.match(page.body, /<section class="adm-editor-status"[^>]*data-editor-status="[1-9]\d*"/);
+  assert.match(page.body, /<li data-editor-blocker="missing_area">Area in m² missing<\/li>/);
+  assert.match(page.body, /<li data-editor-blocker="availability_unverified">Availability not verified<\/li>/);
+  assert.doesNotMatch(page.body, /data-summary-card="cms-status"/);
+  const quality = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=quality", headers: auth });
+  assert.match(quality.body, /<dt>Search engine markup<\/dt>/);
+  assert.doesNotMatch(quality.body, /<dt>Schema<\/dt>/);
   // The server attributes the edit, so the editor id travels as a hidden field.
   assert.match(page.body, /<input type="hidden" name="editor" value="[^"]*" data-editor-name="true">/);
   assert.match(page.body, /Editing as /);
@@ -169,7 +178,8 @@ test("the listing editor names the listing, hides the operator field and carries
 });
 
 test("shared admin status tokens keep dark surfaces legible and owner identity nameable", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  // The brick pills are the quality issues, which live on the Quality tab.
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=quality", headers: auth });
   const ownerIdentity = page.body.match(/<a class="adm-owner-identity"[\s\S]*?<\/a>/)?.[0];
   assert.ok(ownerIdentity, "the owner identity is rendered as a link");
   assert.doesNotMatch(ownerIdentity, /aria-label=/, "visible owner identity text supplies the accessible name");
@@ -199,13 +209,13 @@ test("shared admin status tokens keep dark surfaces legible and owner identity n
 });
 
 test("the editor lists one state per locale, and a stale task wins over the published state", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=translations", headers: auth });
   const locales = [...page.body.matchAll(/data-translation-locale="([a-z]{2})"/g)].map(([, code]) => code);
   assert.deepEqual(locales, [...new Set(locales)], "no locale is listed twice");
 });
 
 test("media assets preview and fail out loud", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media", headers: auth });
   assert.match(page.body, /data-media-preview-state="loading"/);
   assert.match(page.body, /data-media-preview-frame="true"/);
   assert.match(page.body, /class="adm-media-asset__preview-loading"/);
@@ -232,6 +242,7 @@ test("media cards name the asset for a person, give the replace panel room, and 
   const listing = seed.records.find((record) => record.collection === "listings" && (record.media || []).length > 0);
   assert.ok(listing, "the CMS seed has a listing with media");
   const page = renderAdminListingEditorPayload(registry, "en", seed, listing.id, [], [], [], "payload-3f0a1c2d");
+  page.editorTab = "media";
   const html = renderReactAdminBody(page);
   // (a) The heading counts the asset the way a person does; the generated id
   // is a caption, never the headline (PRODUCT.md forbids raw keys as UI text).
@@ -261,7 +272,7 @@ test("media cards name the asset for a person, give the replace panel room, and 
 });
 
 test("a listing without an approved tour says so before the publishing form", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media", headers: auth });
   assert.match(page.body, /class="adm-tour-state" data-tour-empty="(true|configured)"/);
   assert.match(page.body, /No approved 360 tour/);
   assert.match(page.body, /data-tour-editor-form="true"/);

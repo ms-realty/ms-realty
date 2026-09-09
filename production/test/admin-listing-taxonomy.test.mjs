@@ -22,8 +22,10 @@ const generatedCss = fs.readFileSync(path.join(ROOT, "public/vendor/ms-realty-ad
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
 
-function editorHtml(listingId, locale = "en") {
-  return renderReactAdminBody(renderAdminListingEditorPayload(registry, locale, seed, listingId, [], []));
+// The editor renders one section per request, so a contract about a section
+// asks for its tab; the default (Facts) carries the form only.
+function editorHtml(listingId, locale = "en", tab = "") {
+  return renderReactAdminBody(renderAdminListingEditorPayload(registry, locale, seed, listingId, [], [], [], null, { tab }));
 }
 
 function emptyLeads() {
@@ -39,19 +41,51 @@ function emptyLeads() {
   };
 }
 
-test("admin listing editor quality rail uses a compact status list", () => {
-  const html = editorHtml("MS-00815", "bg");
+test("admin listing editor quality tab uses a compact status list", () => {
+  const html = editorHtml("MS-00815", "bg", "quality");
   assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
   assert.match(html, /class="crm-panel"/);
-  assert.match(html, /Публикувано/);
   assert.match(html, /data-quality-panel="true"/);
-  assert.match(html, /data-translation-panel="true"/);
-  assert.match(html, /data-media-review-panel="true"/);
+  assert.match(editorHtml("MS-00815", "bg", "translations"), /data-translation-panel="true"/);
+  assert.match(editorHtml("MS-00815", "bg", "media"), /data-media-review-panel="true"/);
   // Owner-directed publication does not clear the review work: the rail still
   // names the outstanding fact gap and the unverified availability check.
   assert.match(html, /data-listing-quality-issues="[1-9]/);
   assert.match(html, /data-quality-issue="missing_area"/);
   assert.match(html, /Не е проверена/);
+});
+
+test("listing editor tabs are real: the requested section renders and the others do not", () => {
+  const media = editorHtml("MS-00815", "en", "media");
+  assert.match(media, /data-media-review-panel="true"/);
+  assert.doesNotMatch(media, /data-editor-form="listing"/);
+  assert.match(media, /data-editor-tab="media"[^>]*aria-current="page"/);
+  const facts = editorHtml("MS-00815", "en", "facts");
+  assert.doesNotMatch(facts, /data-media-review-panel="true"/);
+  assert.doesNotMatch(facts, /data-translation-panel="true"/);
+  assert.doesNotMatch(facts, /data-seo-panel="true"/);
+  assert.match(facts, /data-editor-form="listing"/);
+  assert.match(facts, /data-editor-shell="true" data-editor-tab="facts"/);
+  assert.match(facts, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media"/);
+  // An unknown or missing tab is Facts, and SEO keeps the same save form.
+  assert.match(editorHtml("MS-00815", "en", "nonsense"), /data-editor-tab="facts"[^>]*aria-current="page"/);
+  const seo = editorHtml("MS-00815", "en", "seo");
+  assert.match(seo, /data-seo-panel="true"/);
+  assert.match(seo, /data-editor-form="listing"/);
+  assert.doesNotMatch(seo, /data-editor-section="content"/);
+});
+
+test("listing cards never lead with the reference", () => {
+  const html = renderReactAdminBody(renderAdminListingManagerPayload(registry, "en", { seed }));
+  const rows = html.match(/<tbody>[\s\S]*<\/tbody>/)?.[0] || "";
+  assert.ok(rows.length > 0);
+  assert.equal([...rows.matchAll(/<(?:strong|h3)[^>]*>\s*MS-/g)].length, 0);
+  assert.match(rows, /<code class="crm-mono adm-id-caption">MS-\d{5}<\/code>/);
+  assert.match(rows, /class="adm-listing-thumb/);
+  assert.match(rows, /data-listing-gaps="\d+">[^<]*(?:missing|No public photos|Nothing missing)/);
+  assert.doesNotMatch(rows, /\d+ issues?<\//);
+  assert.match(html, /Not yet checked/);
+  assert.doesNotMatch(html, /Unverified/);
 });
 
 test("admin listing editor savebar uses workspace copy instead of filter leftovers", () => {
@@ -60,7 +94,7 @@ test("admin listing editor savebar uses workspace copy instead of filter leftove
   assert.match(html, /Отмени промените/);
   assert.doesNotMatch(html, /Изчисти филтрите/);
   assert.doesNotMatch(html, /All changes saved\./);
-  assert.match(html, /data-editor-readiness-rail="true"/);
+  assert.match(html, /data-editor-shell="true" data-editor-tab="facts"/);
   assert.match(html, /class="adm-editor-tab__label">SEO<\/span>/);
   assert.doesNotMatch(html, /<legend>Редактор<\/legend>/);
 });
@@ -185,7 +219,7 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
 });
 
 test("listing editor keeps support panels in the main flow instead of a narrow readiness rail", () => {
-  const html = editorHtml("MS-00815", "en");
+  const html = editorHtml("MS-00815", "en", "media");
   assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
   assert.match(generatedCss, /main\[data-react-admin-ui="listing-editor"\]\s+\.adm-editor-support\{[^}]*grid-template-columns:minmax\(0,1fr\)/);
 });

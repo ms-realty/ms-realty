@@ -113,6 +113,7 @@ import {
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
+  editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
@@ -2214,6 +2215,7 @@ async function listingEditorPayload(registry, url, config) {
     config.runtimeDataDurableOnly ? [] : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     config.runtimeDataDurableOnly ? [] : readTourApprovals(config.tourApprovalLedgerPath),
     config.adminPrincipal || null,
+    { tab: editorTabFromUrl(url) },
   );
   return config.runtimeDataDurableOnly
     ? {

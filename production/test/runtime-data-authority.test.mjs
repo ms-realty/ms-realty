@@ -534,7 +534,7 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(listingBody.listings.every((row) => row.translation_review_required === null), true);
 
   const editor = await renderAppAdminResponse(
-    new Request("https://live.test/admin/listings/edit?listingId=MS-00815&locale=en"),
+    new Request("https://live.test/admin/listings/edit?listingId=MS-00815&locale=en&tab=media"),
     { config },
   );
   const editorHtml = await editor.text();
@@ -650,7 +650,7 @@ test("durable admin reads use Payload while every remaining file mutation fails 
   assert.equal(standaloneListings.body.publicationSchedules, null);
 
   const standaloneEditor = await dispatchHttp(standalone, {
-    url: "/admin/listings/edit?listingId=MS-00815&locale=en",
+    url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   assert.equal(standaloneEditor.status, 200);

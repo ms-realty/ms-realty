@@ -162,7 +162,7 @@ test("an admin upload is stored unreviewed, audited, absent from the public payl
   assert.equal(JSON.stringify(pending.body).includes(asset.asset_id), false);
 
   // The reviewer sees it in the media manager.
-  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}`, headers: ADMIN });
+  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}&tab=media`, headers: ADMIN });
   assert.equal(editor.status, 200);
   assert.ok(editor.body.includes(`data-media-asset="${asset.asset_id}"`));
   assert.ok(editor.body.includes('data-media-upload-form="true"'));
@@ -257,7 +257,7 @@ test("an approved reupload replaces one public asset without a publication gap",
   assert.ok(publishedUrls.includes(replacement.asset_url));
   assert.ok(!publishedUrls.includes(replaced.asset_url));
 
-  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}`, headers: ADMIN });
+  const editor = await dispatchHttp(context.app, { url: `/admin/listings/edit?listingId=${LISTING_ID}&tab=media`, headers: ADMIN });
   assert.match(editor.body, new RegExp(`data-media-replacement="${replacement.asset_id}"`));
   assert.match(editor.body, /name="replacesAssetId"/);
 });

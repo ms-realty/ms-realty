@@ -117,6 +117,7 @@ import {
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
+  editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
@@ -2121,6 +2122,7 @@ export function createHttpApp({
       runtimeDataDurableOnly ? [] : latestTranslationTasks(currentTranslationTasks()),
       runtimeDataDurableOnly ? [] : currentTourApprovals(),
       operatorId,
+      { tab: editorTabFromUrl(url) },
     );
     return runtimeDataDurableOnly
       ? {
