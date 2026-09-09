@@ -7,10 +7,11 @@ import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { ADMIN_PAGE_SURFACES } from "../lib/owner-operator-catalog.mjs";
 
-// An operator should never have to go back to a hub to reach a destination.
-// The rail carries every route the signed-in role may see, on every screen, at
-// one depth -- so this renders each admin surface and checks the rail rather
-// than trusting that one screen's markup stands for the rest.
+// The rail is the same on every screen: eight primary destinations at one
+// depth, then one "Advanced" disclosure holding the owner's setup and operating
+// screens. Pipeline and Requests are not in the rail; the Leads screen links to
+// them. This renders each admin surface and checks the rail rather than
+// trusting that one screen's markup stands for the rest.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const AUTH = { authorization: "Bearer local-admin-smoke" };
@@ -42,8 +43,12 @@ const railOf = (body) => {
   return from === -1 || to === -1 ? "" : body.slice(from, to);
 };
 const routesIn = (rail) => [...rail.matchAll(/data-admin-nav-route="([^"]+)"/g)].map((m) => m[1]);
+const primaryIn = (rail) => [...rail.matchAll(/data-admin-nav-route="([^"]+)" data-admin-nav-primary="true"/g)].map((m) => m[1]);
 
-test("every admin surface renders the whole rail, at one depth", async () => {
+const PRIMARY_RAIL = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
+const LINKED_FROM_LEADS = ["lead_pipeline", "requests"];
+
+test("every admin surface renders the same rail: eight primary destinations, then Advanced", async () => {
   const server = app();
   const surfaces = ADMIN_PAGE_SURFACES.filter((s) => !NEEDS_PAYLOAD_RUNTIME.has(s.path));
   let reference = null;
@@ -65,16 +70,40 @@ test("every admin surface renders the whole rail, at one depth", async () => {
     const routes = routesIn(rail);
     if (reference === null) reference = routes;
     assert.deepEqual(routes, reference, `${surface.path} offers the same destinations, in the same order`);
-    assert.equal((rail.match(/<details/g) || []).length, 0, `${surface.path} hides nothing behind a disclosure`);
+    assert.deepEqual(primaryIn(rail), PRIMARY_RAIL, `${surface.path} leads with the eight primary destinations`);
+    // One disclosure, the owner's Advanced group; nothing a broker works from
+    // sits inside it.
+    assert.equal((rail.match(/<details/g) || []).length, 1, `${surface.path} carries exactly one disclosure`);
+    assert.match(rail, /<details class="crm-sb__group-wrap crm-sb__advanced" data-admin-nav-group="advanced" data-admin-nav-disclosure="true"/);
     reached.push(surface.path);
   }
 
   assert.ok(reached.length >= 15, `at least fifteen surfaces were checked, got ${reached.length}`);
-  assert.ok(reference.length >= 19, `the rail carries every destination, got ${reference.length}`);
-  // The ten that used to sit behind "More in ..." are among them.
-  for (const id of ["lead_pipeline", "viewings", "contacts", "requests", "reports",
-                    "consents", "documents", "realty_cases", "team", "activity"]) {
-    assert.ok(reference.includes(id), `${id} is a first-level destination`);
+  // The administrator reaches every catalogued route from the rail, except the
+  // two the Leads screen links to.
+  const catalogued = ADMIN_PAGE_SURFACES.map((s) => s.id).filter((id) => !LINKED_FROM_LEADS.includes(id));
+  assert.deepEqual([...reference].sort(), [...catalogued].sort(), "primary plus Advanced covers the catalogue");
+
+  const leads = await dispatchHttp(server, { url: "/admin/leads?locale=en", headers: AUTH });
+  assert.equal(leads.status, 200);
+  assert.match(leads.body, /href="\/admin\/pipeline" data-lead-screen-link="pipeline"/);
+  assert.match(leads.body, /href="\/admin\/requests" data-lead-screen-link="requests"/);
+});
+
+test("the Advanced disclosure opens on the screen that lives inside it and stays closed elsewhere", async () => {
+  const server = app();
+  const today = await dispatchHttp(server, { url: "/admin/today?locale=en", headers: AUTH });
+  assert.doesNotMatch(railOf(today.body), /<details[^>]* open/);
+  const hermes = await dispatchHttp(server, { url: "/admin/hermes?locale=en", headers: AUTH });
+  assert.match(railOf(hermes.body), /<details class="crm-sb__group-wrap crm-sb__advanced"[^>]* open/);
+});
+
+test("the Leads destination stays lit on Pipeline and Requests", async () => {
+  const server = app();
+  for (const path of ["/admin/pipeline", "/admin/requests"]) {
+    const res = await dispatchHttp(server, { url: `${path}?locale=en`, headers: AUTH });
+    assert.equal(res.status, 200, path);
+    assert.match(railOf(res.body), /class="crm-nav crm-nav--on" href="\/admin\/leads" aria-current="page" data-admin-nav-route="lead_inbox"/, path);
   }
 });
 

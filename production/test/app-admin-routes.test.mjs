@@ -388,7 +388,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(todayHtml, /data-kind="admin-today"/);
       assert.match(todayHtml, /data-react-admin-ui="today"/);
       assert.match(todayHtml, /data-today-briefing="true"/);
-      assert.match(todayHtml, /data-hermes-entry="today"/);
+      assert.doesNotMatch(todayHtml, /data-hermes-entry="today"/);
       assert.match(todayHtml, /data-next-actions="true"/);
       assert.match(todayHtml, /data-next-action="lead"/);
       assert.match(todayHtml, /data-today-select=/);

@@ -208,9 +208,9 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
   assert.match(html, /adm-lead-more/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.match(html, /class="adm-lead-detail"/);
-  // The inbox metrics are the Atlas summary strip now, not the compact <dl> KPI grid.
-  assert.match(html, /class="adm-summary-strip"/);
-  assert.match(html, /data-summary-card=/);
+  // No KPI strip above the inbox: the filter pills already carry the counts.
+  assert.doesNotMatch(html, /class="adm-summary-strip"/);
+  assert.doesNotMatch(html, /data-summary-card=/);
   assert.doesNotMatch(html, /class="adm-kpis"/);
   assert.match(html, /data-lead-filter=/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
@@ -271,7 +271,9 @@ test("admin pipeline cards keep qualification collapsed and facts unboxed", () =
   assert.match(card, /adm-id-caption/);
   assert.match(card, /class="adm-pipeline-action"/);
   assert.doesNotMatch(card, /class="adm-pipeline-action"[^>]*\sopen/);
-  assert.match(html, /class="adm-kpis"/);
+  // One overflow menu per card, and no KPI strip duplicating the pills.
+  assert.equal((card.match(/data-pipeline-overflow="true"/g) || []).length, 1);
+  assert.doesNotMatch(html, /class="adm-kpis"/);
 });
 
 test("admin lead intake uses canonical family checkboxes instead of English CSV hints", () => {

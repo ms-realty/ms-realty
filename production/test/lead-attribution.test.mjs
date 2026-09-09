@@ -220,7 +220,8 @@ test("the admin lead payload carries Hermes availability, and the button renders
   // The composer already knows on first paint, before any draft request.
   assert.match(unavailable, /data-hermes-state="unavailable"/);
   assert.match(unavailable, /data-hermes-reason="not_configured"/);
-  assert.match(unavailable, /Hermes is not configured in this environment\. Missing: HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY\./);
+  assert.match(unavailable, /Hermes is not configured in this environment\.</);
+  assert.doesNotMatch(unavailable, /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/);
 
   const ready = renderReactAdminBody({ ...payload.body, hermes: { available: true, reason_key: "available", reason: "ok", missing: [] } });
   assert.doesNotMatch(ready, /data-hermes-state="unavailable"/);
