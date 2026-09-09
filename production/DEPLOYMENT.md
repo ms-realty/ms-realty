@@ -175,6 +175,20 @@ Examples and smoke fixtures document schemas; they never clear a runtime gate.
 Private reports stay ignored and are mounted only where the launch materializer
 can validate them.
 
+## Listing identity changes and rollback
+
+The production overwrite-import path reconciles listing IDs by their unique
+source URL before activating the new app. Related property and generated
+fact-review task IDs, foreign keys, version parents, and current lead/viewing
+references follow in one transaction. Content, approvals and historical audit
+or funnel events are not rewritten by this identity step. Occupied or ambiguous
+targets abort the transaction.
+
+Both deployment rollback paths run the same reconciler against the previous
+release's CMS seed before starting older code. This preserves current rows and
+operator changes rather than restoring an old database snapshot. Do not bypass
+the coordinated rollback when crossing a listing-identity release boundary.
+
 ## Email
 
 Website mail uses Cloudflare Email Workers from
