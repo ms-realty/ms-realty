@@ -160,15 +160,23 @@ export function assertLocaleRegistry(registry) {
   return true;
 }
 
+export function localeDefaults(code) {
+  return {
+    native_name: new Intl.DisplayNames([code], { type: "language" }).of(code),
+    direction: new Intl.Locale(code).textInfo.direction,
+  };
+}
+
 export function addLocaleToRegistry(registry, input) {
   const code = String(input.code || "").trim();
   if (!BCP47.test(code)) throw new Error("Locale code must be BCP 47, for example es or fr-CA");
   if (localesByCode(registry).has(code)) throw new Error(`Locale already exists: ${code}`);
+  const defaults = localeDefaults(code);
   const locale = {
     code,
-    native_name: input.native_name || code,
-    admin_name: input.admin_name || input.native_name || code,
-    direction: input.direction || "ltr",
+    native_name: input.native_name || defaults.native_name,
+    admin_name: input.admin_name || input.native_name || defaults.native_name,
+    direction: input.direction || defaults.direction,
     public_enabled: input.public_enabled === true,
     indexable: input.public_enabled === true && input.indexable === true,
     fallback_locale: input.fallback_locale || "en",

@@ -32,6 +32,12 @@ const TEAM_COPY = {
     saveFailed: "Промяната не беше запазена.",
     edit: "Редактирай",
     roleNames: { admin: "Администратор", broker: "Брокер", editor: "Редактор", translator: "Преводач" },
+    firstSignInPassword: "Парола за първо влизане",
+    workspaceChoose: "Отбележи работните пространства, които човекът може да отваря. Без отметка администраторът има достъп навсякъде.",
+    forbiddenTitle: "Нужен е достъп на собственик",
+    forbiddenBody: "Екранът „Екип“ се отваря само за собственик, влязъл през указателя на акаунтите. Помоли собственика да ти даде достъп или влез с акаунта на собственика.",
+    forbiddenSettings: "Към настройките",
+    forbiddenToday: "Към „Днес“",
   },
   ru: {
     documentTitle: "Команда · MS Realty",
@@ -63,6 +69,12 @@ const TEAM_COPY = {
     saveFailed: "Изменение не сохранено.",
     edit: "Редактировать",
     roleNames: { admin: "Администратор", broker: "Брокер", editor: "Редактор", translator: "Переводчик" },
+    firstSignInPassword: "Пароль для первого входа",
+    workspaceChoose: "Отметьте рабочие пространства, которые человек может открывать. Без отметок администратор получает доступ ко всем.",
+    forbiddenTitle: "Нужен доступ владельца",
+    forbiddenBody: "Экран «Команда» открывается только владельцу, вошедшему через каталог учётных записей. Попросите владельца выдать доступ или войдите под учётной записью владельца.",
+    forbiddenSettings: "К настройкам",
+    forbiddenToday: "К экрану «Сегодня»",
   },
   en: {
     documentTitle: "Team · MS Realty",
@@ -94,8 +106,36 @@ const TEAM_COPY = {
     saveFailed: "The change was not saved.",
     edit: "Edit",
     roleNames: { admin: "Administrator", broker: "Broker", editor: "Editor", translator: "Translator" },
+    firstSignInPassword: "First sign-in password",
+    workspaceChoose: "Tick the workspaces this person may open. No ticks means administrator-wide access for an administrator.",
+    forbiddenTitle: "You need owner access",
+    forbiddenBody: "The team screen opens only for an owner signed in through the account directory. Ask the owner to grant access, or sign in with the owner account.",
+    forbiddenSettings: "Back to settings",
+    forbiddenToday: "Back to Today",
   },
 };
+
+// The team screen without an owner session. A browser asked for a page, so
+// it gets one in the shell that says what is missing; the JSON refusal stays
+// for the API route.
+export function renderAdminTeamForbiddenPayload({ registry, requestedLocale = "en" } = {}) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const copy = TEAM_COPY[workspace.locale] || TEAM_COPY.en;
+  return {
+    kind: "admin_team_forbidden",
+    status: 403,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/team",
+    canonical: "/admin/team",
+    indexable: false,
+    metadata: { title: copy.documentTitle, description: copy.forbiddenTitle, robots: "noindex,nofollow" },
+    workspace,
+    operators: [],
+    team: { copy, roles: PAYLOAD_ADMIN_ROLES, notice: null },
+  };
+}
 
 export function renderAdminTeamPayload({
   registry,

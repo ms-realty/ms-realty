@@ -58,7 +58,7 @@ import {
   renderAdminLoginPage,
   renderAdminPasswordChangePage,
 } from "./admin-login.mjs";
-import { renderAdminTeamPayload } from "./admin-team.mjs";
+import { renderAdminTeamForbiddenPayload, renderAdminTeamPayload } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import {
@@ -585,6 +585,8 @@ const LEAD_BACKED_ADMIN_READ_PATHS = new Set([
   "/admin/contacts",
   "/api/admin/documents",
   "/admin/documents",
+  "/api/admin/cases",
+  "/admin/cases",
   "/api/admin/reports",
   "/admin/reports",
   "/api/admin/reports/export",
@@ -1913,6 +1915,7 @@ export function createHttpApp({
         locale: requestedLocale,
       }),
       operatorId,
+      leads,
     );
   const realtyCasePayloadAuthorityActive = () =>
     assertRealtyCasePayloadAuthorityConfig({
@@ -1930,7 +1933,7 @@ export function createHttpApp({
     realtyCasePayloadAuthorityActive()
       ? readRealtyCaseConditionEventsFromPayload({ payload: realtyCasePayload, workspaceId: realtyCaseWorkspaceId })
       : readRealtyCaseConditionEvents(realtyCaseConditionLedgerPath || undefined);
-  const currentRealtyCasePayload = async (requestedLocale, operatorId = null) => {
+  const currentRealtyCasePayload = async (requestedLocale, operatorId = null, leads = currentLeads()) => {
     const payload = renderAdminRealtyCasesPayload(
       activeRegistry,
       requestedLocale,
@@ -1939,7 +1942,7 @@ export function createHttpApp({
       }),
       operatorId,
     );
-    return runtimeDataDurableOnly ? { ...payload, runtime_data_mode: "durable_only" } : payload;
+    return { ...payload, leads, ...(runtimeDataDurableOnly ? { runtime_data_mode: "durable_only" } : {}) };
   };
   const currentAutonomousRealtyCaseIntents = async () =>
     buildAutonomousRealtyCaseIntents(await currentRealtyCaseEvents(), {
@@ -2975,7 +2978,10 @@ export function createHttpApp({
       return adminForbidden("workspace:access");
     }
     let requestLeadRows;
-    if (request.method === "GET" && LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname)) {
+    const caseReadWithoutEnquiryAccess = ["/admin/cases", "/api/admin/cases"].includes(url.pathname)
+      && !canAdminAccess(principal, "operations:read");
+    if (caseReadWithoutEnquiryAccess) requestLeadRows = [];
+    if (request.method === "GET" && LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname) && !caseReadWithoutEnquiryAccess) {
       if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) {
         return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
       }
@@ -4226,8 +4232,17 @@ export function createHttpApp({
       // Team management needs the Payload runtime. When it cannot start (no
       // database locally, or an outage), answer like a missing session instead
       // of surfacing a 500 from the runtime bootstrap.
-      const service = await configuredPayloadAdminAuth().catch(() => null);
-      if (!payloadSession || !service) return adminForbidden("payload_session");
+      const service = payloadSession ? await configuredPayloadAdminAuth().catch(() => null) : null;
+      if (!payloadSession || !service) {
+        if (url.pathname === "/admin/team" && request.method === "GET") {
+          return adminResponse(
+            403,
+            adminHtml(renderAdminTeamForbiddenPayload({ registry: activeRegistry, requestedLocale: adminLocaleParam(url) })),
+            "text/html; charset=utf-8",
+          );
+        }
+        return adminForbidden("payload_session");
+      }
       if (request.method === "GET") {
         const operators = await service.listOperators(payloadSession);
         const payload = renderAdminTeamPayload({
@@ -5519,7 +5534,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       let payload;
       try {
-        payload = await currentRealtyCasePayload(adminLocaleParam(url), principal);
+        payload = await currentRealtyCasePayload(adminLocaleParam(url), principal, requestLeadRows);
       } catch (error) {
         if (realtyCasePayloadAuthorityEnabled) return adminJson(503, realtyCasePayloadAuthorityFailure());
         throw error;
@@ -6437,7 +6452,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = parseJsonBody(request);
+        const input = parseBody(request);
         const result = addLocaleToRegistry(activeRegistry, input);
         activeRegistry = result.registry;
         if (localeRegistryPath) writeLocaleRegistry(activeRegistry, localeRegistryPath);

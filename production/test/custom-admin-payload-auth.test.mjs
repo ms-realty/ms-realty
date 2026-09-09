@@ -694,8 +694,12 @@ test("team registration is admin-only and executes through Payload access", asyn
   assert.match(html, /class="crm-app"/);
   assert.match(html, /data-react-admin-ui="team"/);
   assert.match(html, /data-current-operator="true"/);
-  assert.match(html, /Ivan Peychev · Administrator · All workspaces · You/);
-  assert.match(html, /Second Owner · Administrator · All workspaces/);
+  assert.match(html, /data-team-role="admin" data-current-operator="true">[\s\S]*?<strong>Ivan Peychev<\/strong>/);
+  assert.match(html, /<strong>Second Owner<\/strong>/);
+  const peopleMeta = (html.match(/<div class="adm-team-person__meta">[\s\S]*?<\/div>/g) || []).join("");
+  assert.equal((peopleMeta.match(/>Administrator<\/span>/g) || []).length, 2, "both people carry the role chip");
+  assert.equal((peopleMeta.match(/All workspaces/g) || []).length, 2, "both people show their scope");
+  assert.match(html, /data-current-operator="true"[\s\S]*?>You</);
   assert.doesNotMatch(html, /team-page|>None</);
 
   const input = {

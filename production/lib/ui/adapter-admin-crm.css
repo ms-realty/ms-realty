@@ -459,7 +459,7 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
 .adm-contact-history .adm-id-caption { white-space: normal; overflow-wrap: anywhere; }
 .adm-account-list li { font-size: var(--text-sm); }
 .adm-checklist-card { border-radius: var(--radius-md); box-shadow: none; }
-.adm-checklist-card h2 { font-size: var(--text-lg); }
+.adm-checklist-card h3 { font-size: var(--text-lg); }
 .adm-checklist-card > header > div > a.crm-mono { display: block; width: fit-content; max-width: 100%; overflow-wrap: anywhere; }
 .adm-request-history { min-width: 0; }
 .adm-request-history > summary {
