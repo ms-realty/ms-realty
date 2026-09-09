@@ -331,15 +331,19 @@ test("settings screen speaks Bulgarian and Russian and uses the three Atlas navi
     assert.match(bulgarian.body, /lang="bg"/);
     assert.match(bulgarian.body, /Профил на агенцията/);
     assert.match(bulgarian.body, /Работно пространство/);
-    for (const group of ["Работа", "Записи", "Управление"]) assert.match(bulgarian.body, new RegExp(`>${group}<`));
+    // The primary rail has no group heading; the owner's disclosure is named
+    // in the workbench language.
+    assert.match(bulgarian.body, />Разширени</);
+    for (const heading of ["Работа", "Записи", "Управление"]) assert.doesNotMatch(bulgarian.body, new RegExp(`>${heading}<`));
     const russian = await dispatchHttp(app, { url: "/admin/settings?locale=ru", headers: HEADERS });
     assert.match(russian.body, /Профиль агентства/);
     assert.match(russian.body, /Сроки ответа|Заявки и сроки/);
-    for (const group of ["Работа", "Записи", "Управление"]) assert.match(russian.body, new RegExp(`>${group}<`));
+    assert.match(russian.body, />Дополнительно</);
 
     const today = await dispatchHttp(app, { url: "/admin/today", headers: HEADERS });
     assert.match(today.body, /href="\/admin\/settings"/);
-    for (const group of ["Work", "Records", "Management"]) assert.match(today.body, new RegExp(`>${group}<`));
+    assert.match(today.body, />Advanced</);
+    for (const heading of ["Work", "Records", "Management"]) assert.doesNotMatch(today.body, new RegExp(`>${heading}<`));
     for (const route of ["hermes", "connect", "settings", "team", "activity"]) {
       assert.match(today.body, new RegExp(`href="/admin/${route}"`), `${route} is present in the owner navigation`);
     }
@@ -631,31 +635,41 @@ test("Today exposes every ranked task with a source-backed detail and Hermes ent
     assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
     assert.equal((empty.body.match(/data-hermes-open="today"/g) || []).length, 1);
     assert.doesNotMatch(empty.body, /name="q"/);
-    assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 6, "three product groups in desktop and mobile navigation");
-    assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
-    assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 7);
-    for (const destination of ["Today", "Lead inbox", "Listings", "Translations", "Hermes", "Integrations", "Settings"]) {
+    // Two groups, primary and Advanced, in desktop and mobile navigation.
+    assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 4, "primary and Advanced in desktop and mobile navigation");
+    assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 8);
+    assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 8);
+    for (const destination of ["Today", "Leads", "Viewings", "Contacts", "Listings", "Deals", "Content", "Settings", "Advanced"]) {
       assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
-    // The rail is flat: no disclosure hides a destination behind a second click.
-    assert.doesNotMatch(empty.body, /data-admin-nav-drilldown=/, "no grouped disclosures remain");
+    assert.doesNotMatch(empty.body, /data-admin-nav-drilldown=/, "no per-destination drilldowns remain");
     const rail = empty.body.slice(empty.body.indexOf('class="crm-sb__nav"'), empty.body.indexOf('class="crm-sb__me"'));
-    assert.equal((rail.match(/<details/g) || []).length, 0, "the desktop rail carries no disclosure");
+    // One disclosure: the owner's Advanced group, closed on Today.
+    assert.equal((rail.match(/<details/g) || []).length, 1, "the desktop rail carries exactly one disclosure");
+    assert.doesNotMatch(rail, /<details[^>]* open/, "Advanced is closed on a primary screen");
     // Not a count: the rail must carry exactly the destinations the operator
-    // catalog says this operator can reach, each once, each at one depth. A
-    // number would have to be bumped whenever one is added, and would pass
-    // just as happily if one were swapped for another.
-    const reachable = OWNER_CONSOLE_NAV_DESTINATIONS.flatMap((destination) => [destination.primary, ...destination.children]);
+    // catalog says this operator can reach, each once -- minus Pipeline and
+    // Requests, which the Leads screen links to. A number would have to be
+    // bumped whenever one is added, and would pass just as happily if one were
+    // swapped for another.
+    const linkedFromLeads = new Set(["lead_pipeline", "requests"]);
+    const reachable = OWNER_CONSOLE_NAV_DESTINATIONS.flatMap((destination) => [destination.primary, ...destination.children]).filter((id) => !linkedFromLeads.has(id));
     assert.deepEqual(
       [...rail.matchAll(/data-admin-nav-route="([^"]+)"/g)].map((match) => match[1]).sort(),
       [...reachable].sort(),
-      "every catalogued destination is a link at one depth, and nothing else is",
+      "every catalogued destination is a rail link, primary or Advanced, and nothing else is",
     );
-    // Every destination is reachable directly, including the ten that used to
-    // sit behind "More in ...".
-    for (const route of ["contacts", "consents", "documents", "cases", "pipeline", "requests", "viewings", "reports", "approved-content", "migration/review", "team", "activity"]) {
-      assert.match(empty.body, new RegExp(`href="/admin/${route}"`), route);
+    for (const route of ["contacts", "consents", "documents", "cases", "viewings", "reports", "approved-content", "migration/review", "team", "activity"]) {
+      assert.match(rail, new RegExp(`href="/admin/${route}"`), route);
     }
+    // The header carries the title only; language and theme live with the profile.
+    const header = empty.body.match(/<header class="crm-top">([\s\S]*?)<\/header>/)?.[1] || "";
+    assert.ok(header, "the header renders");
+    assert.doesNotMatch(header, /adm-locales--rail|adm-theme--rail/, "no language or theme controls in the header");
+    const profile = empty.body.slice(empty.body.indexOf('class="crm-sb__me"'), empty.body.indexOf("</aside>"));
+    assert.match(profile, /<nav class="crm-seg adm-locales adm-locales--rail" aria-label="Language" data-admin-locales="rail">/);
+    assert.match(profile, /data-theme-switch="admin-top"/);
+    assert.match(empty.body, /data-admin-preferences="drawer"[\s\S]*?data-admin-locales="drawer"[\s\S]*?data-theme-switch="admin-drawer"/);
     assert.doesNotMatch(empty.body, /data-today-toolbar="true"/);
     assert.match(empty.body, /class="crm-ph"/);
     for (const contract of ["data-priority-leads=\"true\"", "data-lead-pipeline-preview=\"true\"", "data-public-request-preview=\"true\""]) {

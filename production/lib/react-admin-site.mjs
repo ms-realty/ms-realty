@@ -3411,11 +3411,11 @@ function adminNavigationGroups(page) {
     if (copyKey) return label(copy, copyKey.key, copyKey.fallback);
     return screenLabel(item.group, item.id, item.id);
   };
+  // Badges only on Leads and Viewings: two counts a broker acts on today. A
+  // third badge competes with them rather than adding information.
   const routeBadge = (item) => {
     if (item.id === "lead_inbox" && page.kind === "admin_lead_inbox") return page.summary?.leads;
-    if (item.id === "realty_cases") return page.realtyCaseQueue?.summary?.open;
-    if (item.id === "lead_pipeline") return page.leadPipelineQueue?.summary?.open;
-    if (item.id === "requests") return page.publicRequestQueue?.summary?.open;
+    if (item.id === "viewings") return page.summary?.viewingFollowUpsOpen || undefined;
     return undefined;
   };
   const decorateRoute = (item, destinationId = null) => ({
@@ -3440,46 +3440,58 @@ function adminNavigationGroups(page) {
       items,
     };
   };
-  // Paper groups routes by the work people do. The existing registry still
-  // supplies labels, paths and capabilities, so reorganising the rail cannot
-  // grant access or silently drop a secondary destination.
-  const groupLabels = {
-    bg: ["Работа", "Записи", "Управление"],
-    ru: ["Работа", "Записи", "Управление"],
-    en: ["Work", "Records", "Management"],
-  }[page.workspace?.locale] || ["Work", "Records", "Management"];
+  // Eight destinations a broker works from, then one collapsed "Advanced"
+  // disclosure for the owner's operating and setup screens. The registry still
+  // supplies paths and capabilities, so reorganising the rail cannot grant
+  // access; every route stays reachable by URL, and Pipeline and Requests are
+  // linked from the Leads screen rather than listed a second time here.
+  const locale = ["bg", "ru", "en"].includes(page.workspace?.locale) ? page.workspace.locale : "en";
+  const advancedLabel = { bg: "Разширени", ru: "Дополнительно", en: "Advanced" }[locale];
   const shortLabels = {
-    bg: { lead_inbox: "Запитвания", lead_pipeline: "Сделки", viewings: "Огледи", requests: "Заявки", contacts: "Контакти", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
-    ru: { lead_inbox: "Обращения", lead_pipeline: "Сделки", viewings: "Просмотры", requests: "Заявки", contacts: "Контакты", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
-    en: { lead_inbox: "Lead inbox", lead_pipeline: "Pipeline", viewings: "Viewings", requests: "Requests", contacts: "Contacts", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
-  }[page.workspace?.locale] || {};
+    bg: { viewings: "Огледи", contacts: "Контакти", realty_cases: "Сделки", approved_content: "Съдържание", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
+    ru: { viewings: "Просмотры", contacts: "Контакты", realty_cases: "Сделки", approved_content: "Контент", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
+    en: { viewings: "Viewings", contacts: "Contacts", realty_cases: "Deals", approved_content: "Content", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
+  }[locale];
+  // The Leads item stays lit on the two screens it links to, so an operator on
+  // Pipeline or Requests still sees where they are in the rail.
+  const extraKinds = { lead_inbox: ["admin_lead_pipeline", "admin_requests"] };
   const visible = destinations.map(visibleDestination).filter(Boolean);
   const routes = new Map(visible.flatMap((destination) =>
     [destination.route, ...destination.children].map((route) => [route.id, {
-      ...destination, id: route.id, route: { ...route, label: shortLabels[route.id] || route.label }, children: [],
-      primary: route.id === destination.route.id,
+      ...destination,
+      id: route.id,
+      route: { ...route, label: shortLabels[route.id] || route.label, kinds: [route.kind, ...(extraKinds[route.id] || [])] },
+      children: [],
     }])));
-  const groups = [
-    { id: "work", label: groupLabels[0], ids: ["today", "lead_inbox", "lead_pipeline", "viewings", "tasks", "requests"] },
-    { id: "records", label: groupLabels[1], ids: ["contacts", "consents", "realty_cases", "documents", "document_records", "listing_manager", "media_library", "approved_content", "translation_queue"] },
-    { id: "management", label: groupLabels[2], ids: ["hermes", "reports", "connections", "settings", "team", "locale_rollout", "migration_review", "activity"] },
-  ];
-  return groups
-    .map((group) => ({ ...group, destinations: group.ids.map((id) => routes.get(id)).filter(Boolean) }))
-    .filter((group) => group.destinations.length);
+  // Content is publishing work: it needs the editor's or owner's write
+  // capability, not the read capability every broker holds.
+  if (!pageCan(page, "content:write")) routes.delete("approved_content");
+  const primaryIds = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
+  const advancedIds = ["migration_review", "translation_queue", "media_library", "locale_rollout", "document_records", "hermes", "connections", "reports", "activity", "tasks", "consents", "documents", "team"];
+  const pick = (ids, primary) => ids.map((id) => routes.get(id)).filter(Boolean).map((destination) => ({ ...destination, primary }));
+  const groups = [{ id: "primary", label: null, destinations: pick(primaryIds, true) }];
+  if (pageCan(page, "administration:read")) {
+    groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });
+  }
+  return groups.filter((group) => group.destinations.length);
+}
+
+function navigationCurrent(item, page) {
+  return item.kinds ? item.kinds.includes(page.kind) : page.kind === item.kind;
 }
 
 function navigationLink(item, page, { mobile = false, primary = false, key } = {}) {
+  const current = navigationCurrent(item, page);
   const className = mobile
-    ? `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`
-    : `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`;
+    ? `adm-mobile-nav__link${current ? " adm-mobile-nav__link--on" : ""}`
+    : `crm-nav${current ? " crm-nav--on" : ""}`;
   return h(
     "a",
     {
       key,
       className,
       href: adminHref(item.path, page),
-      "aria-current": page.kind === item.kind ? "page" : undefined,
+      "aria-current": current ? "page" : undefined,
       "data-admin-nav-route": item.id,
       "data-admin-nav-primary": primary && !mobile ? "true" : undefined,
       "data-admin-nav-primary-mobile": primary && mobile ? "true" : undefined,
@@ -3490,12 +3502,11 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
   );
 }
 
-// The rail is flat. Every destination the operator can reach is one link at
-// one depth, because the previous shape hid ten of nineteen routes behind three
-// "More in ..." disclosures -- Pipeline, Viewings, Contacts, Requests and
-// Reports were all two clicks and a guess away from a screen that exists to
-// lead with the next action. Grouping still carries the meaning; the disclosure
-// only carried the hiding.
+// Eight primary destinations at one depth, then one "Advanced" disclosure for
+// the owner's setup and operating screens. The earlier flat rail of 23 put the
+// migration console and the Hermes runtime next to Viewings; the earlier
+// grouped rail hid Viewings behind "More in ...". Brokers now see only the
+// screens they work from, and nothing a broker needs sits behind the disclosure.
 function navigationDestination(destination, page, { mobile = false } = {}) {
   return h(
     "div",
@@ -3507,11 +3518,65 @@ function navigationDestination(destination, page, { mobile = false } = {}) {
 }
 
 function navigationGroup(group, page, { mobile = false } = {}) {
+  const prefix = mobile ? "mobile-" : "";
+  const links = group.destinations.map((destination) => navigationDestination(destination, page, { mobile }));
+  if (group.collapsible) {
+    // Collapsed by default; open when the current screen lives inside it, so
+    // the lit destination is never hidden from the operator standing on it.
+    const holdsCurrent = group.destinations.some((destination) => navigationCurrent(destination.route, page));
+    return h(
+      "details",
+      {
+        key: `${prefix}group-${group.id}`,
+        className: mobile ? "adm-mobile-nav__group-wrap adm-mobile-nav__advanced" : "crm-sb__group-wrap crm-sb__advanced",
+        "data-admin-nav-group": group.id,
+        "data-admin-nav-disclosure": "true",
+        open: holdsCurrent ? true : undefined,
+      },
+      h(
+        "summary",
+        { className: mobile ? "adm-mobile-nav__group adm-mobile-nav__group--summary" : "crm-sb__group crm-sb__group--summary" },
+        h(Icon, { name: "chevron-right", size: 16 }),
+        h("span", null, group.label),
+      ),
+      ...links,
+    );
+  }
   return h(
     "section",
-    { key: `${mobile ? "mobile-" : ""}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
-    h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label),
-    ...group.destinations.map((destination) => navigationDestination(destination, page, { mobile })),
+    { key: `${prefix}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
+    group.label ? h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label) : null,
+    ...links,
+  );
+}
+
+// The workspace language is a per-person preference, so it lives with the
+// profile at the foot of the rail (and in the phone drawer), not in the header
+// of every screen. Two copies, like the theme switch: the stylesheet shows one.
+function LocaleSwitch({ page, variant }) {
+  const copy = adminCopy(page);
+  const locales = page.workspace?.interface_locales || [];
+  if (!locales.length) return null;
+  return h(
+    "nav",
+    {
+      className: `crm-seg adm-locales adm-locales--${variant}`,
+      "aria-label": label(copy, "language", "Language"),
+      "data-admin-locales": variant,
+    },
+    ...locales.map((code) =>
+      h(
+        "a",
+        {
+          key: code,
+          href: adminLocaleHref(page, code),
+          "data-on": code === page.workspace?.locale ? "1" : "0",
+          "aria-current": code === page.workspace?.locale ? "page" : undefined,
+          lang: code,
+        },
+        code.toUpperCase(),
+      ),
+    ),
   );
 }
 
@@ -3535,14 +3600,28 @@ function Sidebar({ page }) {
       { className: "crm-sb__nav", "aria-label": page.workspace?.title || "Admin" },
       ...visibleGroups.map((group) => navigationGroup(group, page)),
     ),
-    h("div", { className: "crm-sb__me" }, h(OwnerIdentity, { page })),
+    h(
+      "div",
+      { className: "crm-sb__me" },
+      h(OwnerIdentity, { page }),
+      // Language and palette are the operator's own preferences, so they sit
+      // with the profile rather than in the header of every screen.
+      h(
+        "div",
+        { className: "crm-sb__prefs", "data-admin-preferences": "rail" },
+        h(LocaleSwitch, { page, variant: "rail" }),
+        h(ThemeSwitch, { ui: workbenchCopy(page), variant: "top" }),
+      ),
+    ),
   );
 }
 
 // The workbench half of the palette control: follow the operating system,
-// light, or dark, with system the default and always returnable. Two copies,
-// because the top bar has no room for a second group on a phone and the
-// navigation drawer does; the stylesheet shows exactly one of them.
+// light, or dark, with system the default and always returnable. Two copies:
+// one in the rail's profile block on desktop, one in the navigation drawer on
+// a phone; the stylesheet shows exactly one of them. The desktop copy keeps
+// its "admin-top" switch id from the days it sat in the header, so the browser
+// checks that address it by that id keep finding it.
 const ADMIN_THEME_OPTIONS = Object.freeze([
   { value: "system", icon: "monitor" },
   { value: "light", icon: "sun" },
@@ -3554,7 +3633,7 @@ function ThemeSwitch({ ui, variant }) {
   return h(
     "div",
     {
-      className: variant === "top" ? "crm-seg adm-theme adm-theme--top" : "adm-theme adm-theme--drawer",
+      className: variant === "top" ? "crm-seg adm-theme adm-theme--rail" : "adm-theme adm-theme--drawer",
       role: "group",
       "aria-label": ui.themeLabel,
       "data-theme-switch": `admin-${variant}`,
@@ -3626,15 +3705,20 @@ function MobileNavigation({ page }) {
         ...visibleGroups.map((group) => navigationGroup(group, page, { mobile: true })),
       ),
       h(OwnerIdentity, { page, mobile: true }),
-      h(ThemeSwitch, { ui, variant: "drawer" }),
+      h(
+        "div",
+        { className: "adm-mobile-nav__prefs", "data-admin-preferences": "drawer" },
+        h(LocaleSwitch, { page, variant: "drawer" }),
+        h(ThemeSwitch, { ui, variant: "drawer" }),
+      ),
     ),
   );
 }
 
-function Topbar({ page, title, titleAsHeading = false }) {
-  const copy = adminCopy(page);
-  const ui = workbenchCopy(page);
-  const locales = page.workspace?.interface_locales || [];
+// Title, the phone menu, and at most one primary action. Language and theme
+// controls used to ride here on every screen; they belong to the operator, not
+// to the page, so they moved to the profile block in the rail and the drawer.
+function Topbar({ page, title, titleAsHeading = false, action = null }) {
   return h(
     "header",
     { className: "crm-top" },
@@ -3645,27 +3729,11 @@ function Topbar({ page, title, titleAsHeading = false }) {
       h("div", { className: "crm-top__sub" }, title),
     ),
     h(MobileNavigation, { page }),
-    h(
-      "nav",
-      { className: "crm-seg adm-locales", "aria-label": label(copy, "language", "Language") },
-      ...locales.map((code) =>
-        h(
-          "a",
-          {
-            key: code,
-            href: adminLocaleHref(page, code),
-            "data-on": code === page.workspace?.locale ? "1" : "0",
-            "aria-current": code === page.workspace?.locale ? "page" : undefined,
-          },
-          code.toUpperCase(),
-        ),
-      ),
-    ),
-    h(ThemeSwitch, { ui, variant: "top" }),
+    action ? h("div", { className: "crm-top__action", "data-admin-primary-action": "true" }, action) : null,
   );
 }
 
-function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }) {
+function adminShell(page, { title, titleAsHeading = false, action = null, mainAttrs, children }) {
   const ui = workbenchCopy(page);
   return [
     h("a", { key: "skip", className: "skip-link", href: "#main" }, ui.skipToContent),
@@ -3676,7 +3744,7 @@ function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }
       h(
         "div",
         { className: "crm-main" },
-        h(Topbar, { page, title, titleAsHeading }),
+        h(Topbar, { page, title, titleAsHeading, action }),
         h("main", { id: "main", tabIndex: -1, className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
       ),
     ),
@@ -7569,7 +7637,23 @@ function LeadInboxBody({ page }) {
       "data-task-led": "true",
     },
     children: [
-      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      // Pipeline and Requests left the rail; the Leads screen is their door.
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page), "data-lead-screen-link": "pipeline" },
+          h(Icon, { name: "kanban-square", size: 15 }),
+          h("span", null, label(copy, "pipelineWorkspace", "Buyers and renters")),
+        ),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page), "data-lead-screen-link": "requests" },
+          h(Icon, { name: "bell", size: 15 }),
+          h("span", null, label(copy, "publicRequests", "Website requests")),
+        ),
+      ),
       h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
       h(DataAvailabilityNotice, { page }),
       h(

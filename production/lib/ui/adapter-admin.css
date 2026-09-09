@@ -517,23 +517,26 @@ main.crm-scroll[data-react-admin-ui="listing-editor"] { overflow: visible; }
    and a dark well in the dark one. Naming the ramp step directly, as this rule
    used to, left a cream track under dark type once the palette flipped. */
 .crm-seg { padding: 3px; gap: 2px; border-radius: var(--radius-full); background: var(--surface-sunken); }
-.crm-seg.adm-locales { margin-left: auto; flex: none; }
-[dir="rtl"] .crm-seg.adm-locales { margin-left: 0; margin-right: auto; }
+/* Language switch: one copy in the rail's profile block, one in the phone
+   drawer. The drawer copy is hidden until the drawer exists (max-width: 1023px). */
+.crm-seg.adm-locales { flex: none; }
+.adm-locales--drawer { display: none; }
 
 /* ---- Theme switch: system · light · dark ----
    The workbench twin of the public site's control, riding the same segmented
-   track as the language switcher it sits beside. Both copies ship hidden and
-   the head script reveals them by stamping data-theme-ready on the root, so an
-   operator without JavaScript is never shown a control that cannot act. The
-   selected target paints from the root attribute rather than from aria-pressed
-   so it is correct in the first frame, before the deferred script runs. */
+   track as the language switcher it sits above in the rail's profile block.
+   Both copies ship hidden and the head script reveals them by stamping
+   data-theme-ready on the root, so an operator without JavaScript is never
+   shown a control that cannot act. The selected target paints from the root
+   attribute rather than from aria-pressed so it is correct in the first frame,
+   before the deferred script runs. */
 .adm-theme,
 .crm-seg.adm-theme { display: none; }
-html[data-theme-ready] .crm-seg.adm-theme--top { display: inline-flex; }
+html[data-theme-ready] .crm-seg.adm-theme--rail { display: inline-flex; }
 .adm-theme button { width: 36px; min-width: 36px; padding: 0; }
-html:not([data-theme]) .adm-theme--top button[data-theme-option="system"],
-html[data-theme="light"] .adm-theme--top button[data-theme-option="light"],
-html[data-theme="dark"] .adm-theme--top button[data-theme-option="dark"] {
+html:not([data-theme]) .adm-theme--rail button[data-theme-option="system"],
+html[data-theme="light"] .adm-theme--rail button[data-theme-option="light"],
+html[data-theme="dark"] .adm-theme--rail button[data-theme-option="dark"] {
   background: var(--surface);
   color: var(--text-strong);
   box-shadow: var(--shadow-xs);
@@ -1824,7 +1827,38 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .crm-scroll { padding: var(--space-5); }
   .adm-mobile-nav { order: 1; display: block; margin: 0; }
   [dir="rtl"] .adm-mobile-nav { margin: 0 0 0 auto; }
-  .crm-seg.adm-locales { order: 3; margin-inline-start: auto; }
+  /* The rail is gone on a phone, so its language switch goes with it; the
+     drawer carries its own copy under the profile, in the drawer's idiom. */
+  .adm-locales--rail { display: none; }
+  .adm-mobile-nav__prefs { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border-inverse); }
+  .adm-mobile-nav__prefs .crm-seg.adm-locales--drawer {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+  .adm-locales--drawer a {
+    display: grid;
+    min-height: 44px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: var(--radius-button);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.76);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+    box-shadow: none;
+  }
+  .adm-locales--drawer a:hover { background: rgba(255, 255, 255, 0.16); color: #fff; text-decoration: none; }
+  .adm-locales--drawer a:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+  /* Outranks the Atlas segmented-track selection tint, which would paint a
+     pale pill on the ink drawer. */
+  .crm-app .adm-locales--drawer a[data-on="1"] { border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.2); color: #fff; box-shadow: none; }
+  .crm-app .adm-owner-identity--mobile .adm-owner-identity__copy strong { color: #fff; }
+  .crm-app .adm-owner-identity--mobile .adm-owner-identity__copy small,
+  .crm-app .adm-owner-identity--mobile .adm-owner-identity__role { color: rgba(255, 255, 255, 0.7); }
   .adm-mobile-nav__summary {
     display: grid;
     width: 44px;
@@ -1841,7 +1875,7 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-mobile-nav__panel {
     position: fixed;
     z-index: 30;
-    inset: 64px 0 0;
+    inset: var(--adm-shell-top-offset, 64px) 0 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: var(--space-3) var(--space-4) var(--space-5);
@@ -1886,7 +1920,26 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
     letter-spacing: var(--tracking-caps);
     text-transform: uppercase;
   }
-  .adm-mobile-nav__destination { display: grid; gap: 2px; min-width: 0; }  .adm-owner-identity--mobile { margin-top: var(--space-4); border: 1px solid var(--border-inverse); background: var(--ink-800); }
+  .adm-mobile-nav__destination { display: grid; gap: 2px; min-width: 0; }
+  /* Advanced in the drawer: the same native disclosure as the rail, closed by
+     default so the eight primary destinations and the profile fit one screen. */
+  .adm-mobile-nav__advanced { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--border-inverse); }
+  .adm-mobile-nav__group--summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    margin: 0;
+    padding: var(--space-2);
+    border-radius: var(--radius-button);
+    list-style: none;
+    cursor: pointer;
+  }
+  .adm-mobile-nav__group--summary::-webkit-details-marker { display: none; }
+  .adm-mobile-nav__group--summary:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+  .adm-mobile-nav__group--summary:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+  .adm-mobile-nav__advanced[open] > .adm-mobile-nav__group--summary svg { transform: rotate(90deg); }
+  .adm-owner-identity--mobile { margin-top: var(--space-4); border: 1px solid var(--border-inverse); background: var(--ink-800); }
   .adm-mobile-nav__link {
     display: flex;
     min-width: 0;
@@ -1905,19 +1958,14 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
   .adm-mobile-nav__link--on { background: rgba(255, 255, 255, 0.1); color: #fff; }
   .adm-mobile-nav__link--on .mk-icon { color: var(--brick-400); }
   .adm-mobile-nav__link .crm-nav__badge { flex: none; }
-  /* The top bar already holds the menu button and the language switcher; a
-     third group overflows a 375px viewport, so the theme switch moves into the
-     drawer. The drawer is an inverse surface in both palettes, so this copy is
+  /* The rail copy of the theme switch leaves with the rail; the drawer copy is
      painted in the drawer's own white-on-ink idiom rather than on the pale
-     segmented track. */
-  html[data-theme-ready] .crm-seg.adm-theme--top { display: none; }
+     segmented track, because the drawer is an inverse surface in both palettes. */
+  html[data-theme-ready] .crm-seg.adm-theme--rail { display: none; }
   html[data-theme-ready] .adm-theme--drawer {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border-inverse);
   }
   .adm-theme--drawer button {
     display: grid;
