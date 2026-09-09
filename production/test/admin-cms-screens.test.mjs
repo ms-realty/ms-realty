@@ -222,7 +222,12 @@ test("media assets preview and fail out loud", async () => {
 
 test("media cards name the asset for a person, give the replace panel room, and keep the reviewer read-only", () => {
   const registry = loadLocaleRegistry();
-  const page = renderAdminListingEditorPayload(registry, "en", loadCmsSeed(), "MS-CRAWL-0001", [], [], [], "payload-3f0a1c2d");
+  // Listing ids are rekeyed by the seed (crawl ids became lot numbers on
+  // main), so pick a listing that carries media instead of naming one.
+  const seed = loadCmsSeed();
+  const listing = seed.records.find((record) => record.collection === "listings" && (record.media || []).length > 0);
+  assert.ok(listing, "the CMS seed has a listing with media");
+  const page = renderAdminListingEditorPayload(registry, "en", seed, listing.id, [], [], [], "payload-3f0a1c2d");
   const html = renderReactAdminBody(page);
   // (a) The heading counts the asset the way a person does; the generated id
   // is a caption, never the headline (PRODUCT.md forbids raw keys as UI text).
