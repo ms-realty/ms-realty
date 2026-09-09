@@ -1,0 +1,43 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ms-realty-under-construction",
+  "main": "workers/under-construction.js",
+  "compatibility_date": "2026-09-01",
+  "observability": { "enabled": true },
+
+  // Preview host, so the page can be checked before it takes over the live root.
+  "workers_dev": true,
+
+  // Every public URL is locale-prefixed (locales/registry.json url_strategy),
+  // so the site root plus the seven locale prefixes is the whole public site.
+  // makler-realty.com/* stays with the ms-realty Worker and keeps serving
+  // /admin, /api, media, legacy redirects and the SEO files: Cloudflare routes
+  // the most specific match, and every pattern here outranks that wildcard.
+  "routes": [
+    { "pattern": "makler-realty.com/", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/bg*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/en*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/de*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/nl*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/ru*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/el*", "zone_name": "makler-realty.com" },
+    { "pattern": "makler-realty.com/he*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/bg*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/en*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/de*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/nl*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/ru*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/el*", "zone_name": "makler-realty.com" },
+    { "pattern": "www.makler-realty.com/he*", "zone_name": "makler-realty.com" },
+    // makler-realty.ru has no Worker route yet: it still proxies to the suspended
+    // SuperHosting account, which answers with a 302 to a "suspended" page. A
+    // 503 placeholder is the honest temporary signal for Yandex and Google.
+    { "pattern": "makler-realty.ru/*", "zone_name": "makler-realty.ru" },
+    { "pattern": "www.makler-realty.ru/*", "zone_name": "makler-realty.ru" }
+  ],
+
+  // Direct Worker-to-Worker call, so the app still sees Host: makler-realty.com
+  // and its own admin session cookies.
+  "services": [{ "binding": "APP", "service": "ms-realty" }]
+}

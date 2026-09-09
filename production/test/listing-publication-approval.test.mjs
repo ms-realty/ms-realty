@@ -86,11 +86,11 @@ test("a tampered approval publishes nothing", () => {
 });
 
 test("publication SQL copies Payload join rows and source photos for freeze-active listings", () => {
-  const sql = freezeActivePublicationSql(["MS-CRAWL-0004", "MS-CRAWL-0117"]);
+  const sql = freezeActivePublicationSql(["MS-00905", "MS-CRAWL-0117"]);
   assert.match(sql, /INSERT INTO listings_rels \("order"/);
   assert.match(sql, /version\.translations/);
   assert.match(sql, /approved_imported_photo/);
-  assert.match(sql, /MS-CRAWL-0004/);
+  assert.match(sql, /MS-00905/);
   assert.match(sql, /MS-CRAWL-0117/);
-  assert.doesNotMatch(sql, /MS-CRAWL-0005/);
+  assert.doesNotMatch(sql, /MS-00899/);
 });

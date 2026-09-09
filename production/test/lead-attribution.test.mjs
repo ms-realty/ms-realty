@@ -48,7 +48,7 @@ test("a channel is one of a closed list, defaulted from the source contract", ()
 test("a first-touch path keeps the route and drops everything that could identify a visitor", () => {
   // A query string is where campaign and visitor ids live, so it never lands.
   assert.equal(normalizeFirstTouchPath("/en/properties?utm_source=x&visitor=42"), "/en/properties");
-  assert.equal(normalizeFirstTouchPath("/en/properties/MS-CRAWL-0001#gallery"), "/en/properties/MS-CRAWL-0001");
+  assert.equal(normalizeFirstTouchPath("/en/properties/MS-00815#gallery"), "/en/properties/MS-00815");
   assert.equal(normalizeFirstTouchPath("/bg/"), "/bg");
   assert.equal(normalizeFirstTouchPath("/"), "/");
   assert.equal(normalizeFirstTouchPath(""), null);

@@ -10,7 +10,7 @@
     "locale_codes": [
       "bg"
     ],
-    "digest": "8772eae6f4d8754b9218db96eafb03c39e3732f4b820c137379fd50e1346ea06"
+    "digest": "b5b6417b8da5a752090d2eeb362963c811a99b50ac8da1bc8a44868c695e8c16"
   },
   "summary": {
     "engines": 1,
@@ -28,7 +28,7 @@
       "engine": "postgres",
       "target": "ms_realty_public_search_documents",
       "documents": 1,
-      "digest": "8772eae6f4d8754b9218db96eafb03c39e3732f4b820c137379fd50e1346ea06",
+      "digest": "b5b6417b8da5a752090d2eeb362963c811a99b50ac8da1bc8a44868c695e8c16",
       "locale_codes": [
         "bg"
       ],

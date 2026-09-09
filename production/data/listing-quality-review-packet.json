@@ -18,7 +18,7 @@
   "summary": {
     "expected_review_rows": 165,
     "facts_review_rows_required": 165,
-    "media_review_rows_required": 18,
+    "media_review_rows_required": 17,
     "reviewer_fields_blank": 165,
     "issue_counts": {
       "missing_price": 0,
@@ -28,12 +28,12 @@
       "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
-      "thin_public_gallery": 18,
+      "thin_public_gallery": 17,
       "tour_review_pending": 0
     },
     "by_review_status": {
-      "needs_facts_review": 147,
-      "needs_facts_and_media_review": 18
+      "needs_facts_review": 148,
+      "needs_facts_and_media_review": 17
     }
   },
   "instructions": [

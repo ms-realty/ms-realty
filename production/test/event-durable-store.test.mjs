@@ -32,9 +32,9 @@ test("durable funnel events reuse the configured Payload runtime and preserve pr
   const event = createEvent(
     {
       type: "cta_click",
-      path: "/en/properties/MS-CRAWL-0001",
+      path: "/en/properties/MS-00815",
       locale: "en",
-      listingReference: "MS-CRAWL-0001",
+      listingReference: "MS-00815",
       action: "request_viewing",
     },
     "2026-08-13T10:00:00.000Z",

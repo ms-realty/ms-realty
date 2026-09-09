@@ -51,7 +51,7 @@ test("viewing ledger requires a known lead and creates follow-up task", () => {
   const leads = [
     {
       lead_id: "lead-test",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "he",
       admin_locale: "en",
       contact_preference: "whatsapp",
@@ -75,7 +75,7 @@ test("viewing ledger requires a known lead and creates follow-up task", () => {
 
   const rows = readViewings(file);
   assert.equal(rows.length, 1);
-  assert.equal(rows[0].listing_reference, "MS-CRAWL-0001");
+  assert.equal(rows[0].listing_reference, "MS-00815");
   assert.equal(rows[0].follow_up_task.status, "open");
   assert.deepEqual(rows[0].feedback_request, {
     id: "feedback-lead-test",
@@ -90,5 +90,5 @@ test("viewing ledger requires a known lead and creates follow-up task", () => {
   assert.match(calendar, /BEGIN:VCALENDAR/);
   assert.match(calendar, /DTSTART:20260706T100000Z/);
   assert.match(calendar, /DTEND:20260706T103000Z/);
-  assert.match(calendar, /SUMMARY:MS Realty viewing MS-CRAWL-0001/);
+  assert.match(calendar, /SUMMARY:MS Realty viewing MS-00815/);
 });

@@ -56,7 +56,7 @@ export function renderAdminListingEditorPayload(
   operator = null,
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
-  const record = listingRecord(seed, listingId || "MS-CRAWL-0001");
+  const record = listingRecord(seed, listingId || "MS-00815");
   if (!record) throw new Error("Known listingId is required");
   const property = (seed.properties || []).find((candidate) => candidate.id === record.property) || null;
   const factReview = listingFactReviewFor({ listing: record, property });

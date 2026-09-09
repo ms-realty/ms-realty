@@ -9714,7 +9714,7 @@ function editorInputFor(ui, field, value, disabled = false, id = undefined) {
     ]);
   }
   if (["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field)) return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
-  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-CRAWL-0001" });
+  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-00815" });
   return h("input", shared);
 }
 
@@ -9909,6 +9909,9 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
+  // The topbar already names the screen. The page heading names the listing,
+  // so an operator with several editor tabs open can tell them apart.
+  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
   // One descriptor, so the button is the same control on every field it
@@ -9985,7 +9988,7 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: page.listing.id,
+          title: listingName,
           subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),

@@ -13,7 +13,7 @@ import {
 } from "../lib/admin-workflows.mjs";
 
 const registry = loadLocaleRegistry();
-const listing = findListingById(loadListings(), "MS-CRAWL-0001");
+const listing = findListingById(loadListings(), "MS-00815");
 
 function hermesDraftOutput(propertyFacts, targetLocale = "he") {
   const factText = Object.values(propertyFacts)

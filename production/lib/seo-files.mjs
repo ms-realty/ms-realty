@@ -10,6 +10,7 @@ import {
   sitemapEntriesForHome,
   sitemapEntriesForListing,
   sitemapEntriesForLocations,
+  sitemapEntriesForSearchFacets,
   sitemapEntriesForSeller,
 } from "./seo.mjs";
 
@@ -50,7 +51,19 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
   const homeEntries = sitemapEntriesForHome(registry);
   const contactEntries = sitemapEntriesForContact(registry);
   const guideEntries = sitemapEntriesForGuides(registry, approvedContentGuideGroups(readApprovedCmsContent()));
-  const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries, ...contactEntries, ...guideEntries];
+  // The eight indexable search facets per public locale. They depend on the
+  // registry alone, so the eligible and the public view always carry the same
+  // 56 entries and launch readiness can pin the count.
+  const searchFacetEntries = sitemapEntriesForSearchFacets(registry);
+  const entries = [
+    ...homeEntries,
+    ...listingEntries,
+    ...locationEntries,
+    ...sellerEntries,
+    ...contactEntries,
+    ...guideEntries,
+    ...searchFacetEntries,
+  ];
   return {
     artifact_id: "runtime-localized-sitemap",
     summary: {
@@ -61,6 +74,7 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
       seller_pages: sellerEntries.length,
       contact_pages: contactEntries.length,
       guide_pages: guideEntries.length,
+      search_facet_pages: searchFacetEntries.length,
       entries: entries.length,
       byLocale: countBy(entries, (entry) => entry.locale),
     },
@@ -108,7 +122,14 @@ export function renderRobotsTxt({ origin = DEFAULT_PUBLIC_ORIGIN } = {}) {
 export function assertSeoFiles({ sitemapXml, robotsTxt, sitemap = null }) {
   if (!sitemapXml.includes("/he</loc>")) throw new Error("Sitemap XML must include approved Hebrew homepage");
   if (sitemap) {
-    const xmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname).sort();
+    // Facet entries share the search route and differ only by their query
+    // string, so the comparison keeps the search part of every location.
+    const xmlPaths = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+      .map(([, loc]) => {
+        const url = new URL(loc);
+        return `${url.pathname}${url.search}`;
+      })
+      .sort();
     const publicPaths = sitemap.entries
       .filter((entry) => entry.public !== false)
       .map((entry) => entry.loc)

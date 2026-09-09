@@ -73,7 +73,11 @@ export function buildStructuredDataReport({
 } = {}) {
   const reviewedSeed = applyListingEdits(seed, listingEdits);
   const rows = sitemap.entries
-    .filter((entry) => ["listing", "guide"].includes(entry.type))
+    // An entry flagged public:false is eligible but gated: the runtime answers
+    // 404 for it and sitemap.xml leaves it out, so it has no page whose schema
+    // markup could be reported on. The thirty-eight archived cross-domain twins
+    // are the first listings to be in that state.
+    .filter((entry) => entry.public !== false && ["listing", "guide"].includes(entry.type))
     .map((entry) => reportRow(registry, reviewedSeed, entry));
   const summary = {
     generated_at: generatedAt,
@@ -90,8 +94,16 @@ export function buildStructuredDataReport({
   return { summary, rows };
 }
 
+// The 165 approved listings less the 38 cross-domain twins that the lot-number
+// identity merged into their survivor. A twin is archived and answers 404, so
+// it has no page to describe; a drop below this is a published listing that
+// lost its markup.
+export const PUBLIC_LISTING_SCHEMA_ENTRIES = 127;
+
 export function assertStructuredDataReport(report) {
-  if (report.summary.listing_entries !== 165) throw new Error("Structured data report must cover 165 listing sitemap entries");
+  if (report.summary.listing_entries !== PUBLIC_LISTING_SCHEMA_ENTRIES) {
+    throw new Error(`Structured data report must cover ${PUBLIC_LISTING_SCHEMA_ENTRIES} public listing sitemap entries`);
+  }
   if (report.summary.guide_entries !== 5) throw new Error("Structured data report must cover 5 approved guide sitemap entries");
   if (report.summary.failing_entries !== 0) throw new Error("Structured data report must have zero failing public schemas");
   if (report.rows.some((row) => row.indexable !== true)) throw new Error("Structured data report must only cover indexable rows");
