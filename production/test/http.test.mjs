@@ -936,6 +936,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  smoke.viewingsHtml = await dispatchHttp(app, {
+    url: "/admin/viewings?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   smoke.adminMigrationReview = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=bg",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -1233,7 +1237,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
   assert.equal(smoke.adminHtml.body.includes("data-react-admin-ui=\"lead-inbox\""), true);
-  assert.equal(smoke.adminHtml.body.includes("Эскалации менеджеру"), true);
+  // The KPI strip that carried "Эскалации менеджеру" is gone; the pills and
+  // the SLA state on each row remain.
+  assert.equal(smoke.adminHtml.body.includes('class="adm-summary-strip"'), false);
   assert.equal(smoke.adminHtml.body.includes('data-sla-status="manager_escalation_required"'), true);
   assert.equal(smoke.adminHtml.body.includes("Срок эскалации"), true);
   // The composer's draft is the same control every other assisted value
@@ -1265,8 +1271,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.viewings.length, 1);
   assert.equal(smoke.admin.body.summary.viewingFollowUpsOpen, 1);
   assert.equal(smoke.admin.body.viewingFollowUpQueue.rows[0].task, "feedback");
-  assert.equal(smoke.adminHtml.body.includes('data-viewing-follow-up-queue="true"'), true);
-  assert.equal(smoke.adminHtml.body.includes('action="/api/admin/viewings/follow-up"'), true);
+  // Post-viewing follow-ups live on Viewings; the inbox stays one job.
+  assert.equal(smoke.adminHtml.body.includes('data-viewing-follow-up-queue="true"'), false);
+  assert.equal(smoke.viewingsHtml.body.includes('data-viewing-follow-up-queue="true"'), true);
+  assert.equal(smoke.viewingsHtml.body.includes('action="/api/admin/viewings/follow-up"'), true);
   assert.equal(smoke.adminMigrationReview.body.workspace.locale, "bg");
   assert.equal(smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows, 11859);
   assert.equal(smoke.adminMigrationReview.body.routeMap.total, 457);
