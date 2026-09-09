@@ -1550,17 +1550,30 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 .adm-editor-support [data-translation-panel] .adm-translations { padding-inline: var(--space-5); padding-bottom: var(--space-5); }
 .adm-editor-support [data-translation-panel] .adm-translations li + li { margin-top: var(--space-2); }
 
-.adm-media-manager { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-4); padding: 0 var(--space-5) var(--space-5); }
-.adm-media-asset { display: grid; min-width: 0; gap: var(--space-3); }
-.adm-media-asset__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+/* Cards sit at their own height: one open review panel must not stretch
+   every neighbour in the row into a tall card with a blank lower half. */
+.adm-media-manager { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-4); align-items: start; padding: 0 var(--space-5) var(--space-5); }
+.adm-media-asset { display: grid; min-width: 0; gap: var(--space-3); align-self: start; }
+/* Title, id caption and status stack: a 275px card cannot seat "Photo 5 of
+   19" beside a long status pill without breaking the title letter by letter. */
+.adm-media-asset__header { display: grid; align-items: start; gap: var(--space-1); }
 .adm-media-asset__header > div { display: grid; min-width: 0; gap: 3px; }
-.adm-media-asset__header small { overflow: hidden; text-overflow: ellipsis; }
+.adm-media-asset__header .crm-pill { width: fit-content; max-width: 100%; white-space: normal; }
 .adm-media-asset__source { width: max-content; max-width: 100%; color: var(--adm-media-source); font-size: var(--text-sm); text-decoration: none; }
 .adm-media-review { min-width: 0; border-top: 1px solid var(--border); }
 .adm-media-review > summary { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--text-link); cursor: pointer; font-size: var(--text-sm); font-weight: var(--fw-semibold); list-style: none; }
 .adm-media-review > summary::-webkit-details-marker { display: none; }
 .adm-media-review[open] > summary { margin-bottom: var(--space-3); }
+/* The replacement panel inherits the two-column .adm-form grid; inside a
+   320px card that left the hint a one-character column. One full-width
+   column with a floor on its width keeps the file input and the hint legible. */
+.adm-media-replacement__form { grid-template-columns: minmax(0, 1fr); min-width: min(100%, 16rem); margin-bottom: 0; }
+.adm-media-replacement__form > label:not(.adm-check) > input[type="file"] { max-width: 100%; }
+.adm-media-replacement__form .adm-note { min-width: 0; overflow-wrap: anywhere; }
 .adm-media-review-form { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+.adm-media-review__reviewer { display: grid; min-width: 0; gap: 4px; align-content: start; }
+.adm-media-review__reviewer-label { color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-media-review__reviewer-name { color: var(--text-strong); font-size: var(--text-sm); }
 .adm-media-review-form label { display: grid; min-width: 0; gap: 6px; color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
 .adm-media-review-form label:has(> textarea),
 .adm-media-review-form .adm-check,

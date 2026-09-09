@@ -10,6 +10,8 @@ import { renderAdminTeamPayload } from "../lib/admin-team.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 import { renderOperatorConnectPage } from "../lib/operator-connect.mjs";
+import { renderAdminListingEditorPayload } from "../lib/admin-payloads.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 
 // Contracts for the CMS and launch screens (package A2): the shared shell of
 // the CRM screens applied to the listing manager, translation review, listing
@@ -220,6 +222,42 @@ test("media assets preview and fail out loud", async () => {
   // Package B4 shipped the real upload, so the placeholder it replaced is gone.
   assert.doesNotMatch(page.body, /data-media-upload="planned"/);
   assert.match(page.body, /data-media-upload-form="true"/);
+});
+
+test("media cards name the asset for a person, give the replace panel room, and keep the reviewer read-only", () => {
+  const registry = loadLocaleRegistry();
+  // Listing ids are rekeyed by the seed (crawl ids became lot numbers on
+  // main), so pick a listing that carries media instead of naming one.
+  const seed = loadCmsSeed();
+  const listing = seed.records.find((record) => record.collection === "listings" && (record.media || []).length > 0);
+  assert.ok(listing, "the CMS seed has a listing with media");
+  const page = renderAdminListingEditorPayload(registry, "en", seed, listing.id, [], [], [], "payload-3f0a1c2d");
+  const html = renderReactAdminBody(page);
+  // (a) The heading counts the asset the way a person does; the generated id
+  // is a caption, never the headline (PRODUCT.md forbids raw keys as UI text).
+  const headings = [...html.matchAll(/<(?:h3|strong)[^>]*>([^<]*)<\/(?:h3|strong)>/g)].map(([, text]) => text.trim());
+  assert.ok(headings.length > 0);
+  assert.deepEqual(headings.filter((text) => text.startsWith("media-")), []);
+  assert.match(html, /<strong>Photo 1 of \d+<\/strong><code class="crm-mono adm-id-caption">media-[0-9a-f]+<\/code>/);
+  // (b) The replace-file panel carries a class whose CSS gives it a width
+  // floor and a single full-width column, so the hint no longer wraps letter
+  // by letter inside the two-column .adm-form grid.
+  assert.match(html, /<details class="adm-media-review adm-media-replacement" data-media-replacement="media-[0-9a-f]+">/);
+  assert.match(html, /class="adm-form adm-media-upload adm-media-replacement__form"/);
+  assert.match(adminCss, /\.adm-media-replacement__form \{[^}]*grid-template-columns: minmax\(0, 1fr\);[^}]*min-width: min\(100%, 16rem\);/);
+  assert.match(generatedCss, /\.adm-media-replacement__form\{[^}]*min-width:min\(100%,16rem\)/);
+  // One open panel must not stretch its neighbours: cards align to the start
+  // of their grid row instead of filling it.
+  assert.match(adminCss, /\.adm-media-manager \{[^}]*align-items: start;/);
+  // (c) The reviewer is the signed-in operator: a hidden value plus a witness
+  // line, with the operator id as a caption, and no editable reviewer input.
+  assert.match(html, /<div class="adm-media-review__reviewer" data-media-reviewer="payload-3f0a1c2d"><input type="hidden" name="reviewer" value="payload-3f0a1c2d"><span class="adm-media-review__reviewer-label">Reviewer<\/span><span class="adm-media-review__reviewer-name">Signed-in operator<\/span><code class="crm-mono adm-id-caption">payload-3f0a1c2d<\/code><\/div>/);
+  const reviewForms = [...html.matchAll(/<form[^>]*class="adm-form adm-media-review-form"[\s\S]*?<\/form>/g)].map(([form]) => form);
+  assert.ok(reviewForms.length > 0);
+  for (const form of reviewForms) {
+    assert.doesNotMatch(form, /<input name="reviewer"/);
+    assert.match(form, /<input type="hidden" name="reviewer" value="payload-3f0a1c2d">/);
+  }
 });
 
 test("a listing without an approved tour says so before the publishing form", async () => {
