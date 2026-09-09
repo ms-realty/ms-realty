@@ -271,7 +271,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
-import { browserListingRevisionRequired, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { browserListingRevisionRequired, invalidateListingProjection, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
@@ -2585,7 +2585,7 @@ export function createHttpApp({
       };
     }
   };
-  return async function handle(request) {
+  const handle = async function handle(request) {
    const url = new URL(request.url, "http://localhost");
    const mcpMetadataRoute =
      url.pathname === "/.well-known/oauth-protected-resource" ||
@@ -8030,6 +8030,25 @@ export function createHttpApp({
       });
     }
     return publicResponse(request, url, rendered);
+  };
+  return invalidatesProjectionAfterAdminWrites(handle);
+}
+
+// Any admin write may change what the shared listing projection reads
+// (listing drafts, media documents, reviews, translations, publication), and
+// most of those writers live outside listing-draft-service. Rather than teach
+// every handler about the cache, drop the projection after each successful
+// mutating admin request; the write path's own in-transaction reads are never
+// cached, so this only shortens the read-side window.
+function invalidatesProjectionAfterAdminWrites(handle) {
+  return async function handleAdminAware(request, ...rest) {
+    const response = await handle(request, ...rest);
+    const method = String(request?.method || "GET").toUpperCase();
+    const pathname = (() => { try { return new URL(request.url, "http://localhost").pathname; } catch { return ""; } })();
+    if (!["GET", "HEAD", "OPTIONS"].includes(method) && response && response.status < 400 && (pathname.startsWith("/api/admin/") || pathname.startsWith("/admin/"))) {
+      invalidateListingProjection();
+    }
+    return response;
   };
 }
 
