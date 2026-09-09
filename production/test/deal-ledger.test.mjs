@@ -10,7 +10,7 @@ test("closed deal ledger requires a known lead and creates testimonial and refer
   const leads = [
     {
       lead_id: "lead-test",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "he",
       admin_locale: "en",
       contact_preference: "whatsapp",
@@ -33,7 +33,7 @@ test("closed deal ledger requires a known lead and creates testimonial and refer
     { filePath: file },
   );
 
-  assert.equal(row.listing_reference, "MS-CRAWL-0001");
+  assert.equal(row.listing_reference, "MS-00815");
   assert.deepEqual(row.testimonial_request, {
     id: "testimonial-lead-test",
     kind: "testimonial_request",

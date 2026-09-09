@@ -67,7 +67,7 @@ import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.
 import { publicSeedFor } from "./public-inventory.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { probePayloadCmsImportRuntime } from "./payload-cms-import.mjs";
-import { readHeader, requestHost, sameOriginWriteRejection } from "./request-guard.mjs";
+import { readHeader, requestHost, publicWriteRejection, sameOriginWriteRejection } from "./request-guard.mjs";
 import { productionRuntimeDataUnavailable, runtimeDataUnavailablePayload } from "./runtime-data-boundary.mjs";
 import { publicOrigin } from "./public-origin.mjs";
 // Package B2: the approved purchase-fee estimate, decided in one place.
@@ -825,7 +825,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : url.protocol.slice(0, -1);
       const host = requestHost(request.headers);
       const requestUrl = host ? `${protocol}://${host}${url.pathname}${url.search}` : request.url;
-      const crossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl });
+      const crossOrigin = publicWriteRejection(request.method, request.headers, { requestUrls: [requestUrl, request.url] });
       if (crossOrigin) {
         return webResponse(privateJson(403, { kind: "cross_origin_write_blocked", reason: crossOrigin }));
       }

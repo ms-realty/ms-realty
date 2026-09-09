@@ -17,11 +17,11 @@ test("broker contacts require explicit verified approval and expose direct conta
   assert.throws(
     () =>
       createBrokerContact({
-        listingId: "MS-CRAWL-0001",
+        listingId: "MS-00815",
         broker: "broker_ru",
         phone: "+447700900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001",
+        sourceReference: "test://broker-contact/MS-00815",
         validationStatus: "broker_verified",
       }),
     /explicitly approved/,
@@ -29,11 +29,11 @@ test("broker contacts require explicit verified approval and expose direct conta
   assert.throws(
     () =>
       createBrokerContact({
-        listingId: "MS-CRAWL-0001",
+        listingId: "MS-00815",
         broker: "broker_ru",
         phone: `+35988${"0".repeat(6)}`,
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001",
+        sourceReference: "test://broker-contact/MS-00815",
         validationStatus: "broker_verified",
         approved: true,
       }),
@@ -43,11 +43,11 @@ test("broker contacts require explicit verified approval and expose direct conta
   appendBrokerContact(
     createBrokerContact(
       {
-        listingId: "MS-CRAWL-0001",
+        listingId: "MS-00815",
         broker: "broker_ru",
         phone: "+44 7700 900001",
         reviewer: "owner",
-        sourceReference: "test://broker-contact/MS-CRAWL-0001",
+        sourceReference: "test://broker-contact/MS-00815",
         validationStatus: "broker_verified",
         approved: true,
       },
@@ -57,12 +57,12 @@ test("broker contacts require explicit verified approval and expose direct conta
   );
 
   const rows = readBrokerContacts(file);
-  const contact = latestApprovedBrokerContact(rows, "MS-CRAWL-0001");
+  const contact = latestApprovedBrokerContact(rows, "MS-00815");
   assert.equal(assertBrokerContacts(rows), true);
   assert.equal(contact.channels.phone, "tel:+447700900001");
   assert.equal(contact.channels.whatsapp, "https://wa.me/447700900001");
   assert.equal(contact.channels.viber, "viber://chat?number=%2B447700900001");
   const unverified = { ...contact, validation_status: "entered_pending_review" };
-  assert.equal(latestApprovedBrokerContact([unverified], "MS-CRAWL-0001"), null);
+  assert.equal(latestApprovedBrokerContact([unverified], "MS-00815"), null);
   assert.throws(() => assertBrokerContacts([unverified]), /not independently verified/);
 });

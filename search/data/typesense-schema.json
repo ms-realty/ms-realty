@@ -16,6 +16,38 @@
       "facet": true
     },
     {
+      "name": "lot_number",
+      "type": "int32",
+      "facet": true
+    },
+    {
+      "name": "lot_suffix",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "migration_id",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "legacy_lot_id",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "legacy_post_id",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "merged_into",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
       "name": "search_document_type",
       "type": "string",
       "facet": true

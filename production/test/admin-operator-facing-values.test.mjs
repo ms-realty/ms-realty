@@ -87,11 +87,13 @@ test("a broker is not shown the names of environment variables", async () => {
     const note = broker.body.slice(broker.body.indexOf("data-hermes-unavailable-note"));
     assert.doesNotMatch(note.slice(0, 600), /href="\/admin\/connect"/);
 
-    // The operator who can set them still gets the detail, next to the screen
-    // where they would set it.
+    // The operator who can set them reads the detail on the Hermes screen;
+    // with a lead open they too get one plain sentence and no setup link.
     const admin = await dispatchHttp(createHttpApp(config), { url: "/admin/leads?locale=en", headers: headers.admin });
     assert.equal(admin.status, 200);
-    assert.match(admin.body, /Missing: HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
-    assert.match(admin.body, /href="\/admin\/connect"/);
+    assert.doesNotMatch(admin.body, /HERMES_API_KEY|HERMES_CHAT_COMPLETIONS_URL|HERMES_PROVIDER_MODE/);
+    assert.match(admin.body, /Hermes is not configured in this environment\./);
+    const adminNote = admin.body.slice(admin.body.indexOf("data-hermes-unavailable-note"));
+    assert.doesNotMatch(adminNote.slice(0, 600), /href="\/admin\/connect"/);
   });
 });

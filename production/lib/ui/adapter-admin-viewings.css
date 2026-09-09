@@ -108,3 +108,41 @@
   .adm-week__due { margin-top: 0; }
   .adm-week__nav { flex-wrap: wrap; }
 }
+
+/* Viewings list: appointments grouped by day. A row is time, property, client
+   and broker; the detail keeps one primary action, "Record outcome". */
+.crm-app main[data-react-admin-ui="viewings"] .adm-daily-rows--grouped > .adm-daily-group { border-top: 0; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-daily-group > ol { list-style: none; margin: 0; padding: 0; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-daily-group__label {
+  margin: 0;
+  padding: 12px 16px 8px;
+  border-top: 1px solid var(--atlas-line);
+  color: var(--atlas-muted);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.crm-app main[data-react-admin-ui="viewings"] .adm-daily-rows a { min-height: 72px; align-items: start; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-daily-rows a > .adm-viewing-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  grid-template-areas: "time place pill" "time client pill";
+  column-gap: 12px;
+  row-gap: 4px;
+  width: 100%;
+  align-items: start;
+}
+.crm-app main[data-react-admin-ui="viewings"] .adm-viewing-row__time { grid-area: time; color: var(--atlas-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-viewing-row strong { grid-area: place; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-viewing-row small { grid-area: client; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-viewing-row .crm-pill { grid-area: pill; align-self: start; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-viewing-record h2 { font-size: 20px; line-height: 24px; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-viewing-record .adm-lead-contact { margin-top: 4px; }
+.crm-app main[data-react-admin-ui="viewings"] .adm-lead-identity strong { font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .crm-app main[data-react-admin-ui="viewings"] .adm-daily-rows a > .adm-viewing-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+    grid-template-areas: "time place" "time client" "time pill";
+  }
+}

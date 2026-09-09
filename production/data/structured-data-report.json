@@ -1,44 +1,42 @@
 {
   "summary": {
     "generated_at": "2026-07-05T00:00:00Z",
-    "listing_entries": 165,
+    "listing_entries": 127,
     "guide_entries": 5,
     "failing_entries": 0,
-    "entries_with_offer": 134,
+    "entries_with_offer": 103,
     "warnings": {
       "missing_location": 0,
       "missing_price": 0,
-      "missing_area": 165,
-      "missing_bedrooms": 10,
-      "missing_public_images": 9,
+      "missing_area": 11,
+      "missing_bedrooms": 9,
+      "missing_public_images": 7,
       "media_review_pending": 0
     },
     "by_locale": {
       "bg": 116,
-      "ru": 52,
+      "ru": 14,
       "en": 2
     }
   },
   "rows": [
     {
-      "loc": "/bg/imoti/MS-CRAWL-0001",
+      "loc": "/bg/imoti/MS-00815",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0001",
+      "listing_id": "MS-00815",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 17,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0002",
+      "loc": "/bg/imoti/MS-00907",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0002",
+      "listing_id": "MS-00907",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 2,
@@ -49,504 +47,72 @@
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0003",
+      "loc": "/bg/imoti/MS-00922",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0003",
+      "listing_id": "MS-00922",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 14,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0004",
+      "loc": "/bg/imoti/MS-00905",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0004",
+      "listing_id": "MS-00905",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 8,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0005",
+      "loc": "/bg/imoti/MS-00899",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0005",
+      "listing_id": "MS-00899",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 8,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0006",
+      "loc": "/bg/imoti/MS-00443",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0006",
+      "listing_id": "MS-00443",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 0,
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
         "missing_public_images"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0007",
+      "loc": "/bg/imoti/MS-00911",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0007",
+      "listing_id": "MS-00911",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 6,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0008",
+      "loc": "/bg/imoti/MS-00662",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0008",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 17,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0009",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0009",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0010",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0010",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 16,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0011",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0011",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 20,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0012",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0012",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 1,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0013",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0013",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 6,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0014",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0014",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0015",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0015",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 21,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0016",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0016",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 20,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0017",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0017",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 11,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0018",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0018",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 28,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0019",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0019",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0020",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0020",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0021",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0021",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 26,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0022",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0022",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0023",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0023",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0024",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0024",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0025",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0025",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 18,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0026",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0026",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0027",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0027",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 6,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0028",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0028",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0029",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0029",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0030",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0030",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0031",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0031",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 11,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0032",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0032",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0033",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0033",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 12,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0034",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0034",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0035",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0035",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 12,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0036",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0036",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0037",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0037",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0038",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0038",
+      "listing_id": "MS-00662",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 30,
@@ -557,393 +123,168 @@
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0039",
+      "loc": "/bg/imoti/MS-00957",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0039",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 2,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0040",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0040",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 2,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0041",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0041",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 6,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0042",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0042",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0043",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0043",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 15,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0044",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0044",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0045",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0045",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0046",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0046",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0047",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0047",
+      "listing_id": "MS-00957",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 8,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0048",
+      "loc": "/bg/imoti/MS-01000",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0048",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 14,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0049",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0049",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0050",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0050",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0051",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0051",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0052",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0052",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 12,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0053",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0053",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0054",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0054",
+      "listing_id": "MS-01000",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 16,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0055",
+      "loc": "/bg/imoti/MS-00858",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0055",
+      "listing_id": "MS-00858",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 20,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00895",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00895",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 1,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00567-1",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00567-1",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 6,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0056",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0056",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 2,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0057",
+      "loc": "/bg/imoti/MS-00876",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0057",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0058",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0058",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0059",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0059",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0060",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0060",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0061",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0061",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 16,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0062",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0062",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 14,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0063",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0063",
+      "listing_id": "MS-00876",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 5,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00942",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00942",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 21,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00803",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00803",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 20,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00938",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00938",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 11,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00814",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00814",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 28,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00812",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00812",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 13,
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area",
-        "missing_bedrooms"
+        "missing_area"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0064",
+      "loc": "/bg/imoti/MS-00890",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0064",
+      "listing_id": "MS-00890",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 3,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0065",
+      "loc": "/bg/imoti/MS-00944",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0065",
+      "listing_id": "MS-00944",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 10,
+      "image_count": 26,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0066",
+      "loc": "/bg/imoti/MS-00756",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0066",
+      "listing_id": "MS-00756",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 24,
@@ -954,209 +295,60 @@
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0067",
+      "loc": "/bg/imoti/MS-00833",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0067",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0068",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0068",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0069",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0069",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0070",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0070",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0071",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0071",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0072",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0072",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0073",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0073",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 6,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0074",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0074",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 22,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0075",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0075",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 18,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-3000",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-3000",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0077",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0077",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0078",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0078",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0079",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0079",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 17,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0080",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0080",
+      "listing_id": "MS-00833",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 26,
       "has_offer": true,
       "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00101",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00101",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 10,
+      "has_offer": true,
+      "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_bedrooms"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0081",
+      "loc": "/bg/imoti/MS-00956",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0081",
+      "listing_id": "MS-00956",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 18,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-01001",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-01001",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 26,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-01002",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-01002",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 6,
@@ -1167,196 +359,137 @@
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0082",
+      "loc": "/bg/imoti/MS-00924",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0082",
+      "listing_id": "MS-00924",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0083",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0083",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 16,
+      "image_count": 13,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0084",
+      "loc": "/bg/imoti/MS-00903",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0084",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 16,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0085",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0085",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0086",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0086",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0087",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0087",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0088",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0088",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0089",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0089",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 16,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0090",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0090",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 30,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0091",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0091",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 12,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0092",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0092",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 16,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0093",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0093",
+      "listing_id": "MS-00903",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 7,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_bedrooms"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0094",
+      "loc": "/bg/imoti/MS-00943",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0094",
+      "listing_id": "MS-00943",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": false,
+      "image_count": 8,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_bedrooms"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0095",
+      "loc": "/bg/imoti/MS-00940",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0095",
+      "listing_id": "MS-00940",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 11,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00932",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00932",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 9,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00865",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00865",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 12,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00963",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00963",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 7,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00774",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00774",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 18,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00897",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00897",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 4,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00719",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00719",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 19,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00873",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00873",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
       "has_offer": true,
       "issues": [],
       "warnings": [
@@ -1364,898 +497,470 @@
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0096",
+      "loc": "/bg/imoti/MS-00906",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0096",
+      "listing_id": "MS-00906",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 2,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00555",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00555",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 3,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00788",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00788",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 10,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0097",
+      "loc": "/bg/imoti/MS-00811",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0097",
+      "listing_id": "MS-00811",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 7,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00987",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00987",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 15,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00345",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00345",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 4,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_bedrooms"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0098",
+      "loc": "/bg/imoti/MS-00908",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0098",
+      "listing_id": "MS-00908",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 10,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0099",
+      "loc": "/bg/imoti/MS-00941",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0099",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 21,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0100",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0100",
+      "listing_id": "MS-00941",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 9,
-      "has_offer": false,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00927",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00927",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 15,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00904",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00904",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 14,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00931",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00931",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 0,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_public_images"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0101",
+      "loc": "/bg/imoti/MS-00100",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0101",
+      "listing_id": "MS-00100",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 10,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00816",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00816",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 10,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00657",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00657",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 16,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00766",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00766",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 4,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00432",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00432",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 16,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00770",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00770",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 6,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00321",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00321",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 2,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00898",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00898",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 4,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00749",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00749",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 7,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00945",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00945",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 4,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00234",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00234",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 4,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00470",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00470",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 26,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00894",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00894",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 14,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00960",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00960",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 5,
+      "has_offer": false,
+      "issues": [],
+      "warnings": [
+        "missing_bedrooms"
+      ]
+    },
+    {
+      "loc": "/bg/imoti/MS-00567",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00567",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 3,
+      "has_offer": true,
+      "issues": [],
+      "warnings": [
+        "missing_bedrooms"
+      ]
+    },
+    {
+      "loc": "/bg/imoti/MS-00937",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00937",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 19,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0102",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0102",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0103",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0103",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0104",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0104",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 30,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0105",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0105",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 30,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/bg/imoti/MS-CRAWL-0106",
-      "locale": "bg",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0106",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 14,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
         "missing_bedrooms"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0107",
+      "loc": "/bg/imoti/MS-00893",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0107",
+      "listing_id": "MS-00893",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 14,
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00902",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00902",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 8,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00720",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00720",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 0,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_public_images"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0108",
+      "loc": "/bg/imoti/MS-00744",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0108",
+      "listing_id": "MS-00744",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 6,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0109",
+      "loc": "/bg/imoti/MS-00456",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0109",
+      "listing_id": "MS-00456",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 17,
-      "has_offer": false,
+      "image_count": 0,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_public_images"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0110",
+      "loc": "/bg/imoti/MS-00499",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0110",
+      "listing_id": "MS-00499",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 8,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00930",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00930",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 8,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00860",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00860",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 11,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
         "missing_area"
       ]
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0111",
+      "loc": "/bg/imoti/MS-00939",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0111",
+      "listing_id": "MS-00939",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 22,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0112",
+      "loc": "/bg/imoti/MS-00852",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0112",
+      "listing_id": "MS-00852",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 1,
+      "image_count": 18,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/bg/imoti/MS-CRAWL-0113",
+      "loc": "/bg/imoti/MS-00356",
       "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0113",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 20,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0114",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0114",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0115",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0115",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 14,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0116",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0116",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0117",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0117",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0118",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0118",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0119",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0119",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 19,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0120",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0120",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 23,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0121",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0121",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0122",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0122",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 30,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0123",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0123",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0124",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0124",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 21,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0125",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0125",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0126",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0126",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0127",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0127",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0128",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0128",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0129",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0129",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0130",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0130",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 11,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0131",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0131",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0132",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0132",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0133",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0133",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0134",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0134",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 8,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0135",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0135",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_bedrooms"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0136",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0136",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0137",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0137",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 1,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0138",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0138",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0139",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0139",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0140",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0140",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 29,
-      "has_offer": false,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0141",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0141",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0142",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0142",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 7,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0143",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0143",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 9,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0144",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0144",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0145",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0145",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0146",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0146",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 0,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area",
-        "missing_public_images"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0147",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0147",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 14,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0148",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0148",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 13,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0149",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0149",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 11,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0150",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0150",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 3,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0151",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0151",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 4,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0152",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0152",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0153",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0153",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 6,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0154",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0154",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 10,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0155",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0155",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 1,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0156",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0156",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0157",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0157",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 1,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0158",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0158",
-      "indexable": true,
-      "schema_type": "RealEstateListing",
-      "image_count": 5,
-      "has_offer": true,
-      "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
-    },
-    {
-      "loc": "/ru/properties/MS-CRAWL-0159",
-      "locale": "ru",
-      "page_type": "listing",
-      "listing_id": "MS-CRAWL-0159",
+      "listing_id": "MS-00356",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 15,
@@ -2266,13 +971,113 @@
       ]
     },
     {
-      "loc": "/ru/properties/MS-CRAWL-0160",
-      "locale": "ru",
+      "loc": "/bg/imoti/MS-00959",
+      "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0160",
+      "listing_id": "MS-00959",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 6,
+      "image_count": 9,
+      "has_offer": true,
+      "issues": [],
+      "warnings": [
+        "missing_bedrooms"
+      ]
+    },
+    {
+      "loc": "/bg/imoti/MS-00900",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00900",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 9,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00242",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00242",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 17,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00955",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00955",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 26,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00286",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00286",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 12,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00394",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00394",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 0,
+      "has_offer": false,
+      "issues": [],
+      "warnings": [
+        "missing_public_images"
+      ]
+    },
+    {
+      "loc": "/bg/imoti/MS-00891",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00891",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00869",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00869",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 16,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00851",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00851",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 8,
       "has_offer": true,
       "issues": [],
       "warnings": [
@@ -2280,13 +1085,13 @@
       ]
     },
     {
-      "loc": "/ru/properties/MS-CRAWL-0161",
-      "locale": "ru",
+      "loc": "/bg/imoti/MS-00191",
+      "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0161",
+      "listing_id": "MS-00191",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 4,
+      "image_count": 20,
       "has_offer": false,
       "issues": [],
       "warnings": [
@@ -2294,38 +1099,264 @@
       ]
     },
     {
-      "loc": "/ru/properties/MS-CRAWL-0162",
-      "locale": "ru",
+      "loc": "/bg/imoti/MS-00791",
+      "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0162",
+      "listing_id": "MS-00791",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 19,
+      "image_count": 15,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_area"
-      ]
+      "warnings": []
     },
     {
-      "loc": "/ru/properties/MS-CRAWL-0163",
-      "locale": "ru",
+      "loc": "/bg/imoti/MS-00734",
+      "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0163",
+      "listing_id": "MS-00734",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 6,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00707",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00707",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 24,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00543",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00543",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00872",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00872",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 25,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00671",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00671",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 27,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00190",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00190",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 7,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00619",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00619",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 3,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00699",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00699",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 18,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00758",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00758",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 10,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00751",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00751",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 4,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00750",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00750",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 15,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00666",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00666",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00695",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00695",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 9,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00731",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00731",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00879",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00879",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 13,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00123",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00123",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 9,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00999",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00999",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00739",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00739",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00635",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00635",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 14,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_bedrooms"
       ]
     },
     {
-      "loc": "/ru/properties/MS-CRAWL-0164",
-      "locale": "ru",
+      "loc": "/bg/imoti/MS-00933",
+      "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0164",
+      "listing_id": "MS-00933",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 14,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00870",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00870",
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 19,
@@ -2336,18 +1367,236 @@
       ]
     },
     {
-      "loc": "/ru/properties/MS-CRAWL-0165",
-      "locale": "ru",
+      "loc": "/bg/imoti/MS-00760",
+      "locale": "bg",
       "page_type": "listing",
-      "listing_id": "MS-CRAWL-0165",
+      "listing_id": "MS-00760",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 10,
+      "image_count": 30,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00651",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00651",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 11,
+      "has_offer": false,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00444",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00444",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 22,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00896",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00896",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 1,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/bg/imoti/MS-00778",
+      "locale": "bg",
+      "page_type": "listing",
+      "listing_id": "MS-00778",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 30,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00935",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00935",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 9,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00382",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00382",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 23,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00697",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00697",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 7,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00280",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00280",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 9,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00645",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00645",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 5,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00920",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00920",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 7,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00628",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00628",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 0,
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_public_images"
       ]
+    },
+    {
+      "loc": "/ru/properties/MS-00340",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00340",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 0,
+      "has_offer": true,
+      "issues": [],
+      "warnings": [
+        "missing_public_images"
+      ]
+    },
+    {
+      "loc": "/ru/properties/MS-00296",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00296",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 5,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00232",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00232",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 1,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00362",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00362",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 5,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00074",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00074",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 1,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00046",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00046",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 5,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
+    },
+    {
+      "loc": "/ru/properties/MS-00696",
+      "locale": "ru",
+      "page_type": "listing",
+      "listing_id": "MS-00696",
+      "indexable": true,
+      "schema_type": "RealEstateListing",
+      "image_count": 14,
+      "has_offer": true,
+      "issues": [],
+      "warnings": []
     },
     {
       "loc": "/en/guides/foreign-buyers",

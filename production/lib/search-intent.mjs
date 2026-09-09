@@ -1,4 +1,5 @@
 import { CANONICAL_PROPERTY_FAMILIES, isFactApplicable, taxonomyForLegacyPropertyType } from "./listing-facts.mjs";
+import { extractSearchVocabulary, searchReferenceFromText } from "./search-vocabulary.mjs";
 
 export const SEARCH_INTENT_SCHEMA_VERSION = 1;
 export const SEARCH_SORTS = Object.freeze(["recommended", "price_asc", "price_desc"]);
@@ -108,6 +109,43 @@ export function assertSearchIntentCompatibility(intent) {
   return intent;
 }
 
+// Numeric filters that only make sense for some property families. A text
+// query never adopts a family that would contradict one of these, because the
+// visitor set the filter deliberately and the word may be incidental.
+const FAMILY_SCOPED_FILTERS = Object.freeze([
+  ["bedrooms_count", ["bedrooms_min", "bedrooms_max"]],
+  ["premises_count", ["premises_min"]],
+  ["hotel_room_count", ["hotel_rooms_min"]],
+  ["land_area_sqm", ["land_area_min", "land_area_max"]],
+  ["floor_number", ["floor_min", "floor_max"]],
+  ["storeys_count", ["storeys_min", "storeys_max"]],
+]);
+
+function hasValue(value) {
+  return value !== null && value !== undefined && String(value).trim() !== "";
+}
+
+function familyFitsInput(family, input) {
+  return FAMILY_SCOPED_FILTERS.every(
+    ([fact, fields]) => isFactApplicable(family, fact) || !fields.some((field) => hasValue(input[field] ?? input[field.replace("primary_area", "area")])),
+  );
+}
+
+// The free text is read once here, so the in-memory engine, Postgres and the
+// hosted engines all see the same reference, filters and residual words.
+function lexicalIntent(input, { propertyFamilies, offerType }) {
+  const text = String(input.text_query ?? input.q ?? input.query ?? "").trim();
+  const explicitReference = String(input.exact_reference || input.listing_reference || "").trim();
+  const reference = explicitReference ? null : searchReferenceFromText(text);
+  if (reference) return { text_query: text, exact_reference: reference, property_family: null, offer_type: null };
+  const extracted = extractSearchVocabulary(text, { propertyFamily: propertyFamilies[0] || null, offerType });
+  if (extracted.property_family && !familyFitsInput(extracted.property_family, input)) {
+    const withoutFamily = extractSearchVocabulary(text, { propertyFamily: false, offerType });
+    return { text_query: withoutFamily.text_query, exact_reference: null, property_family: null, offer_type: withoutFamily.offer_type };
+  }
+  return { ...extracted, exact_reference: null };
+}
+
 export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {}) {
   const pricePeriod = String(input.price_period || "").trim();
   // Listings do not yet have an authoritative billing-period field. Reject the
@@ -124,14 +162,16 @@ export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {})
     }
     return legacyFamily || normalized;
   });
+  const explicitOfferType = requiredEnum(input.offer_type, SEARCH_OFFER_TYPES, "offer_type");
+  const lexical = lexicalIntent(input, { propertyFamilies, offerType: explicitOfferType });
   const intent = {
     schema_version: SEARCH_INTENT_SCHEMA_VERSION,
     locale: String(input.locale || defaultLocale).trim() || defaultLocale,
-    text_query: String(input.text_query ?? input.q ?? input.query ?? "").trim(),
-    exact_reference: String(input.exact_reference || input.listing_reference || "").trim() || null,
-    property_families: [...new Set(propertyFamilies)],
+    text_query: lexical.text_query,
+    exact_reference: String(input.exact_reference || input.listing_reference || "").trim() || lexical.exact_reference,
+    property_families: [...new Set([...propertyFamilies, ...(lexical.property_family ? [lexical.property_family] : [])])],
     property_subtypes: [...new Set(values(input.property_subtypes || input.property_subtype))],
-    offer_type: requiredEnum(input.offer_type, SEARCH_OFFER_TYPES, "offer_type"),
+    offer_type: explicitOfferType || lexical.offer_type,
     listing_status: requiredEnum(input.listing_status || input.status, SEARCH_STATUSES, "listing_status"),
     price_currency: String(input.price_currency || input.currency || "EUR").trim().toUpperCase() || "EUR",
     price_period: null,

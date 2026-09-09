@@ -12,6 +12,26 @@ function latestLead(leads) {
   return [...leads].sort((left, right) => timestamp(right.received_at) - timestamp(left.received_at))[0];
 }
 
+function uniqueText(values) {
+  return [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))];
+}
+
+// The last thing the customer wrote, taken from the communication thread of the
+// most recent enquiry; the broker reads it before deciding what to do next.
+function latestInboundMessage(thread) {
+  const inbound = (thread?.events || []).filter((event) => event.direction === "inbound" && event.body);
+  const latest = inbound.at(-1);
+  return latest ? { body: latest.body, at: latest.occurred_at || null } : null;
+}
+
+function nextOpenFollowUp(leads) {
+  const due = leads
+    .map((lead) => lead.follow_up_task)
+    .filter((task) => task && task.status === "open" && timestamp(task.due_at))
+    .sort((left, right) => timestamp(left.due_at) - timestamp(right.due_at))[0];
+  return due?.due_at || null;
+}
+
 export function buildContactRecords({ leads = [], communicationThreads = [], accounts = [] } = {}) {
   const leadsByContact = new Map();
   for (const lead of leads) {
@@ -32,6 +52,7 @@ export function buildContactRecords({ leads = [], communicationThreads = [], acc
       const account = accountByContact.get(contactId);
       const contact = current.contact || contactLeads.find((lead) => lead.contact)?.contact || {};
       const leadIds = [...new Set(contactLeads.map((lead) => lead.lead_id))];
+      const latestMessage = latestInboundMessage(threadsByLead.get(current.lead_id));
       return {
         id: contactId,
         display_name: String(contact.name || "").trim() || contactId,
@@ -46,6 +67,11 @@ export function buildContactRecords({ leads = [], communicationThreads = [], acc
         assigned_brokers: [...new Set(contactLeads.map((lead) => lead.broker_assignment?.broker_id || lead.assigned_broker).filter(Boolean))].sort(),
         latest_received_at: current.received_at || null,
         latest_lead_id: current.lead_id,
+        latest_message: latestMessage?.body || null,
+        latest_message_at: latestMessage?.at || null,
+        listing_references: uniqueText(contactLeads.map((lead) => lead.listing_reference)),
+        locations: uniqueText(contactLeads.flatMap((lead) => [lead.property?.location, ...(lead.requirements?.locations || [])])),
+        next_follow_up_at: nextOpenFollowUp(contactLeads),
         duplicate_leads: Math.max(0, leadIds.length - 1),
         communication_event_count: leadIds.reduce((total, leadId) => total + (threadsByLead.get(leadId)?.event_count || 0), 0),
         account_id: account?.id || null,

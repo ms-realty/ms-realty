@@ -40,7 +40,7 @@ function emptyLeads() {
 }
 
 test("admin listing editor quality rail uses a compact status list", () => {
-  const html = editorHtml("MS-CRAWL-0001", "bg");
+  const html = editorHtml("MS-00815", "bg");
   assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
   assert.match(html, /class="crm-panel"/);
   assert.match(html, /Публикувано/);
@@ -55,7 +55,7 @@ test("admin listing editor quality rail uses a compact status list", () => {
 });
 
 test("admin listing editor savebar uses workspace copy instead of filter leftovers", () => {
-  const html = editorHtml("MS-CRAWL-0002", "bg");
+  const html = editorHtml("MS-00907", "bg");
   assert.match(html, /Промените са записани\./);
   assert.match(html, /Отмени промените/);
   assert.doesNotMatch(html, /Изчисти филтрите/);
@@ -66,7 +66,7 @@ test("admin listing editor savebar uses workspace copy instead of filter leftove
 });
 
 test("admin listing editor offers every canonical family instead of the legacy land list", () => {
-  const html = editorHtml("MS-CRAWL-0001");
+  const html = editorHtml("MS-00815");
   const typeSelect = html.match(/<select name="property_type"[^>]*>([\s\S]*?)<\/select>/)?.[1] || "";
   for (const family of CANONICAL_PROPERTY_FAMILIES) {
     assert.match(typeSelect, new RegExp(`value="${family}"`));
@@ -108,7 +108,7 @@ test("admin listing manager filters and labels every canonical family", () => {
   assert.match(html, /Земеделска земя/);
   assert.match(html, /data-listing-column="property-family"/);
   assert.match(html, /name="q"[^>]*placeholder="напр. Сандански"/);
-  assert.doesNotMatch(html, /name="q"[^>]*placeholder="MS-CRAWL-/);
+  assert.doesNotMatch(html, /name="q"[^>]*placeholder="MS-0\d{4}/);
   assert.match(html, /<th scope="col">Статус<\/th>/);
   assert.match(html, /<th scope="col">Проблеми<\/th>/);
   assert.match(html, /<th scope="col">Действие<\/th>/);
@@ -117,7 +117,7 @@ test("admin listing manager filters and labels every canonical family", () => {
   assert.match(html, /data-listing-filters="true"/);
   assert.match(html, /adm-listing-table/);
   assert.match(html, /data-listing-mobile-summary="true"/);
-  assert.match(html, /data-listing-mobile-more="MS-CRAWL-0001"/);
+  assert.match(html, /data-listing-mobile-more="MS-00815"/);
   assert.match(html, /class="crm-ph"/);
   assert.doesNotMatch(html, /<h2>Резултати<\/h2>/);
   assert.equal([...html.matchAll(/<h2>Резултати · \d+<\/h2>/g)].length, 1);
@@ -158,7 +158,7 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
           admin_locale: "bg",
           contact_preference: "phone",
           source: "website_listing_detail",
-          listing_reference: "MS-CRAWL-0001",
+          listing_reference: "MS-00815",
           property: { location: "Сандански" },
           contact: { name: "Иван Петров", phone: "+359888000111" },
           intake_completion: { complete: false, missing_fields: [] },
@@ -174,9 +174,9 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
   assert.match(html, /adm-lead-more/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
   assert.match(html, /class="adm-lead-detail"/);
-  // The inbox metrics are the Atlas summary strip now, not the compact <dl> KPI grid.
-  assert.match(html, /class="adm-summary-strip"/);
-  assert.match(html, /data-summary-card=/);
+  // No KPI strip above the inbox: the filter pills already carry the counts.
+  assert.doesNotMatch(html, /class="adm-summary-strip"/);
+  assert.doesNotMatch(html, /data-summary-card=/);
   assert.doesNotMatch(html, /class="adm-kpis"/);
   assert.match(html, /data-lead-filter=/);
   assert.match(html, /data-lead-id="lead-inbox-1"/);
@@ -185,7 +185,7 @@ test("admin lead inbox keeps one primary reply action and collapses briefs", () 
 });
 
 test("listing editor keeps support panels in the main flow instead of a narrow readiness rail", () => {
-  const html = editorHtml("MS-CRAWL-0001", "en");
+  const html = editorHtml("MS-00815", "en");
   assert.match(html, /<section class="adm-editor-support"[^>]*data-editor-readiness-rail="true"/);
   assert.match(generatedCss, /main\[data-react-admin-ui="listing-editor"\]\s+\.adm-editor-support\{[^}]*grid-template-columns:minmax\(0,1fr\)/);
 });
@@ -237,7 +237,9 @@ test("admin pipeline cards keep qualification collapsed and facts unboxed", () =
   assert.match(card, /adm-id-caption/);
   assert.match(card, /class="adm-pipeline-action"/);
   assert.doesNotMatch(card, /class="adm-pipeline-action"[^>]*\sopen/);
-  assert.match(html, /class="adm-kpis"/);
+  // One overflow menu per card, and no KPI strip duplicating the pills.
+  assert.equal((card.match(/data-pipeline-overflow="true"/g) || []).length, 1);
+  assert.doesNotMatch(html, /class="adm-kpis"/);
 });
 
 test("admin lead intake uses canonical family checkboxes instead of English CSV hints", () => {
@@ -375,7 +377,7 @@ test("admin activity localizes leftover keys and uses human filter hints", () =>
   );
   assert.match(html, /placeholder="напр. номер на запитване"/);
   assert.match(html, /placeholder="напр. референция на обява"/);
-  assert.doesNotMatch(html, /placeholder="MS-CRAWL-0001"/);
+  assert.doesNotMatch(html, /placeholder="MS-00815"/);
   assert.doesNotMatch(html, /placeholder="lead-…"/);
   assert.match(html, /<dt>Публично включен<\/dt>/);
   assert.match(html, /<dt>Индексируем<\/dt>/);

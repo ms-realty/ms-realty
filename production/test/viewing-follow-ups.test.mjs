@@ -20,7 +20,7 @@ function fixture() {
   const leads = [
     {
       lead_id: "lead-viewing-test",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "he",
       admin_locale: "en",
       contact_preference: "whatsapp",

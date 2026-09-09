@@ -74,13 +74,13 @@
   },
   "persisted": [
     {
-      "id": "translation-listing-MS-CRAWL-0001-el",
+      "id": "translation-listing-MS-00815-el",
       "target_locale": "el",
       "status": "hermes_drafted",
       "public_indexable": false
     },
     {
-      "id": "translation-listing-MS-CRAWL-0001-he",
+      "id": "translation-listing-MS-00815-he",
       "target_locale": "he",
       "status": "hermes_drafted",
       "public_indexable": false

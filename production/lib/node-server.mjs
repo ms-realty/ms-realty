@@ -186,16 +186,16 @@ export function assertServerSmoke(smoke) {
   ) {
     throw new Error("Server must fail readiness with public launch gate details while blockers remain");
   }
-  if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
+  if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-00815") {
     throw new Error("Server must serve approved legacy redirect");
   }
   if (
     smoke.slugChange?.status !== 201 ||
     smoke.slugChange.body.status !== 301 ||
     smoke.slugChange.body.old_path !== "/he/properties/old-sandanski-slug" ||
-    smoke.slugChange.body.new_path !== "/he/properties/MS-CRAWL-0001" ||
+    smoke.slugChange.body.new_path !== "/he/properties/MS-00815" ||
     smoke.slugRedirect?.status !== 301 ||
-    smoke.slugRedirect.headers.location !== "/he/properties/MS-CRAWL-0001"
+    smoke.slugRedirect.headers.location !== "/he/properties/MS-00815"
   ) {
     throw new Error("Server must create path-only slug-change 301 redirects");
   }
@@ -309,7 +309,7 @@ export function assertServerSmoke(smoke) {
   ) {
     throw new Error("Server must expose BG, RU, EN admin workspaces and Greek/Hebrew website locales");
   }
-  const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
+  const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-00815");
   if (
     smoke.staleSearch.status !== 200 ||
     staleSearchCard?.translation_display !== "reviewed_translation" ||

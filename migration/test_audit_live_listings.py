@@ -6,7 +6,7 @@ from migration import audit_live_listings
 from migration.crawl_inventory import FetchResult
 
 
-def record(listing_id: str = "MS-CRAWL-0001") -> dict[str, object]:
+def record(listing_id: str = "MS-00815") -> dict[str, object]:
     return {
         "id": listing_id,
         "source_url": f"https://example.test/{listing_id}",
@@ -28,15 +28,15 @@ def record(listing_id: str = "MS-CRAWL-0001") -> dict[str, object]:
 
 REVIEWS = {
     "places": {"reviewed": {"location_name": "Reviewed place"}},
-    "listing_overrides": {"MS-CRAWL-0001": "reviewed"},
-    "listing_statuses": {"MS-CRAWL-0001": {"status": "confirmed_settlement"}},
+    "listing_overrides": {"MS-00815": "reviewed"},
+    "listing_statuses": {"MS-00815": {"status": "confirmed_settlement"}},
 }
 
 
 class LiveListingAuditTests(unittest.TestCase):
     def test_non_200_body_never_supplies_listing_facts(self) -> None:
         result = FetchResult(
-            url="https://example.test/MS-CRAWL-0001",
+            url="https://example.test/MS-00815",
             status=404,
             content_type="text/html",
             body="<title>Unrelated &amp; card</title><div class='post_content'>Площ: 999 m2 Цена: 999 €</div>",
@@ -53,8 +53,8 @@ class LiveListingAuditTests(unittest.TestCase):
 
     def test_primary_content_comparison_normalizes_entities_and_flags_drift(self) -> None:
         result = FetchResult(
-            url="https://example.test/MS-CRAWL-0001",
-            final_url="https://example.test/MS-CRAWL-0001",
+            url="https://example.test/MS-00815",
+            final_url="https://example.test/MS-00815",
             status=200,
             content_type="text/html; charset=utf-8",
             body=(
@@ -91,7 +91,7 @@ class LiveListingAuditTests(unittest.TestCase):
 
         selected = audit_live_listings.priority_review30(rows)
 
-        self.assertEqual(selected[0]["id"], "MS-CRAWL-0031")
+        self.assertEqual(selected[0]["id"], "MS-00940")
         self.assertEqual([row["id"] for row in selected[1:]], [f"MS-CRAWL-{number:04d}" for number in range(1, 30)])
 
     def test_launch_candidate30_is_a_manual_review_queue_not_risk_queue(self) -> None:
@@ -120,9 +120,9 @@ class LiveListingAuditTests(unittest.TestCase):
         selected = audit_live_listings.launch_candidate30(rows)
 
         self.assertEqual(len(selected), 30)
-        self.assertNotIn("MS-CRAWL-0001", {row["id"] for row in selected})
-        self.assertNotIn("MS-CRAWL-0002", {row["id"] for row in selected})
-        self.assertEqual(selected[0]["id"], "MS-CRAWL-0030")
+        self.assertNotIn("MS-00815", {row["id"] for row in selected})
+        self.assertNotIn("MS-00907", {row["id"] for row in selected})
+        self.assertEqual(selected[0]["id"], "MS-00943")
         self.assertEqual(
             selected[0]["remaining_launch_blockers"],
             ["broker_map_and_verify_observed_area", "complete_human_listing_review"],

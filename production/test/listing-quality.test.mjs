@@ -164,13 +164,13 @@ test("listing quality treats explicit price-on-request as reviewed pricing", () 
   const seed = {
     ...base,
     records: base.records.map((record) =>
-      record.id === "MS-CRAWL-0001"
+      record.id === "MS-00815"
         ? { ...record, facts: { ...record.facts, price_eur: null, price_on_request: true } }
         : record,
     ),
   };
   const row = buildListingQualityReport({ seed, generatedAt: "2026-07-05T00:00:00Z" }).rows.find(
-    (candidate) => candidate.listing_id === "MS-CRAWL-0001",
+    (candidate) => candidate.listing_id === "MS-00815",
   );
 
   if (row) assert.equal(row.issues.includes("missing_price"), false);
@@ -181,13 +181,13 @@ test("listing quality treats reviewed bedroom-not-applicable as complete", () =>
   const seed = {
     ...base,
     records: base.records.map((record) =>
-      record.id === "MS-CRAWL-0044"
+      record.id === "MS-00345"
         ? { ...record, facts: { ...record.facts, bedrooms: null, bedrooms_not_applicable: true } }
         : record,
     ),
   };
   const row = buildListingQualityReport({ seed, generatedAt: "2026-07-05T00:00:00Z" }).rows.find(
-    (candidate) => candidate.listing_id === "MS-CRAWL-0044",
+    (candidate) => candidate.listing_id === "MS-00345",
   );
 
   if (row) assert.equal(row.issues.includes("missing_bedrooms"), false);
@@ -196,10 +196,10 @@ test("listing quality treats reviewed bedroom-not-applicable as complete", () =>
 test("listing quality does not require bedrooms for land and multi-unit listings", () => {
   const seed = loadCmsSeed();
   const report = buildListingQualityReport({ seed, generatedAt: "2026-07-05T00:00:00Z" });
-  const landRow = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0158");
-  const landListing = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0158");
-  const multiUnitRow = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0002");
-  const multiUnitListing = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0002");
+  const landRow = report.rows.find((candidate) => candidate.listing_id === "MS-00046");
+  const landListing = seed.records.find((candidate) => candidate.id === "MS-00046");
+  const multiUnitRow = report.rows.find((candidate) => candidate.listing_id === "MS-00907");
+  const multiUnitListing = seed.records.find((candidate) => candidate.id === "MS-00907");
 
   assert.equal(landListing.facts.property_type, "land");
   if (landRow) {
@@ -215,15 +215,15 @@ test("listing quality does not require bedrooms for land and multi-unit listings
 
 test("listing quality does not require tour review for approved tour ledger rows", () => {
   const seed = loadCmsSeed();
-  const record = seed.records.find((candidate) => candidate.collection === "listings" && candidate.id === "MS-CRAWL-0001");
+  const record = seed.records.find((candidate) => candidate.collection === "listings" && candidate.id === "MS-00815");
   const report = buildListingQualityReport({
     seed,
     tourApprovals: [
       {
         ...record.tour,
         listing_id: record.id,
-        panorama_url: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-CRAWL-0001.jpg",
-        accessibility_caption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+        panorama_url: "https://ms-realty.ms-realty-bg.workers.dev/tours/MS-00815.jpg",
+        accessibility_caption: "Reviewed 360 panorama for MS-00815.",
         is_public: true,
         review_status: "approved",
         reviewer: "media_editor",
@@ -232,7 +232,7 @@ test("listing quality does not require tour review for approved tour ledger rows
     ],
     generatedAt: "2026-07-05T00:00:00Z",
   });
-  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0001");
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-00815");
 
   if (row) {
     assert.equal(row.issues.includes("tour_review_pending"), false);
@@ -243,7 +243,7 @@ test("listing quality does not require tour review for approved tour ledger rows
 test("listing quality only flags tours after a panorama is uploaded for review", () => {
   const seed = loadCmsSeed();
   const draftRow = buildListingQualityReport({ seed, generatedAt: "2026-07-05T00:00:00Z" }).rows.find(
-    (candidate) => candidate.listing_id === "MS-CRAWL-0002",
+    (candidate) => candidate.listing_id === "MS-00907",
   );
 
   if (draftRow) assert.equal(draftRow.issues.includes("tour_review_pending"), false);
@@ -251,13 +251,13 @@ test("listing quality only flags tours after a panorama is uploaded for review",
   const uploadedSeed = {
     ...seed,
     records: seed.records.map((record) =>
-      record.collection === "listings" && record.id === "MS-CRAWL-0002"
-        ? { ...record, tour: { ...record.tour, panorama_url: "https://cdn.example.test/tours/MS-CRAWL-0002.jpg" } }
+      record.collection === "listings" && record.id === "MS-00907"
+        ? { ...record, tour: { ...record.tour, panorama_url: "https://cdn.example.test/tours/MS-00907.jpg" } }
         : record,
     ),
   };
   const uploadedRow = buildListingQualityReport({ seed: uploadedSeed, tourApprovals: [], generatedAt: "2026-07-05T00:00:00Z" }).rows.find(
-    (candidate) => candidate.listing_id === "MS-CRAWL-0002",
+    (candidate) => candidate.listing_id === "MS-00907",
   );
 
   assert.ok(uploadedRow.issues.includes("tour_review_pending"));
@@ -345,7 +345,7 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   const seed = {
     ...base,
     records: base.records.map((record) =>
-      record.id === "MS-CRAWL-0044"
+      record.id === "MS-00345"
         ? { ...record, facts: { ...record.facts, bedrooms: null, bedrooms_not_applicable: false } }
         : record,
     ),
@@ -693,7 +693,7 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /LISTING QUALITY PREFLIGHT FAILED/);
   assert.match(missing.stderr, /Pending review sample:/);
-  assert.match(missing.stderr, /MS-CRAWL-/);
+  assert.match(missing.stderr, /MS-0\d{4}/);
   assert.match(missing.stderr, /\/admin\/listings\/edit\?listingId=/);
   assert.match(missing.stderr, /npm run listing:review-pack/);
   assert.match(missing.stderr, /draft review CSV/);

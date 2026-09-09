@@ -66,10 +66,20 @@ test("the queues still render both tables with their five columns", async () => 
     leadContactVaultPath: path.join(dir, "lead-contacts.jsonl"),
     leadContactKey: "test-only-queue-table-key-32-chars-x",
   });
-  const res = await dispatchHttp(app, { url: "/admin/leads?locale=en", headers: { authorization: "Bearer local-admin-smoke" } });
-  assert.equal(res.status, 200);
-  for (const table of TABLES) assert.match(res.body, new RegExp(`<table[^>]*${table}`));
-  // The stage cell is the one that overflowed: it holds a pill, in a column
-  // the stylesheet above now lets wrap.
-  assert.match(res.body, /data-seller-pipeline-column="stage"[^>]*><span class="crm-pill"/);
+  // Each queue sits on the screen that owns its work: follow-ups on
+  // Viewings, seller valuations on the pipeline. The inbox carries neither.
+  const routes = { "data-viewing-follow-up-table": "/admin/viewings", "data-seller-pipeline-table": "/admin/pipeline" };
+  const headers = { authorization: "Bearer local-admin-smoke" };
+  for (const table of TABLES) {
+    const res = await dispatchHttp(app, { url: `${routes[table]}?locale=en`, headers });
+    assert.equal(res.status, 200);
+    assert.match(res.body, new RegExp(`<table[^>]*${table}`));
+    if (table === "data-seller-pipeline-table") {
+      // The stage cell is the one that overflowed: it holds a pill, in a column
+      // the stylesheet above now lets wrap.
+      assert.match(res.body, /data-seller-pipeline-column="stage"[^>]*><span class="crm-pill"/);
+    }
+  }
+  const inbox = await dispatchHttp(app, { url: "/admin/leads?locale=en", headers });
+  for (const table of TABLES) assert.doesNotMatch(inbox.body, new RegExp(table));
 });
