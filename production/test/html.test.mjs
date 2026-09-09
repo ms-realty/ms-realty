@@ -435,3 +435,21 @@ test("admin seller controls continue from listing publication through offer and 
   assert.match(html, /name="salePriceEur" type="number" min="1" step="1" required/);
   assert.match(html, /name="commissionEur" type="number" min="0" step="1"/);
 });
+
+test("a document rendered for the canonical origin never publishes the operational workers.dev origin", () => {
+  const origin = "https://makler-realty.com";
+  for (const page of [
+    renderHomePage({ registry, listings, localeCode: "bg" }),
+    renderSearchPage({ registry, listings, localeCode: "bg", query: "" }),
+    renderListingPage({ registry, listing, localeCode: "bg" }),
+  ]) {
+    const html = renderHtmlPage(page, { origin });
+    assert.doesNotMatch(html, /\.workers\.dev/, `${page.kind} names the operational origin`);
+    assert.match(html, /<link rel="canonical" href="https:\/\/makler-realty\.com\//);
+  }
+  const searchHtml = renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "bg", query: "" }), { origin });
+  assert.match(searchHtml, /<img src="https:\/\/makler-realty\.com\/media\/makler-realty\.(?:com|ru)\/wp-content\/uploads\//);
+  // Rendered for the operational origin itself, nothing is rewritten.
+  const operational = renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "bg", query: "" }));
+  assert.match(operational, /<img src="https:\/\/ms-realty\.ms-realty-bg\.workers\.dev\/media\//);
+});
