@@ -851,4 +851,5 @@ test("an expired prior monitoring report does not refuse a release", () => {
   );
   assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight; then/);
   assert.match(capture, /echo "valid=false" >> "\$GITHUB_OUTPUT"/);
+  assert.match(capture, /if ! ssh "\$\{ssh_args\[@\]\}" "root@\$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 \/opt\/ms-realty\/incoming;/, "the remote validation is guarded too");
 });
