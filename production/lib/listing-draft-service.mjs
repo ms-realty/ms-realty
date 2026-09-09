@@ -452,9 +452,39 @@ function propertyMutationFromEdit(current, edit) {
   return { changedFields: [...new Set(changedFields)], data, idempotent: false };
 }
 
+// Every public page and most admin screens project the whole Payload draft
+// state over the CMS seed. Reading that snapshot from Postgres took three to
+// eight seconds per request on the production origin, and nothing about it
+// changes between two page views unless an operator saved something. Reads
+// outside a transaction therefore share one projection for a short window and
+// coalesce concurrent misses into one snapshot read; writers in this module
+// drop the shared projection once their transaction has committed, so an
+// operator sees their own save on the next request. In-transaction reads
+// (req present) always read fresh: they are the write path's view of the data.
+const DEFAULT_PROJECTION_TTL_MS = 15_000;
+const projectionCache = new WeakMap();
+let projectionEpoch = 0;
+
+function projectionTtlMs(env, override) {
+  if (override !== undefined && override !== null) return Math.max(0, Number(override) || 0);
+  const configured = String(env?.MS_REALTY_LISTING_PROJECTION_TTL_MS || "").trim();
+  if (configured) return Math.max(0, Number(configured) || 0);
+  return env?.NODE_ENV === "production" ? DEFAULT_PROJECTION_TTL_MS : 0;
+}
+
+export function invalidateListingProjection() {
+  projectionEpoch += 1;
+}
+
+async function readProjection(seed, runtime, { req, requirePayload }) {
+  const snapshot = await readPayloadCmsSnapshot({ payload: runtime, req });
+  if (requirePayload) assertCompletePayloadSnapshot(seed, snapshot);
+  return projectPayloadCmsSeed(seed, snapshot);
+}
+
 export async function projectListingDraftSeed(
   seed,
-  { env = process.env, payload = null, req = null, requirePayload = false } = {},
+  { env = process.env, payload = null, req = null, requirePayload = false, cacheTtlMs = undefined, now = Date.now } = {},
 ) {
   if (!payload && missingPayloadRuntime(env)) {
     if (requirePayload) throw unavailableError("Payload listing authority is not configured");
@@ -462,9 +492,24 @@ export async function projectListingDraftSeed(
   }
   try {
     const runtime = await loadPayloadCmsImportRuntime({ env, payload });
-    const snapshot = await readPayloadCmsSnapshot({ payload: runtime, req });
-    if (requirePayload) assertCompletePayloadSnapshot(seed, snapshot);
-    return projectPayloadCmsSeed(seed, snapshot);
+    const ttl = req ? 0 : projectionTtlMs(env, cacheTtlMs);
+    if (ttl <= 0) return await readProjection(seed, runtime, { req, requirePayload });
+    let bySeed = projectionCache.get(runtime);
+    if (!bySeed) projectionCache.set(runtime, (bySeed = new WeakMap()));
+    const entry = bySeed.get(seed);
+    const at = now();
+    if (entry && entry.epoch === projectionEpoch && at - entry.at < ttl && (entry.requirePayload || !requirePayload)) {
+      return await entry.promise;
+    }
+    const epoch = projectionEpoch;
+    const promise = readProjection(seed, runtime, { req: null, requirePayload });
+    bySeed.set(seed, { promise, at, epoch, requirePayload });
+    try {
+      return await promise;
+    } catch (error) {
+      if (bySeed.get(seed)?.promise === promise) bySeed.delete(seed);
+      throw error;
+    }
   } catch (error) {
     if (!requirePayload && !payload && /Payload runtime is not configured/i.test(String(error?.message || ""))) return seed;
     if (requirePayload && !error?.status) throw unavailableError("Payload listing authority is unavailable", error);
@@ -591,6 +636,9 @@ export async function saveListingDraft(
       staleTranslations,
       projectedSeed,
     };
+  }).then((result) => {
+    invalidateListingProjection();
+    return result;
   }).catch((error) => {
     if ([error?.code, error?.cause?.code, error?.data?.code].includes("40001")) throw draftConflictError();
     throw error;
@@ -671,5 +719,8 @@ export async function saveBulkListingStatusDrafts(
       staleTranslations,
       projectedSeed,
     };
+  }).then((result) => {
+    invalidateListingProjection();
+    return result;
   });
 }

@@ -213,7 +213,7 @@ import {
   recordSellerPipelineOutcomeOperation,
 } from "./lead-ops-workflows.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
-import { browserListingRevisionRequired, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
+import { browserListingRevisionRequired, invalidateListingProjection, projectListingDraftSeed, saveBulkListingStatusDrafts, saveListingDraft } from "./listing-draft-service.mjs";
 import {
   DEFAULT_CONSENT_LEDGER_PATH,
   appendConsentRecord,
@@ -4245,7 +4245,7 @@ async function importListingQualityRows(inputCsv, config, source = "listing_qual
   };
 }
 
-export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
+async function renderAppAdminResponseInner(request, { config = appAdminConfigFromEnv() } = {}) {
   const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
   if (crossOrigin) return jsonResponse(403, { kind: "cross_origin_write_blocked", reason: crossOrigin });
   const authEnv = config.authEnv || process.env;
@@ -6111,3 +6111,23 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return adminBadRequest(error);
   }
 }
+
+// Any admin write may change what the shared listing projection reads
+// (listing drafts, media documents, reviews, translations, publication), and
+// most of those writers live outside listing-draft-service. Rather than teach
+// every handler about the cache, drop the projection after each successful
+// mutating admin request; the write path's own in-transaction reads are never
+// cached, so this only shortens the read-side window.
+function invalidatesProjectionAfterAdminWrites(handle) {
+  return async function handleAdminAware(request, ...rest) {
+    const response = await handle(request, ...rest);
+    const method = String(request?.method || "GET").toUpperCase();
+    const pathname = (() => { try { return new URL(request.url, "http://localhost").pathname; } catch { return ""; } })();
+    if (!["GET", "HEAD", "OPTIONS"].includes(method) && response && response.status < 400 && (pathname.startsWith("/api/admin/") || pathname.startsWith("/admin/"))) {
+      invalidateListingProjection();
+    }
+    return response;
+  };
+}
+
+export const renderAppAdminResponse = invalidatesProjectionAfterAdminWrites(renderAppAdminResponseInner);
