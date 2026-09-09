@@ -271,6 +271,23 @@
     root.setAttribute("data-today-enhanced", "true");
     apply();
   }
+  // Deals: choosing an enquiry or property fills the client and property
+  // references; the broker can still edit them afterwards.
+  function initCaseStartPicker() {
+    var pickers = document.querySelectorAll("[data-case-start-picker]");
+    Array.from(pickers).forEach(function (picker) {
+      var form = picker.closest("form");
+      if (!form) return;
+      picker.addEventListener("change", function () {
+        var option = picker.options[picker.selectedIndex];
+        if (!option || !option.value) return;
+        var client = form.querySelector('[name="clientRef"]');
+        var property = form.querySelector('[name="propertyRef"]');
+        if (client) client.value = option.getAttribute("data-client-ref") || "";
+        if (property) property.value = option.getAttribute("data-property-ref") || "";
+      });
+    });
+  }
   function initAdminListFilters() {
     var navs = document.querySelectorAll("[data-list-filter]");
     for (var i = 0; i < navs.length; i += 1) {
@@ -2159,6 +2176,7 @@
   initCommunicationTemplates();
   initTodayWorkspace();
   initAdminListFilters();
+  initCaseStartPicker();
   initPipelineBoard();
   initLeadInboxPanes();
   initWhatsAppEmbeddedSignup();

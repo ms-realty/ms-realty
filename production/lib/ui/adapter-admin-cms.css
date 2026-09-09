@@ -482,6 +482,7 @@
   color: var(--text-strong);
 }
 .adm-approved-howto__why { color: var(--text-muted); }
+.adm-approved-howto > span:not(.adm-planned-badge) { flex: 1 1 auto; min-width: 0; color: var(--text-body); font-size: var(--text-sm); line-height: var(--lh-normal); }
 .adm-approved-howto > .adm-planned-badge { flex: 0 0 auto; }
 
 .adm-approved-surface {

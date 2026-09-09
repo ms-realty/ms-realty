@@ -921,7 +921,7 @@ export function renderAdminContactsPayload(registry, requestedLocale, data) {
   };
 }
 
-export function renderAdminDocumentChecklistPayload(registry, requestedLocale, checklistQueue, operator = null) {
+export function renderAdminDocumentChecklistPayload(registry, requestedLocale, checklistQueue, operator = null, leads = []) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   return {
     kind: "admin_document_checklists",
@@ -939,6 +939,7 @@ export function renderAdminDocumentChecklistPayload(registry, requestedLocale, c
     },
     workspace: workspaceWithOperator(workspace, operator),
     documentChecklistQueue: checklistQueue,
+    leads,
     summary: checklistQueue.summary,
   };
 }

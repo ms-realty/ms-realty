@@ -364,7 +364,9 @@ test("the standalone pages speak the three workbench languages and carry their s
       operators: [{ id: "a", email: "a@b.c", role: "admin", workspace_ids: [] }],
     }),
   );
-  assert.match(team, /Administrator · All workspaces/);
+  assert.match(team, /data-team-operator="a" data-team-role="admin"/);
+  assert.match(team, />Administrator<\/span>/);
+  assert.match(team, /All workspaces/);
   assert.match(team, /<option value="admin" selected>Administrator<\/option>/);
 });
 
@@ -429,12 +431,14 @@ test("approved content lists every surface with its counts, its route and its wi
   assert.match(page.body, /No named approver/);
 });
 
-test("approved content states that approval is a data-file edit plus a rebuild, and offers no approve control", async () => {
+test("approved content says its records are owner-managed and read-only, and offers no approve control", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en", headers: auth });
   assert.match(page.body, /data-approved-content-howto="true"/);
-  assert.match(page.body, /production\/data\//);
-  assert.match(page.body, /node production\/scripts\/build-approved-content\.mjs/);
-  assert.match(page.body, /source hash/);
+  assert.match(page.body, /managed by the owner and are read-only here/);
+  // Terminal commands and repository paths are the owner's runbook, not workspace copy.
+  const note = page.body.match(/<p class="adm-approved-howto"[\s\S]*?<\/p>/)?.[0];
+  assert.ok(note);
+  assert.doesNotMatch(note, /production\/data\/|build-approved-content\.mjs|source hash/);
   assert.match(page.body, /class="adm-planned-badge">Read-only</);
   // Read-only means no writing controls at all on this screen.
   const main = page.body.slice(page.body.indexOf('data-kind="admin-approved-content"'));
@@ -478,8 +482,9 @@ test("approved content is the Content destination in the primary rail and speaks
     const page = await dispatchHttp(app(), { url: `/admin/approved-content?locale=${locale}`, headers: auth });
     assert.equal(page.status, 200, locale);
     assert.match(page.body, new RegExp(title), locale);
-    // The withheld reasons and the approval procedure are translated too.
-    assert.match(page.body, /build-approved-content\.mjs/, locale);
+    // The withheld reasons and the read-only note are translated too.
+    assert.match(page.body, locale === "bg" ? /само за четене/ : /только для чтения/, locale);
+    assert.doesNotMatch(page.body, /build-approved-content\.mjs/, locale);
     assert.doesNotMatch(page.body, /Example record, not real content/, locale);
   }
   // Listings and Content are primary; the media library and the translation

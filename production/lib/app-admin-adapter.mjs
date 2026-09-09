@@ -44,7 +44,7 @@ import {
 } from "./admin-sessions.mjs";
 import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperatorTwoFactorEvents } from "./operator-two-factor.mjs";
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
-import { renderAdminTeamPayload } from "./admin-team.mjs";
+import { renderAdminTeamForbiddenPayload, renderAdminTeamPayload } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
 import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
@@ -1959,6 +1959,7 @@ async function documentChecklistPayload(registry, url, config) {
     locale,
     buildDocumentChecklistQueue(leads, filterRows(readDocumentChecklistOutcomes(config.documentChecklistLedgerPath)), { locale }),
     config.adminPrincipal || null,
+    leads,
   );
 }
 
@@ -2013,11 +2014,13 @@ async function currentRealtyCaseConditionEvents(config) {
 
 async function realtyCasesPayload(registry, url, config) {
   const now = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
+  const { leads } = await adminLeadSource(config);
   const [caseEvents, conditionEvents] = await Promise.all([
     currentRealtyCaseEvents(config),
     currentRealtyCaseConditionEvents(config),
   ]);
   return {
+    leads,
     ...renderAdminRealtyCasesPayload(
       registry,
       url.searchParams.get("locale") || "en",
@@ -4506,8 +4509,18 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       }
     }
     if (["/admin/team", "/api/admin/team"].includes(url.pathname)) {
-      const service = await payloadAdminAuth();
-      if (!payloadSession || !service) return adminForbidden("payload_session");
+      const service = payloadSession ? await payloadAdminAuth() : null;
+      if (!payloadSession || !service) {
+        if (url.pathname === "/admin/team" && request.method === "GET") {
+          return htmlResponse(
+            renderAdminTeamForbiddenPayload({
+              registry: loadLocaleRegistry(config.localeRegistryPath),
+              requestedLocale: adminLocaleParam(url, config),
+            }),
+          );
+        }
+        return adminForbidden("payload_session");
+      }
       if (request.method === "GET") {
         const operators = await service.listOperators(payloadSession);
         const payload = renderAdminTeamPayload({
@@ -5536,7 +5549,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       return jsonResponse(200, await listingQualityReviewPacket(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
-      return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, addLocale(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
       return jsonResponse(201, appendTranslationDraft(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
