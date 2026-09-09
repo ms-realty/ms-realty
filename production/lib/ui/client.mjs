@@ -4970,6 +4970,7 @@ ${ADMIN_DAILY_JS}
             status.setAttribute("data-state", partial ? "error" : "success");
           }
           if (form.hasAttribute("data-route-decision-form")) completeRouteDecision(form, payload);
+          if (form.hasAttribute("data-locale-form")) window.location.reload();
         })
         .catch(function (error) {
           if (status) { status.textContent = error.message || failure; status.setAttribute("data-state", "error"); }

@@ -9876,8 +9876,8 @@ function LocaleRolloutBody({ page }) {
                   className: "adm-filterbar",
                   "data-locale-form": "true",
                   "data-admin-mutation-form": "locale",
-                  "data-success-message": ui.localeAdded,
-                  "data-failure-message": ui.localeAddFailed,
+                  "data-admin-mutation-success": ui.localeAdded,
+                  "data-admin-mutation-failure": ui.localeAddFailed,
                 },
                 h("input", { type: "hidden", name: "reviewer", value: currentOperatorId(page, "locale_editor") }),
                 // A new language starts closed. It opens only once a human has
@@ -9908,6 +9908,7 @@ function LocaleRolloutBody({ page }) {
                   ui.localeFallback || "Falls back to",
                   h("select", { name: "fallback_locale" }, ...page.locales.filter((row) => row.indexable).map((row) => h("option", { key: row.code, value: row.code }, row.code.toUpperCase()))),
                 ),
+                h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
                 h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "plus", size: 16 }), ui.localeAddAction || "Add language"),
               ),
       ),
