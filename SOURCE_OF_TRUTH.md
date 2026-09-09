@@ -3,7 +3,7 @@
 **Single canonical document for the MS Realty rebuild** (historical `makler-realty.com` +
 `makler-realty.ru` sources; indexable public production at
 `https://makler-realty.com`).
-Last updated: 2026-08-09.
+Last updated: 2026-09-09 (runbook recovery; current launch authority remains `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`; live release markers require a fresh check).
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
 > subsystem READMEs (`production/`, `migration/`, `search/`, `locales/`,
@@ -554,11 +554,10 @@ listing-publication workflow that proves sitemap paths and internal-link suggest
 mobile/elderly QA report, a Next production runtime, and a private checksummed local backup/restore
 path with an automatic pre-restore rollback snapshot.
 
-**Blocked until launch:** explicit route decisions for the 292 non-listing legacy URLs, reviewed listing-quality fixes under `migration/reviews/listing-quality.csv`,
+**Blocked until launch:** reviewed listing-quality fixes under `migration/reviews/listing-quality.csv`,
 live Typesense/Meilisearch URLs/API keys, Hermes/vLLM endpoint, sync/query and Hermes draft-worker
 reports, plus encrypted off-site backup/restore evidence (production Payload secrets, database, and
-operator setup were completed 2026-08-09 — see `production/DEPLOYMENT.md`). Only the 165 mapped listing redirects are covered by the reviewed deployable 301 export; the
-remaining legacy URLs must not be treated as complete.
+operator setup were completed 2026-08-09 — see `production/DEPLOYMENT.md`). Legacy route decisions are complete: all 457 legacy URLs carry a terminal decision under freeze `MSR-LAUNCH-FREEZE-1` (179 one-hop `301`, 268 approved `410`, 10 retained `200`), as recorded by the `redirect_reviews` gate in `production/data/launch-readiness.json`. The reviewer workbook `redirect-approval-workbook.csv` is an input artifact and still shows blank rows; it is not the decision record.
 
 The authoritative launch report now enforces that recovery evidence as `production_recovery`: a local
 Docker snapshot cannot pass it, and the private report must prove encrypted off-site coverage plus a
