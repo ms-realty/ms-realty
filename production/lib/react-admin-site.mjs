@@ -2542,6 +2542,23 @@ function fieldText(copy, field) {
   return copy.fields[field] || String(field || "").replaceAll("_", " ");
 }
 
+// A quality issue about a missing field reads "{field} missing"; the media
+// and tour gates already have a sentence of their own.
+function listingBlockerText(ui, issue) {
+  const missingField = ["missing_price", "missing_area", "missing_bedrooms", "missing_location", "missing_description"].includes(issue);
+  const text = listingQualityIssueText(ui, issue);
+  return missingField ? String(ui.blockerMissing || "{field} missing").replace("{field}", text) : text;
+}
+
+function listingPublishBlockers(ui, { workflow = {}, qualityReview = null, schemaPresent = false, staleCount = 0 } = {}) {
+  const blockers = (qualityReview?.issues || []).map((issue) => ({ key: issue, text: listingBlockerText(ui, issue) }));
+  if (!workflow.availability_verified_at) blockers.push({ key: "availability_unverified", text: ui.availabilityNotVerified });
+  if (!workflow.publish_approved) blockers.push({ key: "publish_not_approved", text: `${ui.publishApproval}: ${ui.notApprovedForPublishing}` });
+  if (!schemaPresent) blockers.push({ key: "search_markup_missing", text: ui.gaps?.search_markup_missing || "Search markup missing" });
+  if (staleCount) blockers.push({ key: "stale_translations", text: String(ui.staleTranslationsLine || "{count} translations out of date").replace("{count}", String(staleCount)) });
+  return blockers;
+}
+
 function listingQualityIssueText(ui, issue) {
   const fieldByIssue = {
     missing_price: "price_eur",
@@ -2809,11 +2826,11 @@ function SummaryStrip({ cards, className = "", ...attrs }) {
   );
 }
 
-function PageHeader({ title, subtitle, children }) {
+function PageHeader({ title, subtitle, meta, children }) {
   return h(
     "div",
     { className: "crm-ph" },
-    h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null),
+    h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null, meta ? h("small", { className: "crm-ph__meta" }, meta) : null),
     children ? h("div", { className: "crm-ph__actions" }, children) : null,
   );
 }
@@ -10007,11 +10024,13 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
-  // The topbar already names the screen. The page heading names the listing,
-  // so an operator with several editor tabs open can tell them apart.
-  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
+  // The topbar already names the screen. The page heading names the listing
+  // the way a broker would say it (reference, type, place); the crawled
+  // headline is the second line, so several open editors still tell apart.
+  const listingName = String(facts.title || facts.h1 || "").trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
+  const listingHeading = [page.listing.id, family ? statusText(ui, family) : "", facts.location || ""].filter(Boolean).join(" · ");
   // One descriptor, so the button is the same control on every field it
   // appears on and every field names the same source and the same boundary.
   const hermesAssist = {
@@ -10054,38 +10073,9 @@ function ListingEditorBody({ page }) {
       h(Icon, { name: icon, size: 16 }),
       h("span", { className: "adm-editor-tab__label" }, text),
     );
-  const listingSummaryCards = [
-    {
-      id: "cms-status",
-      title: label(copy, "qualityStatus", "CMS status"),
-      value: statusText(ui, page.listing.cms_status),
-      meta: `${page.listing.source_domain} · ${page.listing.source_locale.toUpperCase()} · ${page.listing.id}`,
-      tone: PILL_TONES[page.listing.cms_status] || "ink",
-      status: { tone: PILL_TONES[page.listing.cms_status] || "ink", label: statusText(ui, page.listing.cms_status) },
-    },
-    {
-      id: "publish-approval",
-      title: ui.publishApproval,
-      value: workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing,
-      meta: workflow.availability_verified_at ? `${ui.availabilityVerification}: ${formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale)}` : ui.notVerified,
-      tone: workflow.publish_approved ? "success" : "sun",
-      status: { tone: workflow.publish_approved ? "success" : "sun", label: workflow.publish_approved ? statusText(ui, "approved") : statusText(ui, "review_required") },
-    },
-    {
-      id: "translations",
-      title: label(copy, "translationState", "Translation state"),
-      value: String(translationStates.length),
-      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : translationStates.length ? translationStates.map((translation) => `${String(translation.locale).toUpperCase()}: ${statusText(ui, translation.status)}`).join(" · ") : ui.notSet,
-      tone: staleTranslations.length ? "brick" : "sea",
-    },
-    {
-      id: "media",
-      title: label(copy, "media", "Media"),
-      value: String((page.listing.media || []).length),
-      meta: `${ui.tourStatus}: ${statusText(ui, tourStatus)}`,
-      tone: reviewableMedia.length ? "ink" : "sand",
-    },
-  ];
+  // What still stands between this listing and the public site, one line
+  // each, in the words a broker uses. The Quality tab keeps the detail.
+  const publishBlockers = listingPublishBlockers(ui, { workflow, qualityReview, schemaPresent: Boolean(page.listing.seo?.schema_present), staleCount: staleTranslations.length });
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -10105,8 +10095,9 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: listingName,
-          subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
+          title: listingHeading,
+          subtitle: listingName || undefined,
+          meta: `${title} · ${page.listing.source_domain} · ${String(page.listing.source_locale || "").toUpperCase()}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
         page.runtime_data_mode === "durable_only"
@@ -10114,9 +10105,14 @@ function ListingEditorBody({ page }) {
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(DataAvailabilityNotice, { page }),
-      h("details", { className: "adm-editor-overview" },
-        h("summary", null, statusText(ui, page.listing.cms_status), " · ", ui.listingChecks),
-        h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" })),
+      h(
+        "section",
+        { className: "adm-editor-status", "aria-label": ui.publishingStatus, "data-editor-status": String(publishBlockers.length), "data-summary-kind": "listing-editor" },
+        h("h2", null, ui.publishingStatus),
+        publishBlockers.length
+          ? h("ul", null, ...publishBlockers.map((blocker) => h("li", { key: blocker.key, "data-editor-blocker": blocker.key }, blocker.text)))
+          : h("p", null, ui.nothingBlocksPublishing),
+      ),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -10269,7 +10265,7 @@ function ListingEditorBody({ page }) {
               { className: "adm-editor-facts", "data-editor-readiness": "true" },
               ...[
                 [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), PILL_TONES[page.listing.cms_status] || "ink"],
-                [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
+                [ui.searchMarkup, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
                 [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, workflow.availability_verified_at ? "success" : "sun"],
                 [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, workflow.publish_approved ? "success" : "sun"],
               ].map(([factLabel, value, tone]) =>

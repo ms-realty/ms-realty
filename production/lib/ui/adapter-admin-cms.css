@@ -127,6 +127,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* On phones the mobile summary carries the card; the desktop copy of it must
+   lose to the shared 719px rule even though this sheet loads later. */
+@media (max-width: 719px) {
+  .adm-listing-card.adm-listing-identity__desktop { display: none; }
+  /* The phone title wraps in full; the two-line clamp the old summary used
+     collides with the gap line under a narrower column. */
+  .adm-listing-mobile-summary .adm-listing-card__title { display: block; overflow: visible; -webkit-line-clamp: none; }
+  /* The checkbox sits in the card's top-right corner; the card text stops
+     short of it. */
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-mobile-summary .adm-listing-card { padding-inline-end: 44px; }
+}
 @media (max-width: 600px) {
   .adm-listing-card { grid-template-columns: 72px minmax(0, 1fr); }
   .adm-listing-thumb { width: 72px; height: 54px; }
@@ -188,6 +199,47 @@
   .adm-listing-mobile-more { display: grid; gap: var(--space-2); width: 100%; margin-top: var(--space-2); }
   .adm-listing-mobile-more__facts { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ------------------------------------------------------------
+   Listing editor: what blocks publishing, one line each
+   ------------------------------------------------------------ */
+.adm-editor-status {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+/* Scoped past the workbench heading scale: this is a caption, not a title. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-status h2 {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+.adm-editor-status ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.adm-editor-status li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+}
+.adm-editor-status li::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brick-600);
+  transform: translateY(-1px);
+}
+.adm-editor-status p { margin: 0; color: var(--success-600); font-size: var(--text-sm); }
 
 /* ------------------------------------------------------------
    Translation review

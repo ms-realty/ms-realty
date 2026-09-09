@@ -3335,8 +3335,11 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-select-hit { min-width: 44px; min-height: 44px; }
 .crm-app main[data-react-admin-ui="listing-manager"] :is(input:not([type="checkbox"]), select, button, .mk-btn),
 .crm-app main[data-react-admin-ui="listing-editor"] :is(input:not([type="hidden"]):not([type="checkbox"]), select, button, .mk-btn) { min-height: 44px; }
-.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 { font-size: 32px; line-height: 36px; }
-.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p { font-size: 14px; line-height: 20px; }
+/* Dense product UI: the editor heading is a 21px line naming the listing,
+   the crawled title sits under it at body size, the source facts as a caption. */
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph h1 { font-size: 21px; line-height: 28px; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph p { font-size: 14px; line-height: 20px; color: var(--text-muted); }
+.crm-app main[data-react-admin-ui="listing-editor"] .crm-ph__meta { display: block; margin-top: 2px; color: var(--text-subtle); font-size: 12px; line-height: 16px; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell { grid-template-columns: minmax(0,1fr) 360px; gap: 24px; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-main { grid-column: 1; grid-row: 1 / span 2; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support { display: contents; }
