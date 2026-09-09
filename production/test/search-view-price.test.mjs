@@ -40,6 +40,7 @@ test("the migration is registered after the last applied one", async () => {
   const result = spawnSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", script], { cwd: ROOT, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
   const names = JSON.parse(result.stdout);
-  assert.equal(names.at(-1), "20260909_120000_source_stated_price_search_view");
+  assert.equal(names.filter((name) => name === "20260909_120000_source_stated_price_search_view").length, 1);
+  assert.ok(names.indexOf("20260909_120000_source_stated_price_search_view") > names.indexOf("20260901_130000_provider_connection_workspace_scope"));
   assert.deepEqual([...names].sort(), names, "migrations stay in chronological order");
 });
