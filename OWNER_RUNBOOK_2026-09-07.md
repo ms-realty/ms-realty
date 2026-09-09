@@ -28,7 +28,7 @@ that current main has shipped. Never cancel an origin activation mid-rollback.
 
 ## Recovered execution state
 
-At 2026-09-09 13:20 UTC, the previous release
+At 2026-09-09 13:32 UTC, the previous release
 `7d93b4d7c9893a4a7570af059d6d2e6c21b7fbb4` was healthy again after an origin
 rollback. Both public health markers matched that SHA. The pending release
 contains further changes; recheck the live endpoints after it completes.
@@ -38,21 +38,29 @@ contains further changes; recheck the live endpoints after it completes.
   CI and merged after conflict repair.
 - #216 fixed authoritative price projection parity and passed CI before merge.
   The local focused projection checks passed 46 tests. Deployment proof remains separate.
-- #215 received media-tab integration-test corrections and merge regeneration.
+- #215 received media-tab integration-test corrections and merge regeneration,
+  passed full CI and merged.
+- #218 adds the missing lot-identity database migration that caused Payload
+  draft reads to fail during deployment. A production schema-only copy reproduced
+  the failure; applying the migration made the same Payload probe pass. PostgreSQL
+  repeat-run and history-preservation checks passed. Full CI passed before merge.
 - #217 preserves and completes the interrupted deals/documents/team/languages
   work. Seventy-four targeted checks passed on the integrated source; browser
   checks found and corrected deal-form layout and language-save feedback.
   Arabic draft creation was tested locally and remained off/nonindexable.
+  Full CI passed, including production build and deployable-container smoke.
+  The subsequent merge of #218 requires its own final CI result.
 
-Check GitHub for the current status of #215 and #217; this snapshot is not a
+Check GitHub for the current deployment and #217 status; this snapshot is not a
 live status feed. The original Claude worktrees remain intact.
 
 ## Inputs still owned by humans
 
-1. Confirm the intended agency inbox and verify it as an Email Routing
-   destination in the agency Cloudflare account before releasing #194.
-   Keep #194 as draft until this is established. Do not send a customer message
-   or verification email merely to bypass the missing evidence.
+1. Agency Cloudflare was inspected on September 9: `ms.realty.bg@gmail.com`
+   is already a verified destination. Email Sending showed no onboarded zones.
+   Keep #194 draft until sender-domain setup, the shared Worker/origin secret
+   and authorized delivery verification are complete. Do not send customer
+   messages as a setup test.
 2. Supply or verify Search Console, Yandex Webmaster and backlink evidence.
    Reports must describe real services, not local fixtures.
 3. Approve public translations, listing-fact reviews and legal/process copy.
@@ -88,7 +96,8 @@ git status --short
 
 A merged branch does not prove its dirty worktree or stash is redundant.
 Preserve and review unique diffs before removal. The original Claude audit
-worktree contains 85 modified design-canvas files and generators. The failed
+worktree contains 85 modified design-canvas files and generators; its layout
+linter still reports issues in eight canvas files. The failed
 admin-agent worktree also remains as recovery evidence; its runtime changes
 were recovered separately in #217. Other old worktrees contain unique code.
 Remove only individually verified clean, integrated worktrees using ordinary
