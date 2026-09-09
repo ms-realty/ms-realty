@@ -1,9 +1,10 @@
 # MS Realty — production end goal
 
-Audit date: 2026-09-07. Written for the agent that takes the project from its
-current state to a full production release. Every claim below was checked on
-this date against the repository, GitHub, and the live hosts. Where a claim
-can go stale, the command that re-checks it is next to it.
+Audit baseline: 2026-09-07. The acceptance criteria below remain the target;
+the audit observations and PR inventories are dated history, not current
+release evidence. See `OWNER_RUNBOOK_2026-09-07.md` for the September 9 recovery
+state and safe recheck commands. Do not execute historical force-push or cleanup
+commands against current worktrees.
 
 Read `AGENTS.md`, `PRODUCT.md`, `CONTEXT.md`, and `production/DEPLOYMENT.md`
 first. This file does not replace them; it says what "done" means and what
