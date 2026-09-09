@@ -1502,7 +1502,8 @@ main[data-react-admin-ui="consents"] .crm-tbl th:nth-child(5) { width: 24%; }
 @media (max-width: 599px) {
   .adm-editor-tab__label { display: none; }
 }
-.adm-editor-tabs .mk-tab[aria-current="location"] {
+.adm-editor-tabs .mk-tab[aria-current="location"],
+.adm-editor-tabs .mk-tab[aria-current="page"] {
   border-bottom-color: var(--ink-800);
   color: var(--text-strong);
 }
@@ -3343,6 +3344,14 @@ html[data-theme="dark"] .crm-top {
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-quality-panel] { grid-column: 2; grid-row: 1; background: var(--atlas-surface); }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-translation-panel] { grid-column: 2; grid-row: 2; background: var(--atlas-surface); }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-media-review-panel] { grid-column: 1 / -1; }
+/* One tab at a time: the shell is a single column and the form keeps a
+   readable measure instead of stretching across a 1440px canvas. */
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] { grid-template-columns: minmax(0,1fr); }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] .adm-editor-main { grid-column: 1; grid-row: auto; max-width: 920px; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] .adm-editor-support { display: grid; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab] .adm-editor-support > * { grid-column: 1; grid-row: auto; }
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab="quality"] .adm-editor-support,
+.crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-shell[data-editor-tab="translations"] .adm-editor-support { max-width: 920px; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-facts { display: grid; grid-template-columns: 1fr; }
 .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-savebar { background: var(--atlas-canvas); border-color: var(--atlas-control); }
 .crm-app main[data-react-admin-ui="listing-editor"] :is(input,select,textarea,button):disabled { opacity: 1; border-color: var(--atlas-control); color: var(--atlas-muted); }

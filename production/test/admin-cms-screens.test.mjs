@@ -197,13 +197,13 @@ test("shared admin status tokens keep dark surfaces legible and owner identity n
 });
 
 test("the editor lists one state per locale, and a stale task wins over the published state", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=translations", headers: auth });
   const locales = [...page.body.matchAll(/data-translation-locale="([a-z]{2})"/g)].map(([, code]) => code);
   assert.deepEqual(locales, [...new Set(locales)], "no locale is listed twice");
 });
 
 test("media assets preview and fail out loud", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media", headers: auth });
   assert.match(page.body, /data-media-preview-state="loading"/);
   assert.match(page.body, /data-media-preview-frame="true"/);
   assert.match(page.body, /class="adm-media-asset__preview-loading"/);
@@ -223,7 +223,7 @@ test("media assets preview and fail out loud", async () => {
 });
 
 test("a listing without an approved tour says so before the publishing form", async () => {
-  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en", headers: auth });
+  const page = await dispatchHttp(app(), { url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media", headers: auth });
   assert.match(page.body, /class="adm-tour-state" data-tour-empty="(true|configured)"/);
   assert.match(page.body, /No approved 360 tour/);
   assert.match(page.body, /data-tour-editor-form="true"/);

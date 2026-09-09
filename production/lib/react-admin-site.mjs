@@ -9730,7 +9730,7 @@ function TranslationQueueBody({ page }) {
                       "a",
                       {
                         className: "mk-btn mk-btn--ghost mk-btn--sm",
-                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}#listing-translations`,
+                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}&tab=translations`,
                         "aria-label": `${label(copy, "openEditor", "Open editor")} \u00b7 ${String(row.target_locale || "").toUpperCase()}`,
                       },
                       label(copy, "openEditor", "Open editor"),
@@ -9931,6 +9931,21 @@ function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, fact
   );
 }
 
+const LISTING_EDITOR_TAB_KEYS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
+
+// The form column belongs to the Facts and SEO tabs; the three review panels
+// (quality, translations, media) are built in that order and the active tab
+// picks one. Building all three keeps the panel markup where it is; only the
+// choice of which reaches the page changed.
+function editorMainColumn(activeTab, attrs, panel) {
+  return activeTab === "facts" || activeTab === "seo" ? h("div", attrs, panel) : null;
+}
+
+function editorSupportSection(activeTab, attrs, qualityPanel, translationsPanel, mediaPanel) {
+  const panel = { quality: qualityPanel, translations: translationsPanel, media: mediaPanel }[activeTab];
+  return panel ? h("section", attrs, panel) : null;
+}
+
 function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null, assist = null } = {}) {
   if (!fields.length) return null;
   return h(
@@ -10020,6 +10035,25 @@ function ListingEditorBody({ page }) {
       listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
+  // One section per request: the server renders the tab in ?tab= (Facts by
+  // default), so a phone gets one form, not a five-section scroll.
+  const activeTab = LISTING_EDITOR_TAB_KEYS.includes(page.editorTab) ? page.editorTab : "facts";
+  const editorTabHref = (tab) => adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}`, page);
+  const editorTabLink = (tab, text, icon, ariaLabel = text) =>
+    h(
+      "a",
+      {
+        className: "mk-tab",
+        href: editorTabHref(tab),
+        "data-editor-tab": tab,
+        "aria-current": activeTab === tab ? "page" : undefined,
+        "data-active": activeTab === tab ? "" : undefined,
+        "aria-label": ariaLabel,
+        title: ariaLabel,
+      },
+      h(Icon, { name: icon, size: 16 }),
+      h("span", { className: "adm-editor-tab__label" }, text),
+    );
   const listingSummaryCards = [
     {
       id: "cms-status",
@@ -10086,21 +10120,21 @@ function ListingEditorBody({ page }) {
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
-        h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
-        h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
-        h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
-        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, "SEO")),
-        h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
+        editorTabLink("facts", label(copy, "facts", "Facts"), "pencil"),
+        editorTabLink("translations", label(copy, "translations", "Translations"), "languages"),
+        editorTabLink("media", label(copy, "media", "Media"), "camera"),
+        editorTabLink("seo", "SEO", "search", ui.seoSettings),
+        editorTabLink("quality", label(copy, "quality", "Quality"), "shield-check"),
       ),
       h(
         "div",
-        { className: "adm-editor-shell", "data-editor-shell": "true" },
-        h(
-          "div",
+        { className: "adm-editor-shell", "data-editor-shell": "true", "data-editor-tab": activeTab },
+        editorMainColumn(
+          activeTab,
           { className: "adm-editor-main" },
           h(
             Panel,
-            { title: label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
+            { title: activeTab === "seo" ? ui.seoSettings : label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
             h(
               "form",
               {
@@ -10128,18 +10162,20 @@ function ListingEditorBody({ page }) {
                 defaultValue: currentOperatorId(page, ""),
                 "data-editor-name": "true",
               }),
-              page.factReview?.rows?.length
+              activeTab === "facts" && page.factReview?.rows?.length
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
-              h(
-                "section",
-                { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
-              ),
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }) : null,
+              activeTab === "seo"
+                ? h(
+                    "section",
+                    { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
+                    editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
+                  )
+                : null,
               canEditContent
                 ? [
                     h(
@@ -10197,8 +10233,8 @@ function ListingEditorBody({ page }) {
             ),
           ),
         ),
-        h(
-          "section",
+        editorSupportSection(
+          activeTab,
           { className: "adm-editor-support", "data-editor-readiness-rail": "true" },
           h(
             Panel,

@@ -54,6 +54,7 @@ export function renderAdminListingEditorPayload(
   translationTasks,
   tourApprovals = [],
   operator = null,
+  { tab = "" } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const record = listingRecord(seed, listingId || "MS-00815");
@@ -91,7 +92,24 @@ export function renderAdminListingEditorPayload(
     edits: edits.filter((edit) => edit.listing_id === record.id),
     translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
     editableFields: LISTING_EDIT_FIELDS,
+    editorTab: normalizeEditorTab(tab),
   };
+}
+
+// The editor shows one section per request. The tab comes from ?tab=; a
+// media upload redirect that only carries media_upload=1 lands on Media, and
+// anything unknown falls back to Facts.
+export const LISTING_EDITOR_TABS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
+
+export function normalizeEditorTab(tab) {
+  const value = String(tab || "").trim().toLowerCase();
+  return LISTING_EDITOR_TABS.includes(value) ? value : "facts";
+}
+
+export function editorTabFromUrl(url) {
+  const requested = url?.searchParams?.get("tab");
+  if (requested) return normalizeEditorTab(requested);
+  return url?.searchParams?.has("media_upload") ? "media" : "facts";
 }
 
 export function renderAdminOperationsReportPayload(registry, requestedLocale, report, operator = null) {
@@ -706,7 +724,7 @@ export function renderAdminTranslationQueuePayload(
             validated_output: Boolean(task.hermes?.output || task.human?.output),
           }
         : null,
-      editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(row.listing_id)}#listing-translations`,
+      editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(row.listing_id)}&tab=translations`,
     };
   };
   const coverageKeys = new Set(coverage.rows.map((row) => `${row.listing_id}:${row.target_locale}`));

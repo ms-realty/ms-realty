@@ -701,7 +701,7 @@ test("Node and Next admin adapters read the same durable media projection and ke
     assert.equal((await nextReview.json()).review_status, "approved_by_human");
     assert.equal(rawMedia(harness, routeAsset.asset_id).is_public, true);
     const editor = await renderAppAdminResponse(
-      new Request(`https://live.test/admin/listings/edit?listingId=${LISTING_ID}&locale=en`),
+      new Request(`https://live.test/admin/listings/edit?listingId=${LISTING_ID}&locale=en&tab=media`),
       { config },
     );
     assert.equal(editor.status, 200);
