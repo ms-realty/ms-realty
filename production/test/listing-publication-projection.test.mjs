@@ -804,3 +804,33 @@ test("the committed seed and owner approval publish the 127 surviving listings",
   assert.equal(second.summary.unchanged, 127);
   assert.equal(second.summary.refused, 38, "the archived twins stay refused on every run");
 });
+
+
+test("merged twins withdraw the published base even when an imported draft hides it", async () => {
+  const records = [seedRecord("MS-1"), seedRecord("MS-TWIN", { cms_status: "archived", merged_into: "MS-1" })];
+  const drafts = importedRows(records);
+  const published = clone(drafts);
+  publishRowInDb(published, records[1]);
+  const calls = [];
+  const payload = fakePayloadRuntime(drafts).payload;
+  payload.find = async ({ collection, draft }) => {
+    calls.push({ collection, draft });
+    const rows = draft ? drafts : published;
+    return { docs: collection === "listings" ? rows.currentListings : rows.currentTranslations };
+  };
+  const rows = await readPublicationRows(payload);
+  assert.equal(calls.filter((call) => call.draft === false).length, 2);
+  const approval = approvalFor(["MS-1", "MS-TWIN"]);
+  const plan = buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval });
+  const twin = entryFor(plan, "MS-TWIN");
+  assert.equal(twin.action, "revert");
+  assert.equal(twin.listing.data.workflow.publish_approved, false);
+  assert.equal(twin.translation.data.public_indexable, false);
+  assert.equal(twin.listing.data.facts, undefined);
+  for (const merged_into of ["MS-TWIN", "MS-MISSING"]) {
+    const invalid = [records[0], { ...records[1], merged_into }];
+    assert.equal(entryFor(buildListingPublicationSyncPlan({ ...rows, seedRecords: invalid, approval }), "MS-TWIN").action, "refuse");
+  }
+  published.currentListings[1].workflow.publish_approved_by = "other_broker";
+  assert.equal(entryFor(buildListingPublicationSyncPlan({ ...rows, seedRecords: records, approval }), "MS-TWIN").action, "refuse");
+});
