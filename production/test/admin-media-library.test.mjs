@@ -141,7 +141,7 @@ test("a completed human media review leaves the pending queue", () => {
 
 test("the media review form asks for a reason in each admin language", async () => {
   for (const locale of ["bg", "ru", "en"]) {
-    const response = await dispatchHttp(app(), { url: `/admin/listings/edit?listingId=MS-00815&locale=${locale}`, headers: AUTH });
+    const response = await dispatchHttp(app(), { url: `/admin/listings/edit?listingId=MS-00815&locale=${locale}&tab=media`, headers: AUTH });
     assert.equal(response.status, 200);
     const field = response.body.match(/<textarea[^>]*name="reviewNote"[^>]*>/)?.[0];
     assert.ok(field, `missing review note for ${locale}`);

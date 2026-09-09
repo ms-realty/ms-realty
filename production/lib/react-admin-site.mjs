@@ -552,6 +552,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Изтегли CSV по източници",
     privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
     readOnlyAccess: "Достъп само за преглед за тази роля.",
+    gaps: { location_missing: "Липсва локация", area_missing: "Липсва площ", price_missing: "Липсва цена", description_missing: "Липсва описание", no_public_photos: "Няма публични снимки", search_markup_missing: "Липсва разметка за търсачки" },
+    noGaps: "Нищо не липсва",
+    noThumbnail: "Още няма снимка",
+    applyFilters: "Приложи",
+    publishingStatus: "Преди публикуване",
+    nothingBlocksPublishing: "Нищо не пречи на публикуването.",
+    blockerMissing: "Липсва: {field}",
+    availabilityNotVerified: "Наличността не е проверена",
+    searchMarkup: "Разметка за търсачки",
+    staleTranslationsLine: "{count} остарели превода",
+    reviewQueues: "Опашки за преглед",
     viewingFollowUpReadOnly: "Записването е скрито, докато надеждната история на действията не бъде включена.",
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
@@ -575,7 +586,7 @@ const ADMIN_UI_COPY = {
       qualify: "Квалифициране", book_viewing: "Насрочване на оглед", complete_viewing: "Провеждане на оглед", record_offer: "Записване на оферта", start_due_diligence: "Начало на проверка", sign_contract: "Подписване на договор", record_application: "Записване на кандидатура", sign_lease: "Подписване на наем", close_deal: "Затваряне на сделка",
       cash: "В брой", mortgage: "Ипотека", preapproved: "Предварително одобрено", not_applicable: "Не е приложимо",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
-      unverified: "Непроверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
+      unverified: "Още не е проверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
       public_enabled: "Публично включен", indexable: "Индексируем", fallback_locale: "Резервен език", object_id: "Идентификатор на обект", public_indexable: "Публично индексируем", can_mark_indexable: "Може да се маркира за индекс", lead_id: "Номер на запитване", listing_id: "Референция на обява", approved_imported_photo: "Одобрена снимка от източника", reviewed_private: "Прегледана, непублична", needs_media_review: "Чака преглед на медията", instant: "Веднага", daily: "Ежедневно", weekly: "Седмично", broker_international: "Международен брокер",
@@ -1343,6 +1354,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Скачать CSV по источникам",
     privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
     readOnlyAccess: "Для этой роли доступен только просмотр.",
+    gaps: { location_missing: "Нет локации", area_missing: "Нет площади", price_missing: "Нет цены", description_missing: "Нет описания", no_public_photos: "Нет публичных фото", search_markup_missing: "Нет разметки для поисковиков" },
+    noGaps: "Ничего не пропущено",
+    noThumbnail: "Фото пока нет",
+    applyFilters: "Применить",
+    publishingStatus: "Перед публикацией",
+    nothingBlocksPublishing: "Публикации ничего не мешает.",
+    blockerMissing: "Не указано: {field}",
+    availabilityNotVerified: "Доступность не проверена",
+    searchMarkup: "Разметка для поисковиков",
+    staleTranslationsLine: "{count} устаревших переводов",
+    reviewQueues: "Очереди на проверку",
     viewingFollowUpReadOnly: "Запись скрыта, пока не включено надежное хранение истории действий.",
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
@@ -1366,7 +1388,7 @@ const ADMIN_UI_COPY = {
       qualify: "Квалифицировать", book_viewing: "Назначить просмотр", complete_viewing: "Провести просмотр", record_offer: "Записать предложение", start_due_diligence: "Начать проверку", sign_contract: "Подписать договор", record_application: "Записать заявку", sign_lease: "Подписать аренду", close_deal: "Закрыть сделку",
       cash: "Наличные", mortgage: "Ипотека", preapproved: "Предварительно одобрено", not_applicable: "Не применимо",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
-      unverified: "Не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
+      unverified: "Ещё не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
       public_enabled: "Публично включено", indexable: "Индексируемый", fallback_locale: "Резервный язык", object_id: "Идентификатор объекта", public_indexable: "Публично индексируемый", can_mark_indexable: "Можно отметить для индекса", lead_id: "Номер заявки", listing_id: "Ссылка объекта", approved_imported_photo: "Одобренное фото из источника", reviewed_private: "Проверено, непубличное", needs_media_review: "Ожидает проверки медиа", instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно", broker_international: "Международный брокер",
@@ -2134,6 +2156,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Download source CSV",
     privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
     readOnlyAccess: "This role has read-only access.",
+    gaps: { location_missing: "Location missing", area_missing: "Area missing", price_missing: "Price missing", description_missing: "No description", no_public_photos: "No public photos", search_markup_missing: "Search markup missing" },
+    noGaps: "Nothing missing",
+    noThumbnail: "No photo yet",
+    applyFilters: "Apply",
+    publishingStatus: "Before publishing",
+    nothingBlocksPublishing: "Nothing blocks publishing.",
+    blockerMissing: "{field} missing",
+    availabilityNotVerified: "Availability not verified",
+    searchMarkup: "Search engine markup",
+    staleTranslationsLine: "{count} translations out of date",
+    reviewQueues: "Review queues",
     viewingFollowUpReadOnly: "Recording is hidden until durable action history is enabled.",
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
@@ -2157,7 +2190,7 @@ const ADMIN_UI_COPY = {
       qualify: "Qualify", book_viewing: "Book viewing", complete_viewing: "Complete viewing", record_offer: "Record offer", start_due_diligence: "Start due diligence", sign_contract: "Sign contract", record_application: "Record application", sign_lease: "Sign lease", close_deal: "Close deal",
       cash: "Cash", mortgage: "Mortgage", preapproved: "Pre-approved", not_applicable: "Not applicable",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
-      unverified: "Unverified", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
+      unverified: "Not yet checked", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
       public_enabled: "Publicly enabled", indexable: "Indexable", fallback_locale: "Fallback locale", object_id: "Object ID", public_indexable: "Publicly indexable", can_mark_indexable: "Can mark indexable", lead_id: "Enquiry ID", listing_id: "Listing reference", approved_imported_photo: "Approved imported photo", reviewed_private: "Reviewed, private", needs_media_review: "Awaiting media review", instant: "As soon as possible", daily: "Daily", weekly: "Weekly", broker_international: "International broker",
@@ -2515,6 +2548,23 @@ function fieldText(copy, field) {
   return copy.fields[field] || String(field || "").replaceAll("_", " ");
 }
 
+// A quality issue about a missing field reads "{field} missing"; the media
+// and tour gates already have a sentence of their own.
+function listingBlockerText(ui, issue) {
+  const missingField = ["missing_price", "missing_area", "missing_bedrooms", "missing_location", "missing_description"].includes(issue);
+  const text = listingQualityIssueText(ui, issue);
+  return missingField ? String(ui.blockerMissing || "{field} missing").replace("{field}", text) : text;
+}
+
+function listingPublishBlockers(ui, { workflow = {}, qualityReview = null, schemaPresent = false, staleCount = 0 } = {}) {
+  const blockers = (qualityReview?.issues || []).map((issue) => ({ key: issue, text: listingBlockerText(ui, issue) }));
+  if (!workflow.availability_verified_at) blockers.push({ key: "availability_unverified", text: ui.availabilityNotVerified });
+  if (!workflow.publish_approved) blockers.push({ key: "publish_not_approved", text: `${ui.publishApproval}: ${ui.notApprovedForPublishing}` });
+  if (!schemaPresent) blockers.push({ key: "search_markup_missing", text: ui.gaps?.search_markup_missing || "Search markup missing" });
+  if (staleCount) blockers.push({ key: "stale_translations", text: String(ui.staleTranslationsLine || "{count} translations out of date").replace("{count}", String(staleCount)) });
+  return blockers;
+}
+
 function listingQualityIssueText(ui, issue) {
   const fieldByIssue = {
     missing_price: "price_eur",
@@ -2535,6 +2585,39 @@ function listingPriceText(ui, row) {
   if (row.price_on_request) return statusText(ui, "price_on_request");
   if (row.price_eur === null || row.price_eur === undefined || row.price_eur === "") return ui.notSet;
   return `€${Number(row.price_eur).toLocaleString("en")}`;
+}
+
+// The list names a listing the way a broker would on the phone: what it is,
+// where it is, what it costs. The crawled headline and the reference stay on
+// the card as captions; neither is the first thing the eye lands on.
+function listingShortTitle(ui, row) {
+  const parts = [row.property_family ? statusText(ui, row.property_family) : "", row.location || ""].filter(Boolean);
+  if (!parts.length) {
+    const fallback = String(row.title || "").trim();
+    parts.push(fallback && !/^MS-/iu.test(fallback) ? fallback : ui.listing);
+  }
+  if (row.price_on_request || (row.price_eur !== null && row.price_eur !== undefined && row.price_eur !== "")) parts.push(listingPriceText(ui, row));
+  return parts.join(" · ");
+}
+
+// The crawled headline is worth a caption only when the short title does not
+// already say the same thing.
+function listingSourceTitle(row) {
+  const title = String(row.title || "").trim();
+  return title && !/^MS-/iu.test(title) ? title : "";
+}
+
+function listingGapLine(ui, row) {
+  const gaps = Array.isArray(row.gaps) ? row.gaps : [];
+  if (!gaps.length) return ui.noGaps;
+  return gaps.map((gap) => ui.gaps?.[gap] || gap.replaceAll("_", " ")).join(" · ");
+}
+
+function listingThumbnail(ui, row) {
+  if (row.thumbnail_url) {
+    return h("img", { className: "adm-listing-thumb", src: row.thumbnail_url, alt: "", width: 96, height: 72, loading: "lazy", decoding: "async" });
+  }
+  return h("span", { className: "adm-listing-thumb adm-listing-thumb--empty", role: "img", "aria-label": ui.noThumbnail }, h(Icon, { name: "camera", size: 18 }));
 }
 
 function listingLocaleText(row) {
@@ -2749,11 +2832,11 @@ function SummaryStrip({ cards, className = "", ...attrs }) {
   );
 }
 
-function PageHeader({ title, subtitle, children }) {
+function PageHeader({ title, subtitle, meta, children }) {
   return h(
     "div",
     { className: "crm-ph" },
-    h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null),
+    h("div", null, h("h1", null, title), subtitle ? h("p", null, subtitle) : null, meta ? h("small", { className: "crm-ph__meta" }, meta) : null),
     children ? h("div", { className: "crm-ph__actions" }, children) : null,
   );
 }
@@ -8666,7 +8749,9 @@ function ListingManagerBody({ page }) {
       h("section", { className: "adm-catalogue-records", "aria-label": label(copy, "results", "Results") },
       h(
         "form",
-        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
+        // Selects and the search box apply themselves once the client hook runs;
+        // the Apply button below is the no-script path and is hidden after that.
+        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true", "data-auto-submit": "true" },
         filterLocaleInput(page),
         h(
           "div",
@@ -8729,7 +8814,7 @@ function ListingManagerBody({ page }) {
               ),
             )
           : null,
-        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--md adm-filterbar__submit", "data-filter-submit": "true" }, ui.applyFilters),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),
       h(
@@ -8811,26 +8896,38 @@ function ListingManagerBody({ page }) {
                       h(
                         "td",
                         { "data-label": columns.listing, "data-listing-column": "listing" },
-                        h("div", { className: "adm-lead-identity adm-listing-identity__desktop" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, listingPriceText(ui, row))),
+                        h(
+                          "div",
+                          { className: "adm-listing-card adm-listing-identity__desktop" },
+                          listingThumbnail(ui, row),
+                          h(
+                            "div",
+                            { className: "adm-listing-card__body" },
+                            h("strong", { className: "adm-listing-card__title" }, listingShortTitle(ui, row)),
+                            h("small", { className: "adm-listing-card__gaps", "data-listing-gaps": String((row.gaps || []).length) }, listingGapLine(ui, row)),
+                            listingSourceTitle(row) ? h("small", { className: "adm-listing-card__source", title: row.title }, row.title) : null,
+                            h("code", { className: "crm-mono adm-id-caption" }, row.id),
+                          ),
+                        ),
                         h(
                           "div",
                           { className: "adm-listing-mobile-summary", "data-listing-mobile-summary": "true" },
                           h(
                             "div",
                             { className: "adm-listing-mobile-summary__topline" },
-                            h("code", { className: "crm-mono" }, row.id),
                             h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status)),
+                            h("code", { className: "crm-mono adm-id-caption" }, row.id),
                           ),
-                          h("strong", null, row.title),
                           h(
-                            "small",
-                            { className: "adm-listing-mobile-summary__meta" },
-                            [
-                              row.location || ui.notSet,
-                              row.property_family ? statusText(ui, row.property_family) : ui.notSet,
-                              listingPriceText(ui, row),
-                              `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`,
-                            ].join(" · "),
+                            "div",
+                            { className: "adm-listing-card" },
+                            listingThumbnail(ui, row),
+                            h(
+                              "div",
+                              { className: "adm-listing-card__body" },
+                              h("strong", { className: "adm-listing-card__title" }, listingShortTitle(ui, row)),
+                              h("small", { className: "adm-listing-mobile-summary__meta" }, listingGapLine(ui, row)),
+                            ),
                           ),
                         ),
                       ),
@@ -8838,7 +8935,7 @@ function ListingManagerBody({ page }) {
                       h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : ui.notSet),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, listingLocaleText(row))),
-                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", { className: "adm-listing-gaps" }, listingGapLine(ui, row))),
                       h(
                         "td",
                         { "data-label": columns.action, "data-listing-column": "action" },
@@ -8861,7 +8958,7 @@ function ListingManagerBody({ page }) {
                             h("div", null, h("dt", null, columns.propertyFamily), h("dd", null, row.property_family ? statusText(ui, row.property_family) : ui.notSet)),
                             h("div", null, h("dt", null, columns.status), h("dd", null, statusText(ui, row.listing_status))),
                             h("div", null, h("dt", null, columns.locale), h("dd", null, `${String(row.source_locale || "").toUpperCase() || ui.notSet} · ${listingLocaleText(row)}`)),
-                            h("div", null, h("dt", null, columns.quality), h("dd", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()} · ${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                            h("div", null, h("dt", null, columns.quality), h("dd", null, listingGapLine(ui, row))),
                           ),
                           page.runtime_data_mode === "durable_only"
                             ? null
@@ -8885,8 +8982,11 @@ function ListingManagerBody({ page }) {
       ),
       h(Pagination, { page, path: "/admin/listings" }),
       ),
-      h("aside", { className: "adm-catalogue-review", "aria-label": ui.reviewRequired },
-        h("h2", null, ui.reviewRequired),
+      // The review queues (facts to confirm, duplicate pairs, area checks) are
+      // supporting work, not a second dashboard: one closed disclosure under
+      // the list, open only when a queue filter is in the URL.
+      h("details", { className: "adm-catalogue-review-queues", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review-queues": "true" },
+        h("summary", null, h(Icon, { name: "eye", size: 16 }), h("span", null, `${ui.reviewQueues} · ${factReviewSummary.unchecked_figures || 0}`)),
         h("details", { className: "adm-catalogue-review-section", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review": "facts" },
           h("summary", null, factReviewCopy.title || "Facts to confirm", ` · ${factReviewSummary.unchecked_figures || 0}`),
 h(
@@ -8898,7 +8998,7 @@ h(
         h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
         h(
           "form",
-          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
+          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true", "data-auto-submit": "true" },
           filterLocaleInput(page),
           h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
           h(
@@ -8912,7 +9012,7 @@ h(
               ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
             ),
           ),
-          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
+          h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm adm-filterbar__submit", "data-filter-submit": "true" }, ui.applyFilters),
           h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
         ),
         h(
@@ -9887,7 +9987,7 @@ function TranslationQueueBody({ page }) {
                       "a",
                       {
                         className: "mk-btn mk-btn--ghost mk-btn--sm",
-                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}#listing-translations`,
+                        href: `${payloadAdminListingHref(row.listing_id, page)}&translation=${encodeURIComponent(row.target_locale)}&tab=translations`,
                         "aria-label": `${label(copy, "openEditor", "Open editor")} \u00b7 ${String(row.target_locale || "").toUpperCase()}`,
                       },
                       label(copy, "openEditor", "Open editor"),
@@ -10088,6 +10188,21 @@ function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, fact
   );
 }
 
+const LISTING_EDITOR_TAB_KEYS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
+
+// The form column belongs to the Facts and SEO tabs; the three review panels
+// (quality, translations, media) are built in that order and the active tab
+// picks one. Building all three keeps the panel markup where it is; only the
+// choice of which reaches the page changed.
+function editorMainColumn(activeTab, attrs, panel) {
+  return activeTab === "facts" || activeTab === "seo" ? h("div", attrs, panel) : null;
+}
+
+function editorSupportSection(activeTab, attrs, qualityPanel, translationsPanel, mediaPanel) {
+  const panel = { quality: qualityPanel, translations: translationsPanel, media: mediaPanel }[activeTab];
+  return panel ? h("section", attrs, panel) : null;
+}
+
 function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null, assist = null } = {}) {
   if (!fields.length) return null;
   return h(
@@ -10149,11 +10264,13 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
-  // The topbar already names the screen. The page heading names the listing,
-  // so an operator with several editor tabs open can tell them apart.
-  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
+  // The topbar already names the screen. The page heading names the listing
+  // the way a broker would say it (reference, type, place); the crawled
+  // headline is the second line, so several open editors still tell apart.
+  const listingName = String(facts.title || facts.h1 || "").trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
+  const listingHeading = [page.listing.id, family ? statusText(ui, family) : "", facts.location || ""].filter(Boolean).join(" · ");
   // One descriptor, so the button is the same control on every field it
   // appears on and every field names the same source and the same boundary.
   const hermesAssist = {
@@ -10177,38 +10294,28 @@ function ListingEditorBody({ page }) {
       listingEditorFieldApplicable(family, field),
   );
   const canEditContent = pageCan(page, "content:write");
-  const listingSummaryCards = [
-    {
-      id: "cms-status",
-      title: label(copy, "qualityStatus", "CMS status"),
-      value: statusText(ui, page.listing.cms_status),
-      meta: `${page.listing.source_domain} · ${page.listing.source_locale.toUpperCase()} · ${page.listing.id}`,
-      tone: PILL_TONES[page.listing.cms_status] || "ink",
-      status: { tone: PILL_TONES[page.listing.cms_status] || "ink", label: statusText(ui, page.listing.cms_status) },
-    },
-    {
-      id: "publish-approval",
-      title: ui.publishApproval,
-      value: workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing,
-      meta: workflow.availability_verified_at ? `${ui.availabilityVerification}: ${formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale)}` : ui.notVerified,
-      tone: workflow.publish_approved ? "success" : "sun",
-      status: { tone: workflow.publish_approved ? "success" : "sun", label: workflow.publish_approved ? statusText(ui, "approved") : statusText(ui, "review_required") },
-    },
-    {
-      id: "translations",
-      title: label(copy, "translationState", "Translation state"),
-      value: String(translationStates.length),
-      meta: staleTranslations.length ? `${staleTranslations.length} ${statusText(ui, "stale")}` : translationStates.length ? translationStates.map((translation) => `${String(translation.locale).toUpperCase()}: ${statusText(ui, translation.status)}`).join(" · ") : ui.notSet,
-      tone: staleTranslations.length ? "brick" : "sea",
-    },
-    {
-      id: "media",
-      title: label(copy, "media", "Media"),
-      value: String((page.listing.media || []).length),
-      meta: `${ui.tourStatus}: ${statusText(ui, tourStatus)}`,
-      tone: reviewableMedia.length ? "ink" : "sand",
-    },
-  ];
+  // One section per request: the server renders the tab in ?tab= (Facts by
+  // default), so a phone gets one form, not a five-section scroll.
+  const activeTab = LISTING_EDITOR_TAB_KEYS.includes(page.editorTab) ? page.editorTab : "facts";
+  const editorTabHref = (tab) => adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}`, page);
+  const editorTabLink = (tab, text, icon, ariaLabel = text) =>
+    h(
+      "a",
+      {
+        className: "mk-tab",
+        href: editorTabHref(tab),
+        "data-editor-tab": tab,
+        "aria-current": activeTab === tab ? "page" : undefined,
+        "data-active": activeTab === tab ? "" : undefined,
+        "aria-label": ariaLabel,
+        title: ariaLabel,
+      },
+      h(Icon, { name: icon, size: 16 }),
+      h("span", { className: "adm-editor-tab__label" }, text),
+    );
+  // What still stands between this listing and the public site, one line
+  // each, in the words a broker uses. The Quality tab keeps the detail.
+  const publishBlockers = listingPublishBlockers(ui, { workflow, qualityReview, schemaPresent: Boolean(page.listing.seo?.schema_present), staleCount: staleTranslations.length });
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -10228,8 +10335,9 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: listingName,
-          subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
+          title: listingHeading,
+          subtitle: listingName || undefined,
+          meta: `${title} · ${page.listing.source_domain} · ${String(page.listing.source_locale || "").toUpperCase()}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
         page.runtime_data_mode === "durable_only"
@@ -10237,27 +10345,32 @@ function ListingEditorBody({ page }) {
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(DataAvailabilityNotice, { page }),
-      h("details", { className: "adm-editor-overview" },
-        h("summary", null, statusText(ui, page.listing.cms_status), " · ", ui.listingChecks),
-        h(SummaryStrip, { cards: listingSummaryCards, "data-summary-kind": "listing-editor" })),
+      h(
+        "section",
+        { className: "adm-editor-status", "aria-label": ui.publishingStatus, "data-editor-status": String(publishBlockers.length), "data-summary-kind": "listing-editor" },
+        h("h2", null, ui.publishingStatus),
+        publishBlockers.length
+          ? h("ul", null, ...publishBlockers.map((blocker) => h("li", { key: blocker.key, "data-editor-blocker": blocker.key }, blocker.text)))
+          : h("p", null, ui.nothingBlocksPublishing),
+      ),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
-        h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
-        h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
-        h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
-        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, "SEO")),
-        h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
+        editorTabLink("facts", label(copy, "facts", "Facts"), "pencil"),
+        editorTabLink("translations", label(copy, "translations", "Translations"), "languages"),
+        editorTabLink("media", label(copy, "media", "Media"), "camera"),
+        editorTabLink("seo", "SEO", "search", ui.seoSettings),
+        editorTabLink("quality", label(copy, "quality", "Quality"), "shield-check"),
       ),
       h(
         "div",
-        { className: "adm-editor-shell", "data-editor-shell": "true" },
-        h(
-          "div",
+        { className: "adm-editor-shell", "data-editor-shell": "true", "data-editor-tab": activeTab },
+        editorMainColumn(
+          activeTab,
           { className: "adm-editor-main" },
           h(
             Panel,
-            { title: label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
+            { title: activeTab === "seo" ? ui.seoSettings : label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
             h(
               "form",
               {
@@ -10285,18 +10398,20 @@ function ListingEditorBody({ page }) {
                 defaultValue: currentOperatorId(page, ""),
                 "data-editor-name": "true",
               }),
-              page.factReview?.rows?.length
+              activeTab === "facts" && page.factReview?.rows?.length
                 ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
                 : null,
-              editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }),
-              editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
-              editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
-              h(
-                "section",
-                { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-                editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
-              ),
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }) : null,
+              activeTab === "facts" ? editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }) : null,
+              activeTab === "seo"
+                ? h(
+                    "section",
+                    { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
+                    editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
+                  )
+                : null,
               canEditContent
                 ? [
                     h(
@@ -10354,8 +10469,8 @@ function ListingEditorBody({ page }) {
             ),
           ),
         ),
-        h(
-          "section",
+        editorSupportSection(
+          activeTab,
           { className: "adm-editor-support", "data-editor-readiness-rail": "true" },
           h(
             Panel,
@@ -10390,7 +10505,7 @@ function ListingEditorBody({ page }) {
               { className: "adm-editor-facts", "data-editor-readiness": "true" },
               ...[
                 [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), PILL_TONES[page.listing.cms_status] || "ink"],
-                [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
+                [ui.searchMarkup, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), page.listing.seo?.schema_present ? "success" : "brick"],
                 [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, workflow.availability_verified_at ? "success" : "sun"],
                 [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, workflow.publish_approved ? "success" : "sun"],
               ].map(([factLabel, value, tone]) =>

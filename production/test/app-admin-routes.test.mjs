@@ -636,24 +636,26 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingManagerJsonBody.listings[0].listing_status, "unverified");
       assert.ok(listingManagerJsonBody.listings[0].translation_review_required > 0);
 
-      // The singular labels are what is under test, so the rows come from the
-      // manager's own payload rather than a hardcoded id whose counts move with
-      // the catalogue.
+      // The list names each gap in words rather than counting "issues" and
+      // "public photos", so the rows come from the manager's own payload
+      // rather than a hardcoded id whose gaps move with the catalogue.
       const allListings = await (
         await listingManagerJsonRoute.GET(new Request("https://example.test/api/admin/listings?pageSize=500", { headers: auth }))
       ).json();
-      const singleIssueId = allListings.listings.find((row) => row.metadata_gaps === 1).id;
-      const singlePhotoId = allListings.listings.find((row) => row.public_gallery_assets === 1).id;
-      const singularIssueHtml = await (
-        await listingManagerRoute.GET(new Request(`https://example.test/admin/listings?q=${singleIssueId}`, { headers: auth }))
+      const gapRow = allListings.listings.find((row) => row.gaps.includes("no_public_photos")) || allListings.listings.find((row) => row.gaps.length);
+      const wholeRow = allListings.listings.find((row) => row.gaps.length === 0);
+      const gapHtml = await (
+        await listingManagerRoute.GET(new Request(`https://example.test/admin/listings?q=${gapRow.id}`, { headers: auth }))
       ).text();
-      const singularPhotoHtml = await (
-        await listingManagerRoute.GET(new Request(`https://example.test/admin/listings?q=${singlePhotoId}`, { headers: auth }))
-      ).text();
-      assert.match(singularIssueHtml, />1 issue<\/span>/);
-      assert.doesNotMatch(singularIssueHtml, />1 issues<\/span>/);
-      assert.match(singularPhotoHtml, />1 public photo<\/small>/);
-      assert.doesNotMatch(singularPhotoHtml, />1 public photos<\/small>/);
+      assert.match(gapHtml, new RegExp(`data-listing-gaps="${gapRow.gaps.length}">(?:Area missing|Price missing|Location missing|No description|No public photos|Search markup missing)`));
+      assert.doesNotMatch(gapHtml, />\d+ issues?<\/span>/);
+      assert.doesNotMatch(gapHtml, />\d+ public photos?<\/small>/);
+      if (wholeRow) {
+        const wholeHtml = await (
+          await listingManagerRoute.GET(new Request(`https://example.test/admin/listings?q=${wholeRow.id}`, { headers: auth }))
+        ).text();
+        assert.match(wholeHtml, /data-listing-gaps="0">Nothing missing</);
+      }
 
       const translationQueue = await translationQueueRoute.GET(
         new Request("https://example.test/admin/translations?locale=ru&targetLocale=en&q=MS-00815", { headers: auth }),
@@ -689,7 +691,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(russianEditorHtml, /data-editor-savebar="true"/);
       assert.match(russianEditorHtml, /data-editor-dirty-message="[^"]+"/);
       assert.match(russianEditorHtml, /data-editor-clean-message="[^"]+"/);
-      assert.match(russianEditorHtml, /data-editor-readiness-rail="true"/);
+      assert.match(russianEditorHtml, /data-editor-shell="true" data-editor-tab="facts"/);
       assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=bg"/);
       assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=ru"/);
       assert.match(russianEditorHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815"/);

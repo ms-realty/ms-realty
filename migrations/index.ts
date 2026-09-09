@@ -31,6 +31,8 @@ import * as migration_20260901_130000_document_signatures from './20260901_13000
 import * as migration_20260901_130000_provider_connection_workspace_scope from './20260901_130000_provider_connection_workspace_scope';
 import * as migration_20260909_120000_source_stated_price_search_view from './20260909_120000_source_stated_price_search_view';
 
+import * as migration_20260909_140000_listing_lot_identity from './20260909_140000_listing_lot_identity';
+
 export const migrations = [
   {
     up: migration_20260710_132716_initial_schema.up,
@@ -191,5 +193,10 @@ export const migrations = [
     up: migration_20260909_120000_source_stated_price_search_view.up,
     down: migration_20260909_120000_source_stated_price_search_view.down,
     name: '20260909_120000_source_stated_price_search_view',
+  },
+  {
+    up: migration_20260909_140000_listing_lot_identity.up,
+    down: migration_20260909_140000_listing_lot_identity.down,
+    name: '20260909_140000_listing_lot_identity',
   },
 ];
