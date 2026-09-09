@@ -128,11 +128,11 @@
     "@payloadcms/translations": "3.87.1",
     "@photo-sphere-viewer/core": "5.14.3",
     "jose": "5.10.0",
-    "next": "16.2.12",
+    "next": "16.3.4",
     "payload": "3.87.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "sharp": "0.35.3",
+    "sharp": "0.35.4",
     "zod": "4.2.0"
   },
   "overrides": {
@@ -141,10 +141,9 @@
     },
     "dompurify": "3.4.13",
     "fast-uri": "3.1.7",
-    "js-yaml": "4.3.1",
+    "js-yaml": "^4.3.2",
     "nanoid": "3.3.18",
-    "postcss": "8.5.25",
-    "sharp": "0.35.3"
+    "postcss": "8.5.25"
   },
   "devDependencies": {
     "@cloudflare/containers": "0.3.7",
