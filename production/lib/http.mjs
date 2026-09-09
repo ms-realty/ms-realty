@@ -2978,7 +2978,10 @@ export function createHttpApp({
       return adminForbidden("workspace:access");
     }
     let requestLeadRows;
-    if (request.method === "GET" && LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname)) {
+    const caseReadWithoutEnquiryAccess = ["/admin/cases", "/api/admin/cases"].includes(url.pathname)
+      && !canAdminAccess(principal, "operations:read");
+    if (caseReadWithoutEnquiryAccess) requestLeadRows = [];
+    if (request.method === "GET" && LEAD_BACKED_ADMIN_READ_PATHS.has(url.pathname) && !caseReadWithoutEnquiryAccess) {
       if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) {
         return adminJson(503, { kind: "lead_store_unavailable", message: "Lead storage is temporarily unavailable" });
       }

@@ -2015,7 +2015,9 @@ async function currentRealtyCaseConditionEvents(config) {
 
 async function realtyCasesPayload(registry, url, config) {
   const now = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
-  const { leads } = await adminLeadSource(config);
+  const { leads } = canAdminAccess(config.adminPrincipal, "operations:read")
+    ? await adminLeadSource(config)
+    : { leads: [] };
   const [caseEvents, conditionEvents] = await Promise.all([
     currentRealtyCaseEvents(config),
     currentRealtyCaseConditionEvents(config),
