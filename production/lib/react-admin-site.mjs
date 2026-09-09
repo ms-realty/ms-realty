@@ -3710,9 +3710,32 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
 // source row it was derived from. Today and the task queue share this so a
 // lead never shows up as its ledger id on one screen and as a person on the
 // other.
+// The person behind a queue row, in the words a broker recognises: the
+// contact name when one is on file, otherwise the enquiry type. Channel,
+// language and how long they have waited follow as a second line. Ids never
+// reach these labels; the ledger keeps them.
+function leadForRow(page, leadId) {
+  return leadId ? (page.leads || []).find((lead) => lead.lead_id === leadId) || null : null;
+}
+
+function personLabel(lead, ui, fallback) {
+  return lead ? leadTitle(lead, ui) : fallback;
+}
+
+function personMeta(lead, ui, copy, now) {
+  if (!lead) return [];
+  const age = formatRelativeAge(lead.received_at, ui, now);
+  return [
+    lead.contact_preference ? valueText(ui, lead.contact_preference) : null,
+    lead.original_language ? String(lead.original_language).toUpperCase() : null,
+    age ? label(copy, "waitingFor", "waiting {age}").replace("{age}", age) : null,
+  ].filter(Boolean);
+}
+
 function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
     const row = task.source_row || {};
     const source = task.source || {};
+    const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
     const base = {
       key: task.task_id,
       kind: task.kind,
@@ -3748,26 +3771,36 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
       return {
         ...base,
         title: leadTitle(row, ui),
-        context: [row.listing_reference, row.property?.location, statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus)].filter(Boolean).join(" · "),
+        context: [
+          row.listing_reference,
+          row.property?.location,
+          ...personMeta(row, ui, copy, now),
+          statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus),
+        ]
+          .filter(Boolean)
+          .join(" · "),
         href: `${inboxHref}#lead-${encodeURIComponent(row.lead_id)}`,
         action,
       };
     }
     if (task.kind === "viewing") {
       const kindLabel = row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up");
+      const lead = leadForRow(page, row.lead_id);
       return {
         ...base,
-        title: row.listing_reference || kindLabel,
-        context: `${kindLabel} · ${statusText(ui, row.viewing_status)}`,
+        title: [personLabel(lead, ui, kindLabel), row.listing_reference].filter(Boolean).join(" · "),
+        context: [kindLabel, lead?.property?.location, ...personMeta(lead, ui, copy, now), statusText(ui, row.viewing_status)].filter(Boolean).join(" · "),
         href: adminHref("/admin/viewings", page),
         action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
       };
     }
     if (task.kind === "seller") {
+      const lead = leadForRow(page, row.lead_id);
+      const location = row.property?.location || lead?.property?.location;
       return {
         ...base,
-        title: row.property?.location || na.actions.sellerStep,
-        context: statusText(ui, row.stage),
+        title: [personLabel(lead, ui, na.kinds.seller), location].filter(Boolean).join(" · "),
+        context: [...personMeta(lead, ui, copy, now), statusText(ui, row.stage)].filter(Boolean).join(" · "),
         href: adminHref("/admin/viewings", page),
         action: na.actions.sellerStep,
       };
@@ -3793,10 +3826,19 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
         action: na.actions.outcome,
       };
     }
+    const lead = leadForRow(page, row.lead_id);
     return {
       ...base,
-      title: `${statusText(ui, row.lead_type)} · ${statusText(ui, row.stage)}`,
-      context: row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      title: [personLabel(lead, ui, statusText(ui, row.lead_type)), row.listing_reference].filter(Boolean).join(" · "),
+      context: [
+        lead ? statusText(ui, row.lead_type) : null,
+        lead?.property?.location,
+        ...personMeta(lead, ui, copy, now),
+        statusText(ui, row.stage),
+        row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      ]
+        .filter(Boolean)
+        .join(" · "),
       href: adminHref("/admin/pipeline", page),
       action: na.actions.opportunity,
     };
@@ -3804,15 +3846,7 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
 
 function TodayBriefingPanel({ page, rows, total, detailId }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
-  const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
-  const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
-  const prompt = first
-    ? hermesCopy.todayPrompt
-        .replace("{action}", first.action)
-        .replace("{title}", first.title)
-        .replace("{context}", first.context)
-    : "";
   return h(
     Panel,
     {
@@ -3860,34 +3894,6 @@ function TodayBriefingPanel({ page, rows, total, detailId }) {
         )
       : null,
     h("p", { className: "adm-today-briefing__source" }, copy.source),
-    h(
-      "details",
-      { className: "adm-today-assist" },
-      h("summary", null, h(Icon, { name: "sparkles", size: 18 }), h("span", null, hermes.title)),
-      h(
-        "form",
-        { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
-        h("p", { className: "adm-hermes-entry__description" }, hermes.description),
-        h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
-        h("label", { htmlFor: `${detailId || "today"}-hermes-prompt` }, hermesCopy.commandLabel),
-        h("textarea", {
-          id: `${detailId || "today"}-hermes-prompt`,
-          name: "prompt",
-          rows: 2,
-          maxLength: 2000,
-          required: true,
-          defaultValue: prompt,
-          placeholder: hermesCopy.commandPlaceholder,
-          autoComplete: "off",
-        }),
-        h(
-          "button",
-          { className: "mk-btn mk-btn--secondary mk-btn--sm", type: "submit", "data-hermes-open": "today" },
-          h(Icon, { name: "sparkles", size: 18 }),
-          h("span", null, hermesCopy.preparePlan),
-        ),
-      ),
-    ),
   );
 }
 
@@ -4094,7 +4100,6 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
         "div",
         { className: "adm-rail-actions" },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/leads", page) }, h(Icon, { name: "inbox", size: 16 }), label(copy, "viewLeadInbox", "Open lead inbox")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/reports", page) }, h(Icon, { name: "bar-chart-3", size: 16 }), ui.operationsReports),
       ),
     ),
   );
@@ -4148,7 +4153,7 @@ function TodayBody({ page }) {
           })) : [h(TodayBriefingPanel, { key: "empty", page, rows: [], total: 0 })])),
       ),
       h("details", { className: "adm-workbench-disclosure" },
-        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), ui.operationsReports),
+        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), label(copy, "queuesAndSetup", "Queues and setup")),
         h(TodayReadinessRail, {
           page,
           copy,
@@ -5217,7 +5222,7 @@ function PipelinePrimaryAction({ page, state }) {
     return h(
       "details",
       { className: "adm-pipeline-action" },
-      h("summary", null, label(copy, "qualification", "Qualification")),
+      h("summary", null, label(copy, "qualifyLead", "Qualify lead")),
       h(
         PipelineOutcomeForm,
         { page, state, action: "qualify", submitLabel: label(copy, "qualifyLead", "Qualify lead") },
@@ -5345,7 +5350,52 @@ function PipelineCard({ page, state, lead }) {
   const intake = state.intake_requirements;
   const inventoryMatch = (page.leadMatching?.rows || []).find((row) => row.lead_id === state.lead_id);
   const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
-  const contactName = lead?.contact?.name;
+  const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
+  // Title = who and which property. The lead type stays in the meta line when
+  // a name is on file, and stands in for the name when none is.
+  const person = personLabel(lead, ui, statusText(ui, state.lead_type));
+  const meta = [
+    lead && leadTitle(lead, ui) !== statusText(ui, state.lead_type) ? statusText(ui, state.lead_type) : null,
+    lead?.property?.location,
+    ...personMeta(lead, ui, copy, now),
+  ].filter(Boolean);
+  const inventoryList = inventoryMatch
+    ? h(
+        "details",
+        { className: "adm-pipeline-inventory", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
+        h(
+          "summary",
+          { className: "adm-disclosure-chevron" },
+          h(Icon, { name: "building-2", size: 15 }),
+          h("span", null, label(copy, "matchingInventory", "Matching inventory")),
+          h("span", { className: "adm-seg-count", title: label(copy, "matches", "Matches") }, inventoryMatch.match_count),
+        ),
+        inventoryMatch.matches.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...inventoryMatch.matches.map((match) =>
+                h(
+                  "li",
+                  { key: match.listing_id, "data-inventory-match": match.listing_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("strong", null, match.title),
+                    h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
+                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
+      )
+    : null;
   return h(
     "article",
     {
@@ -5361,16 +5411,10 @@ function PipelineCard({ page, state, lead }) {
       h(
         "div",
         null,
-        contactName ? h("small", { className: "t-eyebrow" }, statusText(ui, state.lead_type)) : null,
-        h("h3", null, contactName || statusText(ui, state.lead_type)),
-        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
+        h("h3", null, [person, state.listing_reference].filter(Boolean).join(" · ")),
+        meta.length ? h("small", { className: "adm-lead-context", "data-pipeline-person-meta": "true" }, meta.join(" · ")) : null,
       ),
-      h(
-        "div",
-        { className: "adm-pipeline-card__status" },
-        h(StatusPill, { tone: stageTone }, statusText(ui, state.stage)),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
-      ),
+      h("div", { className: "adm-pipeline-card__status" }, h(StatusPill, { tone: stageTone }, statusText(ui, state.stage))),
     ),
     leadContactActions(lead || {}, ui),
     h(
@@ -5405,48 +5449,20 @@ function PipelineCard({ page, state, lead }) {
           intake.timeline ? h("span", null, intake.timeline) : null,
         )
       : null,
-    inventoryMatch
-      ? h(
-          "details",
-          { className: "adm-pipeline-inventory", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
-          h(
-            "summary",
-            { className: "adm-disclosure-chevron" },
-            h(Icon, { name: "building-2", size: 15 }),
-            h("span", null, label(copy, "matchingInventory", "Matching inventory")),
-            h("span", { className: "adm-seg-count", title: label(copy, "matches", "Matches") }, inventoryMatch.match_count),
-          ),
-          inventoryMatch.matches.length
-            ? h(
-                "ul",
-                { className: "adm-task-list" },
-                ...inventoryMatch.matches.map((match) =>
-                  h(
-                    "li",
-                    { key: match.listing_id, "data-inventory-match": match.listing_id },
-                    h(
-                      "div",
-                      { className: "adm-task-list__body" },
-                      h("strong", null, match.title),
-                      h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
-                    ),
-                    h(
-                      "div",
-                      { className: "adm-task-list__actions" },
-                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
-                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
-                    ),
-                  ),
-                ),
-              )
-            : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
-        )
-      : null,
+    // One primary control: the card's next action. Everything else, the
+    // matching shortlist, history and the outcome forms, waits in one menu.
     state.status === "open" ? h("div", { className: "adm-pipeline-card__primary" }, h(PipelinePrimaryAction, { page, state })) : null,
     h(
       "details",
-      { className: "adm-pipeline-secondary" },
+      { className: "adm-pipeline-secondary", "data-pipeline-overflow": "true" },
       h("summary", null, label(copy, "moreActions", "More actions")),
+      inventoryList,
+      h(
+        "div",
+        { className: "adm-task-list__actions" },
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
+      ),
       state.status === "lost"
         ? h(PipelineOutcomeForm, { page, state, action: "reopen", submitLabel: label(copy, "reopenLead", "Reopen lead"), variant: "secondary" })
         : null,
@@ -6184,12 +6200,7 @@ function LeadPipelineBody({ page }) {
   const openById = new Map((queue.rows || []).map((state) => [state.lead_id, state]));
   const states = (queue.states || []).map((state) => openById.get(state.lead_id) || state);
   const title = label(copy, "pipelineWorkspace", "Buyers and renters");
-  const metrics = [
-    [label(copy, "openPipeline", "Open opportunities"), queue.summary?.open || 0, "kanban-square", "sea"],
-    [label(copy, "buyerPipeline", "Buyers"), queue.summary?.buyers_open || 0, "users", "ink"],
-    [label(copy, "renterPipeline", "Renters"), queue.summary?.renters_open || 0, "key", "sand"],
-    [statusText(ui, "overdue"), queue.summary?.overdue || 0, "triangle-alert", "brick"],
-  ];
+  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
   const count = (predicate) => states.filter(predicate).length;
   return adminShell(page, {
     title,
@@ -6202,7 +6213,6 @@ function LeadPipelineBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(StatGrid, { metrics }),
       h(
         PageToolbar,
         null,
@@ -6240,6 +6250,9 @@ function LeadPipelineBody({ page }) {
             h("p", { className: "adm-empty", role: "status" }, ui.noPipelineMatches),
           )
         : null,
+      // Sellers are a pipeline too; their valuation queue lives here, not in
+      // the inbox, and each row names the owner and the property.
+      sellerQueue.rows?.length ? h(SellerPipelineQueue, { page, copy: { ...ui, ...copy }, ui }) : null,
     ],
   });
 }
@@ -7031,29 +7044,23 @@ function LeadBrief({ brief, intake, copy, ui, locale, open = false }) {
       h(
         "span",
         { className: "adm-lead-brief__readiness" },
-        h("strong", null, `${brief.readiness_score}%`),
+        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
         h(StatusPill, { tone }, readinessLabel),
       ),
     ),
+    // One sentence in place of a score: what is still missing to qualify,
+    // and that the reply is where to ask for it.
     h(
       "div",
       { className: "adm-lead-brief__body" },
       h(
-        "div",
-        { className: "adm-lead-brief__score" },
-        h("span", null, label(copy, "leadReadiness", "Readiness")),
-        h("strong", null, `${brief.readiness_score}%`),
-        h("progress", { value: brief.readiness_score, max: 100, "aria-label": `${label(copy, "leadReadiness", "Readiness")}: ${brief.readiness_score}%` }),
-        missingFields.length ? h("small", null, `${label(copy, "missingFields", "Missing fields")}: ${missingFields.join(", ")}`) : null,
+        "p",
+        { className: "adm-lead-brief__missing", "data-lead-missing-fields": String(missingFields.length) },
+        missingFields.length
+          ? `${label(copy, "missingToQualify", "Missing to qualify")}: ${missingFields.join(", ")}. ${label(copy, "askInReply", "Ask in the reply")}.`
+          : label(copy, "qualificationComplete", "Qualification complete"),
+        brief.match_count ? h("small", null, ` ${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
       ),
-      h(
-        "div",
-        { className: "adm-lead-brief__action" },
-        h("span", null, label(copy, "qualificationDetails", "Qualification evidence")),
-        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
-        brief.match_count ? h("small", null, `${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
-      ),
-      h("small", { className: "adm-lead-brief__guardrail" }, label(copy, "deterministicDecision", "Calculated from workflow evidence; Hermes may only suggest a draft.")),
     ),
   );
 }
@@ -7122,6 +7129,14 @@ function LeadInboxRow({ page, row, ui, locale }) {
   const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age, snooze } = row;
   const selectable = page?.leadOperations?.bulkWritable === true;
   const repliesUnavailable = adminDataUnavailable(page, "replies");
+  // Channel and language on the row, so the broker knows how to answer
+  // before opening the detail.
+  const channelLine = [
+    lead.contact_preference ? valueText(ui, lead.contact_preference) : null,
+    lead.original_language ? String(lead.original_language).toUpperCase() : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return h(
     "li",
     {
@@ -7147,6 +7162,7 @@ function LeadInboxRow({ page, row, ui, locale }) {
       age ? h("time", { className: "adm-inbox__age", dateTime: lead.received_at, title: formatAdminDateTime(lead.received_at, locale) }, age) : null,
       leadContext ? h("small", { className: "adm-inbox__context", "data-lead-context": "true" }, leadContext) : null,
       requestDetails ? h("small", { className: "adm-inbox__context", "data-lead-request-details": "true" }, requestDetails) : null,
+      channelLine ? h("small", { className: "adm-inbox__context", "data-lead-channel": "true" }, channelLine) : null,
       h(
         "span",
         { className: "adm-inbox__tags" },
@@ -7238,13 +7254,10 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
   // hermes-availability builds a reason that names the missing environment
-  // variables. That is the right sentence for whoever can set them, and the
-  // wrong one for a broker with a lead open: HERMES_API_KEY is not something
-  // they can do anything about. The env detail goes to the operator who can
-  // act on it; everyone else is told who to ask.
-  const hermesReason = pageCan(page, "settings:manage")
-    ? page.hermes?.reason || ui.hermesUnavailableOwner
-    : ui.hermesUnavailableBroker;
+  // variables. That detail belongs on the Hermes screen, next to where it is
+  // set; with a lead open, everyone gets one plain sentence. The owner's says
+  // it is not configured, the broker's says who can connect it.
+  const hermesReason = pageCan(page, "settings:manage") ? ui.hermesUnavailableOwner : ui.hermesUnavailableBroker;
   return h(
     "article",
     {
@@ -7449,9 +7462,6 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         },
         h(Icon, { name: "info", size: 15 }),
         h("span", null, hermesReason),
-        pageCan(page, "settings:manage")
-          ? h("a", { href: adminHref("/admin/connect", page) }, label(copy, "connections", "Integrations"))
-          : null,
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
     ),
@@ -7493,12 +7503,6 @@ function LeadInboxBody({ page }) {
   const copy = { ...ui, ...adminCopy(page) };
   const runtimeCopy = ownerConsoleCopy(page).runtime;
   const locale = page.workspace?.locale;
-  const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
-  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
-  const secondaryPanels = [
-    viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { key: "viewings", page, copy, ui }) : null,
-    sellerQueue.rows?.length ? h(SellerPipelineQueue, { key: "seller", page, copy, ui }) : null,
-  ].filter(Boolean);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -7548,12 +7552,6 @@ function LeadInboxBody({ page }) {
     };
   });
   const slaCount = rows.filter((row) => row.slaStatus === "reminder_required" || row.slaStatus === "manager_escalation_required").length;
-  const metrics = [
-    [label(copy, "needsReply", "Needs reply"), repliesUnavailable ? runtimeCopy.unavailable : needsReply.length, "messages-square", "sea"],
-    [label(copy, "repliesQueued", "Replies queued"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesQueued, "send", "sun"],
-    [statusText(ui, "failed"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesFailed, "triangle-alert", "brick"],
-    [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
-  ];
   const title = label(copy, "leadInbox", "Lead inbox");
   const leadColumns = {
     lead: label(copy, "lead", "Lead"),
@@ -7576,7 +7574,6 @@ function LeadInboxBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
       h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
@@ -7613,13 +7610,6 @@ function LeadInboxBody({ page }) {
           h("p", { className: "adm-inbox__hint" }, ui.selectLead),
         ),
       ),
-      secondaryPanels.length
-        ? h(
-            "section",
-            { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
-            ...secondaryPanels,
-          )
-        : null,
     ],
   });
 }
@@ -7798,6 +7788,7 @@ function sellerPipelinePrimaryAction(row, copy) {
 
 function SellerPipelineQueue({ page, copy, ui }) {
   const queue = page.sellerPipelineQueue || { rows: [] };
+  const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
   const columns = {
     seller: label(copy, "sellerRequest", "Seller request"),
     task: label(copy, "task", "Task"),
@@ -7840,6 +7831,12 @@ function SellerPipelineQueue({ page, copy, ui }) {
                 const needsAppraisalSchedule = isAppraisal && row.stage !== "appraisal_scheduled";
                 const primary = sellerPipelinePrimaryAction(row, copy);
                 const primaryAction = primary?.[0] || null;
+                const lead = leadForRow(page, row.lead_id);
+                const location = row.property?.location || lead?.property?.location;
+                const sellerMeta = [
+                  location,
+                  ...(lead ? personMeta(lead, ui, copy, now) : [row.original_language ? String(row.original_language).toUpperCase() : null]),
+                ].filter(Boolean);
                 return h(
                   "tr",
                   {
@@ -7852,7 +7849,12 @@ function SellerPipelineQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-seller-pipeline-column": "seller", "data-label": columns.seller },
-                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.seller_pipeline_id), h("small", { className: "adm-lead-context" }, row.property?.location || row.lead_id)),
+                    h(
+                      "div",
+                      { className: "adm-lead-identity" },
+                      h("strong", null, personLabel(lead, ui, statusText(ui, "seller"))),
+                      sellerMeta.length ? h("small", { className: "adm-lead-context" }, sellerMeta.join(" · ")) : null,
+                    ),
                   ),
                   h("td", { "data-seller-pipeline-column": "task", "data-label": columns.task }, statusText(ui, row.task)),
                   h(
@@ -8778,13 +8780,13 @@ function TaskRow({ page, row, copy, na }) {
             )
           : null,
       ),
-      h("h2", null, row.subject_title || kindLabel),
+      // A delegated task's title is the way to the screen that owns it.
+      h("h2", null, delegated ? h("a", { href: adminHref(row.completion.route, page), "data-task-owner-link": row.kind }, row.subject_title || kindLabel) : row.subject_title || kindLabel),
       row.subject_context ? h("small", { className: "adm-lead-context" }, row.subject_context) : null,
       h("code", { className: "crm-mono adm-id-caption" }, row.subject_ref || row.task_id),
       h("dl", { className: "adm-daily-facts" },
         h("div", null, h("dt", null, copy.owner), h("dd", null, row.owner || workbenchCopy(page).notSet)),
         h("div", null, h("dt", null, copy.taskType), h("dd", null, row.origin === "authored" ? row.kind.replaceAll("_", " ") : kindLabel))),
-      delegated ? h("small", { className: "adm-lead-context" }, copy.delegated) : null,
     ),
     h(
       "div",
@@ -8831,8 +8833,11 @@ function TaskCompletionForm({ page, row, copy }) {
 // heading: PRODUCT.md forbids raw keys as UI text.
 function taskWords(row, page, ui, na) {
   if (row.origin === "authored") {
-    // The operator chose the subject when opening the task; the note is context.
-    return { subject_title: row.task_id, subject_context: row.note || "" };
+    // The operator named the task with a stable code when opening it; read
+    // as words, then the object it is for. The note is context.
+    const words = String(row.task_id || "").replace(/[-_:]+/g, " ").trim();
+    const title = words ? words.charAt(0).toUpperCase() + words.slice(1) : na.kinds.authored;
+    return { subject_title: [title, row.subject_ref].filter(Boolean).join(" · "), subject_context: row.note || "" };
   }
   const words = describeSourceTask(row, { page, copy: adminCopy(page), ui, na, inboxHref: adminHref("/admin/leads", page) });
   return { subject_title: words.title || na.kinds[row.kind], subject_context: words.context || "" };
@@ -8870,7 +8875,6 @@ function TasksBody({ page }) {
           ],
         },
       ),
-      h("p", { className: "adm-daily-note", "data-task-delegated-note": "true" }, copy.delegatedNote),
       h(DailyWorkspace, {
         scope: "task", page, title: copy.title,
         rows: queue.rows.map(row => ({ ...row, ...taskWords(row, page, ui, na), id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),

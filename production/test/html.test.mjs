@@ -349,7 +349,8 @@ test("admin viewing follow-up queue formats due dates and keeps action header di
       summary: { total_viewings: 1, open: 1, overdue: 0, booked: 0, completed: 0, rescheduled: 0, no_show: 0 },
     },
   });
-  const html = renderHtmlPage(page);
+  // Follow-ups render on the Viewings screen; the inbox no longer carries the table.
+  const html = renderHtmlPage({ ...page, kind: "admin_viewings", path: "/admin/viewings" });
   const dueCell = html.match(/data-viewing-column="due_at"[^>]*>([\s\S]*?)<\/td>/)?.[1] || "";
   assert.match(dueCell, /<time dateTime="2026-07-06T12:00:00.000Z"/);
   assert.doesNotMatch(dueCell.replace(/dateTime="[^"]+"|title="[^"]+"/g, ""), /2026-07-06T12:00:00/);
@@ -387,7 +388,9 @@ test("admin seller valuation queue renders native broker outcome controls", () =
     deals: [],
     leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
   });
-  const html = renderHtmlPage(page);
+  // The seller valuation queue is pipeline work; the inbox no longer carries it.
+  assert.doesNotMatch(renderHtmlPage(page), /data-seller-pipeline-queue="true"/);
+  const html = renderHtmlPage({ ...page, kind: "admin_lead_pipeline", path: "/admin/pipeline" });
 
   assert.match(html, /data-seller-pipeline-row="true"/);
   assert.match(html, /action="\/api\/admin\/seller-pipeline\/outcome"/);
@@ -425,7 +428,8 @@ test("admin seller controls continue from listing publication through offer and 
     deals: [],
     leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
   });
-  const html = renderHtmlPage(page);
+  // Seller work renders on the pipeline screen, not in the inbox.
+  const html = renderHtmlPage({ ...page, kind: "admin_lead_pipeline", path: "/admin/pipeline" });
 
   assert.match(html, /name="action" value="listing_published"/);
   assert.match(html, /name="publicPath" required/);

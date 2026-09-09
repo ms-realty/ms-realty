@@ -114,8 +114,23 @@ test('task actor is required and an authenticated identity cannot be edited', ()
 });
 
 test('an authored task without a subject still has a searchable queue title and matching detail title', () => {
+  // The stable code the operator typed is read as words; the raw id stays a caption.
   const html = renderReactAdminBody(page([{ ...authored, subject_ref: null, kind: 'owner_call' }]));
-  assert.match(html, /<strong>call-owner<\/strong>/);
-  assert.match(html, /<h2>call-owner<\/h2>/);
+  assert.match(html, /<strong>Call owner<\/strong>/);
+  assert.match(html, /<h2>Call owner<\/h2>/);
+  assert.match(html, /<code class="crm-mono adm-id-caption">call-owner<\/code>/);
   assert.match(html, /owner call/);
+});
+
+test('an authored task with a subject reads as what to do and for which object', () => {
+  const html = renderReactAdminBody(page([authored]));
+  assert.match(html, /<strong>Call owner · MS-CRAWL-0001<\/strong>/);
+  assert.match(html, /<h2>Call owner · MS-CRAWL-0001<\/h2>/);
+});
+
+test('a delegated task titles itself with the way to the screen that owns it, without a page-level warning', () => {
+  const html = renderReactAdminBody(page());
+  assert.match(html, /<h2><a href="\/admin\/leads(?:\?locale=en)?" data-task-owner-link="lead">Enquiry<\/a><\/h2>/);
+  assert.doesNotMatch(html, /data-task-delegated-note/);
+  assert.doesNotMatch(html, /owned by another screen/);
 });
