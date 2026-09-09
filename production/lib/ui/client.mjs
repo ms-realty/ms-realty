@@ -4260,6 +4260,40 @@ ${ADMIN_DAILY_JS}
     syncOpenState();
   }
   /* Package A2 (CMS and launch screens) --------------------------------- */
+  // A GET filter form marked data-auto-submit applies itself: selects and
+  // number bounds on change, the search box after a short pause in typing.
+  // The form's own submit button stays in the markup for a no-script request
+  // and is hidden once this hook marks the form as enhanced.
+  function initAutoSubmitFilters() {
+    var forms = document.querySelectorAll("form[data-auto-submit]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var timer = 0;
+        function submit() {
+          window.clearTimeout(timer);
+          timer = 0;
+          if (typeof form.requestSubmit === "function") form.requestSubmit();
+          else form.submit();
+        }
+        form.setAttribute("data-enhanced", "true");
+        form.addEventListener("change", function (event) {
+          var control = event.target;
+          if (!control || !control.matches("select, input[type='number'], input[type='search'], input[type='checkbox'], input[type='radio']")) return;
+          submit();
+        });
+        form.addEventListener("input", function (event) {
+          var control = event.target;
+          if (!control || !control.matches("input[type='search']")) return;
+          window.clearTimeout(timer);
+          timer = window.setTimeout(submit, 450);
+        });
+        form.addEventListener("submit", function () {
+          window.clearTimeout(timer);
+          timer = 0;
+        });
+      })(forms[i]);
+    }
+  }
   // The bulk bar is quiet until a listing is selected: the status control and
   // the submit stay disabled, and the hint says what a selection would do.
   // Without JavaScript the bar keeps its server-rendered enabled state, so a
@@ -4270,6 +4304,9 @@ ${ADMIN_DAILY_JS}
       (function (form) {
         var bar = form.querySelector("[data-listing-bulk-bar]");
         if (!bar) return;
+        // Once the watcher runs, an empty selection hides the bar entirely;
+        // the server-rendered bar remains visible for a no-script operator.
+        form.setAttribute("data-enhanced", "true");
         var boxes = form.querySelectorAll("[data-listing-select]");
         var controls = form.querySelectorAll("[data-listing-bulk-control]");
         var hint = form.querySelector("[data-listing-bulk-hint]");
@@ -5155,6 +5192,7 @@ ${ADMIN_DAILY_JS}
   initEditorForms();
   initLeadPipelineFilters();
   initListingBulkForms();
+  initAutoSubmitFilters();
   initListingSelectionBar();
   initListingEditorSaveState();
   initListingMediaPreviews();
