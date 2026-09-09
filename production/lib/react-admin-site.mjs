@@ -468,6 +468,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Смени файла",
     replaceMediaFile: "Избери нов файл",
     mediaReplacementHint: "Текущият файл остава активен, докато човек не одобри замяната.",
+    mediaAssetPosition: "{kind} {index} от {total}",
+    mediaReviewerSignedIn: "Влезлият оператор",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourProvider: "Визуализатор на обиколката",
@@ -1257,6 +1259,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Заменить файл",
     replaceMediaFile: "Выберите новый файл",
     mediaReplacementHint: "Текущий файл останется активным, пока человек не одобрит замену.",
+    mediaAssetPosition: "{kind} {index} из {total}",
+    mediaReviewerSignedIn: "Текущий оператор",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourProvider: "Просмотр тура",
@@ -2046,6 +2050,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Replace file",
     replaceMediaFile: "Choose replacement file",
     mediaReplacementHint: "The current file stays live until a person approves the replacement.",
+    mediaAssetPosition: "{kind} {index} of {total}",
+    mediaReviewerSignedIn: "Signed-in operator",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourProvider: "Tour viewer",
@@ -10263,8 +10269,18 @@ function ListingEditorBody({ page }) {
               "section",
               { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
               reviewableMedia.length
-                ? reviewableMedia.map((item) => {
+                ? reviewableMedia.map((item, index) => {
                     const sourceUrl = item.source_url || item.url || item.asset_url || "";
+                    // The heading names the asset the way a person counts it
+                    // ("Photo 3 of 17"); the generated id is evidence and goes
+                    // in the caption, as on the pipeline and contact cards.
+                    const sameKind = reviewableMedia.filter((other) => other.kind === item.kind);
+                    const assetLabel = fillTemplate(ui.mediaAssetPosition, {
+                      kind: fieldText(ui, `media_kind_${item.kind}`),
+                      index: sameKind.indexOf(item) + 1,
+                      total: sameKind.length,
+                    });
+                    const operatorId = currentOperatorId(page, "");
                     // The preview box is a small 16:10 card. Painting a 2560px
                     // photo into it downloads the whole photograph to draw a
                     // thumbnail, which is what the 640px rendition exists to
@@ -10286,7 +10302,7 @@ function ListingEditorBody({ page }) {
                       h(
                         "header",
                         { className: "adm-media-asset__header" },
-                        h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
+                        h("div", null, h("strong", null, assetLabel), h("code", { className: "crm-mono adm-id-caption" }, item.asset_id)),
                         h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
                       ),
                       // Every asset gets a deliberate state: loading and failed
@@ -10323,7 +10339,7 @@ function ListingEditorBody({ page }) {
                       canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
                         ? h(
                             "details",
-                            { className: "adm-media-review", "data-media-replacement": item.asset_id },
+                            { className: "adm-media-review adm-media-replacement", "data-media-replacement": item.asset_id },
                             h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
                             h(
                               "form",
@@ -10331,7 +10347,7 @@ function ListingEditorBody({ page }) {
                                 method: "post",
                                 action: "/api/admin/media/uploads",
                                 enctype: "multipart/form-data",
-                                className: "adm-form adm-media-upload",
+                                className: "adm-form adm-media-upload adm-media-replacement__form",
                                 "data-media-upload-form": "replacement",
                                 "data-media-upload-pending": ui.mediaUploadPending,
                                 "data-media-upload-success": ui.mediaUploadSuccess,
@@ -10431,7 +10447,19 @@ function ListingEditorBody({ page }) {
                                   ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
                                   : null,
                                 h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
-                                h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
+                                // The signed-in operator is the reviewer of record; the
+                                // form carries the id, the screen shows a witness line
+                                // with the id as a caption rather than an editable key.
+                                operatorId
+                                  ? h(
+                                      "div",
+                                      { className: "adm-media-review__reviewer", "data-media-reviewer": operatorId },
+                                      h("input", { type: "hidden", name: "reviewer", value: operatorId }),
+                                      h("span", { className: "adm-media-review__reviewer-label" }, label(copy, "reviewer", "Reviewer")),
+                                      h("span", { className: "adm-media-review__reviewer-name" }, ui.mediaReviewerSignedIn),
+                                      h("code", { className: "crm-mono adm-id-caption" }, operatorId),
+                                    )
+                                  : h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
                                 h(
                                   "label",
                                   { className: "adm-check" },
