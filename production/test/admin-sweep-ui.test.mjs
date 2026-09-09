@@ -217,16 +217,16 @@ test("viewing and seller queues show localized due dates instead of raw ISO time
 
 test("transaction case forms are localized and report their own status", async () => {
   const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
-  for (const [locale, caseId, saving] of [
-    ["bg", "Идентификатор на сделката", "Записване на сделката…"],
-    ["ru", "Идентификатор сделки", "Сохраняем сделку…"],
-    ["en", "Case ID", "Saving transaction case…"],
+  for (const [locale, dealRef, saving] of [
+    ["bg", "Референция на сделката", "Записване на сделката…"],
+    ["ru", "Ссылка сделки", "Сохраняем сделку…"],
+    ["en", "Deal reference", "Saving transaction case…"],
   ]) {
     const page = await dispatchHttp(app, { url: `/admin/cases?locale=${locale}`, headers: auth });
     assert.equal(page.status, 200);
     const form = page.body.slice(page.body.indexOf('data-admin-mutation-form="realty-case-open"'), page.body.indexOf("</form>", page.body.indexOf('data-admin-mutation-form="realty-case-open"')));
     assert.ok(form.includes(`data-admin-mutation-saving="${saving}"`), `${locale} saving copy`);
-    assert.ok(form.includes(`<label>${caseId}<input name="id" required`), `${locale} case id label`);
+    assert.ok(form.includes(`<span>${dealRef}</span><input name="id" required`), `${locale} deal reference label`);
     assert.ok(form.includes('name="mandateSignedAt" type="datetime-local" required'), `${locale} datetime mandate field`);
     assert.ok(form.includes('<div class="adm-form__actions"><p role="status" aria-live="polite" data-admin-mutation-status="true"></p>'), `${locale} status line`);
     assert.doesNotMatch(form, /Refreshing case queue|buyer purchase|>residential</);

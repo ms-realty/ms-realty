@@ -19,7 +19,7 @@ async function freePort() {
 // Regression: a request to /admin/team with an unreachable Postgres answered
 // 403 and then killed the process with an unhandled rejection, so every other
 // admin and public route died with it.
-test("the server stays up after the Payload runtime cannot reach Postgres", async () => {
+test("sessionless Team access does not start unreachable Payload or kill the server", async () => {
   const port = await freePort();
   const closedPort = await freePort();
   const child = spawn(process.execPath, [serverPath], {
@@ -39,7 +39,7 @@ test("the server stays up after the Payload runtime cannot reach Postgres", asyn
     assert.equal(child.exitCode, null, `server exited: ${stderr.slice(-600)}`);
     const health = await fetch(`http://127.0.0.1:${port}/api/health`);
     assert.equal(health.status, 200);
-    assert.match(stderr, /unhandled_rejection/);
+    assert.doesNotMatch(stderr, /unhandled_rejection|ECONNREFUSED/);
   } finally {
     child.kill("SIGTERM");
   }

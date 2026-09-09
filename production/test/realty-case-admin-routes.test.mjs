@@ -171,7 +171,14 @@ test("admin case routes support human manual work and assured autonomous agents 
       { config },
     );
     assert.equal(api.status, 200);
-    const queue = (await api.json()).realtyCaseQueue;
+    const caseData = await api.json();
+    assert.deepEqual(caseData.leads, [], "case-only agents cannot read enquiry contacts");
+    const queue = caseData.realtyCaseQueue;
+    const standalone = await dispatchHttp(createHttpApp({ realtyCaseWorkspaceId: "workspace-sandanski" }), {
+      url: "/api/admin/cases?locale=en", headers: auth.agent,
+    });
+    assert.equal(standalone.status, 200);
+    assert.deepEqual(standalone.body.leads, []);
     assert.equal(queue.summary.manual, 1);
     assert.equal(queue.summary.autonomous, 1);
 

@@ -8,7 +8,7 @@ import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { renderAdminLocaleRolloutPayload } from "../lib/locale-admin.mjs";
 import { buildLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { buildTranslationCoverageReport } from "../lib/translation-coverage.mjs";
-import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
 // The rollout report has always routed an operator to /admin/locales for a
@@ -45,9 +45,10 @@ test("the language a visitor asked for opens the screen the rollout report point
     const res = await get(`${task.admin_path}&locale=en`);
     assert.equal(res.status, 200, `${task.admin_path} resolves`);
     assert.match(res.body, new RegExp(`data-locale-row="${task.locale}"`));
-    // Following the task lands with that language already filled in, so the
-    // operator does not retype what the report just told them.
-    assert.match(res.body, new RegExp(`name="code"[^>]*value="${task.locale}"`));
+    // The existing language goes to its translation work, never to Add again.
+    assert.match(res.body, new RegExp(`data-locale-row="${task.locale}"`));
+    const add = res.body.match(/<select name="code"[\s\S]*?<\/select>/)?.[0] || "";
+    assert.doesNotMatch(add, new RegExp(`<option value="${task.locale}"`));
   }
 });
 
@@ -123,4 +124,14 @@ test("the screen is reachable from the rail and from settings", async () => {
 
   const settings = await get("/admin/settings?locale=en");
   assert.match(settings.body, /data-settings-locale-link="true"><a href="\/admin\/locales"/);
+});
+
+ test("a code-only language draft derives native metadata and stays closed", () => {
+  const registry = loadLocaleRegistry();
+  const result = addLocaleToRegistry(registry, { code: "ar" });
+  assert.equal(result.locale.native_name, "العربية");
+  assert.equal(result.locale.direction, "rtl");
+  assert.equal(result.locale.public_enabled, false);
+  assert.equal(result.locale.indexable, false);
+  assert.throws(() => addLocaleToRegistry(registry, { code: "fr" }), /already exists/);
 });
