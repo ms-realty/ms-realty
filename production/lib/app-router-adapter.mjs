@@ -1,4 +1,5 @@
 import { searchPath } from "./seo.mjs";
+import { DEFAULT_SLUG_HISTORY_PATH, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { loadLocaleRegistry, siteRootRedirectTarget } from "./locales.mjs";
@@ -44,6 +45,7 @@ export function appRouterConfigFromEnv(env = process.env) {
     cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     launchFreezePath: env.MS_REALTY_LAUNCH_FREEZE_PATH || DEFAULT_LAUNCH_FREEZE_PATH,
+    slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
@@ -283,6 +285,14 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", ac
   if (legacyDecision?.status === 200) {
     pathname = legacyDecision.target_path;
   }
+  const slugHistoryPath = config.slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH;
+  const slugRedirect = slugRedirectForPath(
+    readThroughCached(slugHistoryPath, () => readSlugHistory(slugHistoryPath)), pathname,
+  );
+  if (slugRedirect) return new Response(null, {
+    status: 301,
+    headers: { location: slugRedirect.new_path, "cache-control": PUBLIC_CACHE },
+  });
   if (config.runtimeDataDurableOnly) return renderDurableAppRouteResponse({ pathname, url, accept, config });
   let result;
   try {
