@@ -49,7 +49,7 @@ contains further changes; recheck the live endpoints after it completes.
   checks found and corrected deal-form layout and language-save feedback.
   Arabic draft creation was tested locally and remained off/nonindexable.
   Full CI passed, including production build and deployable-container smoke.
-  The subsequent merge of #218 requires its own final CI result.
+  Final CI also passed after merging #218; #217 merged at 13:45 UTC.
 
 Check GitHub for the current deployment and #217 status; this snapshot is not a
 live status feed. The original Claude worktrees remain intact.
@@ -57,10 +57,12 @@ live status feed. The original Claude worktrees remain intact.
 ## Inputs still owned by humans
 
 1. Agency Cloudflare was inspected on September 9: `ms.realty.bg@gmail.com`
-   is already a verified destination. Email Sending showed no onboarded zones.
-   Keep #194 draft until sender-domain setup, the shared Worker/origin secret
-   and authorized delivery verification are complete. Do not send customer
-   messages as a setup test.
+   is already a verified destination. Email Sending for
+   `notifications.makler-realty.com` is enabled and DNS configured; root-domain
+   SuperHosting mail was preserved. The Worker/origin shared secret is configured
+   and the origin sender is `noreply@notifications.makler-realty.com`.
+   #194 still needs final CI, deployment and authorized delivery verification.
+   Do not send customer messages as a setup test.
 2. Supply or verify Search Console, Yandex Webmaster and backlink evidence.
    Reports must describe real services, not local fixtures.
 3. Approve public translations, listing-fact reviews and legal/process copy.
