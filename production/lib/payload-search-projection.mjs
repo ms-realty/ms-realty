@@ -34,6 +34,11 @@ function listingFactVerifications(listing, property) {
   const result = [...(Array.isArray(property?.fact_verification) ? property.fact_verification : [])];
   const facts = listing.facts || {};
   const workflow = listing.workflow || {};
+  // Published listing prices are source-stated even before broker verification,
+  // matching the public Postgres view without claiming a human approval.
+  for (const field of ["price_amount", "price_currency", "price_on_request"]) {
+    if (!result.some((entry) => entry.field === field && entry.state === "broker_verified")) result.push({ field, state: "entered_pending_review" });
+  }
   for (const field of ["listing_status", "offer_type"]) if (facts[field] !== undefined) result.push(verified(field));
   if (workflow.price_verified_at && workflow.price_verified_by && facts.price_eur !== undefined) result.push(verified("price_amount"));
   if (workflow.price_on_request_verified_at && workflow.price_on_request_verified_by) result.push(verified("price_on_request"));
@@ -95,9 +100,9 @@ function rowFor(listing, translation, registry) {
       public_latitude: location.public_latitude,
       public_longitude: location.public_longitude,
       public_location_precision: location.public_location_precision,
-      price_amount: listingFacts.price_eur,
-      price_currency: listingFacts.price_eur === null || listingFacts.price_eur === undefined ? undefined : "EUR",
-      price_on_request: listingFacts.price_on_request,
+      price_amount: listingFacts.price_on_request === true ? undefined : listingFacts.price_eur,
+      price_currency: listingFacts.price_on_request === true || listingFacts.price_eur === null || listingFacts.price_eur === undefined ? undefined : "EUR",
+      price_on_request: listingFacts.price_on_request === true ? true : undefined,
       bedrooms_count: listingFacts.bedrooms ?? propertyFacts.bedrooms_count,
       floor_number: listingFacts.floor ?? propertyFacts.floor_number,
       total_floors: listingFacts.total_floors ?? propertyFacts.total_floors,

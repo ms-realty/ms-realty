@@ -1599,3 +1599,47 @@ test("a listing with no recorded status and no tour projects the same defaults a
   });
   assert.equal(sold.listing_status, "sold");
 });
+
+test("Postgres search reads a typed reference and typed property words the same way as the in-memory engine", async () => {
+  const dialect = {
+    escapeName: (name) => `"${name}"`,
+    escapeParam: (index) => `$${index + 1}`,
+    escapeString: (value) => `'${String(value).replaceAll("'", "''")}'`,
+    casing: { getColumnCasing: (column) => column.name },
+  };
+  const countStatement = async (input) => {
+    const statements = [];
+    await queryPublicSearch({
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        env: { DATABASE_URL: POSTGRES_DATABASE_TARGET, PAYLOAD_SECRET: "test-payload-secret" },
+        payload: { db: { drizzle: { execute: async (statement) => (statements.push(statement), statements.length === 1 ? [{ total_count: "0" }] : []) } } },
+      },
+      localeCodes: ["en"],
+      ...input,
+    });
+    return statements[0].toQuery(dialect);
+  };
+
+  for (const [typed, reference] of [["MS-CRAWL-0013", "MS-CRAWL-0013"], [" ms-crawl-0013 ", "MS-CRAWL-0013"], ["MS-3000", "MS-3000"], ["ms-00815", "MS-00815"]]) {
+    const query = await countStatement({ intent: { locale: "en", text_query: typed, page: 1, page_size: 12 } });
+    assert.match(query.sql, /d\."listing_reference" = \$2 OR d\."source_listing_id" = \$3/, typed);
+    assert.doesNotMatch(query.sql, /LIKE/);
+    assert.deepEqual(query.params, ["en", reference, reference]);
+  }
+
+  const apartments = await countStatement({ intent: { locale: "en", text_query: "Wohnung Sandanski", page: 1, page_size: 12 } });
+  assert.match(apartments.sql, /ms_realty_search_fold"?\(d\."search_text"\) LIKE \$2/);
+  assert.match(apartments.sql, /d\."property_family" = \$3/);
+  assert.deepEqual(apartments.params, ["en", "%sandanski%", "apartment"]);
+
+  const rentals = await countStatement({ intent: { locale: "en", text_query: "под наем Сандански", page: 1, page_size: 12 } });
+  assert.match(rentals.sql, /d\."offer_type" = \$3/);
+  assert.deepEqual(rentals.params, ["en", "%sandanski%", "rent"]);
+
+  // The legacy call shape (raw q without an intent) is read through the same path.
+  const legacy = await countStatement({ q: "apartment" });
+  assert.doesNotMatch(legacy.sql, /LIKE/);
+  assert.deepEqual(legacy.params, ["en", "apartment"]);
+});

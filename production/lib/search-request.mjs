@@ -75,6 +75,7 @@ const SERIALIZED_SEARCH_INTENT_FIELD_SET = new Set([...SEARCH_INTENT_INPUT_FIELD
 // resolves, because the thirty-eight merged listings kept it and because it
 // is what every printed page and old email carries.
 const EXACT_REFERENCE = /\bMS-(?:CRAWL-\d{4,}|\d{4,}(?:-\d{1,3})?)\b/iu;
+
 const UNSAFE_NL = /(?:<[^>]+>|\b(?:ignore|override|system|developer|prompt|instruction|tool|hermes|assistant|chat|publish|send)\b|https?:\/\/|javascript:)/iu;
 const PROPERTY_RULES = [
   ["apartment", /(?:\b(?:apartment|apartments)\b|апартамент(?:и)?)/iu],

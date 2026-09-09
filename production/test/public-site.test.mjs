@@ -1320,6 +1320,36 @@ test("rendered public fixtures do not introduce Sandanski sea framing", () => {
   assert.doesNotMatch(rendered, /Sandanski sea|sea destination|Сандански море/i);
 });
 
+test("the in-memory engine answers a typed reference exactly and a typed property word as a filter", () => {
+  for (const query of ["MS-00567-1", " ms-00567-1 "]) {
+    const page = renderSearchPage({ registry, listings, localeCode: "en", query });
+    assert.deepEqual(page.cards.map((card) => card.id), ["MS-00567-1"], query);
+    assert.equal(page.search.total_matches, 1);
+    assert.deepEqual(page.search.controls.active_filter_chips, [{ key: "exact_reference", value: "MS-00567-1", active: true }]);
+  }
+
+  const apartments = renderSearchPage({ registry, listings, localeCode: "en", query: "apartment" });
+  assert.ok(apartments.search.total_matches > 0);
+  assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_family", value: "apartment", active: true }]);
+  assert.equal(apartments.search.query, "");
+  for (const [localeCode, query] of [["de", "Wohnung"], ["ru", "квартира"], ["bg", "апартамент"]]) {
+    const localized = renderSearchPage({ registry, listings, localeCode, query });
+    assert.ok(localized.search.total_matches > 0, query);
+    assert.equal(localized.search.controls.active_filter_chips[0].value, "apartment", query);
+  }
+
+  const rentals = renderSearchPage({ registry, listings, localeCode: "bg", query: "под наем" });
+  assert.ok(rentals.search.total_matches > 0);
+  assert.deepEqual(rentals.search.controls.active_filter_chips, [{ key: "offer_type", value: "rent", active: true }]);
+  assert.equal(rentals.search.total_matches, renderSearchPage({ registry, listings, localeCode: "en", query: "rent" }).search.total_matches);
+
+  // A location word is still a lexical match with no filter attached.
+  const hotovo = renderSearchPage({ registry, listings, localeCode: "en", query: "Hotovo" });
+  assert.ok(hotovo.cards.some((card) => card.id === "MS-00567-1"));
+  assert.deepEqual(hotovo.search.controls.active_filter_chips, []);
+  assert.equal(hotovo.search.query, "Hotovo");
+});
+
 // The eight indexable search facets on each of the seven public locales are the
 // 301 targets the legacy taxonomy review proposes, so every one of the 56 has to
 // be a real page with its own canonical, heading and hreflang cluster — and a

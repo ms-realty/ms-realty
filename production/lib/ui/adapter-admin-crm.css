@@ -432,6 +432,31 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
   overflow-wrap: anywhere;
 }
 .adm-contact-card__leads a { padding: 3px 6px; font-size: var(--text-2xs); }
+/* The contact reads as a person: what they said, what they want, when they
+   are owed a reply, and how to reach them. Counts and the minted key sit in
+   the History disclosure. */
+.adm-contact-card .adm-contact-card__leads a { font-family: inherit; font-size: var(--text-xs); }
+.adm-contact-card__meta { margin: 2px 0 0; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-contact-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.adm-contact-actions .mk-btn { min-height: 44px; }
+.adm-contact-actions__none { margin: 0; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-contact-card .adm-contact-facts dd { display: grid; gap: 2px; text-align: start; font-weight: var(--fw-regular); }
+.adm-contact-card .adm-contact-facts dd time,
+.adm-contact-card .adm-contact-facts dd small { color: var(--text-muted); font-size: var(--text-2xs); }
+.adm-contact-quote { quotes: "“" "”"; color: var(--text-strong); overflow-wrap: anywhere; }
+.adm-contact-history > summary {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  list-style: none;
+}
+.adm-contact-history > summary::-webkit-details-marker { display: none; }
+.adm-contact-history p { margin: 0 0 var(--space-1); font-size: var(--text-xs); line-height: var(--lh-snug); }
+.adm-contact-history .adm-id-caption { white-space: normal; overflow-wrap: anywhere; }
 .adm-account-list li { font-size: var(--text-sm); }
 .adm-checklist-card { border-radius: var(--radius-md); box-shadow: none; }
 .adm-checklist-card h3 { font-size: var(--text-lg); }
@@ -717,6 +742,19 @@ details[open] > .adm-disclosure-chevron::after { transform: rotate(180deg); }
     gap: 4px;
   }
   .adm-toolbar > .crm-seg[data-list-filter="requests"] button {
+    min-height: 44px;
+    padding-inline: 8px;
+    font-size: var(--text-xs);
+    line-height: var(--lh-tight);
+    white-space: normal;
+  }
+  /* The consent register's four pills wrap two by two on a phone. */
+  .adm-toolbar > .crm-seg[data-list-filter="consents"] {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .adm-toolbar > .crm-seg[data-list-filter="consents"] button {
     min-height: 44px;
     padding-inline: 8px;
     font-size: var(--text-xs);
