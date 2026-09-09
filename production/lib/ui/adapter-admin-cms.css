@@ -59,6 +59,13 @@
 .adm-filter-chip--removable:active { background: var(--surface-hover); }
 .adm-filter-chip--removable:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
 
+/* Filters apply themselves once the client hook marks the form; the Apply
+   button is only for the request without JavaScript. */
+.adm-filterbar[data-enhanced="true"] .adm-filterbar__submit { display: none; }
+/* The bulk bar appears once a listing is ticked. The server renders it so a
+   no-script operator still has it; the selection watcher hides the empty
+   state and shows it again on the first checkbox. */
+.adm-listing-bulk[data-enhanced="true"] .adm-listing-bulk__bar[data-selection="empty"] { display: none; }
 /* The bulk bar is quiet with nothing selected and lights up once
    a selection exists; mid-save the whole bar reads as busy. */
 .adm-listing-bulk__bar[data-selection="empty"] .adm-listing-bulk__count { color: var(--text-subtle); }

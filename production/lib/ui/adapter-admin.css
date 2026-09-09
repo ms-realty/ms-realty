@@ -3287,27 +3287,31 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Catalogue: Paper 05.01–05.02 puts records first and review beside the work.
-   Existing forms and evidence queues remain in their owning sections. */
+/* Catalogue: records first; the review queues (facts, duplicates, areas) sit
+   under the list as one closed disclosure rather than a second column. */
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-workspace {
-  display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start;
 }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records {
   display: grid; gap: 20px; min-width: 0;
 }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review {
-  background: var(--atlas-surface); border-radius: 24px; padding: 20px; min-width: 0;
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues {
+  background: var(--atlas-surface); border-radius: 24px; padding: 4px 20px; min-width: 0;
 }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review h2 { margin: 0 0 16px; font-size: 20px; line-height: 24px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues > summary {
+  display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 12px 0; cursor: pointer;
+  font-size: 16px; line-height: 24px; font-weight: 600; color: var(--text-strong);
+}
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues[open] > summary { margin-bottom: 4px; }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-section { border-block-start: 1px solid var(--atlas-line); }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-section > summary {
   min-height: 52px; padding: 12px 0; cursor: pointer; font-size: 16px; line-height: 24px; font-weight: 600;
 }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .crm-panel { border: 0; box-shadow: none; background: transparent; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review :is(.adm-filterbar,.adm-report-grid) { grid-template-columns: minmax(0, 1fr); }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list > li { flex-wrap: wrap; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list__body { min-width: 0; overflow-wrap: anywhere; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review .adm-task-list__actions { flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .crm-panel { border: 0; box-shadow: none; background: transparent; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-report-grid { grid-template-columns: minmax(0, 1fr); }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-task-list > li { flex-wrap: wrap; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-task-list__body { min-width: 0; overflow-wrap: anywhere; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues .adm-task-list__actions { flex-wrap: wrap; }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-records > .adm-filterbar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-filterbar__summary { grid-column: 1 / -1; }
 .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table { display: block; min-width: 0; width: 100%; }
@@ -3352,7 +3356,7 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table tr { grid-template-columns: 44px minmax(0,1fr); padding: 12px; }
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="listing"] { padding: 0; }
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-table [data-listing-column="action"] { grid-column: 1 / -1; }
-  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review { padding: 16px; }
+  .crm-app main[data-react-admin-ui="listing-manager"] .adm-catalogue-review-queues { padding: 0 16px; }
   .crm-app main[data-react-admin-ui="listing-manager"] .adm-summary-strip,
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-summary-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-tabs { display: flex; flex-wrap: wrap; }

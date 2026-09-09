@@ -8494,7 +8494,9 @@ function ListingManagerBody({ page }) {
       h("section", { className: "adm-catalogue-records", "aria-label": label(copy, "results", "Results") },
       h(
         "form",
-        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
+        // Selects and the search box apply themselves once the client hook runs;
+        // the Apply button below is the no-script path and is hidden after that.
+        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true", "data-auto-submit": "true" },
         filterLocaleInput(page),
         h(
           "div",
@@ -8557,7 +8559,7 @@ function ListingManagerBody({ page }) {
               ),
             )
           : null,
-        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--md adm-filterbar__submit", "data-filter-submit": "true" }, ui.applyFilters),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),
       h(
@@ -8725,8 +8727,11 @@ function ListingManagerBody({ page }) {
       ),
       h(Pagination, { page, path: "/admin/listings" }),
       ),
-      h("aside", { className: "adm-catalogue-review", "aria-label": ui.reviewRequired },
-        h("h2", null, ui.reviewRequired),
+      // The review queues (facts to confirm, duplicate pairs, area checks) are
+      // supporting work, not a second dashboard: one closed disclosure under
+      // the list, open only when a queue filter is in the URL.
+      h("details", { className: "adm-catalogue-review-queues", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review-queues": "true" },
+        h("summary", null, h(Icon, { name: "eye", size: 16 }), h("span", null, `${ui.reviewQueues} · ${factReviewSummary.unchecked_figures || 0}`)),
         h("details", { className: "adm-catalogue-review-section", open: Boolean(factReview.filters?.row || factReview.filters?.q), "data-catalogue-review": "facts" },
           h("summary", null, factReviewCopy.title || "Facts to confirm", ` · ${factReviewSummary.unchecked_figures || 0}`),
 h(
@@ -8738,7 +8743,7 @@ h(
         h("p", { className: "adm-note", role: "note" }, factReviewCopy.description || "These figures came from the source and await a broker’s confirmation."),
         h(
           "form",
-          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true" },
+          { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-fact-review-filters": "true", "data-auto-submit": "true" },
           filterLocaleInput(page),
           h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "factQ", defaultValue: factReview.filters?.q || "", placeholder: factReviewCopy.title || "Facts to confirm" })),
           h(
@@ -8752,7 +8757,7 @@ h(
               ...factReviewRowOptions.map((option) => h("option", { key: option.value, value: option.value, selected: factReview.filters?.row === option.value }, option.label)),
             ),
           ),
-          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "filter", "Filter")),
+          h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm adm-filterbar__submit", "data-filter-submit": "true" }, ui.applyFilters),
           h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
         ),
         h(
