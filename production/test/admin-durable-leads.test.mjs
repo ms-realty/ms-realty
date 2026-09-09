@@ -35,7 +35,7 @@ const durableLead = {
   source: "website_contact_callback",
   intent: "callback",
   lead_type: "buyer",
-  listing_reference: "MS-CRAWL-0003",
+  listing_reference: "MS-00922",
   property: { location: "Sandanski", type: "apartment" },
   request_details: { callback_time: "Tomorrow" },
   requirements: {

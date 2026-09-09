@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertStructuredDataReport, buildStructuredDataReport } from "../lib/structured-data-report.mjs";
+import { assertStructuredDataReport, buildStructuredDataReport ,
+  PUBLIC_LISTING_SCHEMA_ENTRIES,
+} from "../lib/structured-data-report.mjs";
 import { assertListingSchema, buildListingSchema, schemaIssues } from "../lib/structured-data.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -120,7 +122,7 @@ test("missing approved media is a review warning instead of a schema failure", (
     seed: {
       ...seed,
       records: seed.records.map((record) =>
-        record.id === "MS-CRAWL-0114"
+        record.id === "MS-00191"
           ? { ...record, media: [], facts: { ...record.facts, thumbnail_url: "" } }
           : record,
       ),
@@ -129,8 +131,8 @@ test("missing approved media is a review warning instead of a schema failure", (
   });
 
   assert.equal(assertListingSchema(schema), true);
-  assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").every((row) => row.issues.length === 0));
-  assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").some((row) => row.warnings.includes("missing_public_images")));
+  assert.ok(report.rows.filter((row) => row.listing_id === "MS-00191").every((row) => row.issues.length === 0));
+  assert.ok(report.rows.filter((row) => row.listing_id === "MS-00191").some((row) => row.warnings.includes("missing_public_images")));
 });
 
 test("structured data warnings use broker-verified property edits", () => {
@@ -138,9 +140,9 @@ test("structured data warnings use broker-verified property edits", () => {
   const seedWithPriceGap = {
     ...seed,
     records: seed.records.map((record) =>
-      record.id === "MS-CRAWL-0001"
+      record.id === "MS-00815"
         ? { ...record, facts: { ...record.facts, price_eur: null, price_on_request: false } }
-        : record.id === "MS-CRAWL-0044"
+        : record.id === "MS-00345"
           ? { ...record, facts: { ...record.facts, bedrooms: null, bedrooms_not_applicable: false } }
         : record,
     ),
@@ -150,13 +152,13 @@ test("structured data warnings use broker-verified property edits", () => {
     seed: seedWithPriceGap,
     listingEdits: [
       {
-        listing_id: "MS-CRAWL-0001",
+        listing_id: "MS-00815",
         listing_patch: { price_eur: 123000 },
         property_patch: { usable_area_sqm: 86.5 },
         property_fact_verification: [{ field: "usable_area_sqm", state: "broker_verified" }],
       },
       {
-        listing_id: "MS-CRAWL-0044",
+        listing_id: "MS-00345",
         property_patch: { bedrooms_count: 1 },
         property_fact_verification: [{ field: "bedrooms_count", state: "broker_verified" }],
       },
@@ -171,10 +173,10 @@ test("structured data warnings use broker-verified property edits", () => {
 
 test("structured data warnings treat price-on-request as reviewed pricing without an offer", () => {
   const report = buildStructuredDataReport({
-    listingEdits: [{ listing_id: "MS-CRAWL-0001", patch: { price_on_request: true } }],
+    listingEdits: [{ listing_id: "MS-00815", patch: { price_on_request: true } }],
     generatedAt: "2026-07-05T00:00:00Z",
   });
-  const rows = report.rows.filter((row) => row.listing_id === "MS-CRAWL-0001");
+  const rows = report.rows.filter((row) => row.listing_id === "MS-00815");
 
   assert.ok(rows.length > 0);
   assert.equal(rows.every((row) => !row.warnings.includes("missing_price")), true);
@@ -186,15 +188,15 @@ test("structured data warnings do not let a legacy bedroom flag bypass property 
   const seedWithBedroomGap = {
     ...seed,
     records: seed.records.map((record) =>
-      record.id === "MS-CRAWL-0044" ? { ...record, facts: { ...record.facts, bedrooms_not_applicable: false } } : record,
+      record.id === "MS-00345" ? { ...record, facts: { ...record.facts, bedrooms_not_applicable: false } } : record,
     ),
   };
   const report = buildStructuredDataReport({
     seed: seedWithBedroomGap,
-    listingEdits: [{ listing_id: "MS-CRAWL-0044", patch: { bedrooms_not_applicable: true } }],
+    listingEdits: [{ listing_id: "MS-00345", patch: { bedrooms_not_applicable: true } }],
     generatedAt: "2026-07-05T00:00:00Z",
   });
-  const rows = report.rows.filter((row) => row.listing_id === "MS-CRAWL-0044");
+  const rows = report.rows.filter((row) => row.listing_id === "MS-00345");
 
   assert.ok(rows.length > 0);
   assert.equal(rows.every((row) => row.warnings.includes("missing_bedrooms")), true);
@@ -202,7 +204,7 @@ test("structured data warnings do not let a legacy bedroom flag bypass property 
 
 test("structured data warnings do not require bedrooms for land listings", () => {
   const report = buildStructuredDataReport({ generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0158");
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-00046");
 
   assert.ok(row);
   assert.equal(row.warnings.includes("missing_bedrooms"), false);
@@ -213,7 +215,7 @@ test("generated structured data report covers indexable listing sitemap entries"
   if (!fs.existsSync(file)) return;
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertStructuredDataReport(report), true);
-  assert.equal(report.summary.listing_entries, 165);
+  assert.equal(report.summary.listing_entries, PUBLIC_LISTING_SCHEMA_ENTRIES);
   assert.equal(report.summary.guide_entries, 5);
   assert.equal(report.summary.failing_entries, 0);
   assert.equal(report.rows.some((row) => row.loc === "/en/guides/foreign-buyers" && row.schema_type === "Article"), true);

@@ -74,7 +74,7 @@
       "properties": 165,
       "locations": 31,
       "listing_translations": 1155,
-      "media_assets": 4978,
+      "media_assets": 6224,
       "listing_tours": 165,
       "listing_enrichment_tasks": 165,
       "search_outbox": 0
@@ -101,6 +101,13 @@
           "required": true,
           "localized": false,
           "unique": true
+        },
+        {
+          "name": "lot_number",
+          "type": "number",
+          "required": true,
+          "localized": false,
+          "index": true
         },
         {
           "name": "cms_status",
@@ -134,6 +141,50 @@
           "required": true,
           "localized": false,
           "unique": true
+        },
+        {
+          "name": "lot_suffix",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "migration_id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true,
+          "index": true
+        },
+        {
+          "name": "legacy_lot_id",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "index": true
+        },
+        {
+          "name": "legacy_post_id",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "legacy_urls",
+          "type": "array",
+          "required": false,
+          "localized": false,
+          "fields": [
+            "domain",
+            "url"
+          ]
+        },
+        {
+          "name": "merged_into",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "index": true
         },
         {
           "name": "facts",
@@ -661,7 +712,8 @@
           "required": true,
           "localized": false,
           "options": [
-            "verify_imported_facts"
+            "verify_imported_facts",
+            "reconcile_legacy_translation"
           ]
         },
         {
@@ -780,7 +832,7 @@
     },
     {
       "slug": "media_assets",
-      "records": 4978,
+      "records": 6224,
       "source": "listings.media",
       "workflow": [
         "approved_imported_photo",

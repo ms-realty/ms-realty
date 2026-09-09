@@ -276,7 +276,15 @@ jobs:
           remote_report="/opt/ms-realty/incoming/previous-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
           # Runner values are intentionally expanded before SSH.
           # shellcheck disable=SC2029
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 /opt/ms-realty/incoming; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker exec --user 1001:1001 \"\$container\" node production/scripts/validate-monitoring-rollback-report.mjs >/dev/null; docker cp \"\${container}:/runtime-evidence/monitoring-rollback-report.json\" '$remote_report'; chmod 0600 '$remote_report'"
+          # The prior report is validated on the origin before it is copied. An
+          # expired or invalid one means there is nothing to preserve for a
+          # rollback; it must not stop the release (three releases died here
+          # on 2026-09-09 while the drill could not refresh the report).
+          if ! ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 /opt/ms-realty/incoming; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker exec --user 1001:1001 \"\$container\" node production/scripts/validate-monitoring-rollback-report.mjs >/dev/null; docker cp \"\${container}:/runtime-evidence/monitoring-rollback-report.json\" '$remote_report'; chmod 0600 '$remote_report'"; then
+            echo "Prior monitoring report did not validate on the origin; no report will be preserved for rollback."
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           # The validated temporary path is runner-controlled.
           # shellcheck disable=SC2029
           if ! scp "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST:$remote_report" "$local_report"; then
@@ -289,8 +297,14 @@ jobs:
           # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'"
           chmod 0600 "$local_report"
-          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight
-          echo "valid=true" >> "$GITHUB_OUTPUT"
+          # An expired or invalid prior report means there is nothing worth
+          # preserving for a rollback; it is not a reason to refuse the release.
+          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Prior monitoring report did not validate; no report will be preserved for rollback."
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Preserve validated monitoring evidence for rollback
         if: steps.previous_monitoring.outputs.valid == 'true'

@@ -9,6 +9,7 @@ import {
   normalizeImportedFact,
   normalizeLegacyListingFacts,
 } from "./listing-facts.mjs";
+import { assertListingIdentityRows } from "./listing-identity.mjs";
 import { getLocale } from "./locales.mjs";
 import { mediaWorkflow, normalizeMediaAsset } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -21,6 +22,12 @@ export const DEFAULT_CMS_SEED_OUTPUT = fromRoot("production", "data", "cms-seed.
 export const DEFAULT_CMS_COLLECTIONS_OUTPUT = fromRoot("production", "data", "cms-collections.json");
 
 export const ENRICHMENT_TASK_TYPE = "verify_imported_facts";
+export const LEGACY_TRANSLATION_RECONCILIATION_TASK_TYPE = "reconcile_legacy_translation";
+// A translation row copied from a retired twin's own page on the other domain.
+export const LEGACY_SOURCE_CONTENT_ORIGIN = "legacy_source";
+// 4978 crawl media rows plus the 1246 rows the 38 survivors gain from their
+// retired twins; the twins keep their own rows so every review queue holds.
+export const EXPECTED_SEED_MEDIA_ROWS = 6224;
 export const SEARCH_OUTBOX_SCHEMA_VERSION = 1;
 
 export function propertyTaxonomyContract() {
@@ -66,6 +73,27 @@ export function enrichmentTaskForListing({ listingId, propertyId, factFields = [
     task_state: "pending",
     idempotency_key: `listing:${listing}:${ENRICHMENT_TASK_TYPE}`,
     fact_fields: [...new Set(factFields)].sort(),
+    source,
+  };
+}
+
+// A retired twin's own Russian copy is published on the survivor as a legacy
+// source translation. That text was written independently of the Bulgarian
+// facts, so each such row opens a reconciliation task beside the import task.
+export function legacyTranslationReconciliationTaskForListing({ listingId, propertyId, locale, source = "legacy_backfill" }) {
+  const listing = relationId(listingId);
+  const property = relationId(propertyId);
+  const localeCode = String(locale || "").trim();
+  if (!listing || !property || !localeCode) throw new Error("Legacy translation reconciliation task requires listing, property and locale");
+  return {
+    id: `enrichment-${listing}-legacy-${localeCode}`,
+    collection: "listing_enrichment_tasks",
+    listing,
+    property,
+    task_type: LEGACY_TRANSLATION_RECONCILIATION_TASK_TYPE,
+    task_state: "pending",
+    idempotency_key: `listing:${listing}:${LEGACY_TRANSLATION_RECONCILIATION_TASK_TYPE}:${localeCode}`,
+    fact_fields: ["title", "description"],
     source,
   };
 }
@@ -247,6 +275,24 @@ function publishedListingState(approval, listingId) {
   };
 }
 
+// A retired cross domain twin never publishes under its crawl era id. It stays
+// in the seed, archived, so every catalog count and approval row keeps holding,
+// while its old URL redirects to the survivor.
+function retiredListingState() {
+  return { cms_status: "archived", workflow: { publish_approved: false } };
+}
+
+// Every old URL that pointed at this lot on either domain, the listing's own
+// crawl URL first. A survivor's gallery is the media union over all of them.
+function legacyUrlsForListing(listing) {
+  const entries = Array.isArray(listing.legacy_urls) ? listing.legacy_urls : [];
+  return entries.map((entry) => ({ domain: String(entry?.domain || ""), url: String(entry?.url || "") })).filter((entry) => entry.url);
+}
+
+function mediaUrlsForListing(listing) {
+  return [...new Set([listing.url, ...legacyUrlsForListing(listing).map((entry) => entry.url)].filter(Boolean))];
+}
+
 function catalogTranslationForListing(registry, listing, source, row) {
   const listingId = row.listing || row.listing_id;
   if (listingId !== listing.id) throw new Error(`Translation listing id mismatch for ${listingId || "missing"}`);
@@ -292,6 +338,9 @@ function catalogTranslationForListing(registry, listing, source, row) {
 }
 
 export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows, publicationApproval = null, translationRecords = [] }) {
+  // Fails loudly, naming the offending ids, before any record is built: a
+  // listing without a lot number, two listings on one id, or a malformed id.
+  assertListingIdentityRows(listings);
   const migrationByUrl = new Map(migrationRecords.map((record) => [record.old_url, record]));
   const routeByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const mediaByUrl = groupBy(mediaRows, (row) => row.page_url);
@@ -326,7 +375,7 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
     });
 
     const fallbackAlt = listing.h1 || listing.title || listing.id;
-    const media = (mediaByUrl.get(listing.url) || []).map((row) => mediaEntry(row, fallbackAlt));
+    const media = mediaUrlsForListing(listing).flatMap((url) => (mediaByUrl.get(url) || []).map((row) => mediaEntry(row, fallbackAlt)));
     const snapshot = withPlausibleRent(source);
     if (snapshot.price_on_request) snapshot.price_eur = null;
     const locationId = locationIdForLabel(snapshot.location);
@@ -353,11 +402,25 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
         factFields: enrichmentChecklistFor(property).filter((item) => item.needs_enrichment).map((item) => item.field),
       }),
     );
+    for (const translation of translations) {
+      if (translation.content_origin !== LEGACY_SOURCE_CONTENT_ORIGIN) continue;
+      enrichmentTasks.push(
+        legacyTranslationReconciliationTaskForListing({ listingId: listing.id, propertyId: property.id, locale: translation.locale }),
+      );
+    }
 
-    const publication = publishedListingState(publicationApproval, listing.id);
+    const retired = Boolean(listing.merged_into);
+    const publication = retired ? retiredListingState() : publishedListingState(publicationApproval, listing.id);
 
     return {
       id: listing.id,
+      lot_number: listing.lot_number,
+      lot_suffix: listing.lot_suffix || null,
+      migration_id: listing.migration_id,
+      legacy_lot_id: listing.legacy_lot_id || null,
+      legacy_post_id: listing.legacy_post_id || null,
+      legacy_urls: legacyUrlsForListing(listing),
+      merged_into: listing.merged_into || null,
       collection: "listings",
       cms_status: publication?.cms_status || "source_imported_review_required",
       ...(publication ? { workflow: publication.workflow } : {}),
@@ -373,7 +436,13 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
         canonical: listing.canonical || listing.url,
         schema_present: Boolean(listing.schema_present),
       },
-      translations: translations.map((translation) => ({ ...translation, listing: listing.id, translation_state: translation.status })),
+      translations: translations.map((translation) => ({
+        ...translation,
+        listing: listing.id,
+        translation_state: translation.status,
+        // Nothing of a retired twin is indexable; the survivor carries the copy.
+        ...(retired ? { public_indexable: false } : {}),
+      })),
       media,
       media_workflow: mediaWorkflow(media),
       tour: createTourField({ listingId: listing.id, media }),
@@ -443,6 +512,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       tourFields,
       publicTours,
       publishedListings: records.filter((record) => record.cms_status === "published").length,
+      retiredListings: records.filter((record) => record.merged_into).length,
+      legacySourceTranslations: translationRows.filter((translation) => translation.content_origin === LEGACY_SOURCE_CONTENT_ORIGIN).length,
       publicationExcludedListings: publicationApproval?.excluded_listings?.length || 0,
       missingMigrationRecords: records.filter((record) => !record.migration).length,
       missingRouteRows: records.filter((record) => !record.routing).length,
@@ -463,7 +534,21 @@ export function assertCmsSeed(seed) {
   if (!Array.isArray(seed.locations) || seed.locations.some((location) => !["exact", "approximate", "locality"].includes(location.public_location_precision))) {
     throw new Error("Location collection precision must be exact, approximate, or locality");
   }
-  if (seed.summary.enrichmentTasks !== seed.summary.listings) throw new Error("Every legacy listing must receive one enrichment task");
+  if (seed.summary.enrichmentTasks !== seed.summary.listings + (seed.summary.legacySourceTranslations || 0)) {
+    throw new Error("Every legacy listing must receive one enrichment task and every legacy source translation one reconciliation task");
+  }
+  assertListingIdentityRows(seed.records.filter((record) => record.collection === "listings"));
+  const publicIds = new Set(seed.records.filter((record) => record.collection === "listings" && !record.merged_into).map((record) => record.id));
+  if (
+    seed.records.some(
+      (record) =>
+        record.collection === "listings" &&
+        record.merged_into &&
+        (record.cms_status !== "archived" || record.workflow?.publish_approved !== false || !publicIds.has(record.merged_into)),
+    )
+  ) {
+    throw new Error("Retired twins must stay archived, unapproved and merged into a public listing");
+  }
   if (seed.summary.bySourceLocale.bg !== 113) throw new Error("Expected 113 BG CMS source listings");
   if (seed.summary.bySourceLocale.ru !== 52) throw new Error("Expected 52 RU CMS source listings");
   if (seed.summary.translationLocales.fr) throw new Error("French CMS translations must not be seeded before approval");
@@ -487,7 +572,9 @@ export function assertCmsSeed(seed) {
   ) {
     throw new Error("Indexable CMS translations require review and publication authority metadata");
   }
-  if (seed.summary.mediaAssets !== 4978) throw new Error(`Expected 4978 listing media rows, got ${seed.summary.mediaAssets}`);
+  if (seed.summary.mediaAssets !== EXPECTED_SEED_MEDIA_ROWS) {
+    throw new Error(`Expected ${EXPECTED_SEED_MEDIA_ROWS} listing media rows, got ${seed.summary.mediaAssets}`);
+  }
   if (seed.summary.publicGalleryAssets <= 0) throw new Error("CMS seed must expose reviewed imported photo gallery assets");
   if (seed.summary.mediaReviewGatedAssets <= 0) throw new Error("CMS seed must keep non-gallery media review-gated");
   if (seed.summary.videoCandidates !== 0) throw new Error("Crawl seed must not invent listing video assets");
@@ -534,6 +621,8 @@ function collectionField(name, type, options = {}) {
 const REQUIRED_COLLECTION_FIELDS = {
   listings: {
     id: "text",
+    lot_number: "number",
+    migration_id: "text",
     cms_status: "select",
     source_locale: "relationship",
     source_domain: "text",
@@ -597,7 +686,15 @@ const REQUIRED_COLLECTION_FIELDS = {
 };
 
 const TYPED_OPTIONAL_COLLECTION_FIELDS = {
-  listings: { workflow: "group", location: "relationship" },
+  listings: {
+    workflow: "group",
+    location: "relationship",
+    lot_suffix: "text",
+    legacy_lot_id: "text",
+    legacy_urls: "array",
+    legacy_post_id: "text",
+    merged_into: "text",
+  },
   properties: { location: "relationship" },
 };
 
@@ -636,7 +733,10 @@ export function buildCmsCollections(seed) {
         workflow: ["source_imported_review_required", "draft", "review", "published", "archived"],
         publish_requires_human_review: true,
         fields: [
+          // The first four fields are the admin list columns: the lot number
+          // sits beside the id so the desk sees the number it quotes.
           collectionField("id", "text", { required: true, unique: true }),
+          collectionField("lot_number", "number", { required: true, index: true }),
           collectionField("cms_status", "select", {
             required: true,
             options: ["source_imported_review_required", "draft", "review", "published", "archived"],
@@ -644,6 +744,12 @@ export function buildCmsCollections(seed) {
           collectionField("source_locale", "relationship", { required: true, relationTo: "locales" }),
           collectionField("source_domain", "text", { required: true }),
           collectionField("source_url", "url", { required: true, unique: true }),
+          collectionField("lot_suffix", "text"),
+          collectionField("migration_id", "text", { required: true, unique: true, index: true }),
+          collectionField("legacy_lot_id", "text", { index: true }),
+          collectionField("legacy_post_id", "text"),
+          collectionField("legacy_urls", "array", { fields: ["domain", "url"] }),
+          collectionField("merged_into", "text", { index: true }),
           collectionField("facts", "group", {
             required: true,
             fields: [
@@ -813,7 +919,7 @@ export function buildCmsCollections(seed) {
           collectionField("id", "text", { required: true, unique: true }),
           collectionField("listing", "relationship", { required: true, relationTo: "listings" }),
           collectionField("property", "relationship", { required: true, relationTo: "properties" }),
-          collectionField("task_type", "select", { required: true, options: [ENRICHMENT_TASK_TYPE] }),
+          collectionField("task_type", "select", { required: true, options: [ENRICHMENT_TASK_TYPE, LEGACY_TRANSLATION_RECONCILIATION_TASK_TYPE] }),
           collectionField("task_state", "select", { required: true, options: ["pending", "in_progress", "completed", "skipped"] }),
           collectionField("idempotency_key", "text", { required: true, unique: true }),
           collectionField("fact_fields", "json"),
@@ -944,11 +1050,11 @@ export function assertCmsCollections(manifest) {
     if (!Number.isInteger(manifest.summary.records[slug])) throw new Error(`CMS collection contract has no record count: ${slug}`);
   }
   if (manifest.summary.records.listings !== 165) throw new Error("Listings collection must cover all migrated listings");
-  if (manifest.summary.records.media_assets !== 4978) throw new Error("Media collection must cover all listing media assets");
+  if (manifest.summary.records.media_assets !== EXPECTED_SEED_MEDIA_ROWS) throw new Error("Media collection must cover all listing media assets");
   if (manifest.summary.records.listing_tours !== 165) throw new Error("Tour collection must expose one review-gated tour per listing");
   if (manifest.summary.records.properties !== 165) throw new Error("Property collection must backfill every legacy listing");
   if (!manifest.summary.records.locations) throw new Error("Location collection must backfill imported locations");
-  if (manifest.summary.records.listing_enrichment_tasks !== 165) throw new Error("Every legacy listing must have an enrichment task");
+  if (manifest.summary.records.listing_enrichment_tasks < 165) throw new Error("Every legacy listing must have an enrichment task");
   if (manifest.summary.records.search_outbox !== 0) throw new Error("Search outbox must start empty");
   if (!manifest.taxonomy_contract?.version || !Array.isArray(manifest.taxonomy_contract.mappings)) {
     throw new Error("CMS collection manifest must retain the versioned property taxonomy contract");

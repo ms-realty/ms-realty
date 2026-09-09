@@ -15,7 +15,7 @@ import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const AUTH = { authorization: "Bearer local-admin-smoke", "content-type": "application/json" };
-const LISTING = "MS-CRAWL-0001";
+const LISTING = "MS-00815";
 
 function harness({ provider } = {}) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-copy-"));

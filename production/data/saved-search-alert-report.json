@@ -26,11 +26,11 @@
       "status": "no_new_matches",
       "alert_task": null,
       "sample_listing_ids": [
-        "MS-CRAWL-0002",
-        "MS-CRAWL-0003",
-        "MS-CRAWL-0004",
-        "MS-CRAWL-0005",
-        "MS-CRAWL-0007"
+        "MS-00907",
+        "MS-00922",
+        "MS-00905",
+        "MS-00899",
+        "MS-00911"
       ]
     }
   ]

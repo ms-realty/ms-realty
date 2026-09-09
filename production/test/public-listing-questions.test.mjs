@@ -13,7 +13,7 @@ import { listingPath } from "../lib/seo.mjs";
 import { approvedPublicSeedFixture, approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
-const input = { listingId: "MS-CRAWL-0001", locale: "en", question: "Is there a balcony?" };
+const input = { listingId: "MS-00815", locale: "en", question: "Is there a balcony?" };
 // Synthetic, explicitly approved test wording; no production evidence is added.
 function fixture() {
   const seed = approvedPublicSeedFixture();
@@ -37,7 +37,7 @@ test("returns exact related approved passages with canonical reference and genui
   const result = publicListingQuestion({ registry, seed, input });
   assert.equal(result.status, "related_source");
   assert.deepEqual(result.passages, [{ quote: "There is a balcony.", field: "description", source_hash: contentHash(record.facts) }]);
-  assert.equal(result.canonical_url, "/en/properties/MS-CRAWL-0001");
+  assert.equal(result.canonical_url, "/en/properties/MS-00815");
   assert.equal(result.reviewer, translation.reviewer);
   assert.equal(result.reviewed_at, translation.approved_at);
   assert.equal(JSON.stringify(seed), before);
@@ -62,7 +62,7 @@ for (const [label, mutate] of [
   ["missing reviewer", ({ translation }) => { translation.reviewer = null; }],
   ["projection witness", ({ translation }) => { translation.reviewer = "postgres_public_search_projection"; translation.approved_at = "database_projection"; }],
   ["missing requested locale", ({ record }) => { record.translations = record.translations.filter((row) => row.locale !== "en"); }],
-  ["wrong listing binding", ({ translation }) => { translation.listing = "MS-CRAWL-0002"; }],
+  ["wrong listing binding", ({ translation }) => { translation.listing = "MS-00907"; }],
 ]) {
   test(`does not quote ${label} or fall back to another locale`, () => {
     const state = fixture(); mutate(state);

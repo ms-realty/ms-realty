@@ -206,7 +206,7 @@ test("a published row the approval does not name is skipped, not fatal", () => {
   const registry = loadLocaleRegistry();
   const listing = approvedListing({ id: "MS-CRAWL-0127" });
   const evidence = {
-    listing_ids: ["MS-CRAWL-0001"],
+    listing_ids: ["MS-00815"],
     excluded_listings: [{ id: "MS-CRAWL-0127", reason: "no location relation and an empty title" }],
   };
   const skipped = [];

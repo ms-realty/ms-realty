@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const PLUGIN = path.join(ROOT, "plugins", "ms-realty-operator");
@@ -18,13 +19,17 @@ test("owner plugin packages one production MCP with admin and Hermes tools", () 
   assert.equal(manifest.mcpServers, "./.mcp.json");
   assert.equal(manifest.interface.logo, "./assets/ms-realty-logo.png");
   assert.equal(manifest.interface.logoDark, "./assets/ms-realty-logo-reversed.png");
+  // The vendor file name carries the design-bundle hash, so read the path the
+  // bundle exports instead of pinning a hash that every design:build rewrites.
+  assert.match(LOGO_URL, /^\/vendor\/ms-realty-logo-[0-9a-f]{12}\.png$/);
+  assert.match(LOGO_URL_REVERSED, /^\/vendor\/ms-realty-logo-reversed-[0-9a-f]{12}\.png$/);
   assert.deepEqual(
     fs.readFileSync(path.join(PLUGIN, manifest.interface.logo)),
-    fs.readFileSync(path.join(ROOT, "public", "vendor", "ms-realty-logo-b50d7b4420ed.png")),
+    fs.readFileSync(path.join(ROOT, "public", LOGO_URL)),
   );
   assert.deepEqual(
     fs.readFileSync(path.join(PLUGIN, manifest.interface.logoDark)),
-    fs.readFileSync(path.join(ROOT, "public", "vendor", "ms-realty-logo-reversed-b50d7b4420ed.png")),
+    fs.readFileSync(path.join(ROOT, "public", LOGO_URL_REVERSED)),
   );
   assert.equal(mcp.mcpServers["ms-realty"].url, "https://ms-realty.ms-realty-bg.workers.dev/mcp");
   assert.equal(mcp.mcpServers["ms-realty"].bearer_token_env_var, "MS_REALTY_OPERATOR_TOKEN");

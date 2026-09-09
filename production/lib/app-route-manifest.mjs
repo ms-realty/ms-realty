@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { getLocale, loadLocaleRegistry, publicIndexableLocales } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
+import { searchFacetFor } from "./seo.mjs";
 
 export const DEFAULT_APP_ROUTE_MANIFEST = fromRoot("production", "data", "app-route-manifest.json");
 export const DEFAULT_LOCALIZED_SITEMAP = fromRoot("production", "data", "localized-sitemap.json");
@@ -9,6 +10,10 @@ export const DEFAULT_LOCALIZED_SITEMAP = fromRoot("production", "data", "localiz
 const ROUTE_MODULES = {
   home: { module: "app/[locale]/route", renderer: "renderHomePage", dynamic: false },
   search: { module: "app/[locale]/search/route", renderer: "renderSearchPage", dynamic: true },
+  // The eight indexable facets of the search route (one property family or
+  // one offer type). Same module and renderer as the plain search page; the
+  // query string is the whole difference, so the entry keeps it in its path.
+  search_facet: { module: "app/[locale]/search/route", renderer: "renderSearchPage", dynamic: true },
   listing: { module: "app/[locale]/[...slug]/route", renderer: "renderListingPage", dynamic: true },
   location: { module: "app/[locale]/[...slug]/route", renderer: "renderLocationPage", dynamic: true },
   seller: { module: "app/[locale]/[...slug]/route", renderer: "renderSellerPage", dynamic: true },
@@ -60,15 +65,26 @@ function entryFromSitemap(registry, entry) {
     // the public sitemap.
     sitemap_indexable: entry.public !== false,
     public_indexable: entry.public !== false,
-    cache: "public, max-age=300, s-maxage=3600",
+    // Facet pages render live inventory on the search route, which is served
+    // force-dynamic and no-store like every other search response.
+    cache: entry.type === "search_facet" ? "no-store" : "public, max-age=300, s-maxage=3600",
     params: {
       locale: locale.code,
+      ...(entry.type === "search_facet" ? { facet: searchFacetParams(entry) } : {}),
       ...(entry.type === "listing" ? { listingId: entry.loc.split("/").filter(Boolean).at(-1) } : {}),
       ...(entry.type === "location" ? { location: entry.loc.split("/").filter(Boolean).at(-1) } : {}),
       ...(entry.type === "guide" ? { guidePath: entry.loc.split("/").filter(Boolean).slice(1).join("/") } : {}),
     },
     hreflang_count: entry.hreflang?.length || 0,
   };
+}
+
+function searchFacetParams(entry) {
+  const [param, value] = entry.facet?.param
+    ? [entry.facet.param, entry.facet.value]
+    : [...new URL(entry.loc, "http://localhost").searchParams.entries()][0] || [];
+  if (!searchFacetFor(param, value)) throw new Error(`Unknown search facet entry: ${entry.loc}`);
+  return { param, value };
 }
 
 function searchEntry(registry, locale) {
@@ -139,6 +155,18 @@ export function assertAppRouteManifest(manifest) {
     }
     if (route.type === "search" && (route.sitemap_indexable || route.cache !== "no-store")) {
       throw new Error("Search utility routes must stay out of the sitemap and use no-store");
+    }
+    if (route.type === "search_facet") {
+      const facet = route.params?.facet;
+      if (
+        !facet ||
+        !searchFacetFor(facet.param, facet.value) ||
+        !route.path.endsWith(`?${facet.param}=${facet.value}`) ||
+        !route.sitemap_indexable ||
+        route.cache !== "no-store"
+      ) {
+        throw new Error(`Search facet routes must carry one known facet parameter, stay indexable and use no-store: ${route.path}`);
+      }
     }
   }
   const hebrewHome = manifest.routes.find((route) => route.path === "/he");

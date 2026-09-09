@@ -1,0 +1,5894 @@
+{
+  "artifact_id": "legacy-area-map",
+  "generated_from": {
+    "dumps": {
+      "maklerre_newc.sql": {
+        "bytes": 22588139,
+        "sha256": "7cb1e32c7544d69e65f68a5e8f15bbd97049d0a56f57d5171c043efc2eaf901d"
+      },
+      "maklerre_newru.sql": {
+        "bytes": 52021857,
+        "sha256": "6b7aa4abf133b988589feb550c1e8dce36dfb5c09b1286ef8da37470c62256f5"
+      }
+    },
+    "lot_id_map": "production/data/legacy-lot-id-map.json",
+    "cms_seed": "production/data/cms-seed.json"
+  },
+  "approval": {
+    "state": "review_required",
+    "note": "Proposals only. `node production/scripts/apply-legacy-area-facts.mjs --apply` writes the ready rows to the listing edit ledger; rows under review need a decision in production/data/legacy-area-overrides.json first."
+  },
+  "summary": {
+    "listings": 165,
+    "with_legacy_area": 160,
+    "ready": 37,
+    "review": 128,
+    "review_reasons": {
+      "conflicting_area_keys": 3,
+      "field_choice_required": 117,
+      "lot_area_conflict": 8,
+      "no_legacy_post": 5,
+      "no_property_family": 3,
+      "range": 8,
+      "unmapped_total_area": 51
+    }
+  },
+  "review": {
+    "conflicting_area_keys": [
+      "MS-CRAWL-0087",
+      "MS-CRAWL-0116",
+      "MS-CRAWL-0142"
+    ],
+    "field_choice_required": [
+      "MS-CRAWL-0001",
+      "MS-CRAWL-0002",
+      "MS-CRAWL-0003",
+      "MS-CRAWL-0004",
+      "MS-CRAWL-0005",
+      "MS-CRAWL-0006",
+      "MS-CRAWL-0007",
+      "MS-CRAWL-0009",
+      "MS-CRAWL-0010",
+      "MS-CRAWL-0011",
+      "MS-CRAWL-0012",
+      "MS-CRAWL-0013",
+      "MS-CRAWL-0014",
+      "MS-CRAWL-0015",
+      "MS-CRAWL-0016",
+      "MS-CRAWL-0017",
+      "MS-CRAWL-0018",
+      "MS-CRAWL-0019",
+      "MS-CRAWL-0020",
+      "MS-CRAWL-0021",
+      "MS-CRAWL-0022",
+      "MS-CRAWL-0023",
+      "MS-CRAWL-0024",
+      "MS-CRAWL-0025",
+      "MS-CRAWL-0026",
+      "MS-CRAWL-0028",
+      "MS-CRAWL-0029",
+      "MS-CRAWL-0030",
+      "MS-CRAWL-0031",
+      "MS-CRAWL-0032",
+      "MS-CRAWL-0033",
+      "MS-CRAWL-0034",
+      "MS-CRAWL-0035",
+      "MS-CRAWL-0043",
+      "MS-CRAWL-0044",
+      "MS-CRAWL-0045",
+      "MS-CRAWL-0046",
+      "MS-CRAWL-0047",
+      "MS-CRAWL-0048",
+      "MS-CRAWL-0049",
+      "MS-CRAWL-0050",
+      "MS-CRAWL-0051",
+      "MS-CRAWL-0052",
+      "MS-CRAWL-0053",
+      "MS-CRAWL-0054",
+      "MS-CRAWL-0062",
+      "MS-CRAWL-0063",
+      "MS-CRAWL-0064",
+      "MS-CRAWL-0065",
+      "MS-CRAWL-0066",
+      "MS-CRAWL-0067",
+      "MS-CRAWL-0070",
+      "MS-CRAWL-0072",
+      "MS-CRAWL-0073",
+      "MS-CRAWL-0074",
+      "MS-CRAWL-0075",
+      "MS-CRAWL-0077",
+      "MS-CRAWL-0078",
+      "MS-CRAWL-0079",
+      "MS-CRAWL-0080",
+      "MS-CRAWL-0083",
+      "MS-CRAWL-0084",
+      "MS-CRAWL-0086",
+      "MS-CRAWL-0089",
+      "MS-CRAWL-0090",
+      "MS-CRAWL-0091",
+      "MS-CRAWL-0092",
+      "MS-CRAWL-0093",
+      "MS-CRAWL-0094",
+      "MS-CRAWL-0095",
+      "MS-CRAWL-0096",
+      "MS-CRAWL-0097",
+      "MS-CRAWL-0098",
+      "MS-CRAWL-0099",
+      "MS-CRAWL-0100",
+      "MS-CRAWL-0101",
+      "MS-CRAWL-0102",
+      "MS-CRAWL-0103",
+      "MS-CRAWL-0104",
+      "MS-CRAWL-0105",
+      "MS-CRAWL-0106",
+      "MS-CRAWL-0107",
+      "MS-CRAWL-0108",
+      "MS-CRAWL-0109",
+      "MS-CRAWL-0110",
+      "MS-CRAWL-0111",
+      "MS-CRAWL-0113",
+      "MS-CRAWL-0114",
+      "MS-CRAWL-0115",
+      "MS-CRAWL-0117",
+      "MS-CRAWL-0118",
+      "MS-CRAWL-0119",
+      "MS-CRAWL-0120",
+      "MS-CRAWL-0121",
+      "MS-CRAWL-0123",
+      "MS-CRAWL-0124",
+      "MS-CRAWL-0125",
+      "MS-CRAWL-0130",
+      "MS-CRAWL-0131",
+      "MS-CRAWL-0132",
+      "MS-CRAWL-0133",
+      "MS-CRAWL-0134",
+      "MS-CRAWL-0135",
+      "MS-CRAWL-0138",
+      "MS-CRAWL-0139",
+      "MS-CRAWL-0140",
+      "MS-CRAWL-0146",
+      "MS-CRAWL-0147",
+      "MS-CRAWL-0148",
+      "MS-CRAWL-0149",
+      "MS-CRAWL-0151",
+      "MS-CRAWL-0159",
+      "MS-CRAWL-0160",
+      "MS-CRAWL-0161",
+      "MS-CRAWL-0162",
+      "MS-CRAWL-0163",
+      "MS-CRAWL-0164"
+    ],
+    "lot_area_conflict": [
+      "MS-CRAWL-0083",
+      "MS-CRAWL-0099",
+      "MS-CRAWL-0108",
+      "MS-CRAWL-0109",
+      "MS-CRAWL-0115",
+      "MS-CRAWL-0124",
+      "MS-CRAWL-0148",
+      "MS-CRAWL-0159"
+    ],
+    "no_legacy_post": [
+      "MS-3000",
+      "MS-CRAWL-0008",
+      "MS-CRAWL-0027",
+      "MS-CRAWL-0085",
+      "MS-CRAWL-0165"
+    ],
+    "no_property_family": [
+      "MS-CRAWL-0038",
+      "MS-CRAWL-0122",
+      "MS-CRAWL-0129"
+    ],
+    "range": [
+      "MS-CRAWL-0002",
+      "MS-CRAWL-0019",
+      "MS-CRAWL-0022",
+      "MS-CRAWL-0073",
+      "MS-CRAWL-0086",
+      "MS-CRAWL-0114",
+      "MS-CRAWL-0138",
+      "MS-CRAWL-0149"
+    ],
+    "unmapped_total_area": [
+      "MS-CRAWL-0001",
+      "MS-CRAWL-0006",
+      "MS-CRAWL-0012",
+      "MS-CRAWL-0013",
+      "MS-CRAWL-0015",
+      "MS-CRAWL-0016",
+      "MS-CRAWL-0018",
+      "MS-CRAWL-0023",
+      "MS-CRAWL-0025",
+      "MS-CRAWL-0026",
+      "MS-CRAWL-0032",
+      "MS-CRAWL-0035",
+      "MS-CRAWL-0038",
+      "MS-CRAWL-0043",
+      "MS-CRAWL-0044",
+      "MS-CRAWL-0045",
+      "MS-CRAWL-0046",
+      "MS-CRAWL-0047",
+      "MS-CRAWL-0048",
+      "MS-CRAWL-0049",
+      "MS-CRAWL-0050",
+      "MS-CRAWL-0051",
+      "MS-CRAWL-0052",
+      "MS-CRAWL-0062",
+      "MS-CRAWL-0063",
+      "MS-CRAWL-0064",
+      "MS-CRAWL-0091",
+      "MS-CRAWL-0092",
+      "MS-CRAWL-0093",
+      "MS-CRAWL-0095",
+      "MS-CRAWL-0096",
+      "MS-CRAWL-0098",
+      "MS-CRAWL-0104",
+      "MS-CRAWL-0111",
+      "MS-CRAWL-0117",
+      "MS-CRAWL-0118",
+      "MS-CRAWL-0120",
+      "MS-CRAWL-0122",
+      "MS-CRAWL-0123",
+      "MS-CRAWL-0125",
+      "MS-CRAWL-0129",
+      "MS-CRAWL-0130",
+      "MS-CRAWL-0131",
+      "MS-CRAWL-0132",
+      "MS-CRAWL-0133",
+      "MS-CRAWL-0139",
+      "MS-CRAWL-0146",
+      "MS-CRAWL-0148",
+      "MS-CRAWL-0151",
+      "MS-CRAWL-0160",
+      "MS-CRAWL-0161"
+    ]
+  },
+  "records": [
+    {
+      "new_reference": "MS-3000",
+      "property_id": "property-MS-3000",
+      "property_family": "plot",
+      "legacy_domain": null,
+      "legacy_post_id": null,
+      "legacy_lot_id": "356",
+      "lot_id_override": "assign_legacy",
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": null,
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "no_legacy_post"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0001",
+      "property_id": "property-MS-CRAWL-0001",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11324",
+      "legacy_lot_id": "815",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1394",
+        "sqm": 1394.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "20000",
+        "sqm": 20000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1394.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1394,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0002",
+      "property_id": "property-MS-CRAWL-0002",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11684",
+      "legacy_lot_id": "907",
+      "lot_id_override": null,
+      "area": {
+        "raw": "38-200",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          38.0,
+          200.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0003",
+      "property_id": "property-MS-CRAWL-0003",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11764",
+      "legacy_lot_id": "922",
+      "lot_id_override": null,
+      "area": {
+        "raw": "86",
+        "sqm": 86.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 86.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 86,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0004",
+      "property_id": "property-MS-CRAWL-0004",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11670",
+      "legacy_lot_id": "905",
+      "lot_id_override": null,
+      "area": {
+        "raw": "99",
+        "sqm": 99.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 99.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 99,
+        "description_phrase": "ъстои се от хол с кухня, спалня, баня с тоалетна и голяма панорамна тераса. Застроената площ на апартамента е 99"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0005",
+      "property_id": "property-MS-CRAWL-0005",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11612",
+      "legacy_lot_id": "899",
+      "lot_id_override": null,
+      "area": {
+        "raw": "75",
+        "sqm": 75.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 75.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 75,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0006",
+      "property_id": "property-MS-CRAWL-0006",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "4081",
+      "legacy_lot_id": "443",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1700",
+        "sqm": 1700.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "5000",
+        "sqm": 5000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1700.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1700,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0007",
+      "property_id": "property-MS-CRAWL-0007",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11740",
+      "legacy_lot_id": "911",
+      "lot_id_override": null,
+      "area": {
+        "raw": "59,21",
+        "sqm": 59.21,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 59.21,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 59.21,
+        "description_phrase": "а края на 2026г. Двустаен апартамент на първи жилищен етаж: Застроената му площ е 50, 65 кв.м., а общата площ 59,21"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0008",
+      "property_id": "property-MS-CRAWL-0008",
+      "property_family": "apartment",
+      "legacy_domain": null,
+      "legacy_post_id": null,
+      "legacy_lot_id": "662",
+      "lot_id_override": "assign_legacy",
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": null,
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "no_legacy_post"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0009",
+      "property_id": "property-MS-CRAWL-0009",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12165",
+      "legacy_lot_id": "957",
+      "lot_id_override": null,
+      "area": {
+        "raw": "65",
+        "sqm": 65.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 65.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 65,
+        "description_phrase": "в нова, модерна и отлично завършена сграда с асансьор и добре поддържани общи части. Апартаментът е с площ от 65"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0010",
+      "property_id": "property-MS-CRAWL-0010",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12221",
+      "legacy_lot_id": null,
+      "lot_id_override": "reassign_new",
+      "area": {
+        "raw": "55",
+        "sqm": 55.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 55.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 55,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0011",
+      "property_id": "property-MS-CRAWL-0011",
+      "property_family": "hotel",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10320",
+      "legacy_lot_id": "858",
+      "lot_id_override": null,
+      "area": {
+        "raw": "92",
+        "sqm": 92.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 92.0,
+      "target_field": null,
+      "field_candidates": [
+        "gross_floor_area_sqm",
+        "built_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 92,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0012",
+      "property_id": "property-MS-CRAWL-0012",
+      "property_family": "hotel",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11560",
+      "legacy_lot_id": "895",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1189",
+        "sqm": 1189.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "861",
+        "sqm": 861.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1189.0,
+      "target_field": null,
+      "field_candidates": [
+        "gross_floor_area_sqm",
+        "built_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1189,
+        "description_phrase": "нен проект, в гр, Сандански: Имот с площ от 861 кв.м., с построен върху него хотел и ресторант с обща площ от 1189"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0013",
+      "property_id": "property-MS-CRAWL-0013",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12192",
+      "legacy_lot_id": "567-1",
+      "lot_id_override": null,
+      "area": {
+        "raw": "320",
+        "sqm": 320.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "440",
+        "sqm": 440.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 320.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 320,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0014",
+      "property_id": "property-MS-CRAWL-0014",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11246",
+      "legacy_lot_id": "876",
+      "lot_id_override": null,
+      "area": {
+        "raw": "45",
+        "sqm": 45.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 45.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 45,
+        "description_phrase": "е от кухня с всекидневна, спалня с тераса, WC. Застроената площ на апартамента е 40 кв.м., а общата му площ е 45"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0015",
+      "property_id": "property-MS-CRAWL-0015",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12061",
+      "legacy_lot_id": "942",
+      "lot_id_override": null,
+      "area": {
+        "raw": "110",
+        "sqm": 110.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "350",
+        "sqm": 350.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 110.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 110,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0016",
+      "property_id": "property-MS-CRAWL-0016",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "9283",
+      "legacy_lot_id": "803",
+      "lot_id_override": null,
+      "area": {
+        "raw": "174,1",
+        "sqm": 174.1,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "487",
+        "sqm": 487.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 174.1,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 174.1,
+        "description_phrase": "кт от три еднакви еднофамилни жилищни сгради – А,Б и В. Къщите са със застроена площ от 83 кв.м., и обща площ 174,1"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0017",
+      "property_id": "property-MS-CRAWL-0017",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11977",
+      "legacy_lot_id": "938",
+      "lot_id_override": null,
+      "area": {
+        "raw": "63,93",
+        "sqm": 63.93,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 63.93,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 63.93,
+        "description_phrase": "вена близост до хотел Аква Сан – гр.Сандански. Апартамента е със застроена площ от 54,86 кв.м. и обща площ от 63,93"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0018",
+      "property_id": "property-MS-CRAWL-0018",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11293",
+      "legacy_lot_id": "814",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2800",
+        "sqm": 2800.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "6000",
+        "sqm": 6000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2800.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2800,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0019",
+      "property_id": "property-MS-CRAWL-0019",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11264",
+      "legacy_lot_id": "812",
+      "lot_id_override": null,
+      "area": {
+        "raw": "15-122",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          15.0,
+          122.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0020",
+      "property_id": "property-MS-CRAWL-0020",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11373",
+      "legacy_lot_id": "890",
+      "lot_id_override": "keep",
+      "area": {
+        "raw": "18",
+        "sqm": 18.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 18.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 18,
+        "description_phrase": "Офиса се намира на пешеходната улица на гр.Сандански /ул.Македония/. Състои се от едно помещение с площ от 18"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0021",
+      "property_id": "property-MS-CRAWL-0021",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12092",
+      "legacy_lot_id": "944",
+      "lot_id_override": null,
+      "area": {
+        "raw": "117",
+        "sqm": 117.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 117.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 117,
+        "description_phrase": "ие, чист въздух и удобен достъп до централната част. Жилището е със застроена площ от 106 кв.м и обща площ от 117"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0022",
+      "property_id": "property-MS-CRAWL-0022",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8719",
+      "legacy_lot_id": "756",
+      "lot_id_override": null,
+      "area": {
+        "raw": "220-920",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          220.0,
+          920.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0023",
+      "property_id": "property-MS-CRAWL-0023",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11498",
+      "legacy_lot_id": "833",
+      "lot_id_override": null,
+      "area": {
+        "raw": "148",
+        "sqm": 148.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "547",
+        "sqm": 547.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 148.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 148,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0024",
+      "property_id": "property-MS-CRAWL-0024",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10771",
+      "legacy_lot_id": "101",
+      "lot_id_override": null,
+      "area": {
+        "raw": "45",
+        "sqm": 45.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 45.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 45,
+        "description_phrase": "Апартамент в центъра на Солун, на четвърти жилищен етаж. Жилището е с площ 45"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0025",
+      "property_id": "property-MS-CRAWL-0025",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12152",
+      "legacy_lot_id": "956",
+      "lot_id_override": null,
+      "area": {
+        "raw": "51",
+        "sqm": 51.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "947",
+        "sqm": 947.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 51.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 51,
+        "description_phrase": "еобходими документи. Намира се в собствен поземлен имот с площ от 947 кв.м., а застроената площ на сградата е 51"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0026",
+      "property_id": "property-MS-CRAWL-0026",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11585",
+      "legacy_lot_id": null,
+      "lot_id_override": "reassign_new",
+      "area": {
+        "raw": "313",
+        "sqm": 313.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "760",
+        "sqm": 760.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 313.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 313,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0027",
+      "property_id": "property-MS-CRAWL-0027",
+      "property_family": "apartment",
+      "legacy_domain": null,
+      "legacy_post_id": null,
+      "legacy_lot_id": null,
+      "lot_id_override": "assign_new",
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": null,
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "no_legacy_post"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0028",
+      "property_id": "property-MS-CRAWL-0028",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11795",
+      "legacy_lot_id": "924",
+      "lot_id_override": null,
+      "area": {
+        "raw": "62,12",
+        "sqm": 62.12,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 62.12,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 62.12,
+        "description_phrase": "лесно може да се трансформира в един апартамент. Застроената площ на апартамента е 55,47 кв.м /общата площ е 62,12"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0029",
+      "property_id": "property-MS-CRAWL-0029",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11662",
+      "legacy_lot_id": "903",
+      "lot_id_override": null,
+      "area": {
+        "raw": "29",
+        "sqm": 29.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 29.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 29,
+        "description_phrase": "нта се намира на 3-ти жилищен етаж, с източно изложение е. Застроената му площ е 25,88 кв.м., а общата площ е 29"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0030",
+      "property_id": "property-MS-CRAWL-0030",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12082",
+      "legacy_lot_id": "943",
+      "lot_id_override": null,
+      "area": {
+        "raw": "36,92",
+        "sqm": 36.92,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 36.92,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 36.92,
+        "description_phrase": "е. Разположен е на 4ти жилищен етаж. Източно изложение. Застроената му площ е 32,10 кв.м., а общата му площ е 36,92"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0031",
+      "property_id": "property-MS-CRAWL-0031",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12014",
+      "legacy_lot_id": "940",
+      "lot_id_override": null,
+      "area": {
+        "raw": "112",
+        "sqm": 112.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 112.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 112,
+        "description_phrase": "Имота представлява целия трети жилищен етаж от 4 етажна къща. Застроената му площ е 112"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0032",
+      "property_id": "property-MS-CRAWL-0032",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11894",
+      "legacy_lot_id": "932",
+      "lot_id_override": null,
+      "area": {
+        "raw": "73",
+        "sqm": 73.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "77",
+        "sqm": 77.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 73.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 73,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0033",
+      "property_id": "property-MS-CRAWL-0033",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10463",
+      "legacy_lot_id": "865",
+      "lot_id_override": null,
+      "area": {
+        "raw": "120",
+        "sqm": 120.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 120.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 120,
+        "description_phrase": "Предлагаме за продажба втори жилищен етаж от триетажна къща. Застроената площ на етажа е 120"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0034",
+      "property_id": "property-MS-CRAWL-0034",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11205",
+      "legacy_lot_id": "963",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0035",
+      "property_id": "property-MS-CRAWL-0035",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8970",
+      "legacy_lot_id": "774",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "421",
+        "sqm": 421.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": "Имота се намира в центъра на с.Левуново. Представлява първи етаж от къща. Площта му е 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0036",
+      "property_id": "property-MS-CRAWL-0036",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11565",
+      "legacy_lot_id": "897",
+      "lot_id_override": null,
+      "area": {
+        "raw": "4047",
+        "sqm": 4047.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 4047.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 4047,
+        "description_phrase": "ра на южния склон на селото, в метри от крайните къщи на с.Джигурово. Имота има трапецовидна форма и е с площ 4047"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0037",
+      "property_id": "property-MS-CRAWL-0037",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8077",
+      "legacy_lot_id": "719",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1000",
+        "sqm": 1000.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1000,
+        "description_phrase": "Имота е с площ 1000"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0038",
+      "property_id": "property-MS-CRAWL-0038",
+      "property_family": null,
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10594",
+      "legacy_lot_id": "873",
+      "lot_id_override": null,
+      "area": {
+        "raw": "439",
+        "sqm": 439.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "19427",
+        "sqm": 19427.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 439.0,
+      "target_field": null,
+      "field_candidates": [],
+      "evidence": {
+        "live_area_sqm": 439,
+        "description_phrase": "себе си група недвижими и движими имоти, а именно: Качествена и високотехнологична къща със застроена площ от 439"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "no_property_family"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0039",
+      "property_id": "property-MS-CRAWL-0039",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11682",
+      "legacy_lot_id": "906",
+      "lot_id_override": null,
+      "area": {
+        "raw": "4500",
+        "sqm": 4500.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 4500.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 4500,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0040",
+      "property_id": "property-MS-CRAWL-0040",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10914",
+      "legacy_lot_id": "555",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1386",
+        "sqm": 1386.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "1386",
+        "sqm": 1386.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1386.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1386,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0041",
+      "property_id": "property-MS-CRAWL-0041",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "9116",
+      "legacy_lot_id": "788",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "658",
+        "sqm": 658.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 658.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0042",
+      "property_id": "property-MS-CRAWL-0042",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "9427",
+      "legacy_lot_id": "811",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "2138",
+        "sqm": 2138.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 2138.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0043",
+      "property_id": "property-MS-CRAWL-0043",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10982",
+      "legacy_lot_id": "987",
+      "lot_id_override": "keep",
+      "area": {
+        "raw": "300",
+        "sqm": 300.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "5000",
+        "sqm": 5000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 300.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 300,
+        "description_phrase": "Предлага се за продажба ексклузивна триетажна вила в Еретрия-Котрони, Гърция. Сградата с обща площ от 300"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0044",
+      "property_id": "property-MS-CRAWL-0044",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10906",
+      "legacy_lot_id": "345",
+      "lot_id_override": null,
+      "area": {
+        "raw": "100",
+        "sqm": 100.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "980",
+        "sqm": 980.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 100.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 100,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0045",
+      "property_id": "property-MS-CRAWL-0045",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11688",
+      "legacy_lot_id": "908",
+      "lot_id_override": null,
+      "area": {
+        "raw": "58",
+        "sqm": 58.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "128",
+        "sqm": 128.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 58.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 58,
+        "description_phrase": "като размера на имота е напълно характерен за такива планински села. Върху него е построена сграда с площ от 58"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0046",
+      "property_id": "property-MS-CRAWL-0046",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12025",
+      "legacy_lot_id": "941",
+      "lot_id_override": null,
+      "area": {
+        "raw": "474",
+        "sqm": 474.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "470",
+        "sqm": 470.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 474.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 474,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0047",
+      "property_id": "property-MS-CRAWL-0047",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11848",
+      "legacy_lot_id": "927",
+      "lot_id_override": null,
+      "area": {
+        "raw": "56",
+        "sqm": 56.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "475",
+        "sqm": 475.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 56.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 56,
+        "description_phrase": "ното село Спатово , само на няколко километра от град Сандански. Къщата е с разгъната застроена площ (РЗП) от 56"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0048",
+      "property_id": "property-MS-CRAWL-0048",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11647",
+      "legacy_lot_id": "904",
+      "lot_id_override": null,
+      "area": {
+        "raw": "67",
+        "sqm": 67.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "872",
+        "sqm": 872.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 67.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 67,
+        "description_phrase": "ойто предстои да свързва България и Северна Македония през новия ГКПП Клепало. Къщата е със застроена площ от 67"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0049",
+      "property_id": "property-MS-CRAWL-0049",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11892",
+      "legacy_lot_id": "931",
+      "lot_id_override": null,
+      "area": {
+        "raw": "470",
+        "sqm": 470.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "417",
+        "sqm": 417.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 470.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 470,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0050",
+      "property_id": "property-MS-CRAWL-0050",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10761",
+      "legacy_lot_id": "100",
+      "lot_id_override": null,
+      "area": {
+        "raw": "110",
+        "sqm": 110.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "150",
+        "sqm": 150.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 110.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 110,
+        "description_phrase": "зонета е построен през 2005 г. Състои се от хол с кухня, 2 бани с тоалетни и 3 спални. Общата площ на имота е 110"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0051",
+      "property_id": "property-MS-CRAWL-0051",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11350",
+      "legacy_lot_id": "816",
+      "lot_id_override": null,
+      "area": {
+        "raw": "192",
+        "sqm": 192.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "780",
+        "sqm": 780.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 192.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 192,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0052",
+      "property_id": "property-MS-CRAWL-0052",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "6913",
+      "legacy_lot_id": "657",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1100",
+        "sqm": 1100.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "25000",
+        "sqm": 25000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1100.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1100,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0053",
+      "property_id": "property-MS-CRAWL-0053",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8866",
+      "legacy_lot_id": "766",
+      "lot_id_override": null,
+      "area": {
+        "raw": "315",
+        "sqm": 315.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 315.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 315,
+        "description_phrase": "се намира в нова сграда, в непосредствена близост до Интер Хотел Сандански. Офиса е на 3 нива с обща площ от 315"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0054",
+      "property_id": "property-MS-CRAWL-0054",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10916",
+      "legacy_lot_id": "432",
+      "lot_id_override": "keep",
+      "area": {
+        "raw": "70",
+        "sqm": 70.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 70.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 70,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0055",
+      "property_id": "property-MS-CRAWL-0055",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8927",
+      "legacy_lot_id": "770",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2203",
+        "sqm": 2203.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2203.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2203,
+        "description_phrase": "Парцела се намира в новия район на гр.Сандански, на ул. Сандански мискет. Имота е с площ от 2203"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0056",
+      "property_id": "property-MS-CRAWL-0056",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10911",
+      "legacy_lot_id": "321",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1495",
+        "sqm": 1495.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1495.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1495,
+        "description_phrase": "Имота се намира в новия и активно развиващ се район на гр.Сандански – местността Нишан Таши. Имота е с площ 1495"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0057",
+      "property_id": "property-MS-CRAWL-0057",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11607",
+      "legacy_lot_id": "898",
+      "lot_id_override": null,
+      "area": {
+        "raw": "611",
+        "sqm": 611.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 611.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 611,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0058",
+      "property_id": "property-MS-CRAWL-0058",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8643",
+      "legacy_lot_id": "749",
+      "lot_id_override": null,
+      "area": {
+        "raw": "288",
+        "sqm": 288.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 288.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 288,
+        "description_phrase": "Предлаганият от нас парцел представлява 1/2 идеална част (288"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0059",
+      "property_id": "property-MS-CRAWL-0059",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12122",
+      "legacy_lot_id": "945",
+      "lot_id_override": null,
+      "area": {
+        "raw": "762",
+        "sqm": 762.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 762.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 762,
+        "description_phrase": "Парцел в с. Хотово, община Сандански, състоящ се от два съседни имота с обща площ 762"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0060",
+      "property_id": "property-MS-CRAWL-0060",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10902",
+      "legacy_lot_id": "234",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1704",
+        "sqm": 1704.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "1704",
+        "sqm": 1704.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1704.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1704,
+        "description_phrase": "фалтов път, а от другата със селскостопански път. Предназначението на имота е за комплексно застрояване, площ 1704"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0061",
+      "property_id": "property-MS-CRAWL-0061",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7194",
+      "legacy_lot_id": "470",
+      "lot_id_override": null,
+      "area": {
+        "raw": "677",
+        "sqm": 677.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 677.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 677,
+        "description_phrase": "Имота е с площ 677"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0062",
+      "property_id": "property-MS-CRAWL-0062",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11541",
+      "legacy_lot_id": "894",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2600",
+        "sqm": 2600.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "3000",
+        "sqm": 3000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2600.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2600,
+        "description_phrase": "Имота се състои от парцел с площ 3 000 кв.м., и няколко на брой промишлени халета с обща застроена площ от 2600"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0063",
+      "property_id": "property-MS-CRAWL-0063",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12209",
+      "legacy_lot_id": "960",
+      "lot_id_override": null,
+      "area": {
+        "raw": "36",
+        "sqm": 36.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "342",
+        "sqm": 342.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 36.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 36,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0064",
+      "property_id": "property-MS-CRAWL-0064",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11257",
+      "legacy_lot_id": "567",
+      "lot_id_override": null,
+      "area": {
+        "raw": "160",
+        "sqm": 160.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "218",
+        "sqm": 218.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 160.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 160,
+        "description_phrase": "Къщата се намира в центъра на с.Хотово. Къщата е гредоред, на 2 нива, като всеки етаж е по 80 кв.м. или общо 160"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0065",
+      "property_id": "property-MS-CRAWL-0065",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11945",
+      "legacy_lot_id": "937",
+      "lot_id_override": null,
+      "area": {
+        "raw": "30",
+        "sqm": 30.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 30.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": "ана 4 етажна сграда. Асансьор. Удобен достъп. Застроената площ на апартамента е 24.26 кв.м., общата му площ е 30"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0066",
+      "property_id": "property-MS-CRAWL-0066",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11521",
+      "legacy_lot_id": "893",
+      "lot_id_override": "keep",
+      "area": {
+        "raw": "42",
+        "sqm": 42.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 42.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": "се от хол с кухня, 2 спални, 2 тераси и баня с тоалетна. Чистата жилищната площ по документи за собственост е 42"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0067",
+      "property_id": "property-MS-CRAWL-0067",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11639",
+      "legacy_lot_id": "902",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": ", магазини, Община Сандански и пешеходната улица. Апартамента е със застроена площ от 80 кв.м. и обща площ от 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0068",
+      "property_id": "property-MS-CRAWL-0068",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8089",
+      "legacy_lot_id": "720",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "15000",
+        "sqm": 15000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 15000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0069",
+      "property_id": "property-MS-CRAWL-0069",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8526",
+      "legacy_lot_id": "744",
+      "lot_id_override": null,
+      "area": {
+        "raw": "8000",
+        "sqm": 8000.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 8000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 8000,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0070",
+      "property_id": "property-MS-CRAWL-0070",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "4142",
+      "legacy_lot_id": "456",
+      "lot_id_override": null,
+      "area": {
+        "raw": "3111",
+        "sqm": 3111.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 3111.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 3111,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0071",
+      "property_id": "property-MS-CRAWL-0071",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "4747",
+      "legacy_lot_id": "499",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "38016",
+        "sqm": 38016.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 38016.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0072",
+      "property_id": "property-MS-CRAWL-0072",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11879",
+      "legacy_lot_id": "930",
+      "lot_id_override": null,
+      "area": {
+        "raw": "66",
+        "sqm": 66.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 66.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 66,
+        "description_phrase": "създавайки модерен, но и вечен житейски простор. No. House Pricelist Euro Size sq.m. T1 продаден T2 продаден 66"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0073",
+      "property_id": "property-MS-CRAWL-0073",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11391",
+      "legacy_lot_id": "860",
+      "lot_id_override": null,
+      "area": {
+        "raw": "41-112",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          41.0,
+          112.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0074",
+      "property_id": "property-MS-CRAWL-0074",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11989",
+      "legacy_lot_id": "939",
+      "lot_id_override": null,
+      "area": {
+        "raw": "220",
+        "sqm": 220.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 220.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 220,
+        "description_phrase": "и към Пирин планина. Къщата е част от затворен комплекс от идентични еднофамилни сгради. Застроената и площ е 220"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0075",
+      "property_id": "property-MS-CRAWL-0075",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10215",
+      "legacy_lot_id": "852",
+      "lot_id_override": null,
+      "area": {
+        "raw": "175",
+        "sqm": 175.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 175.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 175,
+        "description_phrase": "града с лице към улицата. Сградата е построена и въведена в експлоатация през 2009 г., Общата площ на имота е 175"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0077",
+      "property_id": "property-MS-CRAWL-0077",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12199",
+      "legacy_lot_id": "959",
+      "lot_id_override": "keep",
+      "area": {
+        "raw": "40",
+        "sqm": 40.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 40.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": "жение, което осигурява много естествена светлина и комфорт през всички сезони. Имотът е със застроена площ от 40"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0078",
+      "property_id": "property-MS-CRAWL-0078",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11443",
+      "legacy_lot_id": "900",
+      "lot_id_override": null,
+      "area": {
+        "raw": "107",
+        "sqm": 107.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 107.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 107,
+        "description_phrase": "се отдели и още една спалня при необходимост Апартамента е със застроена площ от 96,5 кв.м., или обща площ от 107"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0079",
+      "property_id": "property-MS-CRAWL-0079",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11081",
+      "legacy_lot_id": "242",
+      "lot_id_override": null,
+      "area": {
+        "raw": "120",
+        "sqm": 120.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 120.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 120,
+        "description_phrase": "Многостаен обзаведен и напълно оборудван апартамент. Апартамента е с площ 120"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0080",
+      "property_id": "property-MS-CRAWL-0080",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "12126",
+      "legacy_lot_id": "955",
+      "lot_id_override": null,
+      "area": {
+        "raw": "120",
+        "sqm": 120.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 120.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 120,
+        "description_phrase": "Тристаен апартамент в с. Поленица край Сандански с площ 120"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0081",
+      "property_id": "property-MS-CRAWL-0081",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "973",
+      "legacy_lot_id": "286",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "734",
+        "sqm": 734.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 734.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0082",
+      "property_id": "property-MS-CRAWL-0082",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "3255",
+      "legacy_lot_id": "394",
+      "lot_id_override": null,
+      "area": {
+        "raw": "900",
+        "sqm": 900.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 900.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 900,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0083",
+      "property_id": "property-MS-CRAWL-0083",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11466",
+      "legacy_lot_id": "891",
+      "lot_id_override": null,
+      "area": {
+        "raw": "164,5",
+        "sqm": 164.5,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 164.5,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 164.5,
+        "description_phrase": "ъра на град Сандански. Обособен е като самостоятелен обект от подземен етаж на кота -3,95м., с площ на обекта 164,5"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0084",
+      "property_id": "property-MS-CRAWL-0084",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10513",
+      "legacy_lot_id": "869",
+      "lot_id_override": null,
+      "area": {
+        "raw": "190",
+        "sqm": 190.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 190.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 190,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0085",
+      "property_id": "property-MS-CRAWL-0085",
+      "property_family": "apartment",
+      "legacy_domain": null,
+      "legacy_post_id": null,
+      "legacy_lot_id": "851",
+      "lot_id_override": "assign_legacy",
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": null,
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "no_legacy_post"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0086",
+      "property_id": "property-MS-CRAWL-0086",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "644",
+      "legacy_lot_id": "191",
+      "lot_id_override": null,
+      "area": {
+        "raw": "67-195",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          67.0,
+          195.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0087",
+      "property_id": "property-MS-CRAWL-0087",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "9145",
+      "legacy_lot_id": "791",
+      "lot_id_override": null,
+      "area": {
+        "raw": "20740",
+        "sqm": 20740.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "720",
+        "sqm": 720.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 20740.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 20740,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "conflicting_area_keys"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0088",
+      "property_id": "property-MS-CRAWL-0088",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8322",
+      "legacy_lot_id": "734",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2500",
+        "sqm": 2500.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2500.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2500,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0089",
+      "property_id": "property-MS-CRAWL-0089",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7746",
+      "legacy_lot_id": "707",
+      "lot_id_override": null,
+      "area": {
+        "raw": "67,57",
+        "sqm": 67.57,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 67.57,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 67.57,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0090",
+      "property_id": "property-MS-CRAWL-0090",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10998",
+      "legacy_lot_id": "543",
+      "lot_id_override": null,
+      "area": {
+        "raw": "240",
+        "sqm": 240.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 240.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 240,
+        "description_phrase": "200 метра плюс 40 метра балкони общо 240"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0091",
+      "property_id": "property-MS-CRAWL-0091",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10593",
+      "legacy_lot_id": "872",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "350",
+        "sqm": 350.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": "ирана стара сграда, в която е направено всичко необходимо за комфортното ви пребиваване. Застроената и площ е 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0092",
+      "property_id": "property-MS-CRAWL-0092",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7109",
+      "legacy_lot_id": "671",
+      "lot_id_override": null,
+      "area": {
+        "raw": "514",
+        "sqm": 514.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "245",
+        "sqm": 245.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 514.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 514,
+        "description_phrase": "Сградата със застроена площ 514"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0093",
+      "property_id": "property-MS-CRAWL-0093",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11241",
+      "legacy_lot_id": "190",
+      "lot_id_override": null,
+      "area": {
+        "raw": "50",
+        "sqm": 50.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "594",
+        "sqm": 594.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 50.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 50,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0094",
+      "property_id": "property-MS-CRAWL-0094",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "6425",
+      "legacy_lot_id": "619",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1500",
+        "sqm": 1500.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1500.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1500,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0095",
+      "property_id": "property-MS-CRAWL-0095",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7665",
+      "legacy_lot_id": "699",
+      "lot_id_override": null,
+      "area": {
+        "raw": "417",
+        "sqm": 417.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "2205",
+        "sqm": 2205.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 417.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 417,
+        "description_phrase": "на Петрич. Имота върху който е построена сградата е с площ от 2205 кв.м., а самата сграда е едноетажна с площ 417"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0096",
+      "property_id": "property-MS-CRAWL-0096",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8770",
+      "legacy_lot_id": "758",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2859",
+        "sqm": 2859.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "7000",
+        "sqm": 7000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2859.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2859,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0097",
+      "property_id": "property-MS-CRAWL-0097",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8661",
+      "legacy_lot_id": "751",
+      "lot_id_override": null,
+      "area": {
+        "raw": "500",
+        "sqm": 500.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 500.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 500,
+        "description_phrase": "Индустриална сграда под наем в гр. Петрич с площ 500"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0098",
+      "property_id": "property-MS-CRAWL-0098",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8660",
+      "legacy_lot_id": "750",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2850",
+        "sqm": 2850.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "7000",
+        "sqm": 7000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2850.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2850,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0099",
+      "property_id": "property-MS-CRAWL-0099",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7062",
+      "legacy_lot_id": "666",
+      "lot_id_override": null,
+      "area": {
+        "raw": "140,66",
+        "sqm": 140.66,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 140.66,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 140.66,
+        "description_phrase": "изор баня с тоалетна обща тераса Къщи за продажба: Къщи номер 2 и 3 – абсолютно идентични, със застроена площ 140,66"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0100",
+      "property_id": "property-MS-CRAWL-0100",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7598",
+      "legacy_lot_id": "695",
+      "lot_id_override": null,
+      "area": {
+        "raw": "60",
+        "sqm": 60.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 60.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 60,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0101",
+      "property_id": "property-MS-CRAWL-0101",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8282",
+      "legacy_lot_id": "731",
+      "lot_id_override": null,
+      "area": {
+        "raw": "65",
+        "sqm": 65.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 65.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 65,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0102",
+      "property_id": "property-MS-CRAWL-0102",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11382",
+      "legacy_lot_id": "879",
+      "lot_id_override": null,
+      "area": {
+        "raw": "76,7",
+        "sqm": 76.7,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 76.7,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 76.7,
+        "description_phrase": "рко място, което се намира във вътрешния двор на сградата. Застроена площ на апартамента 61 кв.м. Обща площ – 76,7"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0103",
+      "property_id": "property-MS-CRAWL-0103",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10891",
+      "legacy_lot_id": "123",
+      "lot_id_override": null,
+      "area": {
+        "raw": "113",
+        "sqm": 113.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 113.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 113,
+        "description_phrase": "ндански Разпределение: Имота представлява апартамент на 2 нива със застроена площ от 102 кв.м. и обща площ от 113"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0104",
+      "property_id": "property-MS-CRAWL-0104",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10922",
+      "legacy_lot_id": "999",
+      "lot_id_override": null,
+      "area": {
+        "raw": "285",
+        "sqm": 285.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "9000",
+        "sqm": 9000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 285.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 285,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0105",
+      "property_id": "property-MS-CRAWL-0105",
+      "property_family": "hotel",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8386",
+      "legacy_lot_id": "739",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2771",
+        "sqm": 2771.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2771.0,
+      "target_field": null,
+      "field_candidates": [
+        "gross_floor_area_sqm",
+        "built_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2771,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0106",
+      "property_id": "property-MS-CRAWL-0106",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11361",
+      "legacy_lot_id": "635",
+      "lot_id_override": null,
+      "area": {
+        "raw": "40,39",
+        "sqm": 40.39,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 40.39,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 40.39,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0107",
+      "property_id": "property-MS-CRAWL-0107",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11899",
+      "legacy_lot_id": "933",
+      "lot_id_override": null,
+      "area": {
+        "raw": "88",
+        "sqm": 88.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 88.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 88,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0108",
+      "property_id": "property-MS-CRAWL-0108",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11437",
+      "legacy_lot_id": "870",
+      "lot_id_override": null,
+      "area": {
+        "raw": "520",
+        "sqm": 520.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 520.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 520,
+        "description_phrase": "ата е строена през 90-те години. Сградата е двуетажна, масивна, застроената и площ е 260 кв.м., а обща площ е 520"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0109",
+      "property_id": "property-MS-CRAWL-0109",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "8980",
+      "legacy_lot_id": "760",
+      "lot_id_override": null,
+      "area": {
+        "raw": "55",
+        "sqm": 55.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 55.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 55,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0110",
+      "property_id": "property-MS-CRAWL-0110",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "7497",
+      "legacy_lot_id": "651",
+      "lot_id_override": null,
+      "area": {
+        "raw": "73,73",
+        "sqm": 73.73,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 73.73,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 73.73,
+        "description_phrase": "Апартамент под наем в комплекс Медите, Сандански, 73,73"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0111",
+      "property_id": "property-MS-CRAWL-0111",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "10869",
+      "legacy_lot_id": "444",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2500",
+        "sqm": 2500.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "24416",
+        "sqm": 24416.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2500.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2500,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0112",
+      "property_id": "property-MS-CRAWL-0112",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "11563",
+      "legacy_lot_id": "896",
+      "lot_id_override": null,
+      "area": {
+        "raw": "14411",
+        "sqm": 14411.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 14411.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 14411,
+        "description_phrase": "Имота се намира в м. ЧУЙ ПЕТЕЛ, в землището на с.Джигурово. Земеделска, категория 7, НТП Пасище, площ 14411"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0113",
+      "property_id": "property-MS-CRAWL-0113",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.com",
+      "legacy_post_id": "6814",
+      "legacy_lot_id": "778",
+      "lot_id_override": null,
+      "area": {
+        "raw": "93",
+        "sqm": 93.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 93.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 93,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0114",
+      "property_id": "property-MS-CRAWL-0114",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "644",
+      "legacy_lot_id": "191",
+      "lot_id_override": null,
+      "area": {
+        "raw": "67-195",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          67.0,
+          195.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0115",
+      "property_id": "property-MS-CRAWL-0115",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8516",
+      "legacy_lot_id": "760",
+      "lot_id_override": null,
+      "area": {
+        "raw": "67,39",
+        "sqm": 67.39,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 67.39,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 67.39,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0116",
+      "property_id": "property-MS-CRAWL-0116",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8672",
+      "legacy_lot_id": "791",
+      "lot_id_override": null,
+      "area": {
+        "raw": "20740",
+        "sqm": 20740.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "720",
+        "sqm": 720.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 20740.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 20740,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "conflicting_area_keys"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0117",
+      "property_id": "property-MS-CRAWL-0117",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9716",
+      "legacy_lot_id": "927",
+      "lot_id_override": null,
+      "area": {
+        "raw": "56",
+        "sqm": 56.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "475",
+        "sqm": 475.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 56.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 56,
+        "description_phrase": "етрах от города Сандански, рядом с трассой на архитектурный город музей Мелник. Общая площадь дома составляет 56"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0118",
+      "property_id": "property-MS-CRAWL-0118",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9724",
+      "legacy_lot_id": "935",
+      "lot_id_override": null,
+      "area": {
+        "raw": "163",
+        "sqm": 163.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "600",
+        "sqm": 600.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 163.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 163,
+        "description_phrase": "Представляем вашему вниманию просторный и функциональный дом общей площадью 163"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0119",
+      "property_id": "property-MS-CRAWL-0119",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7117",
+      "legacy_lot_id": "778",
+      "lot_id_override": null,
+      "area": {
+        "raw": "93",
+        "sqm": 93.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 93.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 93,
+        "description_phrase": "Трехкомнатная квартира в Парк Отеле Пирин - Сандански. Продажа квартиры площадью 93"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0120",
+      "property_id": "property-MS-CRAWL-0120",
+      "property_family": "hotel",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "3137",
+      "legacy_lot_id": "382",
+      "lot_id_override": null,
+      "area": {
+        "raw": "650",
+        "sqm": 650.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "450",
+        "sqm": 450.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 650.0,
+      "target_field": null,
+      "field_candidates": [
+        "gross_floor_area_sqm",
+        "built_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 650,
+        "description_phrase": "Дом для гостей с рестораном на территории г. Сандански, пятиэтажный, с застроенной площадью 650"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0121",
+      "property_id": "property-MS-CRAWL-0121",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8544",
+      "legacy_lot_id": "766",
+      "lot_id_override": null,
+      "area": {
+        "raw": "315",
+        "sqm": 315.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 315.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 315,
+        "description_phrase": "Офис находится в новом здании, рядом с Интер Отелем Сандански. Офис на 3-х уровнях, общей площадью 315"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0122",
+      "property_id": "property-MS-CRAWL-0122",
+      "property_family": null,
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9128",
+      "legacy_lot_id": "873",
+      "lot_id_override": null,
+      "area": {
+        "raw": "439",
+        "sqm": 439.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "19427",
+        "sqm": 19427.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 439.0,
+      "target_field": null,
+      "field_candidates": [],
+      "evidence": {
+        "live_area_sqm": 439,
+        "description_phrase": "* Качественный и высокотехнологичный дом застроенной площадью 439"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "no_property_family"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0123",
+      "property_id": "property-MS-CRAWL-0123",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7722",
+      "legacy_lot_id": "699",
+      "lot_id_override": null,
+      "area": {
+        "raw": "417",
+        "sqm": 417.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "2205",
+        "sqm": 2205.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 417.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 417,
+        "description_phrase": "Одноэтажное производственное здание площадью 417"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0124",
+      "property_id": "property-MS-CRAWL-0124",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7283",
+      "legacy_lot_id": "666",
+      "lot_id_override": null,
+      "area": {
+        "raw": "138,70",
+        "sqm": 138.7,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 138.7,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 138.7,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0125",
+      "property_id": "property-MS-CRAWL-0125",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9571",
+      "legacy_lot_id": null,
+      "lot_id_override": "reassign_new",
+      "area": {
+        "raw": "313",
+        "sqm": 313.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "760",
+        "sqm": 760.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 313.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 313,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0126",
+      "property_id": "property-MS-CRAWL-0126",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8227",
+      "legacy_lot_id": "734",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2500",
+        "sqm": 2500.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2500.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2500,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0127",
+      "property_id": "property-MS-CRAWL-0127",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "4574",
+      "legacy_lot_id": "499",
+      "lot_id_override": null,
+      "area": {
+        "raw": "38016",
+        "sqm": 38016.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 38016.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 38016,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0128",
+      "property_id": "property-MS-CRAWL-0128",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7623",
+      "legacy_lot_id": "697",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "10000",
+        "sqm": 10000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 10000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0129",
+      "property_id": "property-MS-CRAWL-0129",
+      "property_family": null,
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9344",
+      "legacy_lot_id": "872",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "350",
+        "sqm": 350.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": "ногради, примерно в 15 км от Сандански и в 3 км от Мельника. Это отреставрированное старинное здание площадью 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "no_property_family"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0130",
+      "property_id": "property-MS-CRAWL-0130",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7289",
+      "legacy_lot_id": "671",
+      "lot_id_override": null,
+      "area": {
+        "raw": "514",
+        "sqm": 514.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "245",
+        "sqm": 245.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 514.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 514,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0131",
+      "property_id": "property-MS-CRAWL-0131",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "1015",
+      "legacy_lot_id": "280",
+      "lot_id_override": null,
+      "area": {
+        "raw": "84",
+        "sqm": 84.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "146",
+        "sqm": 146.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 84.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 84,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0132",
+      "property_id": "property-MS-CRAWL-0132",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9585",
+      "legacy_lot_id": "833",
+      "lot_id_override": null,
+      "area": {
+        "raw": "148",
+        "sqm": 148.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "547",
+        "sqm": 547.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 148.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 148,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0133",
+      "property_id": "property-MS-CRAWL-0133",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9711",
+      "legacy_lot_id": "931",
+      "lot_id_override": null,
+      "area": {
+        "raw": "470",
+        "sqm": 470.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "417",
+        "sqm": 417.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 470.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 470,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0134",
+      "property_id": "property-MS-CRAWL-0134",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7779",
+      "legacy_lot_id": "707",
+      "lot_id_override": null,
+      "area": {
+        "raw": "67,57",
+        "sqm": 67.57,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 67.57,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 67.57,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0135",
+      "property_id": "property-MS-CRAWL-0135",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9734",
+      "legacy_lot_id": "937",
+      "lot_id_override": null,
+      "area": {
+        "raw": "30",
+        "sqm": 30.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 30.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 30,
+        "description_phrase": "ошем состоянии 4-этажный дом. Лифт. Удобный подъезд. Площадь квартиры составляет 24,26 кв.м., общая площадь – 30"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0136",
+      "property_id": "property-MS-CRAWL-0136",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8821",
+      "legacy_lot_id": "788",
+      "lot_id_override": null,
+      "area": {
+        "raw": "658",
+        "sqm": 658.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 658.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 658,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0137",
+      "property_id": "property-MS-CRAWL-0137",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9359",
+      "legacy_lot_id": "555",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1386",
+        "sqm": 1386.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1386.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1386,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0138",
+      "property_id": "property-MS-CRAWL-0138",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9598",
+      "legacy_lot_id": "860",
+      "lot_id_override": null,
+      "area": {
+        "raw": "41-112",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          41.0,
+          112.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0139",
+      "property_id": "property-MS-CRAWL-0139",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8426",
+      "legacy_lot_id": "750",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2850",
+        "sqm": 2850.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "7000",
+        "sqm": 7000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2850.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2850,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0140",
+      "property_id": "property-MS-CRAWL-0140",
+      "property_family": "hotel",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8248",
+      "legacy_lot_id": "739",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2771",
+        "sqm": 2771.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2771.0,
+      "target_field": null,
+      "field_candidates": [
+        "gross_floor_area_sqm",
+        "built_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2771,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0141",
+      "property_id": "property-MS-CRAWL-0141",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7097",
+      "legacy_lot_id": "645",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2000",
+        "sqm": 2000.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2000,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0142",
+      "property_id": "property-MS-CRAWL-0142",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9653",
+      "legacy_lot_id": "920",
+      "lot_id_override": null,
+      "area": {
+        "raw": "60",
+        "sqm": 60.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "1180",
+        "sqm": 1180.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 60.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 60,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "conflicting_area_keys"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0143",
+      "property_id": "property-MS-CRAWL-0143",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8033",
+      "legacy_lot_id": "719",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "1000",
+        "sqm": 1000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 1000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": "Участок площадью 1000"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0144",
+      "property_id": "property-MS-CRAWL-0144",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8422",
+      "legacy_lot_id": "749",
+      "lot_id_override": null,
+      "area": {
+        "raw": "288",
+        "sqm": 288.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 288.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 288,
+        "description_phrase": "Участок, который мы предлагаем, составляет 1/2 идеальной части (288"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0145",
+      "property_id": "property-MS-CRAWL-0145",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "6800",
+      "legacy_lot_id": "628",
+      "lot_id_override": null,
+      "area": {
+        "raw": "21400",
+        "sqm": 21400.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 21400.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 21400,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0146",
+      "property_id": "property-MS-CRAWL-0146",
+      "property_family": "hotel",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "2493",
+      "legacy_lot_id": "340",
+      "lot_id_override": null,
+      "area": {
+        "raw": "2140",
+        "sqm": 2140.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "1220",
+        "sqm": 1220.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 2140.0,
+      "target_field": null,
+      "field_candidates": [
+        "gross_floor_area_sqm",
+        "built_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 2140,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0147",
+      "property_id": "property-MS-CRAWL-0147",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7229",
+      "legacy_lot_id": "662",
+      "lot_id_override": null,
+      "area": {
+        "raw": "60",
+        "sqm": 60.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 60.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 60,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0148",
+      "property_id": "property-MS-CRAWL-0148",
+      "property_family": "house",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9357",
+      "legacy_lot_id": "870",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "350",
+        "sqm": 350.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "built_area_sqm",
+        "living_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": "дом в 15 км от СПА курорта Сандански. Две спальни, зал с кухней, санузел, большой подвал. Застроенная площадь 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0149",
+      "property_id": "property-MS-CRAWL-0149",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8478",
+      "legacy_lot_id": "756",
+      "lot_id_override": null,
+      "area": {
+        "raw": "220-920",
+        "sqm": null,
+        "reason": "range",
+        "range_sqm": [
+          220.0,
+          920.0
+        ]
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "range",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0150",
+      "property_id": "property-MS-CRAWL-0150",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8385",
+      "legacy_lot_id": "744",
+      "lot_id_override": null,
+      "area": {
+        "raw": "8000",
+        "sqm": 8000.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 8000.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 8000,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0151",
+      "property_id": "property-MS-CRAWL-0151",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7204",
+      "legacy_lot_id": "657",
+      "lot_id_override": null,
+      "area": {
+        "raw": "1100",
+        "sqm": 1100.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "13000",
+        "sqm": 13000.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 1100.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 1100,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0152",
+      "property_id": "property-MS-CRAWL-0152",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "969",
+      "legacy_lot_id": "296",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "2505",
+        "sqm": 2505.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 2505.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0153",
+      "property_id": "property-MS-CRAWL-0153",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "973",
+      "legacy_lot_id": "286",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "734",
+        "sqm": 734.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 734.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0154",
+      "property_id": "property-MS-CRAWL-0154",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "4264",
+      "legacy_lot_id": "470",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "677",
+        "sqm": 677.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 677.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": "а участка в поселке Струмяни.Недвижимость в 10 км от Сандански.Панорамный участок с видом на горы и р.Струма. 677"
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0155",
+      "property_id": "property-MS-CRAWL-0155",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "1206",
+      "legacy_lot_id": "232",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "2735",
+        "sqm": 2735.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 2735.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0156",
+      "property_id": "property-MS-CRAWL-0156",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "2788",
+      "legacy_lot_id": "362",
+      "lot_id_override": null,
+      "area": {
+        "raw": "952",
+        "sqm": 952.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 952.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 952,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0157",
+      "property_id": "property-MS-CRAWL-0157",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "1255",
+      "legacy_lot_id": "74",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "3417",
+        "sqm": 3417.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 3417.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0158",
+      "property_id": "property-MS-CRAWL-0158",
+      "property_family": "plot",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "1267",
+      "legacy_lot_id": "46",
+      "lot_id_override": null,
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "944",
+        "sqm": 944.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_total_area",
+      "proposed_sqm": 944.0,
+      "target_field": "land_area_sqm",
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "ready",
+      "review_reasons": []
+    },
+    {
+      "new_reference": "MS-CRAWL-0159",
+      "property_id": "property-MS-CRAWL-0159",
+      "property_family": "commercial",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9518",
+      "legacy_lot_id": "891",
+      "lot_id_override": null,
+      "area": {
+        "raw": "165",
+        "sqm": 165.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 165.0,
+      "target_field": null,
+      "field_candidates": [
+        "usable_area_sqm",
+        "gross_floor_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 165,
+        "description_phrase": "профилактики, реабилитации и косметических процедур в бальнеологическом курорте Сандански, Болгария. Площадь 165"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required",
+        "lot_area_conflict"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0160",
+      "property_id": "property-MS-CRAWL-0160",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8691",
+      "legacy_lot_id": "774",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "421",
+        "sqm": 421.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": "Недвижимость находится в центре села Левуново. Это первый этаж дома. Его площадь составляет 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0161",
+      "property_id": "property-MS-CRAWL-0161",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9744",
+      "legacy_lot_id": "932",
+      "lot_id_override": null,
+      "area": {
+        "raw": "73",
+        "sqm": 73.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": "77",
+        "sqm": 77.0,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 73.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 73,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "unmapped_total_area",
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0162",
+      "property_id": "property-MS-CRAWL-0162",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "8174",
+      "legacy_lot_id": "731",
+      "lot_id_override": null,
+      "area": {
+        "raw": "65",
+        "sqm": 65.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 65.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 65,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0163",
+      "property_id": "property-MS-CRAWL-0163",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "7622",
+      "legacy_lot_id": "696",
+      "lot_id_override": null,
+      "area": {
+        "raw": "90",
+        "sqm": 90.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 90.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 90,
+        "description_phrase": "Долгосрочная аренда - Двухкомнатная квартира с гаражом в Сандански. Общая площадь квартиры 90"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0164",
+      "property_id": "property-MS-CRAWL-0164",
+      "property_family": "apartment",
+      "legacy_domain": "makler-realty.ru",
+      "legacy_post_id": "9604",
+      "legacy_lot_id": "893",
+      "lot_id_override": null,
+      "area": {
+        "raw": "42",
+        "sqm": 42.0,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": "wtf_area",
+      "proposed_sqm": 42.0,
+      "target_field": null,
+      "field_candidates": [
+        "living_area_sqm",
+        "built_area_sqm",
+        "usable_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": 42,
+        "description_phrase": "2 спален, 2 террас и ванной комнаты с туалетом. Чистая жилая площадь по документам на недвижимость составляет 42"
+      },
+      "status": "review",
+      "review_reasons": [
+        "field_choice_required"
+      ]
+    },
+    {
+      "new_reference": "MS-CRAWL-0165",
+      "property_id": "property-MS-CRAWL-0165",
+      "property_family": "plot",
+      "legacy_domain": null,
+      "legacy_post_id": null,
+      "legacy_lot_id": "356",
+      "lot_id_override": "assign_legacy",
+      "area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "total_area": {
+        "raw": null,
+        "sqm": null,
+        "reason": null
+      },
+      "source_meta_key": null,
+      "proposed_sqm": null,
+      "target_field": null,
+      "field_candidates": [
+        "land_area_sqm"
+      ],
+      "evidence": {
+        "live_area_sqm": null,
+        "description_phrase": null
+      },
+      "status": "review",
+      "review_reasons": [
+        "no_legacy_post"
+      ]
+    }
+  ]
+}

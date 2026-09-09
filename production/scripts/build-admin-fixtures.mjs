@@ -6,7 +6,7 @@ import { buildAdminWorkflowFixture } from "../lib/admin-workflows.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
-const listing = findListingById(loadListings(), "MS-CRAWL-0001");
+const listing = findListingById(loadListings(), "MS-00815");
 const fixture = buildAdminWorkflowFixture(registry, listing);
 
 const outPath = fromRoot("production", "data", "admin-fixtures.json");

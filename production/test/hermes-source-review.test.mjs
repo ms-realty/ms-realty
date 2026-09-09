@@ -16,7 +16,7 @@ const registry = loadLocaleRegistry();
 const AT = "2026-09-06T12:00:00.000Z";
 function fixture() {
   const seed = approvedPublicSeedFixture();
-  const record = seed.records.find((row) => row.id === "MS-CRAWL-0001");
+  const record = seed.records.find((row) => row.id === "MS-00815");
   record.source_url = "https://makler-realty.com/listing/fixture-land/";
   record.facts.description = "Земеделска земя с площ 8 000 кв.м. Категория 6.";
   record.facts.price_eur = 9000;

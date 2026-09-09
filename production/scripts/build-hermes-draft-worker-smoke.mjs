@@ -26,12 +26,12 @@ const dispatch = buildHermesDraftDispatch({
   limit: 2,
   translationCoverage: {
     rows: ["el", "he"].map((targetLocale) => ({
-      listing_id: "MS-CRAWL-0001",
+      listing_id: "MS-00815",
       target_locale: targetLocale,
       task_type: "hermes_draft_required",
       provider_mode: "hermes_draft",
-      admin_path: `/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=${targetLocale}`,
-      task: { id: `translation-MS-CRAWL-0001-${targetLocale}` },
+      admin_path: `/admin/translations?objectType=listing&objectId=MS-00815&locale=${targetLocale}`,
+      task: { id: `translation-MS-00815-${targetLocale}` },
     })),
   },
 });
