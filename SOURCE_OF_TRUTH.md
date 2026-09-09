@@ -3,7 +3,7 @@
 **Single canonical document for the MS Realty rebuild** (historical `makler-realty.com` +
 `makler-realty.ru` sources; indexable public production at
 `https://makler-realty.com`).
-Last updated: 2026-09-07 (legacy-route paragraph corrected against the gate report; see `PRODUCTION_END_GOAL.md` for the current release state).
+Last updated: 2026-09-09 (runbook recovery; current launch authority remains `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`; live release markers require a fresh check).
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
 > subsystem READMEs (`production/`, `migration/`, `search/`, `locales/`,
