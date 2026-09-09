@@ -25,7 +25,7 @@ import {
   crossOriginWriteRejection,
   readHeader,
   requestHost,
-  sameOriginWriteRejection,
+  publicWriteRejection, sameOriginWriteRejection,
 } from "./request-guard.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
@@ -2649,7 +2649,7 @@ export function createHttpApp({
       const forwardedProtocol = readHeader(request.headers, "x-forwarded-proto").split(",")[0].trim().toLowerCase();
       const protocol = ["http", "https"].includes(forwardedProtocol) ? forwardedProtocol : "http";
       const requestUrl = new URL(request.url, `${protocol}://${requestHost(request.headers) || "localhost"}`);
-      const sameOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl });
+      const sameOrigin = publicWriteRejection(request.method, request.headers, { requestUrls: [requestUrl, request.url] });
       if (sameOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: sameOrigin });
     }
     // Runs after /mcp, which keeps its own MS_REALTY_MCP_ALLOWED_ORIGINS allowlist
@@ -3934,7 +3934,7 @@ export function createHttpApp({
         request.url,
         `${["http", "https"].includes(photoProtocol) ? photoProtocol : "http"}://${requestHost(request.headers) || "localhost"}`,
       );
-      const photoCrossOrigin = sameOriginWriteRejection(request.method, request.headers, { requestUrl: photoRequestUrl });
+      const photoCrossOrigin = publicWriteRejection(request.method, request.headers, { requestUrls: [photoRequestUrl, request.url] });
       if (photoCrossOrigin) return privateJson(403, { kind: "cross_origin_write_blocked", reason: photoCrossOrigin });
       if (publicWriteLimiter) {
         const verdict = publicWriteLimiter.allow(`${clientIdentity(request, { trustProxy })}:${url.pathname}`);
