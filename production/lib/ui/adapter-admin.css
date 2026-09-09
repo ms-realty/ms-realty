@@ -3377,8 +3377,7 @@ html[data-theme="dark"] .crm-top {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-media-manager { grid-template-columns: minmax(0,1fr); }
 }
 
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-identity__desktop strong { white-space: normal; overflow: visible; text-overflow: clip; font-size: 16px; line-height: 20px; }
-.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-identity__desktop code { font-size: 14px; line-height: 20px; }
+.crm-app main[data-react-admin-ui="listing-manager"] .adm-listing-card__title { white-space: normal; overflow: visible; text-overflow: clip; font-size: 16px; line-height: 20px; }
 @media (max-width: 1100px) {
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-quality-panel],
   .crm-app main[data-react-admin-ui="listing-editor"] .adm-editor-support > [data-translation-panel],

@@ -550,6 +550,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Изтегли CSV по източници",
     privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
     readOnlyAccess: "Достъп само за преглед за тази роля.",
+    gaps: { location_missing: "Липсва локация", area_missing: "Липсва площ", price_missing: "Липсва цена", description_missing: "Липсва описание", no_public_photos: "Няма публични снимки", search_markup_missing: "Липсва разметка за търсачки" },
+    noGaps: "Нищо не липсва",
+    noThumbnail: "Още няма снимка",
+    applyFilters: "Приложи",
+    publishingStatus: "Преди публикуване",
+    nothingBlocksPublishing: "Нищо не пречи на публикуването.",
+    blockerMissing: "Липсва: {field}",
+    availabilityNotVerified: "Наличността не е проверена",
+    searchMarkup: "Разметка за търсачки",
+    staleTranslationsLine: "{count} остарели превода",
+    reviewQueues: "Опашки за преглед",
     viewingFollowUpReadOnly: "Записването е скрито, докато надеждната история на действията не бъде включена.",
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
@@ -573,7 +584,7 @@ const ADMIN_UI_COPY = {
       qualify: "Квалифициране", book_viewing: "Насрочване на оглед", complete_viewing: "Провеждане на оглед", record_offer: "Записване на оферта", start_due_diligence: "Начало на проверка", sign_contract: "Подписване на договор", record_application: "Записване на кандидатура", sign_lease: "Подписване на наем", close_deal: "Затваряне на сделка",
       cash: "В брой", mortgage: "Ипотека", preapproved: "Предварително одобрено", not_applicable: "Не е приложимо",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
-      unverified: "Непроверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
+      unverified: "Още не е проверена", available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", plot: "Парцел", agricultural_land: "Земеделска земя", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
       public_enabled: "Публично включен", indexable: "Индексируем", fallback_locale: "Резервен език", object_id: "Идентификатор на обект", public_indexable: "Публично индексируем", can_mark_indexable: "Може да се маркира за индекс", lead_id: "Номер на запитване", listing_id: "Референция на обява", approved_imported_photo: "Одобрена снимка от източника", reviewed_private: "Прегледана, непублична", needs_media_review: "Чака преглед на медията", instant: "Веднага", daily: "Ежедневно", weekly: "Седмично", broker_international: "Международен брокер",
@@ -1339,6 +1350,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Скачать CSV по источникам",
     privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
     readOnlyAccess: "Для этой роли доступен только просмотр.",
+    gaps: { location_missing: "Нет локации", area_missing: "Нет площади", price_missing: "Нет цены", description_missing: "Нет описания", no_public_photos: "Нет публичных фото", search_markup_missing: "Нет разметки для поисковиков" },
+    noGaps: "Ничего не пропущено",
+    noThumbnail: "Фото пока нет",
+    applyFilters: "Применить",
+    publishingStatus: "Перед публикацией",
+    nothingBlocksPublishing: "Публикации ничего не мешает.",
+    blockerMissing: "Не указано: {field}",
+    availabilityNotVerified: "Доступность не проверена",
+    searchMarkup: "Разметка для поисковиков",
+    staleTranslationsLine: "{count} устаревших переводов",
+    reviewQueues: "Очереди на проверку",
     viewingFollowUpReadOnly: "Запись скрыта, пока не включено надежное хранение истории действий.",
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
@@ -1362,7 +1384,7 @@ const ADMIN_UI_COPY = {
       qualify: "Квалифицировать", book_viewing: "Назначить просмотр", complete_viewing: "Провести просмотр", record_offer: "Записать предложение", start_due_diligence: "Начать проверку", sign_contract: "Подписать договор", record_application: "Записать заявку", sign_lease: "Подписать аренду", close_deal: "Закрыть сделку",
       cash: "Наличные", mortgage: "Ипотека", preapproved: "Предварительно одобрено", not_applicable: "Не применимо",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
-      unverified: "Не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
+      unverified: "Ещё не проверено", available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", plot: "Участок", agricultural_land: "Сельхозземля", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
       public_enabled: "Публично включено", indexable: "Индексируемый", fallback_locale: "Резервный язык", object_id: "Идентификатор объекта", public_indexable: "Публично индексируемый", can_mark_indexable: "Можно отметить для индекса", lead_id: "Номер заявки", listing_id: "Ссылка объекта", approved_imported_photo: "Одобренное фото из источника", reviewed_private: "Проверено, непубличное", needs_media_review: "Ожидает проверки медиа", instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно", broker_international: "Международный брокер",
@@ -2128,6 +2150,17 @@ const ADMIN_UI_COPY = {
     downloadSourceReport: "Download source CSV",
     privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
     readOnlyAccess: "This role has read-only access.",
+    gaps: { location_missing: "Location missing", area_missing: "Area missing", price_missing: "Price missing", description_missing: "No description", no_public_photos: "No public photos", search_markup_missing: "Search markup missing" },
+    noGaps: "Nothing missing",
+    noThumbnail: "No photo yet",
+    applyFilters: "Apply",
+    publishingStatus: "Before publishing",
+    nothingBlocksPublishing: "Nothing blocks publishing.",
+    blockerMissing: "{field} missing",
+    availabilityNotVerified: "Availability not verified",
+    searchMarkup: "Search engine markup",
+    staleTranslationsLine: "{count} translations out of date",
+    reviewQueues: "Review queues",
     viewingFollowUpReadOnly: "Recording is hidden until durable action history is enabled.",
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
@@ -2151,7 +2184,7 @@ const ADMIN_UI_COPY = {
       qualify: "Qualify", book_viewing: "Book viewing", complete_viewing: "Complete viewing", record_offer: "Record offer", start_due_diligence: "Start due diligence", sign_contract: "Sign contract", record_application: "Record application", sign_lease: "Sign lease", close_deal: "Close deal",
       cash: "Cash", mortgage: "Mortgage", preapproved: "Pre-approved", not_applicable: "Not applicable",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
-      unverified: "Unverified", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
+      unverified: "Not yet checked", available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", plot: "Plot", agricultural_land: "Agricultural land", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
       public_enabled: "Publicly enabled", indexable: "Indexable", fallback_locale: "Fallback locale", object_id: "Object ID", public_indexable: "Publicly indexable", can_mark_indexable: "Can mark indexable", lead_id: "Enquiry ID", listing_id: "Listing reference", approved_imported_photo: "Approved imported photo", reviewed_private: "Reviewed, private", needs_media_review: "Awaiting media review", instant: "As soon as possible", daily: "Daily", weekly: "Weekly", broker_international: "International broker",
@@ -2529,6 +2562,39 @@ function listingPriceText(ui, row) {
   if (row.price_on_request) return statusText(ui, "price_on_request");
   if (row.price_eur === null || row.price_eur === undefined || row.price_eur === "") return ui.notSet;
   return `€${Number(row.price_eur).toLocaleString("en")}`;
+}
+
+// The list names a listing the way a broker would on the phone: what it is,
+// where it is, what it costs. The crawled headline and the reference stay on
+// the card as captions; neither is the first thing the eye lands on.
+function listingShortTitle(ui, row) {
+  const parts = [row.property_family ? statusText(ui, row.property_family) : "", row.location || ""].filter(Boolean);
+  if (!parts.length) {
+    const fallback = String(row.title || "").trim();
+    parts.push(fallback && !/^MS-/iu.test(fallback) ? fallback : ui.listing);
+  }
+  if (row.price_on_request || (row.price_eur !== null && row.price_eur !== undefined && row.price_eur !== "")) parts.push(listingPriceText(ui, row));
+  return parts.join(" · ");
+}
+
+// The crawled headline is worth a caption only when the short title does not
+// already say the same thing.
+function listingSourceTitle(row) {
+  const title = String(row.title || "").trim();
+  return title && !/^MS-/iu.test(title) ? title : "";
+}
+
+function listingGapLine(ui, row) {
+  const gaps = Array.isArray(row.gaps) ? row.gaps : [];
+  if (!gaps.length) return ui.noGaps;
+  return gaps.map((gap) => ui.gaps?.[gap] || gap.replaceAll("_", " ")).join(" · ");
+}
+
+function listingThumbnail(ui, row) {
+  if (row.thumbnail_url) {
+    return h("img", { className: "adm-listing-thumb", src: row.thumbnail_url, alt: "", width: 96, height: 72, loading: "lazy", decoding: "async" });
+  }
+  return h("span", { className: "adm-listing-thumb adm-listing-thumb--empty", role: "img", "aria-label": ui.noThumbnail }, h(Icon, { name: "camera", size: 18 }));
 }
 
 function listingLocaleText(row) {
@@ -8573,26 +8639,38 @@ function ListingManagerBody({ page }) {
                       h(
                         "td",
                         { "data-label": columns.listing, "data-listing-column": "listing" },
-                        h("div", { className: "adm-lead-identity adm-listing-identity__desktop" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, listingPriceText(ui, row))),
+                        h(
+                          "div",
+                          { className: "adm-listing-card adm-listing-identity__desktop" },
+                          listingThumbnail(ui, row),
+                          h(
+                            "div",
+                            { className: "adm-listing-card__body" },
+                            h("strong", { className: "adm-listing-card__title" }, listingShortTitle(ui, row)),
+                            h("small", { className: "adm-listing-card__gaps", "data-listing-gaps": String((row.gaps || []).length) }, listingGapLine(ui, row)),
+                            listingSourceTitle(row) ? h("small", { className: "adm-listing-card__source", title: row.title }, row.title) : null,
+                            h("code", { className: "crm-mono adm-id-caption" }, row.id),
+                          ),
+                        ),
                         h(
                           "div",
                           { className: "adm-listing-mobile-summary", "data-listing-mobile-summary": "true" },
                           h(
                             "div",
                             { className: "adm-listing-mobile-summary__topline" },
-                            h("code", { className: "crm-mono" }, row.id),
                             h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status)),
+                            h("code", { className: "crm-mono adm-id-caption" }, row.id),
                           ),
-                          h("strong", null, row.title),
                           h(
-                            "small",
-                            { className: "adm-listing-mobile-summary__meta" },
-                            [
-                              row.location || ui.notSet,
-                              row.property_family ? statusText(ui, row.property_family) : ui.notSet,
-                              listingPriceText(ui, row),
-                              `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`,
-                            ].join(" · "),
+                            "div",
+                            { className: "adm-listing-card" },
+                            listingThumbnail(ui, row),
+                            h(
+                              "div",
+                              { className: "adm-listing-card__body" },
+                              h("strong", { className: "adm-listing-card__title" }, listingShortTitle(ui, row)),
+                              h("small", { className: "adm-listing-mobile-summary__meta" }, listingGapLine(ui, row)),
+                            ),
                           ),
                         ),
                       ),
@@ -8600,7 +8678,7 @@ function ListingManagerBody({ page }) {
                       h("td", { "data-label": columns.propertyFamily, "data-listing-column": "property-family" }, row.property_family ? statusText(ui, row.property_family) : ui.notSet),
                       h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, listingLocaleText(row))),
-                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", { className: "adm-listing-gaps" }, listingGapLine(ui, row))),
                       h(
                         "td",
                         { "data-label": columns.action, "data-listing-column": "action" },
@@ -8623,7 +8701,7 @@ function ListingManagerBody({ page }) {
                             h("div", null, h("dt", null, columns.propertyFamily), h("dd", null, row.property_family ? statusText(ui, row.property_family) : ui.notSet)),
                             h("div", null, h("dt", null, columns.status), h("dd", null, statusText(ui, row.listing_status))),
                             h("div", null, h("dt", null, columns.locale), h("dd", null, `${String(row.source_locale || "").toUpperCase() || ui.notSet} · ${listingLocaleText(row)}`)),
-                            h("div", null, h("dt", null, columns.quality), h("dd", null, `${row.metadata_gaps} ${(row.metadata_gaps === 1 ? ui.issue : ui.issues).toLocaleLowerCase()} · ${row.public_gallery_assets} ${(row.public_gallery_assets === 1 ? ui.publicPhoto : ui.publicPhotos).toLocaleLowerCase()}`)),
+                            h("div", null, h("dt", null, columns.quality), h("dd", null, listingGapLine(ui, row))),
                           ),
                           page.runtime_data_mode === "durable_only"
                             ? null

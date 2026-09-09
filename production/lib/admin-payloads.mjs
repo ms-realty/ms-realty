@@ -480,6 +480,22 @@ function withinRange(value, range) {
   return true;
 }
 
+// The gaps a listing row shows are the ones a broker can close from the
+// editor, in the order they would close them. Crawl-metadata gaps that no
+// broker action resolves (a source page without schema markup) are folded
+// into the one line the public site actually depends on.
+export function listingGapKeys({ facts = {}, areaSqm = null, galleryCount = 0, migration = null } = {}) {
+  const crawlGaps = migration?.metadata_gaps || {};
+  const keys = [];
+  if (!facts.location) keys.push("location_missing");
+  if (areaSqm === null || areaSqm === undefined || areaSqm === "") keys.push("area_missing");
+  if (facts.price_on_request !== true && (facts.price_eur === null || facts.price_eur === undefined || facts.price_eur === "")) keys.push("price_missing");
+  if (!facts.description) keys.push("description_missing");
+  if (!Number(galleryCount)) keys.push("no_public_photos");
+  if (crawlGaps.missingSchema) keys.push("search_markup_missing");
+  return keys;
+}
+
 export function renderAdminListingManagerPayload(
   registry,
   requestedLocale,
@@ -533,10 +549,18 @@ export function renderAdminListingManagerPayload(
       ];
       const latestByLocale = new Map(translations.map((row) => [row.locale || row.target_locale, row]));
       const metadataGaps = Object.values(record.migration?.metadata_gaps || {}).filter(Boolean).length;
+      const library = publicMediaLibrary(record.media || []);
+      const areaSqm = facts.area_sqm ?? property?.facts?.primary_area_sqm ?? null;
       return {
         id: record.id,
         title: facts.title || record.seo?.title || record.id,
         location: facts.location || "",
+        // The first public gallery photo stands for the listing in the list;
+        // a row without one renders a neutral placeholder rather than nothing.
+        thumbnail_url: library.gallery[0]?.url || null,
+        // What a broker would have to supply before this listing is whole,
+        // named per gap so the list can say "Area missing" instead of a count.
+        gaps: listingGapKeys({ facts, areaSqm, galleryCount: library.gallery_count, migration: record.migration }),
         property_family: propertyFamilyFor({
           ...facts,
           property_family: property?.property_family || facts.property_family,
@@ -547,9 +571,9 @@ export function renderAdminListingManagerPayload(
         listing_status: facts.listing_status || "unverified",
         cms_status: record.cms_status || "source_imported_review_required",
         price_eur: facts.price_eur ?? null,
-        area_sqm: facts.area_sqm ?? property?.facts?.primary_area_sqm ?? null,
+        area_sqm: areaSqm,
         price_on_request: facts.price_on_request === true,
-        public_gallery_assets: publicMediaLibrary(record.media || []).gallery_count,
+        public_gallery_assets: library.gallery_count,
         metadata_gaps: metadataGaps,
         translation_locales: [...latestByLocale.keys()].filter(Boolean).sort(),
         translation_review_required: translationReviewByListing.get(record.id) || 0,
