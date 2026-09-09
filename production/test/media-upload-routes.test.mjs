@@ -38,8 +38,8 @@ const DURABLE_ENV = Object.freeze({
   DATABASE_URL: "postgres://payload:secret@db.example.test/ms_realty",
 });
 const ENQUIRY_ID = "lead-draft-11111111-2222-3333-4444-555555555555";
-const LISTING_ID = "MS-CRAWL-0001";
-const LISTING_PATH = "/en/properties/MS-CRAWL-0001";
+const LISTING_ID = "MS-00815";
+const LISTING_PATH = "/en/properties/MS-00815";
 
 function workspace(extra = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-upload-routes-"));

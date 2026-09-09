@@ -9,7 +9,7 @@ import crypto from "node:crypto";
 
 const calls = [];
 const docs = JSON.parse(fs.readFileSync(fromRoot("search", "data", "index-listings.json"), "utf8"));
-const reviewed = docs.find((doc) => doc.id === "MS-CRAWL-0001:bg");
+const reviewed = docs.find((doc) => doc.id === "MS-00815:bg");
 const documents = reviewed ? [reviewed] : [];
 const projection = {
   schema_version: 1,

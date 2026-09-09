@@ -4,8 +4,8 @@ import test from "node:test";
 import { ingestMedia } from "../../workers/media-ingest-boundary.mjs";
 
 const SECRET = "media-ingest-test-secret";
-const PRIVATE_KEY = "makler-realty.com/wp-content/private/listings/MS-CRAWL-0001/media-0123456789abcdef0123/ms-photo.jpg";
-const PUBLIC_KEY = "makler-realty.com/wp-content/uploads/2026/09/listings/MS-CRAWL-0001/media-0123456789abcdef0123/ms-photo.jpg";
+const PRIVATE_KEY = "makler-realty.com/wp-content/private/listings/MS-00815/media-0123456789abcdef0123/ms-photo.jpg";
+const PUBLIC_KEY = "makler-realty.com/wp-content/uploads/2026/09/listings/MS-00815/media-0123456789abcdef0123/ms-photo.jpg";
 const LEGACY_KEY = "makler-realty.com/wp-content/uploads/2026/09/legacy.jpg";
 
 function boundaryHarness() {

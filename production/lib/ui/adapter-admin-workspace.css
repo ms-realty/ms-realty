@@ -74,6 +74,9 @@ html:root .crm-app {
   --radius-input: 12px;
   --radius-card: 16px;
   --adm-shell-top-offset: 56px;
+  /* Rail: the lit destination sits on the Atlas tint, in both palettes. */
+  --sb-on: var(--atlas-tint);
+  --sb-on-text: var(--atlas-text);
   font-size: 16px;
   line-height: 1.5;
 }
@@ -83,19 +86,47 @@ html:root .crm-app {
 .crm-app .crm-sb__nav { padding: 0 16px 16px; gap: 8px; }
 .crm-app .crm-sb__group { margin: 8px 10px 4px; font-size: 14px; line-height: 20px; letter-spacing: normal; }
 .crm-app .crm-nav { min-height: 44px; padding: 10px; gap: 12px; color: var(--text-body); font-size: 16px; font-weight: 400; line-height: 20px; border-radius: 12px; }
-.crm-app .crm-nav:hover,
-.crm-app .crm-nav--on { background: var(--atlas-tint); color: var(--text-strong); }
-.crm-app .crm-nav--on { font-weight: 600; }
+.crm-app .crm-nav:hover { background: var(--surface-hover); color: var(--text-strong); }
+.crm-app .crm-nav--on { background: var(--sb-on); color: var(--sb-on-text); font-weight: 600; }
 .crm-app .crm-nav--on::before { content: none; }
 .crm-app .crm-nav--on svg { color: currentColor; }
-.crm-app .crm-sb__me { margin: 0; padding: 16px; background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+/* Advanced: one native disclosure, closed by default, opened by the operator
+   or by the screen that lives inside it. The summary reads like a group label
+   with a chevron so it is not mistaken for a ninth destination. */
+.crm-app .crm-sb__advanced { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+/* Secondary destinations read one step smaller than the eight primary ones,
+   and "Website languages" then fits the 216px rail on one line. */
+.crm-app .crm-sb__advanced .crm-nav { min-height: 40px; padding-block: 8px; font-size: 14px; }
+.crm-app .crm-sb__advanced .crm-sb__destination { gap: 0; }
+.crm-app .crm-sb__group--summary { display: flex; align-items: center; gap: 8px; margin: 0; min-height: 44px; padding: 10px; border-radius: 12px; color: var(--text-muted); font-size: 14px; font-weight: 600; line-height: 20px; list-style: none; cursor: pointer; }
+.crm-app .crm-sb__group--summary::-webkit-details-marker { display: none; }
+.crm-app .crm-sb__group--summary:hover { background: var(--surface-hover); color: var(--text-strong); }
+.crm-app .crm-sb__group--summary:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.crm-app .crm-sb__group--summary svg { transition: transform var(--dur-fast, 120ms) var(--ease-out, ease-out); }
+.crm-app .crm-sb__advanced[open] > .crm-sb__group--summary svg { transform: rotate(90deg); }
+[dir="rtl"] .crm-app .crm-sb__group--summary svg { transform: rotate(180deg); }
+[dir="rtl"] .crm-app .crm-sb__advanced[open] > .crm-sb__group--summary svg { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .crm-app .crm-sb__group--summary svg { transition: none; } }
+/* Profile block: identity, then the operator's own language and palette
+   choices. Two full-width rows, because 184px does not seat six targets side
+   by side at 44px each. */
+.crm-app .crm-sb__me { display: grid; gap: 8px; margin: 0; padding: 12px 16px 16px; background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+.crm-app .crm-sb__prefs { display: grid; gap: 8px; }
+.crm-app .crm-sb__prefs .crm-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; padding: 3px; }
+.crm-app .crm-sb__prefs .crm-seg :is(button, a) { width: auto; min-width: 0; font-size: 14px; }
+html[data-theme-ready] .crm-app .crm-sb__prefs .adm-theme--rail { display: grid; }
+.crm-app .crm-sb__prefs .adm-locales a { color: var(--text-muted); text-decoration: none; }
+.crm-app .crm-sb__prefs .adm-locales a[data-on="1"] { color: var(--text-strong); }
 .crm-app .adm-owner-identity { color: var(--text-body); }
 .crm-app .adm-owner-identity:hover { background: var(--surface-hover); }
 .crm-app .adm-owner-identity__avatar { background: var(--surface-sunken); color: var(--text-strong); border-color: var(--border-strong); }
 .crm-app .adm-owner-identity__copy strong { font-size: 14px; line-height: 20px; }
 .crm-app .adm-owner-identity__copy small,
 .crm-app .adm-owner-identity__role { font-size: 14px; line-height: 20px; }
-.crm-app .crm-top { height: 56px; min-height: 56px; padding: 6px 24px; background: var(--canvas); backdrop-filter: none; }
+/* The kit sizes the bar with flex-basis 64px inside the flex column, so the
+   height alone never took effect; the basis is what makes it 56px. */
+.crm-app .crm-top { box-sizing: border-box; flex: 0 0 56px; height: 56px; min-height: 56px; padding: 6px 24px; background: var(--canvas); backdrop-filter: none; }
+.crm-app .crm-top__action { display: flex; flex: none; align-items: center; margin-inline-start: auto; }
 .crm-app .crm-top__context { display: flex; align-items: center; gap: 12px; }
 .crm-app .crm-top__eyebrow { text-transform: none; letter-spacing: normal; font-size: 14px; font-weight: 400; }
 .crm-app .crm-top__sub { font-size: 14px; line-height: 20px; margin: 0; padding-inline-start: 12px; border-inline-start: 1px solid var(--border); }

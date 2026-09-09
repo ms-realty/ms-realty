@@ -42,6 +42,6 @@ test("activity payload provides privacy-safe lead and listing timelines with bou
   assert.match(html, /placeholder="e.g. listing reference"/);
   assert.match(html, /<dt>Publicly enabled<\/dt>/);
   assert.match(html, /<dt>Object ID<\/dt>/);
-  assert.doesNotMatch(html, /placeholder="MS-CRAWL-0001"/);
+  assert.doesNotMatch(html, /placeholder="MS-00815"/);
   assert.doesNotMatch(html, /<dt>public enabled<\/dt>/);
 });

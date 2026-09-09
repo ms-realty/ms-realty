@@ -272,7 +272,10 @@ test("the Hermes draft button knows it is unconfigured on first paint", async ()
   // existing CSS without a failed draft request first.
   assert.match(inbox.body, /data-hermes-state="unavailable"/);
   assert.match(inbox.body, /data-hermes-reason="not_configured"/);
-  assert.match(inbox.body, /Hermes is not configured in this environment\. Missing: HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY\./);
+  // One plain sentence with a lead open; the variable names stay on the
+  // Hermes screen, next to where they are set.
+  assert.match(inbox.body, /Hermes is not configured in this environment\.</);
+  assert.doesNotMatch(inbox.body, /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/);
   assert.match(crmCss, /\[data-hermes-state="unavailable"\] \.adm-hermes-note/);
 });
 

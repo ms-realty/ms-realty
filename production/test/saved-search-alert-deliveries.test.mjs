@@ -47,7 +47,7 @@ const ALERT_ROW = {
   status: "new_matches",
   new_match_count: 3,
   price_change_count: 0,
-  sample_listing_ids: ["MS-CRAWL-0001", "MS-CRAWL-0002"],
+  sample_listing_ids: ["MS-00815", "MS-00907"],
 };
 
 function emptyLedger(directory, name) {
@@ -98,7 +98,7 @@ test("a due saved search becomes a queued, human-sent alert record", () => {
   assert.equal(delivery.owner, "unassigned");
   assert.equal(delivery.channel, "whatsapp");
   assert.equal(delivery.reason, "new_matches");
-  assert.deepEqual(delivery.listing_ids, ["MS-CRAWL-0001", "MS-CRAWL-0002"]);
+  assert.deepEqual(delivery.listing_ids, ["MS-00815", "MS-00907"]);
   // Routing only, never a contact value.
   assert.equal(delivery.contact, undefined);
   assert.equal(JSON.stringify(delivery).includes("@"), false);

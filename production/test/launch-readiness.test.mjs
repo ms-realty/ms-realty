@@ -804,18 +804,18 @@ function runScript(script, env) {
 
 async function withLiveServiceServer(fn) {
   const hit = {
-    id: "MS-CRAWL-0001:bg",
-    source_listing_id: "MS-CRAWL-0001",
+    id: "MS-00815:bg",
+    source_listing_id: "MS-00815",
     locale: "bg",
-    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    locale_path: "/bg/imoti/MS-00815",
     title: "Reviewed listing",
   };
   const draft = {
-    title: "MS-CRAWL-0001 Sandanski commercial rent",
-    body: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    seo_title: "MS-CRAWL-0001 Sandanski commercial rent",
-    meta_description: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    citations: [{ source: "cms_seed", object_id: "MS-CRAWL-0001" }],
+    title: "MS-00815 Sandanski commercial rent",
+    body: "MS-00815 Sandanski commercial rent draft",
+    seo_title: "MS-00815 Sandanski commercial rent",
+    meta_description: "MS-00815 Sandanski commercial rent draft",
+    citations: [{ source: "cms_seed", object_id: "MS-00815" }],
   };
   const server = http.createServer((request, response) => {
     request.resume();
@@ -933,9 +933,11 @@ test("launch readiness stays blocked until production launch blockers are cleare
     assert.ok(blockedGate.next_actions.length > 0);
   }
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
+  // One of the eighteen thin galleries gained its twin's photographs when the
+  // lot number merged the two records.
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
     id: "listing_quality.thin_public_gallery",
-    count: 18,
+    count: 17,
   });
   assert.ok(report.rollback_plan.length >= 3);
 
@@ -2684,7 +2686,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /Pending review sample:\n- none/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
-  assert.match(markdown, /listing_quality\.thin_public_gallery: 18/);
+  assert.match(markdown, /listing_quality\.thin_public_gallery: 17/);
   assert.match(markdown, /listing_quality\.missing_area: 165/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(markdown, /npm run listing:preflight:report/);
@@ -2710,7 +2712,7 @@ test("launch input checklist names remaining operator-owned blockers", async () 
   assert.match(markdown, /Broker Verification/);
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);
-  assert.match(markdown, /High priority tasks: 74/);
+  assert.match(markdown, /High priority tasks: 156/);
   assert.match(markdown, /unassigned: 165/);
   assert.match(markdown, /MS_REALTY_LISTING_PUBLICATION_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LISTING_VERIFICATION_REPORT_PATH/);

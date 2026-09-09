@@ -165,7 +165,7 @@ test("production server entrypoint serves runtime routes with env config", async
   const address = await listen(server, 0, "127.0.0.1");
   try {
     const baseUrl = `http://${address.address}:${address.port}`;
-    const response = await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001");
+    const response = await jsonFetch(baseUrl, "/he/properties/MS-00815");
     assert.equal(response.status, 200);
     assert.equal(response.body.kind, "listing");
     assert.equal(response.body.lang, "he");
@@ -327,7 +327,7 @@ test("production server HTTP app forwards provider runtimes and durable viewing 
     received_at: "2026-08-13T14:00:00.000Z",
     source: "website_listing_detail",
     lead_type: "buyer",
-    listing_reference: "MS-CRAWL-0001",
+    listing_reference: "MS-00815",
     original_language: "bg",
     admin_locale: "bg",
     contact_preference: "email",
@@ -515,7 +515,7 @@ test("production server HTTP app forwards provider runtimes and durable viewing 
   assert.equal(viewings.body.kind, "admin_viewings");
   assert.equal(viewings.body.summary.viewings, 1);
   assert.equal(viewings.body.viewings[0].id, "durable-viewing-1");
-  assert.equal(viewings.body.viewings[0].listing_reference, "MS-CRAWL-0001");
+  assert.equal(viewings.body.viewings[0].listing_reference, "MS-00815");
 });
 
 test("production server routes seller intake through one durable write with zero JSONL side effects", async (t) => {
@@ -620,7 +620,7 @@ test("production server forwards durable lead-operation and viewing readers into
       source: "website_listing_detail",
       intent: "inquiry",
       lead_type: "buyer",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       original_language: "bg",
       admin_locale: "bg",
       contact_preference: "email",
@@ -665,7 +665,7 @@ test("production server forwards durable lead-operation and viewing readers into
     {
       id: "server-forwarded-viewing",
       lead_id: "server-forwarded-lead",
-      listing_reference: "MS-CRAWL-0001",
+      listing_reference: "MS-00815",
       broker: "broker_ru",
       status: "booked",
       booked_at: "2026-08-13T08:10:00.000Z",
@@ -872,7 +872,7 @@ test("production server persists public leads and reviewed admin replies", async
       body: JSON.stringify({
         leadType: "buyer",
         language: "he",
-        listingReference: "MS-CRAWL-0001",
+        listingReference: "MS-00815",
         contact: { name: "Noa Levi", whatsapp: "+359880000001" },
         contact_preference: "whatsapp",
         message: "Interested in this property.",

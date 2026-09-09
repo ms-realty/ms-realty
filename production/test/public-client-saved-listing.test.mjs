@@ -39,7 +39,7 @@ function bootClient({ failStorage = false, includeMain = false, mainKind = null 
   const toasts = [];
   const fetchCalls = [];
   const button = element({
-    "data-client-save-listing": "MS-CRAWL-0001",
+    "data-client-save-listing": "MS-00815",
     "data-save-label": "Save",
     "data-saved-label": "Saved",
   });
@@ -149,7 +149,7 @@ function bootClient({ failStorage = false, includeMain = false, mainKind = null 
 test("saved-listing UI changes only after local storage read-back succeeds", () => {
   const persisted = bootClient();
   assert.equal(persisted.click(), true);
-  assert.equal(persisted.stored.get("ms-realty:saved-listings"), '["MS-CRAWL-0001"]');
+  assert.equal(persisted.stored.get("ms-realty:saved-listings"), '["MS-00815"]');
   assert.equal(persisted.button.getAttribute("aria-pressed"), "true");
   assert.equal(persisted.button.label.textContent, "Saved");
 
@@ -185,15 +185,15 @@ test("public client records privacy-safe page, search, and CTA events without a 
   assert.deepEqual(initial[1].filters, { property_type: "apartment", price_min: "100000" });
   assert.equal(JSON.stringify(initial).includes("visitor"), false);
 
-  const action = element({ "data-card-action": "detail", "data-listing-reference": "MS-CRAWL-0001" });
+  const action = element({ "data-card-action": "detail", "data-listing-reference": "MS-00815" });
   action.closest = (selector) => selector.includes("[data-card-action]") ? action : null;
   client.click(action);
   const click = JSON.parse(client.fetchCalls[2].options.body);
   assert.equal(click.type, "cta_click");
   assert.equal(click.action, "detail");
-  assert.equal(click.listingReference, "MS-CRAWL-0001");
+  assert.equal(click.listingReference, "MS-00815");
 
-  const utility = element({ "data-card-action": "save", "data-listing-reference": "MS-CRAWL-0001" });
+  const utility = element({ "data-card-action": "save", "data-listing-reference": "MS-00815" });
   utility.closest = (selector) => selector.includes("[data-card-action]") ? utility : null;
   client.click(utility);
   assert.equal(client.fetchCalls.length, 3);

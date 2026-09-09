@@ -468,6 +468,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Смени файла",
     replaceMediaFile: "Избери нов файл",
     mediaReplacementHint: "Текущият файл остава активен, докато човек не одобри замяната.",
+    mediaAssetPosition: "{kind} {index} от {total}",
+    mediaReviewerSignedIn: "Влезлият оператор",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourProvider: "Визуализатор на обиколката",
@@ -1257,6 +1259,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Заменить файл",
     replaceMediaFile: "Выберите новый файл",
     mediaReplacementHint: "Текущий файл останется активным, пока человек не одобрит замену.",
+    mediaAssetPosition: "{kind} {index} из {total}",
+    mediaReviewerSignedIn: "Текущий оператор",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourProvider: "Просмотр тура",
@@ -2046,6 +2050,8 @@ const ADMIN_UI_COPY = {
     replaceMedia: "Replace file",
     replaceMediaFile: "Choose replacement file",
     mediaReplacementHint: "The current file stays live until a person approves the replacement.",
+    mediaAssetPosition: "{kind} {index} of {total}",
+    mediaReviewerSignedIn: "Signed-in operator",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourProvider: "Tour viewer",
@@ -3411,11 +3417,11 @@ function adminNavigationGroups(page) {
     if (copyKey) return label(copy, copyKey.key, copyKey.fallback);
     return screenLabel(item.group, item.id, item.id);
   };
+  // Badges only on Leads and Viewings: two counts a broker acts on today. A
+  // third badge competes with them rather than adding information.
   const routeBadge = (item) => {
     if (item.id === "lead_inbox" && page.kind === "admin_lead_inbox") return page.summary?.leads;
-    if (item.id === "realty_cases") return page.realtyCaseQueue?.summary?.open;
-    if (item.id === "lead_pipeline") return page.leadPipelineQueue?.summary?.open;
-    if (item.id === "requests") return page.publicRequestQueue?.summary?.open;
+    if (item.id === "viewings") return page.summary?.viewingFollowUpsOpen || undefined;
     return undefined;
   };
   const decorateRoute = (item, destinationId = null) => ({
@@ -3440,46 +3446,58 @@ function adminNavigationGroups(page) {
       items,
     };
   };
-  // Paper groups routes by the work people do. The existing registry still
-  // supplies labels, paths and capabilities, so reorganising the rail cannot
-  // grant access or silently drop a secondary destination.
-  const groupLabels = {
-    bg: ["Работа", "Записи", "Управление"],
-    ru: ["Работа", "Записи", "Управление"],
-    en: ["Work", "Records", "Management"],
-  }[page.workspace?.locale] || ["Work", "Records", "Management"];
+  // Eight destinations a broker works from, then one collapsed "Advanced"
+  // disclosure for the owner's operating and setup screens. The registry still
+  // supplies paths and capabilities, so reorganising the rail cannot grant
+  // access; every route stays reachable by URL, and Pipeline and Requests are
+  // linked from the Leads screen rather than listed a second time here.
+  const locale = ["bg", "ru", "en"].includes(page.workspace?.locale) ? page.workspace.locale : "en";
+  const advancedLabel = { bg: "Разширени", ru: "Дополнительно", en: "Advanced" }[locale];
   const shortLabels = {
-    bg: { lead_inbox: "Запитвания", lead_pipeline: "Сделки", viewings: "Огледи", requests: "Заявки", contacts: "Контакти", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
-    ru: { lead_inbox: "Обращения", lead_pipeline: "Сделки", viewings: "Просмотры", requests: "Заявки", contacts: "Контакты", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
-    en: { lead_inbox: "Lead inbox", lead_pipeline: "Pipeline", viewings: "Viewings", requests: "Requests", contacts: "Contacts", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
-  }[page.workspace?.locale] || {};
+    bg: { viewings: "Огледи", contacts: "Контакти", realty_cases: "Сделки", approved_content: "Съдържание", consents: "Съгласия", documents: "Документи", document_records: "Файлове", translation_queue: "Преводи" },
+    ru: { viewings: "Просмотры", contacts: "Контакты", realty_cases: "Сделки", approved_content: "Контент", consents: "Согласия", documents: "Документы", document_records: "Файлы", translation_queue: "Переводы" },
+    en: { viewings: "Viewings", contacts: "Contacts", realty_cases: "Deals", approved_content: "Content", consents: "Consent", documents: "Documents", document_records: "Document files", translation_queue: "Translations" },
+  }[locale];
+  // The Leads item stays lit on the two screens it links to, so an operator on
+  // Pipeline or Requests still sees where they are in the rail.
+  const extraKinds = { lead_inbox: ["admin_lead_pipeline", "admin_requests"] };
   const visible = destinations.map(visibleDestination).filter(Boolean);
   const routes = new Map(visible.flatMap((destination) =>
     [destination.route, ...destination.children].map((route) => [route.id, {
-      ...destination, id: route.id, route: { ...route, label: shortLabels[route.id] || route.label }, children: [],
-      primary: route.id === destination.route.id,
+      ...destination,
+      id: route.id,
+      route: { ...route, label: shortLabels[route.id] || route.label, kinds: [route.kind, ...(extraKinds[route.id] || [])] },
+      children: [],
     }])));
-  const groups = [
-    { id: "work", label: groupLabels[0], ids: ["today", "lead_inbox", "lead_pipeline", "viewings", "tasks", "requests"] },
-    { id: "records", label: groupLabels[1], ids: ["contacts", "consents", "realty_cases", "documents", "document_records", "listing_manager", "media_library", "approved_content", "translation_queue"] },
-    { id: "management", label: groupLabels[2], ids: ["hermes", "reports", "connections", "settings", "team", "locale_rollout", "migration_review", "activity"] },
-  ];
-  return groups
-    .map((group) => ({ ...group, destinations: group.ids.map((id) => routes.get(id)).filter(Boolean) }))
-    .filter((group) => group.destinations.length);
+  // Content is publishing work: it needs the editor's or owner's write
+  // capability, not the read capability every broker holds.
+  if (!pageCan(page, "content:write")) routes.delete("approved_content");
+  const primaryIds = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
+  const advancedIds = ["migration_review", "translation_queue", "media_library", "locale_rollout", "document_records", "hermes", "connections", "reports", "activity", "tasks", "consents", "documents", "team"];
+  const pick = (ids, primary) => ids.map((id) => routes.get(id)).filter(Boolean).map((destination) => ({ ...destination, primary }));
+  const groups = [{ id: "primary", label: null, destinations: pick(primaryIds, true) }];
+  if (pageCan(page, "administration:read")) {
+    groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });
+  }
+  return groups.filter((group) => group.destinations.length);
+}
+
+function navigationCurrent(item, page) {
+  return item.kinds ? item.kinds.includes(page.kind) : page.kind === item.kind;
 }
 
 function navigationLink(item, page, { mobile = false, primary = false, key } = {}) {
+  const current = navigationCurrent(item, page);
   const className = mobile
-    ? `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`
-    : `crm-nav${page.kind === item.kind ? " crm-nav--on" : ""}`;
+    ? `adm-mobile-nav__link${current ? " adm-mobile-nav__link--on" : ""}`
+    : `crm-nav${current ? " crm-nav--on" : ""}`;
   return h(
     "a",
     {
       key,
       className,
       href: adminHref(item.path, page),
-      "aria-current": page.kind === item.kind ? "page" : undefined,
+      "aria-current": current ? "page" : undefined,
       "data-admin-nav-route": item.id,
       "data-admin-nav-primary": primary && !mobile ? "true" : undefined,
       "data-admin-nav-primary-mobile": primary && mobile ? "true" : undefined,
@@ -3490,12 +3508,11 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
   );
 }
 
-// The rail is flat. Every destination the operator can reach is one link at
-// one depth, because the previous shape hid ten of nineteen routes behind three
-// "More in ..." disclosures -- Pipeline, Viewings, Contacts, Requests and
-// Reports were all two clicks and a guess away from a screen that exists to
-// lead with the next action. Grouping still carries the meaning; the disclosure
-// only carried the hiding.
+// Eight primary destinations at one depth, then one "Advanced" disclosure for
+// the owner's setup and operating screens. The earlier flat rail of 23 put the
+// migration console and the Hermes runtime next to Viewings; the earlier
+// grouped rail hid Viewings behind "More in ...". Brokers now see only the
+// screens they work from, and nothing a broker needs sits behind the disclosure.
 function navigationDestination(destination, page, { mobile = false } = {}) {
   return h(
     "div",
@@ -3507,11 +3524,65 @@ function navigationDestination(destination, page, { mobile = false } = {}) {
 }
 
 function navigationGroup(group, page, { mobile = false } = {}) {
+  const prefix = mobile ? "mobile-" : "";
+  const links = group.destinations.map((destination) => navigationDestination(destination, page, { mobile }));
+  if (group.collapsible) {
+    // Collapsed by default; open when the current screen lives inside it, so
+    // the lit destination is never hidden from the operator standing on it.
+    const holdsCurrent = group.destinations.some((destination) => navigationCurrent(destination.route, page));
+    return h(
+      "details",
+      {
+        key: `${prefix}group-${group.id}`,
+        className: mobile ? "adm-mobile-nav__group-wrap adm-mobile-nav__advanced" : "crm-sb__group-wrap crm-sb__advanced",
+        "data-admin-nav-group": group.id,
+        "data-admin-nav-disclosure": "true",
+        open: holdsCurrent ? true : undefined,
+      },
+      h(
+        "summary",
+        { className: mobile ? "adm-mobile-nav__group adm-mobile-nav__group--summary" : "crm-sb__group crm-sb__group--summary" },
+        h(Icon, { name: "chevron-right", size: 16 }),
+        h("span", null, group.label),
+      ),
+      ...links,
+    );
+  }
   return h(
     "section",
-    { key: `${mobile ? "mobile-" : ""}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
-    h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label),
-    ...group.destinations.map((destination) => navigationDestination(destination, page, { mobile })),
+    { key: `${prefix}group-${group.id}`, className: mobile ? "adm-mobile-nav__group-wrap" : "crm-sb__group-wrap", "data-admin-nav-group": group.id },
+    group.label ? h("div", { className: mobile ? "adm-mobile-nav__group" : "crm-sb__group" }, group.label) : null,
+    ...links,
+  );
+}
+
+// The workspace language is a per-person preference, so it lives with the
+// profile at the foot of the rail (and in the phone drawer), not in the header
+// of every screen. Two copies, like the theme switch: the stylesheet shows one.
+function LocaleSwitch({ page, variant }) {
+  const copy = adminCopy(page);
+  const locales = page.workspace?.interface_locales || [];
+  if (!locales.length) return null;
+  return h(
+    "nav",
+    {
+      className: `crm-seg adm-locales adm-locales--${variant}`,
+      "aria-label": label(copy, "language", "Language"),
+      "data-admin-locales": variant,
+    },
+    ...locales.map((code) =>
+      h(
+        "a",
+        {
+          key: code,
+          href: adminLocaleHref(page, code),
+          "data-on": code === page.workspace?.locale ? "1" : "0",
+          "aria-current": code === page.workspace?.locale ? "page" : undefined,
+          lang: code,
+        },
+        code.toUpperCase(),
+      ),
+    ),
   );
 }
 
@@ -3535,14 +3606,28 @@ function Sidebar({ page }) {
       { className: "crm-sb__nav", "aria-label": page.workspace?.title || "Admin" },
       ...visibleGroups.map((group) => navigationGroup(group, page)),
     ),
-    h("div", { className: "crm-sb__me" }, h(OwnerIdentity, { page })),
+    h(
+      "div",
+      { className: "crm-sb__me" },
+      h(OwnerIdentity, { page }),
+      // Language and palette are the operator's own preferences, so they sit
+      // with the profile rather than in the header of every screen.
+      h(
+        "div",
+        { className: "crm-sb__prefs", "data-admin-preferences": "rail" },
+        h(LocaleSwitch, { page, variant: "rail" }),
+        h(ThemeSwitch, { ui: workbenchCopy(page), variant: "top" }),
+      ),
+    ),
   );
 }
 
 // The workbench half of the palette control: follow the operating system,
-// light, or dark, with system the default and always returnable. Two copies,
-// because the top bar has no room for a second group on a phone and the
-// navigation drawer does; the stylesheet shows exactly one of them.
+// light, or dark, with system the default and always returnable. Two copies:
+// one in the rail's profile block on desktop, one in the navigation drawer on
+// a phone; the stylesheet shows exactly one of them. The desktop copy keeps
+// its "admin-top" switch id from the days it sat in the header, so the browser
+// checks that address it by that id keep finding it.
 const ADMIN_THEME_OPTIONS = Object.freeze([
   { value: "system", icon: "monitor" },
   { value: "light", icon: "sun" },
@@ -3554,7 +3639,7 @@ function ThemeSwitch({ ui, variant }) {
   return h(
     "div",
     {
-      className: variant === "top" ? "crm-seg adm-theme adm-theme--top" : "adm-theme adm-theme--drawer",
+      className: variant === "top" ? "crm-seg adm-theme adm-theme--rail" : "adm-theme adm-theme--drawer",
       role: "group",
       "aria-label": ui.themeLabel,
       "data-theme-switch": `admin-${variant}`,
@@ -3626,15 +3711,20 @@ function MobileNavigation({ page }) {
         ...visibleGroups.map((group) => navigationGroup(group, page, { mobile: true })),
       ),
       h(OwnerIdentity, { page, mobile: true }),
-      h(ThemeSwitch, { ui, variant: "drawer" }),
+      h(
+        "div",
+        { className: "adm-mobile-nav__prefs", "data-admin-preferences": "drawer" },
+        h(LocaleSwitch, { page, variant: "drawer" }),
+        h(ThemeSwitch, { ui, variant: "drawer" }),
+      ),
     ),
   );
 }
 
-function Topbar({ page, title, titleAsHeading = false }) {
-  const copy = adminCopy(page);
-  const ui = workbenchCopy(page);
-  const locales = page.workspace?.interface_locales || [];
+// Title, the phone menu, and at most one primary action. Language and theme
+// controls used to ride here on every screen; they belong to the operator, not
+// to the page, so they moved to the profile block in the rail and the drawer.
+function Topbar({ page, title, titleAsHeading = false, action = null }) {
   return h(
     "header",
     { className: "crm-top" },
@@ -3645,27 +3735,11 @@ function Topbar({ page, title, titleAsHeading = false }) {
       h("div", { className: "crm-top__sub" }, title),
     ),
     h(MobileNavigation, { page }),
-    h(
-      "nav",
-      { className: "crm-seg adm-locales", "aria-label": label(copy, "language", "Language") },
-      ...locales.map((code) =>
-        h(
-          "a",
-          {
-            key: code,
-            href: adminLocaleHref(page, code),
-            "data-on": code === page.workspace?.locale ? "1" : "0",
-            "aria-current": code === page.workspace?.locale ? "page" : undefined,
-          },
-          code.toUpperCase(),
-        ),
-      ),
-    ),
-    h(ThemeSwitch, { ui, variant: "top" }),
+    action ? h("div", { className: "crm-top__action", "data-admin-primary-action": "true" }, action) : null,
   );
 }
 
-function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }) {
+function adminShell(page, { title, titleAsHeading = false, action = null, mainAttrs, children }) {
   const ui = workbenchCopy(page);
   return [
     h("a", { key: "skip", className: "skip-link", href: "#main" }, ui.skipToContent),
@@ -3676,7 +3750,7 @@ function adminShell(page, { title, titleAsHeading = false, mainAttrs, children }
       h(
         "div",
         { className: "crm-main" },
-        h(Topbar, { page, title, titleAsHeading }),
+        h(Topbar, { page, title, titleAsHeading, action }),
         h("main", { id: "main", tabIndex: -1, className: "crm-scroll", ...mainAttrs }, h("div", { className: "crm-wrap" }, ...children)),
       ),
     ),
@@ -3704,9 +3778,32 @@ function todayNextActions(page, copy, ui, queue, inboxHref) {
 // source row it was derived from. Today and the task queue share this so a
 // lead never shows up as its ledger id on one screen and as a person on the
 // other.
+// The person behind a queue row, in the words a broker recognises: the
+// contact name when one is on file, otherwise the enquiry type. Channel,
+// language and how long they have waited follow as a second line. Ids never
+// reach these labels; the ledger keeps them.
+function leadForRow(page, leadId) {
+  return leadId ? (page.leads || []).find((lead) => lead.lead_id === leadId) || null : null;
+}
+
+function personLabel(lead, ui, fallback) {
+  return lead ? leadTitle(lead, ui) : fallback;
+}
+
+function personMeta(lead, ui, copy, now) {
+  if (!lead) return [];
+  const age = formatRelativeAge(lead.received_at, ui, now);
+  return [
+    lead.contact_preference ? valueText(ui, lead.contact_preference) : null,
+    lead.original_language ? String(lead.original_language).toUpperCase() : null,
+    age ? label(copy, "waitingFor", "waiting {age}").replace("{age}", age) : null,
+  ].filter(Boolean);
+}
+
 function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
     const row = task.source_row || {};
     const source = task.source || {};
+    const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
     const base = {
       key: task.task_id,
       kind: task.kind,
@@ -3742,26 +3839,36 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
       return {
         ...base,
         title: leadTitle(row, ui),
-        context: [row.listing_reference, row.property?.location, statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus)].filter(Boolean).join(" · "),
+        context: [
+          row.listing_reference,
+          row.property?.location,
+          ...personMeta(row, ui, copy, now),
+          statusText(ui, deliveryStatus === "failed" ? "failed" : slaStatus),
+        ]
+          .filter(Boolean)
+          .join(" · "),
         href: `${inboxHref}#lead-${encodeURIComponent(row.lead_id)}`,
         action,
       };
     }
     if (task.kind === "viewing") {
       const kindLabel = row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up");
+      const lead = leadForRow(page, row.lead_id);
       return {
         ...base,
-        title: row.listing_reference || kindLabel,
-        context: `${kindLabel} · ${statusText(ui, row.viewing_status)}`,
+        title: [personLabel(lead, ui, kindLabel), row.listing_reference].filter(Boolean).join(" · "),
+        context: [kindLabel, lead?.property?.location, ...personMeta(lead, ui, copy, now), statusText(ui, row.viewing_status)].filter(Boolean).join(" · "),
         href: adminHref("/admin/viewings", page),
         action: row.task === "feedback" ? na.actions.feedback : na.actions.followUp,
       };
     }
     if (task.kind === "seller") {
+      const lead = leadForRow(page, row.lead_id);
+      const location = row.property?.location || lead?.property?.location;
       return {
         ...base,
-        title: row.property?.location || na.actions.sellerStep,
-        context: statusText(ui, row.stage),
+        title: [personLabel(lead, ui, na.kinds.seller), location].filter(Boolean).join(" · "),
+        context: [...personMeta(lead, ui, copy, now), statusText(ui, row.stage)].filter(Boolean).join(" · "),
         href: adminHref("/admin/viewings", page),
         action: na.actions.sellerStep,
       };
@@ -3787,10 +3894,19 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
         action: na.actions.outcome,
       };
     }
+    const lead = leadForRow(page, row.lead_id);
     return {
       ...base,
-      title: `${statusText(ui, row.lead_type)} · ${statusText(ui, row.stage)}`,
-      context: row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      title: [personLabel(lead, ui, statusText(ui, row.lead_type)), row.listing_reference].filter(Boolean).join(" · "),
+      context: [
+        lead ? statusText(ui, row.lead_type) : null,
+        lead?.property?.location,
+        ...personMeta(lead, ui, copy, now),
+        statusText(ui, row.stage),
+        row.next_action ? statusText(ui, row.next_action) : statusText(ui, row.status),
+      ]
+        .filter(Boolean)
+        .join(" · "),
       href: adminHref("/admin/pipeline", page),
       action: na.actions.opportunity,
     };
@@ -3798,15 +3914,7 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
 
 function TodayBriefingPanel({ page, rows, total, detailId }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
-  const hermes = workbenchCopy(page).workspaceSettings.hermesEntry;
-  const hermesCopy = ownerConsoleCopy(page).hermes;
   const first = rows[0];
-  const prompt = first
-    ? hermesCopy.todayPrompt
-        .replace("{action}", first.action)
-        .replace("{title}", first.title)
-        .replace("{context}", first.context)
-    : "";
   return h(
     Panel,
     {
@@ -3854,34 +3962,6 @@ function TodayBriefingPanel({ page, rows, total, detailId }) {
         )
       : null,
     h("p", { className: "adm-today-briefing__source" }, copy.source),
-    h(
-      "details",
-      { className: "adm-today-assist" },
-      h("summary", null, h(Icon, { name: "sparkles", size: 18 }), h("span", null, hermes.title)),
-      h(
-        "form",
-        { className: "adm-today-briefing__hermes", method: "get", action: "/admin/hermes", "data-hermes-entry": "today" },
-        h("p", { className: "adm-hermes-entry__description" }, hermes.description),
-        h("input", { type: "hidden", name: "locale", value: page.workspace.locale }),
-        h("label", { htmlFor: `${detailId || "today"}-hermes-prompt` }, hermesCopy.commandLabel),
-        h("textarea", {
-          id: `${detailId || "today"}-hermes-prompt`,
-          name: "prompt",
-          rows: 2,
-          maxLength: 2000,
-          required: true,
-          defaultValue: prompt,
-          placeholder: hermesCopy.commandPlaceholder,
-          autoComplete: "off",
-        }),
-        h(
-          "button",
-          { className: "mk-btn mk-btn--secondary mk-btn--sm", type: "submit", "data-hermes-open": "today" },
-          h(Icon, { name: "sparkles", size: 18 }),
-          h("span", null, hermesCopy.preparePlan),
-        ),
-      ),
-    ),
   );
 }
 
@@ -4088,7 +4168,6 @@ function TodayReadinessRail({ page, copy, ui, queue, openTasks, overdueTasks, in
         "div",
         { className: "adm-rail-actions" },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/leads", page) }, h(Icon, { name: "inbox", size: 16 }), label(copy, "viewLeadInbox", "Open lead inbox")),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/reports", page) }, h(Icon, { name: "bar-chart-3", size: 16 }), ui.operationsReports),
       ),
     ),
   );
@@ -4142,7 +4221,7 @@ function TodayBody({ page }) {
           })) : [h(TodayBriefingPanel, { key: "empty", page, rows: [], total: 0 })])),
       ),
       h("details", { className: "adm-workbench-disclosure" },
-        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), ui.operationsReports),
+        h("summary", null, h(Icon, { name: "chevron-right", size: 17 }), label(copy, "queuesAndSetup", "Queues and setup")),
         h(TodayReadinessRail, {
           page,
           copy,
@@ -5247,7 +5326,7 @@ function PipelinePrimaryAction({ page, state }) {
     return h(
       "details",
       { className: "adm-pipeline-action" },
-      h("summary", null, label(copy, "qualification", "Qualification")),
+      h("summary", null, label(copy, "qualifyLead", "Qualify lead")),
       h(
         PipelineOutcomeForm,
         { page, state, action: "qualify", submitLabel: label(copy, "qualifyLead", "Qualify lead") },
@@ -5375,7 +5454,52 @@ function PipelineCard({ page, state, lead }) {
   const intake = state.intake_requirements;
   const inventoryMatch = (page.leadMatching?.rows || []).find((row) => row.lead_id === state.lead_id);
   const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
-  const contactName = lead?.contact?.name;
+  const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
+  // Title = who and which property. The lead type stays in the meta line when
+  // a name is on file, and stands in for the name when none is.
+  const person = personLabel(lead, ui, statusText(ui, state.lead_type));
+  const meta = [
+    lead && leadTitle(lead, ui) !== statusText(ui, state.lead_type) ? statusText(ui, state.lead_type) : null,
+    lead?.property?.location,
+    ...personMeta(lead, ui, copy, now),
+  ].filter(Boolean);
+  const inventoryList = inventoryMatch
+    ? h(
+        "details",
+        { className: "adm-pipeline-inventory", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
+        h(
+          "summary",
+          { className: "adm-disclosure-chevron" },
+          h(Icon, { name: "building-2", size: 15 }),
+          h("span", null, label(copy, "matchingInventory", "Matching inventory")),
+          h("span", { className: "adm-seg-count", title: label(copy, "matches", "Matches") }, inventoryMatch.match_count),
+        ),
+        inventoryMatch.matches.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...inventoryMatch.matches.map((match) =>
+                h(
+                  "li",
+                  { key: match.listing_id, "data-inventory-match": match.listing_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("strong", null, match.title),
+                    h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
+                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
+      )
+    : null;
   return h(
     "article",
     {
@@ -5391,16 +5515,10 @@ function PipelineCard({ page, state, lead }) {
       h(
         "div",
         null,
-        contactName ? h("small", { className: "t-eyebrow" }, statusText(ui, state.lead_type)) : null,
-        h("h3", null, contactName || statusText(ui, state.lead_type)),
-        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
+        h("h3", null, [person, state.listing_reference].filter(Boolean).join(" · ")),
+        meta.length ? h("small", { className: "adm-lead-context", "data-pipeline-person-meta": "true" }, meta.join(" · ")) : null,
       ),
-      h(
-        "div",
-        { className: "adm-pipeline-card__status" },
-        h(StatusPill, { tone: stageTone }, statusText(ui, state.stage)),
-        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
-      ),
+      h("div", { className: "adm-pipeline-card__status" }, h(StatusPill, { tone: stageTone }, statusText(ui, state.stage))),
     ),
     leadContactActions(lead || {}, ui),
     h(
@@ -5435,48 +5553,20 @@ function PipelineCard({ page, state, lead }) {
           intake.timeline ? h("span", null, intake.timeline) : null,
         )
       : null,
-    inventoryMatch
-      ? h(
-          "details",
-          { className: "adm-pipeline-inventory", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
-          h(
-            "summary",
-            { className: "adm-disclosure-chevron" },
-            h(Icon, { name: "building-2", size: 15 }),
-            h("span", null, label(copy, "matchingInventory", "Matching inventory")),
-            h("span", { className: "adm-seg-count", title: label(copy, "matches", "Matches") }, inventoryMatch.match_count),
-          ),
-          inventoryMatch.matches.length
-            ? h(
-                "ul",
-                { className: "adm-task-list" },
-                ...inventoryMatch.matches.map((match) =>
-                  h(
-                    "li",
-                    { key: match.listing_id, "data-inventory-match": match.listing_id },
-                    h(
-                      "div",
-                      { className: "adm-task-list__body" },
-                      h("strong", null, match.title),
-                      h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
-                    ),
-                    h(
-                      "div",
-                      { className: "adm-task-list__actions" },
-                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
-                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: payloadAdminListingHref(match.listing_id, page) }, label(copy, "propertyEditor", "Edit")),
-                    ),
-                  ),
-                ),
-              )
-            : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
-        )
-      : null,
+    // One primary control: the card's next action. Everything else, the
+    // matching shortlist, history and the outcome forms, waits in one menu.
     state.status === "open" ? h("div", { className: "adm-pipeline-card__primary" }, h(PipelinePrimaryAction, { page, state })) : null,
     h(
       "details",
-      { className: "adm-pipeline-secondary" },
+      { className: "adm-pipeline-secondary", "data-pipeline-overflow": "true" },
       h("summary", null, label(copy, "moreActions", "More actions")),
+      inventoryList,
+      h(
+        "div",
+        { className: "adm-task-list__actions" },
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+        h("code", { className: "crm-mono adm-id-caption" }, state.lead_id),
+      ),
       state.status === "lost"
         ? h(PipelineOutcomeForm, { page, state, action: "reopen", submitLabel: label(copy, "reopenLead", "Reopen lead"), variant: "secondary" })
         : null,
@@ -6214,12 +6304,7 @@ function LeadPipelineBody({ page }) {
   const openById = new Map((queue.rows || []).map((state) => [state.lead_id, state]));
   const states = (queue.states || []).map((state) => openById.get(state.lead_id) || state);
   const title = label(copy, "pipelineWorkspace", "Buyers and renters");
-  const metrics = [
-    [label(copy, "openPipeline", "Open opportunities"), queue.summary?.open || 0, "kanban-square", "sea"],
-    [label(copy, "buyerPipeline", "Buyers"), queue.summary?.buyers_open || 0, "users", "ink"],
-    [label(copy, "renterPipeline", "Renters"), queue.summary?.renters_open || 0, "key", "sand"],
-    [statusText(ui, "overdue"), queue.summary?.overdue || 0, "triangle-alert", "brick"],
-  ];
+  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
   const count = (predicate) => states.filter(predicate).length;
   return adminShell(page, {
     title,
@@ -6232,7 +6317,6 @@ function LeadPipelineBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(StatGrid, { metrics }),
       h(
         PageToolbar,
         null,
@@ -6270,6 +6354,9 @@ function LeadPipelineBody({ page }) {
             h("p", { className: "adm-empty", role: "status" }, ui.noPipelineMatches),
           )
         : null,
+      // Sellers are a pipeline too; their valuation queue lives here, not in
+      // the inbox, and each row names the owner and the property.
+      sellerQueue.rows?.length ? h(SellerPipelineQueue, { page, copy: { ...ui, ...copy }, ui }) : null,
     ],
   });
 }
@@ -7166,29 +7253,23 @@ function LeadBrief({ brief, intake, copy, ui, locale, open = false }) {
       h(
         "span",
         { className: "adm-lead-brief__readiness" },
-        h("strong", null, `${brief.readiness_score}%`),
+        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
         h(StatusPill, { tone }, readinessLabel),
       ),
     ),
+    // One sentence in place of a score: what is still missing to qualify,
+    // and that the reply is where to ask for it.
     h(
       "div",
       { className: "adm-lead-brief__body" },
       h(
-        "div",
-        { className: "adm-lead-brief__score" },
-        h("span", null, label(copy, "leadReadiness", "Readiness")),
-        h("strong", null, `${brief.readiness_score}%`),
-        h("progress", { value: brief.readiness_score, max: 100, "aria-label": `${label(copy, "leadReadiness", "Readiness")}: ${brief.readiness_score}%` }),
-        missingFields.length ? h("small", null, `${label(copy, "missingFields", "Missing fields")}: ${missingFields.join(", ")}`) : null,
+        "p",
+        { className: "adm-lead-brief__missing", "data-lead-missing-fields": String(missingFields.length) },
+        missingFields.length
+          ? `${label(copy, "missingToQualify", "Missing to qualify")}: ${missingFields.join(", ")}. ${label(copy, "askInReply", "Ask in the reply")}.`
+          : label(copy, "qualificationComplete", "Qualification complete"),
+        brief.match_count ? h("small", null, ` ${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
       ),
-      h(
-        "div",
-        { className: "adm-lead-brief__action" },
-        h("span", null, label(copy, "qualificationDetails", "Qualification evidence")),
-        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
-        brief.match_count ? h("small", null, `${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
-      ),
-      h("small", { className: "adm-lead-brief__guardrail" }, label(copy, "deterministicDecision", "Calculated from workflow evidence; Hermes may only suggest a draft.")),
     ),
   );
 }
@@ -7257,6 +7338,14 @@ function LeadInboxRow({ page, row, ui, locale }) {
   const { lead, slaStatus, delivery, delivered, brokerId, leadContext, requestDetails, age, snooze } = row;
   const selectable = page?.leadOperations?.bulkWritable === true;
   const repliesUnavailable = adminDataUnavailable(page, "replies");
+  // Channel and language on the row, so the broker knows how to answer
+  // before opening the detail.
+  const channelLine = [
+    lead.contact_preference ? valueText(ui, lead.contact_preference) : null,
+    lead.original_language ? String(lead.original_language).toUpperCase() : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return h(
     "li",
     {
@@ -7282,6 +7371,7 @@ function LeadInboxRow({ page, row, ui, locale }) {
       age ? h("time", { className: "adm-inbox__age", dateTime: lead.received_at, title: formatAdminDateTime(lead.received_at, locale) }, age) : null,
       leadContext ? h("small", { className: "adm-inbox__context", "data-lead-context": "true" }, leadContext) : null,
       requestDetails ? h("small", { className: "adm-inbox__context", "data-lead-request-details": "true" }, requestDetails) : null,
+      channelLine ? h("small", { className: "adm-inbox__context", "data-lead-channel": "true" }, channelLine) : null,
       h(
         "span",
         { className: "adm-inbox__tags" },
@@ -7373,13 +7463,10 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
   // probe request: the draft button must be right the first time it renders.
   const hermesAvailable = page.hermes ? page.hermes.available === true : true;
   // hermes-availability builds a reason that names the missing environment
-  // variables. That is the right sentence for whoever can set them, and the
-  // wrong one for a broker with a lead open: HERMES_API_KEY is not something
-  // they can do anything about. The env detail goes to the operator who can
-  // act on it; everyone else is told who to ask.
-  const hermesReason = pageCan(page, "settings:manage")
-    ? page.hermes?.reason || ui.hermesUnavailableOwner
-    : ui.hermesUnavailableBroker;
+  // variables. That detail belongs on the Hermes screen, next to where it is
+  // set; with a lead open, everyone gets one plain sentence. The owner's says
+  // it is not configured, the broker's says who can connect it.
+  const hermesReason = pageCan(page, "settings:manage") ? ui.hermesUnavailableOwner : ui.hermesUnavailableBroker;
   return h(
     "article",
     {
@@ -7584,9 +7671,6 @@ function LeadDetail({ page, row, copy, ui, locale, leadColumns }) {
         },
         h(Icon, { name: "info", size: 15 }),
         h("span", null, hermesReason),
-        pageCan(page, "settings:manage")
-          ? h("a", { href: adminHref("/admin/connect", page) }, label(copy, "connections", "Integrations"))
-          : null,
       ),
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
     ),
@@ -7628,12 +7712,6 @@ function LeadInboxBody({ page }) {
   const copy = { ...ui, ...adminCopy(page) };
   const runtimeCopy = ownerConsoleCopy(page).runtime;
   const locale = page.workspace?.locale;
-  const viewingQueue = page.viewingFollowUpQueue || { rows: [] };
-  const sellerQueue = page.sellerPipelineQueue || { rows: [] };
-  const secondaryPanels = [
-    viewingQueue.rows?.length ? h(ViewingFollowUpQueue, { key: "viewings", page, copy, ui }) : null,
-    sellerQueue.rows?.length ? h(SellerPipelineQueue, { key: "seller", page, copy, ui }) : null,
-  ].filter(Boolean);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -7683,12 +7761,6 @@ function LeadInboxBody({ page }) {
     };
   });
   const slaCount = rows.filter((row) => row.slaStatus === "reminder_required" || row.slaStatus === "manager_escalation_required").length;
-  const metrics = [
-    [label(copy, "needsReply", "Needs reply"), repliesUnavailable ? runtimeCopy.unavailable : needsReply.length, "messages-square", "sea"],
-    [label(copy, "repliesQueued", "Replies queued"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesQueued, "send", "sun"],
-    [statusText(ui, "failed"), repliesUnavailable ? runtimeCopy.unavailable : page.summary.repliesFailed, "triangle-alert", "brick"],
-    [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
-  ];
   const title = label(copy, "leadInbox", "Lead inbox");
   const leadColumns = {
     lead: label(copy, "lead", "Lead"),
@@ -7710,8 +7782,23 @@ function LeadInboxBody({ page }) {
       "data-task-led": "true",
     },
     children: [
-      h(PageHeader, { title, subtitle: page.metadata?.description }),
-      h(SummaryStrip, { cards: metrics.map(([label, value], index) => ({ id: String(index), title: label, value: String(value) })) }),
+      // Pipeline and Requests left the rail; the Leads screen is their door.
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page), "data-lead-screen-link": "pipeline" },
+          h(Icon, { name: "kanban-square", size: 15 }),
+          h("span", null, label(copy, "pipelineWorkspace", "Buyers and renters")),
+        ),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page), "data-lead-screen-link": "requests" },
+          h(Icon, { name: "bell", size: 15 }),
+          h("span", null, label(copy, "publicRequests", "Website requests")),
+        ),
+      ),
       h(DataAvailabilityNotice, { page }),
       h(
         PageToolbar,
@@ -7748,13 +7835,6 @@ function LeadInboxBody({ page }) {
           h("p", { className: "adm-inbox__hint" }, ui.selectLead),
         ),
       ),
-      secondaryPanels.length
-        ? h(
-            "section",
-            { className: "adm-secondary-grid", "data-lead-secondary-queues": "true" },
-            ...secondaryPanels,
-          )
-        : null,
     ],
   });
 }
@@ -7938,6 +8018,7 @@ function sellerPipelinePrimaryAction(row, copy) {
 
 function SellerPipelineQueue({ page, copy, ui }) {
   const queue = page.sellerPipelineQueue || { rows: [] };
+  const now = Date.parse(page.leadSla?.generated_at || "") || Date.now();
   const columns = {
     seller: label(copy, "sellerRequest", "Seller request"),
     task: label(copy, "task", "Task"),
@@ -7980,6 +8061,12 @@ function SellerPipelineQueue({ page, copy, ui }) {
                 const needsAppraisalSchedule = isAppraisal && row.stage !== "appraisal_scheduled";
                 const primary = sellerPipelinePrimaryAction(row, copy);
                 const primaryAction = primary?.[0] || null;
+                const lead = leadForRow(page, row.lead_id);
+                const location = row.property?.location || lead?.property?.location;
+                const sellerMeta = [
+                  location,
+                  ...(lead ? personMeta(lead, ui, copy, now) : [row.original_language ? String(row.original_language).toUpperCase() : null]),
+                ].filter(Boolean);
                 return h(
                   "tr",
                   {
@@ -7992,7 +8079,12 @@ function SellerPipelineQueue({ page, copy, ui }) {
                   h(
                     "td",
                     { "data-seller-pipeline-column": "seller", "data-label": columns.seller },
-                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.seller_pipeline_id), h("small", { className: "adm-lead-context" }, row.property?.location || row.lead_id)),
+                    h(
+                      "div",
+                      { className: "adm-lead-identity" },
+                      h("strong", null, personLabel(lead, ui, statusText(ui, "seller"))),
+                      sellerMeta.length ? h("small", { className: "adm-lead-context" }, sellerMeta.join(" · ")) : null,
+                    ),
                   ),
                   h("td", { "data-seller-pipeline-column": "task", "data-label": columns.task }, statusText(ui, row.task)),
                   h(
@@ -8918,13 +9010,13 @@ function TaskRow({ page, row, copy, na }) {
             )
           : null,
       ),
-      h("h2", null, row.subject_title || kindLabel),
+      // A delegated task's title is the way to the screen that owns it.
+      h("h2", null, delegated ? h("a", { href: adminHref(row.completion.route, page), "data-task-owner-link": row.kind }, row.subject_title || kindLabel) : row.subject_title || kindLabel),
       row.subject_context ? h("small", { className: "adm-lead-context" }, row.subject_context) : null,
       h("code", { className: "crm-mono adm-id-caption" }, row.subject_ref || row.task_id),
       h("dl", { className: "adm-daily-facts" },
         h("div", null, h("dt", null, copy.owner), h("dd", null, row.owner || workbenchCopy(page).notSet)),
         h("div", null, h("dt", null, copy.taskType), h("dd", null, row.origin === "authored" ? row.kind.replaceAll("_", " ") : kindLabel))),
-      delegated ? h("small", { className: "adm-lead-context" }, copy.delegated) : null,
     ),
     h(
       "div",
@@ -8971,8 +9063,11 @@ function TaskCompletionForm({ page, row, copy }) {
 // heading: PRODUCT.md forbids raw keys as UI text.
 function taskWords(row, page, ui, na) {
   if (row.origin === "authored") {
-    // The operator chose the subject when opening the task; the note is context.
-    return { subject_title: row.task_id, subject_context: row.note || "" };
+    // The operator named the task with a stable code when opening it; read
+    // as words, then the object it is for. The note is context.
+    const words = String(row.task_id || "").replace(/[-_:]+/g, " ").trim();
+    const title = words ? words.charAt(0).toUpperCase() + words.slice(1) : na.kinds.authored;
+    return { subject_title: [title, row.subject_ref].filter(Boolean).join(" · "), subject_context: row.note || "" };
   }
   const words = describeSourceTask(row, { page, copy: adminCopy(page), ui, na, inboxHref: adminHref("/admin/leads", page) });
   return { subject_title: words.title || na.kinds[row.kind], subject_context: words.context || "" };
@@ -9010,7 +9105,6 @@ function TasksBody({ page }) {
           ],
         },
       ),
-      h("p", { className: "adm-daily-note", "data-task-delegated-note": "true" }, copy.delegatedNote),
       h(DailyWorkspace, {
         scope: "task", page, title: copy.title,
         rows: queue.rows.map(row => ({ ...row, ...taskWords(row, page, ui, na), id: row.task_id, tags: `${row.overdue ? "overdue " : ""}${row.origin}` })),
@@ -9860,7 +9954,7 @@ function editorInputFor(ui, field, value, disabled = false, id = undefined) {
     ]);
   }
   if (["availability_verified_at", "location_verified_at", "price_verified_at", "price_on_request_verified_at"].includes(field)) return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
-  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-CRAWL-0001" });
+  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-00815" });
   return h("input", shared);
 }
 
@@ -10055,6 +10149,9 @@ function ListingEditorBody({ page }) {
       .map((locale) => ({ locale, status: "stale" })),
   ];
   const title = label(copy, "propertyEditor", "Property editor");
+  // The topbar already names the screen. The page heading names the listing,
+  // so an operator with several editor tabs open can tell them apart.
+  const listingName = String(facts.title || facts.h1 || page.listing.id).trim();
   const tourConfigured = Boolean(tour.panorama_url || tour.viewer_url);
   const family = propertyFamilyFor(facts);
   // One descriptor, so the button is the same control on every field it
@@ -10131,7 +10228,7 @@ function ListingEditorBody({ page }) {
       h(
         PageHeader,
         {
-          title: page.listing.id,
+          title: listingName,
           subtitle: `${title} · ${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
@@ -10409,8 +10506,18 @@ function ListingEditorBody({ page }) {
               "section",
               { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
               reviewableMedia.length
-                ? reviewableMedia.map((item) => {
+                ? reviewableMedia.map((item, index) => {
                     const sourceUrl = item.source_url || item.url || item.asset_url || "";
+                    // The heading names the asset the way a person counts it
+                    // ("Photo 3 of 17"); the generated id is evidence and goes
+                    // in the caption, as on the pipeline and contact cards.
+                    const sameKind = reviewableMedia.filter((other) => other.kind === item.kind);
+                    const assetLabel = fillTemplate(ui.mediaAssetPosition, {
+                      kind: fieldText(ui, `media_kind_${item.kind}`),
+                      index: sameKind.indexOf(item) + 1,
+                      total: sameKind.length,
+                    });
+                    const operatorId = currentOperatorId(page, "");
                     // The preview box is a small 16:10 card. Painting a 2560px
                     // photo into it downloads the whole photograph to draw a
                     // thumbnail, which is what the 640px rendition exists to
@@ -10432,7 +10539,7 @@ function ListingEditorBody({ page }) {
                       h(
                         "header",
                         { className: "adm-media-asset__header" },
-                        h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
+                        h("div", null, h("strong", null, assetLabel), h("code", { className: "crm-mono adm-id-caption" }, item.asset_id)),
                         h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
                       ),
                       // Every asset gets a deliberate state: loading and failed
@@ -10469,7 +10576,7 @@ function ListingEditorBody({ page }) {
                       canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
                         ? h(
                             "details",
-                            { className: "adm-media-review", "data-media-replacement": item.asset_id },
+                            { className: "adm-media-review adm-media-replacement", "data-media-replacement": item.asset_id },
                             h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
                             h(
                               "form",
@@ -10477,7 +10584,7 @@ function ListingEditorBody({ page }) {
                                 method: "post",
                                 action: "/api/admin/media/uploads",
                                 enctype: "multipart/form-data",
-                                className: "adm-form adm-media-upload",
+                                className: "adm-form adm-media-upload adm-media-replacement__form",
                                 "data-media-upload-form": "replacement",
                                 "data-media-upload-pending": ui.mediaUploadPending,
                                 "data-media-upload-success": ui.mediaUploadSuccess,
@@ -10577,7 +10684,19 @@ function ListingEditorBody({ page }) {
                                   ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
                                   : null,
                                 h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
-                                h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
+                                // The signed-in operator is the reviewer of record; the
+                                // form carries the id, the screen shows a witness line
+                                // with the id as a caption rather than an editable key.
+                                operatorId
+                                  ? h(
+                                      "div",
+                                      { className: "adm-media-review__reviewer", "data-media-reviewer": operatorId },
+                                      h("input", { type: "hidden", name: "reviewer", value: operatorId }),
+                                      h("span", { className: "adm-media-review__reviewer-label" }, label(copy, "reviewer", "Reviewer")),
+                                      h("span", { className: "adm-media-review__reviewer-name" }, ui.mediaReviewerSignedIn),
+                                      h("code", { className: "crm-mono adm-id-caption" }, operatorId),
+                                    )
+                                  : h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
                                 h(
                                   "label",
                                   { className: "adm-check" },

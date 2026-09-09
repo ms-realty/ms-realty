@@ -27,7 +27,7 @@ test("slug history creates canonical path-only 301s for listing slug changes", (
     seed,
     {
       id: "slug-change-test",
-      listingId: "MS-CRAWL-0001",
+      listingId: "MS-00815",
       locale: "he",
       oldPath: "/he/properties/old-sandanski-slug",
       editor: "editor_bg",
@@ -37,7 +37,7 @@ test("slug history creates canonical path-only 301s for listing slug changes", (
 
   assert.equal(row.status, 301);
   assert.equal(row.old_path, "/he/properties/old-sandanski-slug");
-  assert.equal(row.new_path, "/he/properties/MS-CRAWL-0001");
+  assert.equal(row.new_path, "/he/properties/MS-00815");
   assert.equal(assertSlugHistory(readSlugHistory(filePath)), true);
   assert.deepEqual(slugRedirectForPath(readSlugHistory(filePath), "/he/properties/old-sandanski-slug"), row);
 });
@@ -52,7 +52,7 @@ test("slug history rejects broad or non-canonical mappings", () => {
       appendSlugChange(
         registry,
         seed,
-        { listingId: "MS-CRAWL-0001", locale: "he", oldPath: "/he/search" },
+        { listingId: "MS-00815", locale: "he", oldPath: "/he/search" },
         { filePath },
       ),
     /homepage or search-page/,
@@ -63,7 +63,7 @@ test("slug history rejects broad or non-canonical mappings", () => {
         registry,
         seed,
         {
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           locale: "he",
           oldPath: "/he/properties/old-sandanski-slug",
           newPath: "/he/search",
@@ -78,7 +78,7 @@ test("slug history rejects broad or non-canonical mappings", () => {
         registry,
         seed,
         {
-          listingId: "MS-CRAWL-0001",
+          listingId: "MS-00815",
           locale: "he",
           oldPath: "/he/properties/old-sandanski-slug",
           newPath: "/he/properties/not-the-current-canonical",

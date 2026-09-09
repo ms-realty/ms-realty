@@ -4618,15 +4618,15 @@
   },
   "translation_tasks": {
     "he_draft": {
-      "id": "translation-listing-MS-CRAWL-0001-he",
+      "id": "translation-listing-MS-00815-he",
       "object_type": "listing",
-      "object_id": "MS-CRAWL-0001",
+      "object_id": "MS-00815",
       "source_locale": "bg",
       "target_locale": "he",
       "target_direction": "rtl",
       "status": "hermes_drafted",
       "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
-      "draft_hash": "b65003967242e46103d3898783b271bac88575705ae1563d26f622f83089314c",
+      "draft_hash": "8fe6884edd55c3951347483688c02744e93f7c2f24d09f9d1c15cec88b2058ce",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_he",
       "public_indexable": false,
@@ -4638,7 +4638,7 @@
           "targetLocale": "he",
           "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
-            "id": "MS-CRAWL-0001",
+            "id": "MS-00815",
             "location": "Sandanski",
             "property_type": "commercial",
             "price_eur": null,
@@ -4673,10 +4673,10 @@
           ]
         },
         "output": {
-          "title": "MS-CRAWL-0001 Sandanski he",
-          "body": "MS-CRAWL-0001 Sandanski commercial 35 reviewed he translation draft",
-          "seo_title": "MS-CRAWL-0001 Sandanski",
-          "meta_description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed he translation draft for approved MS Realty listing content.",
+          "title": "MS-00815 Sandanski he",
+          "body": "MS-00815 Sandanski commercial 35 reviewed he translation draft",
+          "seo_title": "MS-00815 Sandanski",
+          "meta_description": "MS-00815 Sandanski commercial 35 reviewed he translation draft for approved MS Realty listing content.",
           "citations": [
             {
               "source": "cms",
@@ -4688,7 +4688,7 @@
           "human_approved": false,
           "source_snapshot": {
             "object_type": "listing",
-            "object_id": "MS-CRAWL-0001",
+            "object_id": "MS-00815",
             "source_locale": "bg",
             "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
@@ -4696,7 +4696,7 @@
         },
         "source_snapshot": {
           "object_type": "listing",
-          "object_id": "MS-CRAWL-0001",
+          "object_id": "MS-00815",
           "source_locale": "bg",
           "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
@@ -4706,15 +4706,15 @@
       }
     },
     "he_approved": {
-      "id": "translation-listing-MS-CRAWL-0001-he",
+      "id": "translation-listing-MS-00815-he",
       "object_type": "listing",
-      "object_id": "MS-CRAWL-0001",
+      "object_id": "MS-00815",
       "source_locale": "bg",
       "target_locale": "he",
       "target_direction": "rtl",
       "status": "approved",
       "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
-      "draft_hash": "b65003967242e46103d3898783b271bac88575705ae1563d26f622f83089314c",
+      "draft_hash": "8fe6884edd55c3951347483688c02744e93f7c2f24d09f9d1c15cec88b2058ce",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_he",
       "public_indexable": true,
@@ -4726,7 +4726,7 @@
           "targetLocale": "he",
           "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
-            "id": "MS-CRAWL-0001",
+            "id": "MS-00815",
             "location": "Sandanski",
             "property_type": "commercial",
             "price_eur": null,
@@ -4761,10 +4761,10 @@
           ]
         },
         "output": {
-          "title": "MS-CRAWL-0001 Sandanski he",
-          "body": "MS-CRAWL-0001 Sandanski commercial 35 reviewed he translation draft",
-          "seo_title": "MS-CRAWL-0001 Sandanski",
-          "meta_description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed he translation draft for approved MS Realty listing content.",
+          "title": "MS-00815 Sandanski he",
+          "body": "MS-00815 Sandanski commercial 35 reviewed he translation draft",
+          "seo_title": "MS-00815 Sandanski",
+          "meta_description": "MS-00815 Sandanski commercial 35 reviewed he translation draft for approved MS Realty listing content.",
           "citations": [
             {
               "source": "cms",
@@ -4776,7 +4776,7 @@
           "human_approved": false,
           "source_snapshot": {
             "object_type": "listing",
-            "object_id": "MS-CRAWL-0001",
+            "object_id": "MS-00815",
             "source_locale": "bg",
             "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
@@ -4784,7 +4784,7 @@
         },
         "source_snapshot": {
           "object_type": "listing",
-          "object_id": "MS-CRAWL-0001",
+          "object_id": "MS-00815",
           "source_locale": "bg",
           "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
@@ -4797,15 +4797,15 @@
       "human_approved": true
     },
     "el_draft": {
-      "id": "translation-listing-MS-CRAWL-0001-el",
+      "id": "translation-listing-MS-00815-el",
       "object_type": "listing",
-      "object_id": "MS-CRAWL-0001",
+      "object_id": "MS-00815",
       "source_locale": "bg",
       "target_locale": "el",
       "target_direction": "ltr",
       "status": "hermes_drafted",
       "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
-      "draft_hash": "a985f39518d2bbadcc01025452a09e18bb9435dd77cd2e6402fd8c1a36ba01dd",
+      "draft_hash": "4818cb46a5325bf3b5c507dea4693b6d62e1132702af8e0519f12f5c8dc80b64",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_el",
       "public_indexable": false,
@@ -4817,7 +4817,7 @@
           "targetLocale": "el",
           "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
-            "id": "MS-CRAWL-0001",
+            "id": "MS-00815",
             "location": "Sandanski",
             "property_type": "commercial",
             "price_eur": null,
@@ -4852,10 +4852,10 @@
           ]
         },
         "output": {
-          "title": "MS-CRAWL-0001 Sandanski el",
-          "body": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft",
-          "seo_title": "MS-CRAWL-0001 Sandanski",
-          "meta_description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
+          "title": "MS-00815 Sandanski el",
+          "body": "MS-00815 Sandanski commercial 35 reviewed el translation draft",
+          "seo_title": "MS-00815 Sandanski",
+          "meta_description": "MS-00815 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
           "citations": [
             {
               "source": "cms",
@@ -4867,7 +4867,7 @@
           "human_approved": false,
           "source_snapshot": {
             "object_type": "listing",
-            "object_id": "MS-CRAWL-0001",
+            "object_id": "MS-00815",
             "source_locale": "bg",
             "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
@@ -4875,7 +4875,7 @@
         },
         "source_snapshot": {
           "object_type": "listing",
-          "object_id": "MS-CRAWL-0001",
+          "object_id": "MS-00815",
           "source_locale": "bg",
           "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
@@ -4885,15 +4885,15 @@
       }
     },
     "el_published": {
-      "id": "translation-listing-MS-CRAWL-0001-el",
+      "id": "translation-listing-MS-00815-el",
       "object_type": "listing",
-      "object_id": "MS-CRAWL-0001",
+      "object_id": "MS-00815",
       "source_locale": "bg",
       "target_locale": "el",
       "target_direction": "ltr",
       "status": "published",
       "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
-      "draft_hash": "a985f39518d2bbadcc01025452a09e18bb9435dd77cd2e6402fd8c1a36ba01dd",
+      "draft_hash": "4818cb46a5325bf3b5c507dea4693b6d62e1132702af8e0519f12f5c8dc80b64",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_el",
       "public_indexable": true,
@@ -4905,7 +4905,7 @@
           "targetLocale": "el",
           "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
-            "id": "MS-CRAWL-0001",
+            "id": "MS-00815",
             "location": "Sandanski",
             "property_type": "commercial",
             "price_eur": null,
@@ -4940,10 +4940,10 @@
           ]
         },
         "output": {
-          "title": "MS-CRAWL-0001 Sandanski el",
-          "body": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft",
-          "seo_title": "MS-CRAWL-0001 Sandanski",
-          "meta_description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
+          "title": "MS-00815 Sandanski el",
+          "body": "MS-00815 Sandanski commercial 35 reviewed el translation draft",
+          "seo_title": "MS-00815 Sandanski",
+          "meta_description": "MS-00815 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
           "citations": [
             {
               "source": "cms",
@@ -4955,7 +4955,7 @@
           "human_approved": false,
           "source_snapshot": {
             "object_type": "listing",
-            "object_id": "MS-CRAWL-0001",
+            "object_id": "MS-00815",
             "source_locale": "bg",
             "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
@@ -4963,7 +4963,7 @@
         },
         "source_snapshot": {
           "object_type": "listing",
-          "object_id": "MS-CRAWL-0001",
+          "object_id": "MS-00815",
           "source_locale": "bg",
           "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
@@ -4976,11 +4976,11 @@
       "human_approved": true,
       "locale": "el",
       "translation_state": "published",
-      "title": "MS-CRAWL-0001 Sandanski el",
-      "description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft",
-      "seo_title": "MS-CRAWL-0001 Sandanski",
-      "meta_description": "MS-CRAWL-0001 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
-      "translated_hash": "ec8007f6a1bfe9230a4e6470aa580b21fb47978bf4c4ba293dd0e642cd6dac48",
+      "title": "MS-00815 Sandanski el",
+      "description": "MS-00815 Sandanski commercial 35 reviewed el translation draft",
+      "seo_title": "MS-00815 Sandanski",
+      "meta_description": "MS-00815 Sandanski commercial 35 reviewed el translation draft for approved MS Realty listing content.",
+      "translated_hash": "256286121c45f60fcb028a98250b322d1781b0c17a12643ddc8c1c8eb2c42555",
       "content_origin": "human_reviewed_hermes_draft",
       "citations": [
         {
@@ -4996,14 +4996,14 @@
   },
   "crm_inbox": {
     "buyer_he": {
-      "id": "inbox-lead-draft-c979361d-f3ca-4160-91f8-7656ef1094a9",
+      "id": "inbox-lead-draft-83824698-c300-435d-aa9f-f738686576d2",
       "lead": {
-        "id": "lead-draft-c979361d-f3ca-4160-91f8-7656ef1094a9",
+        "id": "lead-draft-83824698-c300-435d-aa9f-f738686576d2",
         "idempotency_key": null,
         "source": "website_listing_detail",
         "intent": null,
         "leadType": "buyer",
-        "listingReference": "MS-CRAWL-0001",
+        "listingReference": "MS-00815",
         "contact": {
           "name": "Noa Levi",
           "whatsapp": "+359880000001"
@@ -5088,9 +5088,9 @@
       }
     },
     "seller_el": {
-      "id": "inbox-lead-draft-e3ce4ab7-56f3-443c-88bc-581172ea1108",
+      "id": "inbox-lead-draft-d3657621-e3a3-4015-8c93-e57a347bce45",
       "lead": {
-        "id": "lead-draft-e3ce4ab7-56f3-443c-88bc-581172ea1108",
+        "id": "lead-draft-d3657621-e3a3-4015-8c93-e57a347bce45",
         "idempotency_key": null,
         "source": "website_seller_valuation",
         "intent": null,
