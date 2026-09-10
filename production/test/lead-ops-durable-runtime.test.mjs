@@ -231,6 +231,7 @@ function httpApp(store, paths, overrides = {}) {
     runtimeDataDurableOnly: true,
     reviewedAt: "2026-08-25T09:00:00.000Z",
     leadSnoozeAt: "2026-08-25T09:00:00.000Z",
+    leadSlaGeneratedAt: "2026-08-25T09:00:00.000Z",
     leadDurableStore: {
       leadDurableStoreEnabled: true,
       payloadSecret: "p".repeat(40),
