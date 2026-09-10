@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createEvent } from "../lib/events.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
+import { requestForOrigin } from "../../workers/origin-proxy.mjs";
 import {
   EventStoreUnavailableError,
   eventDurableStoreConfigFromEnv,
@@ -87,11 +88,16 @@ test("public event API writes durably and rejects incomplete durable configurati
     MS_REALTY_RATE_LIMIT_DISABLED: "true",
   });
   config.eventDurablePayload = payload;
-  const request = () => new Request("https://example.test/api/events", {
-    method: "POST",
-    headers: { "content-type": "application/json", origin: "https://example.test" },
-    body: JSON.stringify({ type: "page_view", path: "/en/", locale: "en" }),
-  });
+  const request = () => {
+    const forwarded = requestForOrigin(new Request("https://example.test/api/events", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://example.test", "sec-fetch-site": "same-origin" },
+      body: JSON.stringify({ type: "page_view", path: "/en/", locale: "en" }),
+    }), "https://edge-origin.example.test", "test-origin-token-0000000000000000000000");
+    forwarded.headers.set("host", "app:3000");
+    forwarded.headers.set("x-forwarded-proto", "https");
+    return new Request("http://app:3000/api/events", forwarded);
+  };
 
   const response = await renderAppApiResponse(request(), { config });
   assert.equal(response.status, 201);
