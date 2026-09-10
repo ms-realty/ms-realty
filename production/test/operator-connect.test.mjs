@@ -81,7 +81,7 @@ test("connections payload renders the persistent owner shell without credential 
   assert.ok(html.includes('data-managed-system="neon"'));
   assert.ok(html.includes('data-codex-plugin-install="ms-realty-operator"'));
   assert.ok(html.includes(operatorCodexPluginUrl()));
-  assert.ok(html.includes("Marketing and additional channels"));
+  assert.match(html, /data-connections-layout="app-list"/);
   assert.ok(html.includes("No active Hermes model runtime is confirmed"));
   assert.equal(html.includes("Hermes uses the OpenRouter-authorized key"), false);
   assert.equal(html.includes(OPERATOR_TOKEN), false);

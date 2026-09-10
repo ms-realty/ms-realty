@@ -15,6 +15,7 @@ import {
   operatorProviderAvailability,
   operatorProviderCards,
   operatorProviderConfigFromEnv,
+  operatorProviderConfigForHost,
   revokeOperatorProvider,
   verifyOperatorAiProvider,
 } from "../lib/operator-provider-catalog.mjs";
@@ -404,7 +405,7 @@ test("a configured owner page offers five one-click handoffs and no raw credenti
   assert.equal((html.match(/<input\b/g) || []).length, 0);
   assert.doesNotMatch(html, /data-provider-credential-form/);
   assert.doesNotMatch(html, /name="(?:api_key|token)"/);
-  assert.match(html, /<span>Connect OpenRouter<\/span>/);
+  assert.match(html, /aria-label="Connect OpenRouter"[^>]*>[\s\S]*?<span>Connect<\/span>/);
   assert.doesNotMatch(html, /name="token"/);
   assert.match(html, /data-managed-system="hermes" data-status="ready"/);
   assert.match(html, /data-managed-system="data" data-status="ready"/);
@@ -922,20 +923,14 @@ test("the assistant's configuration helper stays available as an API and the own
   });
   // The owner page exposes the short-lived credential once in a masked,
   // read-only field and keeps the copied configuration token-free.
-  assert.match(html, /data-connection-journey="in-progress"/);
-  assert.match(html, /data-connection-progress="1\/5"/);
-  for (const step of ["google", "ai", "whatsapp", "social", "assistant"]) {
-    assert.match(html, new RegExp(`data-connection-step="${step}"`), `${step} journey step`);
+  assert.match(html, /data-connections-layout="app-list"/);
+  assert.match(html, /data-connection-list="apps"/);
+  for (const provider of ["google", "ai", "whatsapp", "facebook", "instagram", "viber"]) {
+    assert.match(html, new RegExp(`data-provider="${provider}"`));
+    assert.match(html, new RegExp(`data-connection-details="${provider}"`));
   }
-  assert.match(html, /<details class="adm-workbench-disclosure" data-connection-group="secondary-work-accounts">[\s\S]*?Маркетинг канали · 2/);
-  assert.match(html, /<details class="adm-workbench-disclosure" data-connection-group="supporting-disclosure">/);
-  assert.doesNotMatch(html, /Работни акаунти · 2/);
-  assert.match(html, /data-connection-step="assistant" data-status="complete"/);
-  assert.match(html, /data-connection-group="assistant"/);
-  assert.match(html, /data-connection-list="core"/);
-  assert.match(html, /data-connections-stage="true"/);
+  assert.match(html, /data-connection-group="assistant" open/);
   assert.match(html, /data-connection-group="managed-system"/);
-  assert.match(html, /data-connections-support="true"/);
   assert.match(html, /data-codex-plugin-install="ms-realty-operator"/);
   assert.equal((html.match(/id="agent-credential"/g) || []).length, 1);
   assert.match(html, /id="agent-credential" type="password"[^>]*readonly/);
@@ -954,8 +949,8 @@ test("the assistant's configuration helper stays available as an API and the own
     providerConfig: fullConfig(),
     locale: "bg",
   });
-  assert.match(blocked, /data-connection-step="assistant" data-status="pending"[\s\S]*?data-tone="sun"/);
-  assert.doesNotMatch(blocked, /data-connection-step="assistant" data-status="complete"/);
+  assert.match(blocked, /data-connection-group="assistant">/);
+  assert.doesNotMatch(blocked, /data-connection-group="assistant" open/);
   assert.match(blocked, /Отвори в Codex/);
   assert.match(blocked, /добавката/);
   assert.equal(blocked.includes('data-copy-block="agent-config"'), false);
@@ -1114,4 +1109,20 @@ test("the environment names the catalogue asks for are the ones the modules read
   assert.ok(metaUnavailable.instagram.missing.includes("MS_REALTY_META_INSTAGRAM_PUBLISH_READY"));
   // A malformed Hermes mode must not take the page down.
   assert.equal(operatorProviderConfigFromEnv({ HERMES_PROVIDER_MODE: "nonsense" }).hermes.has_api_key, false);
+});
+
+
+test("provider callbacks use the canonical host allowlist without trusting arbitrary Host values", () => {
+  const config = fullConfig();
+  for (const host of ["makler-realty.com", "www.makler-realty.com"]) {
+    for (const provider of ["google", "facebook", "instagram", "ai"]) {
+      const url = new URL(operatorProviderAuthorizationUrl({provider, operatorId: "owner", config: operatorProviderConfigForHost(config, host), codeVerifier: "v".repeat(64)}));
+      const callback = new URL(url.searchParams.get(provider === "ai" ? "callback_url" : "redirect_uri"));
+      assert.equal(callback.origin, "https://makler-realty.com");
+    }
+  }
+  for (const host of ["attacker.example", "makler-realty.com.attacker.example", "ms-realty.ms-realty-bg.workers.dev"]) {
+    assert.equal(operatorProviderConfigForHost(config, host).publicOrigin, config.publicOrigin);
+  }
+  assert.equal(operatorProviderConfigForHost({publicOrigin: ""}, "attacker.example").publicOrigin, "");
 });

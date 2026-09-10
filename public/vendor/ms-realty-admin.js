@@ -1615,7 +1615,7 @@
       var section = document.getElementById(id);
       if (section && section.tagName === "DETAILS") section.open = true;
     };
-    if (!document.querySelector("[data-settings-index-row]")) return;
+    if (!document.querySelector("[data-settings-section]")) return;
     window.addEventListener("hashchange", open);
     open();
   }

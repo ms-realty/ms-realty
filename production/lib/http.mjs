@@ -80,6 +80,7 @@ import {
 import {
   operatorProviderAvailability,
   operatorProviderConfigFromEnv,
+  operatorProviderConfigForHost,
 } from "./operator-provider-catalog.mjs";
 import {
   OPERATOR_INTEGRATIONS_PATH,
@@ -2895,6 +2896,9 @@ export function createHttpApp({
       }
     }
     if (adminRequest && !principal) {
+      if (request.method === "GET" && url.pathname === "/api/admin/connections" && url.searchParams.get("action") === "callback") {
+        return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/login", "set-cookie": adminSessionClearCookie() });
+      }
       if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && wantsHtml(request, url)) {
         return adminResponse(303, "", "text/plain; charset=utf-8", {
           location: "/admin/login",
@@ -4951,9 +4955,10 @@ export function createHttpApp({
     }
 
     if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
+      const providerConfig = operatorProviderConfigForHost(providerConnection, requestHost(request.headers));
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const configuredWorkspaceId =
-        workspaceSettingsWorkspaceId || providerConnection.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
+        workspaceSettingsWorkspaceId || providerConfig.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
       const canManageConnections = Boolean(
         payloadSession && principal?.source === "payload_session" && isUnrestrictedOwnerAdmin(principal),
       );
@@ -4965,7 +4970,7 @@ export function createHttpApp({
         if (input.action !== "issue_agent_credential") return adminJson(400, { kind: "bad_request" });
         agent = issueOperatorAgentToken({ principal, env: operatorAgentEnv });
       }
-      let availability = operatorProviderAvailability(providerConnection);
+      let availability = operatorProviderAvailability(providerConfig);
       let connections = [];
       let storeError = !availability.store.ready;
       try {
@@ -4994,7 +4999,7 @@ export function createHttpApp({
             storeError,
           });
       const base =
-        String(providerConnection.publicOrigin || "").trim() ||
+        String(providerConfig.publicOrigin || "").trim() ||
         new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
       if (agent) {
         recordAudit({
@@ -5013,7 +5018,7 @@ export function createHttpApp({
           operator: principal,
           connections,
           availability,
-          providerConfig: providerConnection,
+          providerConfig,
           baseUrl: base,
           assistantPrompt:
             !agent && principal?.source === "credential_registry"
@@ -5039,11 +5044,12 @@ export function createHttpApp({
       url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH ||
       url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH
     ) {
-      const availability = operatorProviderAvailability(providerConnection);
+      const providerConfig = operatorProviderConfigForHost(providerConnection, requestHost(request.headers));
+      const availability = operatorProviderAvailability(providerConfig);
       const configuredWorkspaceId =
-        workspaceSettingsWorkspaceId || providerConnection.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
+        workspaceSettingsWorkspaceId || providerConfig.workspaceId || operatorAgentEnv.MS_REALTY_WORKSPACE_ID || "";
       const storeOptions = {
-        credentialSecret: providerConnection.credentialSecret,
+        credentialSecret: providerConfig.credentialSecret,
         payload: providerConnectionPayload,
         workspaceId: configuredWorkspaceId,
       };
@@ -5081,7 +5087,7 @@ export function createHttpApp({
             principal,
             workspaceId: workspace.workspace_id || "",
             configuredWorkspaceId: workspace.workspace_id || "",
-            providerConfig: providerConnection,
+            providerConfig,
             providerPayload: scopedStoreOptions.payload,
             readConnections: readProviderConnections,
             canManageConnections: true,
@@ -5123,7 +5129,7 @@ export function createHttpApp({
             intent: "disconnect",
             provider: input.provider,
             operatorId: principal.id,
-            config: providerConnection,
+            config: providerConfig,
             deps: { ...connectionDeps, storeOptions: scopedStoreOptions },
           });
           if (outcome.outcome === "rejected") {
@@ -5177,7 +5183,7 @@ export function createHttpApp({
             });
           }
           const origin =
-            String(providerConnection.publicOrigin || "").trim() ||
+            String(providerConfig.publicOrigin || "").trim() ||
             new URL(request.url, `http://${requestHost(request.headers) || "localhost"}`).origin;
           recordAudit({
             action: "operator_agent_token_issued",
@@ -5212,7 +5218,7 @@ export function createHttpApp({
             intent: "disconnect",
             provider: input.provider,
             operatorId: principal.id,
-            config: providerConnection,
+            config: providerConfig,
             deps: connectionDeps,
           });
           if (outcome.outcome === "rejected") {
@@ -5236,7 +5242,7 @@ export function createHttpApp({
             try {
               const start = operatorConnectionStart({
                 provider: requestedProvider,
-                config: providerConnection,
+                config: providerConfig,
                 operatorId: principal.id,
               });
               return adminResponse(303, "", "text/plain; charset=utf-8", {
@@ -5272,7 +5278,7 @@ export function createHttpApp({
               state: url.searchParams.get("state"),
               codeVerifier,
               operatorId: principal.id,
-              config: providerConnection,
+              config: providerConfig,
               deps: connectionDeps,
             });
             if (outcome.outcome === "rejected") {
@@ -5294,7 +5300,7 @@ export function createHttpApp({
             provider,
             input,
             operatorId: principal.id,
-            config: providerConnection,
+            config: providerConfig,
             deps: connectionDeps,
           });
           if (outcome.outcome === "rejected") {

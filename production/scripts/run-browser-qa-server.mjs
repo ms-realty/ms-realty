@@ -100,7 +100,7 @@ const app = createHttpApp({
               source: "payload_session",
               can_mutate: true,
               roles: ["admin"],
-              workspace_ids: ["sandanski"],
+              workspace_ids: [],
             },
             user: { id: "ms-realty-owner" },
           }

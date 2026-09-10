@@ -262,7 +262,7 @@ const ADMIN_UI_COPY = {
     mediaIssues: { media_review_pending: "Чака преглед", missing_alt_text: "Без alt текст", thin_public_gallery: "Малка галерия", tour_review_pending: "Обиколка за преглед" },
     hermesUnavailableBroker: "Hermes не е свързан за това работно пространство. Използвайте одобрен шаблон или напишете отговора сами; собственикът може да го свърже.",
     hermesUnavailableOwner: "Hermes не е настроен в тази среда.",
-    assistDraft: "Чернова",
+    assistDraft: "Предложи текст",
     assistPending: "Hermes пише чернова…",
     assistCurrent: "Текущ текст",
     editorLaterEdits: "Промените са записани. По-новите ви редакции още не са записани.",
@@ -1065,7 +1065,7 @@ const ADMIN_UI_COPY = {
     mediaIssues: { media_review_pending: "Ждёт проверки", missing_alt_text: "Без alt-текста", thin_public_gallery: "Маленькая галерея", tour_review_pending: "Тур на проверку" },
     hermesUnavailableBroker: "Hermes не подключён для этого рабочего пространства. Используйте одобренный шаблон или напишите ответ сами; подключить может владелец.",
     hermesUnavailableOwner: "Hermes не настроен в этой среде.",
-    assistDraft: "Черновик",
+    assistDraft: "Предложить текст",
     assistPending: "Hermes пишет черновик…",
     assistCurrent: "Текущий текст",
     editorLaterEdits: "Отправленные изменения сохранены. Более поздние правки ещё не сохранены.",
@@ -1868,7 +1868,7 @@ const ADMIN_UI_COPY = {
     mediaIssues: { media_review_pending: "Awaiting review", missing_alt_text: "No alt text", thin_public_gallery: "Thin gallery", tour_review_pending: "Tour awaiting review" },
     hermesUnavailableBroker: "Hermes is not connected for this workspace. Use an approved template or write the reply yourself; the workspace owner can connect it.",
     hermesUnavailableOwner: "Hermes is not configured in this environment.",
-    assistDraft: "Draft",
+    assistDraft: "Suggest text",
     assistPending: "Hermes is drafting…",
     assistCurrent: "Current text",
     editorLaterEdits: "Submitted changes saved. Your newer edits are still unsaved.",
@@ -3533,7 +3533,7 @@ function adminNavigationGroups(page) {
       items,
     };
   };
-  // Eight destinations a broker works from, then one collapsed "Advanced"
+  // Daily work and Hermes, then one collapsed "Advanced"
   // disclosure for the owner's operating and setup screens. The registry still
   // supplies paths and capabilities, so reorganising the rail cannot grant
   // access; every route stays reachable by URL, and Pipeline and Requests are
@@ -3559,8 +3559,8 @@ function adminNavigationGroups(page) {
   // Content is publishing work: it needs the editor's or owner's write
   // capability, not the read capability every broker holds.
   if (!pageCan(page, "content:write")) routes.delete("approved_content");
-  const primaryIds = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
-  const advancedIds = ["migration_review", "translation_queue", "media_library", "locale_rollout", "document_records", "hermes", "connections", "reports", "activity", "tasks", "consents", "documents", "team"];
+  const primaryIds = ["today", "lead_inbox", "listing_manager", "viewings", "contacts", "realty_cases", "hermes"];
+  const advancedIds = ["approved_content", "media_library", "translation_queue", "document_records", "documents", "consents", "tasks", "reports", "activity", "team", "connections", "settings", "locale_rollout", "migration_review"];
   const pick = (ids, primary) => ids.map((id) => routes.get(id)).filter(Boolean).map((destination) => ({ ...destination, primary }));
   const groups = [{ id: "primary", label: null, destinations: pick(primaryIds, true) }];
   groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });
@@ -3593,11 +3593,8 @@ function navigationLink(item, page, { mobile = false, primary = false, key } = {
   );
 }
 
-// Eight primary destinations at one depth, then one "Advanced" disclosure for
-// the owner's setup and operating screens. The earlier flat rail of 23 put the
-// migration console and the Hermes runtime next to Viewings; the earlier
-// grouped rail hid Viewings behind "More in ...". Brokers now see only the
-// screens they work from, and nothing a broker needs sits behind the disclosure.
+// Daily work stays at one depth. Setup and specialist tools remain reachable
+// through a native disclosure in both the desktop rail and the phone menu.
 function navigationDestination(destination, page, { mobile = false } = {}) {
   return h(
     "div",
@@ -3612,9 +3609,7 @@ function navigationGroup(group, page, { mobile = false } = {}) {
   const prefix = mobile ? "mobile-" : "";
   const links = group.destinations.map((destination) => navigationDestination(destination, page, { mobile }));
   if (group.collapsible) {
-    // Collapsed by default; open when the current screen lives inside it, so
-    // the lit destination is never hidden from the operator standing on it.
-    const holdsCurrent = group.destinations.some((destination) => navigationCurrent(destination.route, page));
+    const current = group.destinations.find((destination) => navigationCurrent(destination.route, page));
     return h(
       "details",
       {
@@ -3622,13 +3617,13 @@ function navigationGroup(group, page, { mobile = false } = {}) {
         className: mobile ? "adm-mobile-nav__group-wrap adm-mobile-nav__advanced" : "crm-sb__group-wrap crm-sb__advanced",
         "data-admin-nav-group": group.id,
         "data-admin-nav-disclosure": "true",
-        open: holdsCurrent ? true : undefined,
       },
       h(
         "summary",
-        { className: mobile ? "adm-mobile-nav__group adm-mobile-nav__group--summary" : "crm-sb__group crm-sb__group--summary" },
+        { className: mobile ? "adm-mobile-nav__group adm-mobile-nav__group--summary" : "crm-sb__group crm-sb__group--summary", "data-nav-current": current?.route.id },
         h(Icon, { name: "chevron-right", size: 16 }),
         h("span", null, group.label),
+        current ? h("small", null, current.route.label) : null,
       ),
       ...links,
     );
@@ -3999,6 +3994,7 @@ function describeSourceTask(task, { page, copy, ui, na, inboxHref }) {
 
 function TodayBriefingPanel({ page, rows, total, detailId }) {
   const copy = workbenchCopy(page).workspaceSettings.todayBriefing;
+  const hermes = ownerConsoleCopy(page).hermes;
   const first = rows[0];
   return h(
     Panel,
@@ -4012,28 +4008,7 @@ function TodayBriefingPanel({ page, rows, total, detailId }) {
       "data-today-priority-count": String(rows.length),
       "data-today-priority-total": String(total),
     },
-    h(
-      "dl",
-      { className: "adm-today-briefing__facts" },
-      h(
-        "div",
-        null,
-        h("dt", null, copy.attention),
-        h("dd", null, first ? first.title : copy.clear),
-      ),
-      h(
-        "div",
-        null,
-        h("dt", null, copy.why),
-        h("dd", null, first ? first.context : copy.clearWhy),
-      ),
-      h(
-        "div",
-        null,
-        h("dt", null, copy.next),
-        h("dd", null, first ? first.action : copy.clearNext),
-      ),
-    ),
+    h("p", { className: "adm-today-briefing__context" }, first ? first.context : copy.clearWhy),
     first
       ? h(
           "div",
@@ -4044,9 +4019,14 @@ function TodayBriefingPanel({ page, rows, total, detailId }) {
             h("span", null, first.action),
             h(Icon, { name: "arrow-right", size: 18 }),
           ),
+          pageCan(page, "administration:read") ? h("a", {
+            className: "mk-btn mk-btn--ghost mk-btn--sm",
+            href: adminHref(`/admin/hermes?prompt=${encodeURIComponent(fillTemplate(hermes.todayPrompt, { action: first.action, title: first.title, context: first.context }))}`, page),
+            "data-today-hermes-context": first.key,
+          }, h(Icon, { name: "sparkles", size: 16 }), h("span", null, { bg: "Помощ от Hermes", ru: "Помощь Hermes", en: "Ask Hermes" }[page.workspace.locale])) : null,
         )
       : null,
-    h("p", { className: "adm-today-briefing__source" }, copy.source),
+    first ? null : h("p", { className: "adm-today-briefing__source" }, copy.clearNext),
   );
 }
 
@@ -4054,9 +4034,9 @@ function NextActionsPanel({ page, rows, total }) {
   const ui = workbenchCopy(page);
   const na = ui.workspaceSettings.nextActions;
   const words = {
-    bg: ["Намери задача", "Търси в опашката", "Всички", "Просрочени", "Отговори", "Няма съвпадащи задачи.", "Отвори всички задачи"],
-    ru: ["Найти задачу", "Поиск в очереди", "Все", "Просроченные", "Ответы", "Подходящих задач нет.", "Открыть все задачи"],
-    en: ["Find work", "Search this queue", "All", "Overdue", "Replies", "No matching tasks.", "Open all tasks"],
+    bg: ["За внимание", "Търси в задачите", "Всички", "Просрочени", "Отговори", "Няма съвпадащи задачи.", "Отвори всички задачи"],
+    ru: ["Требует внимания", "Поиск задач", "Все", "Просроченные", "Ответы", "Подходящих задач нет.", "Открыть все задачи"],
+    en: ["Needs attention", "Search tasks", "All", "Overdue", "Replies", "No matching tasks.", "Open all tasks"],
   }[page.workspace?.locale] || [];
   return h(Panel, {
     title: words[0], className: "adm-today-queue", "data-next-actions": "true",
@@ -4265,9 +4245,9 @@ function TodayBody({ page }) {
   const queue = deriveLeadQueueState(page);
   const title = label(copy, "today", "Today");
   const subtitle = {
-    bg: "Избери следващата задача. Виж какво я задържа.",
-    ru: "Выбери следующую задачу. Узнай, чего она ждёт.",
-    en: "Choose the next task. See what it waits for.",
+    bg: "Запитвания, огледи и следващи стъпки.",
+    ru: "Обращения, просмотры и следующие шаги.",
+    en: "Enquiries, viewings and next steps.",
   }[page.workspace?.locale] || settingsCopy.todayBriefing.description;
   const inboxHref = adminHref("/admin/leads", page);
   const nextActions = todayNextActions(page, copy, ui, queue, inboxHref);
@@ -12555,7 +12535,8 @@ function SettingsSection({ page, section, icon, fields }) {
     {
       className: "crm-panel adm-settings-panel adm-settings-disclosure",
       id: `settings-${section}`,
-      open: section === "agency" || saved || failure ? true : undefined,
+      name: "workspace-settings",
+      open: saved || failure ? true : undefined,
       "data-settings-section": section,
       "data-settings-state": meta ? "updated" : "defaults",
       ...(disabled ? { "data-settings-disabled": "true" } : {}),
@@ -12682,15 +12663,17 @@ function SettingsSecuritySection({ page, icon }) {
       }),
     );
   return h(
-    "section",
+    "details",
     {
-      className: "crm-panel adm-settings-panel",
+      className: "crm-panel adm-settings-panel adm-settings-disclosure",
       id: "settings-security",
+      name: "workspace-settings",
+      open: security.notice || status === "pending" ? true : undefined,
       "data-settings-section": "security",
       "data-settings-live": "true",
     },
     h(
-      "div",
+      "summary",
       { className: "crm-panel__hd adm-settings-panel__hd" },
       h(
         "div",
@@ -12885,15 +12868,16 @@ function SettingsDataSection({ page, icon }) {
   const retention = security.audit_retention;
   const locale = page.workspace?.locale;
   return h(
-    "section",
+    "details",
     {
-      className: "crm-panel adm-settings-panel",
+      className: "crm-panel adm-settings-panel adm-settings-disclosure",
       id: "settings-data",
+      name: "workspace-settings",
       "data-settings-section": "data",
       "data-settings-live": "true",
     },
     h(
-      "div",
+      "summary",
       { className: "crm-panel__hd adm-settings-panel__hd" },
       h(
         "div",
@@ -13109,10 +13093,10 @@ function OwnerProfileSection({ page }) {
     [copy.operatorId, operatorIdForPage(page)],
   ].filter(([, value]) => value);
   return h(
-    "section",
-    { className: "crm-panel adm-owner-profile", id: "owner-profile", "data-owner-profile": "true" },
+    "details",
+    { className: "crm-panel adm-owner-profile adm-settings-disclosure", id: "owner-profile", name: "workspace-settings", open: profileNotice ? true : undefined, "data-owner-profile": "true" },
     h(
-      "div",
+      "summary",
       { className: "crm-panel__hd adm-owner-profile__heading" },
       h("div", null, h("h2", null, h(Icon, { name: "user-round", size: 18 }), h("span", null, copy.title)), h("p", null, [role, access.known ? scope : null].filter(Boolean).join(" · "))),
     ),
@@ -13197,10 +13181,6 @@ function connectionListKind(connectionId) {
   return ["google", "google_drive", "whatsapp", "ai"].includes(connectionId) ? "core" : "secondary";
 }
 
-function connectionGroupSummary(title, rows) {
-  return `${title} · ${rows.length}`;
-}
-
 function connectionIcon(connection) {
   if (connection.id === "google") return "mail";
   if (connection.id === "ai") return "sparkles";
@@ -13217,6 +13197,7 @@ function ConnectionAction({ connection }) {
         type: "button",
         disabled: true,
         "data-whatsapp-connect": "true",
+        "aria-label": connection.accessible_label || connection.action_label,
       },
       h(Icon, { name: "message-circle", size: 15 }),
       h("span", null, connection.action_label),
@@ -13225,7 +13206,7 @@ function ConnectionAction({ connection }) {
   if (connection.can_manage && connection.action_href) {
     return h(
       "a",
-      { className: "mk-btn mk-btn--primary mk-btn--sm", href: connection.action_href },
+      { className: "mk-btn mk-btn--primary mk-btn--sm", href: connection.action_href, "aria-label": connection.accessible_label || connection.action_label },
       h(Icon, { name: "link", size: 15 }),
       h("span", null, connection.action_label),
     );
@@ -13240,60 +13221,43 @@ function ConnectionAction({ connection }) {
 }
 
 function ConnectionRow({ connection, copy }) {
-  const connected = connection.status === "connected" || connection.status === "inactive";
-  return h(
-    "li",
-    {
-      className: "adm-connection-row",
-      id: `connection-${connection.id}`,
-      "data-provider": connection.id,
-      "data-status": connection.status,
-      "data-connection-kind": connectionListKind(connection.id),
-    },
-    h(
-      "div",
-      { className: "adm-connection-row__summary" },
-      h("div", { className: "adm-connection-row__icon", "aria-hidden": "true" }, h(Icon, { name: connectionIcon(connection), size: 18 })),
-      h(
-        "div",
-        null,
-        h("h3", null, connection.title),
-        h("p", null, connection.description),
-        connection.helper_text ? h("p", { className: "adm-connection-row__helper" }, connection.helper_text) : null,
-        connected ? h("p", { className: "adm-connection-row__account" }, h("bdi", null, connection.account_label), h("small", null, connection.verified_label)) : null,
-        connection.model || connection.endpoint
-          ? h(
-              "p",
-              { className: "adm-connection-row__account" },
-              connection.model ? h("span", null, connection.model) : null,
-              connection.endpoint ? h("small", null, connection.endpoint) : null,
-            )
-          : null,
+  const connected = ["connected", "inactive"].includes(connection.status);
+  const connectable = connection.can_manage && (connection.action_href || connection.action_ready);
+  return h("li", {
+    className: "adm-connection-row", id: `connection-${connection.id}`,
+    "data-provider": connection.id, "data-status": connection.status,
+    "data-connection-kind": connectionListKind(connection.id),
+    "data-connect-action": !connected && connectable ? "true" : undefined,
+  },
+    h("details", { className: "adm-connection-row__details", "data-connection-details": connection.id },
+      h("summary", { className: "adm-connection-row__summary" },
+        h("span", { className: "adm-connection-row__icon", "aria-hidden": "true" }, h(Icon, { name: connectionIcon(connection), size: 20 })),
+        h("span", { className: "adm-connection-row__label" },
+          h("strong", null, connection.title),
+          h("span", { className: "adm-connection-row__description" }, connected ? connection.account_label : connection.description),
+          connected || !connectable ? h(StatusPill, { tone: connectionTone(connection.status) }, connection.status_label) : null,
+        ),
+        h(Icon, { name: "chevron-down", size: 16 }),
+      ),
+      h("div", { className: "adm-connection-row__detail-body" },
+        h("strong", null, copy.connectionDetails),
+        connection.helper_text ? h("p", null, connection.helper_text) : null,
+        connected ? h("small", null, connection.verified_label) : null,
+        connection.model ? h("p", null, connection.model) : null,
         connection.blocked_text ? h("p", { className: "adm-connection-row__blocked" }, connection.blocked_text) : null,
-        connection.unavailable_message
-          ? h("p", { className: "adm-connection-row__recovery" }, connection.unavailable_message, h("small", null, connection.recovery_message))
-          : null,
+        connection.unavailable_message ? h("p", { className: "adm-connection-row__recovery" }, connection.unavailable_message, h("small", null, connection.recovery_message)) : null,
+        h("div", { className: "adm-connection-row__actions" },
+          connected || !connectable ? h(ConnectionAction, { connection }) : null,
+          connected && connection.can_manage ? h("form", { method: "post", action: "/api/admin/connections/disconnect" },
+            h("input", { type: "hidden", name: "provider", value: connection.id }),
+            h("button", { className: "mk-btn mk-btn--ghost mk-btn--sm", type: "submit" }, copy.disconnect),
+          ) : null,
+        ),
+        connected && connection.can_manage ? h("small", null, connection.disconnect_hint) : null,
       ),
     ),
-    h(
-      "div",
-      { className: "adm-connection-row__state" },
-      h(StatusPill, { tone: connectionTone(connection.status) }, connection.status_label),
-      h(
-        "div",
-        { className: "adm-connection-row__actions" },
-        h(ConnectionAction, { connection }),
-        connected && connection.can_manage
-          ? h(
-              "form",
-              { method: "post", action: "/api/admin/connections/disconnect" },
-              h("input", { type: "hidden", name: "provider", value: connection.id }),
-              h("button", { className: "mk-btn mk-btn--ghost mk-btn--sm", type: "submit" }, copy.disconnect),
-            )
-          : null,
-      ),
-      connection.id === "whatsapp" ? h("small", { className: "adm-connection-row__live", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-whatsapp-result": "true" }) : null,
-    ),
+    !connected && connectable ? h("div", { className: "adm-connection-row__connect" }, h(ConnectionAction, { connection: { ...connection, action_label: copy.connectionConnect, accessible_label: connection.action_label } })) : null,
+    connection.id === "whatsapp" ? h("small", { className: "adm-connection-row__live", role: "status", "aria-live": "polite", "aria-atomic": "true", "data-whatsapp-result": "true" }) : null,
   );
 }
 
@@ -13378,118 +13342,11 @@ function AssistantAccess({ assistant, copy }) {
   );
 }
 
-function ConnectionJourney({ steps, copy }) {
-  const complete = steps.filter((step) => step.ready).length;
-  const next = steps.find((step) => !step.ready) || null;
-  return h(
-    "section",
-    {
-      className: "adm-connection-journey",
-      "aria-labelledby": "connection-journey-title",
-      "data-connection-journey": next ? "in-progress" : "complete",
-      "data-connection-progress": `${complete}/${steps.length}`,
-    },
-    h(
-      "header",
-      { className: "adm-connection-journey__header" },
-      h(
-        "div",
-        null,
-        h("span", { className: "adm-connection-journey__eyebrow" }, copy.journeyProgress.replace("{done}", String(complete)).replace("{total}", String(steps.length))),
-        h("h2", { id: "connection-journey-title" }, copy.journeyTitle),
-        h("p", null, next ? copy.journeyDescription : copy.journeyComplete),
-      ),
-      next
-        ? h(
-            "a",
-            { className: "mk-btn mk-btn--primary", href: next.anchor, "data-connection-next": next.id },
-            h("span", null, copy.journeyReview),
-            h(Icon, { name: "arrow-right", size: 16 }),
-          )
-        : h(StatusPill, { tone: "success" }, copy.journeyComplete),
-    ),
-    h("progress", { max: steps.length, value: complete, "aria-label": copy.journeyProgress.replace("{done}", String(complete)).replace("{total}", String(steps.length)) }),
-    h(
-      "ol",
-      { className: "adm-connection-journey__steps" },
-      ...steps.map((step, index) =>
-        h(
-          "li",
-          { key: step.id, "data-connection-step": step.id, "data-status": step.ready ? "complete" : "pending" },
-          h("span", { className: "adm-connection-journey__number", "aria-hidden": "true" }, step.ready ? h(Icon, { name: "check", size: 15 }) : index + 1),
-          h(
-            "a",
-            { href: step.anchor },
-            h("strong", null, step.title),
-            h("small", null, step.description),
-          ),
-          h(StatusPill, { tone: step.tone }, step.statusLabel),
-        ),
-      ),
-    ),
-  );
-}
-
 function ConnectionsBody({ page }) {
   const copy = page.connection_copy || {};
-  const ui = workbenchCopy(page);
   const whatsapp = page.whatsapp_client || {};
-  const connections = Array.isArray(page.connections) ? page.connections : [];
-  const supporting = Array.isArray(page.supporting_connections) ? page.supporting_connections : [];
-  const managed = Array.isArray(page.managed_systems) ? page.managed_systems : [];
-  const primaryConnectionIds = new Set(["google", "google_drive", "whatsapp", "ai"]);
-  const connectionById = (rows, id) => rows.find((row) => row.id === id) || null;
-  const readyCount = (rows) => rows.filter((row) => ["connected", "ready"].includes(row.status)).length;
-  const socialConnections = [...connections, ...supporting]
-    .filter((row) => ["facebook", "instagram"].includes(row.id))
-    .filter((row, index, rows) => rows.findIndex((candidate) => candidate.id === row.id) === index);
-  const google = connectionById(connections, "google");
-  const whatsappConnection = connectionById(connections, "whatsapp");
-  const primaryConnections = connections.filter((connection) => primaryConnectionIds.has(connection.id));
-  const secondaryWorkAccounts = connections.filter((connection) => !primaryConnectionIds.has(connection.id));
-  const assistantReady = Boolean(page.assistant?.credential);
-  const assistantInstallReady = !assistantReady && Boolean(page.assistant?.plugin_url || page.assistant?.config);
-  const assistantTone = assistantReady ? "success" : assistantInstallReady ? "sun" : "brick";
-  const assistantStatus = assistantReady ? statusText(ui, "ready") : assistantInstallReady ? statusText(ui, "in_progress") : statusText(ui, "blocked");
-  const socialReadyCount = readyCount(socialConnections);
-  const aiConnection = connectionById(connections, "ai");
-  const journeyStep = (connection) =>
-    connection
-      ? {
-          id: connection.id,
-          title: connection.title,
-          description: connection.helper_text || connection.description,
-          ready: ["connected", "ready"].includes(connection.status),
-          statusLabel: connection.status_label,
-          tone: connectionTone(connection.status),
-          anchor: `#connection-${connection.id}`,
-        }
-      : null;
-  const journeySteps = [
-    journeyStep(google),
-    journeyStep(aiConnection),
-    journeyStep(whatsappConnection),
-    socialConnections.length
-      ? {
-          id: "social",
-          title: copy.marketingChannelsTitle || copy.additionalChannelsTitle,
-          description: copy.marketingChannelsDescription || copy.additionalChannelsDescription,
-          ready: socialReadyCount === socialConnections.length,
-          statusLabel: `${socialReadyCount}/${socialConnections.length}`,
-          tone: socialReadyCount === socialConnections.length ? "success" : socialReadyCount ? "sun" : "brick",
-          anchor: `#connection-${socialConnections[0].id}`,
-        }
-      : null,
-    {
-      id: "assistant",
-      title: page.assistant?.title,
-      description: page.assistant?.install_hint || page.assistant?.description,
-      ready: assistantReady,
-      statusLabel: assistantStatus,
-      tone: assistantTone,
-      anchor: "#connection-assistant",
-    },
-  ].filter(Boolean);
+  const connections = [...(page.connections || []), ...(page.supporting_connections || [])];
+  const assistant = page.assistant || {};
   return adminShell(page, {
     title: copy.title,
     titleAsHeading: true,
@@ -13512,123 +13369,31 @@ function ConnectionsBody({ page }) {
       "data-meta-cancelled": copy.metaCancelled || "",
     },
     children: [
-      h(
-        PageHeader,
-        { title: copy.title, subtitle: copy.intro },
+      h(PageHeader, { title: copy.title, subtitle: copy.intro },
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/settings", page) }, h(Icon, { name: "settings", size: 16 }), h("span", null, ownerConsoleCopy(page).routes.settings)),
       ),
-      h(ConnectionJourney, { steps: journeySteps, copy }),
-      h(
-        "div",
-        { className: "adm-owner-flow adm-owner-flow--connections", "data-connections-layout": "operating-flow" },
-        h(
-          "div",
-          { className: "adm-owner-flow__stack" },
-          page.result
-            ? h("p", { className: "adm-connections-notice", role: page.result.tone === "error" ? "alert" : "status", "data-state": page.result.tone }, page.result.message)
-            : null,
-          h(
-            "section",
-            { className: "adm-owner-stage adm-owner-stage--connections", "data-connections-stage": "true" },
-            h(
-              "div",
-              { className: "adm-owner-stage__primary" },
-              h(
-                Panel,
-                { title: copy.workAccountsTitle, "data-connection-group": "work-accounts" },
-                h("p", { className: "adm-connections-section-copy" }, copy.workAccountsDescription),
-            h("ul", { className: "adm-connection-list", "data-connection-list": "core" }, ...primaryConnections.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
-                secondaryWorkAccounts.length
-                  ? h(
-                      WorkbenchDisclosure,
-                      {
-                    summary: connectionGroupSummary(copy.marketingChannelsTitle || copy.additionalChannelsTitle, secondaryWorkAccounts),
-                    "data-connection-group": "secondary-work-accounts",
-                      },
-                  h(
-                    "div",
-                    null,
-                    copy.marketingChannelsDescription ? h("p", { className: "adm-connections-section-copy" }, copy.marketingChannelsDescription) : null,
-                    h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...secondaryWorkAccounts.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
-                  ),
-                )
-              : null,
-              ),
-            ),
-            h(
-              "div",
-              { className: "adm-owner-stage__aside" },
-              h(
-                Panel,
-                {
-                  title: page.assistant?.title,
-                  className: "adm-assistant-connection",
-                  id: "connection-assistant",
-                  "data-connection-group": "assistant",
-                  action: h(
-                    "a",
-                    {
-                      className: "mk-btn mk-btn--secondary mk-btn--sm",
-                      href: page.assistant?.plugin_url,
-                      rel: "noopener",
-                      "data-codex-plugin-install": "ms-realty-operator",
-                    },
-                    h(Icon, { name: "sparkles", size: 15 }),
-                    h("span", null, page.assistant?.install_label),
-                  ),
-                },
-                h(
-                  "div",
-                  { className: "adm-assistant-connection__copy" },
-                  h("p", null, page.assistant?.description),
-                  h("small", null, page.assistant?.install_hint),
-                  h(AssistantAccess, { assistant: page.assistant, copy }),
-                ),
-              ),
-              h(
-                Panel,
-                { title: copy.managedTitle, "data-connection-group": "managed-system" },
-                h("p", { className: "adm-connections-section-copy" }, copy.managedDescription),
-                h(
-                  "ul",
-                  { className: "adm-managed-system-list" },
-                  ...managed.map((system) =>
-                    h(
-                      "li",
-                      { key: system.id, "data-managed-system": system.id, "data-status": system.status },
-                      h(
-                        "div",
-                        null,
-                        h("h3", null, system.title),
-                        h("p", null, system.description),
-                        system.helper_text ? h("small", null, system.helper_text) : null,
-                      ),
-                      h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+      h("div", { className: "adm-connections-directory", "data-connections-layout": "app-list" },
+        page.result ? h("p", { className: "adm-connections-notice", role: page.result.tone === "error" ? "alert" : "status", "data-state": page.result.tone }, page.result.message) : null,
+        h("ul", { className: "adm-connection-list", "data-connection-list": "apps", "aria-label": copy.workAccountsTitle },
+          ...connections.map(connection => h(ConnectionRow, { key: connection.id, connection, copy })),
+        ),
+        h("details", { className: "adm-connections-extra", id: "connection-assistant", "data-connection-group": "assistant", open: Boolean(assistant.credential) },
+          h("summary", null, assistant.title, h(Icon, { name: "chevron-down", size: 16 })),
+          h("div", { className: "adm-assistant-connection__copy" },
+            h("p", null, assistant.description),
+            assistant.plugin_url ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: assistant.plugin_url, rel: "noopener", "data-codex-plugin-install": "ms-realty-operator" }, h(Icon, { name: "sparkles", size: 15 }), h("span", null, assistant.install_label)) : null,
+            h("small", null, assistant.install_hint),
+            h(AssistantAccess, { assistant, copy }),
           ),
         ),
-        h(
-          "div",
-          { className: "adm-owner-flow__support", "data-connections-support": "true" },
-          supporting.length
-            ? h(
-                Panel,
-                { title: copy.additionalChannelsTitle, "data-connection-group": "additional-channels" },
-                h("p", { className: "adm-connections-section-copy" }, copy.additionalChannelsDescription),
-                h(
-                  WorkbenchDisclosure,
-                  {
-                    summary: connectionGroupSummary(copy.additionalChannelsTitle, supporting),
-                    "data-connection-group": "supporting-disclosure",
-                  },
-                  h("ul", { className: "adm-connection-list", "data-connection-list": "secondary" }, ...supporting.map((connection) => h(ConnectionRow, { key: connection.id, connection, copy }))),
-                ),
-              )
-            : null,
+        h("details", { className: "adm-connections-extra", "data-connection-group": "managed-system" },
+          h("summary", null, copy.managedTitle, h(Icon, { name: "chevron-down", size: 16 })),
+          h("ul", { className: "adm-managed-system-list" }, ...(page.managed_systems || []).map(system =>
+            h("li", { key: system.id, "data-managed-system": system.id, "data-status": system.status },
+              h("div", null, h("h3", null, system.title), h("p", null, system.description), system.helper_text ? h("small", null, system.helper_text) : null),
+              h(StatusPill, { tone: connectionTone(system.status) }, system.status_label),
+            ),
+          )),
         ),
       ),
     ],
@@ -13695,7 +13460,6 @@ function HermesBody({ page }) {
   const ui = workbenchCopy(page);
   const runtime = page.runtime || { ready: false, status: "blocked", checks: [], missing: [] };
   const queue = page.queue || { status: "blocked", summary: {}, rows: [] };
-  const receiptStore = page.receipt_store || { status: "blocked" };
   const bridgeReady = queue.status === "ready";
   const tasks = Array.isArray(queue.rows) ? queue.rows : [];
   const firstTask = tasks[0] || null;
@@ -13722,7 +13486,7 @@ function HermesBody({ page }) {
     children: [
       h(
         PageHeader,
-        { title: copy.title, subtitle: copy.description },
+        { title: copy.title, subtitle: { bg: "Помощ с имоти, клиенти и следващи стъпки.", ru: "Помощь с объектами, клиентами и следующими шагами.", en: "Help with properties, clients and next steps." }[page.workspace.locale] },
         pageCan(page, "settings:manage")
           ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, copy.connections))
           : null,
@@ -13751,13 +13515,6 @@ function HermesBody({ page }) {
                       { className: "adm-hermes-command adm-hermes-command--blocked" },
                       h("p", { className: "adm-hermes-panel-intro" }, copy.commandDisabled),
                       h(
-                        "dl",
-                        { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
-                        h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
-                        h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
-                        h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
-                      ),
-                      h(
                         "div",
                         { className: "adm-hermes-recovery", role: "group", "aria-label": copy.recoveryTitle, "data-hermes-command-recovery": "true" },
                         h(Icon, { name: "link", size: 17 }),
@@ -13767,10 +13524,12 @@ function HermesBody({ page }) {
                           h("strong", null, copy.recoveryTitle),
                           h("p", null, copy.recoveryDescription),
                         ),
-                        pageCan(page, "settings:manage")
-                          ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
-                          : null,
-                        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, copy.retry),
+                        h("div", { className: "adm-hermes-recovery__actions" },
+                          pageCan(page, "settings:manage")
+                            ? h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/connect", page) }, copy.connections)
+                            : null,
+                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/hermes?probe=1", page) }, copy.retry),
+                        ),
                       ),
                       firstTask
                         ? h(
@@ -13792,13 +13551,6 @@ function HermesBody({ page }) {
                       "div",
                       { className: "adm-hermes-command" },
                       h("p", { className: "adm-hermes-panel-intro" }, copy.commandDescription),
-                      h(
-                        "dl",
-                        { className: "adm-hermes-command__readiness", "data-hermes-readiness": "true" },
-                        h("div", null, h("dt", null, copy.hosted), h("dd", null, h(StatusPill, { tone: runtimeTone }, hermesStateLabel(copy, runtime.status)))),
-                        h("div", null, h("dt", null, copy.queue), h("dd", null, h(StatusPill, { tone: bridgeReady ? "success" : "brick" }, bridgeReady ? copy.ready : copy.blocked))),
-                        h("div", null, h("dt", null, copy.recentReceipts), h("dd", null, h(StatusPill, { tone: receiptStore.status === "ready" ? "success" : "brick" }, receiptStore.status === "ready" ? copy.ready : copy.blocked))),
-                      ),
                       firstTask
                         ? h(
                             "div",
@@ -13888,9 +13640,8 @@ function HermesBody({ page }) {
                     )
                   : null,
                 h(
-                  "section",
-                  { className: "adm-hermes-receipts", "data-hermes-receipts": receipts.length },
-                  h("h3", null, copy.recentReceipts),
+                  WorkbenchDisclosure,
+                  { summary: `${copy.recentReceipts} · ${receipts.length}`, "data-hermes-receipts": receipts.length },
                   receipts.length
                     ? h(
                         "ul",
@@ -13994,9 +13745,9 @@ function HermesBody({ page }) {
               "div",
               { className: "adm-owner-stage__aside" },
               h(
-                Panel,
+                WorkbenchDisclosure,
                 {
-                  title: copy.hosted,
+                  summary: copy.hosted,
                   "data-hermes-runtime-card": runtime.status,
                 },
                 h(
@@ -14368,8 +14119,6 @@ function SettingsBody({ page }) {
   const ui = workbenchCopy(page);
   const settings = settingsCopy(page);
   const owner = ownerConsoleCopy(page);
-  const ownerAccess = ownerWorkspaceAccess(page, owner.profile);
-  const ownerScope = ownerAccess.value;
   const options = page.settingsOptions || { admin_locales: ["bg", "ru", "en"], timezones: [], date_formats: [], broker_groups: [] };
   const brokers = page.brokerProfiles || [];
   const title = settings.title;
@@ -14394,82 +14143,6 @@ function SettingsBody({ page }) {
         ),
       ),
     );
-  const sectionsNav = h(
-    Panel,
-    { title: settings.sectionsNav, "data-settings-index": "true" },
-    h(
-      "ul",
-      { className: "adm-readiness-list" },
-      h(
-        "li",
-        { key: "owner-profile", "data-settings-index-row": "owner-profile" },
-        h(
-          "a",
-          { className: "adm-readiness-link", href: "#owner-profile" },
-          h("span", { className: "adm-readiness-copy" }, h("strong", null, owner.profile.title), h("small", null, ownerScope)),
-          h("span", { className: "adm-readiness-value" }, h(StatusPill, { tone: "sea" }, owner.profile.owner)),
-        ),
-      ),
-      ...["agency", "leads", "notifications", "workspace", "public_site"].map((section) => {
-        const meta = page.workspace_settings?.section_updates?.[section] || null;
-        return h(
-          "li",
-          { key: section, "data-settings-index-row": section },
-          h(
-            "a",
-            { className: "adm-readiness-link", href: `#settings-${section}` },
-            h(
-              "span",
-              { className: "adm-readiness-copy" },
-              h("strong", null, settings.sections[section].title),
-              h(
-                "small",
-                null,
-                meta ? `${settings.lastUpdated}: ${formatAdminDateTime(meta.updated_at, page.workspace?.locale)}` : settings.sectionState.defaults,
-              ),
-            ),
-            h(
-              "span",
-              { className: "adm-readiness-value" },
-              h(
-                StatusPill,
-                { tone: meta ? "sea" : "ink", "data-settings-section-state": meta ? "updated" : "defaults" },
-                meta ? settings.sectionState.updated : settings.sectionState.defaults,
-              ),
-            ),
-          ),
-        );
-      }),
-      ...["security", "data"]
-        .filter((section) =>
-          section === "security"
-            ? Boolean(page.workspace_security?.two_factor)
-            : Boolean(page.workspace_security?.exports || page.workspace_security?.audit_retention),
-        )
-        .map((section) => {
-        const sectionTitle = settings.liveSections[section].title;
-        return h(
-          "li",
-          { key: section, "data-settings-index-row": section },
-          h(
-            "a",
-            { className: "adm-readiness-link", href: `#settings-${section}` },
-            h(
-              "span",
-              { className: "adm-readiness-copy" },
-              h("strong", null, sectionTitle),
-              h("small", null, settings.sectionState.updated),
-            ),
-            h(
-              "span",
-              { className: "adm-readiness-value" },
-              h(StatusPill, { tone: "sea" }, settings.sectionState.updated),
-            ),
-          ),
-        );
-      }),
-    ),
-  );
   return adminShell(page, {
     title,
     titleAsHeading: true,
@@ -14482,7 +14155,7 @@ function SettingsBody({ page }) {
     children: [
       h(
         PageHeader,
-        { title, subtitle: settings.description },
+        { title, subtitle: { bg: "Агенция, предпочитания и достъп.", ru: "Агентство, предпочтения и доступ.", en: "Agency, preferences and access." }[page.workspace.locale] },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/connect", page) }, h(Icon, { name: "link", size: 16 }), h("span", null, owner.routes.integrations)),
       ),
       // The store being unconfigured is one fact about the environment, said
@@ -14497,39 +14170,7 @@ function SettingsBody({ page }) {
         : null,
       h(
         "div",
-        { className: "adm-owner-flow adm-owner-flow--settings", "data-settings-layout": "sections-flow" },
-        h(
-          "div",
-          { className: "adm-owner-flow__support", "data-settings-overview": "true" },
-          sectionsNav,
-          page.onboarding ? h(WorkspaceChecklistPanel, { page }) : null,
-          h(
-            Panel,
-            { title: settings.lastUpdated, "data-settings-history": "true" },
-            h(
-              "div",
-              { className: "adm-settings-history" },
-              page.workspace_settings?.updated_at
-                ? h(
-                    "p",
-                    null,
-                    h(
-                      "time",
-                      { dateTime: page.workspace_settings.updated_at, title: page.workspace_settings.updated_at },
-                      formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale),
-                    ),
-                    page.workspace_settings.updated_by ? h("small", null, page.workspace_settings.updated_by) : null,
-                  )
-                : h("p", { className: "adm-empty" }, settings.notConfirmed),
-              h(
-                "a",
-                { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) },
-                h(Icon, { name: "list", size: 16 }),
-                h("span", null, label(copy, "viewHistory", "History")),
-              ),
-            ),
-          ),
-        ),
+        { className: "adm-settings-workspace", "data-settings-layout": "on-demand" },
         h(
           "div",
           { className: "adm-owner-flow__stack" },
@@ -14820,6 +14461,10 @@ function SettingsBody({ page }) {
           }),
           page.workspace_security?.two_factor ? h(SettingsSecuritySection, { page, icon: "shield-check" }) : null,
           page.workspace_security?.exports || page.workspace_security?.audit_retention ? h(SettingsDataSection, { page, icon: "download" }) : null,
+          h("div", { className: "adm-settings-history", "data-settings-history": "true" },
+            page.workspace_settings?.updated_at ? h("small", null, `${settings.lastUpdated}: ${formatAdminDateTime(page.workspace_settings.updated_at, page.workspace?.locale)}`) : null,
+            h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref("/admin/activity?action=workspace_settings_updated", page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
+          ),
         ),
       ),
     ],

@@ -269,27 +269,25 @@ test("workspace onboarding is computed from real workspace state", () => {
   assert.ok(complete.items.every((item) => item.done));
 });
 
-test("settings screen renders working sections and an in-flow owner overview", async () => {
+test("settings opens from an intent while preserving forms, feedback and history", async () => {
   await withAdmin(async () => {
     const app = createHttpApp(paths());
     const page = await dispatchHttp(app, { url: "/admin/settings", headers: HEADERS });
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="settings"/);
-    assert.match(page.body, /data-settings-layout="sections-flow"/);
+    assert.match(page.body, /data-settings-layout="on-demand"/);
     assert.match(page.body, /class="crm-ph"/);
     assert.match(page.body, /<h1>Settings<\/h1>/);
-    assert.match(page.body, /Agency profile, lead reply targets, notifications,/);
+    assert.match(page.body, /Agency, preferences and access\./);
     assert.doesNotMatch(page.body, /data-summary-kind="settings"|data-summary-card="settings-state"/);
-    assert.match(page.body, /data-settings-overview="true"[\s\S]*?data-settings-index="true"/);
-    assert.match(page.body, /Set up your workspace[\s\S]*?0 of 5 done/);
+    assert.doesNotMatch(page.body, /data-settings-overview=|data-settings-index=|data-workspace-onboarding=/);
     for (const section of ["agency", "leads", "notifications", "workspace", "public_site"]) {
       assert.match(page.body, new RegExp(`data-settings-section="${section}"`), `${section} panel`);
       assert.match(page.body, new RegExp(`data-workspace-settings-form="${section}"`), `${section} form`);
       assert.match(page.body, new RegExp(`data-admin-mutation-form="workspace-settings-${section}"`), `${section} mutation contract`);
       assert.match(page.body, new RegExp(`id="settings-${section}"`), `${section} anchor`);
     }
-    assert.match(page.body, /<details class="crm-panel adm-settings-panel adm-settings-disclosure" id="settings-agency" open/);
-    assert.doesNotMatch(page.body, /id="settings-leads" open/);
+    assert.doesNotMatch(page.body, /<details[^>]*id="settings-[^"]+"[^>]* open/);
     // Pristine: every section still shows the committed defaults.
     assert.equal(page.body.match(/data-settings-state="defaults"/g).length, 5);
     assert.doesNotMatch(page.body, /data-settings-state="updated"/);
@@ -299,11 +297,9 @@ test("settings screen renders working sections and an in-flow owner overview", a
     // Every form posts to the same endpoint and works without JavaScript.
     assert.equal(page.body.match(/action="\/api\/admin\/settings"/g).length, 5);
     assert.equal(page.body.match(/method="post"/g).length, 5);
-    // Each overview fact has one owner: section index, onboarding checklist,
-    // and history. A second action card must not repeat all three.
+    // Setup belongs to Today; settings keeps a single history link.
     assert.doesNotMatch(page.body, /data-settings-actions=/);
-    assert.equal((page.body.match(/data-settings-index="true"/g) || []).length, 1);
-    assert.match(page.body, /data-workspace-onboarding="open" data-workspace-onboarding-progress="0\/5"/);
+    assert.doesNotMatch(page.body, /data-settings-index=/);
     assert.equal((page.body.match(/data-settings-history="true"/g) || []).length, 1);
     assert.doesNotMatch(page.body, /data-planned-control=/);
     assert.doesNotMatch(page.body, /data-export-form=/);
@@ -361,7 +357,7 @@ test("owner screens keep one page heading after moving titles into PageHeader", 
     assert.equal(headingCount(hermes.body), 1, "Hermes has exactly one h1");
     assert.equal(headingCount(connections.body), 1, "Connections has exactly one h1");
     assert.equal(headingCount(settings.body), 1, "Settings has exactly one h1");
-    assert.equal((connections.body.match(/class="mk-btn mk-btn--primary(?:\s|\")/g) || []).length, 1, "the connection journey owns the page-primary action");
+    assert.match(connections.body, /data-connections-layout="app-list"/, "connections use an app list");
   });
 });
 
@@ -638,8 +634,8 @@ test("Today exposes every ranked task with a source-backed detail and Hermes ent
     assert.doesNotMatch(empty.body, /name="q"/);
     // Two groups, primary and Advanced, in desktop and mobile navigation.
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 4, "primary and Advanced in desktop and mobile navigation");
-    assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 8);
-    assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 8);
+    assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);
+    assert.equal((empty.body.match(/data-admin-nav-primary-mobile="true"/g) || []).length, 7);
     for (const destination of ["Today", "Leads", "Viewings", "Contacts", "Listings", "Deals", "Content", "Settings", "Advanced"]) {
       assert.match(empty.body, new RegExp(`>${destination}<`), destination);
     }
@@ -702,6 +698,7 @@ test("Today exposes every ranked task with a source-backed detail and Hermes ent
     // One enquiry produces two next actions: send the first reply, and work the opportunity.
     assert.match(populated.body, /data-today-primary-action="lead"/);
     assert.match(populated.body, /data-today-primary-open="lead"/);
+    assert.match(populated.body, /href="\/admin\/hermes\?prompt=[^"]+" data-today-hermes-context=/);
     assert.equal((populated.body.match(/class="mk-btn mk-btn--accent(?:\s|\")/g) || []).length, 2, "each selectable task has one primary action in its own detail");
     assert.doesNotMatch(populated.body, /name="prompt"/);
     assert.match(populated.body, /data-next-action="lead"/);
