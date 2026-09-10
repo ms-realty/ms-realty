@@ -1666,6 +1666,13 @@ ${THEME_SWITCH_JS}
   function initImageFallbacks() {
     var images = document.querySelectorAll("main[data-react-public-ui] img, img[data-fallback-src]");
     function recoverImage(image) {
+      // A failed optimized candidate must retry the preserved original before
+      // the existing provenance fallback or unavailable-photo state.
+      if (image.hasAttribute("srcset")) {
+        image.removeAttribute("srcset");
+        image.removeAttribute("sizes");
+        return;
+      }
       var fallback = image.getAttribute("data-fallback-src");
       if (fallback && image.getAttribute("src") !== fallback) {
         image.removeAttribute("data-fallback-src");
