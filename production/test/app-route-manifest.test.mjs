@@ -149,7 +149,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(saved.rendered.cards.length, saved.rendered.search.total_matches);
   assert.match(saved.html, /data-saved-listings-view="true"/);
   assert.match(saved.html, /data-saved-label="נשמר"/);
-  assert.match(search.html, /<select name="sort">/);
+  assert.match(search.html, /<select\b[^>]*\bname="sort"[^>]*>/);
   assert.match(search.html, /data-active-filter-count="1"/);
   assert.match(search.html, /data-mobile-search-filters="true"/);
   assert.match(search.html, /data-mobile-filter-count="1"/);

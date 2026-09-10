@@ -68,7 +68,7 @@ function LanguageMenu({ languages, label }) {
     { className: "site-language", "data-language-switcher": "desktop" },
     h(
       "summary",
-      { "aria-label": `${label}: ${active.label}`, title: `${label}: ${active.label}` },
+      { "aria-label": `${label}: ${active.code.toUpperCase()} (${active.label})`, title: `${label}: ${active.label}` },
       h(Icon, { name: "globe", size: 17 }),
       h("span", { className: "site-language__current", lang: active.code }, active.code.toUpperCase()),
       h(Icon, { name: "chevron-down", size: 14, "aria-hidden": "true" }),
@@ -807,7 +807,6 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
     // link with the same destination would double every tab stop.
     "aria-hidden": "true",
     tabIndex: -1,
-    lang: card.content_locale || undefined,
   };
   const photoPlaceholder = h("span", { key: "noimage", className: "mk-pcard__noimage", "aria-hidden": "true" }, h(Icon, { name: "camera", size: 22 }));
   const media = card.thumbnail?.url
@@ -826,9 +825,9 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       "data-listing-id": card.id,
       "data-translation-display": card.translation_display,
       "data-content-language": card.content_locale,
-      // data-content-language is ours; lang is the one a screen reader and a
-      // crawler read, so untranslated source text declares itself there too.
-      ...(card.content_locale && card.content_locale !== localeCode ? { lang: card.content_locale } : {}),
+      // The title and source badge declare their own language; card controls
+      // and facts use the visitor's UI language, including inside a fallback page.
+      lang: localeCode,
       "data-review-badge": card.review_badge,
       "data-listing-status": card.listing_status,
       ...(rootAttrs || { "data-search-card": "true" }),
@@ -863,7 +862,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       ),
       h(
         "nav",
-        { className: "mk-pcard__actions", "aria-label": labels.searchResultActions },
+        { className: "mk-pcard__actions", "aria-label": `${labels.searchResultActions}: ${card.id}` },
         page ? h(ListingMatchEntry, { page, listingId: card.id }) : null,
         h(
           "a",
@@ -2746,7 +2745,7 @@ function SearchBody({ page }) {
           { className: "sr-select sr-select--compact" },
           h(
             "select",
-            { name: "sort" },
+            { name: "sort", "aria-label": labels.sort },
             ...(controls.sort_options || []).map((option) =>
               h("option", { key: option.id, value: option.id, selected: page.search.sort === option.id ? true : undefined }, option.label),
             ),

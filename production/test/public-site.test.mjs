@@ -599,8 +599,8 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-mobile-menu-close="true"/);
   assert.match(html, /role="dialog" aria-modal="true" aria-label="Primary navigation"/);
   assert.match(html, /data-language-switcher="desktop"/);
-  // The menu button's accessible name carries no dash (house copy rule).
-  assert.match(html, /aria-label="Language: English"/);
+  // The name includes the visible code and carries no dash (house copy rule).
+  assert.match(html, /aria-label="Language: EN \(English\)"/);
   assert.doesNotMatch(html.slice(html.indexOf("<header"), html.indexOf("</header>")), /[—–]/);
   assert.doesNotMatch(html, /<h4>/);
   assert.match(html, /data-language-switcher="mobile"/);
