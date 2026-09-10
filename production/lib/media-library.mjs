@@ -5,11 +5,8 @@ import { loadCmsSeed } from "./runtime.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { latestTourForListing } from "./tours.mjs";
 
-// Every media operation exists on the server — upload, replace, review, publish,
-// reattach — and the only way to reach an asset was to know which listing it
-// hangs off and open that listing's editor. This is the library the canvas
-// draws: every asset in one place, grouped by the four issues the code
-// actually computes.
+// List assets across the catalogue and link their review issues to the
+// existing listing editor. This library has no separate media write path.
 //
 // The four are listing-quality.mjs's media issues, and nothing else is invented
 // here: media_review_pending, missing_alt_text, thin_public_gallery and
