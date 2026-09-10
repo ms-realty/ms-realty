@@ -20,8 +20,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.equal(fs.existsSync(publicStyles), true);
   assert.equal(fs.existsSync(adminStyles), true);
   assert.match(fs.readFileSync(bundle, "utf8"), /MSRealtyPhotoSphereViewer/);
-  assert.equal(fs.readFileSync(publicClient, "utf8").endsWith(`${PUBLIC_APP_JS}\n`), true);
-  assert.equal(fs.readFileSync(adminClient, "utf8").endsWith(`${ADMIN_APP_JS}\n`), true);
+  // design-assets-parity checks both minified bundles against their sources.
   // The shared shell rules reach both surfaces, so both bundles carry them.
   for (const styles of [publicStyles, adminStyles]) {
     assert.match(fs.readFileSync(styles, "utf8"), /^\/\* GENERATED/);
