@@ -2,13 +2,11 @@ import { mediaAssetId } from "./media-reviews.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
 import { workspaceWithOperator } from "./admin-payloads.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
+import { publicMediaLibrary } from "./media.mjs";
+import { latestTourForListing } from "./tours.mjs";
 
-// The catalogue carries 4,978 media assets across 165 listings. Every operation
-// on one of them exists on the server — upload, replace, review, publish,
-// reattach — and the only way to reach an asset was to know which listing it
-// hangs off and open that listing's editor. This is the library the canvas
-// draws: every asset in one place, grouped by the four issues the code
-// actually computes.
+// List assets across the catalogue and link their review issues to the
+// existing listing editor. This library has no separate media write path.
 //
 // The four are listing-quality.mjs's media issues, and nothing else is invented
 // here: media_review_pending, missing_alt_text, thin_public_gallery and
@@ -53,9 +51,10 @@ function assetRow(record, item) {
   };
 }
 
-function matches(row, filters) {
+function matches(row, filters, listingIssues) {
   if (filters.issue === "media_review_pending" && !row.needs_review) return false;
   if (filters.issue === "missing_alt_text" && row.has_alt) return false;
+  if (listingIssues[filters.issue] && !listingIssues[filters.issue].has(row.listing_id)) return false;
   if (filters.listing && row.listing_id !== filters.listing) return false;
   if (filters.kind && row.kind !== filters.kind) return false;
   if (filters.q) {
@@ -68,11 +67,18 @@ function matches(row, filters) {
 export function renderAdminMediaLibraryPayload(
   registry,
   requestedLocale,
-  { seed = loadCmsSeed(), query = "", issue = "", listing = "", kind = "", page = 1, operatorId = null, generatedAt = new Date().toISOString() } = {},
+  { seed = loadCmsSeed(), tourApprovals = [], query = "", issue = "", listing = "", kind = "", page = 1, operatorId = null, generatedAt = new Date().toISOString() } = {},
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const listings = (seed.records || []).filter((record) => record.collection === "listings");
   const rows = listings.flatMap((record) => (record.media || []).map((item) => assetRow(record, item)));
+  const listingIssues = { thin_public_gallery: new Set(), tour_review_pending: new Set() };
+  for (const record of listings) {
+    // Match listing quality's threshold using the gallery the public page renders.
+    if (publicMediaLibrary(record.media || []).gallery_count < 3) listingIssues.thin_public_gallery.add(record.id);
+    const tour = latestTourForListing(tourApprovals, record.id) || record.tour;
+    if ((tour?.panorama_url || tour?.viewer_url) && !tour.is_public) listingIssues.tour_review_pending.add(record.id);
+  }
 
   const filters = {
     q: String(query).trim().toLocaleLowerCase(),
@@ -80,16 +86,12 @@ export function renderAdminMediaLibraryPayload(
     listing: String(listing).trim(),
     kind: String(kind).trim(),
   };
-  const filtered = rows.filter((row) => matches(row, filters));
+  const filtered = rows.filter((row) => matches(row, filters, listingIssues));
 
   const requested = Number(page);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Number.isInteger(requested) && requested > 0 ? Math.min(requested, totalPages) : 1;
   const offset = (currentPage - 1) * PAGE_SIZE;
-
-  // A gallery is thin when the listing cannot fill a public page; the figure
-  // comes from the same public library the site renders from.
-  const thinGalleries = listings.filter((record) => (record.media || []).filter((item) => item.is_public === true && item.kind === "photo").length < 6).length;
 
   return {
     kind: "admin_media_library",
@@ -122,7 +124,8 @@ export function renderAdminMediaLibraryPayload(
       // never makes the queue look shorter than it is.
       media_review_pending: rows.filter((row) => row.needs_review).length,
       missing_alt_text: rows.filter((row) => !row.has_alt).length,
-      thin_public_gallery: thinGalleries,
+      thin_public_gallery: listingIssues.thin_public_gallery.size,
+      tour_review_pending: listingIssues.tour_review_pending.size,
       public: rows.filter((row) => row.is_public).length,
       unreviewable: rows.filter((row) => !row.reviewable).length,
     },

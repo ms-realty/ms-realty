@@ -2702,6 +2702,7 @@ async function mediaLibraryPayload(registry, url, config) {
   });
   return renderAdminMediaLibraryPayload(registry, url.searchParams.get("locale") || "en", {
     seed,
+    tourApprovals: config.runtimeDataDurableOnly ? [] : readTourApprovals(config.tourApprovalLedgerPath),
     query: url.searchParams.get("q") || "",
     issue: url.searchParams.get("issue") || "",
     listing: url.searchParams.get("listing") || "",

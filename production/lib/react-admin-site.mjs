@@ -9695,6 +9695,7 @@ function MediaLibraryBody({ page }) {
     issueRow("media_review_pending", summary.media_review_pending),
     issueRow("missing_alt_text", summary.missing_alt_text),
     issueRow("thin_public_gallery", summary.thin_public_gallery),
+    issueRow("tour_review_pending", summary.tour_review_pending),
   ];
   const columns = [
     ui.mediaAsset || "Asset",

@@ -5807,7 +5807,8 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/admin/media") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = renderAdminMediaLibraryPayload(activeRegistry, adminLocaleParam(url), {
-        seed: currentSeed(),
+        seed: await currentMediaSeed(),
+        tourApprovals: runtimeDataDurableOnly ? [] : currentTourApprovals(),
         query: url.searchParams.get("q") || "",
         issue: url.searchParams.get("issue") || "",
         listing: url.searchParams.get("listing") || "",
