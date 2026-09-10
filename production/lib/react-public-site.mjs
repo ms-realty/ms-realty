@@ -4,6 +4,7 @@ import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 import { SearchAssistantEntry, SearchAssistantDialog } from "./react-public-search-assistant.mjs";
 import { ListingMatchEntry, SearchAlternativesEntry, SearchEvidenceDialog } from "./react-public-search-evidence.mjs";
+import { responsivePublicImageProps } from "./public-images.mjs";
 
 function uiLabels(page) {
   return labelsFor(page.locale || page.lang || "en");
@@ -754,9 +755,10 @@ function photoCountLabel(count, labels) {
   return Number(count) === 1 ? labels.photo || labels.photos : labels.photos;
 }
 
-function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
+function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority, sizes = "100vw") {
   return {
     src: image.url,
+    ...responsivePublicImageProps(image.url, sizes),
     alt: image.alt || fallbackAlt,
     loading,
     decoding: "async",
@@ -813,7 +815,8 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
     ? h(
         "a",
         { ...mediaAttrs, "data-card-thumbnail": "true" },
-        h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined)),
+        h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined,
+          orientation === "horizontal" ? "(max-width: 720px) calc(100vw - 40px), 320px" : "(max-width: 720px) calc(100vw - 40px), (max-width: 1080px) 50vw, 440px")),
         photoPlaceholder,
         ...mediaChildren,
       )
@@ -1068,8 +1071,9 @@ function formatEuro(value, localeCode = "en") {
 function SandanskiPhotograph({ className, localeCode }) {
   const photo = HERO_GALLERY_SLIDES[0];
   return h("picture", { className },
-    h("source", { type: "image/avif", srcSet: photo.avif, sizes: "(max-width: 1080px) 100vw, 50vw" }),
-    h("img", { src: photo.src, alt: localizedLocationValue(localeCode, "Sandanski"), width: photo.width, height: photo.height, fetchPriority: "high", decoding: "async" }),
+    h("img", { src: photo.src,
+      ...responsivePublicImageProps("/hero/sandanski-town-1280.avif", "(max-width: 1080px) calc(100vw - 40px), 520px", { widths: [384, 640, 750, 828], originalWidth: 1280 }),
+      alt: localizedLocationValue(localeCode, "Sandanski"), width: photo.width, height: photo.height, fetchPriority: "high", decoding: "async" }),
   );
 }
 
@@ -1354,8 +1358,9 @@ function HomeBody({ page }) {
     h("section", { className: "hp-town", "aria-labelledby": "hp-areas-title" },
       h("figure", { className: "hp-town__photo" },
         h("picture", null,
-          h("source", { type: "image/avif", srcSet: "/hero/sandanski-640.avif 640w, /hero/sandanski-1280.avif 1280w", sizes: "(max-width: 720px) calc(100vw - 40px), 55vw" }),
-          h("img", { src: "/hero/sandanski-1280.webp", width: 1280, height: 890, alt: english ? "Sandanski town and park" : "Sandanski", loading: "lazy", decoding: "async" }),
+          h("img", { src: "/hero/sandanski-1280.webp",
+            ...responsivePublicImageProps("/hero/sandanski-1280.avif", "(max-width: 720px) calc(100vw - 40px), 55vw", { widths: [384, 640, 750, 828], originalWidth: 1280 }),
+            width: 1280, height: 890, alt: english ? "Sandanski town and park" : "Sandanski", loading: "lazy", decoding: "async" }),
         ),
         english ? h("figcaption", null, "Sandanski town and park") : null,
       ),
@@ -3637,7 +3642,8 @@ function ListingBody({ page }) {
             "data-has-photo": image ? "true" : "false",
             disabled: image ? undefined : true,
           },
-          image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
+          image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined,
+            "(max-width: 1080px) calc(100vw - 40px), 900px")) : null,
           h("span", { className: "ld-g__empty" }, h(Icon, { name: "camera", size: 26 }), h("span", null, labels.photoUnavailable)),
         ),
       ),
@@ -3740,7 +3746,7 @@ function ListingBody({ page }) {
             "figure",
             { "data-listing-gallery-figure": "true" },
             h("img", {
-              ...publicImageProps(gallery[0], page.body.h1, "lazy"),
+              ...publicImageProps(gallery[0], page.body.h1, "lazy", undefined, null),
               "data-listing-gallery-image": "true",
             }),
             // Loading and failed-photo states for the viewer; the client script

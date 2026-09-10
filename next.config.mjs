@@ -5,9 +5,14 @@ import { HERO_ASSET_CACHE, IMMUTABLE_ASSET_CACHE } from "./production/lib/asset-
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
-export default withPayload({
+const config = withPayload({
   turbopack: { root },
   skipTrailingSlashRedirect: true,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "makler-realty.com", port: "", pathname: "/media/**", search: "" },
+    ],
+  },
   async headers() {
     return [
       {
@@ -25,3 +30,14 @@ export default withPayload({
     ];
   },
 });
+
+// Payload marks its theme hint critical on every route, making Chrome retry
+// the first navigation. Our website and CRM already apply the theme before
+// paint with CSS and the storage bootstrap; only Payload needs the SSR hint.
+const payloadHeaders = config.headers;
+config.headers = async () => [
+  ...(await payloadHeaders()).map(rule => ({ ...rule, headers: rule.headers.filter(header => header.key.toLowerCase() !== "critical-ch") })),
+  { source: "/payload-admin/:path*", headers: [{ key: "Critical-CH", value: "Sec-CH-Prefers-Color-Scheme" }] },
+];
+
+export default config;

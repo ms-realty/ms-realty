@@ -365,7 +365,7 @@ import {
   buildPublicRequestQueue,
   readPublicRequestOutcomes,
 } from "./public-request-outcomes.mjs";
-import { loadCmsSeed } from "./runtime.mjs";
+import { DEFAULT_CMS_SEED_PATH, loadCmsSeed } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
 import { parseCsv } from "./csv.mjs";
@@ -1084,7 +1084,9 @@ function bindRealtyCaseConditionExecutor(input, principal, action) {
 }
 
 function currentSeed(config) {
-  if (config.runtimeDataDurableOnly) return loadCmsSeed();
+  // Stable seed identity lets the existing, invalidated-on-save projection
+  // cache work across admin requests. File changes still refresh the seed.
+  if (config.runtimeDataDurableOnly) return readThroughCached(DEFAULT_CMS_SEED_PATH, loadCmsSeed);
   return applyMediaReviews(
     // B4: uploaded listing assets join the seed before reviews are applied, so
     // an upload enters the existing review queue instead of bypassing it.
@@ -1779,7 +1781,7 @@ async function leadInboxPayload(registry, url, config) {
     }
   }
   if (source.durable && config.runtimeDataDurableOnly) {
-    const seed = await projectListingDraftSeed(loadCmsSeed(), {
+    const seed = await projectListingDraftSeed(currentSeed(config), {
       env: config.authEnv || process.env,
       payload: config.payloadListingRuntime || null,
       requirePayload: true,
