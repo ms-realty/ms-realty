@@ -360,7 +360,6 @@ import {
   appendConsentRecord,
   createConsentRecord,
   latestConsentStates,
-  readConsentLedger,
 } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
@@ -1577,11 +1576,13 @@ export function createHttpApp({
   // Consent withdrawal has a durable home already: the consent_events
   // collection durable intake writes into. It goes durable together with the
   // other lead operations, and only while intake owns the consents.
-  const currentConsentLedger = () =>
+  const currentConsentLedger = (principal) =>
     consentLedgerFor({
-      durable: leadOperationsDurable() && leadDurableStore?.leadDurableStoreEnabled === true,
+      durable: leadOperationsDurable() && isLeadDurableStoreEnabled(leadDurableStore || {}),
+      durableOnly: runtimeDataDurableOnly || leadDurableStore?.leadDurableStoreEnabled === true,
       filePath: consentLedgerPath || undefined,
       payload: leadDurablePayload || null,
+      principal,
       workspaceId: leadDurableStore?.workspaceId,
       readConsentEvents: readConsentEventsDurably,
       appendConsentEvent: appendConsentEventDurably,
@@ -1973,11 +1974,11 @@ export function createHttpApp({
     buildRealtyCaseConditionQueue(await currentRealtyCaseConditionEvents(), {
       now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
     });
-  const currentConsentPayload = (requestedLocale, operatorId = null) =>
+  const currentConsentPayload = async (requestedLocale, operatorId = null) =>
     renderAdminConsentPayload(
       activeRegistry,
       requestedLocale,
-      latestConsentStates(readConsentLedger(consentLedgerPath || undefined)),
+      latestConsentStates(await currentConsentLedger(operatorId).read()),
       operatorId,
     );
   const currentOperationsReport = async (leads = null, principal = null, payloadSession = null) => {
@@ -5568,11 +5569,18 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentConsentPayload(adminLocaleParam(url), principal);
-      if (url.pathname === "/admin/consents" || wantsHtml(request, url)) {
-        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      try {
+        const payload = await currentConsentPayload(adminLocaleParam(url), principal);
+        if (url.pathname === "/admin/consents" || wantsHtml(request, url)) {
+          return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+        }
+        return adminJson(200, payload);
+      } catch (error) {
+        if (error?.status === 403) return adminForbidden(error.capability || "workspace:access");
+        const refusal = viewingStoreErrorResponse(error);
+        if (refusal) return refusal;
+        throw error;
       }
-      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/admin") {
@@ -7541,7 +7549,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const result = await recordConsentWithdrawalOperation({
-          consents: currentConsentLedger(),
+          consents: currentConsentLedger(principal),
           input: parseBody(request),
           principal,
           recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
@@ -7549,6 +7557,9 @@ export function createHttpApp({
         });
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
+        if (error?.status === 403) return adminForbidden(error.capability || "workspace:access");
+        const refusal = viewingStoreErrorResponse(error);
+        if (refusal) return refusal;
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }

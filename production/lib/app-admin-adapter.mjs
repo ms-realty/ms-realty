@@ -220,7 +220,6 @@ import {
   appendConsentRecord,
   createConsentRecord,
   latestConsentStates,
-  readConsentLedger,
 } from "./consent-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
@@ -1151,11 +1150,13 @@ function leadOperationLedgersFor(config) {
 // durable intake writes into. It goes durable together with the other lead
 // operations, and only while intake owns the consents.
 function consentLedgerForConfig(config) {
-  const durable = leadOperationsDurable(config) && config.leadDurableStore?.leadDurableStoreEnabled === true;
+  const durable = leadOperationsDurable(config) && isLeadDurableStoreEnabled(config.leadDurableStore || {});
   return consentLedgerFor({
     durable,
+    durableOnly: config.runtimeDataDurableOnly || config.leadDurableStore?.leadDurableStoreEnabled === true,
     filePath: config.consentLedgerPath,
     payload: config.leadDurablePayload || null,
+    principal: config.adminPrincipal,
     workspaceId: config.leadDurableStore?.workspaceId,
     readConsentEvents: config.readConsentEventsDurably || readConsentEventsDurably,
     appendConsentEvent: config.appendConsentEventDurably || appendConsentEventDurably,
@@ -1964,11 +1965,11 @@ async function documentChecklistPayload(registry, url, config) {
   );
 }
 
-function consentPayload(registry, url, config) {
+async function consentPayload(registry, url, config) {
   return renderAdminConsentPayload(
     registry,
     url.searchParams.get("locale") || "en",
-    latestConsentStates(readConsentLedger(config.consentLedgerPath)),
+    latestConsentStates(await consentLedgerForConfig(config).read()),
     config.adminPrincipal || null,
   );
 }
@@ -5333,8 +5334,8 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
 
     if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(await documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, await documentChecklistPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/admin/consents") return htmlResponse(consentPayload(registry, url, config));
-    if (request.method === "GET" && url.pathname === "/api/admin/consents") return jsonResponse(200, consentPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/consents") return htmlResponse(await consentPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/consents") return jsonResponse(200, await consentPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(await pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, await pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/cases") {
