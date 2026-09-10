@@ -17,6 +17,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { bindAuthenticatedOperator } from "./admin-auth.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentWithdrawal, readConsentLedger } from "./consent-ledger.mjs";
+import { LeadStoreUnavailableError, leadReadScopeForPrincipal } from "./lead-durable-store.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, readDeals, resolveClosedDeal } from "./deal-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
@@ -415,13 +416,16 @@ export async function applyLeadBulkOperation({ ledgers, journey, input, principa
  */
 export function consentLedgerFor({
   durable = false,
+  durableOnly = false,
   filePath = null,
   payload = null,
+  principal = null,
   workspaceId = "",
   readConsentEvents,
   appendConsentEvent,
 } = {}) {
   if (!durable) {
+    if (durableOnly) throw new LeadStoreUnavailableError("Durable consent authority is not configured");
     const target = filePath || DEFAULT_CONSENT_LEDGER_PATH;
     return {
       durable: false,
@@ -434,6 +438,7 @@ export function consentLedgerFor({
       },
     };
   }
+  leadReadScopeForPrincipal(principal, workspaceId);
   return {
     durable: true,
     async read() {
