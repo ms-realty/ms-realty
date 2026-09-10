@@ -2,12 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { canAdminAccess } from "../lib/admin-auth.mjs";
+import { ADMIN_PAGE_SURFACES } from "../lib/owner-operator-catalog.mjs";
 
 const TOKENS = {
   admin: "role-admin-token-0123456789abcdef",
   broker: "role-broker-token-0123456789abcdef",
   editor: "role-editor-token-0123456789abcdef",
   translator: "role-translator-token-0123456789abcdef",
+  agent: "role-agent-token-0123456789abcdef",
 };
 
 async function withRoleCredentials(fn) {
@@ -32,6 +35,45 @@ async function withRoleCredentials(fn) {
     }
   }
 }
+
+test("media, documents and locales retain role permissions through both real page adapters", async () => {
+  await withRoleCredentials(async (headers) => {
+    const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+    const surfaces = ADMIN_PAGE_SURFACES.filter((surface) => ["media_library", "document_records", "locale_rollout"].includes(surface.id));
+    for (const [role, auth] of Object.entries(headers)) {
+      const principal = { roles: [role] };
+      const expected = ADMIN_PAGE_SURFACES.filter((surface) =>
+        canAdminAccess(principal, surface.capability) &&
+        !["lead_pipeline", "requests"].includes(surface.id) &&
+        (surface.id !== "approved_content" || canAdminAccess(principal, "content:write")),
+      ).map((surface) => surface.id).sort();
+      for (const locale of ["bg", "ru", "en"]) {
+        for (const surface of surfaces) {
+          const url = `${surface.path}?locale=${locale}`;
+          const standalone = await dispatchHttp(app, { url, headers: auth });
+          const next = await renderAppAdminResponse(new Request(`https://example.test${url}`, { headers: auth }));
+          for (const [adapter, status, body] of [["standalone", standalone.status, standalone.body], ["Next", next.status, await next.text()]]) {
+            const context = `${adapter}/${role}/${locale}/${surface.id}`;
+            assert.equal(status, canAdminAccess(principal, surface.capability) ? 200 : 403, context);
+            if (status === 403) continue;
+            for (const navClass of ["crm-sb__nav", "adm-mobile-nav__links"]) {
+              const nav = body.match(new RegExp(`<nav class="${navClass}"[\\s\\S]*?</nav>`))?.[0];
+              assert.ok(nav, `${context}: ${navClass}`);
+              const routes = [...nav.matchAll(/data-admin-nav-route="([^"]+)"/g)].map((match) => match[1]).sort();
+              assert.deepEqual(routes, expected, `${context}: only permitted destinations`);
+            }
+            if (!canAdminAccess(principal, "administration:write")) assert.doesNotMatch(body, /action="\/api\/admin\/locales"/, context);
+          }
+        }
+        if (!canAdminAccess(principal, "administration:write")) {
+          const url = `/api/admin/locales?locale=${locale}`;
+          assert.equal((await dispatchHttp(app, { method: "POST", url, headers: auth, body: {} })).status, 403);
+          assert.equal((await renderAppAdminResponse(new Request(`https://example.test${url}`, { method: "POST", headers: auth, body: "{}" }))).status, 403);
+        }
+      }
+    }
+  });
+});
 
 test("standalone admin routes enforce role capabilities and hide unavailable workspaces", async () => {
   await withRoleCredentials(async (headers) => {

@@ -3563,9 +3563,7 @@ function adminNavigationGroups(page) {
   const advancedIds = ["migration_review", "translation_queue", "media_library", "locale_rollout", "document_records", "hermes", "connections", "reports", "activity", "tasks", "consents", "documents", "team"];
   const pick = (ids, primary) => ids.map((id) => routes.get(id)).filter(Boolean).map((destination) => ({ ...destination, primary }));
   const groups = [{ id: "primary", label: null, destinations: pick(primaryIds, true) }];
-  if (pageCan(page, "administration:read")) {
-    groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });
-  }
+  groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });
   return groups.filter((group) => group.destinations.length);
 }
 

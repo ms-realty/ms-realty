@@ -6,6 +6,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { ADMIN_PAGE_SURFACES } from "../lib/owner-operator-catalog.mjs";
+import { ADMIN_ROLES, canAdminAccess } from "../lib/admin-auth.mjs";
+import { renderAdminActivityPayload } from "../lib/admin-payloads.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 
 // The rail is the same on every screen: eight primary destinations at one
 // depth, then one "Advanced" disclosure holding the owner's setup and operating
@@ -47,6 +51,28 @@ const primaryIn = (rail) => [...rail.matchAll(/data-admin-nav-route="([^"]+)" da
 
 const PRIMARY_RAIL = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
 const LINKED_FROM_LEADS = ["lead_pipeline", "requests"];
+
+test("every role can navigate to its permitted work in all workspace languages on desktop and mobile", () => {
+  const registry = loadLocaleRegistry();
+  for (const role of ADMIN_ROLES) {
+    const principal = { id: `${role}_operator`, roles: [role], source: "credential_registry" };
+    const expected = ADMIN_PAGE_SURFACES.filter((surface) =>
+      canAdminAccess(principal, surface.capability) &&
+      !LINKED_FROM_LEADS.includes(surface.id) &&
+      (surface.id !== "approved_content" || canAdminAccess(principal, "content:write")),
+    ).map((surface) => surface.id).sort();
+    for (const locale of ["bg", "ru", "en"]) {
+      const body = renderReactAdminBody(renderAdminActivityPayload(registry, locale, [], principal));
+      for (const navClass of ["crm-sb__nav", "adm-mobile-nav__links"]) {
+        const nav = body.match(new RegExp(`<nav class="${navClass}"[\\s\\S]*?</nav>`))?.[0];
+        assert.ok(nav, `${role}/${locale}: ${navClass} exists`);
+        assert.deepEqual(routesIn(nav).sort(), expected, `${role}/${locale}: ${navClass} includes all permitted routes and no others`);
+        assert.equal((nav.match(/aria-current="page"/g) || []).length, 1, `${role}/${locale}: current Activity link stays reachable`);
+        assert.match(nav, /<details[^>]*data-admin-nav-group="advanced"[^>]* open/, `${role}/${locale}: current group opens`);
+      }
+    }
+  }
+});
 
 test("every admin surface renders the same rail: eight primary destinations, then Advanced", async () => {
   const server = app();

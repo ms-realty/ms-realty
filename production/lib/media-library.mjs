@@ -1,5 +1,6 @@
 import { mediaAssetId } from "./media-reviews.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { workspaceWithOperator } from "./admin-payloads.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 
 // The catalogue carries 4,978 media assets across 165 listings. Every operation
@@ -104,7 +105,7 @@ export function renderAdminMediaLibraryPayload(
       description: workspace.copy.mediaLibraryDescription || "Every photo, floor plan and tour in the catalogue, and what each one is waiting for.",
       robots: "noindex,nofollow",
     },
-    workspace: { ...workspace, operator_id: operatorId || workspace.operator_id || null },
+    workspace: workspaceWithOperator(workspace, operatorId),
     generated_at: generatedAt,
     assets: filtered.slice(offset, offset + PAGE_SIZE),
     filters: { q: filters.q, issue: filters.issue, listing: filters.listing, kind: filters.kind },
