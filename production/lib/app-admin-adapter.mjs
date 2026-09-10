@@ -76,7 +76,7 @@ import {
   saveProviderConnection,
   syncViewingToGoogleCalendar,
 } from "./provider-connections.mjs";
-import { operatorProviderAvailability, operatorProviderConfigFromEnv } from "./operator-provider-catalog.mjs";
+import { operatorProviderAvailability, operatorProviderConfigFromEnv, operatorProviderConfigForHost } from "./operator-provider-catalog.mjs";
 import {
   OPERATOR_INTEGRATIONS_PATH,
   isUnrestrictedOwnerAdmin,
@@ -403,7 +403,7 @@ import {
   createTourApproval,
   readTourApprovals,
 } from "./tours.mjs";
-import { crossOriginWriteRejection } from "./request-guard.mjs";
+import { crossOriginWriteRejection, requestHost } from "./request-guard.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
 import {
   adminRuntimeDataDurableOnlyFromEnv,
@@ -4317,6 +4317,9 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     }
   }
   if (!principal) {
+    if (request.method === "GET" && requestPath === "/api/admin/connections" && new URL(request.url).searchParams.get("action") === "callback") {
+      return new Response(null, { status: 303, headers: { location: "/admin/login", "cache-control": "no-store", "set-cookie": adminSessionClearCookie() } });
+    }
     if ((requestPath === "/admin" || requestPath.startsWith("/admin/")) && request.headers.get("accept")?.includes("text/html")) {
       return new Response(null, {
         status: 303,
@@ -4742,7 +4745,10 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       return jsonResponse(405, { kind: "method_not_allowed" });
     }
     if (["GET", "POST"].includes(request.method) && url.pathname === "/admin/connect") {
-      const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
+      const providerConfig = operatorProviderConfigForHost(
+        config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env),
+        requestHost(request.headers) || new URL(request.url).host,
+      );
       const configuredWorkspaceId =
         config.workspaceSettingsWorkspaceId || providerConfig.workspaceId || (config.authEnv || process.env).MS_REALTY_WORKSPACE_ID || "";
       const canManageConnections = Boolean(
@@ -4788,7 +4794,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
             storeError,
           });
       const base =
-        String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
+        String(providerConfig.publicOrigin || "").trim() || new URL(request.url).origin;
       if (agent) {
         recordAudit(
           {
@@ -4831,7 +4837,10 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       url.pathname === OPERATOR_CONNECTION_DISCONNECT_PATH ||
       url.pathname === OPERATOR_CONNECTION_AGENT_CONFIG_PATH
     ) {
-      const providerConfig = config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env);
+      const providerConfig = operatorProviderConfigForHost(
+        config.providerConnection || operatorProviderConfigFromEnv(config.authEnv || process.env),
+        requestHost(request.headers) || new URL(request.url).host,
+      );
       const availability = operatorProviderAvailability(providerConfig);
       const configuredWorkspaceId =
         config.workspaceSettingsWorkspaceId || providerConfig.workspaceId || (config.authEnv || process.env).MS_REALTY_WORKSPACE_ID || "";
@@ -4977,7 +4986,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
           });
         }
         const origin =
-          String((config.authEnv || process.env).MS_REALTY_PUBLIC_ORIGIN || "").trim() || new URL(request.url).origin;
+          String(providerConfig.publicOrigin || "").trim() || new URL(request.url).origin;
         recordAudit(
           {
             action: "operator_agent_token_issued",

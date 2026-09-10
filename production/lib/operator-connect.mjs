@@ -236,6 +236,8 @@ function ownerConnectionView(card, copy, canManageConnections) {
         : copy.connected
       : card.status === "needs_setup"
         ? copy.needsSetup
+        : card.status === "disabled"
+          ? copy.disabled
         : copy.notConnected,
     account_label: storedConnected ? card.account_label || copy.accountConfirmed : "",
     verified_label: storedConnected ? `${copy.verifiedAt}: ${verifiedAt(card.last_verified_at, copy)}` : "",

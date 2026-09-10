@@ -11,7 +11,7 @@ import { renderAdminActivityPayload } from "../lib/admin-payloads.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
 
-// The rail is the same on every screen: eight primary destinations at one
+// The rail is the same on every screen: daily work and Hermes destinations at one
 // depth, then one "Advanced" disclosure holding the owner's setup and operating
 // screens. Pipeline and Requests are not in the rail; the Leads screen links to
 // them. This renders each admin surface and checks the rail rather than
@@ -49,7 +49,7 @@ const railOf = (body) => {
 const routesIn = (rail) => [...rail.matchAll(/data-admin-nav-route="([^"]+)"/g)].map((m) => m[1]);
 const primaryIn = (rail) => [...rail.matchAll(/data-admin-nav-route="([^"]+)" data-admin-nav-primary="true"/g)].map((m) => m[1]);
 
-const PRIMARY_RAIL = ["today", "lead_inbox", "viewings", "contacts", "listing_manager", "realty_cases", "approved_content", "settings"];
+const PRIMARY_RAIL = ["today", "lead_inbox", "listing_manager", "viewings", "contacts", "realty_cases", "hermes"];
 const LINKED_FROM_LEADS = ["lead_pipeline", "requests"];
 
 test("every role can navigate to its permitted work in all workspace languages on desktop and mobile", () => {
@@ -68,13 +68,13 @@ test("every role can navigate to its permitted work in all workspace languages o
         assert.ok(nav, `${role}/${locale}: ${navClass} exists`);
         assert.deepEqual(routesIn(nav).sort(), expected, `${role}/${locale}: ${navClass} includes all permitted routes and no others`);
         assert.equal((nav.match(/aria-current="page"/g) || []).length, 1, `${role}/${locale}: current Activity link stays reachable`);
-        assert.match(nav, /<details[^>]*data-admin-nav-group="advanced"[^>]* open/, `${role}/${locale}: current group opens`);
+        assert.match(nav, /data-nav-current="activity"/, `${role}/${locale}: the closed group names the current destination`);
       }
     }
   }
 });
 
-test("every admin surface renders the same rail: eight primary destinations, then Advanced", async () => {
+test("every admin surface renders the same rail: daily work and Hermes destinations, then Advanced", async () => {
   const server = app();
   const surfaces = ADMIN_PAGE_SURFACES.filter((s) => !NEEDS_PAYLOAD_RUNTIME.has(s.path));
   let reference = null;
@@ -96,7 +96,7 @@ test("every admin surface renders the same rail: eight primary destinations, the
     const routes = routesIn(rail);
     if (reference === null) reference = routes;
     assert.deepEqual(routes, reference, `${surface.path} offers the same destinations, in the same order`);
-    assert.deepEqual(primaryIn(rail), PRIMARY_RAIL, `${surface.path} leads with the eight primary destinations`);
+    assert.deepEqual(primaryIn(rail), PRIMARY_RAIL, `${surface.path} leads with the daily work and Hermes destinations`);
     // One disclosure, the owner's Advanced group; nothing a broker works from
     // sits inside it.
     assert.equal((rail.match(/<details/g) || []).length, 1, `${surface.path} carries exactly one disclosure`);
@@ -116,12 +116,15 @@ test("every admin surface renders the same rail: eight primary destinations, the
   assert.match(leads.body, /href="\/admin\/requests" data-lead-screen-link="requests"/);
 });
 
-test("the Advanced disclosure opens on the screen that lives inside it and stays closed elsewhere", async () => {
+test("specialist navigation stays compact and names the current destination", async () => {
   const server = app();
   const today = await dispatchHttp(server, { url: "/admin/today?locale=en", headers: AUTH });
   assert.doesNotMatch(railOf(today.body), /<details[^>]* open/);
   const hermes = await dispatchHttp(server, { url: "/admin/hermes?locale=en", headers: AUTH });
-  assert.match(railOf(hermes.body), /<details class="crm-sb__group-wrap crm-sb__advanced"[^>]* open/);
+  assert.doesNotMatch(railOf(hermes.body), /<details[^>]* open/);
+  const settings = await dispatchHttp(server, { url: "/admin/settings?locale=en", headers: AUTH });
+  assert.doesNotMatch(railOf(settings.body), /<details[^>]* open/);
+  assert.match(railOf(settings.body), /data-nav-current="settings"/);
 });
 
 test("the Leads destination stays lit on Pipeline and Requests", async () => {

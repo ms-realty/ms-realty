@@ -485,7 +485,7 @@ test("the approved content state filter narrows the rows on show and keeps the c
   assert.match(ready.body, /data-approved-record="hotovo-bg"/);
 });
 
-test("approved content is the Content destination in the primary rail and speaks the three workbench languages", async () => {
+test("approved content stays accessible and speaks the three workbench languages", async () => {
   const english = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en", headers: auth });
   assert.match(english.body, /<a class="crm-nav crm-nav--on" href="\/admin\/approved-content" aria-current="page"/);
   assert.match(english.body, /Approved content/);
@@ -498,17 +498,16 @@ test("approved content is the Content destination in the primary rail and speaks
     assert.doesNotMatch(page.body, /build-approved-content\.mjs/, locale);
     assert.doesNotMatch(page.body, /Example record, not real content/, locale);
   }
-  // Listings and Content are primary; the media library and the translation
-  // queue sit in the owner's Advanced disclosure.
+  // Listings and Hermes lead; publishing tools remain under Advanced.
   const primaryGroup = english.body.match(/data-admin-nav-group="primary"([\s\S]*?)(?=data-admin-nav-group="advanced")/)?.[1] || "";
   const advancedGroup = english.body.match(/data-admin-nav-group="advanced"([\s\S]*?)(?=class="crm-sb__me")/)?.[1] || "";
-  for (const route of ["listings", "approved-content"]) {
+  for (const route of ["listings", "hermes"]) {
     assert.ok(primaryGroup.includes(`href="/admin/${route}"`), `${route} is a primary destination`);
   }
-  for (const route of ["media", "translations"]) {
+  for (const route of ["approved-content", "media", "translations"]) {
     assert.ok(advancedGroup.includes(`href="/admin/${route}"`), `${route} remains accessible under Advanced`);
   }
-  assert.match(primaryGroup, />Content</);
+  assert.match(advancedGroup, />Content</);
 });
 
 test("approved content styles ship in the CMS adapter and reach the generated sheet", () => {

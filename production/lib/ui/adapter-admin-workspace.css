@@ -90,11 +90,10 @@ html:root .crm-app {
 .crm-app .crm-nav--on { background: var(--sb-on); color: var(--sb-on-text); font-weight: 600; }
 .crm-app .crm-nav--on::before { content: none; }
 .crm-app .crm-nav--on svg { color: currentColor; }
-/* Advanced: one native disclosure, closed by default, opened by the operator
-   or by the screen that lives inside it. The summary reads like a group label
-   with a chevron so it is not mistaken for a ninth destination. */
+/* Specialist tools stay behind one native disclosure. Its summary names the
+   current destination without expanding the whole tool list. */
 .crm-app .crm-sb__advanced { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-/* Secondary destinations read one step smaller than the eight primary ones,
+/* Secondary destinations read one step smaller than the daily work routes,
    and "Website languages" then fits the 216px rail on one line. */
 .crm-app .crm-sb__advanced .crm-nav { min-height: 40px; padding-block: 8px; font-size: 14px; }
 .crm-app .crm-sb__advanced .crm-sb__destination { gap: 0; }
@@ -102,6 +101,9 @@ html:root .crm-app {
 .crm-app .crm-sb__group--summary::-webkit-details-marker { display: none; }
 .crm-app .crm-sb__group--summary:hover { background: var(--surface-hover); color: var(--text-strong); }
 .crm-app .crm-sb__group--summary:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.crm-app .crm-sb__group--summary[data-nav-current] { background: var(--atlas-tint); color: var(--text-strong); }
+.crm-sb__group--summary small { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 400; }
+.adm-mobile-nav__group--summary small { margin-inline-start: auto; font-size: 14px; font-weight: 400; }
 .crm-app .crm-sb__group--summary svg { transition: transform var(--dur-fast, 120ms) var(--ease-out, ease-out); }
 .crm-app .crm-sb__advanced[open] > .crm-sb__group--summary svg { transform: rotate(90deg); }
 [dir="rtl"] .crm-app .crm-sb__group--summary svg { transform: rotate(180deg); }
@@ -158,6 +160,9 @@ html[data-theme-ready] .crm-app .crm-sb__prefs .adm-theme--rail { display: grid;
 .crm-app main select:not([multiple]):not([size]),
 .crm-app main input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .crm-app main textarea { min-height: 44px; height: auto; border-color: var(--atlas-control); border-radius: 12px; font-size: 16px; line-height: 24px; }
+.crm-app main :is(input, textarea, select) { font-weight: 400; }
+.adm-form__group > :has(> textarea) { grid-column: 1 / -1; }
+.crm-app .adm-form__group textarea[name="description"] { min-height: 200px; }
 .crm-app .adm-inbox { grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr); gap: 24px; }
 .crm-app .adm-inbox__list { border-radius: 16px; }
 .crm-app .adm-inbox__row[aria-current="true"] { background: var(--atlas-tint); box-shadow: none; }

@@ -297,7 +297,9 @@ test("the owner page GET does not issue a credential, while explicit POST does",
   assert.equal(JSON.stringify(adapterIssued).includes("a1."), false);
 });
 
-test("both owner runtimes complete OpenRouter PKCE and verify one token before storage", async (t) => {
+test("both owner runtimes keep canonical-domain OpenRouter PKCE on the signed-in host with legacy origin config", async (t) => {
+  const browserOrigin = "https://makler-realty.com";
+  const legacyConfig = { ...PROVIDER_CONFIG, publicOrigin: "https://ms-realty.ms-realty-bg.workers.dev" };
   const apiKey = "sk-or-v1-route-secret-never-rendered";
   const model = "NousResearch/Hermes-4-14B";
   const fetchCalls = [];
@@ -323,7 +325,7 @@ test("both owner runtimes complete OpenRouter PKCE and verify one token before s
     }
     throw new Error(`unstubbed OpenRouter fetch: ${requestUrl}`);
   };
-  const sessionHeaders = { cookie: `ms_admin=${SESSION}`, host: "ms-realty.example" };
+  const sessionHeaders = { cookie: `ms_admin=${SESSION}`, host: "makler-realty.com" };
 
   const standalonePayload = providerPayload();
   const standaloneAudit = auditFile(t);
@@ -331,7 +333,7 @@ test("both owner runtimes complete OpenRouter PKCE and verify one token before s
     reviewedAt: "2026-08-29T12:00:00.000Z",
     auditLogPath: standaloneAudit,
     payloadAdminAuth: payloadAdminAuth(),
-    providerConnection: PROVIDER_CONFIG,
+    providerConnection: legacyConfig,
     providerConnectionPayload: standalonePayload,
     providerFetch,
   });
@@ -359,6 +361,7 @@ test("both owner runtimes complete OpenRouter PKCE and verify one token before s
     createHash("sha256").update(standalonePkce.verifier).digest("base64url"),
   );
   const standaloneCallback = new URL(standaloneAuthorization.searchParams.get("callback_url"));
+  assert.equal(standaloneCallback.origin, browserOrigin);
   assert.equal(standaloneCallback.searchParams.get("provider"), "ai");
   assert.equal(standaloneCallback.searchParams.get("action"), "callback");
   assert.equal(standaloneCallback.searchParams.get("state"), standalonePkce.state);
@@ -386,12 +389,12 @@ test("both owner runtimes complete OpenRouter PKCE and verify one token before s
     reviewedAt: "2026-08-29T12:00:00.000Z",
     auditLogPath: adapterAudit,
     payloadAdminAuth: payloadAdminAuth(),
-    providerConnection: PROVIDER_CONFIG,
+    providerConnection: legacyConfig,
     providerConnectionPayload: adapterPayload,
     providerFetch,
   };
   const adapterStart = await renderAppAdminResponse(
-    new Request(`${ORIGIN}/api/admin/connections?provider=ai&action=start`, { headers: sessionHeaders }),
+    new Request(`${browserOrigin}/api/admin/connections?provider=ai&action=start`, { headers: sessionHeaders }),
     { config: adapterConfig },
   );
   assert.equal(adapterStart.status, 303);
@@ -410,10 +413,11 @@ test("both owner runtimes complete OpenRouter PKCE and verify one token before s
     createHash("sha256").update(adapterPkce.verifier).digest("base64url"),
   );
   const adapterCallback = new URL(adapterAuthorization.searchParams.get("callback_url"));
+  assert.equal(adapterCallback.origin, browserOrigin);
   assert.equal(adapterCallback.searchParams.get("state"), adapterPkce.state);
   adapterCallback.searchParams.set("code", "openrouter-code");
   const adapterCallbackResponse = await renderAppAdminResponse(
-    new Request(`${ORIGIN}${adapterCallback.pathname}${adapterCallback.search}`, {
+    new Request(`${browserOrigin}${adapterCallback.pathname}${adapterCallback.search}`, {
       headers: { ...sessionHeaders, cookie: `${sessionHeaders.cookie}; ${adapterCookiePair}` },
     }),
     { config: adapterConfig },
@@ -864,4 +868,18 @@ test("the delegated assistant token opens /mcp and nothing else opens it", async
     { config: disabled },
   );
   assert.equal(withoutSecret.status, 401);
+});
+
+
+test("expired OAuth sessions return to sign-in without exposing callback parameters", async () => {
+  const callback = "/api/admin/connections?provider=ai&action=callback&code=expired-code&state=expired-state";
+  const app = createHttpApp({ providerConnection: PROVIDER_CONFIG, payloadAdminAuth: payloadAdminAuth() });
+  const standalone = await dispatchHttp(app, { method: "GET", url: callback, headers: {host: "makler-realty.com", accept: "text/html"} });
+  assert.equal(standalone.status, 303);
+  assert.equal(standalone.headers.location, "/admin/login");
+  const adapter = await renderAppAdminResponse(new Request("https://makler-realty.com" + callback, {headers: {accept: "text/html"}}), {
+    config: {...appAdminConfigFromEnv({NODE_ENV: "test"}), providerConnection: PROVIDER_CONFIG, payloadAdminAuth: payloadAdminAuth()},
+  });
+  assert.equal(adapter.status, 303);
+  assert.equal(adapter.headers.get("location"), "/admin/login");
 });

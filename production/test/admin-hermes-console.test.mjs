@@ -174,7 +174,7 @@ test("Hermes console loads a safe recovery state without probing when configurat
   assert.equal(fetchCalls, 0);
   assert.match(html, /data-react-admin-ui="hermes"/);
   assert.match(html, /data-hermes-runtime="blocked"/);
-  assert.match(html, /data-hermes-readiness="true"/);
+  assert.match(html, /<details class="adm-workbench-disclosure" data-hermes-runtime-card="blocked">/);
   assert.match(html, /<details class="adm-hermes-diagnostics" data-hermes-diagnostics="collapsed">/);
   assert.match(html, /Runtime diagnostics/);
   assert.match(html, /<details class="adm-hermes-safeguards" data-hermes-safeguards="collapsed">/);

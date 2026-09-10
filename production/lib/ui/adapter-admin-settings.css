@@ -23,6 +23,10 @@
 .adm-today-briefing__facts dt { color: var(--text-muted); font-size: var(--text-xs); }
 .adm-today-briefing__facts dd { margin: 0; color: var(--text-strong); font-size: var(--text-sm); line-height: var(--lh-snug); overflow-wrap: anywhere; }
 .adm-today-briefing__action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   padding: 0 var(--space-5) var(--space-4);
 }
 .adm-today-briefing__action .mk-btn {
@@ -151,6 +155,20 @@
 [data-workspace-onboarding="complete"] .adm-onboarding__progress progress { accent-color: var(--success-600); }
 
 /* ---- Settings screen ---- */
+.adm-settings-workspace { width: 100%; max-width: 960px; }
+.crm-app .adm-settings-workspace .adm-owner-flow__stack { gap: 0; }
+.crm-app .adm-settings-workspace .adm-settings-disclosure {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+.crm-app .adm-settings-workspace .adm-settings-disclosure > summary { padding: 20px 0; }
+.crm-app .adm-settings-workspace .adm-settings-disclosure > summary:hover { background: var(--surface-hover); }
+.crm-app .adm-settings-workspace .adm-settings-disclosure > summary:focus-visible { outline: 2px solid var(--text-link); outline-offset: 2px; }
+.crm-app .adm-settings-workspace .adm-settings-disclosure > summary .crm-pill { display: none; }
+.crm-app .adm-settings-workspace .adm-settings-history { padding-top: 16px; }
+.adm-today-briefing__context { margin: 0; padding: 20px 16px; max-width: 65ch; color: var(--text-body); font-size: 16px; line-height: 1.6; }
 .adm-settings-panel { scroll-margin-top: calc(var(--adm-shell-top-offset, 64px) + var(--space-4)); }
 .adm-settings-disclosure > summary { cursor: pointer; list-style: none; }
 .adm-settings-disclosure > summary::-webkit-details-marker { display: none; }

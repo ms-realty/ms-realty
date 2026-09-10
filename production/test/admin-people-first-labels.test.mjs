@@ -60,14 +60,14 @@ test("the pipeline carries no KPI strip, one overflow menu per card, and the sel
   for (const title of page.body.matchAll(/<h3>([^<]*)<\/h3>/g)) assert.doesNotMatch(title[1], /^lead-/, title[1]);
 });
 
-test("Today keeps its queue and detail and drops the Hermes and reports links", async () => {
+test("Today keeps the work queue and opens Hermes with the selected task context", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/today?locale=en", headers: auth });
   assert.match(page.body, /data-next-actions="true"/);
   assert.match(page.body, /data-today-briefing="true"/);
   assert.doesNotMatch(page.body, /data-hermes-entry="today"/);
-  // The rail may still list those screens; the task surface itself does not.
+  // Assistance opens with a specific task; unrelated reports stay out of the task flow.
   const main = page.body.slice(page.body.indexOf('data-today-workspace="true"'), page.body.indexOf("</main>"));
   assert.ok(main.length > 0, "the Today workspace renders inside main");
   assert.doesNotMatch(main, /href="\/admin\/reports(?:\?[^"]*)?"/);
-  assert.doesNotMatch(main, /href="\/admin\/hermes(?:\?[^"]*)?"/);
+  assert.match(main, /href="\/admin\/hermes\?prompt=[^"]+" data-today-hermes-context=/);
 });

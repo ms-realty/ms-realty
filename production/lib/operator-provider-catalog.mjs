@@ -17,6 +17,7 @@
 // as a button that would fail or a credential checklist for the owner.
 
 import crypto from "node:crypto";
+import { CANONICAL_PUBLIC_ORIGIN, publicOriginForHost } from "./public-origin.mjs";
 
 import {
   DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL,
@@ -340,6 +341,14 @@ export function operatorProviderConfigFromEnv(env = process.env) {
     githubClientSecret: trimmed(env.MS_REALTY_GITHUB_OAUTH_CLIENT_SECRET),
     hermes: hermesConfig(env),
   };
+}
+
+// OAuth must return to the browser's signed-in host after canonical cutover.
+// Reuse the public-domain allowlist; arbitrary forwarded hosts cannot select a callback.
+export function operatorProviderConfigForHost(config, host) {
+  return publicOriginForHost(host, { MS_REALTY_PUBLIC_ORIGIN: config.publicOrigin }) === CANONICAL_PUBLIC_ORIGIN
+    ? { ...config, publicOrigin: CANONICAL_PUBLIC_ORIGIN }
+    : config;
 }
 
 function storeMissing(config) {

@@ -126,8 +126,8 @@ test("Today, Hermes, and Settings use an in-flow owner grid instead of a split r
 
 test("connections and Hermes keep supporting state in-flow without a sticky rail", () => {
   assert.match(adminAdapterCss, /\.adm-owner-flow--connections \[data-connections-support="true"\],\s*\.adm-owner-flow--hermes \[data-hermes-support="true"\],\s*\.adm-owner-flow--hermes \[data-hermes-disclosures="true"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(300px, 1fr\)\)/);
-  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-list\[data-connection-list="core"\]\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit, minmax\(280px, 1fr\)\)/);
-  assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-connection-row\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(adminAdapterCss, /\.adm-connections-directory\s*\{[^}]*max-width:\s*1040px/);
+  assert.match(adminAdapterCss, /\.adm-connection-row__details > summary\s*\{[^}]*min-height:\s*92px/);
   assert.match(adminAdapterCss, /main\[data-react-admin-ui="connections"\] \.adm-workbench-disclosure > summary\s*\{[^}]*min-height:\s*44px/);
   assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?\.adm-owner-flow__support\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.match(adminAdapterCss, /@media \(max-width: 700px\)[\s\S]*?main\[data-react-admin-ui="hermes"\] \.adm-hermes-panel-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
@@ -248,7 +248,7 @@ test("connect page uses the persistent workbench shell and responsive connection
   assert.match(html, /data-react-admin-ui="connections"/);
   assert.match(html, /data-provider="google" data-status="connected"/);
   assert.match(html, /Проверено: дата не указана/);
-  assert.match(adminAdapterCss, /\.adm-connection-row,/);
+  assert.match(adminAdapterCss, /\.adm-connection-row\s*\{/);
   assert.match(adminAdapterCss, /@media \(max-width: 700px\)/);
   const chrome = html.slice(html.indexOf("<body"), html.indexOf("<script defer"));
   assert.doesNotMatch(chrome, /[—–]/);
