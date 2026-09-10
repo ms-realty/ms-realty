@@ -37,8 +37,8 @@ function themeBootstrapScript() {
 }
 
 // The admin CRM and the public site have separate stylesheets so a visitor
-// never pays for the surface they cannot reach, and the Hebrew locale is the
-// only one that asks Google for the Noto Hebrew faces.
+// never pays for the surface they cannot reach. The font stylesheet uses
+// native unicode-range subsets, served from the same origin as the page.
 function designSystemStyle(page) {
   const admin = String(page?.kind || "").startsWith("admin_");
   const sheet = admin ? "ms-realty-admin" : "ms-realty-public";
@@ -46,8 +46,6 @@ function designSystemStyle(page) {
   const locale = page?.lang || page?.locale || "en";
   const fonts = locale === "he" ? FONTS_URL_HEBREW : FONTS_URL;
   return [
-    '<link rel="preconnect" href="https://fonts.googleapis.com">',
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
     `<link rel="stylesheet" href="${fonts}">`,
     `<link rel="stylesheet" href="/vendor/${sheet}.css?v=${hash}" data-ms-realty-design-system="external" data-ds-hash="${hash}">`,
   ].join("\n");
