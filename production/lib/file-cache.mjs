@@ -31,17 +31,21 @@ export function fileSignature(filePath) {
 
 export function readThroughCached(filePath, loader) {
   if (!filePath || disabled()) return loader();
-  const signature = fileSignature(filePath);
+  // An ordered dependency list also caches a derived view. Missing optional
+  // ledgers have a stable null signature; creating one invalidates the view.
+  const multiple = Array.isArray(filePath);
+  const key = multiple ? JSON.stringify(filePath) : filePath;
+  const signature = multiple ? JSON.stringify(filePath.map(fileSignature)) : fileSignature(filePath);
   if (signature === null) {
     // Missing file: always defer to the loader so each module keeps its own
     // missing-file semantics (empty ledger, thrown error, defaults).
-    cache.delete(filePath);
+    cache.delete(key);
     return loader();
   }
-  const hit = cache.get(filePath);
+  const hit = cache.get(key);
   if (hit && hit.signature === signature) return hit.value;
   const value = loader();
-  cache.set(filePath, { signature, value });
+  cache.set(key, { signature, value });
   return value;
 }
 

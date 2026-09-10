@@ -41,6 +41,27 @@ test("readThroughCached defers to the loader for missing files", () => {
   assert.deepEqual(readThroughCached(missing, () => []), []);
 });
 
+test("derived views refresh when any dependency is changed, created or removed", (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-cache-dependencies-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const dependencies = [path.join(dir, "base.json"), path.join(dir, "optional.json")];
+  fs.writeFileSync(dependencies[0], "{}");
+  const loader = () => ({});
+  let current = readThroughCached(dependencies, loader);
+  assert.strictEqual(readThroughCached([...dependencies], loader), current);
+  for (const change of [
+    () => fs.appendFileSync(dependencies[0], "\n"),
+    () => fs.writeFileSync(dependencies[1], "{}"),
+    () => fs.unlinkSync(dependencies[1]),
+  ]) {
+    change();
+    const next = readThroughCached(dependencies, loader);
+    assert.notStrictEqual(next, current);
+    assert.strictEqual(readThroughCached(dependencies, loader), next);
+    current = next;
+  }
+});
+
 test("fileSignature is null for missing files and present for existing files", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-file-cache-sig-"));
   const filePath = path.join(dir, "state.json");

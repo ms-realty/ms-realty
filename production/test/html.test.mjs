@@ -118,10 +118,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /content="width=device-width, initial-scale=1, viewport-fit=cover"/);
   assert.match(homeHtml, /data-ms-realty-design-system="external"/);
   assert.match(homeHtml, /href="\/vendor\/ms-realty-public\.css\?v=[a-f0-9]{12}"/);
-  // A public page never links the admin CRM stylesheet, and the Hebrew locale
-  // is the only one that asks Google for the Noto Hebrew faces.
+  // Public pages keep their own stylesheet and load the pinned font subsets.
   assert.doesNotMatch(homeHtml, /ms-realty-admin\.css/);
-  assert.match(homeHtml, /family=Noto\+Sans\+Hebrew/);
+  assert.match(homeHtml, /href="\/vendor\/ms-realty-fonts\.css\?v=[a-f0-9]{12}"/);
+  assert.doesNotMatch(homeHtml, /fonts\.(googleapis|gstatic)\.com/);
   assert.match(homeHtml, /role="search"/);
   assert.match(homeHtml, /data-action="seller"/);
   assert.match(homeHtml, /data-hero-media="approved"/);

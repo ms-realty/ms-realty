@@ -7,7 +7,8 @@
 //   npm run design:build
 //
 // Inputs:
-//   makler-realty-design-system/project/tokens/*.css   (token layers, fonts URL)
+//   makler-realty-design-system/project/tokens/*.css   (token layers)
+//   public/vendor/ms-realty-fonts.css                  (pinned font subsets)
 //   makler-realty-design-system/project/components/**  (mk-* component CSS blocks)
 //   makler-realty-design-system/project/ui_kits/**     (website + crm kit CSS blocks)
 //   makler-realty-design-system/project/components/general/Logo.jsx (embedded logo data URIs)
@@ -86,17 +87,13 @@ function jsxFilesUnder(dir) {
   return files.sort();
 }
 
-// The Noto Hebrew faces are only worth fetching on the Hebrew locale, so
-// tokens/fonts.css declares two @import urls behind marker comments and the
-// pages pick between them.
+// Production serves pinned copies of the design-system fonts. Keep the design
+// previews portable; native unicode-range selects the required scripts here.
 function fontUrls() {
-  const source = read(path.join(DS, "tokens", "fonts.css"));
-  const grab = (marker) => {
-    const match = source.match(new RegExp(`/\\*\\s*@fonts\\s+${marker}\\s*\\*/\\s*@import\\s+url\\(['"]([^'"]+)['"]\\)`));
-    if (!match) throw new Error(`tokens/fonts.css must contain a "@fonts ${marker}" @import url`);
-    return match[1];
-  };
-  return { base: grab("base"), hebrew: grab("hebrew") };
+  const source = read(path.join(VENDOR_DIR, "ms-realty-fonts.css"));
+  const hash = createHash("sha256").update(source).digest("hex").slice(0, 12);
+  const url = `/vendor/ms-realty-fonts.css?v=${hash}`;
+  return { base: url, hebrew: url };
 }
 
 function logoExports() {

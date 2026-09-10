@@ -4764,7 +4764,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname.startsWith("/vendor/")) {
       // Versioned browser bundles generated into public/vendor by
       // scripts/build-design-assets.mjs (?v= content hash → immutable cache).
-      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt|png))$/i);
+      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt|png|woff2))$/i);
       if (vendorMatch) {
         const vendorPath = fromRoot("public", "vendor", vendorMatch[1]);
         if (fs.existsSync(vendorPath)) {
@@ -4774,8 +4774,9 @@ export function createHttpApp({
             css: "text/css; charset=utf-8",
             txt: "text/plain; charset=utf-8",
             png: "image/png",
+            woff2: "font/woff2",
           };
-          return response(200, fs.readFileSync(vendorPath, extension === "png" ? undefined : "utf8"), vendorTypes[extension], {
+          return response(200, fs.readFileSync(vendorPath, ["png", "woff2"].includes(extension) ? undefined : "utf8"), vendorTypes[extension], {
             "cache-control": IMMUTABLE_ASSET_CACHE,
           });
         }

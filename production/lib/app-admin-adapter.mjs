@@ -1087,7 +1087,10 @@ function currentSeed(config) {
   // Stable seed identity lets the existing, invalidated-on-save projection
   // cache work across admin requests. File changes still refresh the seed.
   if (config.runtimeDataDurableOnly) return readThroughCached(DEFAULT_CMS_SEED_PATH, loadCmsSeed);
-  return applyMediaReviews(
+  return readThroughCached([
+    DEFAULT_CMS_SEED_PATH, config.listingEditLedgerPath,
+    config.mediaUploadLedgerPath, config.mediaReviewLedgerPath,
+  ], () => applyMediaReviews(
     // B4: uploaded listing assets join the seed before reviews are applied, so
     // an upload enters the existing review queue instead of bypassing it.
     applyMediaUploads(
@@ -1095,7 +1098,7 @@ function currentSeed(config) {
       readMediaUploads(config.mediaUploadLedgerPath),
     ),
     readMediaReviews(config.mediaReviewLedgerPath),
-  );
+  ));
 }
 
 function durableMedia(config) {
