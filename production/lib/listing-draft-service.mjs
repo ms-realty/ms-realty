@@ -477,7 +477,8 @@ export function invalidateListingProjection() {
 }
 
 async function readProjection(seed, runtime, { req, requirePayload }) {
-  const snapshot = await readPayloadCmsSnapshot({ payload: runtime, req });
+  // Search event history is not projected. Keep full snapshots on write paths.
+  const snapshot = await readPayloadCmsSnapshot({ payload: runtime, req, includeSearchOutbox: Boolean(req) });
   if (requirePayload) assertCompletePayloadSnapshot(seed, snapshot);
   return projectPayloadCmsSeed(seed, snapshot);
 }

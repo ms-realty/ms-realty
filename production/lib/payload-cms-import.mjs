@@ -578,9 +578,10 @@ function indexSnapshot(docs) {
   return { byId, docs };
 }
 
-async function readSnapshot(payload, req) {
+async function readSnapshot(payload, req, { includeSearchOutbox = true } = {}) {
   const docs = {};
   for (const collection of IMPORT_COLLECTIONS) {
+    if (collection === "search_outbox" && !includeSearchOutbox) continue;
     docs[collection] = await findAll(payload, collection, req);
   }
   return {
@@ -604,18 +605,18 @@ async function readSnapshot(payload, req) {
       byUrl: new Map(docs.media_assets.map((doc) => [String(doc.url || "").trim(), doc])),
     },
     properties: { ...indexSnapshot(docs.properties) },
-    search_outbox: { ...indexSnapshot(docs.search_outbox) },
+    ...(includeSearchOutbox ? { search_outbox: indexSnapshot(docs.search_outbox) } : {}),
   };
 }
 
-export async function readPayloadCmsSnapshot({ payload, req } = {}) {
+export async function readPayloadCmsSnapshot({ payload, req, includeSearchOutbox = true } = {}) {
   assertPayload(payload);
-  if (req?.transactionID) return readSnapshot(payload, req);
+  if (req?.transactionID) return readSnapshot(payload, req, { includeSearchOutbox });
 
   const transactionID = await payload.db.beginTransaction({ accessMode: "read only", isolationLevel: "repeatable read" });
   if (!transactionID) throw new Error("Payload CMS snapshot could not open a read transaction");
   try {
-    return await readSnapshot(payload, { payload, transactionID });
+    return await readSnapshot(payload, { payload, transactionID }, { includeSearchOutbox });
   } finally {
     await payload.db.rollbackTransaction(transactionID).catch(() => undefined);
   }
