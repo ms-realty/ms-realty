@@ -5,6 +5,7 @@ import { readDraftGuideTranslations } from "./guide-translations.mjs";
 import { readLanguageRequests } from "./language-requests.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { workspaceWithOperator } from "./admin-payloads.mjs";
 
 // Adding a language is not a switch. It commits the agency to a human
 // translation of every published listing and every buyer guide before one page
@@ -126,7 +127,7 @@ export function renderAdminLocaleRolloutPayload(
       description: workspace.copy.localeRolloutDescription || "Every website language, what it covers, and what adding or removing one commits the agency to.",
       robots: "noindex,nofollow",
     },
-    workspace: { ...workspace, operator_id: operatorId || workspace.operator_id || null },
+    workspace: workspaceWithOperator(workspace, operatorId),
     generated_at: generatedAt,
     source_locale: registry.source_locale,
     focus: rows.some((row) => row.code === focus) ? focus : "",

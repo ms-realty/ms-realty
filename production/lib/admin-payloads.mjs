@@ -31,7 +31,7 @@ function listingRecord(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
 }
 
-function workspaceWithOperator(workspace, operator) {
+export function workspaceWithOperator(workspace, operator) {
   if (!operator) return workspace;
   if (typeof operator === "string") return { ...workspace, operator_id: operator };
   const principal = publicAdminPrincipal(operator);

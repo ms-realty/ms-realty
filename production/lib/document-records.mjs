@@ -1,5 +1,6 @@
 import { DOCUMENT_STATUSES, DOCUMENT_TYPES, SIGNATURE_REQUEST_STATUSES } from "./document-signatures.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { workspaceWithOperator } from "./admin-payloads.mjs";
 
 // Commit dce39f82 landed the durable document and signature authority: three
 // Payload collections, a migration with append-only triggers, and nine routes.
@@ -94,7 +95,7 @@ export function renderAdminDocumentRecordsPayload(
       description: workspace.copy.documentRecordsDescription || "Every document the workspace holds, the version it is on, and who still has to sign it.",
       robots: "noindex,nofollow",
     },
-    workspace: { ...workspace, operator_id: operatorId || workspace.operator_id || null },
+    workspace: workspaceWithOperator(workspace, operatorId),
     generated_at: generatedAt,
     documents: rows,
     signatureRequests,

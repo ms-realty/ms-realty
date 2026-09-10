@@ -2722,7 +2722,7 @@ async function localeRolloutPayload(registry, url, config) {
     seed,
     translationTasks: config.runtimeDataDurableOnly ? [] : latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     generatedAt: config.reviewedAt || new Date().toISOString(),
-    operatorId: config.adminPrincipal?.id || null,
+    operatorId: config.adminPrincipal || null,
     focus: url.searchParams.get("language") || "",
   });
 }
