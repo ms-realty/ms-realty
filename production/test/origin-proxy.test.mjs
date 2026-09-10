@@ -6,13 +6,13 @@ import {
   responseForPublicOrigin,
   responseWithEdgeBuildMarker,
 } from "../../workers/origin-proxy.mjs";
-import { crossOriginWriteRejection } from "../lib/request-guard.mjs";
+import { crossOriginWriteRejection, publicWriteRejection } from "../lib/request-guard.mjs";
 
 const PUBLIC_URL = "https://ms-realty.ms-realty-bg.workers.dev";
 const ORIGIN_URL = "https://ms-realty-review.157-230-109-185.sslip.io";
 const ORIGIN_TOKEN = "origin-proxy-test-token-000000000001";
 
-test("origin proxy preserves the request while translating a same-origin browser write", async () => {
+test("origin proxy preserves the request and validated browser Origin", async () => {
   const request = new Request(`${PUBLIC_URL}/api/leads?source=site`, {
     method: "POST",
     headers: {
@@ -30,10 +30,27 @@ test("origin proxy preserves the request while translating a same-origin browser
   assert.equal(proxied.url, `${ORIGIN_URL}/api/leads?source=site`);
   assert.equal(proxied.method, "POST");
   assert.equal(proxied.headers.get("authorization"), "Basic preview");
-  assert.equal(proxied.headers.get("origin"), ORIGIN_URL);
+  assert.equal(proxied.headers.get("origin"), PUBLIC_URL);
   assert.equal(proxied.headers.get("x-forwarded-host"), new URL(PUBLIC_URL).host);
   assert.equal(proxied.headers.get("x-ms-realty-origin-token"), ORIGIN_TOKEN);
   assert.deepEqual(await proxied.json(), { name: "Owner" });
+});
+
+test("public writes retain their same-origin proof when Caddy and Next use a container URL", () => {
+  for (const pathname of ["/api/leads", "/api/events", "/api/language-requests"]) {
+    const publicUrl = `https://makler-realty.com${pathname}`;
+    const proxied = requestForOrigin(new Request(publicUrl, {
+      method: "POST",
+      headers: { origin: "https://makler-realty.com", "sec-fetch-site": "same-origin" },
+    }), ORIGIN_URL, ORIGIN_TOKEN);
+    const headers = new Headers(proxied.headers);
+    headers.set("host", "app:3000");
+    headers.set("x-forwarded-proto", "https");
+    assert.equal(publicWriteRejection("POST", headers, {
+      requestUrls: [publicUrl, `http://app:3000${pathname}`], env: {},
+    }), null, pathname);
+    assert.equal(crossOriginWriteRejection("POST", headers, { env: {} }), null, `${pathname}: standalone guard`);
+  }
 });
 
 test("origin proxy forwards the trusted legacy hostname instead of a client spoof", () => {

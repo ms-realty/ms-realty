@@ -128,15 +128,10 @@ export function sameOriginWriteRejection(method, headers, { requestUrl } = {}) {
   }
 }
 
-// A public write reaches the app through the Worker, which forwards the
-// public host in x-forwarded-host and rewrites the browser's Origin to the
-// internal origin it dials (scheme included, which differs from the plain
-// http URL the app sees). The request therefore has two legitimate hosts: the
-// public one the browser saw and the internal one the Worker presented. The
-// Worker has already enforced that the browser's Origin equals the public URL
-// scheme and all, so the app compares hosts. Anything else is refused exactly
-// as before. The 403 that blocked every enquiry form on makler-realty.com came
-// from comparing the rewritten Origin against only the forwarded public URL.
+// The Worker validates and preserves the browser Origin and forwards its
+// public host in x-forwarded-host. Also accept the app's internal request host
+// for older proxy deployments that translate Origin; it may use plain HTTP
+// after TLS terminates at Caddy. Foreign hosts still fail closed.
 export function publicWriteRejection(method, headers, { requestUrls = [], env = process.env } = {}) {
   if (SAFE_METHODS.has(String(method || "GET").toUpperCase())) return null;
   const fetchSite = readHeader(headers, "sec-fetch-site").trim().toLowerCase();
