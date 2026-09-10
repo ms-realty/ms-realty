@@ -1739,6 +1739,7 @@ export function createHttpApp({
           languageRequests: [],
           translationTasks: [],
           listingEdits: [],
+          leadSlaGeneratedAt,
           operatorId,
           leadSourceDurable,
           leadPipelineQueue,
