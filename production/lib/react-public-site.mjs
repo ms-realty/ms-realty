@@ -2,7 +2,7 @@ import { h, renderStaticElement } from "./react-static-html.mjs";
 import { humanizeIdentifier, labelsFor, localizedListingValue, localizedLocationValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
-import { SearchAssistantEntry, SearchAssistantDialog } from "./react-public-search-assistant.mjs";
+import { SearchAssistantEntry, SearchAssistantDialog, searchAssistantCopy } from "./react-public-search-assistant.mjs";
 import { ListingMatchEntry, SearchAlternativesEntry, SearchEvidenceDialog } from "./react-public-search-evidence.mjs";
 import { responsivePublicImageProps } from "./public-images.mjs";
 
@@ -2773,6 +2773,18 @@ function SearchBody({ page }) {
             ),
           )
         : null,
+      // One compact entry for both assistance flows, sized like the sort and
+      // view controls beside it. The actions stay hidden until their client
+      // handlers load and the disclosure appears only once one of them is
+      // available, so a page without JS or backend keeps plain search.
+      h(
+        "details",
+        { className: "sr-help", "data-search-help": "true", hidden: true },
+        h("summary", { className: "sr-help__summary", "aria-label": searchAssistantCopy(page.locale).help, title: searchAssistantCopy(page.locale).help },
+          h(Icon, { name: "sparkles", size: 16 }),
+          h("span", null, searchAssistantCopy(page.locale).help)),
+        h("div", { className: "sr-help__panel" }, h(SearchAssistantEntry, { page }), h(SearchAlternativesEntry, { page })),
+      ),
     );
   };
   const mobileFilterPanelId = `mobile-search-filters-panel-${page.locale}`;
@@ -2861,8 +2873,6 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-toolbar" },
-          !savedView ? h(SearchAssistantEntry, { page }) : null,
-          !savedView ? h(SearchAlternativesEntry, { page }) : null,
           h(
             "div",
             { className: "sr-results__head" },

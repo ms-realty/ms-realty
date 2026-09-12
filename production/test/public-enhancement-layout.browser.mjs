@@ -45,6 +45,9 @@ try {
       await page.goto(base + route.path, { waitUntil: "commit" });
       await page.locator("main").waitFor();
       await page.waitForFunction(() => [...document.styleSheets].some((sheet) => sheet.href?.includes("ms-realty-public.css")));
+      // The local web font settles the heading metrics by a fraction of a
+      // pixel; measure after it so the comparison isolates the enhancement.
+      await page.evaluate(() => document.fonts.ready);
       const before = await page.evaluate(() => {
         const controls = [...document.querySelectorAll(".sr-toolbar [data-search-assistant-open], .sr-toolbar [data-evidence-open]")];
         return {
@@ -56,7 +59,7 @@ try {
       });
       release();
       await page.waitForLoadState("load");
-      await page.locator("[data-search-assistant-open]").waitFor({ state: "visible" });
+      await page.locator("[data-search-help]").waitFor({ state: "visible" });
       const after = await page.evaluate(() => ({
         top: document.querySelector(".sr-list").getBoundingClientRect().top,
         height: document.querySelector(".sr-toolbar").getBoundingClientRect().height,
@@ -68,11 +71,24 @@ try {
       assert(Math.abs(after.height - before.height) <= 0.5, `${label}: toolbar height changed during enhancement`);
       assert(!after.overflow, `${label}: page overflows horizontally`);
       assert.equal(await page.getByRole("combobox", { name: labelsFor(route.locale).sort, exact: true }).count(), 1, label);
+      // One compact entry discloses both assistance actions on request; opening
+      // it floats a panel over the results instead of moving them.
+      await page.locator("[data-search-help] summary").click();
+      assert(await page.locator("[data-search-help]").evaluate((help) => help.open), label);
+      assert(await page.locator("[data-search-help] [data-search-assistant-open], [data-search-help] [data-evidence-open]").evaluateAll((controls) => controls.length === 2 && controls.every((control) => control.checkVisibility())), `${label}: both actions disclosed`);
+      const disclosed = await page.evaluate(() => ({
+        top: document.querySelector(".sr-list").getBoundingClientRect().top,
+        overflow: document.documentElement.scrollWidth > innerWidth + 1,
+      }));
+      assert(Math.abs(disclosed.top - after.top) <= 0.5, `${label}: results moved when the help panel opened`);
+      assert(!disclosed.overflow, `${label}: help panel overflows horizontally`);
       await page.locator("[data-search-assistant-open]").click();
       assert(await page.locator("[data-search-assistant]").evaluate((dialog) => dialog.open), label);
       await page.keyboard.press("Escape");
       assert(await page.locator("[data-search-assistant]").evaluate((dialog) => !dialog.open), label);
       assert(await page.locator("[data-search-assistant-open]").evaluate((control) => document.activeElement === control), label);
+      await page.keyboard.press("Escape");
+      assert(await page.locator("[data-search-help]").evaluate((help) => !help.open && document.activeElement === help.querySelector("summary")), `${label}: Escape closes the entry and restores focus`);
       checked += 1;
     } finally {
       release();
@@ -91,7 +107,7 @@ try {
       });
       const page = await context.newPage();
       await page.goto(base + route.path, { waitUntil: "load" });
-      assert(await page.locator(".psa-entry, .pse-entry").evaluateAll((controls) => controls.every((control) => getComputedStyle(control).display === "none")), `${locale}: no-JS controls reserve no empty space`);
+      assert(await page.locator(".psa-entry, .pse-entry, .sr-help").evaluateAll((controls) => controls.every((control) => getComputedStyle(control).display === "none")), `${locale}: no-JS controls reserve no empty space`);
       const select = page.getByRole("combobox", { name: labelsFor(locale).sort, exact: true });
       const order = await select.locator("option").nth(1).getAttribute("value");
       await select.selectOption(order);

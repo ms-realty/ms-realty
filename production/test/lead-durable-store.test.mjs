@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { LEAD_COLLECTIONS, LEAD_COLLECTION_SLUGS } from "../lib/lead-collections.mjs";
 import { withLeadContactEnvelopes } from "../lib/lead-contact-vault.mjs";
 import {
+  LeadIdempotencyConflictError,
   LeadStoreUnavailableError,
   findLeadByIdempotencyKey,
   isLeadDurableStoreEnabled,
@@ -756,4 +757,72 @@ test("the collections keep contact envelopes opaque and ledger rows immutable", 
     assert.equal(contactFields[name].required, true);
     assert.equal(contactFields[name].access.update(), false, `${name} is write-once`);
   }
+});
+
+// A reused key with a different person or message is a conflict, never a
+// silent confirmation of the earlier lead.
+test("a reused idempotency key with a different payload is refused", async () => {
+  const payload = fakePayload();
+  const row = ledgerRow({ idempotency_key: "browser-retry-conflict", message_fingerprint: "message-one" });
+  await persistLeadDurably(durableArgs({ ledgerRow: row, payload }));
+  const otherPerson = { ...row, lead_id: "lead-draft-33333333-3333-4333-8333-333333333333", contact_fingerprint: "someone-else" };
+  await assert.rejects(
+    () => persistLeadDurably(durableArgs({ ledgerRow: otherPerson, payload })),
+    (error) => error instanceof LeadIdempotencyConflictError && error.status === 409 && error.code === "idempotency_conflict",
+  );
+  const otherMessage = { ...row, lead_id: "lead-draft-44444444-4444-4444-8444-444444444444", message_fingerprint: "different-message" };
+  await assert.rejects(() => persistLeadDurably(durableArgs({ ledgerRow: otherMessage, payload })), LeadIdempotencyConflictError);
+  assert.equal(payload.rows.public_leads.length, 1, "no second person was created");
+  const same = await persistLeadDurably(durableArgs({ ledgerRow: { ...row, lead_id: "lead-draft-55555555-5555-4555-8555-555555555555" }, payload }));
+  assert.equal(same.created, false);
+  assert.equal(same.lead.lead_id, row.lead_id);
+});
+
+// Deterministic same-key race: both requests read "absent", the loser's
+// insert hits the unique key, and its recovery must apply the same
+// comparison as the lookup — same payload returns the winner, a different
+// payload is a 409, and only one durable row exists either way.
+test("a same-key race recovers the winner only for the same enquiry", async () => {
+  const winnerRow = ledgerRow({ idempotency_key: "browser-race-1", message_fingerprint: "message-one" });
+  const race = (loserRow) => {
+    const payload = fakePayload();
+    const originalCreate = payload.create.bind(payload);
+    const originalRollback = payload.db.rollbackTransaction.bind(payload.db);
+    let raced = false;
+    const winnerCommit = () => {
+      if (payload.rows.public_leads.some((row) => row.lead_id === winnerRow.lead_id)) return;
+      payload.rows.public_leads.push({ workspace_id: "workspace-sandanski", lead_id: winnerRow.lead_id, idempotency_key: winnerRow.idempotency_key, source: winnerRow.source, listing_reference: winnerRow.listing_reference, lead_type: winnerRow.lead_type, contact_fingerprint: winnerRow.contact_fingerprint, ledger_row: winnerRow });
+      payload.rows.lead_contacts.push({ ...envelope({ subject_id: winnerRow.lead_id }), workspace_id: "workspace-sandanski" });
+      payload.rows.consent_events.push(consentEvent(winnerRow));
+    };
+    // The winner's commit is independent of the loser's transaction, so it
+    // survives the loser's rollback.
+    payload.db.rollbackTransaction = async () => { await originalRollback(); winnerCommit(); };
+    payload.create = async (input) => {
+      if (input.collection === "public_leads" && !raced) {
+        raced = true;
+        // The winner commits between the loser's lookup and its insert.
+        winnerCommit();
+        if (false) payload.rows.public_leads.push({ workspace_id: "workspace-sandanski", lead_id: winnerRow.lead_id, idempotency_key: winnerRow.idempotency_key, source: winnerRow.source, listing_reference: winnerRow.listing_reference, lead_type: winnerRow.lead_type, contact_fingerprint: winnerRow.contact_fingerprint, ledger_row: winnerRow });
+        payload.rows.lead_contacts.push({ ...envelope({ subject_id: winnerRow.lead_id }), workspace_id: "workspace-sandanski" });
+        payload.rows.consent_events.push(consentEvent(winnerRow));
+        const error = new Error(`duplicate key value violates unique constraint "public_leads_workspace_id_idempotency_key_idx"`);
+        error.code = "23505";
+        throw error;
+      }
+      return originalCreate(input);
+    };
+    return { payload, run: () => persistLeadDurably(durableArgs({ ledgerRow: loserRow, payload })) };
+  };
+  const sameLoser = { ...winnerRow, lead_id: "lead-draft-66666666-6666-4666-8666-666666666666" };
+  const same = race(sameLoser);
+  const outcome = await same.run();
+  assert.equal(outcome.created, false);
+  assert.equal(outcome.lead.lead_id, winnerRow.lead_id);
+  assert.equal(same.payload.rows.public_leads.length, 1);
+
+  const changedLoser = { ...winnerRow, lead_id: "lead-draft-77777777-7777-4777-8777-777777777777", message_fingerprint: "message-two" };
+  const changed = race(changedLoser);
+  await assert.rejects(changed.run, (error) => error instanceof LeadIdempotencyConflictError && error.status === 409);
+  assert.equal(changed.payload.rows.public_leads.length, 1, "the loser never becomes a second durable row");
 });
