@@ -1,3 +1,4 @@
+import { resolvePublicLocale } from "./locales.mjs";
 import { searchRuntimeListings } from "./runtime.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
@@ -53,11 +54,12 @@ function activeListingRecord(record) {
   return record?.collection === "listings" && ["available", "reserved"].includes(status);
 }
 
-export function engineLocaleCodes(seed, registry, result) {
-  if ((seed.records || []).some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
-    return [result.locale];
+export function engineLocaleCodes(seed, registry, localeCode) {
+  const { locale } = resolvePublicLocale(registry, localeCode);
+  if ((seed.records || []).some((record) => activeListingRecord(record) && record.source_locale === locale.code)) {
+    return [locale.code];
   }
-  return [...new Set([result.search?.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
+  return [...new Set([locale.fallback_locale || registry.source_locale, registry.source_locale].filter(Boolean))];
 }
 
 export function seedForSearchHits(seed, hits) {
@@ -246,7 +248,6 @@ export async function executePublicSearch({
     view,
     translationTasks
   };
-  const localeContext = searchRuntimeListings(registry, seed, { ...options, query: "" });
   let engineResult;
 
   try {
@@ -254,7 +255,7 @@ export async function executePublicSearch({
       ...search,
       q: request.query,
       intent: request.intent,
-      localeCodes: engineLocaleCodes(seed, registry, localeContext)
+      localeCodes: engineLocaleCodes(seed, registry, request.intent.locale)
     });
   } catch (error) {
     if (isProduction(search.environment)) {
@@ -264,16 +265,19 @@ export async function executePublicSearch({
   }
 
   const databasePage = engineResult.engine === "postgres";
-  const localResult = searchRuntimeListings(registry, seed, options);
+  // The local catalogue search is only the answer when no engine served the
+  // page; the engine-served page is rendered from its hits with the approved
+  // catalogue passed alongside for the filter universe.
   const result =
     engineResult.engine === "seed_fallback" || (!databasePage && !engineResultIsComplete(engineResult))
-      ? localResult
+      ? searchRuntimeListings(registry, seed, options)
       : searchRuntimeListings(
           registry,
           databasePage ? seedForPostgresSearchHits(seed, engineResult.hits) : seedForSearchHits(seed, engineResult.hits),
           {
           ...options,
           query: "",
+          catalogSeed: seed,
           ...(databasePage
             ? {
                 databasePage: true,

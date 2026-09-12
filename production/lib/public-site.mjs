@@ -3699,6 +3699,12 @@ export function renderSearchPage({
   view = "list",
   databasePage = false,
   totalMatches = null,
+  // The whole approved catalogue when `listings` is only the page of hits an
+  // engine returned. Cards and totals stay with `listings`; the filter
+  // universe (locations, offer types, subtypes, bedrooms, applicable fields,
+  // area maps) comes from here, so a sale-only page or an empty answer never
+  // hides the rent option or the other towns.
+  catalogListings = null,
   savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
@@ -3719,13 +3725,16 @@ export function renderSearchPage({
   const intentFilters = Object.fromEntries(
     Object.entries(searchIntentToQueryFilters(searchIntent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
   );
-  const activeListings = listings.filter(isActiveListing);
-  const localeMatches = activeListings.filter((listing) => listing.locale === locale.code);
-  const fallbackMatches = activeListings.filter(
-    (listing) => listing.locale === (locale.fallback_locale || registry.source_locale) || listing.locale === registry.source_locale,
-  );
-  const searchableListings = localeMatches.length ? localeMatches : fallbackMatches;
-  const filterViews = searchableListings.map((listing) => listingToPublicViewModel(listing));
+  const searchableFor = (source) => {
+    const activeListings = source.filter(isActiveListing);
+    const localeMatches = activeListings.filter((listing) => listing.locale === locale.code);
+    if (localeMatches.length) return localeMatches;
+    return activeListings.filter(
+      (listing) => listing.locale === (locale.fallback_locale || registry.source_locale) || listing.locale === registry.source_locale,
+    );
+  };
+  const searchableListings = searchableFor(listings);
+  const filterViews = (catalogListings ? searchableFor(catalogListings) : searchableListings).map((listing) => listingToPublicViewModel(listing));
   const catalogDistricts = GEOGRAPHY_CATALOG.areas
     .filter((area) => area.country_code === "BG" && area.level === "district")
     .map((area) => area.names.en);

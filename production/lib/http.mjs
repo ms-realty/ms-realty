@@ -415,7 +415,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
-import { seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
+import { engineLocaleCodes, seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
@@ -651,18 +651,6 @@ function publicResponse(request, url, rendered) {
     );
   }
   return json(rendered.status || 200, rendered, cacheHeaders);
-}
-
-function activeListingRecord(record) {
-  const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
-  return record.collection === "listings" && ["available", "reserved"].includes(status);
-}
-
-function engineLocaleCodes(seed, registry, result) {
-  if (seed.records.some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
-    return [result.locale];
-  }
-  return [...new Set([result.search.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
 }
 
 function seedForSearchHits(seed, hits) {
@@ -2552,23 +2540,26 @@ export function createHttpApp({
     const translationTasks = context.translationTasks;
     const registryForRequest = context.registry;
     const searchOptions = { localeCode: intent.locale, query, filters, sort, page, pageSize: intent.page_size, translationTasks, ...options };
-    const localResult = searchRuntimeListings(registryForRequest, seedForRequest, searchOptions);
     const engineResult = await queryPublicSearch({
       ...search,
       q: query,
       intent,
-      localeCodes: engineLocaleCodes(seedForRequest, registryForRequest, localResult),
+      localeCodes: engineLocaleCodes(seedForRequest, registryForRequest, intent.locale),
     });
     const databasePage = engineResult.engine === "postgres";
+    // Same contract as executePublicSearch: the local catalogue search only
+    // when no engine served the page; otherwise the hits page with the
+    // approved catalogue alongside for the filter universe.
     const result =
       engineResult.engine === "seed_fallback" || (!databasePage && !searchEngineResultIsComplete(engineResult))
-        ? localResult
+        ? searchRuntimeListings(registryForRequest, seedForRequest, searchOptions)
         : searchRuntimeListings(
             registryForRequest,
             databasePage ? seedForPostgresSearchHits(seedForRequest, engineResult.hits) : seedForSearchHits(seedForRequest, engineResult.hits),
             {
             ...searchOptions,
             query: "",
+            catalogSeed: seedForRequest,
             ...(databasePage
               ? {
                   databasePage: true,

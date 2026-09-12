@@ -96,10 +96,19 @@ export function initPublicSearchAssistant() {
   }
   document.querySelectorAll("[data-search-assistant-open]").forEach(function (button) {
     button.hidden = false;
+    var help = button.closest && button.closest("[data-search-help]");
+    if (help) help.hidden = false;
     button.addEventListener("click", function () {
       opener = button; invalidate(true); reviewed.clear(); status.textContent = "";
       if (!text.value) text.value = new URLSearchParams(window.location.search).get("nl_context") || "";
       dialog.showModal(); text.focus();
+    });
+  });
+  // The disclosure is native; Escape closes it and returns focus to its summary.
+  document.querySelectorAll("[data-search-help]").forEach(function (help) {
+    help.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || !help.open) return;
+      help.open = false; var summary = help.querySelector("summary"); if (summary) summary.focus();
     });
   });
   dialog.querySelector("[data-assistant-close]").addEventListener("click", function () { dialog.close(); });
