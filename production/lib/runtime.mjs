@@ -457,6 +457,7 @@ export function searchRuntimeListings(
     databasePage = false,
     totalMatches = null,
     catalogSeed = null,
+    widenRanges = null,
   },
 ) {
   return renderSearchPage({
@@ -464,6 +465,7 @@ export function searchRuntimeListings(
     localeCode,
     listings: runtimeListings(seed, translationTasks),
     catalogListings: catalogSeed ? runtimeListings(catalogSeed, translationTasks) : null,
+    widenRanges,
     query,
     filters,
     sort,

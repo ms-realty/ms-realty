@@ -2,6 +2,8 @@ import { resolvePublicLocale } from "./locales.mjs";
 import { searchRuntimeListings } from "./runtime.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
+import { searchIntentToQueryFilters } from "./search-intent.mjs";
+import { RANGE_FILTER_PAIRS } from "./public-site.mjs";
 import { privateSearchServiceNetworkAllowed } from "./search-service-http.mjs";
 import { isProductionEnvironment, searchRuntimeEnvironment } from "./launch-service-contract.mjs";
 
@@ -212,6 +214,30 @@ export function withSearchRequest(result, engineResult, request) {
   };
 }
 
+// "0 matches" on a database page must still name the typed range that emptied
+// it, with a count the visitor will actually get: each typed range pair is
+// re-asked from the same engine with that pair dropped, one count-only query
+// per pair, only when the page is empty.
+export async function engineWidenRanges({ search, request, engineResult, localeCodes, savedView = false }) {
+  if (engineResult.engine !== "postgres" || engineResult.total !== 0 || savedView) return [];
+  const filters = Object.fromEntries(
+    Object.entries(searchIntentToQueryFilters(request.intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
+  );
+  const typed = RANGE_FILTER_PAIRS.filter((pair) => pair.some((key) => filters[key] !== undefined));
+  const suggestions = [];
+  for (const pair of typed) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(filters)) if (!pair.includes(key)) params.set(key, String(value));
+    params.set("locale", request.intent.locale);
+    params.set("page_size", "1");
+    if (request.query) params.set("q", request.query);
+    const widened = normalizeSearchRequest(params, { defaultLocale: request.intent.locale });
+    const count = await queryPublicSearch({ ...search, q: widened.query, intent: widened.intent, localeCodes });
+    if (Number.isFinite(count.total) && count.total > 0) suggestions.push({ fields: pair, matches: count.total });
+  }
+  return suggestions.sort((left, right) => right.matches - left.matches);
+}
+
 function isProduction(environment) {
   return String(environment || "").toLowerCase() === "production";
 }
@@ -249,14 +275,17 @@ export async function executePublicSearch({
     translationTasks
   };
   let engineResult;
+  let widenRanges = null;
+  const localeCodes = engineLocaleCodes(seed, registry, request.intent.locale);
 
   try {
     engineResult = await queryPublicSearch({
       ...search,
       q: request.query,
       intent: request.intent,
-      localeCodes: engineLocaleCodes(seed, registry, request.intent.locale)
+      localeCodes
     });
+    widenRanges = await engineWidenRanges({ search, request, engineResult, localeCodes, savedView });
   } catch (error) {
     if (isProduction(search.environment)) {
       throw new PublicSearchUnavailableError("Search is temporarily unavailable", { cause: error });
@@ -278,6 +307,7 @@ export async function executePublicSearch({
           ...options,
           query: "",
           catalogSeed: seed,
+          widenRanges,
           ...(databasePage
             ? {
                 databasePage: true,

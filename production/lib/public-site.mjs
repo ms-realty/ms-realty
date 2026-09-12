@@ -3677,7 +3677,7 @@ export function renderListingPage({
 
 // Every numeric range the public filter bar can carry. Dropping a pair is the
 // smallest correction that can bring an empty result set back to life.
-const RANGE_FILTER_PAIRS = Object.freeze([
+export const RANGE_FILTER_PAIRS = Object.freeze([
   ["price_min", "price_max"],
   ["area_min", "area_max"],
   ["land_area_min", "land_area_max"],
@@ -3705,6 +3705,9 @@ export function renderSearchPage({
   // area maps) comes from here, so a sale-only page or an empty answer never
   // hides the rent option or the other towns.
   catalogListings = null,
+  // Widen suggestions already counted by the engine for a database page; the
+  // local catalogue count below only stands in when no engine served the page.
+  widenRanges: engineWidenRanges = null,
   savedSearchWritesDisabled = savedSearchWritesDisabledFromEnv(),
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
@@ -3866,7 +3869,8 @@ export function renderSearchPage({
   // dropped, so the empty state can name the filter that is doing the
   // excluding and say what dropping it would return.
   const widenRanges =
-    matchedTotal === 0 && !databasePage && !savedView
+    engineWidenRanges ??
+    (matchedTotal === 0 && !databasePage && !savedView
       ? RANGE_FILTER_PAIRS.filter((pair) => pair.some((key) => intentFilters[key] !== undefined && intentFilters[key] !== ""))
           .map((pair) => {
             const without = { ...intentFilters };
@@ -3878,7 +3882,7 @@ export function renderSearchPage({
           })
           .filter((suggestion) => suggestion.matches > 0)
           .sort((left, right) => right.matches - left.matches)
-      : [];
+      : []);
   const totalPages = Math.max(1, Math.ceil(matchedTotal / normalizedPageSize));
   const currentPage = databasePage ? normalizedPage : Math.min(normalizedPage, totalPages);
   const offset = (currentPage - 1) * normalizedPageSize;

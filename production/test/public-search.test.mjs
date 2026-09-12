@@ -500,7 +500,7 @@ function postgresSearch(pages) {
       postgres: {
         queryImpl: async ({ intent }) => {
           intents.push(intent);
-          const hits = pages.shift() || [];
+          const hits = intent.page_size === 1 ? [] : pages.shift() || [];
           return {
             engine: "postgres",
             total: hits.length,
@@ -558,7 +558,8 @@ test("Node HTML and API keep the catalogue filter universe on Postgres pages and
   assert.deepEqual(catalogFilterUniverse(emptyApi.body), catalog);
   assert.equal(emptyPage.status, 200);
   assert.match(emptyPage.body, /value="rent"/);
-  assert.deepEqual(intents.map((intent) => intent.offer_type), ["sale", "sale", null, null]);
+  // The empty answers also trigger one count-only widen query each.
+  assert.deepEqual(intents.filter((intent) => intent.page_size !== 1).map((intent) => intent.offer_type), ["sale", "sale", null, null]);
 });
 
 // The filter universe is the approved public catalogue as the existing
@@ -683,4 +684,43 @@ test("search assistance is one compact toolbar entry, hidden until its handlers 
     assert.ok(toolbar.indexOf('class="sr-results__head"') < toolbar.indexOf("data-search-help"), `${label}: the results heading comes first`);
     assert.match(toolbar, /aria-label="Още начини за търсене"/, `${label}: localized accessible name`);
   }
+});
+
+// A database page that is empty must still name the typed range to widen,
+// and the count it prints must be the engine's own count for that widening.
+test("empty Postgres pages name the range to widen with the engine's count on every path", async () => {
+  const intents = [];
+  const search = {
+    engine: "postgres",
+    environment: "production",
+    postgres: {
+      queryImpl: async ({ intent }) => {
+        intents.push(intent);
+        const total = intent.price_max === 1 ? 0 : intent.bedrooms_min === 9 ? 0 : 7;
+        return { engine: "postgres", total, hits: total ? [saleOnlyHit] : [], page: intent.page, page_size: intent.page_size, target: "ms_realty_public_search_documents" };
+      },
+    },
+  };
+  const { result } = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=1&bedrooms_min=9&offer_type=sale"), search });
+  assert.equal(result.search.total_matches, 0);
+  // The two typed pairs each get one count-only query with that pair dropped.
+  assert.equal(intents.length, 3);
+  assert.deepEqual(intents.slice(1).map((intent) => [intent.page_size, intent.offer_type, intent.price_max ?? null, intent.bedrooms_min ?? null]), [[1, "sale", null, 9], [1, "sale", 1, null]]);
+  assert.deepEqual(result.search.controls.widen_ranges, []);
+
+  intents.length = 0;
+  const single = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=1&offer_type=sale"), search });
+  assert.deepEqual(single.result.search.controls.widen_ranges, [{ fields: ["price_min", "price_max"], matches: 7 }]);
+  assert.equal(intents.length, 2);
+
+  const nonEmpty = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=500000"), search });
+  assert.equal(nonEmpty.engineResult.total, 7);
+  assert.deepEqual(nonEmpty.result.search.controls.widen_ranges, []);
+
+  const app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), search });
+  const api = await dispatchHttp(app, { url: "/api/search?locale=bg&price_max=1" });
+  const html = await dispatchHttp(app, { url: "/bg/tarsene?price_max=1", headers: { accept: "text/html" } });
+  assert.deepEqual(api.body.search.controls.widen_ranges, [{ fields: ["price_min", "price_max"], matches: 7 }]);
+  assert.match(html.body, /data-search-widen="true"/);
+  assert.match(html.body, /Цена \(EUR\): 7 съвпадения/);
 });

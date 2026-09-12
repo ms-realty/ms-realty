@@ -415,7 +415,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
-import { engineLocaleCodes, seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
+import { engineLocaleCodes, engineWidenRanges, seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
@@ -2540,12 +2540,9 @@ export function createHttpApp({
     const translationTasks = context.translationTasks;
     const registryForRequest = context.registry;
     const searchOptions = { localeCode: intent.locale, query, filters, sort, page, pageSize: intent.page_size, translationTasks, ...options };
-    const engineResult = await queryPublicSearch({
-      ...search,
-      q: query,
-      intent,
-      localeCodes: engineLocaleCodes(seedForRequest, registryForRequest, intent.locale),
-    });
+    const localeCodes = engineLocaleCodes(seedForRequest, registryForRequest, intent.locale);
+    const engineResult = await queryPublicSearch({ ...search, q: query, intent, localeCodes });
+    const widenRanges = await engineWidenRanges({ search, request: searchRequest, engineResult, localeCodes, savedView: options.savedView === true });
     const databasePage = engineResult.engine === "postgres";
     // Same contract as executePublicSearch: the local catalogue search only
     // when no engine served the page; otherwise the hits page with the
@@ -2560,6 +2557,7 @@ export function createHttpApp({
             ...searchOptions,
             query: "",
             catalogSeed: seedForRequest,
+            widenRanges,
             ...(databasePage
               ? {
                   databasePage: true,
