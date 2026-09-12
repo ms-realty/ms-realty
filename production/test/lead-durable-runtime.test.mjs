@@ -255,3 +255,46 @@ test("standalone lead intake requires an exact same-origin browser Origin", asyn
   assert.equal(allowed.status, 201);
   assert.equal(calls.length, 1);
 });
+
+// Same contract on the Next runtime without the durable store: a retry with
+// the same idempotency key replays the original lead, completes a consent
+// record a crash skipped, and a reused key with a different payload is
+// refused. (Reinitialization = a new config in this process.)
+test("Next lead intake replays a retried enquiry and refuses a reused key on the ledger runtime", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-next-lead-retry-"));
+  fs.writeFileSync(path.join(dir, "not-a-dir"), "");
+  const env = (overrides = {}) => ({
+    NODE_ENV: "test",
+    ...approvedPublicSeedFixtureEnv(),
+    MS_REALTY_LEAD_CONTACT_KEY: "test-only-lead-contact-key-32-characters-minimum",
+    MS_REALTY_LEAD_LEDGER_PATH: path.join(dir, "leads.jsonl"),
+    MS_REALTY_LEAD_CONTACT_VAULT_PATH: path.join(dir, "contacts.jsonl"),
+    MS_REALTY_CONSENT_LEDGER_PATH: path.join(dir, "consents.jsonl"),
+    MS_REALTY_EVENT_LEDGER_PATH: path.join(dir, "events.jsonl"),
+    MS_REALTY_SELLER_PIPELINE_PATH: path.join(dir, "seller-pipeline.jsonl"),
+    ...overrides,
+  });
+  const body = { idempotencyKey: "public-lead:22222222-2222-4222-8222-222222222222", source: "website_listing_detail", leadType: "buyer", language: "bg", listingReference: "MS-00815", contact: { name: "Retry Person", phone: "+359880000123" }, contact_preference: "phone", message: "Retry" };
+  const post = (config, payload) => renderAppApiResponse(new Request("https://example.test/api/leads", { method: "POST", headers: { "content-type": "application/json", origin: "https://example.test" }, body: JSON.stringify(payload) }), { config });
+  const { readLeadLedger } = await import("../lib/lead-ledger.mjs");
+
+  const consentFailure = await post(appApiConfigFromEnv(env({ MS_REALTY_CONSENT_LEDGER_PATH: path.join(dir, "not-a-dir", "consents.jsonl") })), body);
+  assert.ok(consentFailure.status >= 400);
+  assert.equal(readLeadLedger(path.join(dir, "leads.jsonl")).length, 1, "ledger row written before consent failed");
+
+  const config = appApiConfigFromEnv(env());
+  const retry = await post(config, body);
+  const retryBody = await retry.json();
+  assert.equal(retry.status, 200);
+  assert.equal(retryBody.lead.id, readLeadLedger(path.join(dir, "leads.jsonl"))[0].lead_id);
+  assert.ok(retryBody.consent, "missing consent recorded on replay");
+  const again = await post(config, body);
+  assert.equal(again.status, 200);
+  assert.equal((await again.json()).consent, null);
+  assert.equal(fs.readFileSync(path.join(dir, "consents.jsonl"), "utf8").trim().split("\n").length, 1);
+
+  const conflict = await post(config, { ...body, message: "Changed" });
+  assert.equal(conflict.status, 409);
+  assert.equal((await conflict.json()).kind, "idempotency_conflict");
+  assert.equal(readLeadLedger(path.join(dir, "leads.jsonl")).length, 1);
+});

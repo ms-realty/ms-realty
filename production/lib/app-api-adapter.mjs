@@ -3,7 +3,7 @@ import { PUBLIC_SEARCH_ASSISTANT_PATHS, PUBLIC_SEARCH_ASSISTANT_MAX_BYTES, publi
 import { LISTING_QUESTION_PATH, LISTING_QUESTION_MAX_BYTES, publicListingQuestion } from "./public-listing-questions.mjs";
 import fs from "node:fs";
 import { readBuildMarker } from "./build-marker.mjs";
-import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
+import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord, readConsentLedger } from "./consent-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
 import {
   EventStoreUnavailableError,
@@ -17,7 +17,7 @@ import {
   createLanguageRequest,
   privacySafeLanguageRequest,
 } from "./language-requests.mjs";
-import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
+import { DEFAULT_LEAD_LEDGER_PATH, appendLead, leadReplayState } from "./lead-ledger.mjs";
 import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 import {
   DEFAULT_WORKSPACE_SETTINGS_PATH,
@@ -25,7 +25,7 @@ import {
   leadSlaOptions,
   readWorkspaceSettings,
 } from "./workspace-settings.mjs";
-import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact } from "./lead-contact-vault.mjs";
+import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, readLeadContacts } from "./lead-contact-vault.mjs";
 import {
   LeadStoreUnavailableError,
   isLeadDurableStoreEnabled,
@@ -462,19 +462,24 @@ async function routeLead(request, body, registry, seed, config) {
           workspaceId: durableStore.workspaceId,
         })
       : null;
-    const ledger =
-      durable?.lead ||
-      appendLead(lead, {
-        filePath: config.leadLedgerPath,
-        receivedAt: config.receivedAt,
-        contactSecret: config.leadContactKey,
-        ...leadSlaOptions(workspaceSettings),
-      });
-    if (ledger?.replayed) {
-      // Same enquiry already in the ledger: answer with the original record
-      // and write nothing else (no second vault row, consent or event).
-      const { replayed, ...original } = ledger;
-      return privateJson(200, { ...lead, id: original.id, lead: { ...lead.lead, id: original.lead_id }, ledger: original, contactVault: null, consent: null, sellerPipeline: null, receipt: publicLeadReceipt(original, { retrySafe: true }) });
+    // Ledger runtime replay: the same key with the same enquiry answers with
+    // the original lead and only completes companions a crash may have
+    // skipped after the ledger append; a different payload is refused.
+    const replay = durable ? { state: "none" } : leadReplayState(lead, { filePath: config.leadLedgerPath, contactSecret: config.leadContactKey });
+    if (replay.state === "conflict") {
+      return privateJson(409, { kind: "idempotency_conflict", intake_status: "rejected", message: "This request reference was already used for a different enquiry" });
+    }
+    if (replay.state === "replay") {
+      const original = replay.row;
+      const replayLead = { ...lead, id: original.id, lead: { ...lead.lead, id: original.lead_id } };
+      const vaultHas = config.leadContactVaultPath ? readLeadContacts(config.leadContactVaultPath, config.leadContactKey).has(original.lead_id) : true;
+      const contactVault = vaultHas ? null : appendLeadContact(replayLead, { filePath: config.leadContactVaultPath, secret: config.leadContactKey, storedAt: config.receivedAt });
+      const consentHas = readConsentLedger(config.consentLedgerPath).some((row) => row.subject_id === original.lead_id);
+      const consent = consentHas
+        ? null
+        : recordConsent({ consentType: "inquiry_follow_up", source: lead.lead?.source, subjectId: original.lead_id, locale: lead.original_language, contact: lead.lead?.contact, marketingOptIn: input.marketingOptIn === true }, config);
+      if (consent) await recordOperationalEvent({ type: "lead_submitted", path: "/api/leads", locale: lead.original_language, listingReference: lead.lead?.listingReference, action: lead.lead?.source }, config);
+      return privateJson(200, { ...replayLead, ledger: original, contactVault, consent, sellerPipeline: null, receipt: publicLeadReceipt(original, { retrySafe: true }) });
     }
     const contactVault = durable
       ? durable.contactVault
@@ -485,6 +490,14 @@ async function routeLead(request, body, registry, seed, config) {
             storedAt: config.receivedAt,
           })
         : null;
+    const ledger =
+      durable?.lead ||
+      appendLead(lead, {
+        filePath: config.leadLedgerPath,
+        receivedAt: config.receivedAt,
+        contactSecret: config.leadContactKey,
+        ...leadSlaOptions(workspaceSettings),
+      });
     const consent = durable
       ? durable.consent
       : recordConsent(
