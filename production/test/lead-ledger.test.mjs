@@ -108,3 +108,18 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   }
   assert.equal(assertLeadLedger(rows), true);
 });
+
+// A browser retry carries the same idempotency key; the ledger must answer
+// with the original row instead of showing staff the enquiry twice.
+test("lead ledger replays a repeated idempotency key onto the original row", () => {
+  const filePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-lead-replay-`)}/leads.jsonl`;
+  const lead = (id) => ({ id: `inbox-${id}`, lead: { id, source: "website_listing_detail", leadType: "buyer", listingReference: "MS-00815", idempotency_key: "public-lead:replay-1", contact: { name: "Retry Person", phone: "+359880000001" } } });
+  const first = appendLead(lead("lead-draft-1"), { filePath, contactSecret: "test-secret-0123456789" });
+  const second = appendLead(lead("lead-draft-2"), { filePath, contactSecret: "test-secret-0123456789" });
+  assert.equal(second.replayed, true);
+  assert.equal(second.lead_id, first.lead_id);
+  assert.equal(readLeadLedger(filePath).length, 1);
+  const other = appendLead({ ...lead("lead-draft-3"), lead: { ...lead("lead-draft-3").lead, idempotency_key: "public-lead:replay-2" } }, { filePath, contactSecret: "test-secret-0123456789" });
+  assert.equal(other.replayed, undefined);
+  assert.equal(readLeadLedger(filePath).length, 2);
+});

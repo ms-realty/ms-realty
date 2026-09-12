@@ -150,6 +150,14 @@ export function appendLead(
     contactSecret = process.env.MS_REALTY_LEAD_CONTACT_KEY,
   } = {},
 ) {
+  // A browser retry carries the same idempotency key; the durable store
+  // collapses it onto the original person and so must this ledger, or the
+  // staff inbox shows one enquiry twice. The key is not a sqlite column, so
+  // existing ledgers keep their schema; the ledger is small enough to scan.
+  // ponytail: full scan, add the column on the next schema migration.
+  const idempotencyKey = lead.lead?.idempotency_key;
+  const existing = idempotencyKey && filePath ? store.readRows(filePath).find((row) => row.idempotency_key === idempotencyKey) : null;
+  if (existing) return { ...existing, replayed: true };
   const row = createLeadLedgerRow(lead, { filePath, receivedAt, slaMinutes, escalationMinutes, contactSecret });
   store.appendRow(filePath, row);
   return row;

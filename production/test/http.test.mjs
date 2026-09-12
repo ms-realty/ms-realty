@@ -3059,3 +3059,24 @@ test("generated HTTP smoke file is valid when present", () => {
   const smoke = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertHttpSmoke(smoke), true);
 });
+
+// The public form sends one idempotency key per enquiry and retries with the
+// same key; on the ledger runtime the retry must return the original lead and
+// leave the staff inbox with one item.
+test("a retried public enquiry with the same idempotency key does not duplicate the inbox item", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-lead-retry-`);
+  const paths = { leadLedgerPath: `${dir}/leads.jsonl`, eventLedgerPath: `${dir}/events.jsonl`, consentLedgerPath: `${dir}/consent.jsonl`, auditLogPath: `${dir}/audit.jsonl` };
+  const body = { idempotencyKey: "public-lead:11111111-1111-4111-8111-111111111111", source: "website_listing_detail", leadType: "buyer", language: "bg", listingReference: "MS-00815", contact: { name: "Retry Person", phone: "+359880000123" }, contact_preference: "phone", message: "Retry" };
+  let app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths });
+  const first = await dispatchHttp(app, { method: "POST", url: "/api/leads", headers: SAME_ORIGIN_LEAD_HEADERS, body });
+  const retry = await dispatchHttp(app, { method: "POST", url: "/api/leads", headers: SAME_ORIGIN_LEAD_HEADERS, body });
+  assert.equal(first.status, 201);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.lead.id, first.body.lead.id);
+  assert.equal(retry.body.receipt.lead_id, first.body.receipt.lead_id);
+  // Restart on the same ledger: the inbox still shows exactly one item.
+  app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths });
+  const inbox = await dispatchHttp(app, { url: "/api/admin/leads?locale=bg", headers: { authorization: "Bearer local-admin-smoke" } });
+  assert.equal(inbox.status, 200);
+  assert.deepEqual(inbox.body.leads.map((item) => item.id), [first.body.id]);
+});

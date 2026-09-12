@@ -462,6 +462,20 @@ async function routeLead(request, body, registry, seed, config) {
           workspaceId: durableStore.workspaceId,
         })
       : null;
+    const ledger =
+      durable?.lead ||
+      appendLead(lead, {
+        filePath: config.leadLedgerPath,
+        receivedAt: config.receivedAt,
+        contactSecret: config.leadContactKey,
+        ...leadSlaOptions(workspaceSettings),
+      });
+    if (ledger?.replayed) {
+      // Same enquiry already in the ledger: answer with the original record
+      // and write nothing else (no second vault row, consent or event).
+      const { replayed, ...original } = ledger;
+      return privateJson(200, { ...lead, id: original.id, lead: { ...lead.lead, id: original.lead_id }, ledger: original, contactVault: null, consent: null, sellerPipeline: null, receipt: publicLeadReceipt(original, { retrySafe: true }) });
+    }
     const contactVault = durable
       ? durable.contactVault
       : config.leadContactVaultPath
@@ -471,14 +485,6 @@ async function routeLead(request, body, registry, seed, config) {
             storedAt: config.receivedAt,
           })
         : null;
-    const ledger =
-      durable?.lead ||
-      appendLead(lead, {
-        filePath: config.leadLedgerPath,
-        receivedAt: config.receivedAt,
-        contactSecret: config.leadContactKey,
-        ...leadSlaOptions(workspaceSettings),
-      });
     const consent = durable
       ? durable.consent
       : recordConsent(
