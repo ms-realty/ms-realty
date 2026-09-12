@@ -12,6 +12,7 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   engineLocaleCodes,
+  engineWidenRanges,
   executePublicSearch,
   publicSearchConfigFromEnv,
   PublicSearchUnavailableError,
@@ -723,4 +724,27 @@ test("empty Postgres pages name the range to widen with the engine's count on ev
   assert.deepEqual(api.body.search.controls.widen_ranges, [{ fields: ["price_min", "price_max"], matches: 7 }]);
   assert.match(html.body, /data-search-widen="true"/);
   assert.match(html.body, /Цена \(EUR\): 7 съвпадения/);
+});
+
+// Without a database page the helper must stay silent (null), so the local
+// catalogue fallback still names the range to widen.
+test("local empty searches keep their widen suggestions on every path", async () => {
+  assert.equal(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "seed_fallback", total: 0 }, localeCodes: ["bg"] }), null);
+  assert.equal(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "typesense", total: 0 }, localeCodes: ["bg"] }), null);
+  assert.equal(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "postgres", total: 0 }, localeCodes: ["bg"], savedView: true }), null);
+  assert.deepEqual(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "postgres", total: 3 }, localeCodes: ["bg"] }), []);
+
+  const fixture = approvedPublicSeedFixture();
+  const params = "locale=bg&price_min=100000000&price_max=200000000";
+  const { result, engineResult } = await executePublicSearch({ registry, seed: fixture, params: new URLSearchParams(params), search: { environment: "test", naturalLanguageEnabled: false } });
+  assert.equal(engineResult.engine, "seed_fallback");
+  assert.equal(result.search.total_matches, 0);
+  assert.equal(result.search.controls.widen_ranges[0]?.fields[0], "price_min");
+  assert.ok(result.search.controls.widen_ranges[0].matches > 0);
+
+  const app = createHttpApp(approvedPublicSeedFixtureOptions());
+  const api = await dispatchHttp(app, { url: `/api/search?${params}` });
+  const html = await dispatchHttp(app, { url: `/bg/tarsene?${params}`, headers: { accept: "text/html" } });
+  assert.deepEqual(api.body.search.controls.widen_ranges, result.search.controls.widen_ranges);
+  assert.match(html.body, /data-search-widen="true"/);
 });

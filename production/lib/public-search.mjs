@@ -218,8 +218,11 @@ export function withSearchRequest(result, engineResult, request) {
 // it, with a count the visitor will actually get: each typed range pair is
 // re-asked from the same engine with that pair dropped, one count-only query
 // per pair, only when the page is empty.
+// Returns null when the engine has nothing to say (not a database page, not
+// empty, or a saved view) so the renderer keeps its local catalogue fallback.
 export async function engineWidenRanges({ search, request, engineResult, localeCodes, savedView = false }) {
-  if (engineResult.engine !== "postgres" || engineResult.total !== 0 || savedView) return [];
+  if (engineResult.engine !== "postgres" || savedView) return null;
+  if (engineResult.total !== 0) return [];
   const filters = Object.fromEntries(
     Object.entries(searchIntentToQueryFilters(request.intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
   );
