@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { appApiConfigFromEnv, renderAppApiResponse } from "../lib/app-api-adapter.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { LeadIdempotencyConflictError } from "../lib/lead-durable-store.mjs";
 import { approvedPublicSeedFixture, approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const CONTACT_SECRET = "test-only-durable-contact-key-32-characters-minimum";
@@ -297,4 +298,44 @@ test("Next lead intake replays a retried enquiry and refuses a reused key on the
   assert.equal(conflict.status, 409);
   assert.equal((await conflict.json()).kind, "idempotency_conflict");
   assert.equal(readLeadLedger(path.join(dir, "leads.jsonl")).length, 1);
+});
+
+// On the durable store a replay answers with the original identity and a
+// reused key with a different payload is a 409, on both runtimes.
+test("durable replay keeps the original identity and a reused key is refused on both runtimes", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-durable-replay-"));
+  const replayStore = async ({ lead }) => ({
+    lead: { lead_id: "lead-draft-original-0001", idempotency_key: lead.lead.idempotency_key, source: lead.lead.source, listing_reference: lead.lead.listingReference || null },
+    contactVault: { lead_id: "lead-draft-original-0001", stored_at: "2026-08-10T09:00:00.000Z", encrypted: true, durable: true },
+    consent: { consent_type: "inquiry_follow_up", subject_id: "lead-draft-original-0001" },
+    sellerPipeline: null,
+    created: false,
+    idempotent: true,
+  });
+  const conflictStore = async () => { throw new LeadIdempotencyConflictError(); };
+  const input = leadInput();
+
+  const nextConfig = (store) => {
+    const config = appApiConfigFromEnv({ NODE_ENV: "test", ...approvedPublicSeedFixtureEnv(), MS_REALTY_LEAD_DURABLE_STORE_ENABLED: "true", PAYLOAD_SECRET: STORE_CONFIG.payloadSecret, DATABASE_URL: STORE_CONFIG.databaseUrl, MS_REALTY_LEAD_CONTACT_KEY: CONTACT_SECRET, MS_REALTY_WORKSPACE_ID: STORE_CONFIG.workspaceId, MS_REALTY_CONSENT_LEDGER_PATH: path.join(dir, "consents.jsonl"), MS_REALTY_EVENT_LEDGER_PATH: path.join(dir, "events.jsonl") });
+    config.persistLeadIntakeDurably = store;
+    return config;
+  };
+  const nextReplay = await renderAppApiResponse(new Request("https://example.test/api/leads", { method: "POST", headers: { "content-type": "application/json", origin: "https://example.test" }, body: JSON.stringify(input) }), { config: nextConfig(replayStore) });
+  const nextReplayBody = await nextReplay.json();
+  assert.equal(nextReplay.status, 200);
+  assert.equal(nextReplayBody.lead.id, "lead-draft-original-0001");
+  assert.equal(nextReplayBody.id, "inbox-lead-draft-original-0001");
+  assert.equal(nextReplayBody.receipt.lead_id, "lead-draft-original-0001");
+  const nextConflict = await renderAppApiResponse(new Request("https://example.test/api/leads", { method: "POST", headers: { "content-type": "application/json", origin: "https://example.test" }, body: JSON.stringify(input) }), { config: nextConfig(conflictStore) });
+  assert.equal(nextConflict.status, 409);
+  assert.deepEqual(await nextConflict.json().then((body) => [body.kind, body.intake_status]), ["idempotency_conflict", "rejected"]);
+
+  const nodeApp = (store) => createHttpApp({ seed: approvedPublicSeedFixture(), leadDurableStore: STORE_CONFIG, persistLeadIntake: store, leadContactKey: CONTACT_SECRET, consentLedgerPath: path.join(dir, "consents.jsonl"), eventLedgerPath: path.join(dir, "events.jsonl") });
+  const nodeReplay = await dispatchHttp(nodeApp(replayStore), { method: "POST", url: "/api/leads", headers: { host: "localhost", origin: "http://localhost" }, body: input });
+  assert.equal(nodeReplay.status, 200);
+  assert.equal(nodeReplay.body.lead.id, "lead-draft-original-0001");
+  assert.equal(nodeReplay.body.id, "inbox-lead-draft-original-0001");
+  const nodeConflict = await dispatchHttp(nodeApp(conflictStore), { method: "POST", url: "/api/leads", headers: { host: "localhost", origin: "http://localhost" }, body: input });
+  assert.equal(nodeConflict.status, 409);
+  assert.deepEqual([nodeConflict.body.kind, nodeConflict.body.intake_status], ["idempotency_conflict", "rejected"]);
 });

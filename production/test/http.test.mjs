@@ -3118,3 +3118,36 @@ test("a retried public enquiry replays, recovers companions, and refuses a reuse
   assert.equal(after.status, 200);
   assert.deepEqual(after.body.leads.map((item) => item.id), [retry.body.id]);
 });
+
+// Seller enquiries add a pipeline row after consent; a crash there must be
+// repaired by the replay too, with the submission event recorded once.
+test("a retried seller enquiry repairs a missing pipeline row and records the event once on the node runtime", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seller-retry-`);
+  fs.writeFileSync(`${dir}/not-a-dir`, "");
+  const paths = { leadLedgerPath: `${dir}/leads.jsonl`, eventLedgerPath: `${dir}/events.jsonl`, consentLedgerPath: `${dir}/consent.jsonl`, leadContactVaultPath: `${dir}/vault.jsonl`, leadContactKey: "test-only-lead-contact-key-32-characters-minimum", auditLogPath: `${dir}/audit.jsonl`, sellerPipelinePath: `${dir}/seller-pipeline.jsonl` };
+  const body = { idempotencyKey: "public-lead:33333333-3333-4333-8333-333333333333", source: "website_seller_valuation", leadType: "seller", language: "bg", contact: { name: "Seller Person", phone: "+359880000321" }, contact_preference: "phone", property: { location: "Sandanski", type: "apartment" }, message: "Valuation please" };
+  const post = (app) => dispatchHttp(app, { method: "POST", url: "/api/leads", headers: SAME_ORIGIN_LEAD_HEADERS, body });
+  const { readLeadLedger } = await import("../lib/lead-ledger.mjs");
+  const { readSellerPipeline } = await import("../lib/seller-pipeline.mjs");
+  const events = () => (fs.existsSync(paths.eventLedgerPath) ? fs.readFileSync(paths.eventLedgerPath, "utf8").trim().split("\n").filter(Boolean).filter((line) => line.includes("lead_submitted")).length : 0);
+
+  let app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths, sellerPipelinePath: `${dir}/not-a-dir/seller-pipeline.jsonl` });
+  const failure = await post(app);
+  assert.ok(failure.status >= 400, JSON.stringify(failure.body).slice(0, 200));
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1);
+  assert.equal(fs.readFileSync(paths.consentLedgerPath, "utf8").trim().split("\n").length, 1, "consent was written before the pipeline failed");
+  assert.equal(events(), 0);
+
+  app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths });
+  const retry = await post(app);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.consent, null);
+  assert.ok(retry.body.sellerPipeline, "the missing pipeline row was written on replay");
+  assert.equal(readSellerPipeline(paths.sellerPipelinePath).filter((row) => row.lead_id === retry.body.lead.id).length, 1);
+  assert.equal(events(), 1);
+  const again = await post(app);
+  assert.equal(again.status, 200);
+  assert.equal(again.body.sellerPipeline, null);
+  assert.equal(events(), 1);
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1);
+});

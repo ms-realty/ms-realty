@@ -478,8 +478,16 @@ async function routeLead(request, body, registry, seed, config) {
       const consent = consentHas
         ? null
         : recordConsent({ consentType: "inquiry_follow_up", source: lead.lead?.source, subjectId: original.lead_id, locale: lead.original_language, contact: lead.lead?.contact, marketingOptIn: input.marketingOptIn === true }, config);
-      if (consent) await recordOperationalEvent({ type: "lead_submitted", path: "/api/leads", locale: lead.original_language, listingReference: lead.lead?.listingReference, action: lead.lead?.source }, config);
-      return privateJson(200, { ...replayLead, ledger: original, contactVault, consent, sellerPipeline: null, receipt: publicLeadReceipt(original, { retrySafe: true }) });
+      const pipelineHas = lead.lead?.leadType !== "seller" || readSellerPipeline(config.sellerPipelinePath).some((row) => row.lead_id === original.lead_id);
+      const sellerPipeline = pipelineHas
+        ? null
+        : appendSellerPipeline(createSellerPipelineItem(replayLead, { createdAt: config.sellerPipelineCreatedAt }), { filePath: config.sellerPipelinePath });
+      // Any repaired companion means the original run stopped before its end,
+      // so the submission event is recorded once here as well.
+      if (contactVault || consent || sellerPipeline) {
+        await recordOperationalEvent({ type: "lead_submitted", path: "/api/leads", locale: lead.original_language, listingReference: lead.lead?.listingReference, action: lead.lead?.source }, config);
+      }
+      return privateJson(200, { ...replayLead, ledger: original, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(original, { retrySafe: true }) });
     }
     const contactVault = durable
       ? durable.contactVault
@@ -530,11 +538,15 @@ async function routeLead(request, body, registry, seed, config) {
         config,
       );
     }
-    return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(ledger, { retrySafe: Boolean(durable) }) });
+    // A durable replay answers with the original identity, not the fresh draft's.
+    const identity = durable?.created === false && ledger?.lead_id ? { id: `inbox-${ledger.lead_id}`, lead: { ...lead.lead, id: ledger.lead_id } } : {};
+    return privateJson(durable?.created === false ? 200 : 201, { ...lead, ...identity, ledger, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(ledger, { retrySafe: Boolean(durable) }) });
   } catch (error) {
     if (error instanceof LeadStoreUnavailableError) {
       return privateJson(503, { kind: error.code, intake_status: persistenceStarted ? "unknown" : "rejected", message: "Lead storage is temporarily unavailable" });
     }
+    // A refused request reference is a validation outcome with its own status.
+    if (error.code === "idempotency_conflict") return privateJson(409, { kind: error.code, intake_status: "rejected", message: error.message });
     return privateJson(400, { kind: "bad_request", intake_status: persistenceStarted ? "unknown" : "rejected", message: error.message });
   }
 }

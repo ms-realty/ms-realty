@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { LEAD_COLLECTIONS, LEAD_COLLECTION_SLUGS } from "../lib/lead-collections.mjs";
 import { withLeadContactEnvelopes } from "../lib/lead-contact-vault.mjs";
 import {
+  LeadIdempotencyConflictError,
   LeadStoreUnavailableError,
   findLeadByIdempotencyKey,
   isLeadDurableStoreEnabled,
@@ -756,4 +757,23 @@ test("the collections keep contact envelopes opaque and ledger rows immutable", 
     assert.equal(contactFields[name].required, true);
     assert.equal(contactFields[name].access.update(), false, `${name} is write-once`);
   }
+});
+
+// A reused key with a different person or message is a conflict, never a
+// silent confirmation of the earlier lead.
+test("a reused idempotency key with a different payload is refused", async () => {
+  const payload = fakePayload();
+  const row = ledgerRow({ idempotency_key: "browser-retry-conflict", message_fingerprint: "message-one" });
+  await persistLeadDurably(durableArgs({ ledgerRow: row, payload }));
+  const otherPerson = { ...row, lead_id: "lead-draft-33333333-3333-4333-8333-333333333333", contact_fingerprint: "someone-else" };
+  await assert.rejects(
+    () => persistLeadDurably(durableArgs({ ledgerRow: otherPerson, payload })),
+    (error) => error instanceof LeadIdempotencyConflictError && error.status === 409 && error.code === "idempotency_conflict",
+  );
+  const otherMessage = { ...row, lead_id: "lead-draft-44444444-4444-4444-8444-444444444444", message_fingerprint: "different-message" };
+  await assert.rejects(() => persistLeadDurably(durableArgs({ ledgerRow: otherMessage, payload })), LeadIdempotencyConflictError);
+  assert.equal(payload.rows.public_leads.length, 1, "no second person was created");
+  const same = await persistLeadDurably(durableArgs({ ledgerRow: { ...row, lead_id: "lead-draft-55555555-5555-4555-8555-555555555555" }, payload }));
+  assert.equal(same.created, false);
+  assert.equal(same.lead.lead_id, row.lead_id);
 });

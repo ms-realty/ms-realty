@@ -156,6 +156,24 @@ export class LeadStoreUnavailableError extends Error {
   }
 }
 
+// The same idempotency key with a different person, listing, source or
+// message must not be confirmed as the earlier lead.
+export class LeadIdempotencyConflictError extends Error {
+  constructor(message = "This request reference was already used for a different enquiry") {
+    super(message);
+    this.name = "LeadIdempotencyConflictError";
+    this.code = "idempotency_conflict";
+    this.status = 409;
+  }
+}
+
+function storedLeadMatches(existing, ledgerRow) {
+  const stored = existing?.ledger_row || existing || {};
+  const same = (field) => (stored[field] ?? existing?.[field] ?? null) === (ledgerRow[field] ?? null);
+  const messageKnown = stored.message_fingerprint !== undefined && ledgerRow.message_fingerprint !== undefined;
+  return same("source") && same("listing_reference") && same("lead_type") && same("contact_fingerprint") && (!messageKnown || stored.message_fingerprint === ledgerRow.message_fingerprint);
+}
+
 export function leadDurableStoreConfigFromEnv(env = process.env) {
   return {
     leadDurableStoreEnabled: String(env.MS_REALTY_LEAD_DURABLE_STORE_ENABLED || "").trim() === "true",
@@ -575,6 +593,11 @@ export async function persistLeadDurably({
       : await findOne(runtime, "public_leads", workspaceScopedWhere(workspaceId, { lead_id: { equals: leadId } }), req);
     const existing = byKey || byId;
     if (existing) {
+      if (byKey && !storedLeadMatches(byKey, ledgerRow)) {
+        await runtime.db.rollbackTransaction(transactionId);
+        transactionId = null;
+        throw new LeadIdempotencyConflictError();
+      }
       const outcome = await storedLeadOutcome(runtime, existing, workspaceId, req);
       await runtime.db.commitTransaction(transactionId);
       committed = true;
@@ -650,6 +673,8 @@ export async function persistLeadDurably({
       idempotent: false,
     };
   } catch (error) {
+    // A conflict is a validation outcome, not an unavailable store.
+    if (error instanceof LeadIdempotencyConflictError) throw error;
     let rolledBack = false;
     if (transactionId && !committed) {
       try {
