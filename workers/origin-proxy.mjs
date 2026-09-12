@@ -67,7 +67,13 @@ export function requestForOrigin(request, originValue, originTokenValue) {
   const publicUrl = new URL(request.url);
   assertSameOriginBrowserWrite(request, publicUrl);
 
-  const upstreamUrl = new URL(`${publicUrl.pathname}${publicUrl.search}`, origin);
+  // The public pathname and query are data on a URL rooted at the configured
+  // origin. Assigning them through the setters keeps a leading "//host" a
+  // path segment instead of a network-path reference that would re-home the
+  // request, and the invariant below is what lets the origin token leave.
+  const upstreamUrl = new URL(origin);
+  upstreamUrl.pathname = publicUrl.pathname;
+  upstreamUrl.search = publicUrl.search;
   const headers = new Headers(request.headers);
   headers.delete("x-forwarded-for");
   headers.delete("x-forwarded-host");
@@ -78,7 +84,11 @@ export function requestForOrigin(request, originValue, originTokenValue) {
   // Both app runtimes validate Origin against this trusted public host.
   // Preserve the browser Origin even if Caddy/Next use a different internal URL.
 
-  return new Request(new Request(upstreamUrl, request), { headers, redirect: "manual" });
+  const upstream = new Request(new Request(upstreamUrl, request), { headers, redirect: "manual" });
+  if (new URL(upstream.url).origin !== origin.origin) {
+    throw new OriginProxyError("Upstream request must stay on the configured origin");
+  }
+  return upstream;
 }
 
 export function responseForPublicOrigin(response, { originValue, publicUrl }) {
