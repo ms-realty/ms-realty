@@ -302,7 +302,10 @@ async function storedLeadOutcome(runtime, document, workspaceId, req = undefined
   };
 }
 
-async function recoverCommittedIdempotentLead(runtime, { idempotencyKey, workspaceId }) {
+// The loser of a same-key race recovers the winner's outcome only when it is
+// the same enquiry; a different payload under the winner's key is the same
+// conflict the in-transaction lookup would have raised.
+async function recoverCommittedIdempotentLead(runtime, { idempotencyKey, workspaceId, ledgerRow }) {
   const deadline = Date.now() + IDEMPOTENCY_RECOVERY_DEADLINE_MS;
   for (let attempt = 0; attempt < IDEMPOTENCY_RECOVERY_ATTEMPTS; attempt += 1) {
     try {
@@ -311,8 +314,10 @@ async function recoverCommittedIdempotentLead(runtime, { idempotencyKey, workspa
         "public_leads",
         workspaceScopedWhere(workspaceId, { idempotency_key: { equals: idempotencyKey } }),
       );
+      if (document && ledgerRow && !storedLeadMatches(document, ledgerRow)) throw new LeadIdempotencyConflictError();
       if (document) return await storedLeadOutcome(runtime, document, workspaceId);
-    } catch {
+    } catch (error) {
+      if (error instanceof LeadIdempotencyConflictError) throw error;
       // The winning serializable transaction may not be visible yet. Only
       // this already-classified idempotency race receives bounded rereads.
     }
@@ -693,6 +698,7 @@ export async function persistLeadDurably({
       const recovered = await recoverCommittedIdempotentLead(runtime, {
         idempotencyKey: ledgerRow.idempotency_key,
         workspaceId,
+        ledgerRow,
       });
       if (recovered) return recovered;
     }
