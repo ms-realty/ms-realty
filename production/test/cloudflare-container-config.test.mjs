@@ -372,7 +372,7 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(rollbackBlock, /rollback-ready\.json/);
   assert.match(rollbackBlock, /if ! ready_status="\$\(curl[\s\S]*"\$ready_url"\)"; then\s+ready_status=000/);
   // Readiness acceptance lives in production/lib/rollback-readiness.mjs, read from the restored release.
-  assert.match(rollback, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers"/);
+  assert.match(rollbackBlock, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers"/);
   assert.match(fs.readFileSync(fromRoot("production", "lib", "rollback-readiness.mjs"), "utf8"), /ready\.launch_ready === launchReady/);
   assert.match(rollbackBlock, /JSON\.stringify\(actual\) !== JSON\.stringify\(blockers\)/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
