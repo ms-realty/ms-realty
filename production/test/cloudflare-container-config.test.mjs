@@ -853,7 +853,8 @@ test("capturing the prior monitoring report records validity without aborting", 
     ciWorkflow.indexOf("- name: Preserve validated monitoring evidence for rollback"),
   );
   assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight; then/);
-  assert.doesNotMatch(capture, /^\s+exit 1$/m);
+  // Only the scp transport failure aborts; an invalid or expiring report records valid=false.
+  assert.equal(capture.match(/^\s+exit 1$/gm)?.length, 1);
   assert.match(capture, /echo "valid=false" >> "\$GITHUB_OUTPUT"/);
   assert.match(capture, /if ! ssh "\$\{ssh_args\[@\]\}" "root@\$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 \/opt\/ms-realty\/incoming;/, "the remote validation is guarded too");
 });
