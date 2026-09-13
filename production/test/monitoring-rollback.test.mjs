@@ -6,6 +6,7 @@ import path from "node:path";
 import {
   assertMonitoringRollbackReport,
   monitoringRollbackState,
+  rollbackEvidenceAction,
   writeMonitoringRollbackReport,
 } from "../lib/monitoring-rollback.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -215,4 +216,21 @@ test("evidence that expires during a queued deploy job is refused at the job sta
   assert.equal(monitoringRollbackState(reportPath, { now: deployJobStart }).status, "pass");
   // With no queue the same evidence covers the whole job.
   assert.equal(monitoringRollbackState(reportPath, { now: "2026-08-01T08:20:00.000Z", requiredRemainingMs: HOUR }).status, "pass");
+});
+
+// Queue arrival with the evidence expired or nearly so: the rollback must not
+// re-attach it (nothing extends validity) and recovers through the real drill.
+test("rollback evidence action preserves only evidence that covers the rollback window", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-rollback-evidence-action-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "monitoring-rollback-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+  const window = 15 * 60 * 1000;
+  // Expires 2026-08-01T10:28Z.
+  assert.equal(rollbackEvidenceAction(reportPath, { now: "2026-08-01T09:40:00.000Z", rollbackWindowMs: window }).action, "preserve"); // 48 min left
+  const nearZero = rollbackEvidenceAction(reportPath, { now: "2026-08-01T10:23:00.000Z", rollbackWindowMs: window }); // 5 min left
+  assert.deepEqual([nearZero.action, nearZero.reason], ["drill", "expiring"]);
+  const expired = rollbackEvidenceAction(reportPath, { now: "2026-08-01T11:10:00.000Z", rollbackWindowMs: window }); // consumed by the queue
+  assert.deepEqual([expired.action, expired.reason], ["drill", "expired"]);
+  assert.equal(rollbackEvidenceAction(path.join(directory, "missing.json"), { now: "2026-08-01T09:40:00.000Z" }).action, "drill");
 });

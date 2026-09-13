@@ -294,3 +294,14 @@ export function writeMonitoringRollbackReport(report, outPath = DEFAULT_MONITORI
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   return outPath;
 }
+
+// What a rollback can do with the evidence it preserved: re-attach it to the
+// restored release ("preserve") only if it still covers the rollback
+// verification window; otherwise the honest recovery is the real drill for
+// the restored release ("drill") and a readiness that says monitoring_rollback
+// is blocked until it lands. Nothing extends the report's validity.
+export function rollbackEvidenceAction(reportPath = DEFAULT_MONITORING_ROLLBACK_REPORT, { now = Date.now(), rollbackWindowMs = 15 * 60 * 1000 } = {}) {
+  const state = monitoringRollbackState(reportPath, { now, requiredRemainingMs: rollbackWindowMs });
+  if (state.status === "pass") return { action: "preserve", reason: "evidence_covers_rollback_window", state };
+  return { action: "drill", reason: state.status, state };
+}

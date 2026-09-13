@@ -882,3 +882,21 @@ test("the release requires monitoring evidence that outlasts the release window 
   assert.match(ciWorkflow.slice(requireJob, workerDeploy), /MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=3600000 npm run monitoring:preflight/);
   assert.match(ciWorkflow.slice(rollback), /if: failure\(\) && needs\.deploy_origin\.outputs\.previous_release != ''/);
 });
+
+// Expired-evidence recovery in the rollback: never re-attach a report that
+// cannot cover the rollback window; restore markers exactly, dispatch the real
+// drill for the restored release, and expect readiness to say so.
+test("the rollback recovers expired preserved evidence through the real drill", () => {
+  const rollback = ciWorkflow.slice(ciWorkflow.indexOf("- name: Roll back failed deployment"));
+  assert.match(rollback, /MS_REALTY_ROLLBACK_WINDOW_MS=900000 node production\/scripts\/rollback-evidence-action\.mjs/);
+  assert.match(rollback, /if \[ "\$evidence_action" = "preserve" \]; then/);
+  assert.match(rollback, /gh workflow run monitoring-drill\.yml --repo "\$GITHUB_REPOSITORY" --ref main -f release_sha="\$previous_origin" -f confirm_alert_drill=true/);
+  assert.match(rollback, /rows\.add\("monitoring_rollback"\)/);
+  assert.match(rollback, /expected_ready=false/);
+  // The plain preflight no longer hard-fails the rollback on an expired report.
+  assert.doesNotMatch(rollback, /MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight/);
+  // Exact marker verification is untouched and the drill needs actions:write on this job only.
+  assert.match(rollback, /d\.build_marker !== edge \|\| d\.origin_build_marker !== origin/);
+  assert.match(ciWorkflow, /  deploy:\n    name: Deploy production\n    permissions:\n      contents: read\n[^\n]*\n      actions: write/);
+  assert.equal(ciWorkflow.match(/actions: write/g)?.length, 1);
+});
