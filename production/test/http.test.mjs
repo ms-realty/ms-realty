@@ -3059,3 +3059,95 @@ test("generated HTTP smoke file is valid when present", () => {
   const smoke = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertHttpSmoke(smoke), true);
 });
+
+
+// The public form sends one idempotency key per enquiry and retries with the
+// same key. On the ledger runtime the retry must return the original lead,
+// complete any companion record a crash skipped after the ledger append,
+// refuse a different payload under the same key, and survive a
+// reinitialization of the app on the same files (new app in this process;
+// a real process restart is exercised by the local journey script).
+test("a retried public enquiry replays, recovers companions, and refuses a reused key on the node runtime", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-lead-retry-`);
+  const paths = { leadLedgerPath: `${dir}/leads.jsonl`, eventLedgerPath: `${dir}/events.jsonl`, consentLedgerPath: `${dir}/consent.jsonl`, leadContactVaultPath: `${dir}/vault.jsonl`, leadContactKey: "test-only-lead-contact-key-32-characters-minimum", auditLogPath: `${dir}/audit.jsonl` };
+  const body = { idempotencyKey: "public-lead:11111111-1111-4111-8111-111111111111", source: "website_listing_detail", leadType: "buyer", language: "bg", listingReference: "MS-00815", contact: { name: "Retry Person", phone: "+359880000123" }, contact_preference: "phone", message: "Retry" };
+  const post = (app, payload) => dispatchHttp(app, { method: "POST", url: "/api/leads", headers: SAME_ORIGIN_LEAD_HEADERS, body: payload });
+  const inbox = (app) => dispatchHttp(app, { url: "/api/admin/leads?locale=bg", headers: { authorization: "Bearer local-admin-smoke" } });
+
+  // Fault 1: the contact vault fails before the ledger append → nothing is
+  // recorded, and the retry becomes a normal first submission.
+  fs.writeFileSync(`${dir}/not-a-dir`, "");
+  let app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths, leadContactVaultPath: `${dir}/not-a-dir/vault.jsonl` });
+  const vaultFailure = await post(app, body);
+  assert.ok(vaultFailure.status >= 400, "vault failure is reported");
+  assert.equal(fs.existsSync(paths.leadLedgerPath) && fs.readFileSync(paths.leadLedgerPath, "utf8").trim() !== "", false, "no ledger row without a vault row");
+
+  // Fault 2: consent fails after the ledger append → the lead exists without
+  // consent; the retry must answer with the same lead and record the consent.
+  app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths, consentLedgerPath: `${dir}/not-a-dir/consent.jsonl` });
+  const consentFailure = await post(app, body);
+  assert.ok(consentFailure.status >= 400, "consent failure is reported");
+  const { readLeadLedger } = await import("../lib/lead-ledger.mjs");
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1, "the ledger row was written before consent failed");
+  assert.equal(fs.existsSync(paths.consentLedgerPath), false);
+
+  app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths });
+  const retry = await post(app, body);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.lead.id, readLeadLedger(paths.leadLedgerPath)[0].lead_id);
+  assert.equal(retry.body.receipt.lead_id, retry.body.lead.id);
+  assert.ok(retry.body.consent, "the missing consent was recorded on replay");
+  assert.equal(fs.readFileSync(paths.consentLedgerPath, "utf8").trim().split("\n").length, 1);
+  const again = await post(app, body);
+  assert.equal(again.status, 200);
+  assert.equal(again.body.consent, null, "a second replay writes nothing");
+  assert.equal(fs.readFileSync(paths.consentLedgerPath, "utf8").trim().split("\n").length, 1);
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1);
+
+  // Same key, different person or message: refused, nothing recorded.
+  const otherPerson = await post(app, { ...body, contact: { name: "Someone Else", phone: "+359880000999" } });
+  const otherMessage = await post(app, { ...body, message: "A different message" });
+  assert.equal(otherPerson.status, 409);
+  assert.equal(otherPerson.body.kind, "idempotency_conflict");
+  assert.equal(otherMessage.status, 409);
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1);
+
+  // Reinitialization on the same files: the inbox shows exactly one item.
+  app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths });
+  const after = await inbox(app);
+  assert.equal(after.status, 200);
+  assert.deepEqual(after.body.leads.map((item) => item.id), [retry.body.id]);
+});
+
+// Seller enquiries add a pipeline row after consent; a crash there must be
+// repaired by the replay too, with the submission event recorded once.
+test("a retried seller enquiry repairs a missing pipeline row and records the event once on the node runtime", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seller-retry-`);
+  fs.writeFileSync(`${dir}/not-a-dir`, "");
+  const paths = { leadLedgerPath: `${dir}/leads.jsonl`, eventLedgerPath: `${dir}/events.jsonl`, consentLedgerPath: `${dir}/consent.jsonl`, leadContactVaultPath: `${dir}/vault.jsonl`, leadContactKey: "test-only-lead-contact-key-32-characters-minimum", auditLogPath: `${dir}/audit.jsonl`, sellerPipelinePath: `${dir}/seller-pipeline.jsonl` };
+  const body = { idempotencyKey: "public-lead:33333333-3333-4333-8333-333333333333", source: "website_seller_valuation", leadType: "seller", language: "bg", contact: { name: "Seller Person", phone: "+359880000321" }, contact_preference: "phone", property: { location: "Sandanski", type: "apartment" }, message: "Valuation please" };
+  const post = (app) => dispatchHttp(app, { method: "POST", url: "/api/leads", headers: SAME_ORIGIN_LEAD_HEADERS, body });
+  const { readLeadLedger } = await import("../lib/lead-ledger.mjs");
+  const { readSellerPipeline } = await import("../lib/seller-pipeline.mjs");
+  const events = () => (fs.existsSync(paths.eventLedgerPath) ? fs.readFileSync(paths.eventLedgerPath, "utf8").trim().split("\n").filter(Boolean).filter((line) => line.includes("lead_submitted")).length : 0);
+
+  let app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths, sellerPipelinePath: `${dir}/not-a-dir/seller-pipeline.jsonl` });
+  const failure = await post(app);
+  assert.ok(failure.status >= 400, JSON.stringify(failure.body).slice(0, 200));
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1);
+  assert.equal(fs.readFileSync(paths.consentLedgerPath, "utf8").trim().split("\n").length, 1, "consent was written before the pipeline failed");
+  assert.equal(events(), 0);
+
+  app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), ...paths });
+  const retry = await post(app);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.consent, null);
+  assert.ok(retry.body.sellerPipeline, "the missing pipeline row was written on replay");
+  assert.equal(readSellerPipeline(paths.sellerPipelinePath).filter((row) => row.lead_id === retry.body.lead.id).length, 1);
+  assert.equal(events(), 1);
+  const again = await post(app);
+  assert.equal(again.status, 200);
+  assert.equal(again.body.sellerPipeline, null);
+  assert.equal(events(), 1);
+  assert.equal(readLeadLedger(paths.leadLedgerPath).length, 1);
+});

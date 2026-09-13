@@ -456,12 +456,16 @@ export function searchRuntimeListings(
     translationTasks = [],
     databasePage = false,
     totalMatches = null,
+    catalogSeed = null,
+    widenRanges = null,
   },
 ) {
   return renderSearchPage({
     registry,
     localeCode,
     listings: runtimeListings(seed, translationTasks),
+    catalogListings: catalogSeed ? runtimeListings(catalogSeed, translationTasks) : null,
+    widenRanges,
     query,
     filters,
     sort,

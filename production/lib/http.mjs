@@ -156,7 +156,7 @@ import {
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
-import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
+import { appendLead, leadReplayState, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_BROKER_PROFILES, normalizeBrokerLeadInput } from "./leads.mjs";
 import { adminLocales } from "./locales.mjs";
 import {
@@ -172,7 +172,7 @@ import {
   WorkspaceSettingsStoreUnavailableError,
   workspaceSettingsView,
 } from "./workspace-settings.mjs";
-import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import { appendLeadContact, readLeadContacts, withLeadContacts } from "./lead-contact-vault.mjs";
 import { isFileBackedLeadMutationBlocked } from "./lead-durable-boundary.mjs";
 import {
   productionRuntimeDataUnavailable,
@@ -360,8 +360,7 @@ import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import {
   appendConsentRecord,
   createConsentRecord,
-  latestConsentStates,
-} from "./consent-ledger.mjs";
+  latestConsentStates, readConsentLedger } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
 import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
@@ -415,7 +414,7 @@ import {
 import { buildListingVerificationReport } from "./listing-verification.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { fromRoot } from "./paths.mjs";
-import { seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
+import { engineLocaleCodes, engineWidenRanges, seedForPostgresSearchHits, withSearchRequest } from "./public-search.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest, searchParamsFromUrl } from "./search-request.mjs";
@@ -651,18 +650,6 @@ function publicResponse(request, url, rendered) {
     );
   }
   return json(rendered.status || 200, rendered, cacheHeaders);
-}
-
-function activeListingRecord(record) {
-  const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
-  return record.collection === "listings" && ["available", "reserved"].includes(status);
-}
-
-function engineLocaleCodes(seed, registry, result) {
-  if (seed.records.some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
-    return [result.locale];
-  }
-  return [...new Set([result.search.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
 }
 
 function seedForSearchHits(seed, hits) {
@@ -2552,23 +2539,24 @@ export function createHttpApp({
     const translationTasks = context.translationTasks;
     const registryForRequest = context.registry;
     const searchOptions = { localeCode: intent.locale, query, filters, sort, page, pageSize: intent.page_size, translationTasks, ...options };
-    const localResult = searchRuntimeListings(registryForRequest, seedForRequest, searchOptions);
-    const engineResult = await queryPublicSearch({
-      ...search,
-      q: query,
-      intent,
-      localeCodes: engineLocaleCodes(seedForRequest, registryForRequest, localResult),
-    });
+    const localeCodes = engineLocaleCodes(seedForRequest, registryForRequest, intent.locale);
+    const engineResult = await queryPublicSearch({ ...search, q: query, intent, localeCodes });
+    const widenRanges = await engineWidenRanges({ search, request: searchRequest, engineResult, localeCodes, savedView: options.savedView === true });
     const databasePage = engineResult.engine === "postgres";
+    // Same contract as executePublicSearch: the local catalogue search only
+    // when no engine served the page; otherwise the hits page with the
+    // approved catalogue alongside for the filter universe.
     const result =
       engineResult.engine === "seed_fallback" || (!databasePage && !searchEngineResultIsComplete(engineResult))
-        ? localResult
+        ? searchRuntimeListings(registryForRequest, seedForRequest, searchOptions)
         : searchRuntimeListings(
             registryForRequest,
             databasePage ? seedForPostgresSearchHits(seedForRequest, engineResult.hits) : seedForSearchHits(seedForRequest, engineResult.hits),
             {
             ...searchOptions,
             query: "",
+            catalogSeed: seedForRequest,
+            widenRanges,
             ...(databasePage
               ? {
                   databasePage: true,
@@ -7839,6 +7827,33 @@ export function createHttpApp({
               workspaceId: leadDurableStore.workspaceId,
             })
           : null;
+        // Ledger runtime replay: the same key with the same enquiry answers with
+        // the original lead and only completes companions a crash may have
+        // skipped after the ledger append; a different payload is refused.
+        const replay = durable || !leadLedgerPath ? { state: "none" } : leadReplayState(lead, { filePath: leadLedgerPath, contactSecret: leadContactKey });
+        if (replay.state === "conflict") {
+          return privateJson(409, { kind: "idempotency_conflict", intake_status: "rejected", message: "This request reference was already used for a different enquiry" });
+        }
+        if (replay.state === "replay") {
+          const original = replay.row;
+          const replayLead = { ...lead, id: original.id, lead: { ...lead.lead, id: original.lead_id } };
+          const vaultHas = leadContactVaultPath ? readLeadContacts(leadContactVaultPath, leadContactKey).has(original.lead_id) : true;
+          const contactVault = vaultHas ? null : appendLeadContact(replayLead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt });
+          const consentHas = consentLedgerPath ? readConsentLedger(consentLedgerPath).some((row) => row.subject_id === original.lead_id) : true;
+          const consent = consentHas
+            ? null
+            : recordConsent({ consentType: "inquiry_follow_up", source: lead.lead?.source, subjectId: original.lead_id, locale: lead.original_language, contact: lead.lead?.contact, marketingOptIn: input.marketingOptIn === true });
+          const pipelineHas = !(sellerPipelinePath && lead.lead?.leadType === "seller") || readSellerPipeline(sellerPipelinePath).some((row) => row.lead_id === original.lead_id);
+          const sellerPipeline = pipelineHas
+            ? null
+            : appendSellerPipeline(createSellerPipelineItem(replayLead, { createdAt: sellerPipelineCreatedAt }), { filePath: sellerPipelinePath });
+          // Any repaired companion means the original run stopped before its
+          // end, so the submission event is recorded once here as well.
+          if (contactVault || consent || sellerPipeline) {
+            recordEvent({ type: "lead_submitted", path: "/api/leads", locale: lead.original_language, listingReference: lead.lead?.listingReference, action: lead.lead?.source });
+          }
+          return privateJson(200, { ...replayLead, ledger: original, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(original, { retrySafe: true }) });
+        }
         const contactVault = durable
           ? durable.contactVault
           : leadContactVaultPath
@@ -7875,7 +7890,9 @@ export function createHttpApp({
             action: lead.lead?.source,
           });
         }
-        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ledger, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(ledger, { retrySafe: Boolean(durable) }) });
+        // A durable replay answers with the original identity, not the fresh draft's.
+        const identity = durable?.created === false && ledger?.lead_id ? { id: `inbox-${ledger.lead_id}`, lead: { ...lead.lead, id: ledger.lead_id } } : {};
+        return privateJson(durable?.created === false ? 200 : 201, { ...lead, ...identity, ledger, contactVault, consent, sellerPipeline, receipt: publicLeadReceipt(ledger, { retrySafe: Boolean(durable) }) });
       } catch (error) {
         if (error instanceof WorkspaceSettingsStoreUnavailableError) {
           return privateJson(error.status || 503, { kind: error.code, message: "Workspace settings are temporarily unavailable" });
@@ -7883,7 +7900,7 @@ export function createHttpApp({
         if (error instanceof LeadStoreUnavailableError) {
           return privateJson(503, { kind: error.code, intake_status: persistenceStarted ? "unknown" : "rejected", message: "Lead storage is temporarily unavailable" });
         }
-        return privateJson(error.status || 400, { kind: error.code || "bad_request", intake_status: persistenceStarted ? "unknown" : "rejected", message: error.message });
+        return privateJson(error.status || 400, { kind: error.code || "bad_request", intake_status: persistenceStarted && error.code !== "idempotency_conflict" ? "unknown" : "rejected", message: error.message });
       }
     }
 

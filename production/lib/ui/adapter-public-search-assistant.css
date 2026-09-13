@@ -15,3 +15,15 @@
 html:has(.psa[open]){overflow:hidden}
 
 .psa [data-assistant-unresolved]{padding:20px;background:var(--atlas-surface);border-radius:16px}
+/* Search help: one compact disclosure beside the sort and view controls; the
+   panel floats over the results so opening it never moves the list. */
+.sr-help{position:relative}
+.sr-help__summary{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 var(--space-3);border:1px solid var(--border);border-radius:var(--radius-full);background:var(--surface);color:var(--text-muted);font-size:var(--text-sm);font-weight:var(--fw-semibold);cursor:pointer;list-style:none;white-space:nowrap}
+.sr-help__summary::-webkit-details-marker{display:none}
+.sr-help__summary:hover{color:var(--text-strong)}
+.sr-help__summary:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.sr-help[open] .sr-help__summary{color:var(--brand);border-color:var(--brand)}
+.sr-help__panel{position:absolute;inset-inline-end:0;top:calc(100% + 8px);z-index:20;display:grid;gap:8px;width:max-content;max-width:min(360px,calc(100vw - 32px));padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-md)}
+.sr-help__panel .psa-entry,.sr-help__panel .pse-entry{margin:0;width:100%;justify-content:flex-start;text-align:start}
+@media (scripting:enabled){main .sr-help[hidden]{display:block!important;visibility:hidden}}
+@media (max-width:600px){.sr-help__summary span{display:none}.sr-help__summary{min-width:44px;padding:0 var(--space-2);justify-content:center}}

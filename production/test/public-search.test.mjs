@@ -11,13 +11,15 @@ import {
 } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
+  engineLocaleCodes,
+  engineWidenRanges,
   executePublicSearch,
   publicSearchConfigFromEnv,
   PublicSearchUnavailableError,
 } from "../lib/public-search.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "../lib/runtime.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
-import { approvedPublicSeedFixtureOptions, approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
+import { approvedPublicSeedFixture, approvedPublicSeedFixtureOptions, approvedPublicSeedFixtureEnv } from "./approved-public-seed.fixture.mjs";
 
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
@@ -464,4 +466,285 @@ test("Node HTML and API use the same retained interpretation after explicit edit
   assert.match(page.body, /data-search-interpretation="true"/);
   assert.ok(page.body.includes(words));
   assert.match(page.body, /name="nl_context"/);
+});
+
+// The dropdown universe must come from the whole approved catalogue, not from
+// the page of hits the engine returned: a sale-only page must still offer
+// rent, and an empty answer must still offer every location.
+const catalogFilterUniverse = (page) => {
+  const options = page.search.controls.filter_options;
+  return {
+    offer_types: options.offer_types,
+    locations: options.locations,
+    property_subtypes: options.property_subtypes,
+    bedrooms: options.bedrooms,
+    applicable_filter_fields: page.search.controls.applicable_filter_fields,
+  };
+};
+const saleOnlyHit = {
+  ...hit,
+  offer_type: "sale",
+  property_family: "apartment",
+  location_label: "Sandanski",
+  bedrooms_count: 2,
+  price_amount: 100000,
+  price_currency: "EUR",
+  price_on_request: false,
+};
+function postgresSearch(pages) {
+  const intents = [];
+  return {
+    intents,
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent }) => {
+          intents.push(intent);
+          const hits = intent.page_size === 1 ? [] : pages.shift() || [];
+          return {
+            engine: "postgres",
+            total: hits.length,
+            hits,
+            page: intent.page,
+            page_size: intent.page_size,
+            target: "ms_realty_public_search_documents",
+          };
+        },
+      },
+    },
+  };
+}
+
+test("Postgres pages and empty answers keep the approved catalogue as the filter universe", async () => {
+  const catalog = catalogFilterUniverse(searchRuntimeListings(registry, seed, { localeCode: "bg" }));
+  assert.deepEqual(catalog.offer_types, ["rent", "sale"]);
+  assert.ok(catalog.locations.length > 1);
+
+  const { search } = postgresSearch([[saleOnlyHit], []]);
+  const saleOnly = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&offer_type=sale"), search });
+  assert.equal(saleOnly.result.search.total_matches, 1);
+  assert.deepEqual(saleOnly.result.cards.map((card) => card.id), ["MS-00815"]);
+  assert.deepEqual(catalogFilterUniverse(saleOnly.result), catalog);
+
+  const empty = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=1"), search });
+  assert.equal(empty.result.search.total_matches, 0);
+  assert.equal(empty.result.cards.length, 0);
+  assert.equal(empty.result.search.filters.price_max, 1);
+  assert.deepEqual(catalogFilterUniverse(empty.result), catalog);
+});
+
+test("Node HTML and API keep the catalogue filter universe on Postgres pages and empty answers", async () => {
+  const { search, intents } = postgresSearch([[saleOnlyHit], [saleOnlyHit], [], []]);
+  const app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), search });
+  const catalog = catalogFilterUniverse(searchRuntimeListings(registry, approvedPublicSeedFixtureOptions().seed, { localeCode: "bg" }));
+  assert.deepEqual(catalog.offer_types, ["rent", "sale"]);
+
+  const saleApi = await dispatchHttp(app, { url: "/api/search?locale=bg&offer_type=sale" });
+  const salePage = await dispatchHttp(app, { url: "/bg/tarsene?offer_type=sale", headers: { accept: "text/html" } });
+  const emptyApi = await dispatchHttp(app, { url: "/api/search?locale=bg&price_max=1" });
+  const emptyPage = await dispatchHttp(app, { url: "/bg/tarsene?price_max=1", headers: { accept: "text/html" } });
+
+  assert.equal(saleApi.status, 200);
+  assert.equal(saleApi.body.search.total_matches, 1);
+  assert.deepEqual(saleApi.body.cards.map((card) => card.id), ["MS-00815"]);
+  assert.deepEqual(catalogFilterUniverse(saleApi.body), catalog);
+  assert.equal(salePage.status, 200);
+  assert.match(salePage.body, /value="rent"/);
+
+  assert.equal(emptyApi.status, 200);
+  assert.equal(emptyApi.body.search.total_matches, 0);
+  assert.equal(emptyApi.body.search.filters.price_max, 1);
+  assert.equal(emptyApi.body.search.filters.offer_type, undefined);
+  assert.deepEqual(catalogFilterUniverse(emptyApi.body), catalog);
+  assert.equal(emptyPage.status, 200);
+  assert.match(emptyPage.body, /value="rent"/);
+  // The empty answers also trigger one count-only widen query each.
+  assert.deepEqual(intents.filter((intent) => intent.page_size !== 1).map((intent) => intent.offer_type), ["sale", "sale", null, null]);
+});
+
+// The filter universe is the approved public catalogue as the existing
+// publication boundary (publicSeedFor) and active-status rule already define
+// it: a listing the operator never approved, and a sold one, contribute no
+// location or subtype, while an approved rental keeps rent on a sale-only or
+// empty Postgres page. Districts come from the static geography catalogue and
+// are deliberately not asserted here.
+function seedWithExcludedListings() {
+  const seed = approvedPublicSeedFixture();
+  const approved = seed.records.find((record) => record.collection === "listings" && record.workflow?.publish_approved === true);
+  const property = seed.properties.find((row) => row.id === approved.property);
+  const variant = (id, facts, extra = {}) => ({
+    ...approved,
+    id,
+    routing: { ...approved.routing, target_path: `/bg/imoti/${id}` },
+    facts: { ...approved.facts, id, ...facts },
+    ...extra,
+  });
+  const records = [
+    ...seed.records,
+    variant("MS-TEST-UNAPPROVED", { location: "Unapproved Town" }, { property: "property-MS-TEST-UNAPPROVED", workflow: { ...approved.workflow, publish_approved: false } }),
+    variant("MS-TEST-SOLD", { location: "Sold Town", listing_status: "sold" }),
+    variant("MS-TEST-RENT", { location: "Rental Town", offer_type: "rent" }),
+  ];
+  const properties = [...seed.properties, { ...property, id: "property-MS-TEST-UNAPPROVED", property_subtype: "unapproved_subtype" }];
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-excluded-listings-`);
+  const cmsSeedPath = `${directory}/cms-seed.json`;
+  fs.writeFileSync(cmsSeedPath, `${JSON.stringify({ ...seed, records, properties })}\n`);
+  return { cmsSeedPath, seed: { ...seed, records, properties } };
+}
+function assertCatalogueBoundary(page, label) {
+  const options = page.search.controls.filter_options;
+  assert.ok(options.locations.includes("Rental Town"), `${label}: approved rental location present`);
+  assert.ok(options.offer_types.includes("rent"), `${label}: rent offered`);
+  assert.ok(!options.locations.includes("Unapproved Town"), `${label}: unapproved location absent`);
+  assert.ok(!options.locations.includes("Sold Town"), `${label}: sold location absent`);
+  assert.ok(!options.property_subtypes.includes("unapproved_subtype"), `${label}: unapproved subtype absent`);
+}
+
+test("facets on Postgres pages follow the publication boundary, not the hits, on every runtime path", async () => {
+  const { cmsSeedPath, seed: excludedSeed } = seedWithExcludedListings();
+  const env = { ...approvedPublicSeedFixtureEnv(), MS_REALTY_CMS_SEED_PATH: cmsSeedPath };
+  const pages = () => postgresSearch([[saleOnlyHit], [saleOnlyHit], [], []]).search;
+
+  const nextSearch = pages();
+  const nextConfig = { ...appRouterConfigFromEnv({ NODE_ENV: "test", ...env }), search: nextSearch };
+  const nextApi = { ...apiConfig(nextSearch), ...appApiConfigFromEnv({ NODE_ENV: "test", ...env }), search: nextSearch };
+  for (const [label, query] of [["sale-only", "offer_type=sale"], ["empty", "price_max=1"]]) {
+    const html = await renderAppSearchRoute({ pathname: "/bg/tarsene", url: `https://example.test/bg/tarsene?${query}`, config: nextConfig });
+    const api = await (await renderAppApiResponse(new Request(`https://example.test/api/search?locale=bg&${query}`), { config: nextApi })).json();
+    assert.equal(html.status, 200);
+    assertCatalogueBoundary(html.rendered, `next html ${label}`);
+    assertCatalogueBoundary(api, `next api ${label}`);
+    assert.equal(api.search.total_matches, label === "empty" ? 0 : 1, `next api ${label}: Postgres total kept`);
+    assert.ok(!html.html.includes("Unapproved Town") && !html.html.includes("Sold Town"), `next html ${label}: excluded towns absent from markup`);
+  }
+
+  const app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), seed: excludedSeed, search: pages() });
+  for (const [label, query] of [["sale-only", "offer_type=sale"], ["empty", "price_max=1"]]) {
+    const api = await dispatchHttp(app, { url: `/api/search?locale=bg&${query}` });
+    const html = await dispatchHttp(app, { url: `/bg/tarsene?${query}`, headers: { accept: "text/html" } });
+    assert.equal(api.status, 200);
+    assert.equal(html.status, 200);
+    assertCatalogueBoundary(api.body, `node api ${label}`);
+    assert.ok(html.body.includes('value="rent"'), `node html ${label}: approved rental offered`);
+    assert.ok(!html.body.includes("Unapproved Town") && !html.body.includes("Sold Town"), `node html ${label}: excluded towns absent from markup`);
+  }
+});
+
+// The engine locale list no longer comes from a rendered page, so the
+// resolver must still give a disabled or unknown locale the public fallback
+// and keep the source locale behind any foreign locale without active source
+// listings.
+test("engine locale codes keep fallback and source-locale behaviour without a rendered page", async () => {
+  const bg = registry.source_locale;
+  const heFallback = registry.locales.find((locale) => locale.code === "he").fallback_locale;
+  assert.equal(heFallback, "en");
+  assert.deepEqual(engineLocaleCodes(seed, registry, "bg"), ["bg"]);
+  // No active he-source listing exists, so the engine searches the public
+  // fallback locale first and the source locale behind it.
+  const he = engineLocaleCodes(seed, registry, "he");
+  assert.deepEqual(he, [heFallback, bg]);
+  assert.deepEqual(engineLocaleCodes(seed, registry, "xx"), engineLocaleCodes(seed, registry, bg));
+  assert.deepEqual(engineLocaleCodes({ records: [] }, registry, "bg"), [bg]);
+
+  const localeCodes = [];
+  const { result } = await executePublicSearch({
+    registry,
+    seed,
+    params: new URLSearchParams("locale=he"),
+    search: {
+      engine: "postgres",
+      environment: "production",
+      postgres: {
+        queryImpl: async ({ intent, localeCodes: codes }) => {
+          localeCodes.push(codes);
+          return { engine: "postgres", total: 0, hits: [], page: intent.page, page_size: intent.page_size, target: "ms_realty_public_search_documents" };
+        },
+      },
+    },
+  });
+  assert.deepEqual(localeCodes[0], he);
+  assert.equal(result.locale, "he");
+  assert.equal(result.search.fallback.locale, heFallback);
+});
+
+test("search assistance is one compact toolbar entry, hidden until its handlers load, on Next and Node HTML", async () => {
+  const { search } = postgresSearch([[saleOnlyHit], [saleOnlyHit]]);
+  const next = await renderAppSearchRoute({
+    pathname: "/bg/tarsene",
+    url: "https://example.test/bg/tarsene?offer_type=sale",
+    config: { ...appRouterConfigFromEnv({ NODE_ENV: "test", ...approvedPublicSeedFixtureEnv() }), search },
+  });
+  const node = await dispatchHttp(createHttpApp({ ...approvedPublicSeedFixtureOptions(), search }), { url: "/bg/tarsene?offer_type=sale", headers: { accept: "text/html" } });
+  for (const [label, html] of [["next", next.html], ["node", node.body]]) {
+    const toolbar = html.slice(html.indexOf('class="sr-toolbar"'), html.indexOf("</form>", html.indexOf('data-search-toolbar-form="true"')));
+    assert.equal((toolbar.match(/data-search-help="true"/g) || []).length, 1, `${label}: one entry`);
+    assert.match(toolbar, /<details class="sr-help" data-search-help="true" hidden>/, `${label}: entry stays hidden until enhanced`);
+    assert.equal((toolbar.match(/data-search-assistant-open/g) || []).length, 1, `${label}: assistant action inside the entry`);
+    assert.equal((toolbar.match(/data-evidence-open="alternatives"/g) || []).length, 1, `${label}: alternatives action inside the entry`);
+    assert.ok(toolbar.indexOf('class="sr-results__head"') < toolbar.indexOf("data-search-help"), `${label}: the results heading comes first`);
+    assert.match(toolbar, /aria-label="Още начини за търсене"/, `${label}: localized accessible name`);
+  }
+});
+
+// A database page that is empty must still name the typed range to widen,
+// and the count it prints must be the engine's own count for that widening.
+test("empty Postgres pages name the range to widen with the engine's count on every path", async () => {
+  const intents = [];
+  const search = {
+    engine: "postgres",
+    environment: "production",
+    postgres: {
+      queryImpl: async ({ intent }) => {
+        intents.push(intent);
+        const total = intent.price_max === 1 ? 0 : intent.bedrooms_min === 9 ? 0 : 7;
+        return { engine: "postgres", total, hits: total ? [saleOnlyHit] : [], page: intent.page, page_size: intent.page_size, target: "ms_realty_public_search_documents" };
+      },
+    },
+  };
+  const { result } = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=1&bedrooms_min=9&offer_type=sale"), search });
+  assert.equal(result.search.total_matches, 0);
+  // The two typed pairs each get one count-only query with that pair dropped.
+  assert.equal(intents.length, 3);
+  assert.deepEqual(intents.slice(1).map((intent) => [intent.page_size, intent.offer_type, intent.price_max ?? null, intent.bedrooms_min ?? null]), [[1, "sale", null, 9], [1, "sale", 1, null]]);
+  assert.deepEqual(result.search.controls.widen_ranges, []);
+
+  intents.length = 0;
+  const single = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=1&offer_type=sale"), search });
+  assert.deepEqual(single.result.search.controls.widen_ranges, [{ fields: ["price_min", "price_max"], matches: 7 }]);
+  assert.equal(intents.length, 2);
+
+  const nonEmpty = await executePublicSearch({ registry, seed, params: new URLSearchParams("locale=bg&price_max=500000"), search });
+  assert.equal(nonEmpty.engineResult.total, 7);
+  assert.deepEqual(nonEmpty.result.search.controls.widen_ranges, []);
+
+  const app = createHttpApp({ ...approvedPublicSeedFixtureOptions(), search });
+  const api = await dispatchHttp(app, { url: "/api/search?locale=bg&price_max=1" });
+  const html = await dispatchHttp(app, { url: "/bg/tarsene?price_max=1", headers: { accept: "text/html" } });
+  assert.deepEqual(api.body.search.controls.widen_ranges, [{ fields: ["price_min", "price_max"], matches: 7 }]);
+  assert.match(html.body, /data-search-widen="true"/);
+  assert.match(html.body, /Цена \(EUR\): 7 съвпадения/);
+});
+
+// Without a database page the helper must stay silent (null), so the local
+// catalogue fallback still names the range to widen.
+test("local empty searches keep their widen suggestions on every path", async () => {
+  assert.equal(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "seed_fallback", total: 0 }, localeCodes: ["bg"] }), null);
+  assert.equal(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "typesense", total: 0 }, localeCodes: ["bg"] }), null);
+  assert.equal(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "postgres", total: 0 }, localeCodes: ["bg"], savedView: true }), null);
+  assert.deepEqual(await engineWidenRanges({ search: {}, request: {}, engineResult: { engine: "postgres", total: 3 }, localeCodes: ["bg"] }), []);
+
+  const fixture = approvedPublicSeedFixture();
+  const params = "locale=bg&price_min=100000000&price_max=200000000";
+  const { result, engineResult } = await executePublicSearch({ registry, seed: fixture, params: new URLSearchParams(params), search: { environment: "test", naturalLanguageEnabled: false } });
+  assert.equal(engineResult.engine, "seed_fallback");
+  assert.equal(result.search.total_matches, 0);
+  assert.equal(result.search.controls.widen_ranges[0]?.fields[0], "price_min");
+  assert.ok(result.search.controls.widen_ranges[0].matches > 0);
+
+  const app = createHttpApp(approvedPublicSeedFixtureOptions());
+  const api = await dispatchHttp(app, { url: `/api/search?${params}` });
+  const html = await dispatchHttp(app, { url: `/bg/tarsene?${params}`, headers: { accept: "text/html" } });
+  assert.deepEqual(api.body.search.controls.widen_ranges, result.search.controls.widen_ranges);
+  assert.match(html.body, /data-search-widen="true"/);
 });

@@ -1237,6 +1237,13 @@ dialog.mk-enquiry {
 }
 dialog.mk-enquiry::backdrop { background: var(--overlay); }
 dialog.mk-enquiry .ct-form { padding: 20px 22px 24px; }
+/* The channels-only fallback (lead writes disabled) has no form wrapper: it
+   needs the same inset, a heading row without the intent-icon column, and
+   a phone-sized email target. */
+dialog.mk-enquiry[data-form-unavailable] { padding: 20px 22px 24px; }
+dialog.mk-enquiry[data-form-unavailable] .mk-enquiry__heading { display: flex; justify-content: space-between; gap: var(--space-3); }
+dialog.mk-enquiry[data-form-unavailable] > p { margin: var(--space-3) 0; }
+dialog.mk-enquiry[data-form-unavailable] > p > a { display: inline-flex; align-items: center; min-height: 44px; }
 dialog.mk-enquiry .ct-modal__hd { align-items: flex-start; padding: 0 0 var(--space-1); }
 .mk-enquiry__heading { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: var(--space-3); align-items: start; min-width: 0; }
 .mk-enquiry__heading h2 { font-family: var(--font-sans); font-size: var(--text-xl); }
@@ -1286,6 +1293,7 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
   dialog.mk-enquiry[open] { animation: mk-sheet-in var(--dur-base) var(--ease-out); }
+  dialog.mk-enquiry[data-form-unavailable],
   dialog.mk-enquiry .ct-form {
     padding-top: var(--space-5);
     padding-right: max(var(--space-5), env(safe-area-inset-right));

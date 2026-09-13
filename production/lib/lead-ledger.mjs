@@ -137,7 +137,41 @@ export function createLeadLedgerRow(
     },
   };
   if (lead.lead?.idempotency_key) row.idempotency_key = lead.lead.idempotency_key;
+  // Lets a replay with the same key but a different message be refused
+  // without storing the message itself in the ledger.
+  row.message_fingerprint = messageFingerprint(lead.lead?.message, contactSecret);
   return row;
+}
+
+function messageFingerprint(message, secret = process.env.MS_REALTY_LEAD_CONTACT_KEY) {
+  const text = String(message || "").trim();
+  if (!text || !secret) return null;
+  return crypto.createHmac("sha256", String(secret)).update(text).digest("hex");
+}
+
+// A browser retry carries the same idempotency key; the durable store
+// collapses it onto the original person and so must this ledger, or the
+// staff inbox shows one enquiry twice. The key is not a sqlite column, so
+// existing ledgers keep their schema; the ledger is small enough to scan.
+// ponytail: full scan, add the column on the next schema migration.
+export function findLeadByIdempotencyKey(filePath, idempotencyKey) {
+  if (!filePath || !idempotencyKey) return null;
+  return store.readRows(filePath).find((row) => row.idempotency_key === idempotencyKey) || null;
+}
+
+// "none": no earlier row. "conflict": same key, different person, listing,
+// source or message — the caller must refuse rather than confirm a new
+// payload with the old lead. "replay": same enquiry again.
+export function leadReplayState(lead, { filePath, contactSecret = process.env.MS_REALTY_LEAD_CONTACT_KEY } = {}) {
+  const row = findLeadByIdempotencyKey(filePath, lead.lead?.idempotency_key);
+  if (!row) return { state: "none", row: null };
+  const same =
+    row.source === lead.lead?.source &&
+    (row.listing_reference || null) === (lead.lead?.listingReference || null) &&
+    row.lead_type === lead.lead?.leadType &&
+    row.contact_fingerprint === contactFingerprint(lead.lead?.contact, contactSecret) &&
+    (row.message_fingerprint === undefined || row.message_fingerprint === messageFingerprint(lead.lead?.message, contactSecret));
+  return { state: same ? "replay" : "conflict", row };
 }
 
 export function appendLead(
