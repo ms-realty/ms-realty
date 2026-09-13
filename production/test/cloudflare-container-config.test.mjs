@@ -421,15 +421,6 @@ test("a stranded launch gate cannot silently strand every deploy", () => {
   // and only if that release is on main.
   assert.match(drillScheduleWorkflow, /edge !== origin/);
   assert.match(drillScheduleWorkflow, /git merge-base --is-ancestor "\$release_sha" origin\/main/);
-  // A transient health-read failure gets exactly three bounded attempts of
-  // 20 s each (well inside the 10-minute job) and still fails closed; the
-  // marker equality and on-main checks run once, on the response that came back.
-  assert.equal(drillScheduleWorkflow.match(/for attempt in 1 2 3; do/g)?.length, 2);
-  assert.equal(drillScheduleWorkflow.match(/--max-time 20/g)?.length, 2);
-  assert.match(drillScheduleWorkflow, /read_health health\.json/);
-  assert.match(drillScheduleWorkflow, /\[ "\$attempt" -eq 3 \] && exit 1/);
-  assert.doesNotMatch(drillScheduleWorkflow, /--retry\b/);
-  assert.match(drillScheduleWorkflow, /timeout-minutes: 10/);
   // It dispatches the same workflow a person runs; no launch contract is widened.
   assert.match(drillWorkflow, /workflow_dispatch:/);
   assert.doesNotMatch(drillWorkflow, /^\s+schedule:/m);
@@ -930,7 +921,7 @@ test("the scheduled drill's health reads retry three times and then fail closed"
   assert.match(resolved.output, /^sha=5616450b5616450b5616450b5616450b5616450b$/m);
   const gate = runStubbedStep("Skip while the gate is already fresh", { succeedOn: 1 });
   assert.match(gate.output, /^blocked=yes$/m);
-
+});
 // The release refuses to start on monitoring evidence that cannot outlast the
 // release + rollback window, before any origin or Worker mutation.
 test("the release requires monitoring evidence that outlasts the release window before mutating anything", () => {
