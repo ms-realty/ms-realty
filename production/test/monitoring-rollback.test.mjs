@@ -3,9 +3,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { rollbackReadinessAccepts } from "../lib/rollback-readiness.mjs";
 import {
   assertMonitoringRollbackReport,
   monitoringRollbackState,
+  rollbackEvidenceAction,
   writeMonitoringRollbackReport,
 } from "../lib/monitoring-rollback.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -171,4 +174,109 @@ test("monitoring rollback evidence rejects placeholders and secret-bearing data"
       }),
     /durable provider receipt identifier/,
   );
+});
+
+// Evidence that is valid now but expires inside the release + rollback window
+// is refused for a release; a plain validity check still passes it.
+test("monitoring rollback state refuses evidence that expires within the release window", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-monitoring-rollback-window-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "monitoring-rollback-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+  // Oldest operational evidence in the fixture is 2026-07-31T10:28Z; 22.5 h later
+  // it has 1.5 h of the 24 h left — enough to pass, not enough for a 2 h window.
+  const now = "2026-08-01T08:58:00.000Z";
+  const twoHours = 2 * 60 * 60 * 1000;
+  assert.equal(monitoringRollbackState(reportPath, { now }).status, "pass");
+  const expiring = monitoringRollbackState(reportPath, { now, requiredRemainingMs: twoHours });
+  assert.equal(expiring.status, "expiring");
+  assert.ok(expiring.remaining_ms > 0 && expiring.remaining_ms < twoHours);
+  assert.equal(expiring.required_remaining_ms, twoHours);
+  assert.equal(monitoringRollbackState(reportPath, { now, requiredRemainingMs: 60 * 60 * 1000 }).status, "pass");
+  assert.equal(monitoringRollbackState(reportPath, { now: "2026-08-01T10:28:00.001Z", requiredRemainingMs: twoHours }).status, "expired");
+  assert.equal(monitoringRollbackState(reportPath, { now, requiredRemainingMs: -1 }).status, "invalid");
+});
+
+// Queue delay across the job boundary: evidence that satisfied the 120-minute
+// release preflight at origin activation can no longer cover the deploy job's
+// own 60-minute cap after a long wait, and rollback-time validity is what the
+// job-start check guarantees.
+test("evidence that expires during a queued deploy job is refused at the job start, not at rollback", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-monitoring-rollback-queue-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "monitoring-rollback-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+  const HOUR = 60 * 60 * 1000;
+  // Oldest operational evidence: 2026-07-31T10:28Z → expires 2026-08-01T10:28Z.
+  const originActivation = "2026-08-01T08:07:00.000Z"; // 141 min left: release preflight (120 min) passes
+  const deployJobStart = "2026-08-01T09:40:00.000Z"; // after a 93 min queue: 48 min left
+  const rollbackAtEnd = "2026-08-01T10:35:00.000Z"; // where a 60 min job would have rolled back: expired
+  assert.equal(monitoringRollbackState(reportPath, { now: originActivation, requiredRemainingMs: 2 * HOUR }).status, "pass");
+  assert.equal(monitoringRollbackState(reportPath, { now: deployJobStart, requiredRemainingMs: HOUR }).status, "expiring");
+  assert.equal(monitoringRollbackState(reportPath, { now: rollbackAtEnd }).status, "expired");
+  // Refused at the job start, the rollback runs at once, while the evidence is still valid.
+  assert.equal(monitoringRollbackState(reportPath, { now: deployJobStart }).status, "pass");
+  // With no queue the same evidence covers the whole job.
+  assert.equal(monitoringRollbackState(reportPath, { now: "2026-08-01T08:20:00.000Z", requiredRemainingMs: HOUR }).status, "pass");
+});
+
+// Queue arrival with the evidence expired or nearly so: the rollback must not
+// re-attach it (nothing extends validity) and recovers through the real drill.
+test("rollback evidence action preserves only evidence that covers the rollback window", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-rollback-evidence-action-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "monitoring-rollback-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+  const window = 15 * 60 * 1000;
+  // Expires 2026-08-01T10:28Z.
+  assert.equal(rollbackEvidenceAction(reportPath, { now: "2026-08-01T09:40:00.000Z", rollbackWindowMs: window }).action, "preserve"); // 48 min left
+  const nearZero = rollbackEvidenceAction(reportPath, { now: "2026-08-01T10:23:00.000Z", rollbackWindowMs: window }); // 5 min left
+  assert.deepEqual([nearZero.action, nearZero.reason], ["drill", "expiring"]);
+  const expired = rollbackEvidenceAction(reportPath, { now: "2026-08-01T11:10:00.000Z", rollbackWindowMs: window }); // consumed by the queue
+  assert.deepEqual([expired.action, expired.reason], ["drill", "expired"]);
+  assert.equal(rollbackEvidenceAction(path.join(directory, "missing.json"), { now: "2026-08-01T09:40:00.000Z" }).action, "drill");
+});
+
+// Exact rollback readiness states. The snapshot is what the release started
+// from; in drill recovery the restored release may already be back on it
+// (near-expiry evidence still valid, or the real drill landed before the
+// first read) or may be pending with monitoring_rollback added. Nothing else.
+test("rollback readiness accepts the snapshot or the pending recovery state, exactly", () => {
+  const snapshotBlockers = ["r2_media_coverage"];
+  const ready = (launch_ready, blockers) => ({ service: "ms-realty", status: launch_ready ? "ready" : "blocked", launch_ready, blockers });
+  const accept = (input) => rollbackReadinessAccepts({ expectedReady: false, expectedBlockers: snapshotBlockers, ...input });
+  // Near-expiry evidence still valid on the restored release: snapshot reproduced.
+  assert.deepEqual(accept({ recovery: "drill", ready: ready(false, ["r2_media_coverage"]), httpStatus: "503" }), { accepted: true, state: "snapshot" });
+  // Drill completed before the first read: snapshot reproduced.
+  assert.deepEqual(accept({ recovery: "drill", ready: ready(false, ["r2_media_coverage"]), httpStatus: 503 }), { accepted: true, state: "snapshot" });
+  // Recovery pending: only monitoring_rollback added to the snapshot.
+  assert.deepEqual(accept({ recovery: "drill", ready: ready(false, ["monitoring_rollback", "r2_media_coverage"]), httpStatus: "503" }), { accepted: true, state: "recovery_pending" });
+  // Unrelated blocker, missing snapshot blocker, wrong readiness or HTTP status: rejected.
+  assert.equal(accept({ recovery: "drill", ready: ready(false, ["monitoring_rollback", "r2_media_coverage", "payload_runtime"]), httpStatus: "503" }).accepted, false);
+  assert.equal(accept({ recovery: "drill", ready: ready(false, ["monitoring_rollback"]), httpStatus: "503" }).accepted, false);
+  assert.equal(accept({ recovery: "drill", ready: ready(true, []), httpStatus: "200" }).accepted, false);
+  assert.equal(accept({ recovery: "drill", ready: ready(false, ["r2_media_coverage"]), httpStatus: "200" }).accepted, false);
+  // Without drill recovery the pending state is a mismatch.
+  assert.equal(accept({ recovery: "preserve", ready: ready(false, ["monitoring_rollback", "r2_media_coverage"]), httpStatus: "503" }).accepted, false);
+  assert.equal(accept({ recovery: "none", ready: ready(false, ["r2_media_coverage"]), httpStatus: "503" }).accepted, true);
+  // A ready snapshot must come back ready with HTTP 200.
+  assert.equal(rollbackReadinessAccepts({ expectedReady: true, expectedBlockers: [], recovery: "drill", ready: ready(true, []), httpStatus: "200" }).accepted, true);
+  assert.equal(rollbackReadinessAccepts({ expectedReady: true, expectedBlockers: [], recovery: "drill", ready: ready(false, ["monitoring_rollback"]), httpStatus: "503" }).accepted, true);
+  assert.equal(rollbackReadinessAccepts({ expectedReady: true, expectedBlockers: [], recovery: "drill", ready: ready(false, ["monitoring_rollback"]), httpStatus: "200" }).accepted, false);
+});
+
+test("the rollback readiness script exits by the same rule", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-rollback-readiness-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const readyPath = path.join(directory, "ready.json");
+  const run = (body, http, expectedReady, blockers, recovery) => {
+    fs.writeFileSync(readyPath, JSON.stringify(body));
+    return spawnSync(process.execPath, [fromRoot("production", "scripts", "rollback-readiness-matches.mjs"), readyPath, String(http), expectedReady, blockers, recovery], { encoding: "utf8" });
+  };
+  const blocked = (blockers) => ({ service: "ms-realty", status: "blocked", launch_ready: false, blockers });
+  assert.equal(run(blocked(["r2_media_coverage"]), 503, "false", "r2_media_coverage", "drill").status, 0);
+  assert.equal(run(blocked(["monitoring_rollback", "r2_media_coverage"]), 503, "false", "r2_media_coverage", "drill").status, 0);
+  assert.equal(run(blocked(["monitoring_rollback", "r2_media_coverage"]), 503, "false", "r2_media_coverage", "preserve").status, 1);
+  assert.equal(run(blocked(["monitoring_rollback", "r2_media_coverage", "live_services"]), 503, "false", "r2_media_coverage", "drill").status, 1);
+  assert.equal(run({ service: "other" }, 503, "false", "r2_media_coverage", "drill").status, 1);
 });

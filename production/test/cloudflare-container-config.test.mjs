@@ -372,8 +372,10 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(rollbackBlock, /d\.origin_build_marker !== origin/);
   assert.match(rollbackBlock, /rollback-ready\.json/);
   assert.match(rollbackBlock, /if ! ready_status="\$\(curl[\s\S]*"\$ready_url"\)"; then\s+ready_status=000/);
-  assert.match(rollbackBlock, /d\.launch_ready !== ready/);
-  assert.match(rollbackBlock, /JSON\.stringify\(actual\) !== JSON\.stringify\(blockers\)/);
+  // Readiness acceptance lives in production/lib/rollback-readiness.mjs, read from the restored release.
+  assert.match(rollbackBlock, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers"/);
+  assert.match(fs.readFileSync(fromRoot("production", "lib", "rollback-readiness.mjs"), "utf8"), /ready\.launch_ready === launchReady/);
+  assert.match(fs.readFileSync(fromRoot("production", "lib", "rollback-readiness.mjs"), "utf8"), /JSON\.stringify\(sorted\(blockers\)\)/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
 
@@ -419,15 +421,6 @@ test("a stranded launch gate cannot silently strand every deploy", () => {
   // and only if that release is on main.
   assert.match(drillScheduleWorkflow, /edge !== origin/);
   assert.match(drillScheduleWorkflow, /git merge-base --is-ancestor "\$release_sha" origin\/main/);
-  // A transient health-read failure gets exactly three bounded attempts of
-  // 20 s each (well inside the 10-minute job) and still fails closed; the
-  // marker equality and on-main checks run once, on the response that came back.
-  assert.equal(drillScheduleWorkflow.match(/for attempt in 1 2 3; do/g)?.length, 2);
-  assert.equal(drillScheduleWorkflow.match(/--max-time 20/g)?.length, 2);
-  assert.match(drillScheduleWorkflow, /read_health health\.json/);
-  assert.match(drillScheduleWorkflow, /\[ "\$attempt" -eq 3 \] && exit 1/);
-  assert.doesNotMatch(drillScheduleWorkflow, /--retry\b/);
-  assert.match(drillScheduleWorkflow, /timeout-minutes: 10/);
   // It dispatches the same workflow a person runs; no launch contract is widened.
   assert.match(drillWorkflow, /workflow_dispatch:/);
   assert.doesNotMatch(drillWorkflow, /^\s+schedule:/m);
@@ -854,12 +847,17 @@ test("Cloudflare Container admits only exact signed-provider webhook paths with 
   assert.match(workerSource, /allowsProviderWebhookMutation/);
 });
 
-test("an expired prior monitoring report does not refuse a release", () => {
+// The capture step itself never aborts: it records whether a report worth
+// preserving exists. Refusing the release on that answer is a separate,
+// explicit step (tested below), not a side effect of the SSH or preflight.
+test("capturing the prior monitoring report records validity without aborting", () => {
   const capture = ciWorkflow.slice(
     ciWorkflow.indexOf("- name: Capture validated monitoring evidence for rollback"),
     ciWorkflow.indexOf("- name: Preserve validated monitoring evidence for rollback"),
   );
-  assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight; then/);
+  assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight; then/);
+  // Only the scp transport failure aborts; an invalid or expiring report records valid=false.
+  assert.equal(capture.match(/^\s+exit 1$/gm)?.length, 1);
   assert.match(capture, /echo "valid=false" >> "\$GITHUB_OUTPUT"/);
   assert.match(capture, /if ! ssh "\$\{ssh_args\[@\]\}" "root@\$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 \/opt\/ms-realty\/incoming;/, "the remote validation is guarded too");
 });
@@ -923,4 +921,47 @@ test("the scheduled drill's health reads retry three times and then fail closed"
   assert.match(resolved.output, /^sha=5616450b5616450b5616450b5616450b5616450b$/m);
   const gate = runStubbedStep("Skip while the gate is already fresh", { succeedOn: 1 });
   assert.match(gate.output, /^blocked=yes$/m);
+});
+// The release refuses to start on monitoring evidence that cannot outlast the
+// release + rollback window, before any origin or Worker mutation.
+test("the release requires monitoring evidence that outlasts the release window before mutating anything", () => {
+  assert.match(ciWorkflow, /MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight/);
+  const refuse = ciWorkflow.indexOf("- name: Require monitoring evidence that outlasts the release window");
+  const coverage = ciWorkflow.indexOf("- name: Capture exact-release R2 media coverage");
+  const activate = ciWorkflow.indexOf("- name: Upload and activate exact origin release");
+  assert.ok(refuse > 0 && refuse < coverage && coverage < activate, "the refusal precedes coverage capture and origin activation");
+  assert.match(ciWorkflow.slice(refuse, coverage), /if: steps\.previous_monitoring\.outputs\.valid != 'true'/);
+  assert.match(ciWorkflow.slice(refuse, coverage), /exit 1/);
+  // Two jobs of 60 minutes each bound the window the evidence must cover.
+  assert.equal(ciWorkflow.match(/timeout-minutes: 60/g)?.length, 2);
+  // The job boundary is explicit: after the origin mutation the deploy job may
+  // queue, so it re-checks the preserved evidence against its own cap before
+  // the Worker changes, and a failure there lands in the rollback step.
+  const restore = ciWorkflow.indexOf("- name: Restore validated monitoring evidence for rollback");
+  const requireJob = ciWorkflow.indexOf("- name: Require the preserved evidence to outlast this job");
+  const workerDeploy = ciWorkflow.indexOf("- name: Deploy exact main commit");
+  const rollback = ciWorkflow.indexOf("- name: Roll back failed deployment");
+  assert.ok(restore > activate && restore < requireJob && requireJob < workerDeploy && workerDeploy < rollback);
+  assert.match(ciWorkflow.slice(requireJob, workerDeploy), /MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=3600000 npm run monitoring:preflight/);
+  assert.match(ciWorkflow.slice(rollback), /if: failure\(\) && needs\.deploy_origin\.outputs\.previous_release != ''/);
+});
+
+// Expired-evidence recovery in the rollback: never re-attach a report that
+// cannot cover the rollback window; restore markers exactly, dispatch the real
+// drill for the restored release, and expect readiness to say so.
+test("the rollback recovers expired preserved evidence through the real drill", () => {
+  const rollback = ciWorkflow.slice(ciWorkflow.indexOf("- name: Roll back failed deployment"));
+  assert.match(rollback, /MS_REALTY_ROLLBACK_WINDOW_MS=900000 node production\/scripts\/rollback-evidence-action\.mjs/);
+  assert.match(rollback, /if \[ "\$evidence_action" = "preserve" \]; then/);
+  assert.match(rollback, /gh workflow run monitoring-drill\.yml --repo "\$GITHUB_REPOSITORY" --ref main -f release_sha="\$previous_origin" -f confirm_alert_drill=true/);
+  // The blocker state is read from the restored release, never inferred from the dispatch.
+  assert.doesNotMatch(rollback, /expected_ready=false/);
+  assert.doesNotMatch(rollback, /rows\.add\("monitoring_rollback"\)/);
+  assert.match(rollback, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers" "\$evidence_action"/);
+  // The plain preflight no longer hard-fails the rollback on an expired report.
+  assert.doesNotMatch(rollback, /MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight/);
+  // Exact marker verification is untouched and the drill needs actions:write on this job only.
+  assert.match(rollback, /d\.build_marker !== edge \|\| d\.origin_build_marker !== origin/);
+  assert.match(ciWorkflow, /  deploy:\n    name: Deploy production\n    permissions:\n      contents: read\n[^\n]*\n      actions: write/);
+  assert.equal(ciWorkflow.match(/actions: write/g)?.length, 1);
 });

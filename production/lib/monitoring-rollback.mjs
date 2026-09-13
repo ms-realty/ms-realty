@@ -107,10 +107,13 @@ function evidenceTimestamp(value, label, generatedAt) {
 
 function stateOptions(options) {
   const maxAgeMs = options?.maxAgeMs ?? DEFAULT_MAX_AGE_MS;
+  const requiredRemainingMs = options?.requiredRemainingMs ?? 0;
   const nowValue = options?.now ?? Date.now();
   const now = nowValue instanceof Date ? nowValue.getTime() : typeof nowValue === "number" ? nowValue : Date.parse(nowValue);
-  if (!Number.isFinite(maxAgeMs) || maxAgeMs < 0 || !Number.isFinite(now)) throw new Error("Monitoring rollback state options are invalid");
-  return { maxAgeMs, now };
+  if (!Number.isFinite(maxAgeMs) || maxAgeMs < 0 || !Number.isFinite(now) || !Number.isFinite(requiredRemainingMs) || requiredRemainingMs < 0) {
+    throw new Error("Monitoring rollback state options are invalid");
+  }
+  return { maxAgeMs, now, requiredRemainingMs };
 }
 
 function evidenceTimes(report) {
@@ -263,7 +266,7 @@ export function monitoringRollbackState(reportPath = DEFAULT_MONITORING_ROLLBACK
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     if (report?.example === true || reportPath.endsWith(".example")) return { status: "example", path: normalizedPath };
     assertMonitoringRollbackReport(report);
-    const { maxAgeMs, now } = stateOptions(options);
+    const { maxAgeMs, now, requiredRemainingMs } = stateOptions(options);
     const [generatedAt, ...operationalEvidenceTimes] = evidenceTimes(report);
     const ageMs = now - generatedAt;
     if (ageMs < 0) return { status: "invalid", path: normalizedPath, error: "generated_at is in the future" };
@@ -271,7 +274,15 @@ export function monitoringRollbackState(reportPath = DEFAULT_MONITORING_ROLLBACK
     if (evidenceAgeMs > maxAgeMs) {
       return { status: "expired", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, max_age_ms: maxAgeMs };
     }
-    return { status: "pass", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, report };
+    // A release plus its rollback window must fit inside the remaining
+    // validity, or the evidence expires mid-release and the rollback can no
+    // longer reproduce the readiness it started from. Nothing is extended:
+    // the same 24 h clock, read once with the window subtracted.
+    const remainingMs = maxAgeMs - evidenceAgeMs;
+    if (requiredRemainingMs > 0 && remainingMs < requiredRemainingMs) {
+      return { status: "expiring", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, max_age_ms: maxAgeMs, remaining_ms: remainingMs, required_remaining_ms: requiredRemainingMs };
+    }
+    return { status: "pass", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, remaining_ms: remainingMs, report };
   } catch (error) {
     return { status: "invalid", path: normalizedPath, error: error.message };
   }
@@ -282,4 +293,15 @@ export function writeMonitoringRollbackReport(report, outPath = DEFAULT_MONITORI
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   return outPath;
+}
+
+// What a rollback can do with the evidence it preserved: re-attach it to the
+// restored release ("preserve") only if it still covers the rollback
+// verification window; otherwise the honest recovery is the real drill for
+// the restored release ("drill") and a readiness that says monitoring_rollback
+// is blocked until it lands. Nothing extends the report's validity.
+export function rollbackEvidenceAction(reportPath = DEFAULT_MONITORING_ROLLBACK_REPORT, { now = Date.now(), rollbackWindowMs = 15 * 60 * 1000 } = {}) {
+  const state = monitoringRollbackState(reportPath, { now, requiredRemainingMs: rollbackWindowMs });
+  if (state.status === "pass") return { action: "preserve", reason: "evidence_covers_rollback_window", state };
+  return { action: "drill", reason: state.status, state };
 }

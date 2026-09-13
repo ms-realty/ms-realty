@@ -297,9 +297,10 @@ jobs:
           # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'"
           chmod 0600 "$local_report"
-          # An expired or invalid prior report means there is nothing worth
-          # preserving for a rollback; it is not a reason to refuse the release.
-          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight; then
+          # The report must outlast this release and its rollback (both jobs
+          # are capped at 60 minutes): evidence that expires mid-release leaves
+          # the rollback unable to reproduce the readiness it started from.
+          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight; then
             echo "valid=true" >> "$GITHUB_OUTPUT"
           else
             echo "Prior monitoring report did not validate; no report will be preserved for rollback."
@@ -314,6 +315,16 @@ jobs:
           path: ${{ runner.temp }}/previous-monitoring-rollback-report.json
           if-no-files-found: error
           retention-days: 1
+
+      # The release verification requires launch_ready, so a release started
+      # without monitoring evidence that outlasts the release + rollback window
+      # can only fail verification and roll back. Refuse it here, before any
+      # origin or Worker mutation, and name the real drill that refreshes it.
+      - name: Require monitoring evidence that outlasts the release window
+        if: steps.previous_monitoring.outputs.valid != 'true'
+        run: |
+          echo "::error::Monitoring rollback evidence is missing, expired, or would expire within the 120-minute release + rollback window. Run the monitoring drill (monitoring-drill.yml, confirm_alert_drill=true) for the serving release, then dispatch the release again."
+          exit 1
 
       - name: Capture exact-release R2 media coverage
         run: |
@@ -352,6 +363,10 @@ jobs:
 
   deploy:
     name: Deploy production
+    permissions:
+      contents: read
+      # The rollback dispatches the real monitoring drill when its preserved evidence expired.
+      actions: write
     if: >-
       vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD != 'true' &&
       github.ref == 'refs/heads/main' &&
@@ -402,6 +417,17 @@ jobs:
         with:
           name: rollback-monitoring-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/rollback-evidence
+
+      # The origin is already on the new release. This job may have waited in
+      # the queue, so the preserved evidence is checked again against this
+      # job's own 60-minute cap before the Worker changes: if it cannot last
+      # the job, fail now, and the rollback below runs while the evidence is
+      # still valid instead of discovering it expired at the end.
+      - name: Require the preserved evidence to outlast this job
+        run: |
+          local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
+          test -s "$local_report"
+          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=3600000 npm run monitoring:preflight
 
       - name: Verify exact R2 report for the Worker image
         run: >-
@@ -564,22 +590,39 @@ jobs:
           # Validated release and run identifiers expand on the runner.
           # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; release='$previous_origin'; target='/opt/ms-realty/releases/$previous_origin'; test -f \"\$target/.ms-realty-release-sha\"; test \"\$(cat \"\$target/.ms-realty-release-sha\")\" = \"\$release\"; link='/opt/ms-realty/.current-rollback-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}'; ln -s \"\$target\" \"\$link\"; mv -Tf \"\$link\" /opt/ms-realty/current; cd \"\$target\"; MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml MS_REALTY_BUILD_MARKER=\"\$release\" npm run docker:up; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\""
+          # Preserved evidence is re-attached only if it still covers the
+          # rollback verification window. If the queue or the run consumed it,
+          # the honest recovery is the real drill for the restored release:
+          # readiness then truthfully shows monitoring_rollback blocked until
+          # the drill lands. Exact markers are verified either way.
+          evidence_action="none"
           if [ "$previous_monitoring_valid" = "true" ]; then
             local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
-            remote_report="/opt/ms-realty/incoming/rollback-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
             test -s "$local_report"
-            MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight
-            # The validated temporary path is runner-controlled.
-            # shellcheck disable=SC2029
-            scp "${ssh_args[@]}" "$local_report" "root@$MS_REALTY_DEPLOY_HOST:$remote_report"
-            # Validated release and temporary paths expand on the runner.
-            # shellcheck disable=SC2029
-            if ! ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; report='$remote_report'; trap 'rm -f \"\$report\"' EXIT; target='/opt/ms-realty/releases/$previous_origin'; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\"; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker cp \"\$report\" \"\${container}:/runtime-evidence/.monitoring-rollback-report.json\"; docker exec --user 0 \"\$container\" sh -c 'chmod 0444 /runtime-evidence/.monitoring-rollback-report.json && mv -f /runtime-evidence/.monitoring-rollback-report.json /runtime-evidence/monitoring-rollback-report.json'; docker exec --user 1001:1001 \"\$container\" sh -c 'node production/scripts/validate-monitoring-rollback-report.mjs && node production/scripts/build-launch-readiness.mjs'"; then
+            evidence_action="$(MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_ROLLBACK_WINDOW_MS=900000 node production/scripts/rollback-evidence-action.mjs)"
+          fi
+          if [ "$evidence_action" = "preserve" ]; then
+              local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
+              remote_report="/opt/ms-realty/incoming/rollback-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+              test -s "$local_report"
               # The validated temporary path is runner-controlled.
               # shellcheck disable=SC2029
-              ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'" || true
-              exit 1
-            fi
+              scp "${ssh_args[@]}" "$local_report" "root@$MS_REALTY_DEPLOY_HOST:$remote_report"
+              # Validated release and temporary paths expand on the runner.
+              # shellcheck disable=SC2029
+              if ! ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; report='$remote_report'; trap 'rm -f \"\$report\"' EXIT; target='/opt/ms-realty/releases/$previous_origin'; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\"; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker cp \"\$report\" \"\${container}:/runtime-evidence/.monitoring-rollback-report.json\"; docker exec --user 0 \"\$container\" sh -c 'chmod 0444 /runtime-evidence/.monitoring-rollback-report.json && mv -f /runtime-evidence/.monitoring-rollback-report.json /runtime-evidence/monitoring-rollback-report.json'; docker exec --user 1001:1001 \"\$container\" sh -c 'node production/scripts/validate-monitoring-rollback-report.mjs && node production/scripts/build-launch-readiness.mjs'"; then
+                # The validated temporary path is runner-controlled.
+                # shellcheck disable=SC2029
+                ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'" || true
+                exit 1
+              fi
+          elif [ "$previous_monitoring_valid" = "true" ] || [ "$expected_ready" = "true" ]; then
+            evidence_action="drill"
+          fi
+          if [ "$evidence_action" = "drill" ]; then
+            echo "Preserved monitoring evidence no longer covers the rollback window; dispatching the real monitoring drill for $previous_origin."
+            GH_TOKEN="${{ github.token }}" gh workflow run monitoring-drill.yml --repo "$GITHUB_REPOSITORY" --ref main -f release_sha="$previous_origin" -f confirm_alert_drill=true
+            echo "rollback_readiness_recovery=drill" >> "$GITHUB_STEP_SUMMARY"
           fi
           health_url="${{ needs.deploy_origin.outputs.workers_dev_url }}"
           if [ -z "$health_url" ]; then health_url="https://ms-realty.ms-realty-bg.workers.dev/api/health"; fi
@@ -597,13 +640,14 @@ jobs:
               elif node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const origin=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || (d.build_marker !== undefined && d.build_marker !== "unversioned") || d.origin_build_marker !== origin) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$previous_origin"; then
                 health_matches=true
               fi
-              expected_ready_status=503
-              if [ "$expected_ready" = "true" ]; then expected_ready_status=200; fi
               if ! ready_status="$(curl --silent --show-error --max-time 20 --header "Cache-Control: no-cache" --output "$RUNNER_TEMP/rollback-ready.json" --write-out '%{http_code}' "$ready_url")"; then
                 ready_status=000
               fi
-              if [ "$health_matches" = true ] && [ "$ready_status" = "$expected_ready_status" ] &&
-                node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const ready=process.argv[2] === "true"; const blockers=process.argv[3] ? process.argv[3].split(",") : []; const actual=Array.isArray(d.blockers) ? [...d.blockers].sort() : []; if (d.service !== "ms-realty" || d.launch_ready !== ready || d.status !== (ready ? "ready" : "blocked") || JSON.stringify(actual) !== JSON.stringify(blockers)) process.exit(1)' "$RUNNER_TEMP/rollback-ready.json" "$expected_ready" "$expected_blockers"; then
+              # Readiness is read from the restored release and compared to the
+              # pre-release snapshot; in drill recovery the snapshot with
+              # monitoring_rollback added is the only other acceptable state.
+              if [ "$health_matches" = true ] &&
+                node production/scripts/rollback-readiness-matches.mjs "$RUNNER_TEMP/rollback-ready.json" "$ready_status" "$expected_ready" "$expected_blockers" "$evidence_action"; then
                 if [ -z "$expected_marker" ]; then
                   echo "Rollback target predates exact image markers; confirmed its legacy unversioned health response."
                 fi
