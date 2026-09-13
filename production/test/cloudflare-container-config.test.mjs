@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { fromRoot } from "../lib/paths.mjs";
@@ -861,4 +862,65 @@ test("an expired prior monitoring report does not refuse a release", () => {
   assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight; then/);
   assert.match(capture, /echo "valid=false" >> "\$GITHUB_OUTPUT"/);
   assert.match(capture, /if ! ssh "\$\{ssh_args\[@\]\}" "root@\$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 \/opt\/ms-realty\/incoming;/, "the remote validation is guarded too");
+});
+
+// The retry blocks are shell; run them under bash -e with stubbed curl, sleep
+// and git so the attempt count, the pauses and the fail-closed exit are
+// observed, not just pattern-matched.
+function drillScheduleStep(name) {
+  const lines = drillScheduleWorkflow.split("\n");
+  const start = lines.findIndex((line) => line.trim() === `- name: ${name}`);
+  assert.ok(start >= 0, `step ${name} exists`);
+  const runAt = lines.findIndex((line, index) => index > start && line.trim() === "run: |");
+  const indent = lines[runAt].match(/^\s*/)[0].length + 2;
+  const body = [];
+  for (let index = runAt + 1; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line.trim() !== "" && line.match(/^\s*/)[0].length < indent) break;
+    body.push(line.slice(indent));
+  }
+  return body.join("\n");
+}
+function runStubbedStep(name, { succeedOn }) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-drill-retry-"));
+  const bin = path.join(dir, "bin");
+  fs.mkdirSync(bin);
+  const sha = "5616450b5616450b5616450b5616450b5616450b";
+  fs.writeFileSync(path.join(bin, "curl"), `#!/bin/bash
+n=$(( $(cat "$STUB_DIR/attempts" 2>/dev/null || echo 0) + 1 )); echo $n > "$STUB_DIR/attempts"
+out=""; while [ $# -gt 0 ]; do [ "$1" = "--output" ] && out="$2"; shift; done
+if [ -n "$STUB_SUCCEED_ON" ] && [ $n -ge "$STUB_SUCCEED_ON" ]; then printf '%s' '{"service":"ms-realty","build_marker":"${sha}","origin_build_marker":"${sha}","blockers":["monitoring_rollback"]}' > "$out"; exit 0; fi
+echo "curl: (28) timed out" >&2; exit 28
+`);
+  fs.writeFileSync(path.join(bin, "sleep"), "#!/bin/bash\necho \"$1\" >> \"$STUB_DIR/sleeps\"\n");
+  fs.writeFileSync(path.join(bin, "git"), "#!/bin/bash\nexit 0\n");
+  for (const file of ["curl", "sleep", "git"]) fs.chmodSync(path.join(bin, file), 0o755);
+  const result = spawnSync("bash", ["-e", "-c", drillScheduleStep(name)], {
+    cwd: dir,
+    env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, STUB_DIR: dir, STUB_SUCCEED_ON: succeedOn ? String(succeedOn) : "", GITHUB_OUTPUT: path.join(dir, "output") },
+    encoding: "utf8",
+  });
+  const read = (file) => (fs.existsSync(path.join(dir, file)) ? fs.readFileSync(path.join(dir, file), "utf8").trim() : "");
+  return { status: result.status, attempts: Number(read("attempts") || 0), sleeps: read("sleeps").split("\n").filter(Boolean), output: read("output"), stderr: result.stderr };
+}
+
+test("the scheduled drill's health reads retry three times and then fail closed", () => {
+  for (const step of ["Resolve the deployed release", "Skip while the gate is already fresh"]) {
+    for (const succeedOn of [1, 2, 3]) {
+      const run = runStubbedStep(step, { succeedOn });
+      assert.equal(run.status, 0, `${step}: success on attempt ${succeedOn}: ${run.stderr}`);
+      assert.equal(run.attempts, succeedOn, `${step}: stops at the first successful read`);
+      assert.equal(run.sleeps.length, succeedOn - 1, `${step}: one 15 s pause between attempts`);
+      assert.ok(run.sleeps.every((value) => value === "15"), `${step}: pause length`);
+    }
+    const failure = runStubbedStep(step, { succeedOn: null });
+    assert.notEqual(failure.status, 0, `${step}: three timeouts fail the step`);
+    assert.equal(failure.attempts, 3, `${step}: exactly three attempts`);
+    assert.equal(failure.sleeps.length, 2, `${step}: no pause after the last attempt`);
+  }
+  // The successful resolve still emits the exact marker it read.
+  const resolved = runStubbedStep("Resolve the deployed release", { succeedOn: 2 });
+  assert.match(resolved.output, /^sha=5616450b5616450b5616450b5616450b5616450b$/m);
+  const gate = runStubbedStep("Skip while the gate is already fresh", { succeedOn: 1 });
+  assert.match(gate.output, /^blocked=yes$/m);
 });
