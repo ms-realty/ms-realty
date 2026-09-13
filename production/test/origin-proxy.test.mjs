@@ -144,3 +144,35 @@ test("edge health keeps the release markers when the origin reports a dependency
   assert.equal(body.build_marker, "a".repeat(40));
   assert.equal(body.origin_build_marker, "b".repeat(40));
 });
+
+// The public pathname and query are data on a URL rooted at the configured
+// origin. A pathname that starts with "//host" is a network-path reference
+// when resolved as a string, and would carry the origin token to that host.
+test("origin proxy pins every credential-bearing request to the configured origin", async () => {
+  const configured = new URL(ORIGIN_URL).origin;
+  const tokenRecipients = new Set();
+  const fetchStub = async (upstream) => {
+    if (upstream.headers.get("x-ms-realty-origin-token")) tokenRecipients.add(new URL(upstream.url).origin);
+    return new Response("");
+  };
+  const cases = [
+    ["//example.invalid/probe", "//example.invalid/probe"],
+    ["///example.invalid/probe", "///example.invalid/probe"],
+    ["/\\example.invalid/probe", "//example.invalid/probe"],
+    ["/%2F%2Fexample.invalid/probe", "/%2F%2Fexample.invalid/probe"],
+    ["/bg/tarsene?next=//example.invalid/&q=x", "/bg/tarsene?next=//example.invalid/&q=x"],
+    ["/bg//imoti/MS-00815", "/bg//imoti/MS-00815"],
+    ["/imoti/prodazhba//sandanski.html", "/imoti/prodazhba//sandanski.html"],
+    ["/api/leads?source=site", "/api/leads?source=site"],
+  ];
+  for (const [path, expected] of cases) {
+    const write = path.startsWith("/api/");
+    const request = new Request(`${PUBLIC_URL}${path}`, write ? { method: "POST", headers: { origin: PUBLIC_URL, "sec-fetch-site": "same-origin", "content-type": "application/json" }, body: "{}" } : {});
+    const proxied = requestForOrigin(request, ORIGIN_URL, ORIGIN_TOKEN);
+    assert.equal(proxied.url, `${ORIGIN_URL}${expected}`, path);
+    assert.equal(new URL(proxied.url).origin, configured, path);
+    assert.equal(proxied.headers.get("x-forwarded-host"), new URL(PUBLIC_URL).host, path);
+    await fetchStub(proxied);
+  }
+  assert.deepEqual([...tokenRecipients], [configured]);
+});
