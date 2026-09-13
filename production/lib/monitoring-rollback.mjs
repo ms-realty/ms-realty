@@ -107,10 +107,13 @@ function evidenceTimestamp(value, label, generatedAt) {
 
 function stateOptions(options) {
   const maxAgeMs = options?.maxAgeMs ?? DEFAULT_MAX_AGE_MS;
+  const requiredRemainingMs = options?.requiredRemainingMs ?? 0;
   const nowValue = options?.now ?? Date.now();
   const now = nowValue instanceof Date ? nowValue.getTime() : typeof nowValue === "number" ? nowValue : Date.parse(nowValue);
-  if (!Number.isFinite(maxAgeMs) || maxAgeMs < 0 || !Number.isFinite(now)) throw new Error("Monitoring rollback state options are invalid");
-  return { maxAgeMs, now };
+  if (!Number.isFinite(maxAgeMs) || maxAgeMs < 0 || !Number.isFinite(now) || !Number.isFinite(requiredRemainingMs) || requiredRemainingMs < 0) {
+    throw new Error("Monitoring rollback state options are invalid");
+  }
+  return { maxAgeMs, now, requiredRemainingMs };
 }
 
 function evidenceTimes(report) {
@@ -263,7 +266,7 @@ export function monitoringRollbackState(reportPath = DEFAULT_MONITORING_ROLLBACK
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     if (report?.example === true || reportPath.endsWith(".example")) return { status: "example", path: normalizedPath };
     assertMonitoringRollbackReport(report);
-    const { maxAgeMs, now } = stateOptions(options);
+    const { maxAgeMs, now, requiredRemainingMs } = stateOptions(options);
     const [generatedAt, ...operationalEvidenceTimes] = evidenceTimes(report);
     const ageMs = now - generatedAt;
     if (ageMs < 0) return { status: "invalid", path: normalizedPath, error: "generated_at is in the future" };
@@ -271,7 +274,15 @@ export function monitoringRollbackState(reportPath = DEFAULT_MONITORING_ROLLBACK
     if (evidenceAgeMs > maxAgeMs) {
       return { status: "expired", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, max_age_ms: maxAgeMs };
     }
-    return { status: "pass", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, report };
+    // A release plus its rollback window must fit inside the remaining
+    // validity, or the evidence expires mid-release and the rollback can no
+    // longer reproduce the readiness it started from. Nothing is extended:
+    // the same 24 h clock, read once with the window subtracted.
+    const remainingMs = maxAgeMs - evidenceAgeMs;
+    if (requiredRemainingMs > 0 && remainingMs < requiredRemainingMs) {
+      return { status: "expiring", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, max_age_ms: maxAgeMs, remaining_ms: remainingMs, required_remaining_ms: requiredRemainingMs };
+    }
+    return { status: "pass", path: normalizedPath, age_ms: ageMs, evidence_age_ms: evidenceAgeMs, remaining_ms: remainingMs, report };
   } catch (error) {
     return { status: "invalid", path: normalizedPath, error: error.message };
   }

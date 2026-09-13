@@ -172,3 +172,24 @@ test("monitoring rollback evidence rejects placeholders and secret-bearing data"
     /durable provider receipt identifier/,
   );
 });
+
+// Evidence that is valid now but expires inside the release + rollback window
+// is refused for a release; a plain validity check still passes it.
+test("monitoring rollback state refuses evidence that expires within the release window", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-monitoring-rollback-window-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "monitoring-rollback-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+  // Oldest operational evidence in the fixture is 2026-07-31T10:28Z; 22.5 h later
+  // it has 1.5 h of the 24 h left — enough to pass, not enough for a 2 h window.
+  const now = "2026-08-01T08:58:00.000Z";
+  const twoHours = 2 * 60 * 60 * 1000;
+  assert.equal(monitoringRollbackState(reportPath, { now }).status, "pass");
+  const expiring = monitoringRollbackState(reportPath, { now, requiredRemainingMs: twoHours });
+  assert.equal(expiring.status, "expiring");
+  assert.ok(expiring.remaining_ms > 0 && expiring.remaining_ms < twoHours);
+  assert.equal(expiring.required_remaining_ms, twoHours);
+  assert.equal(monitoringRollbackState(reportPath, { now, requiredRemainingMs: 60 * 60 * 1000 }).status, "pass");
+  assert.equal(monitoringRollbackState(reportPath, { now: "2026-08-01T10:28:00.001Z", requiredRemainingMs: twoHours }).status, "expired");
+  assert.equal(monitoringRollbackState(reportPath, { now, requiredRemainingMs: -1 }).status, "invalid");
+});

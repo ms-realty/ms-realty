@@ -844,12 +844,30 @@ test("Cloudflare Container admits only exact signed-provider webhook paths with 
   assert.match(workerSource, /allowsProviderWebhookMutation/);
 });
 
-test("an expired prior monitoring report does not refuse a release", () => {
+// The capture step itself never aborts: it records whether a report worth
+// preserving exists. Refusing the release on that answer is a separate,
+// explicit step (tested below), not a side effect of the SSH or preflight.
+test("capturing the prior monitoring report records validity without aborting", () => {
   const capture = ciWorkflow.slice(
     ciWorkflow.indexOf("- name: Capture validated monitoring evidence for rollback"),
     ciWorkflow.indexOf("- name: Preserve validated monitoring evidence for rollback"),
   );
-  assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight; then/);
+  assert.match(capture, /if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight; then/);
+  assert.doesNotMatch(capture, /^\s+exit 1$/m);
   assert.match(capture, /echo "valid=false" >> "\$GITHUB_OUTPUT"/);
   assert.match(capture, /if ! ssh "\$\{ssh_args\[@\]\}" "root@\$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 \/opt\/ms-realty\/incoming;/, "the remote validation is guarded too");
+});
+
+// The release refuses to start on monitoring evidence that cannot outlast the
+// release + rollback window, before any origin or Worker mutation.
+test("the release requires monitoring evidence that outlasts the release window before mutating anything", () => {
+  assert.match(ciWorkflow, /MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight/);
+  const refuse = ciWorkflow.indexOf("- name: Require monitoring evidence that outlasts the release window");
+  const coverage = ciWorkflow.indexOf("- name: Capture exact-release R2 media coverage");
+  const activate = ciWorkflow.indexOf("- name: Upload and activate exact origin release");
+  assert.ok(refuse > 0 && refuse < coverage && coverage < activate, "the refusal precedes coverage capture and origin activation");
+  assert.match(ciWorkflow.slice(refuse, coverage), /if: steps\.previous_monitoring\.outputs\.valid != 'true'/);
+  assert.match(ciWorkflow.slice(refuse, coverage), /exit 1/);
+  // Two jobs of 60 minutes each bound the window the evidence must cover.
+  assert.equal(ciWorkflow.match(/timeout-minutes: 60/g)?.length, 2);
 });

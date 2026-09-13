@@ -297,9 +297,10 @@ jobs:
           # shellcheck disable=SC2029
           ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'"
           chmod 0600 "$local_report"
-          # An expired or invalid prior report means there is nothing worth
-          # preserving for a rollback; it is not a reason to refuse the release.
-          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" npm run monitoring:preflight; then
+          # The report must outlast this release and its rollback (both jobs
+          # are capped at 60 minutes): evidence that expires mid-release leaves
+          # the rollback unable to reproduce the readiness it started from.
+          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight; then
             echo "valid=true" >> "$GITHUB_OUTPUT"
           else
             echo "Prior monitoring report did not validate; no report will be preserved for rollback."
@@ -314,6 +315,16 @@ jobs:
           path: ${{ runner.temp }}/previous-monitoring-rollback-report.json
           if-no-files-found: error
           retention-days: 1
+
+      # The release verification requires launch_ready, so a release started
+      # without monitoring evidence that outlasts the release + rollback window
+      # can only fail verification and roll back. Refuse it here, before any
+      # origin or Worker mutation, and name the real drill that refreshes it.
+      - name: Require monitoring evidence that outlasts the release window
+        if: steps.previous_monitoring.outputs.valid != 'true'
+        run: |
+          echo "::error::Monitoring rollback evidence is missing, expired, or would expire within the 120-minute release + rollback window. Run the monitoring drill (monitoring-drill.yml, confirm_alert_drill=true) for the serving release, then dispatch the release again."
+          exit 1
 
       - name: Capture exact-release R2 media coverage
         run: |
