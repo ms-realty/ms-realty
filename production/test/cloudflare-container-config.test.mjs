@@ -871,4 +871,14 @@ test("the release requires monitoring evidence that outlasts the release window 
   assert.match(ciWorkflow.slice(refuse, coverage), /exit 1/);
   // Two jobs of 60 minutes each bound the window the evidence must cover.
   assert.equal(ciWorkflow.match(/timeout-minutes: 60/g)?.length, 2);
+  // The job boundary is explicit: after the origin mutation the deploy job may
+  // queue, so it re-checks the preserved evidence against its own cap before
+  // the Worker changes, and a failure there lands in the rollback step.
+  const restore = ciWorkflow.indexOf("- name: Restore validated monitoring evidence for rollback");
+  const requireJob = ciWorkflow.indexOf("- name: Require the preserved evidence to outlast this job");
+  const workerDeploy = ciWorkflow.indexOf("- name: Deploy exact main commit");
+  const rollback = ciWorkflow.indexOf("- name: Roll back failed deployment");
+  assert.ok(restore > activate && restore < requireJob && requireJob < workerDeploy && workerDeploy < rollback);
+  assert.match(ciWorkflow.slice(requireJob, workerDeploy), /MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=3600000 npm run monitoring:preflight/);
+  assert.match(ciWorkflow.slice(rollback), /if: failure\(\) && needs\.deploy_origin\.outputs\.previous_release != ''/);
 });

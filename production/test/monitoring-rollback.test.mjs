@@ -193,3 +193,26 @@ test("monitoring rollback state refuses evidence that expires within the release
   assert.equal(monitoringRollbackState(reportPath, { now: "2026-08-01T10:28:00.001Z", requiredRemainingMs: twoHours }).status, "expired");
   assert.equal(monitoringRollbackState(reportPath, { now, requiredRemainingMs: -1 }).status, "invalid");
 });
+
+// Queue delay across the job boundary: evidence that satisfied the 120-minute
+// release preflight at origin activation can no longer cover the deploy job's
+// own 60-minute cap after a long wait, and rollback-time validity is what the
+// job-start check guarantees.
+test("evidence that expires during a queued deploy job is refused at the job start, not at rollback", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-monitoring-rollback-queue-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "monitoring-rollback-report.json");
+  fs.writeFileSync(reportPath, `${JSON.stringify(report())}\n`);
+  const HOUR = 60 * 60 * 1000;
+  // Oldest operational evidence: 2026-07-31T10:28Z → expires 2026-08-01T10:28Z.
+  const originActivation = "2026-08-01T08:07:00.000Z"; // 141 min left: release preflight (120 min) passes
+  const deployJobStart = "2026-08-01T09:40:00.000Z"; // after a 93 min queue: 48 min left
+  const rollbackAtEnd = "2026-08-01T10:35:00.000Z"; // where a 60 min job would have rolled back: expired
+  assert.equal(monitoringRollbackState(reportPath, { now: originActivation, requiredRemainingMs: 2 * HOUR }).status, "pass");
+  assert.equal(monitoringRollbackState(reportPath, { now: deployJobStart, requiredRemainingMs: HOUR }).status, "expiring");
+  assert.equal(monitoringRollbackState(reportPath, { now: rollbackAtEnd }).status, "expired");
+  // Refused at the job start, the rollback runs at once, while the evidence is still valid.
+  assert.equal(monitoringRollbackState(reportPath, { now: deployJobStart }).status, "pass");
+  // With no queue the same evidence covers the whole job.
+  assert.equal(monitoringRollbackState(reportPath, { now: "2026-08-01T08:20:00.000Z", requiredRemainingMs: HOUR }).status, "pass");
+});

@@ -414,6 +414,17 @@ jobs:
           name: rollback-monitoring-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/rollback-evidence
 
+      # The origin is already on the new release. This job may have waited in
+      # the queue, so the preserved evidence is checked again against this
+      # job's own 60-minute cap before the Worker changes: if it cannot last
+      # the job, fail now, and the rollback below runs while the evidence is
+      # still valid instead of discovering it expired at the end.
+      - name: Require the preserved evidence to outlast this job
+        run: |
+          local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
+          test -s "$local_report"
+          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=3600000 npm run monitoring:preflight
+
       - name: Verify exact R2 report for the Worker image
         run: >-
           node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.status !== "pass" || d.release_sha !== process.argv[2] || d.missing_count !== 0) process.exit(1)'
