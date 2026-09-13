@@ -68,7 +68,7 @@ export function initPublicSearchEvidence() {
     try{var saved=JSON.parse(sessionStorage.getItem('ms-realty:match-context')||'null');if(saved&&saved.listingId===id&&saved.locale===dialog.dataset.locale&&Date.now()-saved.at<1800000)return saved.criteria;}catch(_){}
     var params=new URLSearchParams(location.search),value={};params.forEach(function(v,k){if(allowed.includes(k)||['search_intent','nl_context'].includes(k))value[k]=v;});return value;
   }
-  document.querySelectorAll('[data-evidence-open]').forEach(function(button){button.hidden=false;button.addEventListener('click',function(){
+  document.querySelectorAll('[data-evidence-open]').forEach(function(button){button.hidden=false;var help=button.closest&&button.closest('[data-search-help]');if(help)help.hidden=false;button.addEventListener('click',function(){
     cancel();opener=button;mode=button.dataset.evidenceOpen;listingId=button.dataset.listingId||'';sourceHash=null;sourceChanged=false;listingCriteria=mode==='match'&&dialog.dataset.kind==='listing'?loadListingContext(listingId):{};
     dialog.querySelector('#pse-title').textContent=mode==='match'?copy.matchTitle:copy.alternativesTitle;dialog.querySelector('[data-evidence-note]').textContent=mode==='match'?copy.matchNote:copy.alternativesNote;dialog.querySelector('[data-evidence-reference]').textContent=listingId;
     var property=dialog.querySelector('[data-evidence-property]');

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
-import { appendLead, assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { appendLead, assertLeadLedger, leadReplayState, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 
 const CONTACT_SECRET = "test-only-lead-contact-key-32-characters-minimum";
 
@@ -107,4 +107,24 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
     assert.equal(serialized.includes(plaintext), false, `${plaintext} must not enter the public lead ledger`);
   }
   assert.equal(assertLeadLedger(rows), true);
+});
+
+
+// A browser retry carries the same idempotency key. The ledger names it a
+// replay only for the same enquiry; a different person, listing or message
+// under the same key is a conflict the caller must refuse.
+test("lead replay state distinguishes the same enquiry from a reused key", () => {
+  const filePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-lead-replay-`)}/leads.jsonl`;
+  const secret = "test-secret-0123456789";
+  const lead = (id, extra = {}) => ({ id: `inbox-${id}`, lead: { id, source: "website_listing_detail", leadType: "buyer", listingReference: "MS-00815", idempotency_key: "public-lead:replay-1", contact: { name: "Retry Person", phone: "+359880000001" }, message: "First message", ...extra } });
+  assert.equal(leadReplayState(lead("lead-draft-0"), { filePath, contactSecret: secret }).state, "none");
+  const first = appendLead(lead("lead-draft-1"), { filePath, contactSecret: secret });
+  const replay = leadReplayState(lead("lead-draft-2"), { filePath, contactSecret: secret });
+  assert.equal(replay.state, "replay");
+  assert.equal(replay.row.lead_id, first.lead_id);
+  assert.equal(leadReplayState(lead("lead-draft-3", { contact: { name: "Other", phone: "+359880000002" } }), { filePath, contactSecret: secret }).state, "conflict");
+  assert.equal(leadReplayState(lead("lead-draft-4", { message: "Changed message" }), { filePath, contactSecret: secret }).state, "conflict");
+  assert.equal(leadReplayState(lead("lead-draft-5", { listingReference: "MS-00907" }), { filePath, contactSecret: secret }).state, "conflict");
+  assert.equal(leadReplayState(lead("lead-draft-6", { idempotency_key: "public-lead:replay-2" }), { filePath, contactSecret: secret }).state, "none");
+  assert.equal(readLeadLedger(filePath).length, 1);
 });
