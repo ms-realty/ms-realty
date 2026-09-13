@@ -34,9 +34,22 @@ jobs:
       - name: Resolve the deployed release
         id: release
         run: |
-          curl --fail --silent --show-error --max-time 20 \
-            --header 'Cache-Control: no-cache' \
-            https://ms-realty.ms-realty-bg.workers.dev/api/health --output health.json
+          # A single 20 s read can time out on a cold origin and the drill then
+          # never runs, so the evidence expires. Three bounded attempts with a
+          # short pause keep the deadline (< 2 min) and still fail closed.
+          read_health() {
+            for attempt in 1 2 3; do
+              if curl --fail --silent --show-error --max-time 20 \
+                --header 'Cache-Control: no-cache' \
+                https://ms-realty.ms-realty-bg.workers.dev/api/health --output "$1"; then
+                return 0
+              fi
+              echo "health read attempt $attempt failed"
+              [ "$attempt" -lt 3 ] && sleep 15
+            done
+            return 1
+          }
+          read_health health.json
           release_sha="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync("health.json","utf8")); const edge=String(d.build_marker||""); const origin=String(d.origin_build_marker||edge); if (d.service !== "ms-realty" || !/^[0-9a-f]{40}$/i.test(edge) || edge !== origin) process.exit(1); process.stdout.write(edge)')"
           # A drill only means something for a release that is on main and is the
           # one actually serving traffic at both layers.
@@ -46,9 +59,13 @@ jobs:
       - name: Skip while the gate is already fresh
         id: gate
         run: |
-          curl --fail --silent --show-error --max-time 20 \
-            --header 'Cache-Control: no-cache' \
-            https://ms-realty.ms-realty-bg.workers.dev/api/health --output gate.json
+          for attempt in 1 2 3; do
+            curl --fail --silent --show-error --max-time 20 \
+              --header 'Cache-Control: no-cache' \
+              https://ms-realty.ms-realty-bg.workers.dev/api/health --output gate.json && break
+            [ "$attempt" -eq 3 ] && exit 1
+            sleep 15
+          done
           blocked="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync("gate.json","utf8")); const b=Array.isArray(d.blockers)?d.blockers:[]; process.stdout.write(b.includes("monitoring_rollback") ? "yes" : "no")')"
           echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
           echo "monitoring_rollback blocked: $blocked"
