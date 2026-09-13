@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { rollbackReadinessAccepts } from "../lib/rollback-readiness.mjs";
 import {
   assertMonitoringRollbackReport,
   monitoringRollbackState,
@@ -233,4 +235,48 @@ test("rollback evidence action preserves only evidence that covers the rollback 
   const expired = rollbackEvidenceAction(reportPath, { now: "2026-08-01T11:10:00.000Z", rollbackWindowMs: window }); // consumed by the queue
   assert.deepEqual([expired.action, expired.reason], ["drill", "expired"]);
   assert.equal(rollbackEvidenceAction(path.join(directory, "missing.json"), { now: "2026-08-01T09:40:00.000Z" }).action, "drill");
+});
+
+// Exact rollback readiness states. The snapshot is what the release started
+// from; in drill recovery the restored release may already be back on it
+// (near-expiry evidence still valid, or the real drill landed before the
+// first read) or may be pending with monitoring_rollback added. Nothing else.
+test("rollback readiness accepts the snapshot or the pending recovery state, exactly", () => {
+  const snapshotBlockers = ["r2_media_coverage"];
+  const ready = (launch_ready, blockers) => ({ service: "ms-realty", status: launch_ready ? "ready" : "blocked", launch_ready, blockers });
+  const accept = (input) => rollbackReadinessAccepts({ expectedReady: false, expectedBlockers: snapshotBlockers, ...input });
+  // Near-expiry evidence still valid on the restored release: snapshot reproduced.
+  assert.deepEqual(accept({ recovery: "drill", ready: ready(false, ["r2_media_coverage"]), httpStatus: "503" }), { accepted: true, state: "snapshot" });
+  // Drill completed before the first read: snapshot reproduced.
+  assert.deepEqual(accept({ recovery: "drill", ready: ready(false, ["r2_media_coverage"]), httpStatus: 503 }), { accepted: true, state: "snapshot" });
+  // Recovery pending: only monitoring_rollback added to the snapshot.
+  assert.deepEqual(accept({ recovery: "drill", ready: ready(false, ["monitoring_rollback", "r2_media_coverage"]), httpStatus: "503" }), { accepted: true, state: "recovery_pending" });
+  // Unrelated blocker, missing snapshot blocker, wrong readiness or HTTP status: rejected.
+  assert.equal(accept({ recovery: "drill", ready: ready(false, ["monitoring_rollback", "r2_media_coverage", "payload_runtime"]), httpStatus: "503" }).accepted, false);
+  assert.equal(accept({ recovery: "drill", ready: ready(false, ["monitoring_rollback"]), httpStatus: "503" }).accepted, false);
+  assert.equal(accept({ recovery: "drill", ready: ready(true, []), httpStatus: "200" }).accepted, false);
+  assert.equal(accept({ recovery: "drill", ready: ready(false, ["r2_media_coverage"]), httpStatus: "200" }).accepted, false);
+  // Without drill recovery the pending state is a mismatch.
+  assert.equal(accept({ recovery: "preserve", ready: ready(false, ["monitoring_rollback", "r2_media_coverage"]), httpStatus: "503" }).accepted, false);
+  assert.equal(accept({ recovery: "none", ready: ready(false, ["r2_media_coverage"]), httpStatus: "503" }).accepted, true);
+  // A ready snapshot must come back ready with HTTP 200.
+  assert.equal(rollbackReadinessAccepts({ expectedReady: true, expectedBlockers: [], recovery: "drill", ready: ready(true, []), httpStatus: "200" }).accepted, true);
+  assert.equal(rollbackReadinessAccepts({ expectedReady: true, expectedBlockers: [], recovery: "drill", ready: ready(false, ["monitoring_rollback"]), httpStatus: "503" }).accepted, true);
+  assert.equal(rollbackReadinessAccepts({ expectedReady: true, expectedBlockers: [], recovery: "drill", ready: ready(false, ["monitoring_rollback"]), httpStatus: "200" }).accepted, false);
+});
+
+test("the rollback readiness script exits by the same rule", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-rollback-readiness-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const readyPath = path.join(directory, "ready.json");
+  const run = (body, http, expectedReady, blockers, recovery) => {
+    fs.writeFileSync(readyPath, JSON.stringify(body));
+    return spawnSync(process.execPath, [fromRoot("production", "scripts", "rollback-readiness-matches.mjs"), readyPath, String(http), expectedReady, blockers, recovery], { encoding: "utf8" });
+  };
+  const blocked = (blockers) => ({ service: "ms-realty", status: "blocked", launch_ready: false, blockers });
+  assert.equal(run(blocked(["r2_media_coverage"]), 503, "false", "r2_media_coverage", "drill").status, 0);
+  assert.equal(run(blocked(["monitoring_rollback", "r2_media_coverage"]), 503, "false", "r2_media_coverage", "drill").status, 0);
+  assert.equal(run(blocked(["monitoring_rollback", "r2_media_coverage"]), 503, "false", "r2_media_coverage", "preserve").status, 1);
+  assert.equal(run(blocked(["monitoring_rollback", "r2_media_coverage", "live_services"]), 503, "false", "r2_media_coverage", "drill").status, 1);
+  assert.equal(run({ service: "other" }, 503, "false", "r2_media_coverage", "drill").status, 1);
 });

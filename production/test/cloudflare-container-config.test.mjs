@@ -371,7 +371,9 @@ test("main deploys automatically with coordinated Worker and origin rollback", (
   assert.match(rollbackBlock, /d\.origin_build_marker !== origin/);
   assert.match(rollbackBlock, /rollback-ready\.json/);
   assert.match(rollbackBlock, /if ! ready_status="\$\(curl[\s\S]*"\$ready_url"\)"; then\s+ready_status=000/);
-  assert.match(rollbackBlock, /d\.launch_ready !== ready/);
+  // Readiness acceptance lives in production/lib/rollback-readiness.mjs, read from the restored release.
+  assert.match(rollback, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers"/);
+  assert.match(fs.readFileSync(fromRoot("production", "lib", "rollback-readiness.mjs"), "utf8"), /ready\.launch_ready === launchReady/);
   assert.match(rollbackBlock, /JSON\.stringify\(actual\) !== JSON\.stringify\(blockers\)/);
   assert.doesNotMatch(ciWorkflow, /^\s+environment:/m);
 });
@@ -891,8 +893,10 @@ test("the rollback recovers expired preserved evidence through the real drill", 
   assert.match(rollback, /MS_REALTY_ROLLBACK_WINDOW_MS=900000 node production\/scripts\/rollback-evidence-action\.mjs/);
   assert.match(rollback, /if \[ "\$evidence_action" = "preserve" \]; then/);
   assert.match(rollback, /gh workflow run monitoring-drill\.yml --repo "\$GITHUB_REPOSITORY" --ref main -f release_sha="\$previous_origin" -f confirm_alert_drill=true/);
-  assert.match(rollback, /rows\.add\("monitoring_rollback"\)/);
-  assert.match(rollback, /expected_ready=false/);
+  // The blocker state is read from the restored release, never inferred from the dispatch.
+  assert.doesNotMatch(rollback, /expected_ready=false/);
+  assert.doesNotMatch(rollback, /rows\.add\("monitoring_rollback"\)/);
+  assert.match(rollback, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers" "\$evidence_action"/);
   // The plain preflight no longer hard-fails the rollback on an expired report.
   assert.doesNotMatch(rollback, /MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="\$local_report" npm run monitoring:preflight/);
   // Exact marker verification is untouched and the drill needs actions:write on this job only.

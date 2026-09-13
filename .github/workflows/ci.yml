@@ -622,8 +622,6 @@ jobs:
           if [ "$evidence_action" = "drill" ]; then
             echo "Preserved monitoring evidence no longer covers the rollback window; dispatching the real monitoring drill for $previous_origin."
             GH_TOKEN="${{ github.token }}" gh workflow run monitoring-drill.yml --repo "$GITHUB_REPOSITORY" --ref main -f release_sha="$previous_origin" -f confirm_alert_drill=true
-            expected_ready=false
-            expected_blockers="$(node -e 'const rows=new Set((process.argv[1]||"").split(",").filter(Boolean)); rows.add("monitoring_rollback"); process.stdout.write([...rows].sort().join(","))' "$expected_blockers")"
             echo "rollback_readiness_recovery=drill" >> "$GITHUB_STEP_SUMMARY"
           fi
           health_url="${{ needs.deploy_origin.outputs.workers_dev_url }}"
@@ -642,13 +640,14 @@ jobs:
               elif node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const origin=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || (d.build_marker !== undefined && d.build_marker !== "unversioned") || d.origin_build_marker !== origin) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$previous_origin"; then
                 health_matches=true
               fi
-              expected_ready_status=503
-              if [ "$expected_ready" = "true" ]; then expected_ready_status=200; fi
               if ! ready_status="$(curl --silent --show-error --max-time 20 --header "Cache-Control: no-cache" --output "$RUNNER_TEMP/rollback-ready.json" --write-out '%{http_code}' "$ready_url")"; then
                 ready_status=000
               fi
-              if [ "$health_matches" = true ] && [ "$ready_status" = "$expected_ready_status" ] &&
-                node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const ready=process.argv[2] === "true"; const blockers=process.argv[3] ? process.argv[3].split(",") : []; const actual=Array.isArray(d.blockers) ? [...d.blockers].sort() : []; if (d.service !== "ms-realty" || d.launch_ready !== ready || d.status !== (ready ? "ready" : "blocked") || JSON.stringify(actual) !== JSON.stringify(blockers)) process.exit(1)' "$RUNNER_TEMP/rollback-ready.json" "$expected_ready" "$expected_blockers"; then
+              # Readiness is read from the restored release and compared to the
+              # pre-release snapshot; in drill recovery the snapshot with
+              # monitoring_rollback added is the only other acceptable state.
+              if [ "$health_matches" = true ] &&
+                node production/scripts/rollback-readiness-matches.mjs "$RUNNER_TEMP/rollback-ready.json" "$ready_status" "$expected_ready" "$expected_blockers" "$evidence_action"; then
                 if [ -z "$expected_marker" ]; then
                   echo "Rollback target predates exact image markers; confirmed its legacy unversioned health response."
                 fi
