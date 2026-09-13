@@ -230,7 +230,10 @@ test("origin deployment is immutable, backup-first, and rolls back the active re
   assert.match(ciWorkflow, /expected_ready="\$\{\{ needs\.deploy_origin\.outputs\.previous_ready \}\}"/);
   assert.match(ciWorkflow, /expected_blockers="\$\{\{ needs\.deploy_origin\.outputs\.previous_blockers \}\}"/);
   assert.doesNotMatch(ciWorkflow, /expected_ready="\$\{\{ steps\.previous\.outputs\.ready \}\}"/);
-  assert.match(ciWorkflow, /expected_ready_status=503/);
+  // The HTTP status expectation (200 ready / 503 blocked) now lives in the
+  // readiness acceptance module the rollback calls with the live status code.
+  assert.match(ciWorkflow, /node production\/scripts\/rollback-readiness-matches\.mjs "\$RUNNER_TEMP\/rollback-ready\.json" "\$ready_status" "\$expected_ready" "\$expected_blockers"/);
+  assert.match(fs.readFileSync(fromRoot("production", "lib", "rollback-readiness.mjs"), "utf8"), /const EXPECTED_HTTP = \{ true: 200, false: 503 \};/);
   assert.match(ciWorkflow, /ready_status="\$\(curl[\s\S]*--write-out '%\{http_code\}' "\$ready_url"\)"/);
   assert.match(ciWorkflow, /d\.launch_ready !== true/);
   assert.match(ciWorkflow, /needs\.deploy_origin\.outputs\.previous_release/);
