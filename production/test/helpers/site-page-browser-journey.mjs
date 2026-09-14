@@ -18,6 +18,7 @@ export async function exerciseSellerPageBrowser({ payload, chromium }) {
   const config = { ...appAdminConfigFromEnv({}), authEnv, sitePageContentPayload: payload };
   const publicConfig = { ...appRouterConfigFromEnv({}), sitePageContentPayload: payload };
   let origin;
+  let pausedWrite = null;
   const server = http.createServer(async (incoming, outgoing) => {
     try {
       const url = new URL(incoming.url, origin);
@@ -31,6 +32,11 @@ export async function exerciseSellerPageBrowser({ payload, chromium }) {
         for await (const chunk of incoming) chunks.push(chunk);
         const body = chunks.length ? Buffer.concat(chunks) : undefined;
         const request = new Request(url, { method: incoming.method, headers: incoming.headers, ...(body ? { body } : {}) });
+        if (pausedWrite && incoming.method === "POST" && url.pathname === "/api/admin/site-pages/seller") {
+          const pause = pausedWrite;
+          pause.entered();
+          await pause.wait;
+        }
         response = url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/")
           ? await renderAppAdminResponse(request, { config })
           : await renderAppRouteResponse({ pathname: url.pathname, url: url.href, host: incoming.headers.host, accept: "text/html", config: publicConfig });
@@ -185,6 +191,32 @@ export async function exerciseSellerPageBrowser({ payload, chromium }) {
     assert.equal((await cms.readDraft({ principal: { ...owner, can_mutate: true } })).draft.content.h1, "Чернова без JavaScript");
     assert.equal((await cms.readPublished()).revision_id, published.revision_id);
     await nativeContext.close();
+
+    // Hold a real save before adapter dispatch. Navigation must still warn
+    // until the durable readback arrives; cancelling keeps this form intact.
+    await page.goto(editorUrl);
+    await page.locator("#site-page-h1").fill("Pending unsaved seller heading");
+    let entered;
+    let release;
+    const requested = new Promise((resolve) => { entered = resolve; });
+    pausedWrite = { entered, wait: new Promise((resolve) => { release = resolve; }) };
+    try {
+      await save.click();
+      await requested;
+      assert.equal(await page.locator("[data-site-page-editor]").getAttribute("aria-busy"), "true");
+      const dialogPromise = page.waitForEvent("dialog");
+      const navigation = page.getByRole("link", { name: "Website content", exact: true }).click({ noWaitAfter: true });
+      const dialog = await dialogPromise;
+      assert.equal(dialog.type(), "beforeunload");
+      await dialog.dismiss();
+      await navigation;
+      assert.equal(page.url(), editorUrl);
+      assert.equal(await page.locator("#site-page-h1").inputValue(), "Pending unsaved seller heading");
+      assert.notEqual((await cms.readDraft({ principal: { ...owner, can_mutate: true } })).draft.content.h1, "Pending unsaved seller heading");
+    } finally { pausedWrite = null; release(); }
+    await page.waitForURL(/saved=1/);
+    assert.equal((await cms.readDraft({ principal: { ...owner, can_mutate: true } })).draft.content.h1, "Pending unsaved seller heading");
+    assert.equal((await cms.readPublished()).revision_id, published.revision_id);
     assert.deepEqual(pageErrors, []);
     if (process.env.MS_REALTY_SITE_PAGE_SCREENSHOT) await page.screenshot({ path: process.env.MS_REALTY_SITE_PAGE_SCREENSHOT, fullPage: true });
     return published;

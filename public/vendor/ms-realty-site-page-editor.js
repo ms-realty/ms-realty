@@ -20,7 +20,7 @@
   }
   copyForm.addEventListener("input", syncDirty);
   window.addEventListener("beforeunload", function (event) {
-    if (!dirty || saving) return;
+    if (!dirty) return;
     event.preventDefault();
     event.returnValue = "";
   });
