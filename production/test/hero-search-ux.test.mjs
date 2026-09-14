@@ -33,7 +33,7 @@ test("home hero has responsive local imagery and a lean, accessible search contr
   assert.match(html, /id="home-hero-search-form" class="hp-search" action="\/en\/search" method="get" role="search" aria-label="Search" data-hero-search="true"/);
   const form = html.slice(html.indexOf('id="home-hero-search-form"'), html.indexOf("</form>", html.indexOf('id="home-hero-search-form"')));
   // Buy / Rent remains one radio group shared by the bar and drawer.
-  assert.match(form, /<fieldset class="hp-search__intent" data-search-intent="true"><legend class="mk-sr-only">Offer<\/legend>/);
+  assert.match(form, /<fieldset class="hp-search__intent" data-search-intent="true"><legend class="hp-search__label">Offer<\/legend>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="sale" checked><span>Buy<\/span><\/label>/);
   assert.match(form, /<label class="hp-search__tab"><input type="radio" name="offer_type" value="rent"><span>Rent<\/span><\/label>/);
   // Primary controls stay in the bar; the drawer exposes numeric bounds.

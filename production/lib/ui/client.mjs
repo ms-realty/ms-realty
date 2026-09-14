@@ -1430,11 +1430,62 @@ ${THEME_SWITCH_JS}
   }
   function initSearchFilterForms() {
     var forms = document.querySelectorAll("[data-search-filter-form]");
-    for (var i = 0; i < forms.length; i += 1) stripEmptyControlsOnSubmit(forms[i]);
+    Array.from(forms).forEach(function (form) {
+      stripEmptyControlsOnSubmit(form);
+      var dialog = form.querySelector("[data-results-filter-dialog]");
+      var more = form.querySelector("[data-search-more-filters]");
+      if (!dialog || !more || typeof dialog.showModal !== "function") return;
+      var trigger = more.querySelector("summary");
+      var body = dialog.querySelector(".sr-filter-dialog__body");
+      var footer = dialog.querySelector(".sr-filter-dialog__footer");
+      var entries = Array.from(form.children).filter(function (node) { return node.classList.contains("sr-fg") || node.classList.contains("sr-filter-actions"); });
+      entries.push(more.querySelector(".sr-more__body"));
+      var moves = entries.map(function (node) {
+        var marker = document.createComment("filter-position"); node.before(marker);
+        return { node: node, marker: marker };
+      });
+      more.open = false;
+      trigger.addEventListener("click", function (event) {
+        event.preventDefault(); more.open = false;
+        moves.forEach(function (entry) {
+          var copy = entry.node.cloneNode(true); copy.inert = true; copy.setAttribute("aria-hidden", "true");
+          [copy].concat(Array.from(copy.querySelectorAll("*"))).forEach(function (node) {
+            ["id", "name", "for", "list"].forEach(function (attr) { node.removeAttribute(attr); });
+            if ("disabled" in node) node.disabled = true;
+          });
+          entry.copy = copy; entry.node.before(copy);
+          (entry.node.classList.contains("sr-filter-actions") ? footer : body).appendChild(entry.node);
+        });
+        dialog.showModal(); syncPublicDialogState();
+      });
+      dialog.querySelector("[data-results-filter-close]").addEventListener("click", function () { dialog.close(); });
+      dialog.addEventListener("close", function () {
+        moves.forEach(function (entry) { entry.marker.after(entry.node); if (entry.copy) entry.copy.remove(); });
+        syncPublicDialogState(); trigger.focus({ preventScroll: true });
+      });
+      dialog.addEventListener("click", function (event) {
+        var rect = dialog.getBoundingClientRect();
+        if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
+      });
+      form.addEventListener("invalid", function (event) { if (!dialog.open && more.contains(event.target)) trigger.click(); }, true);
+    });
   }
   function initHeroSearch() {
     var form = document.querySelector("[data-hero-search]");
     if (!form) return;
+    var budget = form.querySelector("[data-search-budget]");
+    if (budget) {
+      var budgetSummary = budget.querySelector("[data-budget-summary]");
+      function syncBudget() {
+        var min = form.querySelector('[name="price_min"]').value;
+        var max = form.querySelector('[name="price_max"]').value;
+        budgetSummary.textContent = min || max ? (min ? Number(min).toLocaleString() : "0") + " – " + (max ? Number(max).toLocaleString() : "∞") + " €" : budgetSummary.getAttribute("data-any-label");
+      }
+      form.addEventListener("input", syncBudget);
+      form.addEventListener("reset", function () { window.setTimeout(syncBudget); });
+      document.addEventListener("click", function (event) { if (!budget.contains(event.target)) budget.open = false; });
+      budget.addEventListener("keydown", function (event) { if (event.key === "Escape") { budget.open = false; budget.querySelector("summary").focus(); } });
+    }
     var priceSelects = form.querySelectorAll("[data-price-presets]");
     var family = form.querySelector("[data-hero-family]");
     var bedrooms = form.querySelectorAll("[data-hero-bedrooms]");
@@ -1528,6 +1579,7 @@ ${THEME_SWITCH_JS}
       });
       form.addEventListener("invalid", function (event) {
         if (!drawer.open && more.contains(event.target)) trigger.click();
+        else if (!drawer.open && budget && budget.contains(event.target)) budget.open = true;
       }, true);
       drawer.querySelector("[data-hero-filter-close]").addEventListener("click", function () { drawer.close(); });
       drawer.querySelectorAll("[data-drawer-family]").forEach(function (button) {
@@ -2760,7 +2812,7 @@ ${THEME_SWITCH_JS}
      var contactOptions = document.querySelector("[data-mobile-contact-options]");
      var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
      var filters = document.querySelector("[data-hero-filter-dialog]");
-     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open) || (filters && filters.open));
+     var dialogOpen = Boolean(document.querySelector("[data-results-filter-dialog][open]") || (enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open) || (filters && filters.open));
      document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
    }
   // The desktop language menu is a native <details>; it still needs to close

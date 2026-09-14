@@ -26,6 +26,7 @@ def main():
                 summary = page.locator(".hp-discovery__summary")
                 if summary.is_visible():
                     summary.click()
+                page.locator("[data-search-budget] > summary").click()
                 page.locator('#home-hero-search-form [name="price_max"]').fill(values["price_max"])
                 trigger = page.locator(".hp-search__more-summary")
                 trigger.click()
@@ -37,8 +38,9 @@ def main():
                 for name, value in values.items():
                     drawer.locator(f'[name="{name}"]').fill(value)
                 dimensions = drawer.bounding_box()
-                assert abs(dimensions["width"] - min(480, width)) < 1
-                assert abs(dimensions["x"] + dimensions["width"] - width) < 1
+                expected_width = width if width <= 720 else min(680, width - 48)
+                assert abs(dimensions["width"] - expected_width) < 1
+                assert abs(dimensions["x"] - (width - expected_width) / 2) < 1
                 assert not page.evaluate("document.documentElement.scrollWidth > innerWidth")
                 assert page.locator("html").get_attribute("class").find("public-dialog-open") >= 0
                 page.keyboard.press("Escape")
