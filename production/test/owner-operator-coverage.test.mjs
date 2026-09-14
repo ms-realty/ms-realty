@@ -6,6 +6,7 @@ import path from "node:path";
 import { appendAdminSessionEvent, createAdminSessionOpened } from "../lib/admin-sessions.mjs";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { PagePayload } from "./helpers/site-page-payload.mjs";
 import {
   ADMIN_PAGE_SURFACES,
   ADMIN_ROUTE_COVERAGE,
@@ -78,6 +79,19 @@ test("owner/operator operations include each Hermes tool exactly once", () => {
     hermes.map((row) => row.operation),
     HERMES_TOOL_COVERAGE.map((row) => row.operation),
   );
+});
+
+test("seller-page authoring is inventoried with a human browser entrypoint", () => {
+  const routes = ADMIN_ROUTE_COVERAGE.filter((row) => row.pathname === "/api/admin/site-pages/seller");
+  assert.deepEqual(routes.map((row) => row.method), ["GET", "POST"]);
+  for (const row of routes) {
+    assert.equal(row.family, "content");
+    assert.equal(row.execution, "browser_session");
+    assert.equal(row.ui_path, "/admin/site-pages/seller");
+    assert.equal(row.hermes_access, "none");
+    assert.equal(OWNER_OPERATOR_REMOTE_OPERATIONS.includes(row), false);
+  }
+  assert.ok(ADMIN_PAGE_SURFACES.some((row) => row.path === "/admin/site-pages/seller"));
 });
 
 test("generated matrix is source-derived and includes Hermes tool coverage", () => {
@@ -173,6 +187,7 @@ test("every authorized admin page renders for a full-scope owner session", async
     authEnv: { NODE_ENV: "test" },
     adminSessionLedgerPath: sessionLedgerPath,
     payloadAdminAuth,
+    sitePageContentPayload: new PagePayload(),
     readProviderConnections: async () => [],
     readProviderCredentials: async () => [],
   };

@@ -28,6 +28,7 @@ export const ADMIN_PAGE_SURFACES = Object.freeze([
   { id: "listing_manager", group: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
   { id: "translation_queue", group: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
   { id: "approved_content", group: "cms", path: "/admin/approved-content", icon: "check-circle-2", kind: "admin_approved_content_review", capability: "content:read" },
+  { id: "seller_page", group: "cms", path: "/admin/site-pages/seller", icon: "file-text", kind: "admin_site_page", capability: "content:read" },
   { id: "document_records", group: "crm", path: "/admin/documents/records", icon: "file-text", kind: "admin_document_records", capability: "documents:read" },
   { id: "media_library", group: "cms", path: "/admin/media", icon: "camera", kind: "admin_media_library", capability: "content:read" },
   { id: "locale_rollout", group: "cms", path: "/admin/locales", icon: "globe", kind: "admin_locale_rollout", capability: "content:read" },
@@ -163,6 +164,8 @@ const ADMIN_ROUTE_METHODS = [
   ["POST", "/api/admin/signature-requests/{requestId}/status"],
   ["GET", "/api/admin/signature-requests"],
   ["POST", "/api/admin/signature-requests"],
+  ["GET", "/api/admin/site-pages/seller"],
+  ["POST", "/api/admin/site-pages/seller"],
   ["POST", "/api/admin/social-marketing/publish"],
   ["GET", "/api/admin/seo-evidence/export"],
   ["POST", "/api/admin/seo-evidence/import"],
@@ -229,6 +232,7 @@ function operationSlug(method, pathname) {
 }
 
 function operationFamily(pathname) {
+  if (pathname === "/api/admin/site-pages/seller") return "content";
   if (/\/hermes(?:\/|$)/.test(pathname)) return "hermes";
   if (/\/security\/|\/data-exports/.test(pathname)) return "security";
   if (/\/cases(?:\/|$)/.test(pathname)) return "cases";
@@ -274,6 +278,7 @@ function executionBoundary(pathname) {
     /\/(?:connections|integrations)(?:\/|$)/.test(pathname) ||
     pathname === "/api/admin/profile" ||
     pathname === "/api/admin/team" ||
+    pathname === "/api/admin/site-pages/seller" ||
     /\/media\/uploads(?:\/|$)/.test(pathname) ||
     /\/import$/.test(pathname)
   ) {
@@ -283,6 +288,7 @@ function executionBoundary(pathname) {
 }
 
 function browserUiPath(pathname) {
+  if (pathname === "/api/admin/site-pages/seller") return "/admin/site-pages/seller";
   if (/(?:\/connections|\/integrations)(?:\/|$)/.test(pathname)) return "/admin/connect";
   if (/\/security\/|\/data-exports/.test(pathname)) return "/admin/settings#settings-security";
   if (pathname === "/api/admin/profile") return "/admin/settings#owner-profile";
