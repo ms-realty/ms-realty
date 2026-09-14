@@ -20,6 +20,7 @@ import { VIEWING_TRIP_REQUEST_COLLECTION } from "./production/lib/viewing-trip-r
 import { REALTY_CASE_COLLECTIONS } from "./production/lib/realty-case-collections.mjs";
 import { DOCUMENT_COLLECTIONS } from "./production/lib/document-signatures.mjs";
 import { WORKSPACE_SETTINGS_COLLECTION } from "./production/lib/workspace-settings.mjs";
+import { SITE_PAGE_CONTENT_COLLECTIONS } from "./production/lib/site-page-content.mjs";
 import { enrichmentTaskForListing, searchOutboxEventForListing } from "./production/lib/cms-seed.mjs";
 import { payloadCmsImportContextEnabled } from "./production/lib/payload-cms-import.mjs";
 import {
@@ -405,6 +406,7 @@ export default buildConfig({
     locales,
     ...collections,
     ...DOCUMENT_COLLECTIONS,
+    ...SITE_PAGE_CONTENT_COLLECTIONS,
     ...caseCollectionsWithAccess,
     ...leadCollectionsWithAccess,
     funnelEventCollectionWithAccess,

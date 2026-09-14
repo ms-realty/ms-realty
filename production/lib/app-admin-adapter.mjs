@@ -46,6 +46,7 @@ import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperator
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamForbiddenPayload, renderAdminTeamPayload } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
+import { renderSitePageAdminResponse } from "./site-page-admin.mjs";
 import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -317,7 +318,7 @@ import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, required
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
 import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
 import { renderAdminDocumentRecordsPayload } from "./document-records.mjs";
-import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
+import { createHermesListingCopyDraft, readHermesListingCopySource } from "./listing-copy-drafts.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
@@ -867,21 +868,26 @@ function calendarResponse(body) {
   });
 }
 
-async function readRequestBody(request, maxBodyBytes) {
-  if (!request.body) return "";
+async function readRequestBytes(request, maxBodyBytes) {
+  if (!request.body) return new Uint8Array();
   const reader = request.body.getReader();
   const chunks = [];
   let total = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    total += value.byteLength;
-    if (total > maxBodyBytes) {
-      const error = new Error("Request body too large");
-      error.status = 413;
-      throw error;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBodyBytes) {
+        await reader.cancel().catch(() => {});
+        const error = new Error("Request body too large");
+        error.status = 413;
+        throw error;
+      }
+      chunks.push(value);
     }
-    chunks.push(value);
+  } finally {
+    reader.releaseLock();
   }
   const bytes = new Uint8Array(total);
   let offset = 0;
@@ -889,7 +895,11 @@ async function readRequestBody(request, maxBodyBytes) {
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return new TextDecoder().decode(bytes);
+  return bytes;
+}
+
+async function readRequestBody(request, maxBodyBytes) {
+  return new TextDecoder().decode(await readRequestBytes(request, maxBodyBytes));
 }
 
 function parseJsonBody(body) {
@@ -4489,6 +4499,15 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     ) {
       return adminForbidden("workspace:access");
     }
+    if (["/admin/site-pages/seller", "/api/admin/site-pages/seller"].includes(url.pathname)) {
+      return renderSitePageAdminResponse(request, {
+        config,
+        principal,
+        defaultInterfaceLocale: adminLocaleParam(url, config),
+        decoratePage: (page) => withOwnerProfile(withWorkspaceSettings(page, config), config),
+        parseInput: async () => parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+      });
+    }
     if (url.pathname === "/api/admin/profile") {
       const service = await payloadAdminAuth();
       if (!payloadSession || !service) return adminForbidden("payload_session");
@@ -5901,12 +5920,29 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/copy/draft") {
+      const input = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));
+      const readSource = config.runtimeDataDurableOnly === true
+        ? () => readHermesListingCopySource(input.listingId, {
+          env: config.payloadListingEnv || config.authEnv || process.env,
+          payload: config.payloadListingRuntime || null,
+          principal,
+        })
+        : null;
+      const seed = readSource ? await readSource() : currentSeed(config);
       return jsonResponse(
         201,
-        await createHermesListingCopyDraft(currentSeed(config), parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), {
+        await createHermesListingCopyDraft(seed, input, {
           auditLogPath: config.auditLogPath,
           provider: config.hermesListingCopyProvider || undefined,
           recordedAt: config.reviewedAt || config.editedAt,
+          assertSourceCurrent: readSource ? async (record) => {
+            const current = await readSource();
+            if (current.records[0].draft_revision !== record.draft_revision || current.records[0].source_locale !== record.source_locale) {
+              throw Object.assign(new Error("This listing source changed while Hermes was drafting. Reload it before requesting another draft."), {
+                status: 409, code: "listing_draft_conflict",
+              });
+            }
+          } : null,
         }),
       );
     }
@@ -6004,7 +6040,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       }
       if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
       const uploaded = await handleAdminMediaUpload({
-        bytes: Buffer.from(await request.arrayBuffer()),
+        bytes: Buffer.from(await readRequestBytes(request, Math.min(uploadLimits.maxRequestBytes, config.maxBodyBytes ?? uploadLimits.maxRequestBytes))),
         contentType: request.headers.get("content-type") || "",
         acceptsHtml: acceptsHtmlResponse(request.headers.get("accept")),
         seed: await currentMediaSeed(config),

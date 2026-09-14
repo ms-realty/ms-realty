@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 115,
-    "admin_methods": 135,
-    "admin_pages": 23,
+    "admin_route_files": 116,
+    "admin_methods": 137,
+    "admin_pages": 24,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 161,
-    "structurally_covered_workflows": 161,
+    "authorized_workflows": 164,
+    "structurally_covered_workflows": 164,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -168,6 +168,15 @@
       "path": "/admin/approved-content",
       "icon": "check-circle-2",
       "kind": "admin_approved_content_review",
+      "capability": "content:read",
+      "declared_entrypoint": "signed_in_admin_ui"
+    },
+    {
+      "id": "seller_page",
+      "group": "cms",
+      "path": "/admin/site-pages/seller",
+      "icon": "file-text",
+      "kind": "admin_site_page",
       "capability": "content:read",
       "declared_entrypoint": "signed_in_admin_ui"
     },
@@ -1200,6 +1209,24 @@
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/signature-requests/route.js",
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_site_pages_seller",
+      "method": "GET",
+      "pathname": "/api/admin/site-pages/seller",
+      "family": "content",
+      "tool": "ms_realty_admin_read",
+      "capability": "content:read",
+      "read_only": true,
+      "sensitive": false,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "browser_session",
+      "ui_path": "/admin/site-pages/seller",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/site-pages/seller/route.js",
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_get_tasks",
@@ -3064,6 +3091,35 @@
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/signature-requests/[requestId]/status/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_site_pages_seller",
+      "method": "POST",
+      "pathname": "/api/admin/site-pages/seller",
+      "family": "content",
+      "tool": "ms_realty_admin_write",
+      "capability": "content:read",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "browser_session",
+      "ui_path": "/admin/site-pages/seller",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/site-pages/seller/route.js",
+      "declared_entrypoint": "admin_ui_and_signed_in_webmcp_open"
     },
     {
       "operation": "admin_post_social_marketing_publish",

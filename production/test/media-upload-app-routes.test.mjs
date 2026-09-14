@@ -138,6 +138,35 @@ test("the admin adapter stores an upload unreviewed and refuses a renamed text f
   assert.deepEqual(Buffer.from(await preview.arrayBuffer()), expected.bytes);
 });
 
+test("the admin adapter stops consuming chunked uploads at the lower body limit", async () => {
+  for (const [maxBodyBytes, maxRequestBytes] of [[100, 16], [16, 100]]) {
+    let chunksRead = 0;
+    let cancelled = false;
+    const body = new ReadableStream({
+      pull(controller) {
+        chunksRead += 1;
+        controller.enqueue(new Uint8Array(9));
+        if (chunksRead === 4) controller.close();
+      },
+      cancel() { cancelled = true; },
+    }, { highWaterMark: 0 });
+    const config = {
+      ...appAdminConfigFromEnv({}),
+      adminPrincipal: { id: "operations_lead", source: "credential_registry", can_mutate: true, roles: ["admin"] },
+      maxBodyBytes,
+      mediaUploadLimits: { maxRequestBytes, maxFileBytes: 8, maxFiles: 1 },
+    };
+    const response = await renderAppAdminResponse(
+      uploadRequest("http://localhost/api/admin/media/uploads", { body, contentType: "application/octet-stream" }),
+      { config },
+    );
+    assert.equal(response.status, 413);
+    assert.equal((await response.json()).kind, "request_too_large");
+    assert.equal(cancelled, true);
+    assert.equal(chunksRead, 2);
+  }
+});
+
 test("the admin adapter uses the durable media authority without falling back to the upload ledger", async () => {
   const context = scratch();
   const runtime = durablePayloadRuntime();
