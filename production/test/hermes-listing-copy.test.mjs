@@ -7,6 +7,10 @@ import { fileURLToPath } from "node:url";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readAuditLog } from "../lib/audit-log.mjs";
 import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
+import { renderAdminListingEditorPayload } from "../lib/admin-payloads.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { renderReactAdminBody } from "../lib/react-admin-site.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 
 // Hermes could draft a translation and a reply. It could not draft the listing's
 // own words, which is the value a broker rewrites most often. The affordance is
@@ -42,6 +46,26 @@ const draft = (app, body) =>
   dispatchHttp(app, { method: "POST", url: "/api/admin/listings/copy/draft", headers: AUTH, body: JSON.stringify(body) });
 
 const body = (res) => (typeof res.body === "string" ? JSON.parse(res.body) : res.body);
+
+test("durable listing editor buttons bind every assisted field to its rendered revision", () => {
+  const seed = structuredClone(loadCmsSeed());
+  seed.records = seed.records.filter((row) => row.id === LISTING).map((row) => ({ ...row, draft_revision: "a".repeat(64) }));
+  const registry = loadLocaleRegistry();
+  for (const tab of ["facts", "seo", "media"]) {
+    const page = renderAdminListingEditorPayload(registry, "en", seed, LISTING, [], [], [], null, { tab });
+    page.runtime_data_mode = "durable_only";
+    const html = renderReactAdminBody(page);
+    const buttons = [...html.matchAll(/<button[^>]*data-hermes-assist="true"[^>]*>/g)].map((match) => match[0]);
+    assert.ok(buttons.length, tab);
+    for (const button of buttons) {
+      assert.match(button, new RegExp(`data-hermes-assist-revision="${"a".repeat(64)}"`));
+      assert.match(button, /data-hermes-assist-require-revision="true"/);
+      assert.match(button, /data-hermes-assist-source-changed="[^"]+"/);
+      assert.match(button, /data-hermes-assist-stale="[^"]+"/);
+      assert.match(button, /data-hermes-assist-save-source="[^"]+"/);
+    }
+  }
+});
 
 test("a description is drafted from the listing's own approved facts", async () => {
   let seen = null;

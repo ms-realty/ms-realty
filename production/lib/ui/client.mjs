@@ -3810,12 +3810,71 @@ ${ADMIN_DAILY_JS}
       var pending = button.getAttribute("data-hermes-assist-pending") || "Drafting…";
       var failure = button.getAttribute("data-hermes-assist-failure") || "Could not draft this.";
       var unavailable = button.getAttribute("data-hermes-assist-unavailable") || failure;
+      var listingCopy = button.getAttribute("data-hermes-assist-endpoint") === "/api/admin/listings/copy/draft";
+      var generationText = target.value;
+      var generationForm = target.form || null;
+      var generationState = listingCopy && generationForm ? editorFormState(generationForm) : null;
+      var generationListing = button.getAttribute("data-hermes-assist-listing");
+      var generationField = button.getAttribute("data-hermes-assist-field");
+      var generationLocale = button.getAttribute("data-hermes-assist-locale");
+      function currentSourceRevision() {
+        var revision = generationForm && generationForm.querySelector('[name="draftRevision"]');
+        return revision ? revision.value : button.getAttribute("data-hermes-assist-revision") || "";
+      }
+      var generationRevision = currentSourceRevision();
+      var requireRevision = button.getAttribute("data-hermes-assist-require-revision") === "true" || Boolean(generationRevision);
+      var staleMessage = button.getAttribute("data-hermes-assist-stale") || "Your edits have changed. Request a new draft and review it before use.";
+      var sourceChangedMessage = button.getAttribute("data-hermes-assist-source-changed") || "This draft does not match the current listing. Keep your edits and reload the listing before requesting a new draft.";
+      function editsMatchGeneration() {
+        return target.value === generationText && (!generationForm || editorFormState(generationForm) === generationState);
+      }
+      function otherListingFieldsSaved() {
+        var saved = generationForm && generationForm.getAttribute("data-editor-initial-state");
+        if (!saved) return true;
+        try {
+          var sourceFields = function (state) {
+            return JSON.stringify(JSON.parse(state).filter(function (field) { return field[0] !== target.name; }));
+          };
+          return sourceFields(saved) === sourceFields(generationState);
+        } catch (error) {
+          return false;
+        }
+      }
+      // A proposal belongs to the source and form captured before the async
+      // request. A second Apply click cannot make an old proposal current.
+      function listingSourceError(draft) {
+        if (!listingCopy) return "";
+        var source = draft.source_snapshot;
+        var listing = generationForm && generationForm.querySelector('[name="listingId"]');
+        if (!generationListing || !source || source.listing_id !== generationListing || draft.listing_id !== generationListing
+          || draft.field !== generationField || draft.locale !== generationLocale
+          || button.getAttribute("data-hermes-assist-listing") !== generationListing
+          || button.getAttribute("data-hermes-assist-field") !== generationField
+          || button.getAttribute("data-hermes-assist-locale") !== generationLocale
+          || (listing && listing.value !== generationListing) || target.form !== generationForm
+          || document.getElementById(button.getAttribute("data-hermes-assist-target") || "") !== target
+          || currentSourceRevision() !== generationRevision
+          || ((requireRevision || source.draft_revision) && (!/^[a-f0-9]{64}$/.test(generationRevision) || source.draft_revision !== generationRevision))) {
+          return sourceChangedMessage;
+        }
+        return editsMatchGeneration() ? "" : staleMessage;
+      }
       var previousProposal = host && host.querySelector("[data-hermes-proposal]");
       if (previousProposal) previousProposal.remove();
       if (host) host.removeAttribute("data-hermes-error");
       if (bar) {
         bar.hidden = true;
         bar.removeAttribute("data-hermes-drafted-state");
+      }
+      if (listingCopy && !otherListingFieldsSaved()) {
+        var saveSourceMessage = button.getAttribute("data-hermes-assist-save-source") || "Save your other listing changes before requesting a draft. Your current text will be kept.";
+        if (host) host.setAttribute("data-hermes-error", saveSourceMessage);
+        if (bar) {
+          bar.hidden = false;
+          bar.setAttribute("data-hermes-drafted-state", "error");
+          bar.textContent = saveSourceMessage;
+        }
+        return;
       }
       button.disabled = true;
       button.setAttribute("data-busy", "true");
@@ -3854,6 +3913,8 @@ ${ADMIN_DAILY_JS}
           if (typeof draft.text !== "string" || !draft.text.trim() || !approvalRequired || draft.can_publish === true || draft.can_send_without_approval === true) {
             throw new Error("invalid Hermes draft response");
           }
+          var sourceError = listingSourceError(draft);
+          if (sourceError) throw new Error(sourceError);
           if (!host || !bar) throw new Error("draft review unavailable");
           var proposal = document.createElement("div");
           proposal.className = "adm-hermes-proposal";
@@ -3891,7 +3952,17 @@ ${ADMIN_DAILY_JS}
           bar.hidden = false;
           host.appendChild(proposal);
           apply.addEventListener("click", function () {
-            if (target.disabled || target.readOnly) return;
+            if (apply.disabled || target.disabled || target.readOnly) return;
+            var sourceError = listingSourceError(draft);
+            if (sourceError) {
+              apply.disabled = true;
+              comparison[0].value = target.value;
+              host.setAttribute("data-hermes-error", sourceError);
+              bar.setAttribute("data-hermes-drafted-state", "error");
+              bar.textContent = sourceError;
+              button.focus();
+              return;
+            }
             if (target.value !== comparison[0].value) {
               comparison[0].value = target.value;
               bar.textContent = button.getAttribute("data-hermes-assist-changed") || "Your text has changed. Review the updated comparison before using this draft.";
