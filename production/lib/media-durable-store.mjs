@@ -315,32 +315,21 @@ async function findMediaDocument(runtime, { assetId, listingId = "", req = null 
     collection: MEDIA_ASSET_COLLECTION,
     depth: 0,
     draft: true,
-    limit: 0,
+    limit: 1,
     pagination: false,
     overrideAccess: true,
     req,
     where: { asset_id: { equals: requested } },
   });
-  let docs = Array.isArray(result?.docs) ? result.docs : [];
+  const docs = Array.isArray(result?.docs) ? result.docs : [];
+  const document = docs.find((doc) => assetIdForDocument(doc) === requested && (!listingId || String(doc.subject_id || "") === String(listingId)));
+  if (document || !listingId) return document || null;
   // Legacy imported media predates the stable asset_id field. It remains
-  // addressable by the deterministic mediaAssetId fallback until an operator
-  // next edits it, so a query on the new field must not hide those rows.
-  if (!docs.length) {
-    const all = await runtime.find({
-      collection: MEDIA_ASSET_COLLECTION,
-      depth: 0,
-      draft: true,
-      limit: 0,
-      pagination: false,
-      overrideAccess: true,
-      req,
-    });
-    docs = Array.isArray(all?.docs) ? all.docs : [];
-  }
-  return (
-    docs.find((doc) => assetIdForDocument(doc) === requested && (!listingId || String(doc.subject_id || "") === String(listingId))) ||
-    null
-  );
+  // addressable by its derived id, but only among this listing's attachments.
+  // These rows may also predate subject_id; the relation supplies their scope.
+  const listing = await findListing(runtime, listingId, req);
+  const attached = await listingMediaDocuments(runtime, listing, req);
+  return attached.find((doc) => assetIdForDocument(doc) === requested) || null;
 }
 
 function mediaDocumentForListing(docs, listing) {
@@ -350,6 +339,29 @@ function mediaDocumentForListing(docs, listing) {
     if (doc.subject_id && String(doc.subject_id) !== String(listing.id)) return false;
     return refs.has(relationId(doc.id));
   });
+}
+
+async function listingMediaDocuments(runtime, listing, req = null) {
+  const ids = relationIds(listing?.media);
+  if (!ids.length) return [];
+  const docs = [];
+  for (let page = 1; ; page += 1) {
+    const result = await runtime.find({
+      collection: MEDIA_ASSET_COLLECTION,
+      depth: 0,
+      draft: true,
+      limit: 100,
+      page,
+      pagination: true,
+      sort: "id",
+      overrideAccess: true,
+      req,
+      where: { id: { in: ids } },
+    });
+    docs.push(...(Array.isArray(result?.docs) ? result.docs : []));
+    if (!result.hasNextPage) break;
+  }
+  return mediaDocumentForListing(docs, listing);
 }
 
 async function findListing(runtime, listingId, req = null) {
@@ -419,12 +431,6 @@ async function cleanupStoredObjects(storage, keys) {
   } catch {
     return "failed";
   }
-}
-
-async function cleanupSafeRecord(storage, record) {
-  const keys = safeCompensationKeys(record);
-  if (keys.length) return cleanupStoredObjects(storage, keys);
-  return cleanupKeysForRecord(record).length ? "unknown" : "not_needed";
 }
 
 function persistenceFailure(error, cleanup) {
@@ -533,9 +539,9 @@ export async function persistMediaUploadDurably(
   try {
     runtime = await runtimePayload(payload, env);
   } catch (error) {
-    const cleanup = await cleanupSafeRecord(storage, record);
-    if (error instanceof MediaDurableStoreUnavailableError) throw persistenceFailure(error, cleanup);
-    throw persistenceFailure(error, cleanup);
+    // A retry writes the same key as an earlier committed upload. Without an
+    // authority read we cannot distinguish its bytes from a new orphan.
+    throw persistenceFailure(error, "unknown");
   }
 
   try {
@@ -1043,15 +1049,7 @@ export async function listMediaUploadsDurably({ payload = null, env = process.en
   const runtime = await runtimePayload(payload, env);
   const listingDoc = await findListing(runtime, listingId);
   if (!listingDoc) return { status: 404, body: { kind: "unknown_listing", message: "Known listingId is required" } };
-  const result = await runtime.find({
-    collection: MEDIA_ASSET_COLLECTION,
-    depth: 0,
-    draft: true,
-    limit: 0,
-    pagination: false,
-    overrideAccess: true,
-  });
-  const selected = mediaDocumentForListing(Array.isArray(result?.docs) ? result.docs : [], listingDoc);
+  const selected = await listingMediaDocuments(runtime, listingDoc);
   return {
     status: 200,
     body: {
@@ -1073,7 +1071,7 @@ export async function readMediaUploadBytesDurably({ payload = null, env = proces
     collection: MEDIA_ASSET_COLLECTION,
     depth: 0,
     draft: true,
-    limit: 0,
+    limit: 1,
     pagination: false,
     overrideAccess: true,
     where: { asset_id: { equals: requested } },

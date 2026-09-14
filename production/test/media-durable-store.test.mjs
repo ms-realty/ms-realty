@@ -14,7 +14,7 @@ import {
   persistMediaUploadDurably,
   readMediaUploadBytesDurably,
 } from "../lib/media-durable-store.mjs";
-import { createMediaReview } from "../lib/media-reviews.mjs";
+import { createMediaReview, mediaAssetId } from "../lib/media-reviews.mjs";
 import { projectListingDraftSeed } from "../lib/listing-draft-service.mjs";
 import { handleAdminMediaUpload } from "../lib/media-upload-routes.mjs";
 import { readMediaUploads } from "../lib/media-uploads.mjs";
@@ -169,6 +169,33 @@ function rawMedia(harness, assetId) {
   return harness.currentRows().media_assets.find((row) => row.asset_id === assetId);
 }
 
+function paginatedMediaRuntime(harness) {
+  const find = harness.payload.find;
+  const matches = (row, where) => Object.entries(where || {}).every(([field, condition]) => {
+    if (field === "and") return condition.every((part) => matches(row, part));
+    if (field === "or") return condition.some((part) => matches(row, part));
+    if (Object.hasOwn(condition, "equals")) return String(row[field] ?? "") === String(condition.equals);
+    if (condition.in) return condition.in.map(String).includes(String(row[field]));
+    throw new Error(`Unsupported fixture query: ${field}`);
+  });
+  harness.payload.find = async (options) => {
+    const result = await find(options);
+    if (options.collection !== "media_assets") return result;
+    assert.ok(options.where, "The database refuses unscoped media scans");
+    assert.ok(options.limit > 0 && options.limit <= 100, "Media reads must have a bounded page size");
+    const rows = result.docs.filter((row) => matches(row, options.where));
+    const page = options.page || 1;
+    const totalPages = Math.max(1, Math.ceil(rows.length / options.limit));
+    return {
+      docs: rows.slice((page - 1) * options.limit, page * options.limit),
+      page,
+      totalPages,
+      hasNextPage: page < totalPages,
+    };
+  };
+  return harness;
+}
+
 test("durable media schema and migration retain identity, storage, lineage, and review audit fields", () => {
   const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-collections.json"), "utf8"));
   const media = manifest.collections.find((collection) => collection.slug === "media_assets");
@@ -276,6 +303,58 @@ test("durable listing uploads commit Payload metadata, attach atomically, and re
   assert.equal(projectedAsset.is_public, false);
   assert.equal(projectedAsset.review_status, "review_required");
   assert.equal(Object.hasOwn(projectedAsset, "storage_key"), false);
+});
+
+test("listing media reads stay scoped and return every page of legacy attachments", async () => {
+  const seed = focusedSeed();
+  const listing = listingFor(seed);
+  listing.media = Array.from({ length: 203 }, (_, index) => ({
+    url: `https://makler-realty.com/wp-content/uploads/2026/09/scoped-${index}.jpg`,
+    kind: "photo",
+    review_status: "review_required",
+    is_public: false,
+  }));
+  seed.records.push({ ...clone(listing), id: "MS-99999", media: [{ ...listing.media[0], url: "https://makler-realty.com/wp-content/uploads/2026/09/unrelated.jpg" }] });
+  const harness = paginatedMediaRuntime(runtimeHarness(seed));
+
+  const listed = await listMediaUploadsDurably({ payload: harness.payload, listing: LISTING_ID });
+  assert.equal(listed.status, 200);
+  assert.equal(listed.body.uploads.length, 203);
+  assert.equal(new Set(listed.body.uploads.map((row) => row.asset_id)).size, 203);
+  assert.ok(listed.body.uploads.every((row) => row.source_url.includes("/scoped-")));
+});
+
+test("new uploads and legacy media review work without catalogue scans", async () => {
+  const seed = focusedSeed();
+  const listing = listingFor(seed);
+  listing.media = Array.from({ length: 101 }, (_, index) => ({
+    url: `https://makler-realty.com/wp-content/uploads/2026/09/legacy-${index}.jpg`,
+    kind: "photo",
+    review_status: "review_required",
+    is_public: false,
+  }));
+  const harness = paginatedMediaRuntime(runtimeHarness(seed));
+  const { storage, objects } = storageHarness();
+  const record = uploadRecord("new-scoped-upload");
+  objects.set(record.storage_key, Buffer.from("new-scoped-photo"));
+  const uploaded = await persistMediaUploadDurably(record, { payload: harness.payload, principal: EDITOR, storage });
+  const preview = await readMediaUploadBytesDurably({ payload: harness.payload, assetId: uploaded.asset_id, storage });
+  assert.equal(preview.status, 200);
+  assert.deepEqual(preview.body, Buffer.from("new-scoped-photo"));
+
+  const review = createMediaReview(seed, {
+    listingId: LISTING_ID,
+    assetId: mediaAssetId(listing.media.at(-1)),
+    decision: "keep_private",
+    reviewer: EDITOR.id,
+    reviewConfirmed: true,
+  });
+  const reviewed = await persistMediaReviewDurably(review, { payload: harness.payload, principal: EDITOR, storage });
+  assert.equal(reviewed.asset_id, review.asset_id);
+  assert.equal(reviewed.is_public, false);
+  const listed = await listMediaUploadsDurably({ payload: harness.payload, listing: LISTING_ID });
+  assert.equal(listed.body.uploads.length, 102);
+  assert.equal(listed.body.uploads.find((row) => row.asset_id === reviewed.asset_id).review_status, "reviewed_private");
 });
 
 test("durable media review promotes private bytes and rendition, persists publication, and is idempotent", async () => {
@@ -514,6 +593,32 @@ test("retry reconciles staged bytes after a committed publish cleanup failure", 
   assert.equal(retry.idempotent, true);
   assert.equal(objects.has(committed.storage_key), true);
   assert.equal(objects.has(record.storage_key), false);
+});
+
+test("a committed upload survives a retry while Payload initialization is unavailable", async () => {
+  const harness = runtimeHarness();
+  const { storage, objects } = storageHarness();
+  const record = uploadRecord("retry-initialization-failure", { withRendition: true });
+  objects.set(record.storage_key, Buffer.from("committed-photo"));
+  objects.set(record.rendition.storage_key, Buffer.from("committed-thumbnail"));
+  const first = await persistMediaUploadDurably(record, { payload: harness.payload, principal: EDITOR, storage });
+
+  const unavailablePayload = {
+    get db() { throw new Error("Payload initialization unavailable"); },
+  };
+  await assert.rejects(
+    persistMediaUploadDurably(record, { payload: unavailablePayload, principal: EDITOR, storage }),
+    (error) => error.code === "media_persistence_failed" && error.storageCleanup === "unknown" && error.orphanedStorage === true,
+  );
+
+  for (const [rendition, expected] of [["", "committed-photo"], ["thumb", "committed-thumbnail"]]) {
+    const preview = await readMediaUploadBytesDurably({ payload: harness.payload, assetId: first.asset_id, rendition, storage });
+    assert.equal(preview.status, 200);
+    assert.deepEqual(preview.body, Buffer.from(expected));
+  }
+  const retry = await persistMediaUploadDurably(record, { payload: harness.payload, principal: EDITOR, storage });
+  assert.equal(retry.idempotent, true);
+  assert.equal(retry.asset_id, first.asset_id);
 });
 
 test("durable media mutations enforce operator roles and report orphan cleanup explicitly", async () => {

@@ -867,21 +867,26 @@ function calendarResponse(body) {
   });
 }
 
-async function readRequestBody(request, maxBodyBytes) {
-  if (!request.body) return "";
+async function readRequestBytes(request, maxBodyBytes) {
+  if (!request.body) return new Uint8Array();
   const reader = request.body.getReader();
   const chunks = [];
   let total = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    total += value.byteLength;
-    if (total > maxBodyBytes) {
-      const error = new Error("Request body too large");
-      error.status = 413;
-      throw error;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBodyBytes) {
+        await reader.cancel().catch(() => {});
+        const error = new Error("Request body too large");
+        error.status = 413;
+        throw error;
+      }
+      chunks.push(value);
     }
-    chunks.push(value);
+  } finally {
+    reader.releaseLock();
   }
   const bytes = new Uint8Array(total);
   let offset = 0;
@@ -889,7 +894,11 @@ async function readRequestBody(request, maxBodyBytes) {
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return new TextDecoder().decode(bytes);
+  return bytes;
+}
+
+async function readRequestBody(request, maxBodyBytes) {
+  return new TextDecoder().decode(await readRequestBytes(request, maxBodyBytes));
 }
 
 function parseJsonBody(body) {
@@ -6004,7 +6013,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       }
       if (request.method !== "POST") return jsonResponse(405, { kind: "method_not_allowed" });
       const uploaded = await handleAdminMediaUpload({
-        bytes: Buffer.from(await request.arrayBuffer()),
+        bytes: Buffer.from(await readRequestBytes(request, Math.min(uploadLimits.maxRequestBytes, config.maxBodyBytes ?? uploadLimits.maxRequestBytes))),
         contentType: request.headers.get("content-type") || "",
         acceptsHtml: acceptsHtmlResponse(request.headers.get("accept")),
         seed: await currentMediaSeed(config),
