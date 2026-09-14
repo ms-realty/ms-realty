@@ -117,6 +117,36 @@ export async function exerciseSellerPageBrowser({ payload, chromium }) {
     assert.match(await publicPage.locator("body").innerText(), new RegExp(copy.intro));
     await publicPage.close();
 
+    // English previously ignored the selected h1/intro even while its public
+    // headers acknowledged the new revision. Exercise both visible surfaces.
+    await page.goto(`${origin}/admin/site-pages/seller?locale=en&contentLocale=en`);
+    assert.equal(await page.locator("#site-page-h1").inputValue(), "Your property. Let’s talk about what’s next.");
+    const english = { title: "English browser title", description: "English browser search description", h1: "English browser sentinel heading", intro: "English browser sentinel introduction." };
+    for (const [name, value] of Object.entries(english)) await page.locator(`#site-page-${name}`).fill(value);
+    await Promise.all([page.waitForURL(/saved=1/), save.click()]);
+    const englishPopup = context.waitForEvent("page");
+    await page.getByRole("link", { name: "Preview saved draft" }).click();
+    const englishPreview = await englishPopup;
+    await englishPreview.waitForLoadState();
+    assert.equal(await englishPreview.getByRole("heading", { name: english.h1, exact: true }).count(), 1);
+    assert.match(await englishPreview.locator("body").innerText(), new RegExp(english.intro));
+    await englishPreview.close();
+    await Promise.all([page.waitForEvent("load"), page.getByRole("button", { name: "Send for review", exact: true }).click()]);
+    await page.getByLabel("Sources checked during review", { exact: true }).fill("Reviewed Bulgarian seller-page source");
+    await page.getByLabel("I checked the text and its factual claims against these sources.", { exact: true }).check();
+    await page.getByLabel("I checked this translation against the current Bulgarian text.", { exact: true }).check();
+    await Promise.all([page.waitForEvent("load"), page.getByRole("button", { name: "Approve reviewed text", exact: true }).click()]);
+    await page.getByLabel("Publish this exact reviewed text on the website.", { exact: true }).check();
+    await Promise.all([page.waitForEvent("load"), page.getByRole("button", { name: "Publish page", exact: true }).click()]);
+    const englishPublished = await cms.readPublished({ locale: "en" });
+    const englishPublic = await context.newPage();
+    const englishResponse = await englishPublic.goto(`${origin}${sellerPath(loadLocaleRegistry(), "en")}`);
+    assert.equal(englishResponse.headers()["x-ms-site-page-revision"], englishPublished.revision_id);
+    assert.equal(await englishPublic.getByRole("heading", { name: english.h1, exact: true }).count(), 1);
+    assert.match(await englishPublic.locator("body").innerText(), new RegExp(english.intro));
+    await englishPublic.close();
+    await page.goto(editorUrl);
+
     // Another editor saves while this form stays open. It must retain the local
     // text and show the conflict instead of rebasing or overwriting silently.
     await page.locator("#site-page-h1").fill("Моят незапазен текст");

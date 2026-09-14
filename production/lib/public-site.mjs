@@ -1935,7 +1935,8 @@ const SELLER_COPY = {
   en: {
     title: "Sell your property with MS Realty",
     description: "Request a broker valuation and follow-up from the MS Realty team.",
-    h1: "Sell your property",
+    h1: "Your property.\nLet’s talk about what’s next.",
+    intro: "Thinking of selling in Sandanski or the region? Start with a few details about your property.",
     form_unavailable: "The form is temporarily unavailable. Call or message us instead. We reply quickly.",
     photos_title: "Add photos",
     photos_intro: "Photos let the broker prepare the valuation before the visit.",
@@ -4838,7 +4839,7 @@ export function renderLocationPage({ registry, localeCode, location, listings, a
 
 export function sellerPageBaselineContent(localeCode) {
   const copy = sellerCopy(localeCode);
-  return { title: copy.title, description: copy.description, h1: copy.h1, intro: copy.description };
+  return { title: copy.title, description: copy.description, h1: copy.h1.replaceAll("\n", " "), intro: copy.intro || copy.description };
 }
 
 // Callers supply only a verified publication or an authenticated private preview.
@@ -4888,7 +4889,7 @@ export function renderSellerPage({
     }),
     body: {
       h1: copy.h1,
-      intro: copy.description,
+      intro: copy.intro || copy.description,
       contact_channels: {
         phone: { href: `tel:${BRAND_CONTACT.phone}`, label: BRAND_CONTACT.phone_display },
         whatsapp: { href: BRAND_CONTACT.whatsapp, label: "WhatsApp" },

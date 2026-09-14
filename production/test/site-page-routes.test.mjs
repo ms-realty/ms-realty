@@ -131,3 +131,29 @@ test("unconfigured seller routes keep approved baseline and route wrappers use e
   assert.equal((await admin.GET(new Request(`https://example.test${editorPath}`, { headers: { accept: "text/html" } }))).status, 303);
   assert.equal((await apiRoute.POST(new Request(`https://example.test${api}`, { method: "POST", body: "{}" }))).status, 401);
 });
+
+test("English preview and public HTML render the exact selected copy and preserve the unpublished baseline", async () => {
+  const f = fixture();
+  const baseline = await (await f.publicPage("en")).text();
+  assert.match(baseline, /Your property\.<br>Let’s talk about what’s next\./);
+  assert.match(baseline, /Thinking of selling in Sandanski or the region\?/);
+  async function publish(draft, translation = false) {
+    const review = await f.mutate({ action: "submit", ...selected(draft) }, translation ? "translator" : "editor");
+    const approved = await f.mutate({ action: "approve", ...selected(review), contentReviewed: true, translationReviewed: translation, evidenceRefs: "Reviewed seller-page source" });
+    return f.mutate({ action: "publish", ...selected(approved), confirm: true }, "admin");
+  }
+  const bg = await publish(await f.mutate({ action: "save", expectedVersion: 0, ...copy }));
+  const english = { title: "English reviewed title", description: "English reviewed search description", h1: "English approved sentinel heading", intro: "English approved sentinel introduction." };
+  const draft = await f.mutate({ action: "save", contentLocale: "en", expectedVersion: bg.version, sourceRevisionId: bg.published.revision_id, ...english }, "translator");
+  assert.equal(await (await f.publicPage("en")).text(), baseline, "an unpublished English draft cannot replace the approved baseline");
+  const previewUrl = `/admin/site-pages/seller?${new URLSearchParams({ ...selected(draft), preview: "1", locale: "en" })}`;
+  const preview = await f.request(previewUrl);
+  assert.equal(preview.status, 200);
+  assert.match(await preview.text(), /<h1>English approved sentinel heading<\/h1>[\s\S]*English approved sentinel introduction\./);
+  const live = await publish(draft, true);
+  const response = await f.publicPage("en");
+  assert.equal(response.headers.get("x-ms-site-page-revision"), live.published.revision_id);
+  const html = await response.text();
+  assert.match(html, /<h1>English approved sentinel heading<\/h1>[\s\S]*English approved sentinel introduction\./);
+  assert.doesNotMatch(html, /Your property\.<br>Let’s talk about what’s next\./);
+});
