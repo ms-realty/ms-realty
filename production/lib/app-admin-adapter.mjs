@@ -317,7 +317,7 @@ import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, required
 import { renderAdminLocaleRolloutPayload } from "./locale-admin.mjs";
 import { renderAdminMediaLibraryPayload } from "./media-library.mjs";
 import { renderAdminDocumentRecordsPayload } from "./document-records.mjs";
-import { createHermesListingCopyDraft } from "./listing-copy-drafts.mjs";
+import { createHermesListingCopyDraft, readHermesListingCopySource } from "./listing-copy-drafts.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
@@ -5910,12 +5910,29 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/copy/draft") {
+      const input = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));
+      const readSource = config.runtimeDataDurableOnly === true
+        ? () => readHermesListingCopySource(input.listingId, {
+          env: config.payloadListingEnv || config.authEnv || process.env,
+          payload: config.payloadListingRuntime || null,
+          principal,
+        })
+        : null;
+      const seed = readSource ? await readSource() : currentSeed(config);
       return jsonResponse(
         201,
-        await createHermesListingCopyDraft(currentSeed(config), parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), {
+        await createHermesListingCopyDraft(seed, input, {
           auditLogPath: config.auditLogPath,
           provider: config.hermesListingCopyProvider || undefined,
           recordedAt: config.reviewedAt || config.editedAt,
+          assertSourceCurrent: readSource ? async (record) => {
+            const current = await readSource();
+            if (current.records[0].draft_revision !== record.draft_revision) {
+              throw Object.assign(new Error("This listing or its shared property changed while Hermes was drafting. Reload it before requesting another draft."), {
+                status: 409, code: "listing_draft_conflict",
+              });
+            }
+          } : null,
         }),
       );
     }
