@@ -32,6 +32,7 @@ import * as migration_20260901_130000_provider_connection_workspace_scope from '
 import * as migration_20260909_120000_source_stated_price_search_view from './20260909_120000_source_stated_price_search_view';
 
 import * as migration_20260909_140000_listing_lot_identity from './20260909_140000_listing_lot_identity';
+import * as migration_20260914_120000_site_page_content from './20260914_120000_site_page_content';
 
 export const migrations = [
   {
@@ -198,5 +199,10 @@ export const migrations = [
     up: migration_20260909_140000_listing_lot_identity.up,
     down: migration_20260909_140000_listing_lot_identity.down,
     name: '20260909_140000_listing_lot_identity',
+  },
+  {
+    up: migration_20260914_120000_site_page_content.up,
+    down: migration_20260914_120000_site_page_content.down,
+    name: '20260914_120000_site_page_content',
   },
 ];
