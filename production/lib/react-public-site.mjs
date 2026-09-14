@@ -2810,6 +2810,7 @@ function SearchBody({ page }) {
       id: "main",
       tabIndex: -1,
       "data-kind": "search",
+      className: "sr-page",
       "data-react-public-ui": "search",
       "data-atlas-public": "search",
       "data-total-matches": page.search.total_matches,
