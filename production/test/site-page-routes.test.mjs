@@ -44,6 +44,10 @@ test("seller routes retain session, role, CSRF, second-factor and bounded-body c
   for (const role of ["broker", "translator", "agent"]) assert.equal((await f.request(api, { role, input })).status, 403);
   assert.equal((await f.request(api, { input, headers: { origin: "https://foreign.test", host: "example.test" } })).status, 403);
   assert.equal((await f.request(api, { input, headers: { "sec-fetch-site": "cross-site", origin: "https://foreign.test", host: "example.test" } })).status, 403);
+  const opaque = await f.request(api, { role: "admin", method: "POST", body: new URLSearchParams({ action: "save", expectedVersion: "0", ...copy }),
+    headers: { "content-type": "application/x-www-form-urlencoded", origin: "null", "sec-fetch-site": "cross-site", host: "example.test" } });
+  assert.equal(opaque.status, 403, "ambient authorized credentials cannot admit an opaque cross-site form");
+  assert.equal(f.payload.rows.site_page_revisions.length, 0);
   f.config.maxBodyBytes = 10;
   assert.equal((await f.request(api, { input })).status, 413);
   f.config.maxBodyBytes = 65536;

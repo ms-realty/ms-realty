@@ -14,6 +14,22 @@ test("non-browser clients pass: no Origin and no Sec-Fetch-Site cannot be CSRF'd
   assert.equal(crossOriginWriteRejection("POST", HOST), null);
 });
 
+test("unsafe requests reject opaque origins and explicit cross-site evidence", () => {
+  for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+    for (const fetchSite of [undefined, "none", "same-origin", "same-site", "cross-site"]) {
+      const headers = { ...HOST, origin: "null", ...(fetchSite ? { "sec-fetch-site": fetchSite } : {}) };
+      assert.equal(crossOriginWriteRejection(method, headers), "opaque_origin", `${method}/${fetchSite}`);
+    }
+    assert.equal(crossOriginWriteRejection(method, { ...HOST, "sec-fetch-site": "cross-site" }), "cross_site_request");
+    assert.equal(crossOriginWriteRejection(method, { ...HOST, origin: "https://review.ms-realty.example", "sec-fetch-site": "cross-site" }), "cross_site_request");
+    assert.equal(crossOriginWriteRejection(method, HOST), null, "ordinary server clients keep their existing contract");
+    assert.equal(crossOriginWriteRejection(method, { ...HOST, "sec-fetch-site": "same-origin" }), null);
+  }
+  for (const method of ["GET", "HEAD", "OPTIONS"]) {
+    assert.equal(crossOriginWriteRejection(method, { ...HOST, origin: "null", "sec-fetch-site": "cross-site" }), null);
+  }
+});
+
 test("same-origin browser writes pass", () => {
   assert.equal(
     crossOriginWriteRejection("POST", { ...HOST, origin: "https://review.ms-realty.example", "sec-fetch-site": "same-origin" }),

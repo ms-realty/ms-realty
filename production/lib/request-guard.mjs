@@ -79,7 +79,9 @@ export function crossOriginWriteRejection(method, headers, { env = process.env }
   const fetchSite = readHeader(headers, "sec-fetch-site").trim().toLowerCase();
   const origin = readHeader(headers, "origin").trim();
   // Some browsers send `Origin: null` for sandboxed/opaque contexts.
-  if (!origin || origin.toLowerCase() === "null") return fetchSite ? null : origin ? "opaque_origin" : null;
+  if (origin.toLowerCase() === "null") return "opaque_origin";
+  if (fetchSite === "cross-site") return "cross_site_request";
+  if (!origin) return fetchSite && !SAME_SITE_VALUES.has(fetchSite) ? "cross_site_request" : null;
 
   let originHost;
   try {
