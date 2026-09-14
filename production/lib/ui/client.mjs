@@ -3817,6 +3817,7 @@ ${ADMIN_DAILY_JS}
       var generationListing = button.getAttribute("data-hermes-assist-listing");
       var generationField = button.getAttribute("data-hermes-assist-field");
       var generationLocale = button.getAttribute("data-hermes-assist-locale");
+      var generationSourceLocale = button.getAttribute("data-hermes-assist-source-locale");
       function currentSourceRevision() {
         var revision = generationForm && generationForm.querySelector('[name="draftRevision"]');
         return revision ? revision.value : button.getAttribute("data-hermes-assist-revision") || "";
@@ -3848,9 +3849,11 @@ ${ADMIN_DAILY_JS}
         var listing = generationForm && generationForm.querySelector('[name="listingId"]');
         if (!generationListing || !source || source.listing_id !== generationListing || draft.listing_id !== generationListing
           || draft.field !== generationField || draft.locale !== generationLocale
+          || !generationSourceLocale || source.source_locale !== generationSourceLocale
           || button.getAttribute("data-hermes-assist-listing") !== generationListing
           || button.getAttribute("data-hermes-assist-field") !== generationField
           || button.getAttribute("data-hermes-assist-locale") !== generationLocale
+          || button.getAttribute("data-hermes-assist-source-locale") !== generationSourceLocale
           || (listing && listing.value !== generationListing) || target.form !== generationForm
           || document.getElementById(button.getAttribute("data-hermes-assist-target") || "") !== target
           || currentSourceRevision() !== generationRevision

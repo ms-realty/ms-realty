@@ -60,6 +60,7 @@ test("durable listing editor buttons bind every assisted field to its rendered r
     for (const button of buttons) {
       assert.match(button, new RegExp(`data-hermes-assist-revision="${"a".repeat(64)}"`));
       assert.match(button, /data-hermes-assist-require-revision="true"/);
+      assert.match(button, /data-hermes-assist-source-locale="bg"/);
       assert.match(button, /data-hermes-assist-source-changed="[^"]+"/);
       assert.match(button, /data-hermes-assist-stale="[^"]+"/);
       assert.match(button, /data-hermes-assist-save-source="[^"]+"/);

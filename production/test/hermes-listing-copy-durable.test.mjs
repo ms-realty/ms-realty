@@ -109,6 +109,33 @@ test("a shared-property edit during generation rejects the stale draft before re
   assert.equal(runtime.payload.calls.update.length, 0);
 });
 
+test("a linked locale code edit during generation rejects the draft even when the save revision is unchanged", async () => {
+  const runtime = currentSource();
+  const before = runtime.currentRows();
+  const revision = listingDraftRevision(before.listings[0], before.properties[0]);
+  const read = runtime.payload.findByID.bind(runtime.payload);
+  let changed = false;
+  let calls = 0;
+  runtime.payload.findByID = async (input) => {
+    const document = await read(input);
+    if (changed && input.collection === "locales") document.code = "fr";
+    return document;
+  };
+  const response = await requestDraft(runtime, async () => {
+    calls += 1;
+    changed = true;
+    return { text: "Имот с площ 92 кв.м. и 3 спални. Цена 860 евро.", citations: [{ source: "listing_facts" }] };
+  });
+  const result = await response.json();
+  assert.equal(response.status, 409);
+  assert.equal(result.kind, "listing_draft_conflict");
+  assert.equal(result.text, undefined, "copy from the previous source language cannot be applied");
+  const after = runtime.currentRows();
+  assert.equal(listingDraftRevision(after.listings[0], after.properties[0]), revision, "the ordinary save revision contract is unchanged");
+  assert.equal(calls, 1, "a locale conflict never automatically replays the provider");
+  assert.equal(runtime.payload.calls.update.length, 0);
+});
+
 test("a listing without its required shared property is unavailable instead of using stale mirrors", async () => {
   const runtime = currentSource();
   const read = runtime.payload.findByID.bind(runtime.payload);

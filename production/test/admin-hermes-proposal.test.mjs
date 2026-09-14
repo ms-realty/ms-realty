@@ -51,6 +51,7 @@ function harness({ listing = false } = {}) {
     button.setAttribute("data-hermes-assist-listing", listingId.value);
     button.setAttribute("data-hermes-assist-field", "description");
     button.setAttribute("data-hermes-assist-locale", "bg");
+    button.setAttribute("data-hermes-assist-source-locale", "bg");
     button.setAttribute("data-hermes-assist-require-revision", "true");
   }
   button.innerHTML = "Draft";
@@ -162,12 +163,38 @@ test("a newer save revision invalidates a pending or displayed listing proposal 
   });
 });
 
-test("listing proposals require the requested identity and exact source revision", async (t) => {
+test("an observed source locale change invalidates a pending or displayed proposal without resetting save state", async (t) => {
+  for (const phase of ["pending", "displayed"]) await t.test(phase, async () => {
+    const ui = harness({ listing: true });
+    ui.request();
+    if (phase === "displayed") await ui.resolve();
+    ui.button.setAttribute("data-hermes-assist-source-locale", "fr");
+    if (phase === "pending") {
+      await ui.resolve();
+      assert.equal(Boolean(ui.proposal()), false);
+    } else {
+      const apply = ui.proposal().children[2].children[0];
+      apply.listeners.click();
+      assert.equal(apply.disabled, true);
+    }
+    assert.equal(ui.target.value, "Operator's original text");
+    assert.equal(ui.target.events, undefined);
+    assert.equal(ui.revision.value, "a".repeat(64));
+    assert.equal(ui.revision.defaultValue, "a".repeat(64));
+    assert.equal(ui.requests.length, 1);
+    assert.equal(ui.bar.getAttribute("data-hermes-drafted-state"), "error");
+    assert.match(ui.bar.textContent, /listing|source/i);
+  });
+});
+
+test("listing proposals require the requested identity, source locale and exact source revision", async (t) => {
   const cases = [
     ["different listing", { listing_id: "MS-00905" }],
-    ["different source listing", { source_snapshot: { listing_id: "MS-00905", draft_revision: "a".repeat(64) } }],
-    ["different source revision", { source_snapshot: { listing_id: "MS-00922", draft_revision: "b".repeat(64) } }],
-    ["missing source revision", { source_snapshot: { listing_id: "MS-00922" } }],
+    ["different source listing", { source_snapshot: { listing_id: "MS-00905", draft_revision: "a".repeat(64), source_locale: "bg" } }],
+    ["different source revision", { source_snapshot: { listing_id: "MS-00922", draft_revision: "b".repeat(64), source_locale: "bg" } }],
+    ["missing source revision", { source_snapshot: { listing_id: "MS-00922", source_locale: "bg" } }],
+    ["source locale changed since render", { source_snapshot: { listing_id: "MS-00922", draft_revision: "a".repeat(64), source_locale: "fr" } }],
+    ["missing source locale", { source_snapshot: { listing_id: "MS-00922", draft_revision: "a".repeat(64) } }],
     ["missing source snapshot", { source_snapshot: undefined }],
     ["different field", { field: "meta_description" }],
     ["different locale", { locale: "ru" }],
@@ -202,6 +229,17 @@ test("a matching listing proposal changes only the accepted field and preserves 
   assert.equal(ui.proposal(), undefined);
 });
 
+test("the requested output locale can differ from the bound source locale", async () => {
+  const ui = harness({ listing: true });
+  ui.button.setAttribute("data-hermes-assist-locale", "en");
+  ui.request();
+  await ui.resolve(listingDraft({ locale: "en" }));
+  assert.equal(ui.requests[0].locale, "en");
+  ui.proposal().children[2].children[0].listeners.click();
+  assert.equal(ui.target.value, "Proposed text");
+  assert.equal(ui.revision.value, "a".repeat(64));
+});
+
 test("a proposal cannot be applied after the control is reused for another listing", async () => {
   const ui = harness({ listing: true });
   ui.request();
@@ -219,7 +257,7 @@ test("a fresh request uses the current saved form revision instead of the initia
   ui.button.setAttribute("data-hermes-assist-revision", "a".repeat(64));
   ui.revision.value = ui.revision.defaultValue = "b".repeat(64);
   ui.request();
-  await ui.resolve(listingDraft({ source_snapshot: { listing_id: "MS-00922", draft_revision: "b".repeat(64) } }));
+  await ui.resolve(listingDraft({ source_snapshot: { listing_id: "MS-00922", draft_revision: "b".repeat(64), source_locale: "bg" } }));
   ui.proposal().children[2].children[0].listeners.click();
   assert.equal(ui.target.value, "Proposed text");
   assert.equal(ui.revision.value, "b".repeat(64));

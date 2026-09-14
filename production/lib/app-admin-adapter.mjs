@@ -5927,8 +5927,8 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
           recordedAt: config.reviewedAt || config.editedAt,
           assertSourceCurrent: readSource ? async (record) => {
             const current = await readSource();
-            if (current.records[0].draft_revision !== record.draft_revision) {
-              throw Object.assign(new Error("This listing or its shared property changed while Hermes was drafting. Reload it before requesting another draft."), {
+            if (current.records[0].draft_revision !== record.draft_revision || current.records[0].source_locale !== record.source_locale) {
+              throw Object.assign(new Error("This listing source changed while Hermes was drafting. Reload it before requesting another draft."), {
                 status: 409, code: "listing_draft_conflict",
               });
             }
