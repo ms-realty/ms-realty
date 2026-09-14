@@ -46,6 +46,7 @@ import { DEFAULT_OPERATOR_TWO_FACTOR_PATH, operatorTwoFactorStatus, readOperator
 import { DEFAULT_WORKSPACE_EXPORT_LEDGER_PATH } from "./workspace-export.mjs";
 import { renderAdminTeamForbiddenPayload, renderAdminTeamPayload } from "./admin-team.mjs";
 import { buildAdminHermesPayload } from "./admin-hermes.mjs";
+import { renderSitePageAdminResponse } from "./site-page-admin.mjs";
 import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-command.mjs";
 import { renderAdminWorkspaceSettingsPayload } from "./admin-payloads.mjs";
 import { approvedContentReviewPayload } from "./approved-content-review.mjs";
@@ -4497,6 +4498,15 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       !canAdminAccessWorkspace(principal, config.realtyCaseWorkspaceId)
     ) {
       return adminForbidden("workspace:access");
+    }
+    if (["/admin/site-pages/seller", "/api/admin/site-pages/seller"].includes(url.pathname)) {
+      return renderSitePageAdminResponse(request, {
+        config,
+        principal,
+        defaultInterfaceLocale: adminLocaleParam(url, config),
+        decoratePage: (page) => withOwnerProfile(withWorkspaceSettings(page, config), config),
+        parseInput: async () => parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+      });
     }
     if (url.pathname === "/api/admin/profile") {
       const service = await payloadAdminAuth();

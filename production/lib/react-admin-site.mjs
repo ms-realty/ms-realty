@@ -11931,6 +11931,11 @@ function ApprovedContentBody({ page }) {
         { title: cms.title, subtitle: cms.description },
         h(
           "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: `/admin/site-pages/seller?locale=${page.workspace.locale}` },
+          { bg: "Страница за продавачи", ru: "Страница для продавцов", en: "Seller page" }[page.workspace.locale] || "Seller page",
+        ),
+        h(
+          "a",
           { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/translations", page) },
           h(Icon, { name: "languages", size: 16 }),
           h("span", null, label(copy, "translationQueue", "Translation review")),
@@ -14487,6 +14492,16 @@ function SettingsBody({ page }) {
       ),
     ],
   });
+}
+
+export function renderAdminShellBody(page, options) {
+  const previousDisplaySettings = activeDisplaySettings;
+  activeDisplaySettings = displaySettingsFor(page);
+  try {
+    return renderStaticElement(adminShell(page, options));
+  } finally {
+    activeDisplaySettings = previousDisplaySettings;
+  }
 }
 
 export function renderReactAdminBody(page) {

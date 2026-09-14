@@ -4836,6 +4836,19 @@ export function renderLocationPage({ registry, localeCode, location, listings, a
   };
 }
 
+export function sellerPageBaselineContent(localeCode) {
+  const copy = sellerCopy(localeCode);
+  return { title: copy.title, description: copy.description, h1: copy.h1, intro: copy.description };
+}
+
+// Callers supply only a verified publication or an authenticated private preview.
+// Route identity, indexing approval, contacts and lead forms stay with this page.
+export function withSellerPageContent(page, content) {
+  if (page.kind !== "seller") throw new Error("Seller page required");
+  return { ...page, metadata: { ...page.metadata, title: content.title, description: content.description },
+    body: { ...page.body, h1: content.h1, intro: content.intro } };
+}
+
 export function renderSellerPage({
   registry,
   localeCode,

@@ -5,6 +5,7 @@ import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import test from "node:test";
 import { createSitePageContentService, SITE_PAGE_CONTENT_COLLECTIONS } from "../lib/site-page-content.mjs";
 
@@ -136,6 +137,19 @@ test("seller content persists through Payload/Postgres restart and rejects concu
     assert.deepEqual((await restarted.readPublished()).content, copy);
     await assert.rejects(restarted.publishRevision({ ...selected(live, owner), confirm: true }), { status: 409 });
     assert.equal(await restarted.readPublished({ locale: "he" }), null);
+    if (process.env.MS_REALTY_SITE_PAGE_PLAYWRIGHT_MODULE) {
+      const browserModule = process.env.MS_REALTY_SITE_PAGE_PLAYWRIGHT_MODULE;
+      assert.ok(path.isAbsolute(browserModule), "Select an installed Playwright module explicitly; no browser is downloaded by this test");
+      const [{ chromium }, { exerciseSellerPageBrowser }] = await Promise.all([
+        import(pathToFileURL(browserModule).href), import("./helpers/site-page-browser-journey.mjs"),
+      ]);
+      const publication = await exerciseSellerPageBrowser({ payload, chromium });
+      await closePayload();
+      stop();
+      start();
+      payload = await openPayload();
+      assert.deepEqual(await createSitePageContentService({ payload }).readPublished(), publication, "the browser-published revision survives restart");
+    }
   } finally {
     if (payload) await closePayload();
     if (fs.existsSync(path.join(data, "postmaster.pid"))) stop();

@@ -76,6 +76,10 @@ export function normalizeSellerPageContent(content) {
   return Object.fromEntries(Object.entries(COPY_FIELDS).map(([key, max]) => [key, requiredText(content[key], key, max)]));
 }
 
+export function sitePageContentConfigured({ payload = null, env = process.env } = {}) {
+  return Boolean(payload || (env.DATABASE_URL && env.PAYLOAD_SECRET));
+}
+
 function digest(locale, sourceRevisionId, content) {
   return createHash("sha256").update(JSON.stringify([SITE_PAGE_KEY, locale, sourceRevisionId || null, content])).digest("hex");
 }
