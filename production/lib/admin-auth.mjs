@@ -219,6 +219,8 @@ export function canAdminAccessWorkspace(principal, workspaceId) {
 export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
+  // The page service checks each action's existing edit/review/owner capability.
+  if (["/admin/site-pages/seller", "/api/admin/site-pages/seller"].includes(pathname)) return "content:read";
   // B6 workspace security and data
   if (SECURITY_SELF_PATHS.has(pathname)) return "security:self";
   if (DATA_EXPORT_PATHS.has(pathname)) return "data:export";

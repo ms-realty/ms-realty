@@ -32,6 +32,8 @@ import {
 import { publicSeedFor } from "./public-inventory.mjs";
 import { projectListingDraftSeed } from "./listing-draft-service.mjs";
 import { publicOriginForHost } from "./public-origin.mjs";
+import { createSitePageContentService, sitePageContentConfigured } from "./site-page-content.mjs";
+import { withSellerPageContent } from "./public-site.mjs";
 
 const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
@@ -177,6 +179,37 @@ function htmlRequested(accept) {
   return String(accept || "").toLowerCase().includes("text/html");
 }
 
+function sellerContentStore(config) {
+  return { payload: config.sitePageContentPayload || config.payloadListingRuntime || null, env: config.payloadListingEnv || process.env };
+}
+
+async function withPublishedSellerContent(result, url, config) {
+  if (result.rendered.kind !== "seller" || !sitePageContentConfigured(sellerContentStore(config))) return result;
+  const published = await createSitePageContentService(sellerContentStore(config)).readPublished({ locale: result.rendered.locale });
+  const page = published ? withSellerPageContent(result.rendered, published.content) : result.rendered;
+  const updated = renderedHtmlResponse(page, new URL(url, "http://localhost"), config.publicOrigin);
+  // Read publication authority on every request, including before first publish.
+  // An unavailable configured store is an error, never a baseline-copy fallback.
+  updated.headers["cache-control"] = "no-store";
+  if (published) {
+    updated.headers["x-ms-site-page-revision"] = published.revision_id;
+    updated.headers["x-ms-site-page-content-hash"] = published.content_hash;
+  }
+  return updated;
+}
+
+async function sellerContentResponse(result, { pathname, url, accept, config }) {
+  try {
+    const updated = await withPublishedSellerContent(result, url, config);
+    return new Response(updated.html, { status: updated.status, headers: updated.headers });
+  } catch (error) {
+    if (htmlRequested(accept)) return originUnavailableResponse({ pathname, url, config });
+    return new Response(JSON.stringify({ kind: error.code || "site_page_store_unavailable", message: "Page content storage is unavailable." }), {
+      status: 503, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
+}
+
 function originUnavailableResponse({ pathname, url, config }) {
   const registry = currentRegistry(config);
   const localeCode = String(pathname || "").split("/").filter(Boolean)[0] || registry.source_locale;
@@ -309,6 +342,9 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", ac
       headers: { location: `${pathname.replace(/\/+$/, "")}${new URL(url, "http://localhost").search}`, "cache-control": PUBLIC_CACHE },
     });
   }
+  if (result.rendered.kind === "seller" && sitePageContentConfigured(sellerContentStore(config))) {
+    return sellerContentResponse(result, { pathname, url, accept, config });
+  }
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 
@@ -317,6 +353,7 @@ async function renderDurableAppRouteResponse({ pathname, url, accept, config }) 
   try {
     const context = await durablePublicContext(config);
     result = renderAppRouteWithContext({ pathname, url, config, ...context });
+    result = await withPublishedSellerContent(result, url, config);
   } catch (error) {
     if (htmlRequested(accept)) return originUnavailableResponse({ pathname, url, config });
     return new Response(JSON.stringify({ kind: error.code || "payload_draft_unavailable", message: error.message }), {

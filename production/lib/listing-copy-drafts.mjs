@@ -1,6 +1,10 @@
 import { appendAuditLog, createAuditLogEntry, DEFAULT_AUDIT_LOG_PATH } from "./audit-log.mjs";
 import { HERMES_LISTING_COPY_FIELDS, listingCopyPrompt, validateHermesListingCopyDraft } from "./hermes.mjs";
 import { assertHermesChatCompletionsEndpoint, hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
+import { canAdminAccess } from "./admin-auth.mjs";
+import { withPayloadTransaction } from "./listing-draft-service.mjs";
+import { derivePrimaryAreaSqm, primaryAreaFieldFor } from "./listing-facts.mjs";
+import { listingDraftRevision, loadPayloadCmsImportRuntime } from "./payload-cms-import.mjs";
 
 // Hermes could draft a translation of a listing and a reply to a lead. It could
 // not draft the listing's own copy, which is the value a broker rewrites most
@@ -67,12 +71,67 @@ function listingFor(seed, listingId) {
   return record;
 }
 
+// Read the requested draft and its shared property together. The catalogue
+// projection is cached and may contain imported fallback rows; neither is an
+// authority for a new model request.
+export async function readHermesListingCopySource(listingId, { env = process.env, payload = null, principal } = {}) {
+  if (!principal?.id || !canAdminAccess(principal, "content:write")) {
+    throw Object.assign(new Error("Listing copy requires content write access"), { status: 403, capability: "content:write" });
+  }
+  const id = String(listingId || "").trim();
+  if (!id || id.length > 80) throw new Error("Listing copy draft requires a known listingId");
+  const relationId = (value) => String(value && typeof value === "object" ? value.id || "" : value || "").trim();
+  try {
+    const runtime = await loadPayloadCmsImportRuntime({ env, payload });
+    return await withPayloadTransaction(runtime, { principal, accessMode: "read only", isolationLevel: "repeatable read" }, async (req) => {
+      const read = (collection, documentId) => runtime.findByID({
+        collection, id: documentId, depth: 0, draft: collection === "listings", overrideAccess: false, disableErrors: true, req,
+      });
+      const listing = await read("listings", id);
+      if (!listing) {
+        throw Object.assign(new Error("The requested listing is unavailable to this operator"), { status: 404, code: "listing_draft_not_found" });
+      }
+      if (String(listing.id) !== id) throw new Error("Payload returned a different listing");
+      const propertyId = relationId(listing.property);
+      if (!propertyId) throw new Error("The listing's shared property is unavailable");
+      const property = await read("properties", propertyId);
+      if (!property || String(property.id) !== propertyId) throw new Error("The listing's shared property is unavailable");
+      const locale = await read("locales", relationId(listing.source_locale));
+      if (!locale?.code) throw new Error("The listing's source locale is unavailable");
+      return {
+        records: [{
+          ...listing,
+          collection: "listings",
+          property: propertyId,
+          source_locale: locale.code,
+          draft_revision: listingDraftRevision(listing, property),
+        }],
+        properties: [property],
+      };
+    });
+  } catch (error) {
+    if (error?.status === 403) {
+      throw Object.assign(new Error("The requested listing source is unavailable to this operator"), {
+        status: 403, capability: "content:write", cause: error,
+      });
+    }
+    if (error?.code === "listing_draft_not_found") throw error;
+    throw Object.assign(new Error("The current Payload listing source is unavailable. Try again when the source is restored."), {
+      status: 503, code: "payload_draft_unavailable", cause: error,
+    });
+  }
+}
+
 // Which figures the draft is allowed to state, and which of them a broker has
 // actually confirmed. A description drawn from an unconfirmed area is not
 // wrong to draft — it is wrong to publish without someone noticing, so the
 // reviewer is told rather than the draft being refused.
 export function approvedListingFacts(seed, record) {
   const property = (seed.properties || []).find((row) => row.id === record.property) || null;
+  const currentPropertyFacts = property ? { ...property.facts, property_family: property.property_family } : null;
+  const propertyFact = (field, legacyValue) => currentPropertyFacts ? currentPropertyFacts[field] : legacyValue;
+  const areaField = currentPropertyFacts ? primaryAreaFieldFor(currentPropertyFacts) : null;
+  const floorsField = ["house", "hotel"].includes(property?.property_family) ? "storeys_count" : "total_floors";
   const verified = new Set(
     (property?.fact_verification || []).filter((row) => row.state === "broker_verified").map((row) => row.field),
   );
@@ -85,14 +144,14 @@ export function approvedListingFacts(seed, record) {
   };
   take("reference", record.id);
   take("price_eur", record.facts?.price_eur);
-  take("area_sqm", record.facts?.area_sqm ?? property?.facts?.primary_area_sqm, "primary_area_sqm");
-  take("land_area_sqm", record.facts?.land_area_sqm ?? property?.facts?.land_area_sqm, "land_area_sqm");
-  take("bedrooms", record.facts?.bedrooms ?? property?.facts?.bedrooms_count, "bedrooms_count");
-  take("floor", record.facts?.floor ?? property?.facts?.floor_number, "floor_number");
-  take("total_floors", record.facts?.total_floors ?? property?.facts?.storeys_count, "storeys_count");
-  take("location", record.facts?.location);
-  take("municipality", record.facts?.municipality);
-  take("property_type", property?.property_family || record.facts?.property_type);
+  take("area_sqm", currentPropertyFacts ? derivePrimaryAreaSqm(currentPropertyFacts) : record.facts?.area_sqm, areaField || "primary_area_sqm");
+  take("land_area_sqm", propertyFact("land_area_sqm", record.facts?.land_area_sqm), "land_area_sqm");
+  take("bedrooms", propertyFact("bedrooms_count", record.facts?.bedrooms), "bedrooms_count");
+  take("floor", propertyFact("floor_number", record.facts?.floor), "floor_number");
+  take("total_floors", propertyFact(floorsField, record.facts?.total_floors), floorsField);
+  take("location", propertyFact("location_label", record.facts?.location), "location_label");
+  take("municipality", propertyFact("municipality", record.facts?.municipality));
+  take("property_type", propertyFact("property_family", record.facts?.property_type), "property_family");
   take("offer_type", record.facts?.offer_type);
   return { facts, provenance };
 }
@@ -100,7 +159,7 @@ export function approvedListingFacts(seed, record) {
 export async function createHermesListingCopyDraft(
   seed,
   input,
-  { auditLogPath = DEFAULT_AUDIT_LOG_PATH, provider = openAiCompatibleHermesListingCopyProvider(), recordedAt = new Date().toISOString() } = {},
+  { auditLogPath = DEFAULT_AUDIT_LOG_PATH, provider = openAiCompatibleHermesListingCopyProvider(), recordedAt = new Date().toISOString(), assertSourceCurrent = null } = {},
 ) {
   const field = String(input.field || "").trim();
   if (!HERMES_LISTING_COPY_FIELDS.includes(field)) {
@@ -131,6 +190,7 @@ export async function createHermesListingCopyDraft(
           status: draft ? "persisted" : "rejected",
           metadata: {
             listing_id: record.id,
+            ...(record.draft_revision ? { draft_revision: record.draft_revision } : {}),
             field,
             prompt_role: prompt.role,
             can_publish: false,
@@ -150,8 +210,13 @@ export async function createHermesListingCopyDraft(
       draft: output,
       field,
       propertyFacts: facts,
-      sourceSnapshot: { listing_id: record.id, source_locale: record.source_locale },
+      sourceSnapshot: {
+        listing_id: record.id,
+        source_locale: record.source_locale,
+        ...(record.draft_revision ? { draft_revision: record.draft_revision } : {}),
+      },
     });
+    if (assertSourceCurrent) await assertSourceCurrent(record);
     audit(draft);
     // The reviewer is told which facts the draft leaned on and which of those
     // no broker has confirmed, because that is the part they have to check.
