@@ -21,6 +21,7 @@ function label(copy, key, fallback) {
 // Destinations whose name lives in the workspace copy rather than in the owner
 // console's module list.
 const RAIL_LABEL_KEYS = Object.freeze({
+  seller_page: { key: "sellerPage", fallback: "Seller page" },
   migration_review: { key: "migrationReview", fallback: "Migration review" },
   locale_rollout: { key: "localeRollout", fallback: "Website languages" },
   media_library: { key: "mediaLibrary", fallback: "Media" },
@@ -3569,7 +3570,7 @@ function adminNavigationGroups(page) {
   // capability, not the read capability every broker holds.
   if (!pageCan(page, "content:write")) routes.delete("approved_content");
   const primaryIds = ["today", "lead_inbox", "listing_manager", "viewings", "contacts", "realty_cases", "hermes"];
-  const advancedIds = ["approved_content", "media_library", "translation_queue", "document_records", "documents", "consents", "tasks", "reports", "activity", "team", "connections", "settings", "locale_rollout", "migration_review"];
+  const advancedIds = ["approved_content", "seller_page", "media_library", "translation_queue", "document_records", "documents", "consents", "tasks", "reports", "activity", "team", "connections", "settings", "locale_rollout", "migration_review"];
   const pick = (ids, primary) => ids.map((id) => routes.get(id)).filter(Boolean).map((destination) => ({ ...destination, primary }));
   const groups = [{ id: "primary", label: null, destinations: pick(primaryIds, true) }];
   groups.push({ id: "advanced", label: advancedLabel, collapsible: true, destinations: pick(advancedIds, false) });

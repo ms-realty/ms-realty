@@ -42,7 +42,7 @@ export const OWNER_CONSOLE_NAV_DESTINATIONS = Object.freeze([
   { id: "today", group: "today", primary: "today", children: ["tasks"] },
   { id: "leads", group: "crm", primary: "lead_inbox", children: ["contacts", "consents", "documents", "document_records", "realty_cases", "lead_pipeline", "requests", "viewings", "reports"] },
   { id: "listings", group: "cms", primary: "listing_manager", children: ["media_library"] },
-  { id: "translations", group: "cms", primary: "translation_queue", children: ["approved_content", "locale_rollout", "migration_review"] },
+  { id: "translations", group: "cms", primary: "translation_queue", children: ["approved_content", "seller_page", "locale_rollout", "migration_review"] },
   { id: "hermes", group: "hermes", primary: "hermes", children: [] },
   { id: "integrations", group: "workspace", primary: "connections", children: [] },
   { id: "settings", group: "workspace", primary: "settings", children: ["team", "activity"] },
