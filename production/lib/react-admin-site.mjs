@@ -225,6 +225,19 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортирай CSV за качество",
     reviewListing: "Прегледай обявата",
     factsReviewer: "Проверил данните",
+    recordSearch: {
+      label: "Търсене в работното място",
+      placeholder: "Обява, запитване, човек, оглед…",
+      submit: "Търси",
+      title: "Резултати от търсенето",
+      empty: "Нищо не съвпада с това търсене.",
+      emptyHint: "Провери изписването или потърси по референция.",
+      tooShort: "Въведи поне два знака.",
+      prompt: "Търси обява, запитване, човек или оглед.",
+      counted: "{count} намерени",
+      unavailable: "Не беше претърсено: {sources}.",
+      types: { listing: "Обява", lead: "Запитване", contact: "Човек", viewing: "Оглед" },
+    },
     mediaReviewer: "Проверил медиите",
     editMediaAsset: "Редактирай",
     closeInspector: "Затвори",
@@ -1033,6 +1046,19 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортировать CSV качества",
     reviewListing: "Проверить объект",
     factsReviewer: "Проверил данные",
+    recordSearch: {
+      label: "Поиск по рабочему пространству",
+      placeholder: "Объект, заявка, человек, показ…",
+      submit: "Найти",
+      title: "Результаты поиска",
+      empty: "Ничего не совпало с этим запросом.",
+      emptyHint: "Проверь написание или попробуй референс.",
+      tooShort: "Введи хотя бы два знака.",
+      prompt: "Найди объект, заявку, человека или показ.",
+      counted: "Найдено: {count}",
+      unavailable: "Не искали в: {sources}.",
+      types: { listing: "Объект", lead: "Заявка", contact: "Человек", viewing: "Показ" },
+    },
     mediaReviewer: "Проверил медиа",
     editMediaAsset: "Редактировать",
     closeInspector: "Закрыть",
@@ -1841,6 +1867,19 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Import listing quality CSV",
     reviewListing: "Review listing",
     factsReviewer: "Facts reviewer",
+    recordSearch: {
+      label: "Search the workspace",
+      placeholder: "Listing, enquiry, person, viewing…",
+      submit: "Search",
+      title: "Search results",
+      empty: "Nothing matches that search.",
+      emptyHint: "Check the spelling, or try a reference.",
+      tooShort: "Type at least two characters.",
+      prompt: "Find a listing, an enquiry, a person or a viewing.",
+      counted: "{count} found",
+      unavailable: "Not searched: {sources}.",
+      types: { listing: "Listing", lead: "Enquiry", contact: "Person", viewing: "Viewing" },
+    },
     mediaReviewer: "Media reviewer",
     editMediaAsset: "Edit",
     closeInspector: "Close",
@@ -3830,8 +3869,49 @@ function Topbar({ page, title, titleAsHeading = false, action = null }) {
       h("div", { className: "crm-top__eyebrow" }, page.workspace?.title || "MS Realty"),
       h("div", { className: "crm-top__sub" }, title),
     ),
+    h(AdminSearchEntry, { page }),
     h(MobileNavigation, { page }),
     action ? h("div", { className: "crm-top__action", "data-admin-primary-action": "true" }, action) : null,
+  );
+}
+
+// One way in, on every screen. It is a real form to a real page, so it works
+// with scripting off and a result can be opened in a new tab; the client only
+// adds suggestions underneath it.
+function AdminSearchEntry({ page }) {
+  if (!pageCan(page, "workspace:read")) return null;
+  const ui = workbenchCopy(page);
+  const search = ui.recordSearch;
+  return h(
+    "form",
+    {
+      className: "crm-top__search",
+      role: "search",
+      method: "get",
+      action: adminHref("/admin/search", page),
+      "data-admin-search": "true",
+    },
+    h("label", { className: "sr-only", htmlFor: "admin-search-q" }, search.label),
+    h(Icon, { name: "search", size: 16 }),
+    h("input", {
+      id: "admin-search-q",
+      type: "search",
+      name: "q",
+      autoComplete: "off",
+      placeholder: search.placeholder,
+      defaultValue: page.kind === "admin_record_search" ? page.query || "" : "",
+      "data-admin-search-input": "true",
+      "aria-controls": "admin-search-suggestions",
+      "aria-expanded": "false",
+    }),
+    h("button", { type: "submit", className: "mk-btn mk-btn--ghost mk-btn--sm" }, search.submit),
+    h("div", {
+      id: "admin-search-suggestions",
+      className: "crm-top__suggestions",
+      role: "listbox",
+      hidden: true,
+      "data-admin-search-suggestions": "true",
+    }),
   );
 }
 
@@ -10685,6 +10765,69 @@ function listingMediaAssetForms(page, ui, copy, item, { canEditContent, publishe
   ];
 }
 
+// The results screen. Every row says what kind of record it is, what it is
+// called, where it stands and one way in, because a broker scanning a mixed
+// list needs the kind before anything else.
+function RecordSearchBody({ page }) {
+  const ui = workbenchCopy(page);
+  const search = ui.recordSearch;
+  const results = page.results || [];
+  const query = String(page.query || "").trim();
+  const unavailable = Object.entries(page.sources || {})
+    .filter(([, source]) => source?.status === "unavailable")
+    .map(([type]) => search.types[type] || type);
+  // An empty box is an invitation, not a complaint about length.
+  const state = !query ? "prompt" : page.too_short ? "too_short" : results.length ? "results" : "empty";
+  return adminShell(page, {
+    title: search.title,
+    titleAsHeading: true,
+    mainAttrs: { "data-react-admin-ui": "record-search", "data-search-state": state },
+    children: [
+      h(
+        Panel,
+        { key: "results", title: search.title, "data-record-search": "true", "data-search-results": String(results.length) },
+        state === "results"
+          ? h("p", { className: "adm-note" }, fillTemplate(search.counted, { count: results.length }))
+          : null,
+        // A source nobody could read is named here rather than left out, so a
+        // short list is never mistaken for a complete one.
+        unavailable.length
+          ? h(
+              "p",
+              { className: "adm-note", role: "note", "data-search-unavailable": unavailable.length },
+              fillTemplate(search.unavailable, { sources: unavailable.join(", ") }),
+            )
+          : null,
+        state === "results"
+          ? h(
+              "ul",
+              { className: "adm-search-results" },
+              ...results.map((row) =>
+                h(
+                  "li",
+                  { key: `${row.type}-${row.id}`, className: "adm-search-result", "data-search-result": row.type },
+                  h(
+                    "a",
+                    { className: "adm-search-result__link", href: adminHref(row.href, page) },
+                    h("span", { className: "adm-search-result__kind" }, search.types[row.type] || row.type),
+                    h("strong", { className: "adm-search-result__title" }, row.title || row.id),
+                    row.subtitle ? h("span", { className: "adm-search-result__sub" }, row.subtitle) : null,
+                  ),
+                  row.status ? h(StatusPill, { tone: "sun" }, statusText(ui, row.status)) : null,
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "search", "data-search-empty": state },
+              state === "too_short" ? search.tooShort : state === "prompt" ? search.prompt : search.empty,
+              state === "empty" ? h("p", null, search.emptyHint) : null,
+            ),
+      ),
+    ],
+  });
+}
+
 function ListingEditorBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -14692,6 +14835,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_task_queue") return renderStaticElement(h(TasksBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
+  if (page.kind === "admin_record_search") return renderStaticElement(h(RecordSearchBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
   if (page.kind === "admin_migration_review") return renderStaticElement(h(MigrationReviewBody, { page }));
   return "";

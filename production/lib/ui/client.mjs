@@ -4495,6 +4495,93 @@ ${ADMIN_DAILY_JS}
   // Media to check a photo threw away unsaved Facts. Every section is already in
   // the document; this only changes which one is on screen, and the save bar
   // stays put so the draft can be saved from wherever the operator is looking.
+  // The search box is a real form to a real page; this only adds suggestions
+  // under it so a known record is one keystroke and one Enter away. Submitting
+  // still works if this never runs, and the request is abandoned rather than
+  // raced when the operator keeps typing.
+  function initAdminSearchEntry() {
+    var form = document.querySelector("[data-admin-search]");
+    if (!form || typeof fetch !== "function") return;
+    var input = form.querySelector("[data-admin-search-input]");
+    var list = form.querySelector("[data-admin-search-suggestions]");
+    if (!input || !list) return;
+    var timer = 0;
+    var inflight = null;
+    var active = -1;
+    function close() {
+      list.hidden = true;
+      list.innerHTML = "";
+      input.setAttribute("aria-expanded", "false");
+      active = -1;
+    }
+    function options() { return list.querySelectorAll("[data-admin-search-option]"); }
+    function highlight(next) {
+      var rows = options();
+      if (!rows.length) return;
+      active = (next + rows.length) % rows.length;
+      for (var i = 0; i < rows.length; i += 1) {
+        var on = i === active;
+        rows[i].setAttribute("aria-selected", on ? "true" : "false");
+        if (on) rows[i].scrollIntoView({ block: "nearest" });
+      }
+    }
+    function render(payload) {
+      var rows = (payload && payload.results) || [];
+      if (!rows.length) { close(); return; }
+      list.innerHTML = "";
+      for (var i = 0; i < rows.length && i < 8; i += 1) {
+        var row = rows[i];
+        var option = document.createElement("a");
+        option.className = "crm-top__suggestion";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
+        option.setAttribute("data-admin-search-option", row.type);
+        option.href = row.href;
+        var kind = document.createElement("span");
+        kind.className = "crm-top__suggestion-kind";
+        kind.textContent = row.type;
+        var title = document.createElement("strong");
+        title.textContent = row.title || row.id;
+        option.appendChild(kind);
+        option.appendChild(title);
+        list.appendChild(option);
+      }
+      list.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      active = -1;
+    }
+    function ask() {
+      var query = input.value.trim();
+      if (query.length < 2) { close(); return; }
+      if (inflight && typeof inflight.abort === "function") inflight.abort();
+      var controller = typeof AbortController === "function" ? new AbortController() : null;
+      inflight = controller;
+      fetch("/api/admin/search?q=" + encodeURIComponent(query), {
+        credentials: "same-origin",
+        headers: { accept: "application/json" },
+        signal: controller ? controller.signal : undefined,
+      })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (payload) { if (payload) render(payload); })
+        .catch(function () { /* the form still submits to the results page */ });
+    }
+    input.addEventListener("input", function () {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(ask, 180);
+    });
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowDown") { event.preventDefault(); highlight(active + 1); return; }
+      if (event.key === "ArrowUp") { event.preventDefault(); highlight(active - 1); return; }
+      if (event.key === "Escape") { close(); return; }
+      if (event.key === "Enter" && active >= 0) {
+        var rows = options();
+        if (rows[active]) { event.preventDefault(); window.location.assign(rows[active].getAttribute("href")); }
+      }
+    });
+    document.addEventListener("click", function (event) {
+      if (!form.contains(event.target)) close();
+    });
+  }
   function initListingEditorPanels() {
     var nav = document.querySelector("[data-editor-tabs]");
     var shell = document.querySelector("[data-editor-shell]");
@@ -5469,6 +5556,7 @@ ${ADMIN_DAILY_JS}
   initLeadQueueFilters();
   initAdminMobileNavigation();
   initListingEditorTabs();
+  initAdminSearchEntry();
   initListingEditorPanels();
   initListingMediaInspector();
   initEditorForms();

@@ -115,6 +115,7 @@ import {
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
+  renderAdminRecordSearchPayload,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -5185,10 +5186,16 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
         payload: config.payloadListingRuntime || null,
         requirePayload: config.runtimeDataDurableOnly,
       });
-      return jsonResponse(200, searchAdminRecords({
+      const found = searchAdminRecords({
         query: url.searchParams.get("q") || "",
         listings: seedForSearch.records.filter((record) => record.collection === "listings"),
-      }));
+      });
+      if (url.pathname === "/admin/search") {
+        return htmlResponse(
+          renderAdminRecordSearchPayload(registry, url.searchParams.get("locale") || "en", found, config.adminPrincipal || null),
+        );
+      }
+      return jsonResponse(200, found);
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, await contactsPayload(registry, url, config));

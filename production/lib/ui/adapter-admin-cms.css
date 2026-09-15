@@ -784,3 +784,74 @@ html[data-theme="dark"] .adm-media-inspector::backdrop { background: rgb(0 0 0 /
   .adm-media-inspector[open] { animation: adm-media-inspector-in 140ms ease-out; }
   @keyframes adm-media-inspector-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 }
+
+/* ------------------------------------------------------------------
+   One search entry, on every screen
+   ------------------------------------------------------------------ */
+
+.crm-top__search {
+  position: relative;
+  display: flex; align-items: center; gap: var(--space-2);
+  min-width: min(100%, 15rem); flex: 1 1 22rem; max-width: 34rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.crm-top__search input {
+  flex: 1 1 auto; min-width: 0; min-height: 44px;
+  border: 0; background: none; color: var(--text);
+  font: inherit; outline: none;
+}
+.crm-top__search input::-webkit-search-cancel-button { cursor: pointer; }
+.crm-top__search:focus-within { border-color: var(--text-link); }
+
+.crm-top__suggestions {
+  position: absolute; z-index: 40; top: calc(100% + var(--space-1)); left: 0; right: 0;
+  display: grid;
+  max-height: min(60vh, 26rem); overflow: auto;
+  padding: var(--space-1);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 18%);
+}
+.crm-top__suggestion {
+  display: flex; align-items: baseline; gap: var(--space-2);
+  min-height: 44px; padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm, 8px);
+  color: var(--text); text-decoration: none;
+}
+.crm-top__suggestion:hover,
+.crm-top__suggestion[aria-selected="true"] { background: var(--surface-sunken, var(--bg)); }
+/* The kind comes first: a mixed list is unreadable if every row looks alike. */
+.crm-top__suggestion-kind {
+  flex: 0 0 auto; color: var(--text-muted);
+  font-size: var(--text-sm); text-transform: capitalize;
+}
+
+/* Results screen */
+.adm-search-results { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.adm-search-result {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.adm-search-result__link {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  min-height: 44px; min-width: 0;
+  color: var(--text); text-decoration: none;
+}
+.adm-search-result__link:hover .adm-search-result__title { text-decoration: underline; }
+.adm-search-result__kind { color: var(--text-muted); font-size: var(--text-sm); }
+.adm-search-result__title { min-width: 0; overflow-wrap: anywhere; }
+.adm-search-result__sub { grid-column: 2; color: var(--text-muted); font-size: var(--text-sm); }
+
+/* On a phone the search entry takes its own line rather than crushing the
+   page title beside it. */
+@media (max-width: 720px) {
+  .crm-top__search { order: 3; flex-basis: 100%; max-width: none; }
+  .adm-search-result { flex-direction: column; align-items: flex-start; }
+}
+
+html[data-theme="dark"] .crm-top__suggestions { box-shadow: 0 18px 40px rgb(0 0 0 / 55%); }
