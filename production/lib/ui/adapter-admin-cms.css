@@ -687,3 +687,100 @@
 /* The editor support grid pins its stat strips to two columns, so an odd last stat
    would leave a dead cell next to it. Let it take the full row instead. */
 .adm-editor-support .adm-kpis > .crm-stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* ------------------------------------------------------------------
+   Record page: one listing, panels that swap in place
+   ------------------------------------------------------------------ */
+
+/* The save bar belongs to the record, not to the Facts panel, so the panel
+   heading and its fields step aside on Media, Translations and Quality while
+   the bar keeps the draft one click from being saved. */
+[data-editor-primary-panel][data-editor-fields-hidden="true"] > .crm-panel__hd { display: none; }
+[data-editor-primary-panel][data-editor-fields-hidden="true"] .adm-editor-fields { display: none; }
+.adm-editor-savebar { position: sticky; bottom: 0; z-index: 3; }
+
+/* Each state says one true thing. Uncertain is deliberately neither saved nor
+   failed: the write may have landed and the edits are still here. */
+.adm-editor-savebar[data-save-state="uncertain"] { border-color: var(--warn, #b45309); }
+[data-admin-mutation-status][data-state="uncertain"] { color: var(--warn, #b45309); font-weight: var(--fw-semibold); }
+
+/* ------------------------------------------------------------------
+   Media: a gallery of photographs, and one roomy editor for the chosen one
+   ------------------------------------------------------------------ */
+
+/* Tiles are tiles. Their editors live outside this grid, which is what stops
+   an opened form from stretching its whole row and truncating its controls. */
+.adm-media-asset { padding: var(--space-3); }
+.adm-media-asset__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.adm-media-asset__open { width: 100%; min-height: 44px; justify-content: center; }
+
+/* Without scripting these are the working editors: full width, one after
+   another, never squeezed into a gallery column. */
+.adm-media-editors { display: grid; gap: var(--space-4); padding: 0 var(--space-5) var(--space-5); }
+.adm-media-editor { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+
+.adm-media-inspector {
+  width: min(960px, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100vh - 2 * var(--space-4));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--surface);
+  color: var(--text);
+}
+.adm-media-inspector::backdrop { background: rgb(0 0 0 / 55%); }
+.adm-media-inspector__hd {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  position: sticky; top: 0; z-index: 1;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.adm-media-inspector__hd h2 { margin: 0; font-size: var(--text-lg, 1.05rem); }
+.adm-media-inspector__close { min-height: 44px; }
+.adm-media-inspector__body { display: grid; gap: var(--space-5); padding: var(--space-5); overflow: auto; }
+/* A large picture first: the point of opening one asset is to look at it. */
+.adm-media-inspector__figure { display: grid; gap: var(--space-2); margin: 0; }
+.adm-media-inspector__figure img {
+  width: 100%; max-height: min(52vh, 460px);
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken, var(--surface));
+}
+/* The generated id is evidence, so it reads as a caption rather than a field. */
+.adm-media-inspector__figure figcaption { color: var(--text-muted); font-size: var(--text-sm); }
+/* Full width inside the dialog: the forms finally have room for their labels. */
+.adm-media-inspector__forms { display: grid; gap: var(--space-4); }
+.adm-media-inspector__forms .adm-media-editor { padding: 0; border: 0; background: none; }
+.adm-media-inspector__forms .adm-form { grid-template-columns: 1fr; }
+.adm-media-inspector__forms select,
+.adm-media-inspector__forms input,
+.adm-media-inspector__forms textarea { width: 100%; min-height: 44px; }
+.adm-media-inspector__forms textarea { min-height: 88px; }
+/* The assisted alt field spans the form rather than sharing a cramped column. */
+.adm-media-inspector__forms .adm-field--assisted { grid-column: 1 / -1; }
+
+@media (min-width: 900px) {
+  .adm-media-inspector__body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .adm-media-inspector__figure { position: sticky; top: var(--space-4); }
+}
+
+/* On a phone the inspector is the screen, with its close control always in
+   reach at the top rather than below a long form. */
+@media (max-width: 560px) {
+  .adm-media-inspector {
+    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh;
+    margin: 0; border: 0; border-radius: 0;
+  }
+  .adm-media-inspector__body { padding: var(--space-4); }
+  .adm-media-inspector__figure img { max-height: 38vh; }
+}
+
+html[data-theme="dark"] .adm-media-inspector { background: var(--surface); border-color: var(--border); }
+html[data-theme="dark"] .adm-media-inspector__hd { background: var(--surface); }
+html[data-theme="dark"] .adm-media-inspector::backdrop { background: rgb(0 0 0 / 70%); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .adm-media-inspector[open] { animation: adm-media-inspector-in 140ms ease-out; }
+  @keyframes adm-media-inspector-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}

@@ -4491,6 +4491,124 @@ ${ADMIN_DAILY_JS}
   // sentence of text, tells the operator where the save got to. A conflict is
   // an error the server does not report yet: the marker below is the hook, and
   // until a version token exists the bar falls back to the plain error state.
+  // One record, one page. The tabs used to be links that navigated, so opening
+  // Media to check a photo threw away unsaved Facts. Every section is already in
+  // the document; this only changes which one is on screen, and the save bar
+  // stays put so the draft can be saved from wherever the operator is looking.
+  function initListingEditorPanels() {
+    var nav = document.querySelector("[data-editor-tabs]");
+    var shell = document.querySelector("[data-editor-shell]");
+    if (!nav || !shell) return;
+    var links = nav.querySelectorAll("[data-editor-tab-link]");
+    if (!links.length) return;
+    var primary = document.querySelector("[data-editor-primary-panel]");
+    var heading = primary ? primary.querySelector("h2") : null;
+    function groups(name) { return document.querySelectorAll("[" + name + "]"); }
+    function show(tab) {
+      var fields = groups("data-editor-fields-tab");
+      for (var i = 0; i < fields.length; i += 1) {
+        fields[i].hidden = fields[i].getAttribute("data-editor-fields-tab") !== tab;
+      }
+      var panels = groups("data-editor-panel-tab");
+      for (var j = 0; j < panels.length; j += 1) {
+        panels[j].hidden = panels[j].getAttribute("data-editor-panel-tab") !== tab;
+      }
+      var onForm = tab === "facts" || tab === "seo";
+      // The save bar belongs to the record, not to one section, so the panel
+      // keeps it while its heading and fields step aside.
+      if (primary) primary.setAttribute("data-editor-fields-hidden", onForm ? "false" : "true");
+      if (heading && onForm) {
+        var title = primary.getAttribute("data-editor-title-" + tab);
+        if (title) heading.textContent = title;
+      }
+      for (var k = 0; k < links.length; k += 1) {
+        var owned = links[k].getAttribute("data-editor-tab-link") === tab;
+        if (owned) { links[k].setAttribute("aria-current", "page"); links[k].setAttribute("data-active", ""); }
+        else { links[k].removeAttribute("aria-current"); links[k].removeAttribute("data-active"); }
+      }
+      shell.setAttribute("data-editor-tab", tab);
+    }
+    for (var n = 0; n < links.length; n += 1) {
+      links[n].addEventListener("click", function (event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
+        var tab = this.getAttribute("data-editor-tab-link");
+        if (!tab) return;
+        event.preventDefault();
+        show(tab);
+        // The address keeps naming the section, and the link already carries
+        // the locale, so a reload or a shared link lands in the same place.
+        try { history.replaceState(null, "", this.getAttribute("href")); } catch (error) { /* history is optional */ }
+      });
+    }
+    show(shell.getAttribute("data-editor-tab") || "facts");
+  }
+  // The gallery stays a gallery; one asset at a time gets a roomy editor. The
+  // selected asset's real forms are MOVED into the dialog and moved back on
+  // close, never cloned, so a half-typed reason or an already-chosen file is
+  // still there afterwards.
+  function initListingMediaInspector() {
+    var dialog = document.querySelector("[data-media-inspector]");
+    var mount = document.querySelector("[data-media-inspector-mount]");
+    var editors = document.querySelector("[data-media-editors]");
+    if (!dialog || !mount || !editors || typeof dialog.showModal !== "function") return;
+    var titleNode = dialog.querySelector("[data-media-inspector-title]");
+    var previewNode = dialog.querySelector("[data-media-inspector-preview]");
+    var idNode = dialog.querySelector("[data-media-inspector-id]");
+    var openedBy = null;
+    var borrowed = null;
+    var homeParent = null;
+    var homeNext = null;
+    // With scripting the dialog is the way in, so the full-width editors below
+    // the gallery stand down. Without it they remain the working forms.
+    editors.hidden = true;
+    function restore() {
+      if (borrowed && homeParent) homeParent.insertBefore(borrowed, homeNext);
+      borrowed = null; homeParent = null; homeNext = null;
+      if (previewNode) { previewNode.removeAttribute("src"); previewNode.alt = ""; }
+      if (idNode) idNode.textContent = "";
+      if (openedBy && typeof openedBy.focus === "function") openedBy.focus();
+      openedBy = null;
+    }
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-media-open]") : null;
+      if (button) {
+        var assetId = button.getAttribute("data-media-open");
+        var block = editors.querySelector('[data-media-asset-forms="' + assetId + '"]');
+        if (!block) return;
+        event.preventDefault();
+        openedBy = button;
+        borrowed = block;
+        homeParent = block.parentNode;
+        homeNext = block.nextSibling;
+        mount.appendChild(block);
+        var tile = document.querySelector('[data-media-asset="' + assetId + '"]');
+        var thumb = tile ? tile.querySelector("[data-media-preview]") : null;
+        var name = tile ? tile.querySelector("strong") : null;
+        if (titleNode && name) titleNode.textContent = name.textContent;
+        if (idNode) idNode.textContent = assetId;
+        if (previewNode) {
+          if (thumb && thumb.getAttribute("src")) {
+            previewNode.setAttribute("src", thumb.getAttribute("src"));
+            previewNode.alt = thumb.getAttribute("alt") || "";
+            previewNode.hidden = false;
+          } else {
+            previewNode.removeAttribute("src");
+            previewNode.hidden = true;
+          }
+        }
+        dialog.showModal();
+        var first = block.querySelector("summary, input, select, textarea, button");
+        if (first && typeof first.focus === "function") first.focus();
+        return;
+      }
+      if (event.target && event.target.closest && event.target.closest("[data-media-inspector-close]")) {
+        event.preventDefault();
+        dialog.close();
+      }
+    });
+    // Escape closes the dialog natively; both routes end in the same restore.
+    dialog.addEventListener("close", restore);
+  }
   function initListingEditorSaveState() {
     var savebars = document.querySelectorAll("[data-editor-savebar]");
     for (var i = 0; i < savebars.length; i += 1) {
@@ -4503,6 +4621,9 @@ ${ADMIN_DAILY_JS}
           var state = status.getAttribute("data-state") || "";
           if (state === "success") state = "saved";
           if (state === "error" && marker && status.textContent.indexOf(marker) >= 0) state = "conflict";
+          // An unconfirmed save keeps the edits and the retry, so the bar must
+          // not claim the work is either saved or lost.
+          if (state === "uncertain") state = "uncertain";
           if (!state) state = savebar.getAttribute("data-dirty") === "true" ? "dirty" : "clean";
           savebar.setAttribute("data-save-state", state);
           if (conflict) conflict.hidden = state !== "conflict";
@@ -5127,7 +5248,12 @@ ${ADMIN_DAILY_JS}
               || !/^[a-f0-9]{64}$/.test(payload.draft_revision || "")
               || typeof mutationPayload.listingId !== "string" || !mutationPayload.listingId
               || payload.listing_id !== mutationPayload.listingId || payload.draft_only !== true)) {
-              throw new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+              // A response we cannot confirm is not the same as a refusal: the
+              // write may well have landed. Say so in its own state instead of
+              // calling it a failure, and keep every edit either way.
+              var unconfirmed = new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+              unconfirmed.editorUncertain = true;
+              throw unconfirmed;
             }
             if (revision) revision.value = revision.defaultValue = payload.draft_revision;
             commitEditorFormState(form, editorSnapshot);
@@ -5143,7 +5269,10 @@ ${ADMIN_DAILY_JS}
           if (form.hasAttribute("data-locale-form")) window.location.reload();
         })
         .catch(function (error) {
-          if (status) { status.textContent = error.message || failure; status.setAttribute("data-state", "error"); }
+          if (status) {
+            status.textContent = error.message || failure;
+            status.setAttribute("data-state", error && error.editorUncertain ? "uncertain" : "error");
+          }
         })
         .then(function () {
           form.removeAttribute("aria-busy");
@@ -5340,6 +5469,8 @@ ${ADMIN_DAILY_JS}
   initLeadQueueFilters();
   initAdminMobileNavigation();
   initListingEditorTabs();
+  initListingEditorPanels();
+  initListingMediaInspector();
   initEditorForms();
   initLeadPipelineFilters();
   initListingBulkForms();

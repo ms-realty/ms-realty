@@ -1120,13 +1120,16 @@ function durableMedia(config) {
   });
 }
 
+// The editor renders its gallery from the projected draft seed, where a stored
+// asset_id travels with each item. Resolving an asset against the raw seed
+// instead derives a different id from the source URL, so an operator's review of
+// a rendered asset came back as an unknown asset. Both sides have to read the
+// same seed for an asset id to mean one thing.
 async function currentMediaSeed(config) {
-  const seed = currentSeed(config);
-  if (!config.runtimeDataDurableOnly) return seed;
-  return projectListingDraftSeed(seed, {
+  return projectListingDraftSeed(currentSeed(config), {
     env: config.payloadListingEnv || config.authEnv || process.env,
     payload: config.payloadListingRuntime || null,
-    requirePayload: true,
+    requirePayload: config.runtimeDataDurableOnly,
   });
 }
 
