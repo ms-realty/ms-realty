@@ -91,10 +91,12 @@ import {
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
+  isOperatorConnectionReturn,
   isOperatorOAuthProvider,
   operatorConnectionAudit,
   operatorConnectionPkceClearCookie,
   operatorConnectionPkceVerifier,
+  operatorConnectionReturn,
   operatorConnectionStart,
   runOperatorConnectionAction,
 } from "./operator-connect-routes.mjs";
@@ -2884,7 +2886,11 @@ export function createHttpApp({
       }
     }
     if (adminRequest && !principal) {
-      if (request.method === "GET" && url.pathname === "/api/admin/connections" && url.searchParams.get("action") === "callback") {
+      // A provider round trip that arrives on an expired or absent session is
+      // still a browser navigation, so it belongs at the login page rather than
+      // at an unauthorized JSON body. The provider parameters the redirect was
+      // built with may be gone, so the evidence of a round trip is what decides.
+      if (isOperatorConnectionReturn({ method: request.method, pathname: url.pathname, searchParams: url.searchParams })) {
         return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/login", "set-cookie": adminSessionClearCookie() });
       }
       if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && wantsHtml(request, url)) {
@@ -4976,7 +4982,8 @@ export function createHttpApp({
       }
       const connectLocale = adminLocaleParam(url);
       const agentError = request.method === "POST" && !agent;
-      const resultError = Boolean(url.searchParams.get("error")) || storeError || agentError;
+      const returnExpired = Boolean(url.searchParams.get("expired"));
+      const resultError = Boolean(url.searchParams.get("error")) || returnExpired || storeError || agentError;
       const result = agentError
         ? operatorConnectCopy(connectLocale).agentBlocked
         : operatorConnectResult({
@@ -4984,6 +4991,7 @@ export function createHttpApp({
             connected: url.searchParams.get("connected") || "",
             disconnected: url.searchParams.get("disconnected") || "",
             verified: url.searchParams.get("verified") || "",
+            returnExpired,
             error: Boolean(url.searchParams.get("error")),
             storeError,
           });
@@ -5050,6 +5058,11 @@ export function createHttpApp({
         saveProviderConnection,
         deleteProviderConnection,
       };
+      const providerReturn = isOperatorConnectionReturn({
+        method: request.method,
+        pathname: url.pathname,
+        searchParams: url.searchParams,
+      });
       const connectionRedirect = (query, headers = {}) =>
         adminResponse(303, "", "text/plain; charset=utf-8", { location: `/admin/connect?${query}`, ...headers });
       const recordConnectionOutcome = (outcome) => {
@@ -5144,7 +5157,10 @@ export function createHttpApp({
         }
       }
       try {
-        if (request.method === "GET" && url.pathname === "/api/admin/connections" && !url.searchParams.get("action")) {
+        // An inventory read and a provider round trip arrive on the same method
+        // and path. Only the round trip carries a state, code or error, so that
+        // is what keeps a returning browser out of this JSON body.
+        if (request.method === "GET" && url.pathname === "/api/admin/connections" && !url.searchParams.get("action") && !providerReturn) {
           return adminJson(200, {
             kind: "provider_connections",
             availability,
@@ -5243,40 +5259,56 @@ export function createHttpApp({
               return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`);
             }
           }
-          if (action === "callback") {
-            const clearCookie = operatorConnectionPkceClearCookie(requestedProvider);
-            const redirectHeaders = clearCookie ? { "set-cookie": clearCookie } : {};
-            if (url.searchParams.get("error")) {
-              recordProviderConnectionFailure(requestedProvider, "oauth_callback", new Error("provider_rejected"));
-              return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`, redirectHeaders);
-            }
-            let codeVerifier = "";
-            try {
-              codeVerifier = operatorConnectionPkceVerifier(request.headers?.cookie || request.headers?.Cookie || "", {
-                provider: requestedProvider,
-                state: url.searchParams.get("state"),
-              });
-            } catch (error) {
-              recordProviderConnectionFailure(requestedProvider, "oauth_callback", error);
-              return connectionRedirect(`error=${encodeURIComponent(requestedProvider)}`, redirectHeaders);
-            }
-            const outcome = await runOperatorConnectionAction({
-              intent: "callback",
-              provider: requestedProvider,
-              code: url.searchParams.get("code"),
-              state: url.searchParams.get("state"),
-              codeVerifier,
-              operatorId: principal.id,
-              config: providerConfig,
-              deps: connectionDeps,
-            });
-            if (outcome.outcome === "rejected") {
-              recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error);
-              return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
-            }
-            recordConnectionOutcome(outcome);
-            return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
+        }
+        // The round trip itself. Which provider this is, and which operator it
+        // belongs to, come out of the signed state and nowhere else: the query is
+        // whatever the provider chose to hand back. An unattributable return is
+        // sent to a recovery result that names no provider, consumes no other
+        // authorization session and starts no credential exchange.
+        if (providerReturn) {
+          const providerRedirect = operatorConnectionReturn(url.searchParams, {
+            operatorId: principal.id,
+            stateSecret: providerConfig.stateSecret,
+          });
+          if (providerRedirect.kind === "unattributable") return connectionRedirect("expired=1");
+          const clearCookie = operatorConnectionPkceClearCookie(providerRedirect.provider);
+          const redirectHeaders = clearCookie ? { "set-cookie": clearCookie } : {};
+          if (providerRedirect.kind !== "exchange") {
+            // Declined, cancelled, or returned without a code. None of these is a
+            // connection, and none of them may reach the token endpoint.
+            recordProviderConnectionFailure(
+              providerRedirect.provider,
+              "oauth_callback",
+              new Error(providerRedirect.kind === "declined" ? "provider_rejected" : "authorization_code_missing"),
+            );
+            return connectionRedirect(`error=${encodeURIComponent(providerRedirect.provider)}`, redirectHeaders);
           }
+          let codeVerifier = "";
+          try {
+            codeVerifier = operatorConnectionPkceVerifier(request.headers?.cookie || request.headers?.Cookie || "", {
+              provider: providerRedirect.provider,
+              state: providerRedirect.state,
+            });
+          } catch (error) {
+            recordProviderConnectionFailure(providerRedirect.provider, "oauth_callback", error);
+            return connectionRedirect(`error=${encodeURIComponent(providerRedirect.provider)}`, redirectHeaders);
+          }
+          const outcome = await runOperatorConnectionAction({
+            intent: "callback",
+            provider: providerRedirect.provider,
+            code: providerRedirect.code,
+            state: providerRedirect.state,
+            codeVerifier,
+            operatorId: principal.id,
+            config: providerConfig,
+            deps: connectionDeps,
+          });
+          if (outcome.outcome === "rejected") {
+            recordProviderConnectionFailure(outcome.provider, outcome.phase, outcome.error);
+            return connectionRedirect(`error=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
+          }
+          recordConnectionOutcome(outcome);
+          return connectionRedirect(`connected=${encodeURIComponent(outcome.provider)}`, redirectHeaders);
         }
         if (request.method === "POST") {
           const formEncoded = String(request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes(

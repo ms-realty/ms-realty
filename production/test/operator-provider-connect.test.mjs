@@ -23,6 +23,7 @@ import {
   OPERATOR_CONNECT_LOCALES,
   operatorConnectCopy,
   providerCopyKey,
+  providerDisplayName,
 } from "../lib/operator-connect-copy.mjs";
 import {
   OPERATOR_TOKEN_ENV,
@@ -133,6 +134,25 @@ function storeDeps(overrides = {}) {
     },
   };
 }
+
+// The recovery result a provider return falls back to when its signed state
+// cannot be attributed. It names no provider on purpose, so it needs its own
+// sentence in every language rather than borrowing a provider-shaped one.
+test("an unattributable provider return has a recovery sentence in all three languages", () => {
+  for (const locale of OPERATOR_CONNECT_LOCALES) {
+    const copy = operatorConnectCopy(locale);
+    assert.equal(typeof copy.resultReturnExpired, "string", `${locale}.resultReturnExpired`);
+    assert.ok(copy.resultReturnExpired.length > 0, `${locale}.resultReturnExpired is empty`);
+    assert.equal(copy.resultReturnExpired.includes("{provider}"), false, `${locale} must not name a guessed provider`);
+    assert.equal(operatorConnectResult({ locale, returnExpired: true }), copy.resultReturnExpired, locale);
+    // A completed connection still wins over the recovery sentence.
+    assert.equal(
+      operatorConnectResult({ locale, connected: "ai", returnExpired: true }),
+      copy.resultConnected.replace("{provider}", providerDisplayName("ai", copy.lang)),
+      locale,
+    );
+  }
+});
 
 test("every catalogue provider has a card, a title and a sentence in all three languages", () => {
   const cards = operatorProviderCards({ availability: operatorProviderAvailability(fullConfig()), config: fullConfig() });

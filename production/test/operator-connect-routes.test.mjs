@@ -16,7 +16,7 @@ import { OWNER_CONNECTABLE_PROVIDERS, OPERATOR_PROVIDERS } from "../lib/operator
 import { OPERATOR_AGENT_SECRET_ENV, mintOperatorAgentToken } from "../lib/operator-agent-access.mjs";
 import { ADMIN_ROUTE_COVERAGE, OWNER_OPERATOR_BROWSER_OPERATIONS } from "../lib/owner-operator-catalog.mjs";
 import { payloadAdminPrincipal } from "../lib/payload-admin-auth.mjs";
-import { readProviderCredentials, saveProviderConnection } from "../lib/provider-connections.mjs";
+import { createProviderOAuthState, readProviderCredentials, saveProviderConnection } from "../lib/provider-connections.mjs";
 
 const ORIGIN = "https://ms-realty.example";
 const SECRET = "operator-routes-secret-that-is-longer-than-thirty-two-characters";
@@ -882,4 +882,177 @@ test("expired OAuth sessions return to sign-in without exposing callback paramet
   });
   assert.equal(adapter.status, 303);
   assert.equal(adapter.headers.get("location"), "/admin/login");
+});
+
+// OpenRouter documents only a "code" on the return and separately supports
+// echoing "state"; the provider= and action=callback parameters the redirect was
+// built with do not come home. Both runtimes used to key the callback on exactly
+// those two parameters, so a real return missed the callback branch and fell
+// through to the inventory read — the operator's browser was shown the
+// provider_connections JSON instead of a connection result. These drive the
+// return shapes a provider actually sends, through both runtimes, from a real
+// authorization start.
+test("both owner runtimes resolve a provider return from its signed state, not from route parameters", async (t) => {
+  const code = "openrouter-return-code";
+  const apiKey = "sk-or-v1-return-secret-never-rendered";
+  const model = "NousResearch/Hermes-4-14B";
+
+  async function fixture(surface) {
+    const calls = [];
+    const rows = providerPayload();
+    const auditPath = auditFile(t);
+    const providerFetch = async (url, init = {}) => {
+      const requestUrl = String(url);
+      calls.push({ url: requestUrl, body: init.body ? JSON.parse(init.body) : null });
+      if (requestUrl === "https://openrouter.ai/api/v1/auth/keys") {
+        return new Response(JSON.stringify({ key: apiKey, user_id: "openrouter-user" }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      if (requestUrl === "https://openrouter.ai/api/v1/chat/completions") {
+        return new Response(JSON.stringify({ id: "generation-return", choices: [{ message: { content: "OK" } }] }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      throw new Error(`unstubbed OpenRouter fetch: ${requestUrl}`);
+    };
+    const shared = {
+      reviewedAt: "2026-09-15T12:00:00.000Z",
+      auditLogPath: auditPath,
+      payloadAdminAuth: payloadAdminAuth(),
+      providerConnection: PROVIDER_CONFIG,
+      providerConnectionPayload: rows,
+      providerFetch,
+    };
+    let send;
+    if (surface === "standalone") {
+      const app = createHttpApp(shared);
+      send = async (target, headers) => {
+        const response = await dispatchHttp(app, { method: "GET", url: target, headers: { host: "ms-realty.example", ...headers } });
+        return {
+          status: response.status,
+          location: response.headers?.location || "",
+          setCookie: response.headers?.["set-cookie"] || "",
+          body: response.body,
+        };
+      };
+    } else {
+      const config = { ...appAdminConfigFromEnv({ NODE_ENV: "test", MS_REALTY_PUBLIC_ORIGIN: ORIGIN }), ...shared };
+      send = async (target, headers) => {
+        const response = await renderAppAdminResponse(new Request(`${ORIGIN}${target}`, { headers }), { config });
+        const text = await response.clone().text();
+        let body;
+        try {
+          body = JSON.parse(text);
+        } catch {
+          body = text;
+        }
+        return {
+          status: response.status,
+          location: response.headers.get("location") || "",
+          setCookie: response.headers.get("set-cookie") || "",
+          body,
+        };
+      };
+    }
+    const start = await send("/api/admin/connections?provider=ai&action=start", { cookie: `ms_admin=${SESSION}` });
+    assert.equal(start.status, 303, `${surface}: the authorization start must succeed before a return can be replayed`);
+    const authorization = new URL(start.location);
+    const callback = new URL(authorization.searchParams.get("callback_url"));
+    const pkceCookie = start.setCookie.split(";", 1)[0];
+    return { surface, send, calls, rows, auditPath, state: callback.searchParams.get("state"), pkceCookie };
+  }
+
+  for (const surface of ["standalone", "next-adapter"]) {
+    // The shape OpenRouter actually returns: a state it echoed and a code, with
+    // no trace of the route parameters the callback URL was built with.
+    const connected = await fixture(surface);
+    const success = await connected.send(
+      `/api/admin/connections?${new URLSearchParams({ state: connected.state, code })}`,
+      { cookie: `ms_admin=${SESSION}; ${connected.pkceCookie}`, accept: "text/html" },
+    );
+    assert.equal(success.status, 303, surface);
+    assert.equal(success.location, "/admin/connect?connected=ai", surface);
+    assert.match(success.setCookie, /Max-Age=0/, `${surface}: the browser-bound verifier is spent`);
+    assert.equal(connected.calls.length, 2, `${surface}: exactly one exchange and one verification`);
+    assert.equal(connected.calls[0].body.code, code);
+    assert.equal(connected.calls[0].body.code_challenge_method, "S256");
+    assert.equal(connected.rows.rows.length, 1, `${surface}: one credential persisted`);
+    assert.equal(JSON.stringify(connected.rows.rows).includes(apiKey), false, `${surface}: stored encrypted`);
+    assert.deepEqual(await readProviderCredentials("ai", { credentialSecret: SECRET, payload: connected.rows }), {
+      api_key: apiKey,
+      endpoint: "https://openrouter.ai/api/v1/chat/completions",
+      model,
+    });
+    // Nothing the provider handed back may follow the operator to the page or
+    // land in the audit trail.
+    const exposed = JSON.stringify({ location: success.location, body: success.body }) + fs.readFileSync(connected.auditPath, "utf8");
+    for (const value of [code, apiKey, connected.state]) assert.equal(exposed.includes(value), false, `${surface}: ${value.slice(0, 6)} leaked`);
+
+    // Every return that is not a completed authorization: an honest result, no
+    // token endpoint call, and no stored credential.
+    const refusals = [
+      ["cancelled", (f) => ({ state: f.state, error: "access_denied" }), "/admin/connect?error=ai"],
+      ["without a code", (f) => ({ state: f.state }), "/admin/connect?error=ai"],
+      ["with a forged state", (f) => ({ state: `eyJ2IjoyfQ.${f.state.split(".").slice(1).join(".")}`, code }), "/admin/connect?expired=1"],
+      ["with no state at all", () => ({ code }), "/admin/connect?expired=1"],
+      [
+        "with an expired state",
+        (f) => ({
+          state: createProviderOAuthState(
+            { provider: "ai", operatorId: payloadAdminPrincipal(adminUser()).id },
+            { stateSecret: SECRET, now: Date.now() - 3_600_000 },
+          ),
+          code,
+        }),
+        "/admin/connect?expired=1",
+      ],
+      // A query that names a different provider than the signature does is a
+      // request describing one flow while carrying another. Resolving it in the
+      // signature's favour would complete a connection the URL never described.
+      ["naming a provider the state contradicts", (f) => ({ provider: "google", action: "callback", state: f.state, code }), "/admin/connect?expired=1"],
+    ];
+    for (const [name, query, location] of refusals) {
+      const refused = await fixture(surface);
+      const response = await refused.send(`/api/admin/connections?${new URLSearchParams(query(refused))}`, {
+        cookie: `ms_admin=${SESSION}; ${refused.pkceCookie}`,
+        accept: "text/html",
+      });
+      assert.equal(response.status, 303, `${surface}: a return ${name}`);
+      assert.equal(response.location, location, `${surface}: a return ${name}`);
+      assert.equal(response.body?.kind, undefined, `${surface}: a return ${name} is never the inventory body`);
+      assert.equal(refused.calls.length, 0, `${surface}: a return ${name} contacts no provider`);
+      assert.equal(refused.rows.rows.length, 0, `${surface}: a return ${name} stores no credential`);
+    }
+
+    // A verifier the browser no longer holds cannot be substituted for.
+    const unbound = await fixture(surface);
+    const missingVerifier = await unbound.send(
+      `/api/admin/connections?${new URLSearchParams({ state: unbound.state, code })}`,
+      { cookie: `ms_admin=${SESSION}`, accept: "text/html" },
+    );
+    assert.equal(missingVerifier.location, "/admin/connect?error=ai", `${surface}: no PKCE cookie`);
+    assert.equal(unbound.calls.length, 0, `${surface}: no PKCE cookie contacts no provider`);
+
+    // An expired admin session on the way back is still a browser navigation.
+    const signedOut = await fixture(surface);
+    const login = await signedOut.send(
+      `/api/admin/connections?${new URLSearchParams({ state: signedOut.state, code })}`,
+      { accept: "text/html" },
+    );
+    assert.equal(login.status, 303, `${surface}: unauthenticated return`);
+    assert.equal(login.location, "/admin/login", `${surface}: unauthenticated return`);
+    assert.equal(signedOut.calls.length, 0, `${surface}: unauthenticated return contacts no provider`);
+
+    // The inventory read is unchanged for a client that is not coming back from
+    // a provider.
+    const inventory = await signedOut.send("/api/admin/connections", {
+      cookie: `ms_admin=${SESSION}`,
+      accept: "application/json",
+    });
+    assert.equal(inventory.status, 200, surface);
+    assert.equal(inventory.body.kind, "provider_connections", surface);
+  }
 });

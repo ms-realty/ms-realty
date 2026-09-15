@@ -14,6 +14,7 @@ import {
   registerWhatsAppWebhook,
   saveProviderConnection,
   syncViewingToGoogleCalendar,
+  readProviderOAuthState,
   verifyProviderOAuthState,
 } from "../lib/provider-connections.mjs";
 
@@ -103,6 +104,40 @@ test("Google OAuth state is operator-bound, short-lived, and tamper-evident", ()
         now: NOW + 11 * 60_000,
       }),
     /expired/i,
+  );
+});
+
+// A provider may hand the browser back without the route parameters the redirect
+// was built with, so the signature has to be able to say which round trip this
+// is. It may only say so after it has proved the signature, the expiry and the
+// binding to the operator asking.
+test("a signed OAuth state names its own provider only once signature, expiry and operator all hold", () => {
+  const state = createProviderOAuthState({ provider: "google", operatorId: "payload-42" }, { stateSecret: SECRET, now: NOW });
+  const read = readProviderOAuthState(state, { operatorId: "payload-42", stateSecret: SECRET, now: NOW + 1000 });
+  assert.equal(read.provider, "google");
+  assert.equal(read.operator_id, "payload-42");
+  // Tampered signature, another operator's session, and a state past its ten
+  // minutes each refuse to name a provider at all.
+  assert.throws(
+    () => readProviderOAuthState(`${state}x`, { operatorId: "payload-42", stateSecret: SECRET, now: NOW }),
+    /state/i,
+  );
+  assert.throws(
+    () => readProviderOAuthState(state, { operatorId: "payload-7", stateSecret: SECRET, now: NOW }),
+    /state/i,
+  );
+  assert.throws(
+    () => readProviderOAuthState(state, { operatorId: "payload-42", stateSecret: SECRET, now: NOW + 11 * 60_000 }),
+    /expired/i,
+  );
+  assert.throws(
+    () => readProviderOAuthState(state, { operatorId: "payload-42", stateSecret: `${SECRET}-other`, now: NOW }),
+    /state/i,
+  );
+  // The checking form still refuses a provider the caller did not expect.
+  assert.throws(
+    () => verifyProviderOAuthState(state, { provider: "facebook", operatorId: "payload-42", stateSecret: SECRET, now: NOW }),
+    /state/i,
   );
 });
 

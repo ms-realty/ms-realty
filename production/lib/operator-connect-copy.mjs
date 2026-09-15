@@ -185,6 +185,7 @@ const CONNECT_COPY = {
     resultStoreError: "Хранилището на връзките е недостъпно в момента; нови идентификатори няма да бъдат приети.",
     resultDisconnected: "{provider} е прекъснат и записът е изтрит.",
     resultVerified: "{provider} отговори. Проверката е записана.",
+    resultReturnExpired: "Сесията за оторизация е изтекла или не съвпада с този оператор. Започни свързването отново от картата по-долу.",
   },
   ru: {
     lang: "ru",
@@ -363,6 +364,7 @@ const CONNECT_COPY = {
     resultStoreError: "Хранилище подключений сейчас недоступно; новые credentials не будут приняты.",
     resultDisconnected: "{provider} отключён, запись удалена.",
     resultVerified: "{provider} ответил. Проверка записана.",
+    resultReturnExpired: "Сессия авторизации истекла или не соответствует этому оператору. Начни подключение заново с карточки ниже.",
   },
   en: {
     lang: "en",
@@ -541,6 +543,7 @@ const CONNECT_COPY = {
     resultStoreError: "The connection store is unavailable right now; new credentials will not be accepted.",
     resultDisconnected: "{provider} is disconnected and the record is deleted.",
     resultVerified: "{provider} answered. The check has been recorded.",
+    resultReturnExpired: "The authorization session expired or could not be matched to this operator. Start the connection again from the card below.",
   },
 };
 

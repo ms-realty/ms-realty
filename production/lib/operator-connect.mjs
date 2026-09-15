@@ -157,6 +157,10 @@ export function operatorConnectResult({
   connected = "",
   disconnected = "",
   verified = "",
+  // A provider round trip that arrived without a signed state we can attribute.
+  // It names no provider on purpose: guessing one from the query is exactly the
+  // inference this result exists to refuse.
+  returnExpired = false,
   error = false,
   storeError = false,
 }) {
@@ -164,6 +168,7 @@ export function operatorConnectResult({
   if (connected) return copy.resultConnected.replace("{provider}", providerDisplayName(connected, copy.lang));
   if (disconnected) return copy.resultDisconnected.replace("{provider}", providerDisplayName(disconnected, copy.lang));
   if (verified) return copy.resultVerified.replace("{provider}", providerDisplayName(verified, copy.lang));
+  if (returnExpired) return copy.resultReturnExpired;
   if (error) return copy.resultRejected;
   if (storeError) return copy.resultStoreError;
   return "";
