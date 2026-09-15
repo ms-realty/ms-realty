@@ -249,7 +249,17 @@ test("media cards name the asset for a person, give the replace panel room, and 
   const headings = [...html.matchAll(/<(?:h3|strong)[^>]*>([^<]*)<\/(?:h3|strong)>/g)].map(([, text]) => text.trim());
   assert.ok(headings.length > 0);
   assert.deepEqual(headings.filter((text) => text.startsWith("media-")), []);
-  assert.match(html, /<strong>Photo 1 of \d+<\/strong><code class="crm-mono adm-id-caption">media-[0-9a-f]+<\/code>/);
+  // The gallery tile names the photograph the way a person counts it and shows
+  // no generated key at all; the key stays with that asset's editor, which is
+  // where someone who needs the evidence goes looking for it.
+  assert.match(html, /<strong>Photo 1 of \d+<\/strong>/);
+  const tiles = [...html.matchAll(/<article[^>]*data-media-asset="[^"]+"[\s\S]*?<\/article>/g)].map(([tile]) => tile);
+  assert.ok(tiles.length > 0);
+  for (const tile of tiles) {
+    assert.doesNotMatch(tile, /adm-id-caption/);
+    assert.doesNotMatch(tile, /<form/);
+  }
+  assert.match(html, /<code class="crm-mono adm-id-caption" data-media-asset-id="media-[0-9a-f]+">media-[0-9a-f]+<\/code>/);
   // (b) The replace-file panel carries a class whose CSS gives it a width
   // floor and a single full-width column, so the hint no longer wraps letter
   // by letter inside the two-column .adm-form grid.
@@ -520,4 +530,84 @@ test("approved content styles ship in the CMS adapter and reach the generated sh
 test("approved content refuses an unauthorized reader", async () => {
   const page = await dispatchHttp(app(), { url: "/admin/approved-content?locale=en" });
   assert.equal(page.status, 401);
+});
+
+// The editor used to render one tab per request behind plain links, so a broker
+// who opened Media to check a photo navigated away from unsaved Facts and lost
+// them with no warning and nothing to retry. One record is now one document.
+test("the listing editor keeps every section and one save bar in a single document", async () => {
+  for (const tab of ["facts", "translations", "media", "seo", "quality"]) {
+    const page = await dispatchHttp(app(), {
+      url: `/admin/listings/edit?listingId=MS-00815&locale=en&tab=${tab}`,
+      headers: auth,
+    });
+    assert.equal(page.status, 200, tab);
+    // The draft form and its save bar exist whichever section is showing, so
+    // changing section cannot discard what was typed.
+    assert.match(page.body, /<form id="listing-facts"/, tab);
+    assert.match(page.body, /data-editor-savebar="true"/, tab);
+    // Every section is in the document; only one is on screen.
+    for (const owned of ["facts", "seo"]) {
+      assert.ok(page.body.includes(`data-editor-fields-tab="${owned}"`), `${tab}: ${owned} fields`);
+    }
+    for (const owned of ["quality", "translations", "media"]) {
+      assert.ok(page.body.includes(`data-editor-panel-tab="${owned}"`), `${tab}: ${owned} panel`);
+    }
+    assert.ok(page.body.includes(`data-editor-tab-link="${tab}"`), tab);
+  }
+});
+
+// Six narrow columns each holding a full replacement and review form is what
+// made an opened editor stretch its whole row and cut off its own controls.
+test("media tiles hold no forms and the selected photo opens a roomy inspector", async () => {
+  const page = await dispatchHttp(app(), {
+    url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media",
+    headers: auth,
+  });
+  const tiles = [...page.body.matchAll(/<article[^>]*data-media-asset="[^"]+"[\s\S]*?<\/article>/g)].map(([tile]) => tile);
+  assert.ok(tiles.length > 1);
+  for (const tile of tiles) {
+    assert.doesNotMatch(tile, /<form/);
+    assert.match(tile, /data-media-open="media-[0-9a-f]+"/);
+  }
+  // The real forms are full width outside the grid, so they work without
+  // scripting, and the dialog borrows them rather than cloning them.
+  const editors = (page.body.match(/data-media-asset-forms="media-[0-9a-f]+"/g) || []).length;
+  assert.equal(editors, tiles.length);
+  assert.match(page.body, /<dialog class="adm-media-inspector" data-media-inspector="true"/);
+  assert.match(page.body, /data-media-inspector-mount="true"/);
+  assert.match(ADMIN_APP_JS, /function initListingMediaInspector\(\)/);
+  assert.match(ADMIN_APP_JS, /function initListingEditorPanels\(\)/);
+  // Moved, never cloned: a half-typed reason or a chosen file survives the trip.
+  assert.match(ADMIN_APP_JS, /mount\.appendChild\(block\)/);
+  assert.match(ADMIN_APP_JS, /homeParent\.insertBefore\(borrowed, homeNext\)/);
+  assert.doesNotMatch(ADMIN_APP_JS, /cloneNode\(true\)[\s\S]{0,80}media-inspector/);
+  // The inspector has room for the picture and 44px controls.
+  assert.match(cmsCss, /\.adm-media-inspector \{[^}]*width: min\(960px/);
+  assert.match(cmsCss, /\.adm-media-inspector__forms textarea \{[^}]*min-height: 88px;/);
+  assert.match(cmsCss, /\.adm-media-asset__open \{[^}]*min-height: 44px;/);
+});
+
+// Gallery order is the listing's own media array, so the first photo is the
+// cover. The controls are buttons rather than a drag gesture, because a drag
+// gesture is unreachable from a keyboard.
+test("gallery order is changed with reachable controls, and only where the store can keep it", async () => {
+  const page = await dispatchHttp(app(), {
+    url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media",
+    headers: auth,
+  });
+  // This runtime has no durable media store, so no order control is offered at
+  // all rather than a button that cannot persist what it promises.
+  assert.doesNotMatch(page.body, /data-media-move=/);
+  assert.doesNotMatch(page.body, /data-media-order-listing=/);
+  // The client half exists and saves the whole gallery, which is what the route
+  // accepts and what stops a stale tab from dropping a photo.
+  assert.match(ADMIN_APP_JS, /function initListingMediaOrder\(\)/);
+  assert.match(ADMIN_APP_JS, /"\/api\/admin\/media\/order"/);
+  assert.match(ADMIN_APP_JS, /assetIds: assetOrder\(\)/);
+  // A refusal puts the tiles back rather than leaving the screen disagreeing
+  // with the stored order.
+  assert.match(ADMIN_APP_JS, /restore\(\);/);
+  // Cover, earlier and later all have 44px targets.
+  assert.match(cmsCss, /\.adm-media-asset__order \.mk-btn \{[^}]*min-height: 44px;[^}]*min-width: 44px;/);
 });

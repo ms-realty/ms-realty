@@ -34,6 +34,7 @@ const ADMIN_ACTIONS = new Set([
   "listing_publication_scheduled",
   "listing_quality_imported",
   "listing_slug_changed",
+  "listing_media_reordered",
   "media_reviewed",
   "media_uploaded",
   "lead_assigned",

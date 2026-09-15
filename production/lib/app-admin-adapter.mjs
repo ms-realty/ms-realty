@@ -84,6 +84,7 @@ import {
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
+import { searchAdminRecords } from "./admin-record-search.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -116,6 +117,7 @@ import {
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
+  renderAdminRecordSearchPayload,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -282,6 +284,7 @@ import {
   mediaDurableRuntimeConfigured,
   mediaDurableStoreConfigFromEnv,
   persistMediaReviewDurably,
+  reorderListingMediaDurably,
   persistMediaUploadDurably,
   readMediaUploadBytesDurably,
 } from "./media-durable-store.mjs";
@@ -1122,13 +1125,16 @@ function durableMedia(config) {
   });
 }
 
+// The editor renders its gallery from the projected draft seed, where a stored
+// asset_id travels with each item. Resolving an asset against the raw seed
+// instead derives a different id from the source URL, so an operator's review of
+// a rendered asset came back as an unknown asset. Both sides have to read the
+// same seed for an asset id to mean one thing.
 async function currentMediaSeed(config) {
-  const seed = currentSeed(config);
-  if (!config.runtimeDataDurableOnly) return seed;
-  return projectListingDraftSeed(seed, {
+  return projectListingDraftSeed(currentSeed(config), {
     env: config.payloadListingEnv || config.authEnv || process.env,
     payload: config.payloadListingRuntime || null,
-    requirePayload: true,
+    requirePayload: config.runtimeDataDurableOnly,
   });
 }
 
@@ -2237,6 +2243,9 @@ async function listingEditorPayload(registry, url, config) {
     config.adminPrincipal || null,
     { tab: editorTabFromUrl(url) },
   );
+  // Same condition as the standalone runtime: the control exists only where the
+  // order can actually be kept.
+  payload.media_order_available = durableMedia(config);
   return config.runtimeDataDurableOnly
     ? {
         ...payload,
@@ -5216,6 +5225,26 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));
+    // The same one entry as the standalone runtime, reading the same sources
+    // through the same checks, so a record found on one is found on the other.
+    if (request.method === "GET" && ["/api/admin/search", "/admin/search"].includes(url.pathname)) {
+      const seedForSearch = await projectListingDraftSeed(currentSeed(config), {
+        env: config.payloadListingEnv || config.authEnv || process.env,
+        payload: config.payloadListingRuntime || null,
+        requirePayload: config.runtimeDataDurableOnly,
+      });
+      const found = searchAdminRecords({
+        query: url.searchParams.get("q") || "",
+        listings: seedForSearch.records.filter((record) => record.collection === "listings"),
+      });
+      if (url.pathname === "/admin/search") {
+        return htmlResponse(
+          renderAdminRecordSearchPayload(registry, url.searchParams.get("locale") || "en", found, config.adminPrincipal || null),
+        );
+      }
+      return jsonResponse(200, found);
+    }
+
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, await contactsPayload(registry, url, config));
 
     // Durable document metadata and signature state live in Payload/Postgres.
@@ -6030,7 +6059,14 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
           idempotent: result.idempotent,
         });
       } catch (error) {
-        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        return jsonResponse(error.status || 400, {
+          kind: error.code || "bad_request",
+          message: error.message,
+          // A conflict carries what the operator needs to decide with:
+          // the version now in force and which of their own fields
+          // somebody else changed underneath them.
+          ...(error.details ? error.details : {}),
+        });
       }
     }
     // B4 media upload
@@ -6109,7 +6145,41 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       }
       return jsonResponse(uploaded.status, uploaded.body);
     }
-    if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
+// Gallery order, written as a permutation of the listing's own media array.
+    // It publishes nothing and deletes nothing.
+    if (request.method === "POST" && url.pathname === "/api/admin/media/order") {
+      if (!durableMedia(config)) {
+        return jsonResponse(503, { kind: "media_order_unavailable", message: "Gallery order needs durable media storage" });
+      }
+      try {
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const outcome = await reorderListingMediaDurably(
+          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [] },
+          {
+            payload: config.payloadListingRuntime || null,
+            env: config.payloadListingEnv || config.authEnv || process.env,
+            principal: config.adminPrincipal,
+          },
+        );
+        if (!outcome.idempotent) {
+          recordAudit(
+            {
+              action: "listing_media_reordered",
+              actor: config.adminPrincipal?.id,
+              objectType: "listing",
+              objectId: outcome.listing_id,
+              metadata: { photo_count: outcome.asset_ids.length },
+            },
+            config,
+          );
+        }
+        return jsonResponse(outcome.idempotent ? 200 : 201, outcome);
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
+    }
+
+        if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = await appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }

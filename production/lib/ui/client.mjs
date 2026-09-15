@@ -4491,6 +4491,291 @@ ${ADMIN_DAILY_JS}
   // sentence of text, tells the operator where the save got to. A conflict is
   // an error the server does not report yet: the marker below is the hook, and
   // until a version token exists the bar falls back to the plain error state.
+  // One record, one page. The tabs used to be links that navigated, so opening
+  // Media to check a photo threw away unsaved Facts. Every section is already in
+  // the document; this only changes which one is on screen, and the save bar
+  // stays put so the draft can be saved from wherever the operator is looking.
+  // The search box is a real form to a real page; this only adds suggestions
+  // under it so a known record is one keystroke and one Enter away. Submitting
+  // still works if this never runs, and the request is abandoned rather than
+  // raced when the operator keeps typing.
+  // Order is changed one step at a time and saved as the whole gallery, because
+  // the route only accepts a full permutation - which is exactly what stops a
+  // tab left open from dropping a photo somebody else added. A refusal puts the
+  // tiles back where they were rather than leaving the screen disagreeing with
+  // the stored order.
+  function initListingMediaOrder() {
+    var manager = document.querySelector("[data-media-order-listing]");
+    if (!manager) return;
+    var listingId = manager.getAttribute("data-media-order-listing");
+    var status = manager.querySelector("[data-media-order-status]");
+    var saving = manager.getAttribute("data-media-order-saving") || "Saving…";
+    var success = manager.getAttribute("data-media-order-success") || "Saved.";
+    var failure = manager.getAttribute("data-media-order-failure") || "Not saved.";
+    var busy = false;
+    function tiles() { return manager.querySelectorAll("[data-media-asset]"); }
+    function assetOrder() {
+      var rows = tiles();
+      var order = [];
+      for (var i = 0; i < rows.length; i += 1) order.push(rows[i].getAttribute("data-media-asset"));
+      return order;
+    }
+    function say(text, state) {
+      if (!status) return;
+      status.textContent = text;
+      status.setAttribute("data-state", state);
+    }
+    function save(restore) {
+      busy = true;
+      say(saving, "saving");
+      fetch("/api/admin/media/order", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ listingId: listingId, assetIds: assetOrder() }),
+      })
+        .then(function (response) {
+          return response.json().catch(function () { return {}; }).then(function (payload) {
+            if (!response.ok) throw new Error(payload.message || failure);
+            return payload;
+          });
+        })
+        .then(function () { say(success, "success"); })
+        .catch(function (error) {
+          restore();
+          say(error.message || failure, "error");
+        })
+        .then(function () { busy = false; refresh(); });
+    }
+    // The first tile is the cover, so the controls say so rather than leaving
+    // the operator to infer it from position.
+    function refresh() {
+      var rows = tiles();
+      for (var i = 0; i < rows.length; i += 1) {
+        var up = rows[i].querySelector('[data-media-move="up"]');
+        var down = rows[i].querySelector('[data-media-move="down"]');
+        if (up) up.disabled = busy || i === 0;
+        if (down) down.disabled = busy || i === rows.length - 1;
+        var front = rows[i].querySelector('[data-media-move="front"]');
+        if (front) front.disabled = busy;
+      }
+    }
+    manager.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-media-move]") : null;
+      if (!button || busy) return;
+      event.preventDefault();
+      var tile = button.closest("[data-media-asset]");
+      var parent = tile.parentNode;
+      var home = tile.nextSibling;
+      var direction = button.getAttribute("data-media-move");
+      if (direction === "up" && tile.previousElementSibling) parent.insertBefore(tile, tile.previousElementSibling);
+      else if (direction === "down" && tile.nextElementSibling) parent.insertBefore(tile.nextElementSibling, tile);
+      else if (direction === "front") parent.insertBefore(tile, parent.firstElementChild);
+      else return;
+      refresh();
+      save(function () { parent.insertBefore(tile, home); refresh(); });
+      var moved = tile.querySelector("[data-media-move]");
+      if (moved && typeof moved.focus === "function") moved.focus();
+    });
+    refresh();
+  }
+  function initAdminSearchEntry() {
+    var form = document.querySelector("[data-admin-search]");
+    if (!form || typeof fetch !== "function") return;
+    var input = form.querySelector("[data-admin-search-input]");
+    var list = form.querySelector("[data-admin-search-suggestions]");
+    if (!input || !list) return;
+    var timer = 0;
+    var inflight = null;
+    var active = -1;
+    function close() {
+      list.hidden = true;
+      list.innerHTML = "";
+      input.setAttribute("aria-expanded", "false");
+      active = -1;
+    }
+    function options() { return list.querySelectorAll("[data-admin-search-option]"); }
+    function highlight(next) {
+      var rows = options();
+      if (!rows.length) return;
+      active = (next + rows.length) % rows.length;
+      for (var i = 0; i < rows.length; i += 1) {
+        var on = i === active;
+        rows[i].setAttribute("aria-selected", on ? "true" : "false");
+        if (on) rows[i].scrollIntoView({ block: "nearest" });
+      }
+    }
+    function render(payload) {
+      var rows = (payload && payload.results) || [];
+      if (!rows.length) { close(); return; }
+      list.innerHTML = "";
+      for (var i = 0; i < rows.length && i < 8; i += 1) {
+        var row = rows[i];
+        var option = document.createElement("a");
+        option.className = "crm-top__suggestion";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
+        option.setAttribute("data-admin-search-option", row.type);
+        option.href = row.href;
+        var kind = document.createElement("span");
+        kind.className = "crm-top__suggestion-kind";
+        kind.textContent = row.type;
+        var title = document.createElement("strong");
+        title.textContent = row.title || row.id;
+        option.appendChild(kind);
+        option.appendChild(title);
+        list.appendChild(option);
+      }
+      list.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      active = -1;
+    }
+    function ask() {
+      var query = input.value.trim();
+      if (query.length < 2) { close(); return; }
+      if (inflight && typeof inflight.abort === "function") inflight.abort();
+      var controller = typeof AbortController === "function" ? new AbortController() : null;
+      inflight = controller;
+      fetch("/api/admin/search?q=" + encodeURIComponent(query), {
+        credentials: "same-origin",
+        headers: { accept: "application/json" },
+        signal: controller ? controller.signal : undefined,
+      })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (payload) { if (payload) render(payload); })
+        .catch(function () { /* the form still submits to the results page */ });
+    }
+    input.addEventListener("input", function () {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(ask, 180);
+    });
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowDown") { event.preventDefault(); highlight(active + 1); return; }
+      if (event.key === "ArrowUp") { event.preventDefault(); highlight(active - 1); return; }
+      if (event.key === "Escape") { close(); return; }
+      if (event.key === "Enter" && active >= 0) {
+        var rows = options();
+        if (rows[active]) { event.preventDefault(); window.location.assign(rows[active].getAttribute("href")); }
+      }
+    });
+    document.addEventListener("click", function (event) {
+      if (!form.contains(event.target)) close();
+    });
+  }
+  function initListingEditorPanels() {
+    var nav = document.querySelector("[data-editor-tabs]");
+    var shell = document.querySelector("[data-editor-shell]");
+    if (!nav || !shell) return;
+    var links = nav.querySelectorAll("[data-editor-tab-link]");
+    if (!links.length) return;
+    var primary = document.querySelector("[data-editor-primary-panel]");
+    var heading = primary ? primary.querySelector("h2") : null;
+    function groups(name) { return document.querySelectorAll("[" + name + "]"); }
+    function show(tab) {
+      var fields = groups("data-editor-fields-tab");
+      for (var i = 0; i < fields.length; i += 1) {
+        fields[i].hidden = fields[i].getAttribute("data-editor-fields-tab") !== tab;
+      }
+      var panels = groups("data-editor-panel-tab");
+      for (var j = 0; j < panels.length; j += 1) {
+        panels[j].hidden = panels[j].getAttribute("data-editor-panel-tab") !== tab;
+      }
+      var onForm = tab === "facts" || tab === "seo";
+      // The save bar belongs to the record, not to one section, so the panel
+      // keeps it while its heading and fields step aside.
+      if (primary) primary.setAttribute("data-editor-fields-hidden", onForm ? "false" : "true");
+      if (heading && onForm) {
+        var title = primary.getAttribute("data-editor-title-" + tab);
+        if (title) heading.textContent = title;
+      }
+      for (var k = 0; k < links.length; k += 1) {
+        var owned = links[k].getAttribute("data-editor-tab-link") === tab;
+        if (owned) { links[k].setAttribute("aria-current", "page"); links[k].setAttribute("data-active", ""); }
+        else { links[k].removeAttribute("aria-current"); links[k].removeAttribute("data-active"); }
+      }
+      shell.setAttribute("data-editor-tab", tab);
+    }
+    for (var n = 0; n < links.length; n += 1) {
+      links[n].addEventListener("click", function (event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
+        var tab = this.getAttribute("data-editor-tab-link");
+        if (!tab) return;
+        event.preventDefault();
+        show(tab);
+        // The address keeps naming the section, and the link already carries
+        // the locale, so a reload or a shared link lands in the same place.
+        try { history.replaceState(null, "", this.getAttribute("href")); } catch (error) { /* history is optional */ }
+      });
+    }
+    show(shell.getAttribute("data-editor-tab") || "facts");
+  }
+  // The gallery stays a gallery; one asset at a time gets a roomy editor. The
+  // selected asset's real forms are MOVED into the dialog and moved back on
+  // close, never cloned, so a half-typed reason or an already-chosen file is
+  // still there afterwards.
+  function initListingMediaInspector() {
+    var dialog = document.querySelector("[data-media-inspector]");
+    var mount = document.querySelector("[data-media-inspector-mount]");
+    var editors = document.querySelector("[data-media-editors]");
+    if (!dialog || !mount || !editors || typeof dialog.showModal !== "function") return;
+    var titleNode = dialog.querySelector("[data-media-inspector-title]");
+    var previewNode = dialog.querySelector("[data-media-inspector-preview]");
+    var idNode = dialog.querySelector("[data-media-inspector-id]");
+    var openedBy = null;
+    var borrowed = null;
+    var homeParent = null;
+    var homeNext = null;
+    // With scripting the dialog is the way in, so the full-width editors below
+    // the gallery stand down. Without it they remain the working forms.
+    editors.hidden = true;
+    function restore() {
+      if (borrowed && homeParent) homeParent.insertBefore(borrowed, homeNext);
+      borrowed = null; homeParent = null; homeNext = null;
+      if (previewNode) { previewNode.removeAttribute("src"); previewNode.alt = ""; }
+      if (idNode) idNode.textContent = "";
+      if (openedBy && typeof openedBy.focus === "function") openedBy.focus();
+      openedBy = null;
+    }
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-media-open]") : null;
+      if (button) {
+        var assetId = button.getAttribute("data-media-open");
+        var block = editors.querySelector('[data-media-asset-forms="' + assetId + '"]');
+        if (!block) return;
+        event.preventDefault();
+        openedBy = button;
+        borrowed = block;
+        homeParent = block.parentNode;
+        homeNext = block.nextSibling;
+        mount.appendChild(block);
+        var tile = document.querySelector('[data-media-asset="' + assetId + '"]');
+        var thumb = tile ? tile.querySelector("[data-media-preview]") : null;
+        var name = tile ? tile.querySelector("strong") : null;
+        if (titleNode && name) titleNode.textContent = name.textContent;
+        if (idNode) idNode.textContent = assetId;
+        if (previewNode) {
+          if (thumb && thumb.getAttribute("src")) {
+            previewNode.setAttribute("src", thumb.getAttribute("src"));
+            previewNode.alt = thumb.getAttribute("alt") || "";
+            previewNode.hidden = false;
+          } else {
+            previewNode.removeAttribute("src");
+            previewNode.hidden = true;
+          }
+        }
+        dialog.showModal();
+        var first = block.querySelector("summary, input, select, textarea, button");
+        if (first && typeof first.focus === "function") first.focus();
+        return;
+      }
+      if (event.target && event.target.closest && event.target.closest("[data-media-inspector-close]")) {
+        event.preventDefault();
+        dialog.close();
+      }
+    });
+    // Escape closes the dialog natively; both routes end in the same restore.
+    dialog.addEventListener("close", restore);
+  }
   function initListingEditorSaveState() {
     var savebars = document.querySelectorAll("[data-editor-savebar]");
     for (var i = 0; i < savebars.length; i += 1) {
@@ -4503,6 +4788,9 @@ ${ADMIN_DAILY_JS}
           var state = status.getAttribute("data-state") || "";
           if (state === "success") state = "saved";
           if (state === "error" && marker && status.textContent.indexOf(marker) >= 0) state = "conflict";
+          // An unconfirmed save keeps the edits and the retry, so the bar must
+          // not claim the work is either saved or lost.
+          if (state === "uncertain") state = "uncertain";
           if (!state) state = savebar.getAttribute("data-dirty") === "true" ? "dirty" : "clean";
           savebar.setAttribute("data-save-state", state);
           if (conflict) conflict.hidden = state !== "conflict";
@@ -4874,6 +5162,51 @@ ${ADMIN_DAILY_JS}
     if (form.hasAttribute("data-lead-bulk-form")) payload.bulkConfirmed = form.elements.bulkConfirmed && form.elements.bulkConfirmed.checked;
     return payload;
   }
+  // Losing an afternoon's typing to a version number is not a recovery. The
+  // conflict panel names the fields somebody else changed and what they now
+  // say, keeps every edit in place, and offers one deliberate way forward:
+  // take the newer version and save over it. The revision is only advanced by
+  // that click, never automatically, because doing it silently would overwrite
+  // a colleague's work on the operator's behalf.
+  function showEditorConflict(form, payload) {
+    var panel = document.querySelector("[data-editor-conflict]");
+    if (!panel) return;
+    var list = panel.querySelector("[data-editor-conflict-fields]");
+    var accept = panel.querySelector("[data-editor-conflict-accept]");
+    var fields = (payload && payload.conflicting_fields) || [];
+    if (list) {
+      list.innerHTML = "";
+      for (var i = 0; i < fields.length; i += 1) {
+        var row = document.createElement("li");
+        var name = document.createElement("strong");
+        name.textContent = fields[i].field;
+        row.appendChild(name);
+        var value = fields[i].current_value;
+        if (value !== null && value !== undefined && value !== "") {
+          var theirs = document.createElement("span");
+          theirs.textContent = " " + String(value);
+          row.appendChild(theirs);
+        }
+        list.appendChild(row);
+      }
+      list.hidden = fields.length === 0;
+    }
+    if (accept) {
+      var fresh = payload && payload.draft_revision;
+      accept.hidden = !/^[a-f0-9]{64}$/.test(String(fresh || ""));
+      accept.onclick = function () {
+        var revision = form.querySelector('[name="draftRevision"]');
+        if (revision) revision.value = revision.defaultValue = fresh;
+        panel.hidden = true;
+        var status = form.querySelector("[data-admin-mutation-status]");
+        if (status) {
+          status.textContent = form.getAttribute("data-editor-conflict-ready") || "Ready to save over the newer version.";
+          status.setAttribute("data-state", "dirty");
+        }
+        syncEditorSavebar(form);
+      };
+    }
+  }
   function bulkOutcomeText(form, payload) {
     var failure = form.getAttribute("data-admin-mutation-failure") || "Could not apply to every enquiry.";
     var refused = (payload.results || []).filter(function (row) { return row.status === "refused"; });
@@ -5110,9 +5443,15 @@ ${ADMIN_DAILY_JS}
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
             if (!response.ok && response.status !== 207) {
-              throw new Error(payload.kind === "listing_draft_conflict"
+              var refusal = new Error(payload.kind === "listing_draft_conflict"
                 ? form.getAttribute("data-editor-conflict-message") || payload.message || failure
                 : payload.message || failure);
+              // A conflict is the one refusal the operator can act on, so the
+              // answer travels with the error instead of being reduced to a
+              // sentence: which version is in force, and which of their fields
+              // somebody else changed.
+              if (payload.kind === "listing_draft_conflict") refusal.conflict = payload;
+              throw refusal;
             }
             return payload;
           });
@@ -5127,7 +5466,12 @@ ${ADMIN_DAILY_JS}
               || !/^[a-f0-9]{64}$/.test(payload.draft_revision || "")
               || typeof mutationPayload.listingId !== "string" || !mutationPayload.listingId
               || payload.listing_id !== mutationPayload.listingId || payload.draft_only !== true)) {
-              throw new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+              // A response we cannot confirm is not the same as a refusal: the
+              // write may well have landed. Say so in its own state instead of
+              // calling it a failure, and keep every edit either way.
+              var unconfirmed = new Error(form.getAttribute("data-editor-unknown-message") || "The save could not be confirmed. Keep your edits and reload the listing before trying again.");
+              unconfirmed.editorUncertain = true;
+              throw unconfirmed;
             }
             if (revision) revision.value = revision.defaultValue = payload.draft_revision;
             commitEditorFormState(form, editorSnapshot);
@@ -5143,7 +5487,11 @@ ${ADMIN_DAILY_JS}
           if (form.hasAttribute("data-locale-form")) window.location.reload();
         })
         .catch(function (error) {
-          if (status) { status.textContent = error.message || failure; status.setAttribute("data-state", "error"); }
+          if (status) {
+            status.textContent = error.message || failure;
+            status.setAttribute("data-state", error && error.editorUncertain ? "uncertain" : "error");
+          }
+          if (error && error.conflict) showEditorConflict(form, error.conflict);
         })
         .then(function () {
           form.removeAttribute("aria-busy");
@@ -5340,6 +5688,10 @@ ${ADMIN_DAILY_JS}
   initLeadQueueFilters();
   initAdminMobileNavigation();
   initListingEditorTabs();
+  initAdminSearchEntry();
+  initListingMediaOrder();
+  initListingEditorPanels();
+  initListingMediaInspector();
   initEditorForms();
   initLeadPipelineFilters();
   initListingBulkForms();

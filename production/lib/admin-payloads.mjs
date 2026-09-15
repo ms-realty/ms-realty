@@ -45,6 +45,29 @@ export function workspaceWithOperator(workspace, operator) {
     : workspace;
 }
 
+// The search screen is a page like any other: same shell, same workspace, same
+// operator identity. The results themselves arrive already ranked.
+export function renderAdminRecordSearchPayload(registry, requestedLocale, found, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    ...found,
+    kind: "admin_record_search",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/search",
+    canonical: "/admin/search",
+    indexable: false,
+    metadata: {
+      title: "MS Realty workspace search",
+      description: "Admin-only search across listings, enquiries, people and viewings.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+  };
+}
+
 export function renderAdminListingEditorPayload(
   registry,
   requestedLocale,

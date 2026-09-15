@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 116,
-    "admin_methods": 137,
+    "admin_route_files": 118,
+    "admin_methods": 139,
     "admin_pages": 24,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 164,
-    "structurally_covered_workflows": 164,
+    "authorized_workflows": 166,
+    "structurally_covered_workflows": 166,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -1052,6 +1052,23 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/requests/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_search",
+      "method": "GET",
+      "pathname": "/api/admin/search",
+      "family": "administration",
+      "tool": "ms_realty_admin_read",
+      "capability": "workspace:read",
+      "read_only": true,
+      "sensitive": false,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/search/route.js",
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {
@@ -2463,6 +2480,34 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/locales/route.js",
+      "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
+    },
+    {
+      "operation": "admin_post_media_order",
+      "method": "POST",
+      "pathname": "/api/admin/media/order",
+      "family": "content",
+      "tool": "ms_realty_admin_write",
+      "capability": "administration:write",
+      "read_only": false,
+      "sensitive": false,
+      "confirmation": {
+        "kind": "signed_expiring_challenge",
+        "version": "c1",
+        "algorithm": "HMAC-SHA256",
+        "ttl_seconds": 120,
+        "binds": [
+          "operator_id",
+          "session_id",
+          "operation",
+          "input_hash"
+        ]
+      },
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/media/order/route.js",
       "declared_entrypoint": "signed_delegated_mcp_and_human_admin_ui"
     },
     {
