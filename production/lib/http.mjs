@@ -121,6 +121,7 @@ import {
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
+  renderAdminRecordSearchPayload,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -5382,11 +5383,22 @@ export function createHttpApp({
         env: payloadListingEnv,
         requirePayload: runtimeDataDurableOnly,
       });
-      return adminJson(200, searchAdminRecords({
+      const found = searchAdminRecords({
         query: url.searchParams.get("q") || "",
         listings: seedForSearch.records.filter((record) => record.collection === "listings"),
         leads: canAdminAccess(principal, "operations:read") && Array.isArray(requestLeadRows) ? requestLeadRows : null,
-      }));
+      });
+      if (url.pathname === "/admin/search") {
+        return adminResponse(
+          200,
+          adminHtml(withWorkspaceSettings(
+            renderAdminRecordSearchPayload(activeRegistry, adminLocaleParam(url), found, principal),
+          )),
+          "text/html; charset=utf-8",
+          { "x-robots-tag": "noindex, nofollow" },
+        );
+      }
+      return adminJson(200, found);
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {

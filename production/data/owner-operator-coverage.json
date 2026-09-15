@@ -22,13 +22,13 @@
     }
   },
   "summary": {
-    "admin_route_files": 116,
-    "admin_methods": 137,
+    "admin_route_files": 117,
+    "admin_methods": 138,
     "admin_pages": 24,
     "nav_destinations": 7,
     "hermes_tools": 3,
-    "authorized_workflows": 164,
-    "structurally_covered_workflows": 164,
+    "authorized_workflows": 165,
+    "structurally_covered_workflows": 165,
     "structural_coverage_percent": 100,
     "providers": 10,
     "enabled_integrations": 5,
@@ -1052,6 +1052,23 @@
       "execution": "mcp_delegated",
       "source": "app/api/admin/**/route.js",
       "source_file": "app/api/admin/requests/route.js",
+      "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
+    },
+    {
+      "operation": "admin_get_search",
+      "method": "GET",
+      "pathname": "/api/admin/search",
+      "family": "administration",
+      "tool": "ms_realty_admin_read",
+      "capability": "workspace:read",
+      "read_only": true,
+      "sensitive": false,
+      "confirmation": null,
+      "idempotency": "existing_admin_route",
+      "hermes_access": "none",
+      "execution": "mcp_delegated",
+      "source": "app/api/admin/**/route.js",
+      "source_file": "app/api/admin/search/route.js",
       "declared_entrypoint": "delegated_mcp_and_signed_in_webmcp_read"
     },
     {

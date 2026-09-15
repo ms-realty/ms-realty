@@ -85,3 +85,50 @@ test("people, enquiries and viewings come back as their own kinds", () => {
   );
   for (const row of found.results) assert.ok(row.href.startsWith("/admin/"), row.type);
 });
+
+// The entry and the screen, end to end through the real dispatchers. The API
+// on its own was a route nothing linked to.
+test("every screen carries the search entry and the results page answers in four honest states", async () => {
+  const { createHttpApp, dispatchHttp } = await import("../lib/http.mjs");
+  const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+  const headers = { authorization: "Bearer local-admin-smoke", accept: "text/html" };
+  const state = (html) => (html.match(/data-search-state="([a-z_]+)"/) || [])[1];
+
+  // The entry is part of the shell, not of one screen.
+  for (const path of ["/admin/listings?locale=en", "/admin/leads?locale=en", "/admin/search?locale=en"]) {
+    const page = await dispatchHttp(app, { url: path, headers });
+    assert.match(page.body, /<form class="crm-top__search" role="search" method="get"/, path);
+    assert.match(page.body, /data-admin-search-input="true"/, path);
+  }
+
+  // Empty is an invitation, one character is too short, a miss is a miss, and
+  // a hit links to the canonical record.
+  for (const [query, want] of [["", "prompt"], ["a", "too_short"], ["zzzznotaword", "empty"], ["MS-00815", "results"]]) {
+    const page = await dispatchHttp(app, { url: `/admin/search?q=${encodeURIComponent(query)}&locale=en`, headers });
+    assert.equal(page.status, 200, query);
+    assert.equal(state(page.body), want, query);
+  }
+  const hit = await dispatchHttp(app, { url: "/admin/search?q=MS-00815&locale=en", headers });
+  assert.match(hit.body, /href="\/admin\/listings\/edit\?listingId=MS-00815"/);
+  assert.match(hit.body, /data-search-result="listing"/);
+  // A source nobody could read is named on the page, so a short list is never
+  // mistaken for a complete one.
+  assert.match(hit.body, /data-search-unavailable="\d+"/);
+
+  // Signed out, search is not a way around the front door.
+  const closed = await dispatchHttp(app, { url: "/admin/search?q=MS-00815", headers: { accept: "text/html" } });
+  assert.equal(closed.status === 401 || closed.status === 303, true);
+});
+
+test("the suggestion list is an enhancement, never the only way to search", async () => {
+  const { ADMIN_APP_JS } = await import("../lib/ui/client.mjs");
+  assert.match(ADMIN_APP_JS, /function initAdminSearchEntry\(\)/);
+  // It reads the same route the page uses, and abandons a request rather than
+  // racing it when the operator keeps typing.
+  assert.match(ADMIN_APP_JS, /\/api\/admin\/search\?q="/);
+  assert.match(ADMIN_APP_JS, /inflight\.abort\(\)/);
+  // Keyboard reach: arrows move, Escape closes, Enter opens the highlighted row.
+  for (const key of ["ArrowDown", "ArrowUp", "Escape", "Enter"]) {
+    assert.ok(ADMIN_APP_JS.includes(`"${key}"`), key);
+  }
+});
