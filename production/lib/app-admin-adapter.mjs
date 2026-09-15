@@ -84,6 +84,7 @@ import {
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
+import { searchAdminRecords } from "./admin-record-search.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -5176,6 +5177,20 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, await leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(await contactsPayload(registry, url, config));
+    // The same one entry as the standalone runtime, reading the same sources
+    // through the same checks, so a record found on one is found on the other.
+    if (request.method === "GET" && ["/api/admin/search", "/admin/search"].includes(url.pathname)) {
+      const seedForSearch = await projectListingDraftSeed(currentSeed(config), {
+        env: config.payloadListingEnv || config.authEnv || process.env,
+        payload: config.payloadListingRuntime || null,
+        requirePayload: config.runtimeDataDurableOnly,
+      });
+      return jsonResponse(200, searchAdminRecords({
+        query: url.searchParams.get("q") || "",
+        listings: seedForSearch.records.filter((record) => record.collection === "listings"),
+      }));
+    }
+
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, await contactsPayload(registry, url, config));
 
     // Durable document metadata and signature state live in Payload/Postgres.
