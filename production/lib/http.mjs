@@ -88,6 +88,7 @@ import {
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
+import { searchAdminRecords } from "./admin-record-search.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -5369,6 +5370,23 @@ export function createHttpApp({
         throw error;
       }
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+    }
+
+    // One entry for the whole workbench. Each source is read through the check
+    // it already has, and a source this operator or this runtime cannot read is
+    // reported as unavailable rather than quietly left out of the results.
+    if (request.method === "GET" && ["/api/admin/search", "/admin/search"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const seedForSearch = await projectListingDraftSeed(currentSeed(), {
+        payload: payloadListingRuntime,
+        env: payloadListingEnv,
+        requirePayload: runtimeDataDurableOnly,
+      });
+      return adminJson(200, searchAdminRecords({
+        query: url.searchParams.get("q") || "",
+        listings: seedForSearch.records.filter((record) => record.collection === "listings"),
+        leads: canAdminAccess(principal, "operations:read") && Array.isArray(requestLeadRows) ? requestLeadRows : null,
+      }));
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
