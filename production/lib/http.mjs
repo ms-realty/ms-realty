@@ -5241,7 +5241,11 @@ export function createHttpApp({
           });
         }
         const requestedProvider = String(url.searchParams.get("provider") || "").trim().toLowerCase();
-        if (request.method === "GET" && isOperatorOAuthProvider(requestedProvider)) {
+        // A request already carrying a provider's own return evidence is not a
+        // fresh authorization, whatever its action says. Starting one here would
+        // mint a new state and verifier and send the operator back out to the
+        // provider instead of finishing the round trip they are in.
+        if (request.method === "GET" && !providerReturn && isOperatorOAuthProvider(requestedProvider)) {
           const action = url.searchParams.get("action");
           if (action === "start") {
             try {

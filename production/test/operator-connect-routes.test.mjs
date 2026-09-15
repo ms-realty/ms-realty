@@ -1013,6 +1013,10 @@ test("both owner runtimes resolve a provider return from its signed state, not f
       // request describing one flow while carrying another. Resolving it in the
       // signature's favour would complete a connection the URL never described.
       ["naming a provider the state contradicts", (f) => ({ provider: "google", action: "callback", state: f.state, code }), "/admin/connect?expired=1"],
+      // Return evidence and a start action in one request. Honouring the action
+      // would mint a second state and verifier and send the operator back out to
+      // the provider, abandoning the round trip they are already in.
+      ["asking to start while carrying a code", (f) => ({ provider: "ai", action: "start", state: f.state, code }), "/admin/connect?expired=1"],
     ];
     for (const [name, query, location] of refusals) {
       const refused = await fixture(surface);

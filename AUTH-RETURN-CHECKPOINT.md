@@ -51,11 +51,19 @@ Route and provider context now come out of the signed state and nothing else.
   `unattributable`, `declined`, `incomplete`, `exchange`. A query `provider=` or
   `action=` that contradicts the signature yields `unattributable` rather than
   being resolved in the signature's favour.
-- `http.mjs`, `app-admin-adapter.mjs` — three matching changes each: the
+- `http.mjs`, `app-admin-adapter.mjs` — four matching changes each: the
   unauthenticated precondition and the inventory branch both consult
-  `isOperatorConnectionReturn`, and the callback branch is replaced by one driven
-  by `operatorConnectionReturn`. Role, payload-session and owner-admin gates are
-  untouched and still run before any return handling.
+  `isOperatorConnectionReturn`, the `action=start` branch refuses a request that
+  already carries return evidence, and the callback branch is replaced by one
+  driven by `operatorConnectionReturn`. Role, payload-session and owner-admin
+  gates are untouched and still run before any return handling.
+
+  The `action=start` guard closes the mirror image of the original defect. A
+  return carrying `code` and `state` alongside `action=start` used to match the
+  start branch, which mints a fresh state and PKCE verifier and redirects the
+  operator back out to the provider — abandoning the round trip they were already
+  in. Raised by the independent reviewer's `conflicting-start-action` case and
+  confirmed against the first commit of this branch.
 - `operator-connect-copy.mjs`, `operator-connect.mjs` — one new result state,
   `resultReturnExpired`, in bg/ru/en, reached by `/admin/connect?expired=1`. It
   names no provider on purpose and renders with the error tone.
@@ -79,7 +87,16 @@ node /Users/ivan/Documents/Codex/2026-09-12/realtime-voice-chat-2/outputs/ms-rea
 
 ```
 node /Users/ivan/Documents/Codex/2026-09-12/realtime-voice-chat-2/outputs/ms-realty/auth-return-20260915/review-openrouter-return.mjs .
-{"tests":24,"failures":18,"source":"."}
+{"tests":24,"failures":18,"source":"."}          # first revision of the script
+```
+
+With the reviewer's later revision, against this branch's first commit — that is,
+with everything above in place except the `action=start` guard:
+
+```
+{"tests":26,"failures":2,"source":"."}           # both conflicting-start-action cases
+node --test production/test/operator-connect-routes.test.mjs
+not ok 12 - both owner runtimes resolve a provider return from its signed state, not from route parameters
 ```
 
 ```
@@ -100,7 +117,7 @@ node .../reproduce-callback-fallthrough.mjs .
 
 ```
 node .../review-openrouter-return.mjs .
-{"tests":24,"failures":0,"source":"/Users/ivan/Code/MS-Realty-auth-return-20260915"}
+{"tests":26,"failures":0,"source":"/Users/ivan/Code/MS-Realty-auth-return-20260915"}
 ```
 
 ```
@@ -139,6 +156,7 @@ the return shapes a provider actually sends:
 | no state at all | `303 /admin/connect?expired=1`, no provider call, no row |
 | expired state | `303 /admin/connect?expired=1`, no provider call, no row |
 | `provider=google` against an `ai` state | `303 /admin/connect?expired=1`, no provider call, no row |
+| `action=start` while carrying a code | `303 /admin/connect?expired=1`, no provider call, no new authorization minted |
 | valid return, PKCE cookie absent | `303 /admin/connect?error=ai`, no provider call |
 | valid return, no admin session | `303 /admin/login`, no provider call |
 | plain inventory read | `200 provider_connections` |
