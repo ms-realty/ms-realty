@@ -6055,7 +6055,14 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
           idempotent: result.idempotent,
         });
       } catch (error) {
-        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        return jsonResponse(error.status || 400, {
+          kind: error.code || "bad_request",
+          message: error.message,
+          // A conflict carries what the operator needs to decide with:
+          // the version now in force and which of their own fields
+          // somebody else changed underneath them.
+          ...(error.details ? error.details : {}),
+        });
       }
     }
     // B4 media upload

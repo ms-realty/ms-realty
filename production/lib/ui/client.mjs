@@ -5082,6 +5082,51 @@ ${ADMIN_DAILY_JS}
     if (form.hasAttribute("data-lead-bulk-form")) payload.bulkConfirmed = form.elements.bulkConfirmed && form.elements.bulkConfirmed.checked;
     return payload;
   }
+  // Losing an afternoon's typing to a version number is not a recovery. The
+  // conflict panel names the fields somebody else changed and what they now
+  // say, keeps every edit in place, and offers one deliberate way forward:
+  // take the newer version and save over it. The revision is only advanced by
+  // that click, never automatically, because doing it silently would overwrite
+  // a colleague's work on the operator's behalf.
+  function showEditorConflict(form, payload) {
+    var panel = document.querySelector("[data-editor-conflict]");
+    if (!panel) return;
+    var list = panel.querySelector("[data-editor-conflict-fields]");
+    var accept = panel.querySelector("[data-editor-conflict-accept]");
+    var fields = (payload && payload.conflicting_fields) || [];
+    if (list) {
+      list.innerHTML = "";
+      for (var i = 0; i < fields.length; i += 1) {
+        var row = document.createElement("li");
+        var name = document.createElement("strong");
+        name.textContent = fields[i].field;
+        row.appendChild(name);
+        var value = fields[i].current_value;
+        if (value !== null && value !== undefined && value !== "") {
+          var theirs = document.createElement("span");
+          theirs.textContent = " " + String(value);
+          row.appendChild(theirs);
+        }
+        list.appendChild(row);
+      }
+      list.hidden = fields.length === 0;
+    }
+    if (accept) {
+      var fresh = payload && payload.draft_revision;
+      accept.hidden = !/^[a-f0-9]{64}$/.test(String(fresh || ""));
+      accept.onclick = function () {
+        var revision = form.querySelector('[name="draftRevision"]');
+        if (revision) revision.value = revision.defaultValue = fresh;
+        panel.hidden = true;
+        var status = form.querySelector("[data-admin-mutation-status]");
+        if (status) {
+          status.textContent = form.getAttribute("data-editor-conflict-ready") || "Ready to save over the newer version.";
+          status.setAttribute("data-state", "dirty");
+        }
+        syncEditorSavebar(form);
+      };
+    }
+  }
   function bulkOutcomeText(form, payload) {
     var failure = form.getAttribute("data-admin-mutation-failure") || "Could not apply to every enquiry.";
     var refused = (payload.results || []).filter(function (row) { return row.status === "refused"; });
@@ -5318,9 +5363,15 @@ ${ADMIN_DAILY_JS}
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
             if (!response.ok && response.status !== 207) {
-              throw new Error(payload.kind === "listing_draft_conflict"
+              var refusal = new Error(payload.kind === "listing_draft_conflict"
                 ? form.getAttribute("data-editor-conflict-message") || payload.message || failure
                 : payload.message || failure);
+              // A conflict is the one refusal the operator can act on, so the
+              // answer travels with the error instead of being reduced to a
+              // sentence: which version is in force, and which of their fields
+              // somebody else changed.
+              if (payload.kind === "listing_draft_conflict") refusal.conflict = payload;
+              throw refusal;
             }
             return payload;
           });
@@ -5360,6 +5411,7 @@ ${ADMIN_DAILY_JS}
             status.textContent = error.message || failure;
             status.setAttribute("data-state", error && error.editorUncertain ? "uncertain" : "error");
           }
+          if (error && error.conflict) showEditorConflict(form, error.conflict);
         })
         .then(function () {
           form.removeAttribute("aria-busy");
