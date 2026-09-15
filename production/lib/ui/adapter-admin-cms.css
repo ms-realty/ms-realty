@@ -855,3 +855,10 @@ html[data-theme="dark"] .adm-media-inspector::backdrop { background: rgb(0 0 0 /
 }
 
 html[data-theme="dark"] .crm-top__suggestions { box-shadow: 0 18px 40px rgb(0 0 0 / 55%); }
+
+/* The conflict panel is a decision, not a dead end: what moved, and one way on
+   that keeps what was typed. */
+.adm-editor-conflict__fields { display: grid; gap: var(--space-1); margin: var(--space-2) 0 0; padding-left: var(--space-4); }
+.adm-editor-conflict__fields strong { overflow-wrap: anywhere; }
+.adm-editor-conflict__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.adm-editor-conflict__actions .mk-btn { min-height: 44px; }

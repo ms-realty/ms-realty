@@ -46,7 +46,10 @@ function harness() {
     + section("  function adminMutationPayload(", "  function bulkOutcomeText(")
     + section("  function initAdminMutationForms(", "  function initWhatsAppEmbeddedSignup(");
   const api = new Function("document", "fetch", "FormData", "HTMLInputElement", "HTMLSelectElement", "HTMLFormElement", source + '\ninitAdminMutationForms(); return { commitEditorFormState, syncEditorSavebar, editorFormState };')(
-    { addEventListener(name, listener) { if (name === "submit") submit = listener; } },
+    // The conflict panel lives outside the form, so the stub has to answer for
+    // it the way a document would: absent here, which is the case the handler
+    // must survive on a page that never rendered one.
+    { addEventListener(name, listener) { if (name === "submit") submit = listener; }, querySelector: () => null },
     (url, options) => { requests.push(JSON.parse(options.body)); return new Promise((done) => { resolve = done; }); },
     FormDataFixture, Input, Select, Form,
   );
@@ -174,4 +177,36 @@ test("listing acknowledgement identity is bound to the submitted request, not a 
   // nothing about this draft: unconfirmed, edits kept, still dirty.
   assert.equal(form.status.getAttribute("data-state"), "uncertain");
   assert.equal(form.savebar.getAttribute("data-dirty"), "true");
+});
+
+// A version number is not a good enough reason to lose an afternoon's typing.
+// The refusal has to say which fields moved and offer one deliberate way on.
+test("a conflict names the fields that moved and advances the version only on purpose", async () => {
+  const ui = harness(); const { form } = ui;
+  form.title.value = "My unsaved title";
+  ui.submit();
+  await ui.respond(409, {
+    kind: "listing_draft_conflict",
+    message: "Reload before saving",
+    draft_revision: "c".repeat(64),
+    conflicting_fields: [{ field: "title", current_value: "Someone else edited this" }],
+  });
+  // Every edit is still here and the form is still dirty: nothing was discarded
+  // to make room for the refusal.
+  assert.equal(form.title.value, "My unsaved title");
+  assert.equal(form.savebar.getAttribute("data-dirty"), "true");
+  assert.equal(form.status.getAttribute("data-state"), "error");
+  // Crucially the version is NOT advanced by the refusal itself. Doing that
+  // silently would overwrite a colleague's work on the operator's behalf.
+  assert.equal(form.revision.value, "a".repeat(64));
+});
+
+test("the client carries the conflict payload rather than reducing it to a sentence", () => {
+  // The refusal is the only place the fresh version and the changed fields
+  // exist, so it has to survive the throw.
+  assert.match(ADMIN_APP_JS, /refusal\.conflict = payload/);
+  assert.match(ADMIN_APP_JS, /function showEditorConflict\(form, payload\)/);
+  assert.match(ADMIN_APP_JS, /conflicting_fields/);
+  // Advancing the version is bound to the button, never to the response.
+  assert.match(ADMIN_APP_JS, /accept\.onclick = function \(\) \{[\s\S]*?revision\.value = revision\.defaultValue = fresh;/);
 });

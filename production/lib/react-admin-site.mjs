@@ -225,6 +225,8 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортирай CSV за качество",
     reviewListing: "Прегледай обявата",
     factsReviewer: "Проверил данните",
+    saveOverNewer: "Запази върху по-новата версия",
+    saveOverNewerReady: "Готово за запис върху по-новата версия.",
     recordSearch: {
       label: "Търсене в работното място",
       placeholder: "Обява, запитване, човек, оглед…",
@@ -1046,6 +1048,8 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортировать CSV качества",
     reviewListing: "Проверить объект",
     factsReviewer: "Проверил данные",
+    saveOverNewer: "Сохранить поверх новой версии",
+    saveOverNewerReady: "Готово к записи поверх новой версии.",
     recordSearch: {
       label: "Поиск по рабочему пространству",
       placeholder: "Объект, заявка, человек, показ…",
@@ -1867,6 +1871,8 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Import listing quality CSV",
     reviewListing: "Review listing",
     factsReviewer: "Facts reviewer",
+    saveOverNewer: "Save over the newer version",
+    saveOverNewerReady: "Ready to save over the newer version.",
     recordSearch: {
       label: "Search the workspace",
       placeholder: "Listing, enquiry, person, viewing…",
@@ -11005,6 +11011,7 @@ function ListingEditorBody({ page }) {
                 "data-editor-panel": "facts",
                 "data-editor-later-edits-message": ui.editorLaterEdits,
                 "data-editor-conflict-message": ui.editorConflict,
+                "data-editor-conflict-ready": ui.saveOverNewerReady,
                 "data-editor-unknown-message": ui.editorUnknownSave,
                 "data-editor-clean-message": label(copy, "saved", "All changes saved."),
                 "data-editor-dirty-message": label(copy, "unsavedChanges", "Unsaved changes"),
@@ -11071,11 +11078,25 @@ function ListingEditorBody({ page }) {
                         null,
                         h("strong", null, ui.saveConflictTitle),
                         h("p", null, ui.saveConflictBody),
+                        // Filled by the client from the refusal itself: the
+                        // fields somebody else changed, and what they now say.
+                        h("ul", { className: "adm-editor-conflict__fields", "data-editor-conflict-fields": "true", hidden: true }),
                       ),
                       h(
-                        "a",
-                        { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}`, page) },
-                        ui.reloadListing,
+                        "div",
+                        { className: "adm-editor-conflict__actions" },
+                        // One deliberate way forward that keeps the typing, and
+                        // the old way out for anyone who would rather start again.
+                        h(
+                          "button",
+                          { type: "button", className: "mk-btn mk-btn--primary mk-btn--sm", "data-editor-conflict-accept": "true", hidden: true },
+                          ui.saveOverNewer,
+                        ),
+                        h(
+                          "a",
+                          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}`, page) },
+                          ui.reloadListing,
+                        ),
                       ),
                     ),
                     h(

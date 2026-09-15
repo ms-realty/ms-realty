@@ -6624,7 +6624,14 @@ export function createHttpApp({
           idempotent: result.idempotent,
         });
       } catch (error) {
-        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+        return adminJson(error.status || 400, {
+          kind: error.code || "bad_request",
+          message: error.message,
+          // A conflict carries what the operator needs to decide with:
+          // the version now in force and which of their own fields
+          // somebody else changed underneath them.
+          ...(error.details ? error.details : {}),
+        });
       }
     }
 
