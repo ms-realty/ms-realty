@@ -103,8 +103,15 @@ test("cleared fields are sent and a clean successful acknowledgement disables sa
   assert.equal(form.description.value, "");
 });
 
+// A refusal and an answer we cannot read are different facts, and the operator
+// acts on them differently: one is "it did not save", the other is "it may have
+// saved, check before retrying". Both keep every edit and stay dirty.
 test("conflicts and unknown successful responses never acknowledge unsaved text", async () => {
-  for (const [status, payload] of [[409, { kind: "listing_draft_conflict", message: "Reload before saving" }], [200, {}]]) {
+  const cases = [
+    [409, { kind: "listing_draft_conflict", message: "Reload before saving" }, "error"],
+    [200, {}, "uncertain"],
+  ];
+  for (const [status, payload, state] of cases) {
     const ui = harness(); const { form } = ui;
     form.title.value = "Unsaved operator text";
     ui.submit(); await ui.respond(status, payload);
@@ -112,7 +119,8 @@ test("conflicts and unknown successful responses never acknowledge unsaved text"
     assert.equal(form.title.defaultValue, "Original title");
     assert.equal(form.revision.value, "a".repeat(64));
     assert.equal(form.savebar.getAttribute("data-dirty"), "true");
-    assert.equal(form.status.getAttribute("data-state"), "error");
+    assert.equal(form.status.getAttribute("data-state"), state);
+    assert.notEqual(form.status.getAttribute("data-state"), "saved");
   }
 });
 
@@ -145,7 +153,7 @@ test("listing acknowledgements require the submitted identity and an explicit dr
       assert.equal(form.revision.defaultValue, "a".repeat(64));
       assert.equal(form.getAttribute("data-editor-initial-state"), initialState);
       assert.equal(form.savebar.getAttribute("data-dirty"), "true");
-      assert.equal(form.status.getAttribute("data-state"), "error");
+      assert.equal(form.status.getAttribute("data-state"), "uncertain");
       assert.match(form.status.textContent, /save could not be confirmed/);
       assert.equal(form.hasAttribute("aria-busy"), false);
       assert.equal(form.save.disabled, false);
@@ -162,6 +170,8 @@ test("listing acknowledgement identity is bound to the submitted request, not a 
   await ui.respond(200, { kind: "listing_draft_saved", draft_revision: "b".repeat(64), listing_id: "MS-CRAWL-0165", draft_only: true });
   assert.equal(form.title.defaultValue, "Original title");
   assert.equal(form.revision.value, "a".repeat(64));
-  assert.equal(form.status.getAttribute("data-state"), "error");
+  // The answer names a listing this request never submitted, so it proves
+  // nothing about this draft: unconfirmed, edits kept, still dirty.
+  assert.equal(form.status.getAttribute("data-state"), "uncertain");
   assert.equal(form.savebar.getAttribute("data-dirty"), "true");
 });

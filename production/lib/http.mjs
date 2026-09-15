@@ -1253,15 +1253,17 @@ export function createHttpApp({
       config: mediaDurableStore || null,
       env: payloadListingEnv || process.env,
     });
-  const currentMediaSeed = async () => {
-    const source = currentSeed();
-    if (!runtimeDataDurableOnly) return source;
-    return projectListingDraftSeed(source, {
+  // The editor renders its gallery from the projected draft seed, where a stored
+  // asset_id travels with each item. Resolving an asset against the raw seed
+  // instead derives a different id from the source URL, so an operator's review
+  // of a rendered asset came back as an unknown asset. Both sides have to read
+  // the same seed for an asset id to mean one thing.
+  const currentMediaSeed = async () =>
+    projectListingDraftSeed(currentSeed(), {
       payload: payloadListingRuntime,
       env: payloadListingEnv,
-      requirePayload: true,
+      requirePayload: runtimeDataDurableOnly,
     });
-  };
   const currentPublicSeed = () => {
     if (runtimeDataDurableOnly) throw Object.assign(new Error("Payload public listing authority is required"), { status: 503 });
     return publicSeedFor(currentSeed());
