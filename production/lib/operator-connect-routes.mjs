@@ -14,6 +14,7 @@ import crypto from "node:crypto";
 import {
   completeViberConnection,
   completeWhatsAppEmbeddedSignup,
+  readProviderOAuthState,
   registerViberWebhook,
   registerWhatsAppWebhook,
 } from "./provider-connections.mjs";
@@ -59,6 +60,48 @@ export function isOperatorOAuthProvider(provider) {
   } catch {
     return false;
   }
+}
+
+// Arbitrary routing parameters are not guaranteed to survive a provider return.
+// OpenRouter documents a code and supports echoing state; the observed failure
+// omitted provider/action, but the cause of that omission is not established.
+// This syntactic test distinguishes a browser return from an inventory read.
+// Trusted routing context is recovered from the validated signed state below.
+export function isOperatorConnectionReturn({ method, pathname, searchParams } = {}) {
+  if (method !== "GET" || pathname !== OPERATOR_CONNECTION_BASE_PATH) return false;
+  if (searchParams?.get("action") === "callback") return true;
+  return ["state", "code", "error"].some((name) => searchParams?.get(name) !== null);
+}
+
+// What the return actually is, decided once for both runtimes. "unattributable"
+// is the honest answer whenever the signed state does not prove which round trip
+// this is: no provider is guessed from the query, no credential work is started,
+// and no other provider's authorization session is consumed.
+export function operatorConnectionReturn(searchParams, { operatorId, stateSecret, now } = {}) {
+  const state = searchParams?.get("state") || "";
+  let signed;
+  try {
+    signed = readProviderOAuthState(state, { operatorId, stateSecret, now });
+  } catch {
+    return { kind: "unattributable" };
+  }
+  const provider = normalizedProvider(signed.provider);
+  if (!isOperatorOAuthProvider(provider)) return { kind: "unattributable" };
+  // A genuine return either omits these route parameters or carries the ones the
+  // redirect was built with, which always agree with the state. A query that
+  // contradicts the signature is not a round trip to resolve in the signature's
+  // favour; it is a request describing one flow while carrying another, and the
+  // only safe reading of it is that we cannot attribute this return at all.
+  const declaredProvider = normalizedProvider(searchParams.get("provider"));
+  const declaredAction = String(searchParams.get("action") || "").trim().toLowerCase();
+  if (declaredProvider && declaredProvider !== provider) return { kind: "unattributable" };
+  if (declaredAction && declaredAction !== "callback") return { kind: "unattributable" };
+  // The provider said no, or the operator pressed cancel. Either way there is
+  // nothing to exchange, so this must never reach the token endpoint.
+  if (searchParams.get("error")) return { kind: "declined", provider };
+  const code = String(searchParams.get("code") || "").trim();
+  if (!code) return { kind: "incomplete", provider };
+  return { kind: "exchange", provider, code, state };
 }
 
 function pkceCookie(value, maxAge) {

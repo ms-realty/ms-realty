@@ -207,7 +207,14 @@ export function createProviderOAuthState({ provider, operatorId }, { stateSecret
   return `${encoded}.${stateSignature(encoded, stateSecret)}`;
 }
 
-export function verifyProviderOAuthState(value, { provider, operatorId, stateSecret, now = Date.now() } = {}) {
+// The signed state is the only trustworthy record of which provider round trip
+// a browser is returning from: a provider may hand the return URL back without
+// the query parameters the redirect was built with. This reads the provider out
+// of the signature rather than taking the caller's word for it, so the trust
+// order is fixed here: signature, then shape and expiry, then the binding to the
+// operator whose session is making the request. Nothing from the payload is
+// returned before all three hold.
+export function readProviderOAuthState(value, { operatorId, stateSecret, now = Date.now() } = {}) {
   const [encoded, suppliedSignature, extra] = String(value || "").split(".");
   if (!encoded || !suppliedSignature || extra) throw new Error("Invalid provider OAuth state");
   const expectedSignature = stateSignature(encoded, stateSecret);
@@ -224,7 +231,8 @@ export function verifyProviderOAuthState(value, { provider, operatorId, stateSec
   }
   if (
     payload.v !== 1 ||
-    payload.provider !== providerName(provider) ||
+    typeof payload.provider !== "string" ||
+    !payload.provider ||
     payload.operator_id !== String(operatorId || "").trim() ||
     !Number.isFinite(payload.issued_at) ||
     !Number.isFinite(payload.expires_at) ||
@@ -233,6 +241,13 @@ export function verifyProviderOAuthState(value, { provider, operatorId, stateSec
   ) {
     throw new Error("Invalid or expired provider OAuth state");
   }
+  return payload;
+}
+
+export function verifyProviderOAuthState(value, { provider, operatorId, stateSecret, now = Date.now() } = {}) {
+  const expectedProvider = providerName(provider);
+  const payload = readProviderOAuthState(value, { operatorId, stateSecret, now });
+  if (payload.provider !== expectedProvider) throw new Error("Invalid or expired provider OAuth state");
   return payload;
 }
 
