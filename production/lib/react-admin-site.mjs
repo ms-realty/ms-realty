@@ -225,6 +225,13 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортирай CSV за качество",
     reviewListing: "Прегледай обявата",
     factsReviewer: "Проверил данните",
+    moveMediaEarlier: "Премести напред",
+    moveMediaLater: "Премести назад",
+    coverPhoto: "Корица",
+    makeCoverPhoto: "Направи корица",
+    mediaOrderSaving: "Записване на реда…",
+    mediaOrderSaved: "Редът на галерията е записан.",
+    mediaOrderFailed: "Редът не беше записан. Опитай пак.",
     saveOverNewer: "Запази върху по-новата версия",
     saveOverNewerReady: "Готово за запис върху по-новата версия.",
     recordSearch: {
@@ -1048,6 +1055,13 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортировать CSV качества",
     reviewListing: "Проверить объект",
     factsReviewer: "Проверил данные",
+    moveMediaEarlier: "Переместить вперёд",
+    moveMediaLater: "Переместить назад",
+    coverPhoto: "Обложка",
+    makeCoverPhoto: "Сделать обложкой",
+    mediaOrderSaving: "Сохранение порядка…",
+    mediaOrderSaved: "Порядок галереи сохранён.",
+    mediaOrderFailed: "Порядок не сохранён. Попробуй ещё раз.",
     saveOverNewer: "Сохранить поверх новой версии",
     saveOverNewerReady: "Готово к записи поверх новой версии.",
     recordSearch: {
@@ -1871,6 +1885,13 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Import listing quality CSV",
     reviewListing: "Review listing",
     factsReviewer: "Facts reviewer",
+    moveMediaEarlier: "Move earlier",
+    moveMediaLater: "Move later",
+    coverPhoto: "Cover",
+    makeCoverPhoto: "Make cover",
+    mediaOrderSaving: "Saving gallery order…",
+    mediaOrderSaved: "Gallery order saved.",
+    mediaOrderFailed: "The gallery order was not saved. Try again.",
     saveOverNewer: "Save over the newer version",
     saveOverNewerReady: "Ready to save over the newer version.",
     recordSearch: {
@@ -11282,7 +11303,29 @@ function ListingEditorBody({ page }) {
               : null,
             h(
               "section",
-              { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
+              {
+                className: "adm-media-manager",
+                "aria-label": ui.mediaManager,
+                "data-media-manager": "true",
+                // Only where the order can actually be kept, so the client does
+                // not attach itself to a gallery it cannot save.
+                ...(canEditContent && page.media_order_available === true
+                  ? {
+                      "data-media-order-listing": page.listing.id,
+                      "data-media-order-saving": ui.mediaOrderSaving,
+                      "data-media-order-success": ui.mediaOrderSaved,
+                      "data-media-order-failure": ui.mediaOrderFailed,
+                    }
+                  : {}),
+              },
+              canEditContent && page.media_order_available === true
+                ? h("p", {
+                    className: "adm-form__status adm-media-order-status",
+                    role: "status",
+                    "aria-live": "polite",
+                    "data-media-order-status": "true",
+                  })
+                : null,
               reviewableMedia.length
                 ? reviewableMedia.map((item, index) => {
                     const sourceUrl = item.source_url || item.url || item.asset_url || "";
@@ -11366,6 +11409,54 @@ function ListingEditorBody({ page }) {
                             },
                             h(Icon, { name: "pencil", size: 16 }),
                             h("span", null, ui.editMediaAsset),
+                          )
+                        : null,
+                      // Order is moved one step at a time with buttons rather
+                      // than by dragging: a keyboard reaches these, and the
+                      // first photo is the cover, so "move to front" is how a
+                      // cover is chosen.
+                      canEditContent && page.media_order_available === true
+                        ? h(
+                            "div",
+                            { className: "adm-media-asset__order", "data-media-order-controls": item.asset_id },
+                            h(
+                              "button",
+                              {
+                                type: "button",
+                                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                "data-media-move": "up",
+                                "data-media-move-asset": item.asset_id,
+                                disabled: index === 0,
+                                "aria-label": ui.moveMediaEarlier,
+                                title: ui.moveMediaEarlier,
+                              },
+                              h(Icon, { name: "chevron-up", size: 16 }),
+                            ),
+                            h(
+                              "button",
+                              {
+                                type: "button",
+                                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                "data-media-move": "down",
+                                "data-media-move-asset": item.asset_id,
+                                disabled: index === reviewableMedia.length - 1,
+                                "aria-label": ui.moveMediaLater,
+                                title: ui.moveMediaLater,
+                              },
+                              h(Icon, { name: "chevron-down", size: 16 }),
+                            ),
+                            index === 0
+                              ? h("span", { className: "adm-media-asset__cover", "data-media-cover": "true" }, ui.coverPhoto)
+                              : h(
+                                  "button",
+                                  {
+                                    type: "button",
+                                    className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                    "data-media-move": "front",
+                                    "data-media-move-asset": item.asset_id,
+                                  },
+                                  ui.makeCoverPhoto,
+                                ),
                           )
                         : null,
                     );

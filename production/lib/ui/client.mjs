@@ -4499,6 +4499,86 @@ ${ADMIN_DAILY_JS}
   // under it so a known record is one keystroke and one Enter away. Submitting
   // still works if this never runs, and the request is abandoned rather than
   // raced when the operator keeps typing.
+  // Order is changed one step at a time and saved as the whole gallery, because
+  // the route only accepts a full permutation - which is exactly what stops a
+  // tab left open from dropping a photo somebody else added. A refusal puts the
+  // tiles back where they were rather than leaving the screen disagreeing with
+  // the stored order.
+  function initListingMediaOrder() {
+    var manager = document.querySelector("[data-media-order-listing]");
+    if (!manager) return;
+    var listingId = manager.getAttribute("data-media-order-listing");
+    var status = manager.querySelector("[data-media-order-status]");
+    var saving = manager.getAttribute("data-media-order-saving") || "Saving…";
+    var success = manager.getAttribute("data-media-order-success") || "Saved.";
+    var failure = manager.getAttribute("data-media-order-failure") || "Not saved.";
+    var busy = false;
+    function tiles() { return manager.querySelectorAll("[data-media-asset]"); }
+    function assetOrder() {
+      var rows = tiles();
+      var order = [];
+      for (var i = 0; i < rows.length; i += 1) order.push(rows[i].getAttribute("data-media-asset"));
+      return order;
+    }
+    function say(text, state) {
+      if (!status) return;
+      status.textContent = text;
+      status.setAttribute("data-state", state);
+    }
+    function save(restore) {
+      busy = true;
+      say(saving, "saving");
+      fetch("/api/admin/media/order", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ listingId: listingId, assetIds: assetOrder() }),
+      })
+        .then(function (response) {
+          return response.json().catch(function () { return {}; }).then(function (payload) {
+            if (!response.ok) throw new Error(payload.message || failure);
+            return payload;
+          });
+        })
+        .then(function () { say(success, "success"); })
+        .catch(function (error) {
+          restore();
+          say(error.message || failure, "error");
+        })
+        .then(function () { busy = false; refresh(); });
+    }
+    // The first tile is the cover, so the controls say so rather than leaving
+    // the operator to infer it from position.
+    function refresh() {
+      var rows = tiles();
+      for (var i = 0; i < rows.length; i += 1) {
+        var up = rows[i].querySelector('[data-media-move="up"]');
+        var down = rows[i].querySelector('[data-media-move="down"]');
+        if (up) up.disabled = busy || i === 0;
+        if (down) down.disabled = busy || i === rows.length - 1;
+        var front = rows[i].querySelector('[data-media-move="front"]');
+        if (front) front.disabled = busy;
+      }
+    }
+    manager.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-media-move]") : null;
+      if (!button || busy) return;
+      event.preventDefault();
+      var tile = button.closest("[data-media-asset]");
+      var parent = tile.parentNode;
+      var home = tile.nextSibling;
+      var direction = button.getAttribute("data-media-move");
+      if (direction === "up" && tile.previousElementSibling) parent.insertBefore(tile, tile.previousElementSibling);
+      else if (direction === "down" && tile.nextElementSibling) parent.insertBefore(tile.nextElementSibling, tile);
+      else if (direction === "front") parent.insertBefore(tile, parent.firstElementChild);
+      else return;
+      refresh();
+      save(function () { parent.insertBefore(tile, home); refresh(); });
+      var moved = tile.querySelector("[data-media-move]");
+      if (moved && typeof moved.focus === "function") moved.focus();
+    });
+    refresh();
+  }
   function initAdminSearchEntry() {
     var form = document.querySelector("[data-admin-search]");
     if (!form || typeof fetch !== "function") return;
@@ -5609,6 +5689,7 @@ ${ADMIN_DAILY_JS}
   initAdminMobileNavigation();
   initListingEditorTabs();
   initAdminSearchEntry();
+  initListingMediaOrder();
   initListingEditorPanels();
   initListingMediaInspector();
   initEditorForms();

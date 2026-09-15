@@ -79,6 +79,7 @@ const ADMIN_ROUTE_METHODS = [
   ["GET", "/api/admin/consents"],
   ["POST", "/api/admin/consents/withdraw"],
   ["GET", "/api/admin/contacts"],
+  ["POST", "/api/admin/media/order"],
   ["GET", "/api/admin/search"],
   ["GET", "/api/admin/data-exports/download"],
   ["GET", "/api/admin/data-exports"],

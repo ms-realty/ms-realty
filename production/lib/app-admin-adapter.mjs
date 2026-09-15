@@ -282,6 +282,7 @@ import {
   mediaDurableRuntimeConfigured,
   mediaDurableStoreConfigFromEnv,
   persistMediaReviewDurably,
+  reorderListingMediaDurably,
   persistMediaUploadDurably,
   readMediaUploadBytesDurably,
 } from "./media-durable-store.mjs";
@@ -2240,6 +2241,9 @@ async function listingEditorPayload(registry, url, config) {
     config.adminPrincipal || null,
     { tab: editorTabFromUrl(url) },
   );
+  // Same condition as the standalone runtime: the control exists only where the
+  // order can actually be kept.
+  payload.media_order_available = durableMedia(config);
   return config.runtimeDataDurableOnly
     ? {
         ...payload,
@@ -6098,7 +6102,41 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       }
       return jsonResponse(uploaded.status, uploaded.body);
     }
-    if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
+// Gallery order, written as a permutation of the listing's own media array.
+    // It publishes nothing and deletes nothing.
+    if (request.method === "POST" && url.pathname === "/api/admin/media/order") {
+      if (!durableMedia(config)) {
+        return jsonResponse(503, { kind: "media_order_unavailable", message: "Gallery order needs durable media storage" });
+      }
+      try {
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        const outcome = await reorderListingMediaDurably(
+          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [] },
+          {
+            payload: config.payloadListingRuntime || null,
+            env: config.payloadListingEnv || config.authEnv || process.env,
+            principal: config.adminPrincipal,
+          },
+        );
+        if (!outcome.idempotent) {
+          recordAudit(
+            {
+              action: "listing_media_reordered",
+              actor: config.adminPrincipal?.id,
+              objectType: "listing",
+              objectId: outcome.listing_id,
+              metadata: { photo_count: outcome.asset_ids.length },
+            },
+            config,
+          );
+        }
+        return jsonResponse(outcome.idempotent ? 200 : 201, outcome);
+      } catch (error) {
+        return jsonResponse(error.status || 400, { kind: error.code || "bad_request", message: error.message });
+      }
+    }
+
+        if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       const result = await appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }

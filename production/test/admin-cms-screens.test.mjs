@@ -587,3 +587,27 @@ test("media tiles hold no forms and the selected photo opens a roomy inspector",
   assert.match(cmsCss, /\.adm-media-inspector__forms textarea \{[^}]*min-height: 88px;/);
   assert.match(cmsCss, /\.adm-media-asset__open \{[^}]*min-height: 44px;/);
 });
+
+// Gallery order is the listing's own media array, so the first photo is the
+// cover. The controls are buttons rather than a drag gesture, because a drag
+// gesture is unreachable from a keyboard.
+test("gallery order is changed with reachable controls, and only where the store can keep it", async () => {
+  const page = await dispatchHttp(app(), {
+    url: "/admin/listings/edit?listingId=MS-00815&locale=en&tab=media",
+    headers: auth,
+  });
+  // This runtime has no durable media store, so no order control is offered at
+  // all rather than a button that cannot persist what it promises.
+  assert.doesNotMatch(page.body, /data-media-move=/);
+  assert.doesNotMatch(page.body, /data-media-order-listing=/);
+  // The client half exists and saves the whole gallery, which is what the route
+  // accepts and what stops a stale tab from dropping a photo.
+  assert.match(ADMIN_APP_JS, /function initListingMediaOrder\(\)/);
+  assert.match(ADMIN_APP_JS, /"\/api\/admin\/media\/order"/);
+  assert.match(ADMIN_APP_JS, /assetIds: assetOrder\(\)/);
+  // A refusal puts the tiles back rather than leaving the screen disagreeing
+  // with the stored order.
+  assert.match(ADMIN_APP_JS, /restore\(\);/);
+  // Cover, earlier and later all have 44px targets.
+  assert.match(cmsCss, /\.adm-media-asset__order \.mk-btn \{[^}]*min-height: 44px;[^}]*min-width: 44px;/);
+});

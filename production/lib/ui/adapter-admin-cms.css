@@ -862,3 +862,17 @@ html[data-theme="dark"] .crm-top__suggestions { box-shadow: 0 18px 40px rgb(0 0 
 .adm-editor-conflict__fields strong { overflow-wrap: anywhere; }
 .adm-editor-conflict__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .adm-editor-conflict__actions .mk-btn { min-height: 44px; }
+
+/* Order is moved with buttons, so they have to be reachable and obvious rather
+   than hidden behind a drag gesture no keyboard can perform. */
+.adm-media-asset__order { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); }
+.adm-media-asset__order .mk-btn { min-height: 44px; min-width: 44px; justify-content: center; }
+.adm-media-asset__cover {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-sunken, var(--bg));
+  color: var(--text-muted);
+  font-size: var(--text-sm); font-weight: var(--fw-semibold);
+}
+.adm-media-order-status { margin: 0 var(--space-5) var(--space-2); }
+.adm-media-order-status[data-state="error"] { color: var(--danger, #b42318); }

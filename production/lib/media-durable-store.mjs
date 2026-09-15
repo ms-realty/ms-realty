@@ -1010,6 +1010,112 @@ async function reconcileReviewStorage(storage, review, result) {
   }
 }
 
+// Gallery order is the listing's own media array: first is the cover, and the
+// public gallery reads it in that order. Reordering therefore needs no new
+// column and no new concept - it writes a permutation of the ids already there.
+//
+// A permutation, strictly. Accepting an arbitrary list here would let a stale
+// tab silently drop a photograph somebody added a minute ago, or attach one
+// belonging to another listing, so the submitted set has to match the stored
+// set exactly. Nothing is published, unpublished or deleted by this: the review
+// state of every asset is untouched and the write stays on the draft.
+export async function reorderListingMediaDurably(
+  { listingId, assetIds = [] },
+  { payload = null, env = process.env, principal } = {},
+) {
+  const actor = assertPrincipal(principal);
+  const runtime = await runtimePayload(payload, env);
+  return withPayloadTransaction(runtime, { principal: actor, accessMode: "read write", isolationLevel: "serializable" }, (req) =>
+    reorderWithin(runtime, req, { listingId, assetIds, actor }),
+  );
+}
+
+// The read that decides the order and the write that applies it belong to one
+// transaction: a photo added between them would otherwise be dropped by an
+// order that never knew about it.
+async function reorderWithin(runtime, req, { listingId, assetIds, actor }) {
+  const listing = await findListing(runtime, listingId, req);
+  if (!listing) {
+    throw Object.assign(new Error("Known listingId is required"), { status: 404, code: "listing_not_found" });
+  }
+  const current = relationIds(listing.media);
+  const documents = await listingMediaDocuments(runtime, listing, req);
+  // The asset id is not always a stored column: outside the durable store it is
+  // derived from the source URL, and the editor renders whichever the record
+  // yields. mediaAssetId is that one rule, so ordering resolves an asset the
+  // same way reviewing one does rather than inventing a second identity.
+  //
+  // The same URL can also be attached to a listing more than once - MS-00815
+  // carries thirty-five photos under twenty-seven ids - so an id addresses a
+  // set of interchangeable rows rather than one row. The submitted order is
+  // therefore matched as a multiset: each id consumes the next row still
+  // holding it. Two rows with one URL are interchangeable on screen, and this
+  // keeps a gallery with repeats reorderable instead of permanently refused.
+  // Queue the listing's own entries, not normalised copies of them: writing a
+  // relation back as a string where the store keeps a number leaves an array
+  // that no longer resolves to any row, which is a broken gallery rather than
+  // a reordered one.
+  const entries = Array.isArray(listing.media) ? [...listing.media] : [];
+  const queueByAsset = new Map();
+  for (const entry of entries) {
+    const id = relationId(entry);
+    const document = documents.find((candidate) => relationId(candidate?.id) === id);
+    let assetId = "";
+    try {
+      assetId = document ? mediaAssetId(document) : "";
+    } catch {
+      assetId = "";
+    }
+    if (!assetId) {
+      throw Object.assign(
+        new Error("This gallery has a photo with no usable source, so its order cannot be changed"),
+        { status: 409, code: "media_order_unaddressable" },
+      );
+    }
+    if (!queueByAsset.has(assetId)) queueByAsset.set(assetId, []);
+    queueByAsset.get(assetId).push(entry);
+  }
+  const requested = [];
+  for (const assetId of assetIds) {
+    const queue = queueByAsset.get(String(assetId || "").trim());
+    if (!queue || !queue.length) {
+      throw Object.assign(
+        new Error("The gallery order must list every photo of this listing exactly once"),
+        { status: 409, code: "media_order_stale" },
+      );
+    }
+    requested.push(queue.shift());
+  }
+  // Anything still queued is a photo the submitted order forgot, which is what
+  // a tab left open while somebody else added one looks like.
+  const missing = [...queueByAsset.values()].some((queue) => queue.length > 0);
+  if (missing || requested.length !== entries.length) {
+    throw Object.assign(
+      new Error("The gallery order must list every photo of this listing exactly once"),
+      { status: 409, code: "media_order_stale" },
+    );
+  }
+  const unchanged = requested.every((entry, index) => relationId(entry) === relationId(entries[index]));
+  if (!unchanged) {
+    await runtime.update({
+      collection: "listings",
+      id: listing.id,
+      depth: 0,
+      draft: true,
+      overrideAccess: true,
+      req,
+      data: { media: requested },
+      context: operatorContext(actor),
+    });
+  }
+  return {
+    kind: "listing_media_order",
+    listing_id: listing.id,
+    asset_ids: assetIds.map((assetId) => String(assetId).trim()),
+    idempotent: unchanged,
+  };
+}
+
 export async function persistMediaReviewDurably(
   review,
   { payload = null, env = process.env, principal, storage = null } = {},

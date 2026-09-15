@@ -282,6 +282,7 @@ import {
   listMediaUploadsDurably,
   mediaDurableRuntimeConfigured,
   persistMediaReviewDurably,
+  reorderListingMediaDurably,
   persistMediaUploadDurably,
   readMediaUploadBytesDurably,
 } from "./media-durable-store.mjs";
@@ -2118,6 +2119,10 @@ export function createHttpApp({
       operatorId,
       { tab: editorTabFromUrl(url) },
     );
+    // Gallery order is written straight to the listing's media array, which
+    // only the durable store keeps. Saying so here is what stops the editor
+    // offering a control whose route would refuse it.
+    payload.media_order_available = durableMedia();
     return runtimeDataDurableOnly
       ? {
           ...payload,
@@ -6632,6 +6637,38 @@ export function createHttpApp({
           // somebody else changed underneath them.
           ...(error.details ? error.details : {}),
         });
+      }
+    }
+
+    // Gallery order, written as a permutation of the listing's own media array.
+    // It publishes nothing and deletes nothing; a reordered gallery is still a
+    // draft until the usual review and publication steps say otherwise.
+    if (request.method === "POST" && url.pathname === "/api/admin/media/order") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!durableMedia()) {
+        return adminJson(503, {
+          kind: "media_order_unavailable",
+          message: "Gallery order needs durable media storage",
+        });
+      }
+      try {
+        const input = parseBody(request);
+        const outcome = await reorderListingMediaDurably(
+          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [] },
+          { payload: payloadListingRuntime, env: payloadListingEnv, principal },
+        );
+        if (!outcome.idempotent) {
+          recordAudit({
+            action: "listing_media_reordered",
+            actor: principal?.id,
+            objectType: "listing",
+            objectId: outcome.listing_id,
+            metadata: { photo_count: outcome.asset_ids.length },
+          });
+        }
+        return adminJson(outcome.idempotent ? 200 : 201, outcome);
+      } catch (error) {
+        return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }
 
