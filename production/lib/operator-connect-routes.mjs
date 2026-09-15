@@ -62,14 +62,11 @@ export function isOperatorOAuthProvider(provider) {
   }
 }
 
-// A provider is free to hand the browser back to the return URL without the
-// query parameters that URL was built with. OpenRouter documents only a "code"
-// on the return and separately supports echoing "state"; provider= and
-// action=callback do not survive it. So a return is recognised by the evidence
-// a provider actually leaves behind, never by route parameters we hoped would
-// come home. This is deliberately a syntactic test on unsigned input: it only
-// decides that a request is a browser round trip rather than an inventory read,
-// and every trustworthy fact is still taken from the signed state afterwards.
+// Arbitrary routing parameters are not guaranteed to survive a provider return.
+// OpenRouter documents a code and supports echoing state; the observed failure
+// omitted provider/action, but the cause of that omission is not established.
+// This syntactic test distinguishes a browser return from an inventory read.
+// Trusted routing context is recovered from the validated signed state below.
 export function isOperatorConnectionReturn({ method, pathname, searchParams } = {}) {
   if (method !== "GET" || pathname !== OPERATOR_CONNECTION_BASE_PATH) return false;
   if (searchParams?.get("action") === "callback") return true;
