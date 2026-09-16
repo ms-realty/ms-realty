@@ -152,6 +152,7 @@ import {
 } from "./document-signatures.mjs";
 import { appendAccountContactLink, appendAccountCreation, deriveAccounts, readAccountLedger } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
+import { CONTACT_DATA_UNAVAILABLE, withContactRelations } from "./contact-relations.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import {
   addLocaleToRegistry,
@@ -1533,6 +1534,14 @@ export function createHttpApp({
       throw new LeadStoreUnavailableError("Durable lead store read failed", error);
     }
   };
+  // Every listing the workspace has, from the same authority as the listing
+  // manager; search and the contact record use it to open real listings only.
+  const currentListingRecords = async () =>
+    (await projectListingDraftSeed(currentSeed(), {
+      payload: payloadListingRuntime,
+      env: payloadListingEnv,
+      requirePayload: runtimeDataDurableOnly,
+    })).records.filter((record) => record.collection === "listings");
   // The operator's own enquiries, and the viewings attached to them. Search and
   // the listing record both read relations through these, so the two can never
   // disagree about what an operator is allowed to see.
@@ -1912,13 +1921,33 @@ export function createHttpApp({
       operatorViews: currentOperatorViews(operatorId),
     });
   };
-  const currentContactPayload = async (requestedLocale, operatorId = null, leads = currentLeads(), payloadSession = null) => {
-    const replies = readReplyOutbox(replyOutboxPath || undefined);
-    const outcomes = readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined);
-    const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
-    const accounts = deriveAccounts(readAccountLedger(accountLedgerPath || undefined));
+  const currentContactPayload = async (requestedLocale, operatorId = null, leads = currentLeads(), payloadSession = null, { withRelations = false } = {}) => {
+    const filterRows = leadScopedRows({ durable: leadDurableStore?.leadDurableStoreEnabled === true, leads });
+    // A Payload-only runtime keeps assignments and deals in the lead operations
+    // store; replies and accounts have no durable home yet, so they are
+    // reported unavailable instead of read from a disk that is not the authority.
+    const durableOnly = runtimeDataDurableOnly;
+    if (durableOnly) leads = applyLeadAssignments(leads, filterRows(await currentLeadOperationLedgers().assignments.read()));
+    const communicationThreads = durableOnly
+      ? []
+      : buildCommunicationThreads({
+          leads,
+          replies: readReplyOutbox(replyOutboxPath || undefined),
+          outcomes: readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined),
+        });
+    const accounts = durableOnly ? [] : deriveAccounts(readAccountLedger(accountLedgerPath || undefined));
+    const contacts = buildContactRecords({ leads, communicationThreads, accounts });
     return renderAdminContactsPayload(activeRegistry, requestedLocale, {
-      contacts: buildContactRecords({ leads, communicationThreads, accounts }),
+      contacts: withRelations
+        ? await withContactRelations(contacts, {
+            leads,
+            loadViewings: () => scopedLeadLoaders(operatorId, payloadSession).loadViewings(leads),
+            loadDeals: async () => filterRows(await currentLeadOperationLedgers().deals.read()),
+            loadListings: canAdminAccess(operatorId, "content:read") ? currentListingRecords : null,
+          })
+        : contacts,
+      dataAvailability: durableOnly ? CONTACT_DATA_UNAVAILABLE : null,
+      runtimeDataMode: durableOnly ? "durable_only" : null,
       accounts,
       operatorId,
       brokerProfiles: await currentBrokerProfiles(payloadSession),
@@ -5415,11 +5444,7 @@ export function createHttpApp({
       const found = await searchAuthorizedAdminRecords({
         query: url.searchParams.get("q") || "",
         principal,
-        loadListings: async () => (await projectListingDraftSeed(currentSeed(), {
-              payload: payloadListingRuntime,
-              env: payloadListingEnv,
-              requirePayload: runtimeDataDurableOnly,
-            })).records.filter((record) => record.collection === "listings"),
+        loadListings: currentListingRecords,
         ...scopedLeadLoaders(principal, payloadSession),
       });
       if (url.pathname === "/admin/search") {
@@ -5437,7 +5462,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = await currentContactPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession);
+      const payload = await currentContactPayload(adminLocaleParam(url), principal, requestLeadRows, payloadSession, { withRelations: true });
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }

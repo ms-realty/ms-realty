@@ -159,6 +159,7 @@ import {
   readAccountLedger,
 } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
+import { CONTACT_DATA_UNAVAILABLE, withContactRelations } from "./contact-relations.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, readDeals } from "./deal-ledger.mjs";
@@ -1948,6 +1949,22 @@ async function leadInboxPayload(registry, url, config) {
 async function contactWorkspaceData(config) {
   const source = await adminLeadSource(config);
   const filterRows = leadScopedRows(source);
+  const loadDeals = async () => filterRows(await leadOperationLedgersFor(config).deals.read());
+  // A Payload-only runtime keeps assignments and deals in the lead operations
+  // store; replies and accounts have no durable home yet, so they are reported
+  // unavailable instead of read from a disk that is not the authority.
+  if (config.runtimeDataDurableOnly) {
+    const assignments = await leadOperationLedgersFor(config).assignments.read();
+    const leads = applyLeadAssignments(source.leads, filterRows(assignments));
+    return {
+      leads,
+      communicationThreads: [],
+      accounts: [],
+      contacts: buildContactRecords({ leads }),
+      loadDeals,
+      dataAvailability: CONTACT_DATA_UNAVAILABLE,
+    };
+  }
   const leads = applyLeadAssignments(
     source.leads,
     filterRows(readLeadAssignments(config.leadAssignmentLedgerPath)),
@@ -1978,16 +1995,36 @@ async function contactWorkspaceData(config) {
     communicationThreads,
     accounts,
     contacts: buildContactRecords({ leads, communicationThreads, accounts }),
+    loadDeals,
+    dataAvailability: null,
   };
+}
+
+// Every listing the workspace has, from the same authority as the listing
+// manager; search and the contact record use it to open real listings only.
+async function workspaceListingRecords(config) {
+  return (await projectListingDraftSeed(currentSeed(config), {
+    env: config.payloadListingEnv || config.authEnv || process.env,
+    payload: config.payloadListingRuntime || null,
+    requirePayload: config.runtimeDataDurableOnly,
+  })).records.filter((record) => record.collection === "listings");
 }
 
 async function contactsPayload(registry, url, config) {
   const data = await contactWorkspaceData(config);
+  const contacts = await withContactRelations(data.contacts, {
+    leads: data.leads,
+    loadViewings: () => scopedLeadLoaders(config).loadViewings(data.leads),
+    loadDeals: data.loadDeals,
+    loadListings: canAdminAccess(config.adminPrincipal, "content:read") ? () => workspaceListingRecords(config) : null,
+  });
   return renderAdminContactsPayload(registry, url.searchParams.get("locale") || "en", {
-    contacts: data.contacts,
+    contacts,
     accounts: data.accounts,
     operatorId: config.adminPrincipal || null,
     brokerProfiles: config.brokerProfiles || [],
+    dataAvailability: data.dataAvailability,
+    runtimeDataMode: config.runtimeDataDurableOnly ? "durable_only" : null,
   });
 }
 
@@ -5272,11 +5309,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       const found = await searchAuthorizedAdminRecords({
         query: url.searchParams.get("q") || "",
         principal: config.adminPrincipal,
-        loadListings: async () => (await projectListingDraftSeed(currentSeed(config), {
-              env: config.payloadListingEnv || config.authEnv || process.env,
-              payload: config.payloadListingRuntime || null,
-              requirePayload: config.runtimeDataDurableOnly,
-            })).records.filter((record) => record.collection === "listings"),
+        loadListings: () => workspaceListingRecords(config),
         ...scopedLeadLoaders(config),
       });
       if (url.pathname === "/admin/search") {

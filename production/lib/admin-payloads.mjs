@@ -1021,6 +1021,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
 
 export function renderAdminContactsPayload(registry, requestedLocale, data) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const dataAvailable = (key) => data.dataAvailability?.[key]?.status !== "unavailable";
   const contacts = data.contacts || [];
   const accounts = data.accounts || [];
   return {
@@ -1043,11 +1044,15 @@ export function renderAdminContactsPayload(registry, requestedLocale, data) {
     accounts,
     summary: {
       contacts: contacts.length,
-      accounts: accounts.length,
+      accounts: dataAvailable("accounts") ? accounts.length : null,
       duplicate_leads: contacts.reduce((total, contact) => total + (contact.duplicate_leads || 0), 0),
-      unassigned_accounts: contacts.filter((contact) => !contact.account_id).length,
-      communication_events: contacts.reduce((total, contact) => total + (contact.communication_event_count || 0), 0),
+      unassigned_accounts: dataAvailable("accounts") ? contacts.filter((contact) => !contact.account_id).length : null,
+      communication_events: dataAvailable("communicationThreads")
+        ? contacts.reduce((total, contact) => total + (contact.communication_event_count || 0), 0)
+        : null,
     },
+    ...(data.dataAvailability ? { dataAvailability: data.dataAvailability } : {}),
+    ...(data.runtimeDataMode ? { runtime_data_mode: data.runtimeDataMode } : {}),
   };
 }
 

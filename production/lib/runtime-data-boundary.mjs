@@ -84,7 +84,14 @@ export const FILE_BACKED_ADMIN_READS = new Set([
 
 // These handlers select the same authority as their durable writes and refuse
 // incomplete configuration instead of falling back to a file ledger.
-const DURABLE_LEAD_OPERATION_READS = ["/admin/pipeline", "/api/admin/pipeline", "/admin/consents", "/api/admin/consents"];
+const DURABLE_LEAD_OPERATION_READS = [
+  "/admin/pipeline",
+  "/api/admin/pipeline",
+  "/admin/consents",
+  "/api/admin/consents",
+  "/admin/contacts",
+  "/api/admin/contacts",
+];
 
 // A production runtime pointed at Payload refuses every file-backed mutation,
 // because the disk it would write to is not the authority and does not survive
