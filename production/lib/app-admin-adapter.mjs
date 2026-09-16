@@ -85,6 +85,7 @@ import {
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
 import { searchAuthorizedAdminRecords } from "./admin-record-search.mjs";
+import { loadListingRelations, safeListingManagerReturn } from "./admin-listing-relations.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -121,6 +122,7 @@ import {
   listingEditorOutcomeFromUrl,
   listingEditorReturnPath,
   listingEditorSubmission,
+  splitTaskFormReturn,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -1674,6 +1676,18 @@ function rowsForLeadIds(rows, leadIds) {
   return rows.filter((row) => leadIds.has(row.lead_id));
 }
 
+// The operator's own enquiries and the viewings attached to them, read the same
+// way for search and for the listing record.
+function scopedLeadLoaders(config) {
+  return {
+    loadLeads: async () => (await adminLeadSource(config)).leads,
+    loadViewings: async (leads) =>
+      leadScopedRows({ durable: Boolean(config.leadDurableStore?.leadDurableStoreEnabled), leads })(
+        (await adminViewingSource(config)).viewings,
+      ),
+  };
+}
+
 function leadScopedRows(source) {
   if (!source.durable) return (rows) => rows;
   const leadIds = new Set(source.leads.map((lead) => lead.lead_id));
@@ -2250,6 +2264,14 @@ async function listingEditorPayload(registry, url, config) {
   // order can actually be kept.
   payload.media_order_available = durableMedia(config);
   payload.editorOutcome = listingEditorOutcomeFromUrl(url);
+  payload.backToList = safeListingManagerReturn(url.searchParams.get("back"));
+  payload.relations = config.adminPrincipal
+    ? await loadListingRelations({
+        listingId: payload.listing.id,
+        principal: config.adminPrincipal,
+        ...scopedLeadLoaders(config),
+      })
+    : null;
   return config.runtimeDataDurableOnly
     ? {
         ...payload,
@@ -5219,11 +5241,26 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       return url.pathname === "/admin/tasks" ? htmlResponse(payload) : jsonResponse(200, payload);
     }
     if (request.method === "POST" && ["/api/admin/tasks", "/api/admin/tasks/action"].includes(url.pathname)) {
-      const result = appendTaskEntry(
-        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
-        config,
-        { opening: url.pathname === "/api/admin/tasks" },
-      );
+      const opening = url.pathname === "/api/admin/tasks";
+      const split = splitTaskFormReturn(parseBody(request, await readRequestBody(request, config.maxBodyBytes)));
+      // Same contract as the standalone runtime: a script-free follow-up from a
+      // listing returns to that listing; everything else keeps its JSON.
+      if (opening && split.listingId && acceptsHtmlResponse(request.headers.get("accept"))) {
+        let outcome = "task_opened";
+        try {
+          appendTaskEntry(split.task, config, { opening });
+        } catch {
+          outcome = "task_failed";
+        }
+        return new Response(null, {
+          status: 303,
+          headers: {
+            location: `${listingEditorReturnPath(split.listingId, { tab: "related", locale: split.locale, outcome })}#listing-related`,
+            "cache-control": "no-store",
+          },
+        });
+      }
+      const result = appendTaskEntry(split.task, config, { opening });
       return jsonResponse(result.idempotent ? 200 : 201, { kind: "task", ...result });
     }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(await leadInboxPayload(registry, url, config));
@@ -5240,8 +5277,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
               payload: config.payloadListingRuntime || null,
               requirePayload: config.runtimeDataDurableOnly,
             })).records.filter((record) => record.collection === "listings"),
-        loadLeads: async () => (await adminLeadSource(config)).leads,
-        loadViewings: async (leads) => leadScopedRows({ durable: Boolean(config.leadDurableStore?.leadDurableStoreEnabled), leads })((await adminViewingSource(config)).viewings),
+        ...scopedLeadLoaders(config),
       });
       if (url.pathname === "/admin/search") {
         return htmlResponse(

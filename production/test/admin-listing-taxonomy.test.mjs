@@ -65,14 +65,14 @@ test("listing editor sections all exist and the requested one is the visible one
     assert.ok(tag, `${attribute}="${tab}" is in the document`);
     return !/\shidden(?:[=\s>])/.test(tag[0]);
   };
-  for (const tab of ["facts", "translations", "media", "seo", "quality"]) {
+  for (const tab of ["facts", "translations", "media", "seo", "quality", "related"]) {
     const html = editorHtml("MS-00815", "en", tab);
     // The draft survives a section change because it never leaves the page.
     assert.match(html, /data-editor-form="listing"/, tab);
     assert.match(html, /data-editor-savebar="true"/, tab);
     assert.match(html, new RegExp(`data-editor-tab="${tab}"[^>]*aria-current="page"`), tab);
     assert.match(html, new RegExp(`data-editor-shell="true" data-editor-tab="${tab}"`), tab);
-    for (const section of ["quality", "translations", "media"]) {
+    for (const section of ["quality", "translations", "media", "related"]) {
       assert.equal(visible(html, "data-editor-panel-tab", section), section === tab, `${tab}: ${section} panel`);
     }
     for (const section of ["facts", "seo"]) {

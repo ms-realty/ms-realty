@@ -89,6 +89,7 @@ import {
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
 import { searchAuthorizedAdminRecords } from "./admin-record-search.mjs";
+import { loadListingRelations, safeListingManagerReturn } from "./admin-listing-relations.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -125,6 +126,7 @@ import {
   listingEditorOutcomeFromUrl,
   listingEditorReturnPath,
   listingEditorSubmission,
+  splitTaskFormReturn,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -1531,6 +1533,21 @@ export function createHttpApp({
       throw new LeadStoreUnavailableError("Durable lead store read failed", error);
     }
   };
+  // The operator's own enquiries, and the viewings attached to them. Search and
+  // the listing record both read relations through these, so the two can never
+  // disagree about what an operator is allowed to see.
+  const scopedLeadLoaders = (principal, payloadSession) => ({
+    loadLeads: async () => {
+      if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) {
+        throw new LeadStoreUnavailableError("Lead storage is unavailable");
+      }
+      return (await currentDurableLeadSource(principal, payloadSession)).leads;
+    },
+    loadViewings: async (leads) =>
+      leadScopedRows({ durable: Boolean(leadDurableStore?.leadDurableStoreEnabled), leads })(
+        (await currentDurableViewingSource()).viewings,
+      ),
+  });
   const currentDurableViewingSource = async () => {
     if (!viewingDurableStore?.viewingDurableStoreEnabled) {
       if (runtimeDataDurableOnly) {
@@ -2108,7 +2125,7 @@ export function createHttpApp({
         }
       : payload;
   };
-  const currentListingEditorPayload = async (url, operatorId = null) => {
+  const currentListingEditorPayload = async (url, operatorId = null, { payloadSession = null } = {}) => {
     const payload = renderAdminListingEditorPayload(
       activeRegistry,
       adminLocaleParam(url),
@@ -2129,6 +2146,14 @@ export function createHttpApp({
     // offering a control whose route would refuse it.
     payload.media_order_available = durableMedia();
     payload.editorOutcome = listingEditorOutcomeFromUrl(url);
+    payload.backToList = safeListingManagerReturn(url.searchParams.get("back"));
+    payload.relations = operatorId
+      ? await loadListingRelations({
+          listingId: payload.listing.id,
+          principal: operatorId,
+          ...scopedLeadLoaders(operatorId, payloadSession),
+        })
+      : null;
     return runtimeDataDurableOnly
       ? {
           ...payload,
@@ -5395,11 +5420,7 @@ export function createHttpApp({
               env: payloadListingEnv,
               requirePayload: runtimeDataDurableOnly,
             })).records.filter((record) => record.collection === "listings"),
-        loadLeads: async () => {
-          if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) throw new LeadStoreUnavailableError("Lead storage is unavailable");
-          return (await currentDurableLeadSource(principal, payloadSession)).leads;
-        },
-        loadViewings: async (leads) => leadScopedRows({ durable: Boolean(leadDurableStore?.leadDurableStoreEnabled), leads })((await currentDurableViewingSource()).viewings),
+        ...scopedLeadLoaders(principal, payloadSession),
       });
       if (url.pathname === "/admin/search") {
         return adminResponse(
@@ -5703,11 +5724,23 @@ export function createHttpApp({
 
     if (request.method === "POST" && ["/api/admin/tasks", "/api/admin/tasks/action"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const opening = url.pathname === "/api/admin/tasks";
+      // A follow-up opened from a listing without scripting goes back to that
+      // listing's related section rather than to a JSON body.
+      let taskReturn = { listingId: "", locale: "" };
+      const nativeListingReturn = (outcome) =>
+        opening && taskReturn.listingId && acceptsHtmlResponse(readHeader(request.headers, "accept"))
+          ? adminResponse(303, "", "text/plain; charset=utf-8", {
+              location: `${listingEditorReturnPath(taskReturn.listingId, { tab: "related", locale: taskReturn.locale, outcome })}#listing-related`,
+              "cache-control": "no-store",
+            })
+          : null;
       try {
         const recordedAt = reviewedAt || receivedAt || new Date().toISOString();
-        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const split = splitTaskFormReturn(parseBody(request));
+        taskReturn = split;
+        const input = bindAuthenticatedOperator(split.task, principal, ["actor"]);
         const options = { filePath: taskLedgerPath || undefined, recordedAt };
-        const opening = url.pathname === "/api/admin/tasks";
         const result = opening ? openTask(input, options) : appendTaskAction(input, options);
         if (!result.idempotent) {
           recordAudit({
@@ -5724,9 +5757,9 @@ export function createHttpApp({
             },
           }, recordedAt);
         }
-        return adminJson(result.idempotent ? 200 : 201, { kind: "task", ...result });
+        return nativeListingReturn("task_opened") || adminJson(result.idempotent ? 200 : 201, { kind: "task", ...result });
       } catch (error) {
-        return adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error.message });
+        return nativeListingReturn("task_failed") || adminJson(error?.status || 400, { kind: error?.code || "bad_request", message: error.message });
       }
     }
 
@@ -5940,7 +5973,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return adminResponse(200, adminHtml(await currentListingEditorPayload(url, principal)), "text/html; charset=utf-8");
+        return adminResponse(200, adminHtml(await currentListingEditorPayload(url, principal, { payloadSession })), "text/html; charset=utf-8");
       } catch (error) {
         return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
@@ -6696,7 +6729,7 @@ export function createHttpApp({
               listingEditorReturnPath(editInput.listingId, { tab: editInput.returnTab, locale: editInput.returnLocale }),
               "http://ms-realty.local",
             );
-            const page = await currentListingEditorPayload(editorUrl, principal);
+            const page = await currentListingEditorPayload(editorUrl, principal, { payloadSession });
             page.editorSubmission = listingEditorSubmission(editInput, error);
             return adminResponse(error.status || 400, adminHtml(page), "text/html; charset=utf-8", { "cache-control": "no-store" });
           } catch {

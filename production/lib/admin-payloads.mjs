@@ -122,7 +122,7 @@ export function renderAdminListingEditorPayload(
 // The editor shows one section per request. The tab comes from ?tab=; a
 // media upload redirect that only carries media_upload=1 lands on Media, and
 // anything unknown falls back to Facts.
-export const LISTING_EDITOR_TABS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
+export const LISTING_EDITOR_TABS = Object.freeze(["facts", "translations", "media", "seo", "quality", "related"]);
 
 export function normalizeEditorTab(tab) {
   const value = String(tab || "").trim().toLowerCase();
@@ -140,7 +140,22 @@ export function editorTabFromUrl(url) {
 // that renders as raw data in the browser, the same failure an OAuth return
 // once had. Every part of the address is rebuilt from known values, so a
 // submitted field can only choose among the editor's own tabs and locales.
-export const LISTING_EDITOR_OUTCOMES = Object.freeze(["saved", "media_reviewed", "media_review_failed"]);
+export const LISTING_EDITOR_OUTCOMES = Object.freeze(["saved", "media_reviewed", "media_review_failed", "task_opened", "task_failed"]);
+
+// A follow-up opened from a listing names it as its subject. That is the only
+// thing a script-free task form is allowed to steer: which listing to go back
+// to, never an arbitrary address.
+export function listingIdFromTaskSubject(subjectRef) {
+  const match = String(subjectRef || "").match(/^listing:([A-Za-z0-9][A-Za-z0-9._-]{0,80})$/);
+  return match ? match[1] : "";
+}
+
+// The task contract refuses keys it does not know, so the form's return hint
+// is taken off before the task is opened.
+export function splitTaskFormReturn(input = {}) {
+  const { returnLocale = "", ...task } = input && typeof input === "object" ? input : {};
+  return { task, listingId: listingIdFromTaskSubject(task.subjectRef ?? task.subject_ref), locale: String(returnLocale || "") };
+}
 
 export function listingEditorReturnPath(listingId, { tab = "facts", locale = "", outcome = "" } = {}) {
   const url = new URL("/admin/listings/edit", "http://ms-realty.local");
