@@ -45,6 +45,29 @@ export function workspaceWithOperator(workspace, operator) {
     : workspace;
 }
 
+// The search screen is a page like any other: same shell, same workspace, same
+// operator identity. The results themselves arrive already ranked.
+export function renderAdminRecordSearchPayload(registry, requestedLocale, found, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    ...found,
+    kind: "admin_record_search",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/search",
+    canonical: "/admin/search",
+    indexable: false,
+    metadata: {
+      title: "MS Realty workspace search",
+      description: "Admin-only search across listings, enquiries, people and viewings.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+  };
+}
+
 export function renderAdminListingEditorPayload(
   registry,
   requestedLocale,
@@ -110,6 +133,56 @@ export function editorTabFromUrl(url) {
   const requested = url?.searchParams?.get("tab");
   if (requested) return normalizeEditorTab(requested);
   return url?.searchParams?.has("media_upload") ? "media" : "facts";
+}
+
+// Where a script-free editor form lands once it has been submitted. The editor
+// works without JavaScript, so its native POST cannot answer with a JSON body:
+// that renders as raw data in the browser, the same failure an OAuth return
+// once had. Every part of the address is rebuilt from known values, so a
+// submitted field can only choose among the editor's own tabs and locales.
+export const LISTING_EDITOR_OUTCOMES = Object.freeze(["saved", "media_reviewed", "media_review_failed"]);
+
+export function listingEditorReturnPath(listingId, { tab = "facts", locale = "", outcome = "" } = {}) {
+  const url = new URL("/admin/listings/edit", "http://ms-realty.local");
+  url.searchParams.set("listingId", String(listingId || ""));
+  url.searchParams.set("tab", normalizeEditorTab(tab));
+  const lang = String(locale || "");
+  if (/^[a-z]{2}(?:-[A-Z]{2})?$/.test(lang)) url.searchParams.set("locale", lang);
+  if (LISTING_EDITOR_OUTCOMES.includes(outcome)) url.searchParams.set("editor", outcome);
+  return `${url.pathname}${url.search}`;
+}
+
+export function listingEditorOutcomeFromUrl(url) {
+  const value = url?.searchParams?.get("editor") || "";
+  return LISTING_EDITOR_OUTCOMES.includes(value) ? value : null;
+}
+
+// What a refused script-free save puts back in front of the operator: exactly
+// the editable values they submitted, the version they submitted against, and
+// why it was refused. The version is never advanced here - re-rendering with the
+// current one would let the next click silently overwrite whoever changed the
+// listing in the meantime, which is the one outcome worse than a refusal.
+export function listingEditorSubmission(input = {}, error = null) {
+  const source = input && typeof input.patch === "object" && input.patch ? input.patch : input || {};
+  const values = {};
+  for (const field of LISTING_EDIT_FIELDS) {
+    const value = source[field];
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") values[field] = String(value);
+  }
+  const revision = String(input?.draftRevision ?? "");
+  return {
+    values,
+    draftRevision: /^[a-f0-9]{64}$/.test(revision) ? revision : "",
+    error: error
+      ? {
+          kind: String(error.code || "bad_request"),
+          message: String(error.message || "The draft was not saved."),
+          conflicting_fields: Array.isArray(error.details?.conflicting_fields)
+            ? error.details.conflicting_fields.map((row) => ({ field: String(row.field || ""), current_value: row.current_value ?? null }))
+            : [],
+        }
+      : null,
+  };
 }
 
 export function renderAdminOperationsReportPayload(registry, requestedLocale, report, operator = null) {

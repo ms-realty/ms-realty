@@ -5,6 +5,7 @@ import { assertCmsSeed } from "./cms-seed.mjs";
 import { assertLocaleRegistry, loadLocaleRegistry } from "./locales.mjs";
 import { mediaWorkflow } from "./media.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
+import { mediaGalleryRevision } from "./media-gallery-order.mjs";
 
 export const CMS_SEED_IMPORT_CONTEXT_FLAG = "ms_realty_cms_seed_import";
 
@@ -773,6 +774,7 @@ function projectedListingRecord(document, snapshot, sourceRecord = null) {
     seo: clone(document.seo || {}),
     translations: translationDocs,
     media: mediaDocs,
+    media_order_revision: mediaGalleryRevision(document.media || []),
     media_workflow: mediaWorkflow(mediaDocs),
     tour: tourDocument ? projectedTour(tourDocument) : null,
     migration: clone(document.migration || null),

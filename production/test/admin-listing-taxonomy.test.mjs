@@ -55,24 +55,38 @@ test("admin listing editor quality tab uses a compact status list", () => {
   assert.match(html, /Не е проверена/);
 });
 
-test("listing editor tabs are real: the requested section renders and the others do not", () => {
-  const media = editorHtml("MS-00815", "en", "media");
-  assert.match(media, /data-media-review-panel="true"/);
-  assert.doesNotMatch(media, /data-editor-form="listing"/);
-  assert.match(media, /data-editor-tab="media"[^>]*aria-current="page"/);
+// Rendering one section per request meant changing section was a navigation,
+// and an unsaved draft died with it. One record is one document now: the tab
+// chooses what is on screen, never what exists, and the draft form and its save
+// bar are present on every section.
+test("listing editor sections all exist and the requested one is the visible one", () => {
+  const visible = (html, attribute, tab) => {
+    const tag = html.match(new RegExp(`<div[^>]*${attribute}="${tab}"[^>]*>`));
+    assert.ok(tag, `${attribute}="${tab}" is in the document`);
+    return !/\shidden(?:[=\s>])/.test(tag[0]);
+  };
+  for (const tab of ["facts", "translations", "media", "seo", "quality"]) {
+    const html = editorHtml("MS-00815", "en", tab);
+    // The draft survives a section change because it never leaves the page.
+    assert.match(html, /data-editor-form="listing"/, tab);
+    assert.match(html, /data-editor-savebar="true"/, tab);
+    assert.match(html, new RegExp(`data-editor-tab="${tab}"[^>]*aria-current="page"`), tab);
+    assert.match(html, new RegExp(`data-editor-shell="true" data-editor-tab="${tab}"`), tab);
+    for (const section of ["quality", "translations", "media"]) {
+      assert.equal(visible(html, "data-editor-panel-tab", section), section === tab, `${tab}: ${section} panel`);
+    }
+    for (const section of ["facts", "seo"]) {
+      assert.equal(visible(html, "data-editor-fields-tab", section), section === tab, `${tab}: ${section} fields`);
+    }
+  }
   const facts = editorHtml("MS-00815", "en", "facts");
-  assert.doesNotMatch(facts, /data-media-review-panel="true"/);
-  assert.doesNotMatch(facts, /data-translation-panel="true"/);
-  assert.doesNotMatch(facts, /data-seo-panel="true"/);
-  assert.match(facts, /data-editor-form="listing"/);
-  assert.match(facts, /data-editor-shell="true" data-editor-tab="facts"/);
-  assert.match(facts, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media"/);
-  // An unknown or missing tab is Facts, and SEO keeps the same save form.
+  // The link keeps the language the broker is working in: a reload or a shared
+  // link must land in the same section and the same locale, even the default.
+  assert.match(facts, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media&amp;locale=en"/);
+  assert.match(editorHtml("MS-00815", "bg", "facts"), /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media&amp;locale=bg"/);
+  assert.match(facts, /data-editor-tab-link="media"/);
+  // An unknown or missing tab is still Facts.
   assert.match(editorHtml("MS-00815", "en", "nonsense"), /data-editor-tab="facts"[^>]*aria-current="page"/);
-  const seo = editorHtml("MS-00815", "en", "seo");
-  assert.match(seo, /data-seo-panel="true"/);
-  assert.match(seo, /data-editor-form="listing"/);
-  assert.doesNotMatch(seo, /data-editor-section="content"/);
 });
 
 test("listing cards never lead with the reference", () => {

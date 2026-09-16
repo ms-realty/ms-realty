@@ -148,6 +148,7 @@ const CONTENT_WRITE_PATHS = new Set([
   "/api/admin/listings/publication-schedules/cancel",
   "/api/admin/listings/publication-schedules/run-due",
   "/api/admin/media/reviews",
+  "/api/admin/media/order",
   "/api/admin/media/uploads",
   "/api/admin/social-marketing/publish",
   "/api/admin/tours/approve",
@@ -230,6 +231,12 @@ export function requiredAdminCapability(method, pathname) {
   // role/workspace fields; this capability only makes the self-service route
   // reachable through the custom admin shell.
   if (pathname === "/api/admin/profile") return "workspace:read";
+  // Search reaches across listings, enquiries, people and viewings, so the
+  // entry itself is only as wide as the capability the reader already holds:
+  // the route asks for the weakest one and each source is read through its own
+  // existing check, which is what keeps an operator from finding a record the
+  // rest of the workbench would refuse to show them.
+  if (verb === "GET" && ["/admin/search", "/api/admin/search"].includes(pathname)) return "workspace:read";
   if (["/admin/team", "/api/admin/team"].includes(pathname)) return "team:manage";
   // Connecting the agency's own tools, disconnecting them, and minting the
   // assistant's delegated access all change what this workspace can reach, so

@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import {
   createBulkListingStatusEdits,
   createListingEdit,
@@ -85,8 +86,27 @@ function unavailableError(message, cause = null) {
   return error;
 }
 
-function draftConflictError(message = "This listing or its shared property has changed. Keep your edits and reload the listing before saving again.") {
-  return Object.assign(new Error(message), { status: 409, code: "listing_draft_conflict" });
+function draftConflictError(
+  message = "This listing or its shared property has changed. Keep your edits and reload the listing before saving again.",
+  details = null,
+) {
+  return Object.assign(new Error(message), { status: 409, code: "listing_draft_conflict", ...(details ? { details } : {}) });
+}
+
+// What the operator needs in order to decide, rather than just being told no:
+// the version the listing is on now, and which of the fields they were editing
+// somebody else has since changed. Only the fields in their own patch are
+// reported, so a busy listing does not bury the two values they care about.
+function draftConflictDetails(current, currentProperty, patch) {
+  const fields = [];
+  for (const field of Object.keys(patch || {})) {
+    const theirs = current?.facts?.[field] ?? currentProperty?.[field] ?? null;
+    const mine = patch[field];
+    if (!isDeepStrictEqual(theirs ?? null, mine ?? null)) {
+      fields.push({ field, current_value: theirs === undefined ? null : theirs });
+    }
+  }
+  return { draft_revision: listingDraftRevision(current, currentProperty), conflicting_fields: fields };
 }
 
 export function browserListingRevisionRequired(headers) {
@@ -525,15 +545,22 @@ export async function saveListingDraft(
   const listingId = listingIdFor(input?.listingId || input?.listing_id);
   const patch = listingDraftPatchFromInput(input);
   const expectedRevision = String(input?.draftRevision ?? "").trim();
-  if ((requireRevision || Object.hasOwn(input || {}, "draftRevision")) && !/^[a-f0-9]{64}$/.test(expectedRevision)) {
-    throw draftConflictError("The listing version is missing. Keep your edits and reload the listing before saving.");
-  }
 
+  // The store is reached first on purpose. A missing version and an absent
+  // draft store both stop the save, but they are different facts and the
+  // operator acts on them differently: reloading fixes a stale version and can
+  // never fix an unconfigured store. Answering "reload before saving" to a
+  // store that is not there sent brokers round a loop that could not end,
+  // because the reload rendered the same empty version it had just refused.
   let runtime;
   try {
     runtime = await loadPayloadCmsImportRuntime({ env, payload });
   } catch (error) {
     throw unavailableError("Payload draft store is not configured", error);
+  }
+
+  if ((requireRevision || Object.hasOwn(input || {}, "draftRevision")) && !/^[a-f0-9]{64}$/.test(expectedRevision)) {
+    throw draftConflictError("The listing version is missing. Keep your edits and reload the listing before saving.");
   }
 
   return withListingWorkQueueDuplicateRetry(runtime, { principal, accessMode: "read write", isolationLevel: "serializable" }, async (req) => {
@@ -553,7 +580,9 @@ export async function saveListingDraft(
           req,
         })
       : null;
-    if (expectedRevision && expectedRevision !== listingDraftRevision(current, currentProperty)) throw draftConflictError();
+    if (expectedRevision && expectedRevision !== listingDraftRevision(current, currentProperty)) {
+      throw draftConflictError(undefined, draftConflictDetails(current, currentProperty, patch));
+    }
     const currentSeed = await projectListingDraftSeed(seed, { payload: runtime, req });
     const listing = currentSeed.records.find((record) => record.collection === "listings" && record.id === listingId);
     if (!listing) throw notFoundError("Known listingId is required");

@@ -225,7 +225,31 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортирай CSV за качество",
     reviewListing: "Прегледай обявата",
     factsReviewer: "Проверил данните",
+    moveMediaEarlier: "Премести напред",
+    moveMediaLater: "Премести назад",
+    coverPhoto: "Корица",
+    makeCoverPhoto: "Направи корица",
+    mediaOrderSaving: "Записване на реда…",
+    mediaOrderSaved: "Редът на галерията е записан.",
+    mediaOrderFailed: "Редът не беше записан. Опитай пак.",
+    saveOverNewer: "Запази върху по-новата версия",
+    saveOverNewerReady: "Готово за запис върху по-новата версия.",
+    recordSearch: {
+      label: "Търсене в работното място",
+      placeholder: "Обява, запитване, човек, оглед…",
+      submit: "Търси",
+      title: "Резултати от търсенето",
+      empty: "Нищо не съвпада с това търсене.",
+      emptyHint: "Провери изписването или потърси по референция.",
+      tooShort: "Въведи поне два знака.",
+      prompt: "Търси обява, запитване, човек или оглед.",
+      counted: "{count} намерени",
+      unavailable: "Не беше претърсено: {sources}.",
+      types: { listing: "Обява", lead: "Запитване", contact: "Човек", viewing: "Оглед" },
+    },
     mediaReviewer: "Проверил медиите",
+    editMediaAsset: "Редактирай",
+    closeInspector: "Затвори",
     reviewNotes: "Бележки и източник на проверката",
     reviewNotesHint: "Опишете как данните и медиите са проверени.",
     saveListingReview: "Запази проверката",
@@ -1031,7 +1055,31 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Импортировать CSV качества",
     reviewListing: "Проверить объект",
     factsReviewer: "Проверил данные",
+    moveMediaEarlier: "Переместить вперёд",
+    moveMediaLater: "Переместить назад",
+    coverPhoto: "Обложка",
+    makeCoverPhoto: "Сделать обложкой",
+    mediaOrderSaving: "Сохранение порядка…",
+    mediaOrderSaved: "Порядок галереи сохранён.",
+    mediaOrderFailed: "Порядок не сохранён. Попробуй ещё раз.",
+    saveOverNewer: "Сохранить поверх новой версии",
+    saveOverNewerReady: "Готово к записи поверх новой версии.",
+    recordSearch: {
+      label: "Поиск по рабочему пространству",
+      placeholder: "Объект, заявка, человек, показ…",
+      submit: "Найти",
+      title: "Результаты поиска",
+      empty: "Ничего не совпало с этим запросом.",
+      emptyHint: "Проверь написание или попробуй референс.",
+      tooShort: "Введи хотя бы два знака.",
+      prompt: "Найди объект, заявку, человека или показ.",
+      counted: "Найдено: {count}",
+      unavailable: "Не искали в: {sources}.",
+      types: { listing: "Объект", lead: "Заявка", contact: "Человек", viewing: "Показ" },
+    },
     mediaReviewer: "Проверил медиа",
+    editMediaAsset: "Редактировать",
+    closeInspector: "Закрыть",
     reviewNotes: "Заметки и источник проверки",
     reviewNotesHint: "Опишите, как были проверены данные и медиа.",
     saveListingReview: "Сохранить проверку",
@@ -1837,7 +1885,31 @@ const ADMIN_UI_COPY = {
     importQualityCsv: "Import listing quality CSV",
     reviewListing: "Review listing",
     factsReviewer: "Facts reviewer",
+    moveMediaEarlier: "Move earlier",
+    moveMediaLater: "Move later",
+    coverPhoto: "Cover",
+    makeCoverPhoto: "Make cover",
+    mediaOrderSaving: "Saving gallery order…",
+    mediaOrderSaved: "Gallery order saved.",
+    mediaOrderFailed: "The gallery order was not saved. Try again.",
+    saveOverNewer: "Save over the newer version",
+    saveOverNewerReady: "Ready to save over the newer version.",
+    recordSearch: {
+      label: "Search the workspace",
+      placeholder: "Listing, enquiry, person, viewing…",
+      submit: "Search",
+      title: "Search results",
+      empty: "Nothing matches that search.",
+      emptyHint: "Check the spelling, or try a reference.",
+      tooShort: "Type at least two characters.",
+      prompt: "Find a listing, an enquiry, a person or a viewing.",
+      counted: "{count} found",
+      unavailable: "Not searched: {sources}.",
+      types: { listing: "Listing", lead: "Enquiry", contact: "Person", viewing: "Viewing" },
+    },
     mediaReviewer: "Media reviewer",
+    editMediaAsset: "Edit",
+    closeInspector: "Close",
     reviewNotes: "Review notes and source",
     reviewNotesHint: "Describe how the listing facts and media were verified.",
     saveListingReview: "Save review",
@@ -3824,8 +3896,49 @@ function Topbar({ page, title, titleAsHeading = false, action = null }) {
       h("div", { className: "crm-top__eyebrow" }, page.workspace?.title || "MS Realty"),
       h("div", { className: "crm-top__sub" }, title),
     ),
+    h(AdminSearchEntry, { page }),
     h(MobileNavigation, { page }),
     action ? h("div", { className: "crm-top__action", "data-admin-primary-action": "true" }, action) : null,
+  );
+}
+
+// One way in, on every screen. It is a real form to a real page, so it works
+// with scripting off and a result can be opened in a new tab; the client only
+// adds suggestions underneath it.
+function AdminSearchEntry({ page }) {
+  if (!pageCan(page, "workspace:read")) return null;
+  const ui = workbenchCopy(page);
+  const search = ui.recordSearch;
+  return h(
+    "form",
+    {
+      className: "crm-top__search",
+      role: "search",
+      method: "get",
+      action: adminHref("/admin/search", page),
+      "data-admin-search": "true",
+    },
+    h("label", { className: "adm-visually-hidden", htmlFor: "admin-search-q" }, search.label),
+    h(Icon, { name: "search", size: 16 }),
+    h("input", {
+      id: "admin-search-q",
+      type: "search",
+      name: "q",
+      autoComplete: "off",
+      placeholder: search.placeholder,
+      defaultValue: page.kind === "admin_record_search" ? page.query || "" : "",
+      "data-admin-search-input": "true",
+      "aria-controls": "admin-search-suggestions",
+      "aria-expanded": "false",
+    }),
+    h("button", { type: "submit", className: "mk-btn mk-btn--ghost mk-btn--sm" }, search.submit),
+    h("div", {
+      id: "admin-search-suggestions",
+      className: "crm-top__suggestions",
+      role: "listbox",
+      hidden: true,
+      "data-admin-search-suggestions": "true",
+    }),
   );
 }
 
@@ -10487,17 +10600,35 @@ function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, fact
 
 const LISTING_EDITOR_TAB_KEYS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
 
-// The form column belongs to the Facts and SEO tabs; the three review panels
-// (quality, translations, media) are built in that order and the active tab
-// picks one. Building all three keeps the panel markup where it is; only the
-// choice of which reaches the page changed.
+// One record, one document. Every section of the listing is rendered on the page
+// and the tabs only change which one is showing, because rendering a single tab
+// per request meant a broker who opened Media to check a photo navigated away
+// from unsaved Facts and lost them with no warning. The form column carries
+// Facts and SEO together; the three review panels are siblings of it, never
+// nested inside it, so their own forms stay legal HTML.
 function editorMainColumn(activeTab, attrs, panel) {
-  return activeTab === "facts" || activeTab === "seo" ? h("div", attrs, panel) : null;
+  const owned = activeTab === "facts" || activeTab === "seo" ? activeTab : "facts";
+  return h("div", { ...attrs, "data-editor-column": "form", "data-editor-column-tab": owned }, panel);
 }
 
 function editorSupportSection(activeTab, attrs, qualityPanel, translationsPanel, mediaPanel) {
-  const panel = { quality: qualityPanel, translations: translationsPanel, media: mediaPanel }[activeTab];
-  return panel ? h("section", attrs, panel) : null;
+  const panels = [
+    ["quality", qualityPanel],
+    ["translations", translationsPanel],
+    ["media", mediaPanel],
+  ].filter(([, panel]) => panel);
+  if (!panels.length) return null;
+  return h(
+    "section",
+    attrs,
+    ...panels.map(([tab, panel]) =>
+      h(
+        "div",
+        { key: tab, className: "adm-editor-panel", "data-editor-panel-tab": tab, hidden: activeTab === tab ? undefined : true },
+        panel,
+      ),
+    ),
+  );
 }
 
 function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false, { open = false, section = "facts", factReview = null, assist = null } = {}) {
@@ -10513,6 +10644,215 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
     ),
     editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview, assist),
   );
+}
+
+// The replacement and review forms for one asset. They used to be rendered
+// inside the gallery tile, which is what made an opened editor stretch its whole
+// six-column row and cut off its own controls. The markup and every data binding
+// are unchanged; only where it is mounted moved, to a full-width block the
+// inspector borrows the selected asset's forms from.
+function listingMediaAssetForms(page, ui, copy, item, { canEditContent, published, hermesAssist }) {
+  const operatorId = currentOperatorId(page, "");
+  const fieldId = `${item.asset_id}-${item.media_order_entry}`;
+  return [
+    canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
+      ? h(
+          "details",
+          { className: "adm-media-review adm-media-replacement", "data-media-replacement": item.asset_id },
+          h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
+          h(
+            "form",
+            {
+              method: "post",
+              action: "/api/admin/media/uploads",
+              enctype: "multipart/form-data",
+              className: "adm-form adm-media-upload adm-media-replacement__form",
+              "data-media-upload-form": "replacement",
+              "data-media-upload-pending": ui.mediaUploadPending,
+              "data-media-upload-success": ui.mediaUploadSuccess,
+              "data-media-upload-failure": ui.mediaUploadFailed,
+              "data-media-upload-rejected": ui.mediaUploadRejected,
+            },
+            h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+            h("input", { type: "hidden", name: "replacesAssetId", defaultValue: item.asset_id }),
+            h("input", { type: "hidden", name: "kind", defaultValue: item.kind === "floor_plan" ? "floor_plan" : "photo" }),
+            h(
+              "label",
+              null,
+              ui.replaceMediaFile,
+              h("input", {
+                type: "file",
+                name: "photo",
+                required: true,
+                accept: "image/jpeg,image/png,image/webp,image/avif",
+                "data-media-upload-input": "true",
+              }),
+            ),
+            h("p", { className: "adm-note" }, ui.mediaReplacementHint),
+            h("progress", { max: "100", value: "0", hidden: true, "data-media-upload-progress": "true", "aria-label": ui.mediaUploadPending }),
+            h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-media-upload-status": "true" }),
+            h("ul", { className: "adm-media-upload__results", "data-media-upload-results": "true" }),
+            h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", "data-media-upload-submit": "true" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
+          ),
+        )
+      : null,
+    canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/reviews")
+      ? h(
+          "details",
+          { className: "adm-media-review", "data-media-review-disclosure": item.asset_id },
+          h(
+            "summary",
+            null,
+            h(Icon, { name: "shield-check", size: 16 }),
+            h("span", null, ui.reviewMediaAsset),
+          ),
+          h(
+            "form",
+            {
+              method: "post",
+              action: "/api/admin/media/reviews",
+              className: "adm-form adm-media-review-form",
+              "data-admin-mutation-form": "media-review",
+              "data-admin-mutation-saving": ui.mediaReviewSaving,
+              "data-admin-mutation-success": ui.mediaReviewSaved,
+              "data-admin-mutation-failure": ui.mediaReviewFailed,
+            },
+              h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+              h("input", { type: "hidden", name: "assetId", defaultValue: item.asset_id }),
+              h(
+                "label",
+                null,
+                ui.mediaDecision,
+                h(
+                  "select",
+                  { name: "decision", defaultValue: published ? "publish" : "keep_private" },
+                  h("option", { value: "keep_private", selected: published ? undefined : true }, ui.keepMediaPrivate),
+                  h("option", { value: "publish", selected: published ? true : undefined }, ui.publishMedia),
+                ),
+              ),
+              h(
+                "label",
+                null,
+                ui.mediaKind,
+                h(
+                  "select",
+                  { name: "kind", defaultValue: item.kind },
+                  ...["photo", "floor_plan", "video"].map((kind) =>
+                    h("option", { key: kind, value: kind, selected: item.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
+                  ),
+                ),
+              ),
+              // Alt text is the value that blocks publication when it is
+              // empty, and the one a broker is least likely to write. Same
+              // control, same boundary, drawn from the same approved facts.
+              h(
+                "div",
+                { className: "adm-field adm-field--assisted", "data-hermes-assist-for": `alt-${fieldId}` },
+                h(
+                  "div",
+                  { className: "adm-lblrow" },
+                  h("label", { htmlFor: `media-alt-${fieldId}` }, ui.mediaAlt),
+                  hermesAssistButton(ui, {
+                    assist: hermesAssist,
+                    hermesField: "alt_text",
+                    targetId: `media-alt-${fieldId}`,
+                    barId: `media-alt-${fieldId}-drafted`,
+                  }),
+                ),
+                h("textarea", { id: `media-alt-${fieldId}`, name: "alt", rows: 2, defaultValue: item.alt || "" }),
+                hermesDraftedBar(ui, { assist: hermesAssist, barId: `media-alt-${fieldId}-drafted`, field: `alt-${fieldId}` }),
+              ),
+              item.kind === "video"
+                ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
+                : null,
+              h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
+              // The signed-in operator is the reviewer of record; the
+              // form carries the id, the screen shows a witness line
+              // with the id as a caption rather than an editable key.
+              operatorId
+                ? h(
+                    "div",
+                    { className: "adm-media-review__reviewer", "data-media-reviewer": operatorId },
+                    h("input", { type: "hidden", name: "reviewer", value: operatorId }),
+                    h("span", { className: "adm-media-review__reviewer-label" }, label(copy, "reviewer", "Reviewer")),
+                    h("span", { className: "adm-media-review__reviewer-name" }, ui.mediaReviewerSignedIn),
+                  )
+                : h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
+              h(
+                "label",
+                { className: "adm-check" },
+                h("input", { type: "checkbox", name: "reviewConfirmed", required: true }),
+                ` ${ui.mediaReviewConfirmation}`,
+              ),
+              h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+              h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, ui.saveMediaReview)),
+          ),
+        )
+      : null
+  ];
+}
+
+// The results screen. Every row says what kind of record it is, what it is
+// called, where it stands and one way in, because a broker scanning a mixed
+// list needs the kind before anything else.
+function RecordSearchBody({ page }) {
+  const ui = workbenchCopy(page);
+  const search = ui.recordSearch;
+  const results = page.results || [];
+  const query = String(page.query || "").trim();
+  const unavailable = Object.entries(page.sources || {})
+    .filter(([, source]) => source?.status === "unavailable")
+    .map(([type]) => search.types[type] || type);
+  // An empty box is an invitation, not a complaint about length.
+  const state = !query ? "prompt" : page.too_short ? "too_short" : results.length ? "results" : "empty";
+  return adminShell(page, {
+    title: search.title,
+    titleAsHeading: true,
+    mainAttrs: { "data-react-admin-ui": "record-search", "data-search-state": state },
+    children: [
+      h(
+        Panel,
+        { key: "results", title: search.title, "data-record-search": "true", "data-search-results": String(results.length) },
+        state === "results"
+          ? h("p", { className: "adm-note" }, fillTemplate(search.counted, { count: results.length }))
+          : null,
+        // A source nobody could read is named here rather than left out, so a
+        // short list is never mistaken for a complete one.
+        unavailable.length
+          ? h(
+              "p",
+              { className: "adm-note", role: "note", "data-search-unavailable": unavailable.length },
+              fillTemplate(search.unavailable, { sources: unavailable.join(", ") }),
+            )
+          : null,
+        state === "results"
+          ? h(
+              "ul",
+              { className: "adm-search-results" },
+              ...results.map((row) =>
+                h(
+                  "li",
+                  { key: `${row.type}-${row.id}`, className: "adm-search-result", "data-search-result": row.type },
+                  h(
+                    "a",
+                    { className: "adm-search-result__link", href: adminHref(row.href, page) },
+                    h("span", { className: "adm-search-result__kind" }, search.types[row.type] || row.type),
+                    h("strong", { className: "adm-search-result__title" }, row.title || row.id),
+                    row.subtitle ? h("span", { className: "adm-search-result__sub" }, row.subtitle) : null,
+                  ),
+                  row.status ? h(StatusPill, { tone: "sun" }, statusText(ui, row.status)) : null,
+                ),
+              ),
+            )
+          : h(
+              EmptyState,
+              { icon: "search", "data-search-empty": state },
+              state === "too_short" ? search.tooShort : state === "prompt" ? search.prompt : search.empty,
+              state === "empty" ? h("p", null, search.emptyHint) : null,
+            ),
+      ),
+    ],
+  });
 }
 
 function ListingEditorBody({ page }) {
@@ -10540,12 +10880,26 @@ function ListingEditorBody({ page }) {
       editorValues[row.editor_field] = row.value;
     }
   }
+  // A refused script-free save comes back as this page, carrying what the
+  // operator typed. Their values win over the stored ones, and the version stays
+  // the one they submitted against.
+  const submission = page.editorSubmission || null;
+  for (const [field, value] of Object.entries(submission?.values || {})) editorValues[field] = value;
+  const editorRevision = submission ? submission.draftRevision : page.draftRevision || "";
+  const editorOutcome = page.editorOutcome || null;
+  const submissionConflict = submission?.error?.kind === "listing_draft_conflict" ? submission.error : null;
   const tour = page.listing.tour || {};
   const tourProvider = tour.provider === "supersplat-viewer" ? "supersplat-viewer" : "photo-sphere-viewer";
   const tourPublished = tour.is_public === true;
   const tourStatus = tourPublished ? "approved" : tour.review_status || "review_required";
   const fallbackGalleryCount = (tour.fallback_gallery || []).length;
-  const reviewableMedia = (page.listing.media || [])
+  const mediaRelation = page.listing.media || [];
+  // The grid deliberately shows a bounded subset, while ordering still owns
+  // the whole relation, including hidden kinds and duplicate source assets.
+  const mediaOrder = mediaRelation.map((item, entry) => ({ entry, asset_id: item.asset_id, relation_id: String(item.id ?? "") }));
+  const mediaOrderAddressable = mediaOrder.every((item) => typeof item.asset_id === "string" && item.asset_id);
+  const reviewableMedia = mediaRelation
+    .map((item, entry) => ({ ...item, media_order_entry: entry }))
     .filter((item) => ["photo", "floor_plan", "video"].includes(item.kind))
     .slice(0, 50);
   const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
@@ -10597,7 +10951,7 @@ function ListingEditorBody({ page }) {
   // One section per request: the server renders the tab in ?tab= (Facts by
   // default), so a phone gets one form, not a five-section scroll.
   const activeTab = LISTING_EDITOR_TAB_KEYS.includes(page.editorTab) ? page.editorTab : "facts";
-  const editorTabHref = (tab) => adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}`, page);
+  const editorTabHref = (tab) => `/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}&locale=${encodeURIComponent(page.workspace.locale)}`;
   const editorTabLink = (tab, text, icon, ariaLabel = text) =>
     h(
       "a",
@@ -10605,6 +10959,7 @@ function ListingEditorBody({ page }) {
         className: "mk-tab",
         href: editorTabHref(tab),
         "data-editor-tab": tab,
+        "data-editor-tab-link": tab,
         "aria-current": activeTab === tab ? "page" : undefined,
         "data-active": activeTab === tab ? "" : undefined,
         "aria-label": ariaLabel,
@@ -10670,7 +11025,15 @@ function ListingEditorBody({ page }) {
           { className: "adm-editor-main" },
           h(
             Panel,
-            { title: activeTab === "seo" ? ui.seoSettings : label(copy, "facts", "Facts"), "data-editor-primary-panel": "true" },
+            {
+              title: activeTab === "seo" ? ui.seoSettings : label(copy, "facts", "Facts"),
+              "data-editor-primary-panel": "true",
+              "data-editor-title-facts": label(copy, "facts", "Facts"),
+              "data-editor-title-seo": ui.seoSettings,
+              // On a review section the panel keeps only the save bar, so the
+              // draft can be saved from wherever the operator is looking.
+              "data-editor-fields-hidden": activeTab === "facts" || activeTab === "seo" ? "false" : "true",
+            },
             h(
               "form",
               {
@@ -10681,14 +11044,29 @@ function ListingEditorBody({ page }) {
                 "data-admin-mutation-form": "listing",
                 "data-editor-form": "listing",
                 "data-editor-panel": "facts",
+                // Values carried back from a refused submission are not saved,
+                // whatever the browser's form defaults now say, so the client
+                // keeps them dirty until a save succeeds. Discarding them means
+                // reopening the stored listing, not resetting to what was typed.
+                ...(submission
+                  ? {
+                      "data-editor-unsaved-submission": "true",
+                      "data-editor-discard-href": adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${activeTab}`, page),
+                    }
+                  : {}),
                 "data-editor-later-edits-message": ui.editorLaterEdits,
                 "data-editor-conflict-message": ui.editorConflict,
+                "data-editor-conflict-ready": ui.saveOverNewerReady,
                 "data-editor-unknown-message": ui.editorUnknownSave,
                 "data-editor-clean-message": label(copy, "saved", "All changes saved."),
                 "data-editor-dirty-message": label(copy, "unsavedChanges", "Unsaved changes"),
               },
               h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-              h("input", { type: "hidden", name: "draftRevision", defaultValue: page.draftRevision || "" }),
+              h("input", { type: "hidden", name: "draftRevision", defaultValue: editorRevision }),
+              // Where a script-free submission comes back to. Both are checked
+              // against the editor's own tabs and locales before use.
+              h("input", { type: "hidden", name: "returnTab", defaultValue: activeTab === "seo" ? "seo" : "facts" }),
+              h("input", { type: "hidden", name: "returnLocale", defaultValue: page.workspace?.locale || "" }),
               // The server attributes every edit to the authenticated operator,
               // so the editor id travels with the form but never occupies a
               // field: the save bar names who is editing instead.
@@ -10698,20 +11076,40 @@ function ListingEditorBody({ page }) {
                 defaultValue: currentOperatorId(page, ""),
                 "data-editor-name": "true",
               }),
-              activeTab === "facts" && page.factReview?.rows?.length
-                ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
-                : null,
-              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }) : null,
-              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }) : null,
-              activeTab === "facts" ? editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }) : null,
-              activeTab === "facts" ? editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }) : null,
-              activeTab === "seo"
-                ? h(
-                    "section",
-                    { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
-                    editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
-                  )
-                : null,
+              // Facts and SEO are two views of one draft, so both are in the
+              // document and the tab only decides which is on screen. One form,
+              // one dirty state, one save: switching between them can no longer
+              // drop what the broker typed.
+              h(
+                "div",
+                {
+                  key: "facts-fields",
+                  className: "adm-editor-fields",
+                  "data-editor-fields-tab": "facts",
+                  hidden: activeTab === "facts" ? undefined : true,
+                },
+                page.factReview?.rows?.length
+                  ? h("p", { className: "adm-note", role: "note", "data-fact-review-note": "true" }, `${page.factReview.copy?.description || "These figures await a broker's confirmation."} ${page.factReview.rows.length} ${page.factReview.copy?.count || "unchecked facts"}.`)
+                  : null,
+                editorFieldDisclosure(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent, { open: true, section: "content", factReview: page.factReview, assist: hermesAssist }),
+                editorFieldDisclosure(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent, { open: false, section: "details", factReview: page.factReview }),
+                editorFieldDisclosure(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent, { open: true, section: "terms", factReview: page.factReview }),
+                editorFieldDisclosure(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent, { open: false, section: "workflow" }),
+              ),
+              h(
+                "div",
+                {
+                  key: "seo-fields",
+                  className: "adm-editor-fields",
+                  "data-editor-fields-tab": "seo",
+                  hidden: activeTab === "seo" ? undefined : true,
+                },
+                h(
+                  "section",
+                  { id: "listing-seo", className: "adm-form__section adm-editor-anchor", "data-seo-panel": "true", "aria-label": ui.seoSettings },
+                  editorFieldDisclosure(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent, { open: true, section: "seo", assist: hermesAssist }),
+                ),
+              ),
               canEditContent
                 ? [
                     h(
@@ -10720,7 +11118,7 @@ function ListingEditorBody({ page }) {
                         key: "conflict",
                         className: "adm-inline-alert adm-editor-conflict",
                         role: "alert",
-                        hidden: true,
+                        hidden: submissionConflict ? undefined : true,
                         "data-editor-conflict": "true",
                       },
                       h(Icon, { name: "triangle-alert", size: 17 }),
@@ -10729,11 +11127,42 @@ function ListingEditorBody({ page }) {
                         null,
                         h("strong", null, ui.saveConflictTitle),
                         h("p", null, ui.saveConflictBody),
+                        // Filled by the client from the refusal itself: the
+                        // fields somebody else changed, and what they now say.
+                        h(
+                          "ul",
+                          {
+                            className: "adm-editor-conflict__fields",
+                            "data-editor-conflict-fields": "true",
+                            hidden: submissionConflict?.conflicting_fields?.length ? undefined : true,
+                          },
+                          ...(submissionConflict?.conflicting_fields || []).map((row) =>
+                            h(
+                              "li",
+                              { key: row.field },
+                              h("strong", null, row.field),
+                              row.current_value !== null && row.current_value !== undefined && row.current_value !== ""
+                                ? ` ${String(row.current_value)}`
+                                : null,
+                            ),
+                          ),
+                        ),
                       ),
                       h(
-                        "a",
-                        { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}`, page) },
-                        ui.reloadListing,
+                        "div",
+                        { className: "adm-editor-conflict__actions" },
+                        // One deliberate way forward that keeps the typing, and
+                        // the old way out for anyone who would rather start again.
+                        h(
+                          "button",
+                          { type: "button", className: "mk-btn mk-btn--primary mk-btn--sm", "data-editor-conflict-accept": "true", hidden: true },
+                          ui.saveOverNewer,
+                        ),
+                        h(
+                          "a",
+                          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}`, page) },
+                          ui.reloadListing,
+                        ),
                       ),
                     ),
                     h(
@@ -10742,15 +11171,25 @@ function ListingEditorBody({ page }) {
                       key: "savebar",
                       className: "adm-form__actions adm-editor-savebar",
                       "data-editor-savebar": "true",
-                      "data-dirty": "false",
-                      "data-save-state": "clean",
+                      "data-dirty": submission ? "true" : "false",
+                      "data-save-state": submissionConflict ? "conflict" : submission ? "error" : editorOutcome === "saved" ? "saved" : "clean",
                       "data-editor-conflict-marker": ui.editorConflict,
                     },
                     h(
                       "div",
                       { className: "adm-editor-savebar__meta" },
                       h("strong", { "data-editor-dirty-note": "true" }, label(copy, "saved", "All changes saved.")),
-                      h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                      h(
+                        "p",
+                        {
+                          className: "adm-form__status",
+                          role: "status",
+                          "aria-live": "polite",
+                          "data-admin-mutation-status": "true",
+                          "data-state": submissionConflict ? "conflict" : submission ? "error" : editorOutcome === "saved" ? "success" : undefined,
+                        },
+                        submission?.error?.message || (editorOutcome === "saved" ? label(copy, "saved", "All changes saved.") : null),
+                      ),
                       h(
                         "small",
                         { className: "adm-editor-savebar__actor" },
@@ -10761,7 +11200,7 @@ function ListingEditorBody({ page }) {
                       "div",
                       { className: "adm-editor-savebar__controls" },
                       h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "discardChanges", ui.discardChanges)),
-                      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md", disabled: true }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
+                      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
                     ),
                   ),
                   ]
@@ -10919,7 +11358,45 @@ function ListingEditorBody({ page }) {
               : null,
             h(
               "section",
-              { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
+              {
+                className: "adm-media-manager",
+                "aria-label": ui.mediaManager,
+                "data-media-manager": "true",
+                // Only where the order can actually be kept, so the client does
+                // not attach itself to a gallery it cannot save.
+                ...(canEditContent && page.media_order_available === true && mediaOrderAddressable
+                  ? {
+                      "data-media-order-listing": page.listing.id,
+                      "data-media-order": JSON.stringify(mediaOrder),
+                      "data-media-order-revision": page.listing.media_order_revision || "",
+                      "data-media-order-saving": ui.mediaOrderSaving,
+                      "data-media-order-success": ui.mediaOrderSaved,
+                      "data-media-order-failure": ui.mediaOrderFailed,
+                    }
+                  : {}),
+              },
+              // A script-free review comes back here; say how it went, since
+              // there is no in-page status line to have said it.
+              editorOutcome === "media_reviewed" || editorOutcome === "media_review_failed"
+                ? h(
+                    "p",
+                    {
+                      className: "adm-form__status adm-media-review-outcome",
+                      role: "status",
+                      "data-media-review-outcome": editorOutcome,
+                      "data-state": editorOutcome === "media_reviewed" ? "success" : "error",
+                    },
+                    editorOutcome === "media_reviewed" ? ui.mediaReviewSaved : ui.mediaReviewFailed,
+                  )
+                : null,
+              canEditContent && page.media_order_available === true && mediaOrderAddressable
+                ? h("p", {
+                    className: "adm-form__status adm-media-order-status",
+                    role: "status",
+                    "aria-live": "polite",
+                    "data-media-order-status": "true",
+                  })
+                : null,
               reviewableMedia.length
                 ? reviewableMedia.map((item, index) => {
                     const sourceUrl = item.source_url || item.url || item.asset_url || "";
@@ -10941,12 +11418,17 @@ function ListingEditorBody({ page }) {
                     const published = item.is_public === true;
                     const hasImagePreview = Boolean(sourceUrl && item.kind !== "video");
                     const previewState = hasImagePreview ? "loading" : sourceUrl ? "video" : "empty";
+                    // The tile is the whole card: a picture, what it is and where
+                    // it stands. Its forms are not in this grid column — six
+                    // narrow columns is why an opened editor used to stretch its
+                    // whole row and truncate its own controls.
                     return h(
                       "article",
                       {
-                        key: item.asset_id,
-                        className: "mk-card mk-card--sunken mk-card--pad-md adm-media-asset",
+                        key: `tile-${item.media_order_entry}`,
+                        className: "mk-card mk-card--sunken adm-media-asset",
                         "data-media-asset": item.asset_id,
+                        "data-media-order-entry": item.media_order_entry,
                         "data-media-kind": item.kind,
                         "data-media-public": published ? "true" : "false",
                         "data-media-preview-state": previewState,
@@ -10954,7 +11436,7 @@ function ListingEditorBody({ page }) {
                       h(
                         "header",
                         { className: "adm-media-asset__header" },
-                        h("div", null, h("strong", null, assetLabel), h("code", { className: "crm-mono adm-id-caption" }, item.asset_id)),
+                        h("strong", null, assetLabel),
                         h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
                       ),
                       // Every asset gets a deliberate state: loading and failed
@@ -10988,145 +11470,149 @@ function ListingEditorBody({ page }) {
                       sourceUrl
                         ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
                         : null,
-                      canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
+                      canEditContent && (durableRuntimeMutationAvailable(page, "/api/admin/media/reviews") || durableRuntimeMutationAvailable(page, "/api/admin/media/uploads"))
                         ? h(
-                            "details",
-                            { className: "adm-media-review adm-media-replacement", "data-media-replacement": item.asset_id },
-                            h("summary", null, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
-                            h(
-                              "form",
-                              {
-                                method: "post",
-                                action: "/api/admin/media/uploads",
-                                enctype: "multipart/form-data",
-                                className: "adm-form adm-media-upload adm-media-replacement__form",
-                                "data-media-upload-form": "replacement",
-                                "data-media-upload-pending": ui.mediaUploadPending,
-                                "data-media-upload-success": ui.mediaUploadSuccess,
-                                "data-media-upload-failure": ui.mediaUploadFailed,
-                                "data-media-upload-rejected": ui.mediaUploadRejected,
-                              },
-                              h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-                              h("input", { type: "hidden", name: "replacesAssetId", defaultValue: item.asset_id }),
-                              h("input", { type: "hidden", name: "kind", defaultValue: item.kind === "floor_plan" ? "floor_plan" : "photo" }),
-                              h(
-                                "label",
-                                null,
-                                ui.replaceMediaFile,
-                                h("input", {
-                                  type: "file",
-                                  name: "photo",
-                                  required: true,
-                                  accept: "image/jpeg,image/png,image/webp,image/avif",
-                                  "data-media-upload-input": "true",
-                                }),
-                              ),
-                              h("p", { className: "adm-note" }, ui.mediaReplacementHint),
-                              h("progress", { max: "100", value: "0", hidden: true, "data-media-upload-progress": "true", "aria-label": ui.mediaUploadPending }),
-                              h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-media-upload-status": "true" }),
-                              h("ul", { className: "adm-media-upload__results", "data-media-upload-results": "true" }),
-                              h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", "data-media-upload-submit": "true" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.replaceMedia)),
-                            ),
+                            "button",
+                            {
+                              type: "button",
+                              className: "mk-btn mk-btn--secondary mk-btn--sm adm-media-asset__open",
+                              "data-media-open": item.asset_id,
+                              hidden: true,
+                              "aria-haspopup": "dialog",
+                            },
+                            h(Icon, { name: "pencil", size: 16 }),
+                            h("span", null, ui.editMediaAsset),
                           )
                         : null,
-                      canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/media/reviews")
+                      // Order is moved one step at a time with buttons rather
+                      // than by dragging: a keyboard reaches these, and the
+                      // first photo is the cover, so "move to front" is how a
+                      // cover is chosen.
+                      canEditContent && page.media_order_available === true && mediaOrderAddressable
                         ? h(
-                            "details",
-                            { className: "adm-media-review", "data-media-review-disclosure": item.asset_id },
+                            "div",
+                            { className: "adm-media-asset__order", "data-media-order-controls": item.asset_id, hidden: true },
                             h(
-                              "summary",
-                              null,
-                              h(Icon, { name: "shield-check", size: 16 }),
-                              h("span", null, ui.reviewMediaAsset),
-                            ),
-                            h(
-                              "form",
+                              "button",
                               {
-                                method: "post",
-                                action: "/api/admin/media/reviews",
-                                className: "adm-form adm-media-review-form",
-                                "data-admin-mutation-form": "media-review",
-                                "data-admin-mutation-saving": ui.mediaReviewSaving,
-                                "data-admin-mutation-success": ui.mediaReviewSaved,
-                                "data-admin-mutation-failure": ui.mediaReviewFailed,
+                                type: "button",
+                                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                "data-media-move": "up",
+                                "data-media-move-asset": item.asset_id,
+                                disabled: index === 0,
+                                "aria-label": ui.moveMediaEarlier,
+                                title: ui.moveMediaEarlier,
                               },
-                                h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-                                h("input", { type: "hidden", name: "assetId", defaultValue: item.asset_id }),
-                                h(
-                                  "label",
-                                  null,
-                                  ui.mediaDecision,
-                                  h(
-                                    "select",
-                                    { name: "decision", defaultValue: published ? "publish" : "keep_private" },
-                                    h("option", { value: "keep_private", selected: published ? undefined : true }, ui.keepMediaPrivate),
-                                    h("option", { value: "publish", selected: published ? true : undefined }, ui.publishMedia),
-                                  ),
-                                ),
-                                h(
-                                  "label",
-                                  null,
-                                  ui.mediaKind,
-                                  h(
-                                    "select",
-                                    { name: "kind", defaultValue: item.kind },
-                                    ...["photo", "floor_plan", "video"].map((kind) =>
-                                      h("option", { key: kind, value: kind, selected: item.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
-                                    ),
-                                  ),
-                                ),
-                                // Alt text is the value that blocks publication when it is
-                                // empty, and the one a broker is least likely to write. Same
-                                // control, same boundary, drawn from the same approved facts.
-                                h(
-                                  "div",
-                                  { className: "adm-field adm-field--assisted", "data-hermes-assist-for": `alt-${item.asset_id}` },
-                                  h(
-                                    "div",
-                                    { className: "adm-lblrow" },
-                                    h("label", { htmlFor: `media-alt-${item.asset_id}` }, ui.mediaAlt),
-                                    hermesAssistButton(ui, {
-                                      assist: hermesAssist,
-                                      hermesField: "alt_text",
-                                      targetId: `media-alt-${item.asset_id}`,
-                                      barId: `media-alt-${item.asset_id}-drafted`,
-                                    }),
-                                  ),
-                                  h("textarea", { id: `media-alt-${item.asset_id}`, name: "alt", rows: 2, defaultValue: item.alt || "" }),
-                                  hermesDraftedBar(ui, { assist: hermesAssist, barId: `media-alt-${item.asset_id}-drafted`, field: `alt-${item.asset_id}` }),
-                                ),
-                                item.kind === "video"
-                                  ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
-                                  : null,
-                                h("label", null, ui.reason, h("textarea", { name: "reviewNote", rows: 2, required: true, maxLength: 2000, dir: "auto" })),
-                                // The signed-in operator is the reviewer of record; the
-                                // form carries the id, the screen shows a witness line
-                                // with the id as a caption rather than an editable key.
-                                operatorId
-                                  ? h(
-                                      "div",
-                                      { className: "adm-media-review__reviewer", "data-media-reviewer": operatorId },
-                                      h("input", { type: "hidden", name: "reviewer", value: operatorId }),
-                                      h("span", { className: "adm-media-review__reviewer-label" }, label(copy, "reviewer", "Reviewer")),
-                                      h("span", { className: "adm-media-review__reviewer-name" }, ui.mediaReviewerSignedIn),
-                                      h("code", { className: "crm-mono adm-id-caption" }, operatorId),
-                                    )
-                                  : h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
-                                h(
-                                  "label",
-                                  { className: "adm-check" },
-                                  h("input", { type: "checkbox", name: "reviewConfirmed", required: true }),
-                                  ` ${ui.mediaReviewConfirmation}`,
-                                ),
-                                h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
-                                h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, ui.saveMediaReview)),
+                              h(Icon, { name: "chevron-up", size: 16 }),
                             ),
+                            h(
+                              "button",
+                              {
+                                type: "button",
+                                className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                "data-media-move": "down",
+                                "data-media-move-asset": item.asset_id,
+                                disabled: index === reviewableMedia.length - 1,
+                                "aria-label": ui.moveMediaLater,
+                                title: ui.moveMediaLater,
+                              },
+                              h(Icon, { name: "chevron-down", size: 16 }),
+                            ),
+                            h("span", { className: "adm-media-asset__cover", "data-media-cover": "true", hidden: index !== 0 }, ui.coverPhoto),
+                            h(
+                                  "button",
+                                  {
+                                    type: "button",
+                                    className: "mk-btn mk-btn--ghost mk-btn--sm",
+                                    "data-media-move": "front",
+                                    "data-media-move-asset": item.asset_id,
+                                    hidden: index === 0,
+                                    disabled: index === 0,
+                                  },
+                                  ui.makeCoverPhoto,
+                                ),
                           )
                         : null,
                     );
                   })
                 : h(EmptyState, { icon: "camera", "data-media-empty": "true" }, ui.noMediaBody),
             ),
+            // Full width, outside the gallery grid. Without scripting these are
+            // the working editors, one after another; with scripting the client
+            // moves the selected asset's block into the inspector and puts it
+            // back on close, so a half-typed reason or a chosen file survives.
+            reviewableMedia.length
+              ? h(
+                  "div",
+                  { className: "adm-media-editors", "data-media-editors": "true" },
+                  ...reviewableMedia.map((item) =>
+                    h(
+                      "section",
+                      {
+                        key: `forms-${item.media_order_entry}`,
+                        className: "adm-media-editor",
+                        "data-media-asset-forms": item.asset_id,
+                        "data-media-editor-entry": item.media_order_entry,
+                        "aria-label": fillTemplate(ui.mediaAssetPosition, {
+                          kind: fieldText(ui, `media_kind_${item.kind}`),
+                          index: reviewableMedia.filter((other) => other.kind === item.kind).indexOf(item) + 1,
+                          total: reviewableMedia.filter((other) => other.kind === item.kind).length,
+                        }),
+                      },
+                      h("h3", { className: "adm-media-editor__fallback-title" }, fillTemplate(ui.mediaAssetPosition, {
+                        kind: fieldText(ui, `media_kind_${item.kind}`),
+                        index: reviewableMedia.filter((other) => other.kind === item.kind).indexOf(item) + 1,
+                        total: reviewableMedia.filter((other) => other.kind === item.kind).length,
+                      })),
+                      ...listingMediaAssetForms(page, ui, copy, item, {
+                        canEditContent,
+                        published: item.is_public === true,
+                        hermesAssist,
+                      }).filter(Boolean),
+                    ),
+                  ),
+                )
+              : null,
+            reviewableMedia.length
+              ? h(
+                  "dialog",
+                  { className: "adm-media-inspector", "data-media-inspector": "true", "aria-label": ui.mediaManager },
+                  h(
+                    "header",
+                    { className: "adm-media-inspector__hd" },
+                    h("h2", { "data-media-inspector-title": "true" }, ui.mediaManager),
+                    h(
+                      "button",
+                      {
+                        type: "button",
+                        className: "mk-btn mk-btn--ghost mk-btn--sm adm-media-inspector__close",
+                        "data-media-inspector-close": "true",
+                      },
+                      h(Icon, { name: "x", size: 18 }),
+                      h("span", null, ui.closeInspector),
+                    ),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-media-inspector__body" },
+                    h(
+                      "figure",
+                      { className: "adm-media-inspector__figure" },
+                      h("div", { className: "adm-media-inspector__preview", "data-inspector-image-state": "loading" },
+                        h("img", { alt: "", "data-media-inspector-preview": "true" }),
+                        h("span", { className: "adm-media-inspector__loading", role: "status" }, ui.mediaPreviewLoading),
+                        h("span", { className: "adm-media-inspector__failed", role: "status" }, ui.mediaPreviewUnavailable),
+                      ),
+                      h(
+                        "figcaption",
+                        null,
+                        h("a", { "data-media-inspector-source": "true", target: "_blank", rel: "noreferrer" }, h(Icon, { name: "external-link", size: 15 }), ui.sourceAsset),
+                      ),
+                    ),
+                    h("div", { className: "adm-media-inspector__forms", "data-media-inspector-mount": "true" }),
+                  ),
+                )
+              : null,
             canEditContent && durableRuntimeMutationAvailable(page, "/api/admin/tours/approve")
               ? [
                   // A listing without an approved tour says so before the form,
@@ -14540,6 +15026,7 @@ function renderReactAdminBodyHtml(page) {
   if (page.kind === "admin_task_queue") return renderStaticElement(h(TasksBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_approved_content_review") return renderStaticElement(h(ApprovedContentBody, { page }));
+  if (page.kind === "admin_record_search") return renderStaticElement(h(RecordSearchBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
   if (page.kind === "admin_migration_review") return renderStaticElement(h(MigrationReviewBody, { page }));
   return "";
