@@ -234,6 +234,29 @@ const ADMIN_UI_COPY = {
     mediaOrderFailed: "Редът не беше записан. Опитай пак.",
     saveOverNewer: "Запази върху по-новата версия",
     saveOverNewerReady: "Готово за запис върху по-новата версия.",
+    listingHistory: {
+      title: "История",
+      unavailable: "Историята не може да бъде прочетена в момента.",
+      empty: "Няма записани промени по тази обява.",
+      truncated: "Показани са само последните промени.",
+      edited: "Променено: {fields}",
+      editedNoFields: "Черновата е записана",
+      status: "Статус: {from} → {to}",
+      unknownStatus: "няма",
+      actorUnrecorded: "без записан автор",
+      you: "Ти",
+      viaAssistant: "чрез асистента",
+      kinds: {
+        gallery_reordered: "Променен е редът на снимките",
+        gallery_changed: "Галерията е променена",
+        media_reviewed: "Снимка е прегледана",
+        media_uploaded: "Качена е снимка",
+        slug_changed: "Адресът е променен",
+        published: "Публикувана",
+        unpublished: "Свалена от публикация",
+        other: "Промяна",
+      },
+    },
     listingRelations: {
       tab: "Връзки",
       title: "Свързано с обявата",
@@ -1081,6 +1104,29 @@ const ADMIN_UI_COPY = {
     mediaOrderFailed: "Порядок не сохранён. Попробуй ещё раз.",
     saveOverNewer: "Сохранить поверх новой версии",
     saveOverNewerReady: "Готово к записи поверх новой версии.",
+    listingHistory: {
+      title: "История",
+      unavailable: "Историю сейчас не удаётся прочитать.",
+      empty: "Изменений по этому объекту не записано.",
+      truncated: "Показаны только последние изменения.",
+      edited: "Изменено: {fields}",
+      editedNoFields: "Черновик сохранён",
+      status: "Статус: {from} → {to}",
+      unknownStatus: "нет",
+      actorUnrecorded: "автор не записан",
+      you: "Вы",
+      viaAssistant: "через ассистента",
+      kinds: {
+        gallery_reordered: "Изменён порядок фотографий",
+        gallery_changed: "Галерея изменена",
+        media_reviewed: "Фото проверено",
+        media_uploaded: "Фото загружено",
+        slug_changed: "Адрес изменён",
+        published: "Опубликован",
+        unpublished: "Снят с публикации",
+        other: "Изменение",
+      },
+    },
     listingRelations: {
       tab: "Связи",
       title: "Связано с объектом",
@@ -1928,6 +1974,29 @@ const ADMIN_UI_COPY = {
     mediaOrderFailed: "The gallery order was not saved. Try again.",
     saveOverNewer: "Save over the newer version",
     saveOverNewerReady: "Ready to save over the newer version.",
+    listingHistory: {
+      title: "History",
+      unavailable: "The history cannot be read right now.",
+      empty: "No changes have been recorded for this listing.",
+      truncated: "Only the most recent changes are shown.",
+      edited: "Changed: {fields}",
+      editedNoFields: "Draft saved",
+      status: "Status: {from} → {to}",
+      unknownStatus: "none",
+      actorUnrecorded: "author not recorded",
+      you: "You",
+      viaAssistant: "via the assistant",
+      kinds: {
+        gallery_reordered: "Photo order changed",
+        gallery_changed: "Gallery changed",
+        media_reviewed: "A photo was reviewed",
+        media_uploaded: "A photo was uploaded",
+        slug_changed: "Address changed",
+        published: "Published",
+        unpublished: "Unpublished",
+        other: "Change",
+      },
+    },
     listingRelations: {
       tab: "Related",
       title: "Connected to this listing",
@@ -10709,6 +10778,62 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
   );
 }
 
+// What happened to this listing, beside the listing. Field names only, never
+// their values. An actor the record does not name is said to be unrecorded
+// rather than guessed, and a history that could not be read says so.
+function ListingHistorySection({ page, ui, when }) {
+  const words = ui.listingHistory;
+  const history = page.history || null;
+  // The operator reading the page is named as "you"; anyone else is shown by
+  // the reference the record holds, since the page has no directory to look
+  // their name up in.
+  const self = currentOperatorId(page, "");
+  const who = (actor) => (!actor ? words.actorUnrecorded : self && actor === self ? words.you : actor);
+  const readable = history?.status === "read";
+  const events = readable ? history.events || [] : [];
+  const describe = (event) => {
+    if (event.kind === "edited") {
+      const fields = (event.fields || []).map((field) => fieldText(ui, field)).filter(Boolean);
+      return fields.length ? fillTemplate(words.edited, { fields: fields.join(", ") }) : words.editedNoFields;
+    }
+    if (event.kind === "status") {
+      return fillTemplate(words.status, {
+        from: event.from ? statusText(ui, event.from) : words.unknownStatus,
+        to: statusText(ui, event.to),
+      });
+    }
+    return words.kinds[event.kind] || words.kinds.other;
+  };
+  return h(
+    "section",
+    { className: "adm-history", "aria-label": words.title, "data-listing-history": history?.status || "unavailable" },
+    h("h3", null, words.title),
+    !readable
+      ? h("p", { className: "adm-note", role: "note", "data-listing-history-unavailable": "true" }, words.unavailable)
+      : events.length
+        ? h(
+            "ol",
+            { className: "adm-history__list" },
+            ...events.map((event, index) =>
+              h(
+                "li",
+                { key: `${event.at}-${index}`, className: "adm-history__row", "data-listing-history-event": event.kind },
+                h("time", { dateTime: event.at }, when(event.at)),
+                h("span", { className: "adm-history__what" }, describe(event)),
+                h(
+                  "span",
+                  { className: "adm-history__who" },
+                  who(event.actor),
+                  event.channel === "mcp" ? h("span", { className: "adm-history__channel", "data-listing-history-channel": "mcp" }, words.viaAssistant) : null,
+                ),
+              ),
+            ),
+          )
+        : h("p", { className: "adm-empty", "data-listing-history-empty": "true" }, words.empty),
+    readable && history.truncated ? h("p", { className: "adm-note", "data-listing-history-truncated": "true" }, words.truncated) : null,
+  );
+}
+
 // What this listing is connected to, on the listing itself: the enquiries that
 // name it, the viewings booked for it, and a follow-up already pointed at it.
 // A source the operator may not read, or that could not be read, says so; an
@@ -10779,6 +10904,7 @@ function ListingRelationsPanel({ page, ui, copy }) {
         ),
       ),
     ),
+    h(ListingHistorySection, { page, ui, when }),
     // A follow-up created here is already pointed at this listing, so it
     // arrives in the task queue with its subject instead of a bare reminder.
     // Offered only where the task store can keep it.
