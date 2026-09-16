@@ -90,6 +90,7 @@ import {
 } from "./operator-integration-aggregator.mjs";
 import { searchAuthorizedAdminRecords } from "./admin-record-search.mjs";
 import { loadListingRelations, safeListingManagerReturn } from "./admin-listing-relations.mjs";
+import { loadListingHistory, readListingVersionHistory } from "./listing-edit-history.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -2183,6 +2184,17 @@ export function createHttpApp({
           ...scopedLeadLoaders(operatorId, payloadSession),
         })
       : null;
+    // Payload's own versions are the history wherever Payload is the listing
+    // authority; a local runtime without it reads its file audit log instead.
+    payload.history = await loadListingHistory({
+      listingId: payload.listing.id,
+      readVersions:
+        runtimeDataDurableOnly || payloadListingRuntime
+          ? ({ listingId, limit }) =>
+              readListingVersionHistory({ listingId, limit, payload: payloadListingRuntime, env: payloadListingEnv })
+          : null,
+      readAudit: () => readAuditLog(auditLogPath || undefined),
+    });
     return runtimeDataDurableOnly
       ? {
           ...payload,

@@ -910,3 +910,26 @@ html[data-theme="dark"] .crm-top__suggestions { box-shadow: 0 18px 40px rgb(0 0 
 .adm-relations__follow-up .adm-task-open { display: grid; gap: var(--space-2); max-width: 36rem; }
 .adm-relations__follow-up input:not([type="checkbox"]):not([type="hidden"]) { min-height: 44px; }
 .adm-relations__actor { margin: 0; color: var(--text-muted); font-size: var(--text-sm); }
+
+/* History beside the record: when, what, who - in that order, because the
+   question is usually "what changed since I last looked". */
+.adm-history { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.adm-history h3 { margin: 0 0 var(--space-2); font-size: var(--text-base, 1rem); }
+.adm-history__list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.adm-history__row {
+  display: grid; grid-template-columns: minmax(9rem, auto) minmax(0, 1fr) auto; align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface);
+}
+.adm-history__row time { color: var(--text-muted); font-size: var(--text-sm); white-space: nowrap; }
+.adm-history__what { min-width: 0; overflow-wrap: anywhere; }
+.adm-history__who { color: var(--text-muted); font-size: var(--text-sm); text-align: end; }
+.adm-history__channel {
+  margin-inline-start: var(--space-2); padding: 0 var(--space-2);
+  border-radius: 999px; background: var(--surface-sunken, var(--bg)); font-size: var(--text-xs, 0.75rem);
+}
+@media (max-width: 640px) {
+  .adm-history__row { grid-template-columns: minmax(0, 1fr); }
+  .adm-history__who { text-align: start; }
+}

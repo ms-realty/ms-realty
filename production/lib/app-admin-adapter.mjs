@@ -86,6 +86,7 @@ import {
 } from "./operator-integration-aggregator.mjs";
 import { searchAuthorizedAdminRecords } from "./admin-record-search.mjs";
 import { loadListingRelations, safeListingManagerReturn } from "./admin-listing-relations.mjs";
+import { loadListingHistory, readListingVersionHistory } from "./listing-edit-history.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -2309,6 +2310,20 @@ async function listingEditorPayload(registry, url, config) {
         ...scopedLeadLoaders(config),
       })
     : null;
+  payload.history = await loadListingHistory({
+    listingId: payload.listing.id,
+    readVersions:
+      config.runtimeDataDurableOnly || config.payloadListingRuntime
+        ? ({ listingId, limit }) =>
+            readListingVersionHistory({
+              listingId,
+              limit,
+              payload: config.payloadListingRuntime || null,
+              env: config.payloadListingEnv || config.authEnv || process.env,
+            })
+        : null,
+    readAudit: () => readAuditLog(config.auditLogPath),
+  });
   return config.runtimeDataDurableOnly
     ? {
         ...payload,
