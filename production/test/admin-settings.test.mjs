@@ -631,7 +631,7 @@ test("Today exposes every ranked task with a source-backed detail and Hermes ent
     const todayMain = empty.body.slice(empty.body.indexOf('data-today-workspace="true"'), empty.body.indexOf("</main>"));
     assert.doesNotMatch(todayMain, /href="\/admin\/reports(?:\?[^"]*)?"/);
     assert.match(empty.body, /class="mk-btn mk-btn--secondary mk-btn--sm" href="\/admin\/leads"/);
-    assert.doesNotMatch(empty.body, /name="q"/);
+    assert.doesNotMatch(todayMain, /name="q"/, "Today content does not add a second search field");
     // Two groups, primary and Advanced, in desktop and mobile navigation.
     assert.equal((empty.body.match(/data-admin-nav-group=/g) || []).length, 4, "primary and Advanced in desktop and mobile navigation");
     assert.equal((empty.body.match(/data-admin-nav-primary="true"/g) || []).length, 7);

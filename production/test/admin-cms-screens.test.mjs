@@ -250,8 +250,7 @@ test("media cards name the asset for a person, give the replace panel room, and 
   assert.ok(headings.length > 0);
   assert.deepEqual(headings.filter((text) => text.startsWith("media-")), []);
   // The gallery tile names the photograph the way a person counts it and shows
-  // no generated key at all; the key stays with that asset's editor, which is
-  // where someone who needs the evidence goes looking for it.
+  // no generated key at all; source metadata stays in the form data.
   assert.match(html, /<strong>Photo 1 of \d+<\/strong>/);
   const tiles = [...html.matchAll(/<article[^>]*data-media-asset="[^"]+"[\s\S]*?<\/article>/g)].map(([tile]) => tile);
   assert.ok(tiles.length > 0);
@@ -259,7 +258,8 @@ test("media cards name the asset for a person, give the replace panel room, and 
     assert.doesNotMatch(tile, /adm-id-caption/);
     assert.doesNotMatch(tile, /<form/);
   }
-  assert.match(html, /<code class="crm-mono adm-id-caption" data-media-asset-id="media-[0-9a-f]+">media-[0-9a-f]+<\/code>/);
+  assert.doesNotMatch(html, />media-[0-9a-f]+<\/code>/);
+  assert.match(html, /data-media-inspector-source="true"/);
   // (b) The replace-file panel carries a class whose CSS gives it a width
   // floor and a single full-width column, so the hint no longer wraps letter
   // by letter inside the two-column .adm-form grid.
@@ -271,8 +271,8 @@ test("media cards name the asset for a person, give the replace panel room, and 
   // of their grid row instead of filling it.
   assert.match(adminCss, /\.adm-media-manager \{[^}]*align-items: start;/);
   // (c) The reviewer is the signed-in operator: a hidden value plus a witness
-  // line, with the operator id as a caption, and no editable reviewer input.
-  assert.match(html, /<div class="adm-media-review__reviewer" data-media-reviewer="payload-3f0a1c2d"><input type="hidden" name="reviewer" value="payload-3f0a1c2d"><span class="adm-media-review__reviewer-label">Reviewer<\/span><span class="adm-media-review__reviewer-name">Signed-in operator<\/span><code class="crm-mono adm-id-caption">payload-3f0a1c2d<\/code><\/div>/);
+  // line and no editable reviewer input or technical ID in the visible copy.
+  assert.match(html, /<div class="adm-media-review__reviewer" data-media-reviewer="payload-3f0a1c2d"><input type="hidden" name="reviewer" value="payload-3f0a1c2d"><span class="adm-media-review__reviewer-label">Reviewer<\/span><span class="adm-media-review__reviewer-name">Signed-in operator<\/span><\/div>/);
   const reviewForms = [...html.matchAll(/<form[^>]*class="adm-form adm-media-review-form"[\s\S]*?<\/form>/g)].map(([form]) => form);
   assert.ok(reviewForms.length > 0);
   for (const form of reviewForms) {
@@ -604,7 +604,7 @@ test("gallery order is changed with reachable controls, and only where the store
   // accepts and what stops a stale tab from dropping a photo.
   assert.match(ADMIN_APP_JS, /function initListingMediaOrder\(\)/);
   assert.match(ADMIN_APP_JS, /"\/api\/admin\/media\/order"/);
-  assert.match(ADMIN_APP_JS, /assetIds: assetOrder\(\)/);
+  assert.match(ADMIN_APP_JS, /assetIds: submittedOrder, galleryRevision: revision/);
   // A refusal puts the tiles back rather than leaving the screen disagreeing
   // with the stored order.
   assert.match(ADMIN_APP_JS, /restore\(\);/);

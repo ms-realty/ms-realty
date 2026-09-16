@@ -250,7 +250,12 @@ test("a provider without an active authorization path stays unavailable without 
   assert.match(html, /href="https:\/\/developers\.facebook\.com\/apps"/);
   assert.match(html, /data-managed-system="cloudflare" data-status="managed"/);
   assert.match(html, /data-managed-system="neon" data-status="managed"/);
-  assert.equal((html.match(/<input\b/g) || []).length, 0);
+  const providerContent = (html.match(/<main\b[\s\S]*?<\/main>/) || [""])[0];
+  assert.ok(providerContent, "the provider screen renders its own main region");
+  assert.equal((providerContent.match(/<input\b/g) || []).length, 0, "provider content has no input of any kind");
+  const shellInputs = (html.replace(providerContent, "").match(/<input\b[^>]*>/g) || []);
+  assert.equal(shellInputs.length, 1, "the shell carries exactly one input");
+  assert.match(shellInputs[0], /type="search"[^>]*name="q"[^>]*data-admin-search-input="true"/, "and it is the workspace search");
   assert.doesNotMatch(html, /data-provider-credential-form/);
   assert.doesNotMatch(html, /name="(?:api_key|token)"/);
 });
@@ -422,7 +427,12 @@ test("a configured owner page offers five one-click handoffs and no raw credenti
   assert.equal(html.includes("/api/admin/connections?provider=viber&amp;action=start"), false);
   assert.doesNotMatch(html, /data-provider="(?:google_drive|github|cloudflare|neon)"/);
   assert.match(html, /data-provider="ai" data-status="not_connected"/);
-  assert.equal((html.match(/<input\b/g) || []).length, 0);
+  const providerContent = (html.match(/<main\b[\s\S]*?<\/main>/) || [""])[0];
+  assert.ok(providerContent, "the provider screen renders its own main region");
+  assert.equal((providerContent.match(/<input\b/g) || []).length, 0, "provider content has no input of any kind");
+  const shellInputs = (html.replace(providerContent, "").match(/<input\b[^>]*>/g) || []);
+  assert.equal(shellInputs.length, 1, "the shell carries exactly one input");
+  assert.match(shellInputs[0], /type="search"[^>]*name="q"[^>]*data-admin-search-input="true"/, "and it is the workspace search");
   assert.doesNotMatch(html, /data-provider-credential-form/);
   assert.doesNotMatch(html, /name="(?:api_key|token)"/);
   assert.match(html, /aria-label="Connect OpenRouter"[^>]*>[\s\S]*?<span>Connect<\/span>/);

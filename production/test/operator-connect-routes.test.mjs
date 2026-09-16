@@ -211,7 +211,12 @@ test("a signed-in Payload owner gets five one-click actions and no raw OpenRoute
     (response.body.match(/(?:\/api\/admin\/connections\?provider=(?:google|facebook|instagram|ai)&amp;action=start|data-whatsapp-connect="true")/g) || []).length,
     5,
   );
-  assert.equal((response.body.match(/<input\b/g) || []).length, 0);
+  const providerContent = (response.body.match(/<main\b[\s\S]*?<\/main>/) || [""])[0];
+  assert.ok(providerContent, "the provider screen renders its own main region");
+  assert.equal((providerContent.match(/<input\b/g) || []).length, 0, "provider content has no input of any kind");
+  const shellInputs = (response.body.replace(providerContent, "").match(/<input\b[^>]*>/g) || []);
+  assert.equal(shellInputs.length, 1, "the shell carries exactly one input");
+  assert.match(shellInputs[0], /type="search"[^>]*name="q"[^>]*data-admin-search-input="true"/, "and it is the workspace search");
   assert.doesNotMatch(response.body, /data-provider-credential-form/);
   assert.doesNotMatch(response.body, /name="(?:api_key|token)"/);
   assert.doesNotMatch(response.body, /name="token"/);

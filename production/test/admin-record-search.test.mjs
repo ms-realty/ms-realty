@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { loadCmsSeed } from "../lib/runtime.mjs";
-import { ADMIN_SEARCH_MIN_QUERY, searchAdminRecords } from "../lib/admin-record-search.mjs";
+import { ADMIN_SEARCH_MIN_QUERY, searchAdminRecords, searchAuthorizedAdminRecords } from "../lib/admin-record-search.mjs";
+import { renderAppAdminResponse, appAdminConfigFromEnv } from "../lib/app-admin-adapter.mjs";
+import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 
 const seed = loadCmsSeed();
 const listings = seed.records.filter((record) => record.collection === "listings");
@@ -111,9 +113,9 @@ test("every screen carries the search entry and the results page answers in four
   const hit = await dispatchHttp(app, { url: "/admin/search?q=MS-00815&locale=en", headers });
   assert.match(hit.body, /href="\/admin\/listings\/edit\?listingId=MS-00815"/);
   assert.match(hit.body, /data-search-result="listing"/);
-  // A source nobody could read is named on the page, so a short list is never
-  // mistaken for a complete one.
-  assert.match(hit.body, /data-search-unavailable="\d+"/);
+  // Local stores are now wired for every source; they must not be reported as
+  // unavailable just because they contain no matching records.
+  assert.doesNotMatch(hit.body, /data-search-unavailable=/);
 
   // Signed out, search is not a way around the front door.
   const closed = await dispatchHttp(app, { url: "/admin/search?q=MS-00815", headers: { accept: "text/html" } });
@@ -127,8 +129,144 @@ test("the suggestion list is an enhancement, never the only way to search", asyn
   // racing it when the operator keeps typing.
   assert.match(ADMIN_APP_JS, /\/api\/admin\/search\?q="/);
   assert.match(ADMIN_APP_JS, /inflight\.abort\(\)/);
+  assert.match(ADMIN_APP_JS, /requestVersion/);
   // Keyboard reach: arrows move, Escape closes, Enter opens the highlighted row.
   for (const key of ["ArrowDown", "ArrowUp", "Escape", "Enter"]) {
     assert.ok(ADMIN_APP_JS.includes(`"${key}"`), key);
   }
+});
+
+test("search applies every result source's capability in both admin runtimes", async () => {
+  const previous = { NODE_ENV: process.env.NODE_ENV, MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN, MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON };
+  const credentials = JSON.stringify([
+    { id: "search-agent", token: "search-agent-token-0123456789", roles: ["agent"] },
+    { id: "search-editor", token: "search-editor-token-0123456789", roles: ["editor"] },
+  ]);
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = credentials;
+    const agentHeaders = { authorization: "Bearer search-agent-token-0123456789", accept: "application/json" };
+    const editorHeaders = { authorization: "Bearer search-editor-token-0123456789", accept: "application/json" };
+    const app = createHttpApp({ reviewedAt: "2026-07-19T12:00:00.000Z" });
+    const denied = await dispatchHttp(app, { url: "/api/admin/search?q=MS-00815", headers: agentHeaders });
+    assert.equal(denied.status, 200);
+    assert.equal(denied.body.results.some((row) => row.id === "MS-00815"), false);
+    assert.equal(denied.body.sources.listing.status, "unavailable");
+    const allowed = await dispatchHttp(app, { url: "/api/admin/search?q=MS-00815", headers: editorHeaders });
+    assert.equal(allowed.body.results.some((row) => row.id === "MS-00815"), true);
+
+    const authEnv = { NODE_ENV: "production", MS_REALTY_ADMIN_CREDENTIALS_JSON: credentials };
+    const adapterDenied = await renderAppAdminResponse(new Request("https://example.test/api/admin/search?q=MS-00815", { headers: agentHeaders }), {
+      config: { ...appAdminConfigFromEnv({ NODE_ENV: "test" }), authEnv },
+    });
+    const adapterDeniedBody = await adapterDenied.json();
+    assert.equal(adapterDeniedBody.results.some((row) => row.id === "MS-00815"), false);
+    assert.equal(adapterDeniedBody.sources.listing.status, "unavailable");
+    // The same suggestions route still answers an operator who may read content.
+    const adapterAllowed = await renderAppAdminResponse(new Request("https://example.test/api/admin/search?q=MS-00815", { headers: editorHeaders }), {
+      config: { ...appAdminConfigFromEnv({ NODE_ENV: "test" }), authEnv },
+    });
+    const adapterAllowedBody = await adapterAllowed.json();
+    assert.equal(adapterAllowedBody.results.some((row) => row.id === "MS-00815"), true);
+    assert.equal(adapterAllowedBody.sources.listing.status, "searched");
+    // A draft title is content: the denied body must not carry it in any field.
+    const draftTitle = listings.find((record) => record.id === "MS-00815").facts.title;
+    assert.equal(JSON.stringify(denied.body).includes(draftTitle), false);
+    assert.equal(JSON.stringify(adapterDeniedBody).includes(draftTitle), false);
+    for (const headers of [agentHeaders, editorHeaders]) {
+      const expected = headers === editorHeaders;
+      const nodePage = await dispatchHttp(app, { url: "/admin/search?q=MS-00815", headers: { ...headers, accept: "text/html" } });
+      assert.equal(nodePage.status, 200);
+      assert.equal(nodePage.body.includes('data-search-result="listing"'), expected);
+      const nextPage = await renderAppAdminResponse(new Request("https://example.test/admin/search?q=MS-00815", { headers: { ...headers, accept: "text/html" } }), {
+        config: { ...appAdminConfigFromEnv({ NODE_ENV: "test" }), authEnv },
+      });
+      assert.equal(nextPage.status, 200);
+      assert.equal((await nextPage.text()).includes('data-search-result="listing"'), expected);
+    }
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});
+
+test("restricted sources are never loaded, including on short searches", async () => {
+  const forbidden = () => { assert.fail("forbidden source was read"); };
+  for (const query of ["MS-00815", ""]) {
+    const result = await searchAuthorizedAdminRecords({ query, principal: { id: "agent", roles: ["agent"] }, loadListings: forbidden, loadLeads: forbidden, loadViewings: forbidden });
+    assert.deepEqual(result.results, []);
+    assert.equal(Object.values(result.sources).every(source => source.status === "unavailable"), true);
+  }
+});
+
+test("real enquiry and contact shapes are searchable and unavailable sources do not erase available results", async () => {
+  const leads = [{ lead_id: "lead-kalina", contact: { name: "Kalina Petrova", email: "kalina@example.test" }, listing_reference: "MS-00815", received_at: "2026-09-15T10:00:00Z" }];
+  const result = await searchAuthorizedAdminRecords({
+    query: "kalina", principal: { id: "broker", roles: ["broker"] },
+    loadListings: async () => { throw new Error("Store offline"); },
+    loadLeads: async () => leads,
+    loadViewings: async visible => {
+      assert.deepEqual(visible, leads);
+      return [{ id: "viewing-kalina", lead_id: "lead-kalina", listing_reference: "MS-00815", contact_name: "Kalina Petrova" }];
+    },
+  });
+  assert.deepEqual([...new Set(result.results.map(row => row.type))].sort(), ["contact", "lead", "viewing"]);
+  assert.equal(result.sources.listing.status, "unavailable");
+  assert.equal(result.sources.contact.status, "searched");
+  assert.equal(result.results.find(row => row.type === "contact").title, "Kalina Petrova");
+  assert.match(result.results.find(row => row.type === "lead").href, /#lead-lead-kalina$/);
+});
+
+test("both search routes join all four real sources and exclude viewings outside the broker's leads", async () => {
+  const query = "MS-00815";
+  const principal = { id: "broker-search", roles: ["broker"], workspace_ids: ["sandanski"], source: "payload_session", can_mutate: true };
+  let scopedReads = 0;
+  const config = {
+    ...appAdminConfigFromEnv({ NODE_ENV: "test" }),
+    seed,
+    payloadAdminAuth: { async resolve() { return { principal, user: { id: 3, roles: ["broker"] } }; } },
+    leadDurableStore: {
+      leadDurableStoreEnabled: true, workspaceId: "sandanski",
+      payloadSecret: "payload-secret-for-test", databaseUrl: "postgres://test.invalid/ms_realty",
+      contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+    },
+    viewingDurableStore: {
+      viewingDurableStoreEnabled: true, workspaceId: "sandanski",
+      payloadSecret: "payload-secret-for-test", databaseUrl: "postgres://test.invalid/ms_realty",
+      contactSecret: "lead-contact-secret-longer-than-thirty-two-characters",
+    },
+    readLeadIntakesDurably: async ({ admin, workspaceIds }) => {
+      assert.equal(admin, false);
+      assert.deepEqual(workspaceIds, ["sandanski"]);
+      scopedReads += 1;
+      return [{ lead_id: "lead-search-visible", contact: { name: query, email: "search@example.test" }, listing_reference: "MS-00815", received_at: "2026-09-15T10:00:00Z" }];
+    },
+    readViewingsDurably: async () => [
+      { id: "viewing-search-visible", lead_id: "lead-search-visible", contact_name: query, listing_reference: "MS-00815" },
+      { id: "viewing-search-hidden", lead_id: "another-workspace-lead", contact_name: query, listing_reference: "MS-SECRET" },
+    ],
+  };
+  const app = createHttpApp(config);
+  const headers = { cookie: "ms_admin=scoped-search-fixture" };
+  for (const path of [`/api/admin/search?q=${query}`, `/admin/search?q=${query}`]) {
+    const standalone = await dispatchHttp(app, { url: path, headers });
+    const adapter = await renderAppAdminResponse(new Request(`https://example.test${path}`, { headers }), { config });
+    assert.equal(standalone.status, 200);
+    assert.equal(adapter.status, 200);
+    if (path.startsWith("/api/")) {
+      for (const body of [standalone.body, await adapter.json()]) {
+        assert.deepEqual([...new Set(body.results.map(row => row.type))].sort(), ["contact", "lead", "listing", "viewing"]);
+        assert.equal(body.results.some(row => row.id === "viewing-search-hidden"), false);
+        assert.equal(Object.values(body.sources).every(source => source.status === "searched"), true);
+      }
+    } else {
+      for (const html of [standalone.body, await adapter.text()]) {
+        for (const type of ["contact", "lead", "listing", "viewing"]) assert.ok(html.includes(`data-search-result="${type}"`), type);
+        assert.doesNotMatch(html, /viewing-search-hidden|MS-SECRET/);
+      }
+    }
+  }
+  assert.equal(scopedReads, 4, "both formats and both runtimes use the scoped lead loader");
 });

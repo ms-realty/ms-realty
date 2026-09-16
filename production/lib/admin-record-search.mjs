@@ -10,6 +10,9 @@
 // quietly omitted. A search that silently drops enquiries looks exactly like a
 // search that found none, and the operator would act on the difference.
 
+import { canAdminAccess } from "./admin-auth.mjs";
+import { buildContactRecords } from "./contact-records.mjs";
+
 export const ADMIN_SEARCH_TYPES = Object.freeze(["listing", "lead", "contact", "viewing"]);
 export const ADMIN_SEARCH_MIN_QUERY = 2;
 const DEFAULT_LIMIT = 20;
@@ -85,12 +88,12 @@ function leadCandidates(leads) {
   return leads.filter(Boolean).map((row) => ({
     type: "lead",
     id: row.id || row.lead_id || "",
-    title: row.contact_name || row.name || row.email || row.phone || row.id || row.lead_id || "",
-    subtitle: text(row.listing_id, row.channel).join(" · "),
+    title: row.contact?.name || row.contact_name || row.name || row.email || row.phone || row.id || row.lead_id || "",
+    subtitle: text(row.listing_reference || row.listing_id, row.source || row.channel).join(" · "),
     status: row.status || row.state || "",
-    href: `/admin/leads?lead=${encodeURIComponent(row.id || row.lead_id || "")}`,
-    identity: text(row.id, row.lead_id, row.email, row.phone),
-    haystack: text(row.contact_name, row.name, row.email, row.phone, row.listing_id, row.message, row.channel),
+    href: `/admin/leads#lead-${encodeURIComponent(row.lead_id || row.id || "")}`,
+    identity: text(row.id, row.lead_id, row.contact?.email, row.contact?.phone, row.email, row.phone),
+    haystack: text(row.contact?.name, row.contact_name, row.name, row.contact?.email, row.contact?.phone, row.email, row.phone, row.listing_reference || row.listing_id, row.message, row.source || row.channel),
   }));
 }
 
@@ -98,12 +101,12 @@ function contactCandidates(contacts) {
   return contacts.filter(Boolean).map((row) => ({
     type: "contact",
     id: row.id || row.contact_id || "",
-    title: row.name || row.full_name || row.email || row.phone || row.id || "",
-    subtitle: text(row.email, row.phone).join(" · "),
+    title: row.display_name || row.contact?.name || row.name || row.full_name || row.email || row.phone || row.id || "",
+    subtitle: text(row.contact?.email || row.email, row.contact?.phone || row.phone).join(" · "),
     status: row.status || "",
-    href: `/admin/contacts?contact=${encodeURIComponent(row.id || row.contact_id || "")}`,
-    identity: text(row.id, row.contact_id, row.email, row.phone),
-    haystack: text(row.name, row.full_name, row.email, row.phone, row.company),
+    href: `/admin/contacts#contact-${encodeURIComponent(row.id || row.contact_id || "")}`,
+    identity: text(row.id, row.contact_id, row.contact?.email, row.contact?.phone, row.email, row.phone),
+    haystack: text(row.display_name, row.contact?.name, row.name, row.full_name, row.contact?.email, row.contact?.phone, row.email, row.phone, row.company),
   }));
 }
 
@@ -111,12 +114,12 @@ function viewingCandidates(viewings) {
   return viewings.filter(Boolean).map((row) => ({
     type: "viewing",
     id: row.id || row.viewing_id || "",
-    title: row.listing_id || row.contact_name || row.id || "",
+    title: row.listing_reference || row.listing_id || row.contact_name || row.id || row.viewing_id || "",
     subtitle: text(row.scheduled_at || row.starts_at, row.contact_name).join(" · "),
     status: row.status || row.outcome || "",
-    href: `/admin/viewings?viewing=${encodeURIComponent(row.id || row.viewing_id || "")}`,
-    identity: text(row.id, row.viewing_id, row.listing_id),
-    haystack: text(row.listing_id, row.contact_name, row.notes, row.outcome, row.status),
+    href: `/admin/viewings#viewing-${encodeURIComponent(row.id || row.viewing_id || "")}`,
+    identity: text(row.id, row.viewing_id, row.listing_reference || row.listing_id),
+    haystack: text(row.listing_reference || row.listing_id, row.contact_name, row.notes, row.outcome, row.status),
   }));
 }
 
@@ -133,7 +136,7 @@ export function searchAdminRecords({
   // the difference between "no enquiries match" and "enquiries were not
   // searched", and an operator acts differently on each.
   const sources = {
-    listing: { status: "searched" },
+    listing: listings ? { status: "searched" } : { status: "unavailable", reason_key: "listing_store_unavailable" },
     lead: leads ? { status: "searched" } : { status: "unavailable", reason_key: "lead_store_unavailable" },
     contact: contacts ? { status: "searched" } : { status: "unavailable", reason_key: "contact_store_unavailable" },
     viewing: viewings ? { status: "searched" } : { status: "unavailable", reason_key: "viewing_store_unavailable" },
@@ -143,7 +146,7 @@ export function searchAdminRecords({
     return { kind: "admin_record_search", query: String(query || ""), too_short: true, results: [], sources };
   }
   const candidates = [
-    ...listingCandidates(listings),
+    ...listingCandidates(listings || []),
     ...leadCandidates(leads || []),
     ...contactCandidates(contacts || []),
     ...viewingCandidates(viewings || []),
@@ -162,4 +165,20 @@ export function searchAdminRecords({
       href: candidate.href,
     }));
   return { kind: "admin_record_search", query: String(query || ""), too_short: false, results, sources };
+}
+
+// Read through each destination's authority before ranking. A failed or
+// forbidden source contributes no candidates and remains visible as unavailable.
+export async function searchAuthorizedAdminRecords({ query, principal, loadListings, loadLeads, loadViewings }) {
+  const read = async (capability, loader) => {
+    if (!canAdminAccess(principal, capability)) return null;
+    try { return await loader(); } catch { return null; }
+  };
+  const [listings, leads] = await Promise.all([
+    read("content:read", loadListings),
+    read("operations:read", loadLeads),
+  ]);
+  const contacts = leads ? buildContactRecords({ leads }) : null;
+  const viewings = leads ? await read("operations:read", () => loadViewings(leads)) : null;
+  return searchAdminRecords({ query, listings, leads, contacts, viewings });
 }

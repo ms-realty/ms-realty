@@ -711,8 +711,10 @@
 /* Tiles are tiles. Their editors live outside this grid, which is what stops
    an opened form from stretching its whole row and truncating its controls. */
 .adm-media-asset { padding: var(--space-3); }
-.adm-media-asset__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.adm-media-asset__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.adm-media-asset__header strong { white-space: nowrap; }
 .adm-media-asset__open { width: 100%; min-height: 44px; justify-content: center; }
+[data-media-open][hidden], [data-media-order-controls][hidden], [data-media-cover][hidden], [data-media-move][hidden], [data-media-editors][hidden] { display: none; }
 
 /* Without scripting these are the working editors: full width, one after
    another, never squeezed into a gallery column. */
@@ -741,17 +743,23 @@
 .adm-media-inspector__body { display: grid; gap: var(--space-5); padding: var(--space-5); overflow: auto; }
 /* A large picture first: the point of opening one asset is to look at it. */
 .adm-media-inspector__figure { display: grid; gap: var(--space-2); margin: 0; }
+.adm-media-inspector__preview { display: grid; place-items: center; position: relative; min-height: 160px; aspect-ratio: 16 / 10; overflow: hidden; border-radius: var(--radius-md); background: var(--surface-sunken, var(--surface)); }
+.adm-media-inspector__loading, .adm-media-inspector__failed { display: none; padding: var(--space-4); color: var(--text-muted); text-align: center; }
+[data-inspector-image-state="loading"] .adm-media-inspector__loading,
+[data-inspector-image-state="failed"] .adm-media-inspector__failed { display: block; }
+[data-inspector-image-state]:not([data-inspector-image-state="loaded"]) img { position: absolute; opacity: 0; }
 .adm-media-inspector__figure img {
   width: 100%; max-height: min(52vh, 460px);
   object-fit: contain;
   border-radius: var(--radius-md);
   background: var(--surface-sunken, var(--surface));
 }
-/* The generated id is evidence, so it reads as a caption rather than a field. */
 .adm-media-inspector__figure figcaption { color: var(--text-muted); font-size: var(--text-sm); }
+.adm-media-inspector__figure figcaption a { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; }
 /* Full width inside the dialog: the forms finally have room for their labels. */
 .adm-media-inspector__forms { display: grid; gap: var(--space-4); }
 .adm-media-inspector__forms .adm-media-editor { padding: 0; border: 0; background: none; }
+.adm-media-inspector__forms .adm-media-editor__fallback-title { display: none; }
 .adm-media-inspector__forms .adm-form { grid-template-columns: 1fr; }
 .adm-media-inspector__forms select,
 .adm-media-inspector__forms input,
@@ -814,6 +822,7 @@ html[data-theme="dark"] .adm-media-inspector::backdrop { background: rgb(0 0 0 /
   background: var(--surface);
   box-shadow: 0 18px 40px rgb(0 0 0 / 18%);
 }
+.crm-top__suggestions[hidden] { display: none; }
 .crm-top__suggestion {
   display: flex; align-items: baseline; gap: var(--space-2);
   min-height: 44px; padding: var(--space-2) var(--space-3);

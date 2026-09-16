@@ -4253,7 +4253,9 @@ ${ADMIN_DAILY_JS}
     var savebar = form.querySelector("[data-editor-savebar]");
     if (!savebar) return;
     var initial = form.getAttribute("data-editor-initial-state") || "";
-    var dirty = initial !== editorFormState(form);
+    // Values the server carried back from a refused submission look like form
+    // defaults but are not saved; they stay dirty until a save succeeds.
+    var dirty = form.hasAttribute("data-editor-unsaved-submission") || initial !== editorFormState(form);
     var save = savebar.querySelector('[type="submit"]');
     var reset = savebar.querySelector("[data-editor-reset]");
     var note = savebar.querySelector("[data-editor-dirty-note]");
@@ -4322,6 +4324,13 @@ ${ADMIN_DAILY_JS}
         });
         if (reset) {
           reset.addEventListener("click", function () {
+            // A carried-back submission has no stored values to reset to in
+            // this page; discarding it means reopening the stored listing.
+            var discard = form.getAttribute("data-editor-discard-href");
+            if (form.hasAttribute("data-editor-unsaved-submission") && discard) {
+              window.location.assign(discard);
+              return;
+            }
             form.reset();
             syncEditorSavebar(form);
             var status = form.querySelector("[data-admin-mutation-status]");
@@ -4508,6 +4517,13 @@ ${ADMIN_DAILY_JS}
     var manager = document.querySelector("[data-media-order-listing]");
     if (!manager) return;
     var listingId = manager.getAttribute("data-media-order-listing");
+    var revision = manager.getAttribute("data-media-order-revision");
+    var fullOrder;
+    try { fullOrder = JSON.parse(manager.getAttribute("data-media-order") || "[]"); } catch (error) { return; }
+    if (!Array.isArray(fullOrder) || !fullOrder.length || fullOrder.some(function (row) { return !row || typeof row.asset_id !== "string" || !row.asset_id || typeof row.relation_id !== "string" || !row.relation_id; })) return;
+    if (!/^[a-f0-9]{64}$/.test(revision || "")) return;
+    var controls = manager.querySelectorAll("[data-media-order-controls]");
+    for (var controlIndex = 0; controlIndex < controls.length; controlIndex += 1) controls[controlIndex].hidden = false;
     var status = manager.querySelector("[data-media-order-status]");
     var saving = manager.getAttribute("data-media-order-saving") || "Saving…";
     var success = manager.getAttribute("data-media-order-success") || "Saved.";
@@ -4515,10 +4531,25 @@ ${ADMIN_DAILY_JS}
     var busy = false;
     function tiles() { return manager.querySelectorAll("[data-media-asset]"); }
     function assetOrder() {
-      var rows = tiles();
-      var order = [];
-      for (var i = 0; i < rows.length; i += 1) order.push(rows[i].getAttribute("data-media-asset"));
-      return order;
+      return fullOrder.map(function (row) { return row.asset_id; });
+    }
+    function entryFor(tile) {
+      return Number(tile.getAttribute("data-media-order-entry"));
+    }
+    function orderIndex(entry) {
+      for (var i = 0; i < fullOrder.length; i += 1) if (fullOrder[i].entry === entry) return i;
+      return -1;
+    }
+    function moveEntry(entry, direction, neighbour) {
+      var from = orderIndex(entry);
+      var to = direction === "front" ? 0 : orderIndex(entryFor(neighbour));
+      if (from < 0 || to < 0 || from === to) return false;
+      if (direction === "up" || direction === "down") {
+        var swapped = fullOrder[to]; fullOrder[to] = fullOrder[from]; fullOrder[from] = swapped;
+      } else {
+        var moved = fullOrder.splice(from, 1)[0]; fullOrder.splice(to, 0, moved);
+      }
+      return true;
     }
     function say(text, state) {
       if (!status) return;
@@ -4527,12 +4558,14 @@ ${ADMIN_DAILY_JS}
     }
     function save(restore) {
       busy = true;
+      refresh();
       say(saving, "saving");
+      var submittedOrder = assetOrder();
       fetch("/api/admin/media/order", {
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json", accept: "application/json" },
-        body: JSON.stringify({ listingId: listingId, assetIds: assetOrder() }),
+        body: JSON.stringify({ listingId: listingId, assetIds: submittedOrder, galleryRevision: revision, relationIds: fullOrder.map(function (row) { return row.relation_id; }) }),
       })
         .then(function (response) {
           return response.json().catch(function () { return {}; }).then(function (payload) {
@@ -4540,7 +4573,13 @@ ${ADMIN_DAILY_JS}
             return payload;
           });
         })
-        .then(function () { say(success, "success"); })
+        .then(function (payload) {
+          if (!payload || payload.kind !== "listing_media_order" || String(payload.listing_id) !== listingId ||
+              JSON.stringify(payload.asset_ids) !== JSON.stringify(submittedOrder) || !/^[a-f0-9]{64}$/.test(payload.gallery_revision || "")) throw new Error(failure);
+          revision = payload.gallery_revision;
+          manager.setAttribute("data-media-order-revision", revision);
+          say(success, "success");
+        })
         .catch(function (error) {
           restore();
           say(error.message || failure, "error");
@@ -4558,23 +4597,37 @@ ${ADMIN_DAILY_JS}
         if (down) down.disabled = busy || i === rows.length - 1;
         var front = rows[i].querySelector('[data-media-move="front"]');
         if (front) front.disabled = busy;
+        var cover = rows[i].querySelector("[data-media-cover]");
+        var isCover = fullOrder[0] && fullOrder[0].entry === entryFor(rows[i]);
+        if (cover) cover.hidden = !isCover;
+        if (front) front.hidden = isCover;
       }
     }
     manager.addEventListener("click", function (event) {
       var button = event.target && event.target.closest ? event.target.closest("[data-media-move]") : null;
-      if (!button || busy) return;
+      // A disabled control can still be activated by a synthetic or queued
+      // event; it must stay as inert as it looks.
+      if (!button || busy || button.disabled) return;
       event.preventDefault();
       var tile = button.closest("[data-media-asset]");
       var parent = tile.parentNode;
       var home = tile.nextSibling;
       var direction = button.getAttribute("data-media-move");
-      if (direction === "up" && tile.previousElementSibling) parent.insertBefore(tile, tile.previousElementSibling);
-      else if (direction === "down" && tile.nextElementSibling) parent.insertBefore(tile.nextElementSibling, tile);
-      else if (direction === "front") parent.insertBefore(tile, parent.firstElementChild);
+      var orderedTiles = Array.from(tiles());
+      var tileIndex = orderedTiles.indexOf(tile);
+      var neighbour = direction === "up" ? orderedTiles[tileIndex - 1] : direction === "down" ? orderedTiles[tileIndex + 1] : null;
+      // The first tile has nothing above it and the last nothing below: those
+      // moves are no-ops, not requests.
+      if ((direction === "up" || direction === "down") && !neighbour) return;
+      var before = fullOrder.slice();
+      if (!moveEntry(entryFor(tile), direction, neighbour)) return;
+      if (direction === "up" && neighbour) parent.insertBefore(tile, neighbour);
+      else if (direction === "down" && neighbour) parent.insertBefore(neighbour, tile);
+      else if (direction === "front") parent.insertBefore(tile, tiles()[0]);
       else return;
       refresh();
-      save(function () { parent.insertBefore(tile, home); refresh(); });
-      var moved = tile.querySelector("[data-media-move]");
+      save(function () { fullOrder = before; parent.insertBefore(tile, home); refresh(); });
+      var moved = tile.querySelector("[data-media-open]");
       if (moved && typeof moved.focus === "function") moved.focus();
     });
     refresh();
@@ -4588,7 +4641,12 @@ ${ADMIN_DAILY_JS}
     var timer = 0;
     var inflight = null;
     var active = -1;
+    var requestVersion = 0;
     function close() {
+      window.clearTimeout(timer);
+      requestVersion += 1;
+      if (inflight && typeof inflight.abort === "function") inflight.abort();
+      inflight = null;
       list.hidden = true;
       list.innerHTML = "";
       input.setAttribute("aria-expanded", "false");
@@ -4636,13 +4694,14 @@ ${ADMIN_DAILY_JS}
       if (inflight && typeof inflight.abort === "function") inflight.abort();
       var controller = typeof AbortController === "function" ? new AbortController() : null;
       inflight = controller;
+      var version = ++requestVersion;
       fetch("/api/admin/search?q=" + encodeURIComponent(query), {
         credentials: "same-origin",
         headers: { accept: "application/json" },
         signal: controller ? controller.signal : undefined,
       })
         .then(function (response) { return response.ok ? response.json() : null; })
-        .then(function (payload) { if (payload) render(payload); })
+        .then(function (payload) { if (payload && version === requestVersion) render(payload); })
         .catch(function () { /* the form still submits to the results page */ });
     }
     input.addEventListener("input", function () {
@@ -4718,9 +4777,16 @@ ${ADMIN_DAILY_JS}
     var mount = document.querySelector("[data-media-inspector-mount]");
     var editors = document.querySelector("[data-media-editors]");
     if (!dialog || !mount || !editors || typeof dialog.showModal !== "function") return;
+    var openers = document.querySelectorAll("[data-media-open]");
+    for (var openerIndex = 0; openerIndex < openers.length; openerIndex += 1) openers[openerIndex].hidden = false;
     var titleNode = dialog.querySelector("[data-media-inspector-title]");
     var previewNode = dialog.querySelector("[data-media-inspector-preview]");
-    var idNode = dialog.querySelector("[data-media-inspector-id]");
+    var sourceNode = dialog.querySelector("[data-media-inspector-source]");
+    var previewFrame = dialog.querySelector("[data-inspector-image-state]");
+    if (previewNode && previewFrame) {
+      previewNode.addEventListener("load", function () { previewFrame.setAttribute("data-inspector-image-state", "loaded"); });
+      previewNode.addEventListener("error", function () { previewFrame.setAttribute("data-inspector-image-state", "failed"); });
+    }
     var openedBy = null;
     var borrowed = null;
     var homeParent = null;
@@ -4732,15 +4798,16 @@ ${ADMIN_DAILY_JS}
       if (borrowed && homeParent) homeParent.insertBefore(borrowed, homeNext);
       borrowed = null; homeParent = null; homeNext = null;
       if (previewNode) { previewNode.removeAttribute("src"); previewNode.alt = ""; }
-      if (idNode) idNode.textContent = "";
+      if (sourceNode) sourceNode.removeAttribute("href");
       if (openedBy && typeof openedBy.focus === "function") openedBy.focus();
       openedBy = null;
     }
     document.addEventListener("click", function (event) {
       var button = event.target && event.target.closest ? event.target.closest("[data-media-open]") : null;
       if (button) {
-        var assetId = button.getAttribute("data-media-open");
-        var block = editors.querySelector('[data-media-asset-forms="' + assetId + '"]');
+        var tile = button.closest("[data-media-asset]");
+        var entry = tile && tile.getAttribute("data-media-order-entry");
+        var block = editors.querySelector('[data-media-editor-entry="' + entry + '"]');
         if (!block) return;
         event.preventDefault();
         openedBy = button;
@@ -4748,12 +4815,16 @@ ${ADMIN_DAILY_JS}
         homeParent = block.parentNode;
         homeNext = block.nextSibling;
         mount.appendChild(block);
-        var tile = document.querySelector('[data-media-asset="' + assetId + '"]');
         var thumb = tile ? tile.querySelector("[data-media-preview]") : null;
+        var source = tile ? tile.querySelector(".adm-media-asset__source") : null;
         var name = tile ? tile.querySelector("strong") : null;
         if (titleNode && name) titleNode.textContent = name.textContent;
-        if (idNode) idNode.textContent = assetId;
+        if (sourceNode) {
+          sourceNode.hidden = !source;
+          if (source) sourceNode.href = source.href;
+        }
         if (previewNode) {
+          if (previewFrame) previewFrame.setAttribute("data-inspector-image-state", thumb ? "loading" : "failed");
           if (thumb && thumb.getAttribute("src")) {
             previewNode.setAttribute("src", thumb.getAttribute("src"));
             previewNode.alt = thumb.getAttribute("alt") || "";
@@ -4812,7 +4883,10 @@ ${ADMIN_DAILY_JS}
           if (asset) asset.setAttribute("data-media-preview-state", "failed");
           image.hidden = true;
         }
-        if (image.complete && image.naturalWidth === 0) fail();
+        if (image.complete) {
+          if (image.naturalWidth === 0) fail();
+          else if (asset) asset.setAttribute("data-media-preview-state", "loaded");
+        }
         image.addEventListener("error", fail);
         image.addEventListener("load", function () {
           if (asset) asset.setAttribute("data-media-preview-state", "loaded");
@@ -5474,6 +5548,7 @@ ${ADMIN_DAILY_JS}
               throw unconfirmed;
             }
             if (revision) revision.value = revision.defaultValue = payload.draft_revision;
+            form.removeAttribute("data-editor-unsaved-submission");
             commitEditorFormState(form, editorSnapshot);
           }
           if (status) {

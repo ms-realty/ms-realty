@@ -88,7 +88,7 @@ import {
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
-import { searchAdminRecords } from "./admin-record-search.mjs";
+import { searchAuthorizedAdminRecords } from "./admin-record-search.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -122,6 +122,9 @@ import {
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
   renderAdminRecordSearchPayload,
+  listingEditorOutcomeFromUrl,
+  listingEditorReturnPath,
+  listingEditorSubmission,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -2125,6 +2128,7 @@ export function createHttpApp({
     // only the durable store keeps. Saying so here is what stops the editor
     // offering a control whose route would refuse it.
     payload.media_order_available = durableMedia();
+    payload.editorOutcome = listingEditorOutcomeFromUrl(url);
     return runtimeDataDurableOnly
       ? {
           ...payload,
@@ -5383,15 +5387,19 @@ export function createHttpApp({
     // reported as unavailable rather than quietly left out of the results.
     if (request.method === "GET" && ["/api/admin/search", "/admin/search"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const seedForSearch = await projectListingDraftSeed(currentSeed(), {
-        payload: payloadListingRuntime,
-        env: payloadListingEnv,
-        requirePayload: runtimeDataDurableOnly,
-      });
-      const found = searchAdminRecords({
+      const found = await searchAuthorizedAdminRecords({
         query: url.searchParams.get("q") || "",
-        listings: seedForSearch.records.filter((record) => record.collection === "listings"),
-        leads: canAdminAccess(principal, "operations:read") && Array.isArray(requestLeadRows) ? requestLeadRows : null,
+        principal,
+        loadListings: async () => (await projectListingDraftSeed(currentSeed(), {
+              payload: payloadListingRuntime,
+              env: payloadListingEnv,
+              requirePayload: runtimeDataDurableOnly,
+            })).records.filter((record) => record.collection === "listings"),
+        loadLeads: async () => {
+          if (runtimeDataDurableOnly && !isLeadDurableStoreEnabled(leadDurableStore)) throw new LeadStoreUnavailableError("Lead storage is unavailable");
+          return (await currentDurableLeadSource(principal, payloadSession)).leads;
+        },
+        loadViewings: async (leads) => leadScopedRows({ durable: Boolean(leadDurableStore?.leadDurableStoreEnabled), leads })((await currentDurableViewingSource()).viewings),
       });
       if (url.pathname === "/admin/search") {
         return adminResponse(
@@ -6632,12 +6640,17 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      // The editor works without JavaScript, so its native POST must come back
+      // as a page. Enhanced saves ask for JSON and keep getting it.
+      const nativeForm = acceptsHtmlResponse(readHeader(request.headers, "accept"));
+      let editInput = null;
       try {
+        editInput = listingEditInput(request);
         const result = await saveListingDraft(currentSeed(), {
           env: payloadListingEnv,
           payload: payloadListingRuntime,
           principal,
-          input: listingEditInput(request),
+          input: editInput,
           requireRevision: browserListingRevisionRequired(request.headers),
           editedAt,
         });
@@ -6653,6 +6666,16 @@ export function createHttpApp({
             },
           });
         }
+        if (nativeForm) {
+          return adminResponse(303, "", "text/plain; charset=utf-8", {
+            location: `${listingEditorReturnPath(result.listingId, {
+              tab: editInput.returnTab,
+              locale: editInput.returnLocale,
+              outcome: "saved",
+            })}#listing-facts`,
+            "cache-control": "no-store",
+          });
+        }
         return adminJson(result.idempotent ? 200 : 201, {
           kind: "listing_draft_saved",
           draft_revision: result.draftRevision,
@@ -6665,6 +6688,21 @@ export function createHttpApp({
           idempotent: result.idempotent,
         });
       } catch (error) {
+        // A refused script-free save re-renders the editor with what was typed
+        // and the version it was typed against, so nothing is lost to a reload.
+        if (nativeForm && editInput?.listingId) {
+          try {
+            const editorUrl = new URL(
+              listingEditorReturnPath(editInput.listingId, { tab: editInput.returnTab, locale: editInput.returnLocale }),
+              "http://ms-realty.local",
+            );
+            const page = await currentListingEditorPayload(editorUrl, principal);
+            page.editorSubmission = listingEditorSubmission(editInput, error);
+            return adminResponse(error.status || 400, adminHtml(page), "text/html; charset=utf-8", { "cache-control": "no-store" });
+          } catch {
+            // An editor that cannot be rendered falls through to the plain answer.
+          }
+        }
         return adminJson(error.status || 400, {
           kind: error.code || "bad_request",
           message: error.message,
@@ -6690,7 +6728,7 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const outcome = await reorderListingMediaDurably(
-          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [] },
+          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [], galleryRevision: input.galleryRevision ?? input.gallery_revision ?? null, relationOrder: input.relationIds ?? input.relation_ids ?? null },
           { payload: payloadListingRuntime, env: payloadListingEnv, principal },
         );
         if (!outcome.idempotent) {
@@ -6710,8 +6748,20 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const nativeForm = acceptsHtmlResponse(readHeader(request.headers, "accept"));
+      let reviewInput = null;
+      const reviewReturn = (outcome) =>
+        adminResponse(303, "", "text/plain; charset=utf-8", {
+          location: `${listingEditorReturnPath(reviewInput?.listingId || reviewInput?.listing_id || "", {
+            tab: "media",
+            locale: reviewInput?.returnLocale,
+            outcome,
+          })}#listing-media`,
+          "cache-control": "no-store",
+        });
       try {
-        const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
+        reviewInput = parseBody(request);
+        const input = bindAuthenticatedOperator(reviewInput, principal, ["reviewer"]);
         const review = createMediaReview(await currentMediaSeed(), input, reviewedAt, { allowStaged: durableMedia() });
         const persisted = durableMedia()
           ? await persistMediaReviewDurably(review, {
@@ -6736,8 +6786,10 @@ export function createHttpApp({
             },
           });
         }
+        if (nativeForm) return reviewReturn("media_reviewed");
         return adminJson(persisted.idempotent ? 200 : 201, persisted);
       } catch (error) {
+        if (nativeForm && (reviewInput?.listingId || reviewInput?.listing_id)) return reviewReturn("media_review_failed");
         return adminJson(error.status || 400, { kind: error.code || "bad_request", message: error.message });
       }
     }

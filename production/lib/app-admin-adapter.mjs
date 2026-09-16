@@ -84,7 +84,7 @@ import {
   readOperatorIntegrationContract,
   resolveOperatorIntegrationWorkspace,
 } from "./operator-integration-aggregator.mjs";
-import { searchAdminRecords } from "./admin-record-search.mjs";
+import { searchAuthorizedAdminRecords } from "./admin-record-search.mjs";
 import {
   OPERATOR_CONNECTION_AGENT_CONFIG_PATH,
   OPERATOR_CONNECTION_DISCONNECT_PATH,
@@ -118,6 +118,9 @@ import {
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
   renderAdminRecordSearchPayload,
+  listingEditorOutcomeFromUrl,
+  listingEditorReturnPath,
+  listingEditorSubmission,
   editorTabFromUrl,
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
@@ -2246,6 +2249,7 @@ async function listingEditorPayload(registry, url, config) {
   // Same condition as the standalone runtime: the control exists only where the
   // order can actually be kept.
   payload.media_order_available = durableMedia(config);
+  payload.editorOutcome = listingEditorOutcomeFromUrl(url);
   return config.runtimeDataDurableOnly
     ? {
         ...payload,
@@ -5228,14 +5232,16 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     // The same one entry as the standalone runtime, reading the same sources
     // through the same checks, so a record found on one is found on the other.
     if (request.method === "GET" && ["/api/admin/search", "/admin/search"].includes(url.pathname)) {
-      const seedForSearch = await projectListingDraftSeed(currentSeed(config), {
-        env: config.payloadListingEnv || config.authEnv || process.env,
-        payload: config.payloadListingRuntime || null,
-        requirePayload: config.runtimeDataDurableOnly,
-      });
-      const found = searchAdminRecords({
+      const found = await searchAuthorizedAdminRecords({
         query: url.searchParams.get("q") || "",
-        listings: seedForSearch.records.filter((record) => record.collection === "listings"),
+        principal: config.adminPrincipal,
+        loadListings: async () => (await projectListingDraftSeed(currentSeed(config), {
+              env: config.payloadListingEnv || config.authEnv || process.env,
+              payload: config.payloadListingRuntime || null,
+              requirePayload: config.runtimeDataDurableOnly,
+            })).records.filter((record) => record.collection === "listings"),
+        loadLeads: async () => (await adminLeadSource(config)).leads,
+        loadViewings: async (leads) => leadScopedRows({ durable: Boolean(config.leadDurableStore?.leadDurableStoreEnabled), leads })((await adminViewingSource(config)).viewings),
       });
       if (url.pathname === "/admin/search") {
         return htmlResponse(
@@ -6019,8 +6025,12 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
+      // Same contract as the standalone runtime: a native form submission comes
+      // back as the editor page, an enhanced save keeps its JSON.
+      const nativeForm = config.requestChannel !== "mcp" && acceptsHtmlResponse(request.headers.get("accept"));
+      let input = null;
       try {
-        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
         const result = await saveListingDraft(currentSeed(config), {
           env: config.authEnv || process.env,
           payload: config.payloadListingRuntime || null,
@@ -6046,6 +6056,15 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
             config,
           );
         }
+        if (nativeForm) {
+          return new Response(null, {
+            status: 303,
+            headers: {
+              location: `${listingEditorReturnPath(result.listingId, { tab: input.returnTab, locale: input.returnLocale, outcome: "saved" })}#listing-facts`,
+              "cache-control": "no-store",
+            },
+          });
+        }
         return jsonResponse(result.idempotent ? 200 : 201, {
           kind: "listing_draft_saved",
           draft_revision: result.draftRevision,
@@ -6059,6 +6078,23 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
           idempotent: result.idempotent,
         });
       } catch (error) {
+        if (nativeForm && input?.listingId) {
+          try {
+            const editorUrl = new URL(
+              listingEditorReturnPath(input.listingId, { tab: input.returnTab, locale: input.returnLocale }),
+              "http://ms-realty.local",
+            );
+            const page = await listingEditorPayload(registry, editorUrl, config);
+            page.editorSubmission = listingEditorSubmission(input, error);
+            const rendered = await htmlResponse(page);
+            return new Response(rendered.body, {
+              status: error.status || 400,
+              headers: { ...Object.fromEntries(rendered.headers), "cache-control": "no-store" },
+            });
+          } catch {
+            // An editor that cannot be rendered falls through to the plain answer.
+          }
+        }
         return jsonResponse(error.status || 400, {
           kind: error.code || "bad_request",
           message: error.message,
@@ -6154,7 +6190,7 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
       try {
         const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
         const outcome = await reorderListingMediaDurably(
-          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [] },
+          { listingId: input.listingId || input.listing_id, assetIds: input.assetIds || input.asset_ids || [], galleryRevision: input.galleryRevision ?? input.gallery_revision ?? null, relationOrder: input.relationIds ?? input.relation_ids ?? null },
           {
             payload: config.payloadListingRuntime || null,
             env: config.payloadListingEnv || config.authEnv || process.env,
@@ -6180,7 +6216,25 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     }
 
         if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
-      const result = await appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const reviewInput = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+      // A script-free review is answered with the editor, never with JSON.
+      if (acceptsHtmlResponse(request.headers.get("accept"))) {
+        const listingId = reviewInput.listingId || reviewInput.listing_id || "";
+        let outcome = "media_reviewed";
+        try {
+          await appendMediaReviewEntry(reviewInput, config);
+        } catch {
+          outcome = "media_review_failed";
+        }
+        return new Response(null, {
+          status: 303,
+          headers: {
+            location: `${listingEditorReturnPath(listingId, { tab: "media", locale: reviewInput.returnLocale, outcome })}#listing-media`,
+            "cache-control": "no-store",
+          },
+        });
+      }
+      const result = await appendMediaReviewEntry(reviewInput, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {

@@ -80,7 +80,10 @@ test("listing editor sections all exist and the requested one is the visible one
     }
   }
   const facts = editorHtml("MS-00815", "en", "facts");
-  assert.match(facts, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media"/);
+  // The link keeps the language the broker is working in: a reload or a shared
+  // link must land in the same section and the same locale, even the default.
+  assert.match(facts, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media&amp;locale=en"/);
+  assert.match(editorHtml("MS-00815", "bg", "facts"), /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;tab=media&amp;locale=bg"/);
   assert.match(facts, /data-editor-tab-link="media"/);
   // An unknown or missing tab is still Facts.
   assert.match(editorHtml("MS-00815", "en", "nonsense"), /data-editor-tab="facts"[^>]*aria-current="page"/);

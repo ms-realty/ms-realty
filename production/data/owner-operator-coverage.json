@@ -2488,7 +2488,7 @@
       "pathname": "/api/admin/media/order",
       "family": "content",
       "tool": "ms_realty_admin_write",
-      "capability": "administration:write",
+      "capability": "content:write",
       "read_only": false,
       "sensitive": false,
       "confirmation": {

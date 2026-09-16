@@ -9,6 +9,7 @@
 
 import { createHash } from "node:crypto";
 import { mediaAssetId } from "./media-reviews.mjs";
+import { mediaGalleryRevision } from "./media-gallery-order.mjs";
 import { publicMediaUpload } from "./media-uploads.mjs";
 import { withPayloadTransaction } from "./listing-draft-service.mjs";
 import {
@@ -1020,43 +1021,50 @@ async function reconcileReviewStorage(storage, review, result) {
 // set exactly. Nothing is published, unpublished or deleted by this: the review
 // state of every asset is untouched and the write stays on the draft.
 export async function reorderListingMediaDurably(
-  { listingId, assetIds = [] },
+  { listingId, assetIds = [], galleryRevision = null, relationOrder = null },
   { payload = null, env = process.env, principal } = {},
 ) {
   const actor = assertPrincipal(principal);
+  if (!Array.isArray(assetIds) || assetIds.some((id) => typeof id !== "string" || !id.trim())) {
+    throw Object.assign(new Error("Photo order must be an array of asset identifiers"), { status: 400, code: "media_order_invalid" });
+  }
   const runtime = await runtimePayload(payload, env);
   return withPayloadTransaction(runtime, { principal: actor, accessMode: "read write", isolationLevel: "serializable" }, (req) =>
-    reorderWithin(runtime, req, { listingId, assetIds, actor }),
+    reorderWithin(runtime, req, { listingId, assetIds, galleryRevision, relationOrder, actor }),
   );
 }
 
 // The read that decides the order and the write that applies it belong to one
 // transaction: a photo added between them would otherwise be dropped by an
 // order that never knew about it.
-async function reorderWithin(runtime, req, { listingId, assetIds, actor }) {
+async function reorderWithin(runtime, req, { listingId, assetIds, galleryRevision, relationOrder, actor }) {
   const listing = await findListing(runtime, listingId, req);
   if (!listing) {
     throw Object.assign(new Error("Known listingId is required"), { status: 404, code: "listing_not_found" });
   }
   const current = relationIds(listing.media);
+  if (galleryRevision !== null && galleryRevision !== mediaGalleryRevision(current)) {
+    throw Object.assign(new Error("The gallery changed. Reload it before changing its order."), { status: 409, code: "media_order_stale" });
+  }
   const documents = await listingMediaDocuments(runtime, listing, req);
   // The asset id is not always a stored column: outside the durable store it is
   // derived from the source URL, and the editor renders whichever the record
   // yields. mediaAssetId is that one rule, so ordering resolves an asset the
   // same way reviewing one does rather than inventing a second identity.
   //
-  // The same URL can also be attached to a listing more than once - MS-00815
-  // carries thirty-five photos under twenty-seven ids - so an id addresses a
-  // set of interchangeable rows rather than one row. The submitted order is
-  // therefore matched as a multiset: each id consumes the next row still
-  // holding it. Two rows with one URL are interchangeable on screen, and this
-  // keeps a gallery with repeats reorderable instead of permanently refused.
+  // A source URL can occur in several distinct media records. The editor sends
+  // relation IDs as well as asset IDs so moving one tile preserves its exact
+  // record, including its review state and caption. Legacy asset-only callers
+  // consume matching entries in their existing order.
   // Queue the listing's own entries, not normalised copies of them: writing a
   // relation back as a string where the store keeps a number leaves an array
   // that no longer resolves to any row, which is a broken gallery rather than
   // a reordered one.
   const entries = Array.isArray(listing.media) ? [...listing.media] : [];
-  const queueByAsset = new Map();
+  if (relationOrder !== null && (!galleryRevision || !Array.isArray(relationOrder) || relationOrder.length !== entries.length || relationOrder.some((id) => typeof id !== "string" || !id))) {
+    throw Object.assign(new Error("The complete gallery relation order and revision are required"), { status: 400, code: "media_order_invalid" });
+  }
+  const entriesByIdentity = new Map();
   for (const entry of entries) {
     const id = relationId(entry);
     const document = documents.find((candidate) => relationId(candidate?.id) === id);
@@ -1072,23 +1080,24 @@ async function reorderWithin(runtime, req, { listingId, assetIds, actor }) {
         { status: 409, code: "media_order_unaddressable" },
       );
     }
-    if (!queueByAsset.has(assetId)) queueByAsset.set(assetId, []);
-    queueByAsset.get(assetId).push(entry);
+    const key = relationOrder === null ? assetId : id;
+    if (!entriesByIdentity.has(key)) entriesByIdentity.set(key, []);
+    entriesByIdentity.get(key).push({ entry, assetId });
   }
   const requested = [];
-  for (const assetId of assetIds) {
-    const queue = queueByAsset.get(String(assetId || "").trim());
-    if (!queue || !queue.length) {
+  for (const [index, assetId] of assetIds.entries()) {
+    const queue = entriesByIdentity.get(relationOrder === null ? assetId.trim() : relationOrder[index]);
+    if (!queue || !queue.length || queue[0].assetId !== assetId.trim()) {
       throw Object.assign(
         new Error("The gallery order must list every photo of this listing exactly once"),
         { status: 409, code: "media_order_stale" },
       );
     }
-    requested.push(queue.shift());
+    requested.push(queue.shift().entry);
   }
   // Anything still queued is a photo the submitted order forgot, which is what
   // a tab left open while somebody else added one looks like.
-  const missing = [...queueByAsset.values()].some((queue) => queue.length > 0);
+  const missing = [...entriesByIdentity.values()].some((queue) => queue.length > 0);
   if (missing || requested.length !== entries.length) {
     throw Object.assign(
       new Error("The gallery order must list every photo of this listing exactly once"),
@@ -1112,6 +1121,7 @@ async function reorderWithin(runtime, req, { listingId, assetIds, actor }) {
     kind: "listing_media_order",
     listing_id: listing.id,
     asset_ids: assetIds.map((assetId) => String(assetId).trim()),
+    gallery_revision: mediaGalleryRevision(requested),
     idempotent: unchanged,
   };
 }

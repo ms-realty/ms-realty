@@ -3918,7 +3918,7 @@ function AdminSearchEntry({ page }) {
       action: adminHref("/admin/search", page),
       "data-admin-search": "true",
     },
-    h("label", { className: "sr-only", htmlFor: "admin-search-q" }, search.label),
+    h("label", { className: "adm-visually-hidden", htmlFor: "admin-search-q" }, search.label),
     h(Icon, { name: "search", size: 16 }),
     h("input", {
       id: "admin-search-q",
@@ -10653,6 +10653,7 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
 // inspector borrows the selected asset's forms from.
 function listingMediaAssetForms(page, ui, copy, item, { canEditContent, published, hermesAssist }) {
   const operatorId = currentOperatorId(page, "");
+  const fieldId = `${item.asset_id}-${item.media_order_entry}`;
   return [
     canEditContent && item.kind !== "video" && durableRuntimeMutationAvailable(page, "/api/admin/media/uploads")
       ? h(
@@ -10746,20 +10747,20 @@ function listingMediaAssetForms(page, ui, copy, item, { canEditContent, publishe
               // control, same boundary, drawn from the same approved facts.
               h(
                 "div",
-                { className: "adm-field adm-field--assisted", "data-hermes-assist-for": `alt-${item.asset_id}` },
+                { className: "adm-field adm-field--assisted", "data-hermes-assist-for": `alt-${fieldId}` },
                 h(
                   "div",
                   { className: "adm-lblrow" },
-                  h("label", { htmlFor: `media-alt-${item.asset_id}` }, ui.mediaAlt),
+                  h("label", { htmlFor: `media-alt-${fieldId}` }, ui.mediaAlt),
                   hermesAssistButton(ui, {
                     assist: hermesAssist,
                     hermesField: "alt_text",
-                    targetId: `media-alt-${item.asset_id}`,
-                    barId: `media-alt-${item.asset_id}-drafted`,
+                    targetId: `media-alt-${fieldId}`,
+                    barId: `media-alt-${fieldId}-drafted`,
                   }),
                 ),
-                h("textarea", { id: `media-alt-${item.asset_id}`, name: "alt", rows: 2, defaultValue: item.alt || "" }),
-                hermesDraftedBar(ui, { assist: hermesAssist, barId: `media-alt-${item.asset_id}-drafted`, field: `alt-${item.asset_id}` }),
+                h("textarea", { id: `media-alt-${fieldId}`, name: "alt", rows: 2, defaultValue: item.alt || "" }),
+                hermesDraftedBar(ui, { assist: hermesAssist, barId: `media-alt-${fieldId}-drafted`, field: `alt-${fieldId}` }),
               ),
               item.kind === "video"
                 ? h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.mp4" }))
@@ -10775,7 +10776,6 @@ function listingMediaAssetForms(page, ui, copy, item, { canEditContent, publishe
                     h("input", { type: "hidden", name: "reviewer", value: operatorId }),
                     h("span", { className: "adm-media-review__reviewer-label" }, label(copy, "reviewer", "Reviewer")),
                     h("span", { className: "adm-media-review__reviewer-name" }, ui.mediaReviewerSignedIn),
-                    h("code", { className: "crm-mono adm-id-caption" }, operatorId),
                   )
                 : h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
               h(
@@ -10880,12 +10880,26 @@ function ListingEditorBody({ page }) {
       editorValues[row.editor_field] = row.value;
     }
   }
+  // A refused script-free save comes back as this page, carrying what the
+  // operator typed. Their values win over the stored ones, and the version stays
+  // the one they submitted against.
+  const submission = page.editorSubmission || null;
+  for (const [field, value] of Object.entries(submission?.values || {})) editorValues[field] = value;
+  const editorRevision = submission ? submission.draftRevision : page.draftRevision || "";
+  const editorOutcome = page.editorOutcome || null;
+  const submissionConflict = submission?.error?.kind === "listing_draft_conflict" ? submission.error : null;
   const tour = page.listing.tour || {};
   const tourProvider = tour.provider === "supersplat-viewer" ? "supersplat-viewer" : "photo-sphere-viewer";
   const tourPublished = tour.is_public === true;
   const tourStatus = tourPublished ? "approved" : tour.review_status || "review_required";
   const fallbackGalleryCount = (tour.fallback_gallery || []).length;
-  const reviewableMedia = (page.listing.media || [])
+  const mediaRelation = page.listing.media || [];
+  // The grid deliberately shows a bounded subset, while ordering still owns
+  // the whole relation, including hidden kinds and duplicate source assets.
+  const mediaOrder = mediaRelation.map((item, entry) => ({ entry, asset_id: item.asset_id, relation_id: String(item.id ?? "") }));
+  const mediaOrderAddressable = mediaOrder.every((item) => typeof item.asset_id === "string" && item.asset_id);
+  const reviewableMedia = mediaRelation
+    .map((item, entry) => ({ ...item, media_order_entry: entry }))
     .filter((item) => ["photo", "floor_plan", "video"].includes(item.kind))
     .slice(0, 50);
   const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
@@ -10937,7 +10951,7 @@ function ListingEditorBody({ page }) {
   // One section per request: the server renders the tab in ?tab= (Facts by
   // default), so a phone gets one form, not a five-section scroll.
   const activeTab = LISTING_EDITOR_TAB_KEYS.includes(page.editorTab) ? page.editorTab : "facts";
-  const editorTabHref = (tab) => adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}`, page);
+  const editorTabHref = (tab) => `/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}&locale=${encodeURIComponent(page.workspace.locale)}`;
   const editorTabLink = (tab, text, icon, ariaLabel = text) =>
     h(
       "a",
@@ -11030,6 +11044,16 @@ function ListingEditorBody({ page }) {
                 "data-admin-mutation-form": "listing",
                 "data-editor-form": "listing",
                 "data-editor-panel": "facts",
+                // Values carried back from a refused submission are not saved,
+                // whatever the browser's form defaults now say, so the client
+                // keeps them dirty until a save succeeds. Discarding them means
+                // reopening the stored listing, not resetting to what was typed.
+                ...(submission
+                  ? {
+                      "data-editor-unsaved-submission": "true",
+                      "data-editor-discard-href": adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${activeTab}`, page),
+                    }
+                  : {}),
                 "data-editor-later-edits-message": ui.editorLaterEdits,
                 "data-editor-conflict-message": ui.editorConflict,
                 "data-editor-conflict-ready": ui.saveOverNewerReady,
@@ -11038,7 +11062,11 @@ function ListingEditorBody({ page }) {
                 "data-editor-dirty-message": label(copy, "unsavedChanges", "Unsaved changes"),
               },
               h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-              h("input", { type: "hidden", name: "draftRevision", defaultValue: page.draftRevision || "" }),
+              h("input", { type: "hidden", name: "draftRevision", defaultValue: editorRevision }),
+              // Where a script-free submission comes back to. Both are checked
+              // against the editor's own tabs and locales before use.
+              h("input", { type: "hidden", name: "returnTab", defaultValue: activeTab === "seo" ? "seo" : "facts" }),
+              h("input", { type: "hidden", name: "returnLocale", defaultValue: page.workspace?.locale || "" }),
               // The server attributes every edit to the authenticated operator,
               // so the editor id travels with the form but never occupies a
               // field: the save bar names who is editing instead.
@@ -11090,7 +11118,7 @@ function ListingEditorBody({ page }) {
                         key: "conflict",
                         className: "adm-inline-alert adm-editor-conflict",
                         role: "alert",
-                        hidden: true,
+                        hidden: submissionConflict ? undefined : true,
                         "data-editor-conflict": "true",
                       },
                       h(Icon, { name: "triangle-alert", size: 17 }),
@@ -11101,7 +11129,24 @@ function ListingEditorBody({ page }) {
                         h("p", null, ui.saveConflictBody),
                         // Filled by the client from the refusal itself: the
                         // fields somebody else changed, and what they now say.
-                        h("ul", { className: "adm-editor-conflict__fields", "data-editor-conflict-fields": "true", hidden: true }),
+                        h(
+                          "ul",
+                          {
+                            className: "adm-editor-conflict__fields",
+                            "data-editor-conflict-fields": "true",
+                            hidden: submissionConflict?.conflicting_fields?.length ? undefined : true,
+                          },
+                          ...(submissionConflict?.conflicting_fields || []).map((row) =>
+                            h(
+                              "li",
+                              { key: row.field },
+                              h("strong", null, row.field),
+                              row.current_value !== null && row.current_value !== undefined && row.current_value !== ""
+                                ? ` ${String(row.current_value)}`
+                                : null,
+                            ),
+                          ),
+                        ),
                       ),
                       h(
                         "div",
@@ -11126,15 +11171,25 @@ function ListingEditorBody({ page }) {
                       key: "savebar",
                       className: "adm-form__actions adm-editor-savebar",
                       "data-editor-savebar": "true",
-                      "data-dirty": "false",
-                      "data-save-state": "clean",
+                      "data-dirty": submission ? "true" : "false",
+                      "data-save-state": submissionConflict ? "conflict" : submission ? "error" : editorOutcome === "saved" ? "saved" : "clean",
                       "data-editor-conflict-marker": ui.editorConflict,
                     },
                     h(
                       "div",
                       { className: "adm-editor-savebar__meta" },
                       h("strong", { "data-editor-dirty-note": "true" }, label(copy, "saved", "All changes saved.")),
-                      h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                      h(
+                        "p",
+                        {
+                          className: "adm-form__status",
+                          role: "status",
+                          "aria-live": "polite",
+                          "data-admin-mutation-status": "true",
+                          "data-state": submissionConflict ? "conflict" : submission ? "error" : editorOutcome === "saved" ? "success" : undefined,
+                        },
+                        submission?.error?.message || (editorOutcome === "saved" ? label(copy, "saved", "All changes saved.") : null),
+                      ),
                       h(
                         "small",
                         { className: "adm-editor-savebar__actor" },
@@ -11145,7 +11200,7 @@ function ListingEditorBody({ page }) {
                       "div",
                       { className: "adm-editor-savebar__controls" },
                       h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--md", "data-editor-reset": "true", disabled: true }, label(copy, "discardChanges", ui.discardChanges)),
-                      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md", disabled: true }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
+                      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
                     ),
                   ),
                   ]
@@ -11309,16 +11364,32 @@ function ListingEditorBody({ page }) {
                 "data-media-manager": "true",
                 // Only where the order can actually be kept, so the client does
                 // not attach itself to a gallery it cannot save.
-                ...(canEditContent && page.media_order_available === true
+                ...(canEditContent && page.media_order_available === true && mediaOrderAddressable
                   ? {
                       "data-media-order-listing": page.listing.id,
+                      "data-media-order": JSON.stringify(mediaOrder),
+                      "data-media-order-revision": page.listing.media_order_revision || "",
                       "data-media-order-saving": ui.mediaOrderSaving,
                       "data-media-order-success": ui.mediaOrderSaved,
                       "data-media-order-failure": ui.mediaOrderFailed,
                     }
                   : {}),
               },
-              canEditContent && page.media_order_available === true
+              // A script-free review comes back here; say how it went, since
+              // there is no in-page status line to have said it.
+              editorOutcome === "media_reviewed" || editorOutcome === "media_review_failed"
+                ? h(
+                    "p",
+                    {
+                      className: "adm-form__status adm-media-review-outcome",
+                      role: "status",
+                      "data-media-review-outcome": editorOutcome,
+                      "data-state": editorOutcome === "media_reviewed" ? "success" : "error",
+                    },
+                    editorOutcome === "media_reviewed" ? ui.mediaReviewSaved : ui.mediaReviewFailed,
+                  )
+                : null,
+              canEditContent && page.media_order_available === true && mediaOrderAddressable
                 ? h("p", {
                     className: "adm-form__status adm-media-order-status",
                     role: "status",
@@ -11354,9 +11425,10 @@ function ListingEditorBody({ page }) {
                     return h(
                       "article",
                       {
-                        key: item.asset_id,
+                        key: `tile-${item.media_order_entry}`,
                         className: "mk-card mk-card--sunken adm-media-asset",
                         "data-media-asset": item.asset_id,
+                        "data-media-order-entry": item.media_order_entry,
                         "data-media-kind": item.kind,
                         "data-media-public": published ? "true" : "false",
                         "data-media-preview-state": previewState,
@@ -11405,6 +11477,7 @@ function ListingEditorBody({ page }) {
                               type: "button",
                               className: "mk-btn mk-btn--secondary mk-btn--sm adm-media-asset__open",
                               "data-media-open": item.asset_id,
+                              hidden: true,
                               "aria-haspopup": "dialog",
                             },
                             h(Icon, { name: "pencil", size: 16 }),
@@ -11415,10 +11488,10 @@ function ListingEditorBody({ page }) {
                       // than by dragging: a keyboard reaches these, and the
                       // first photo is the cover, so "move to front" is how a
                       // cover is chosen.
-                      canEditContent && page.media_order_available === true
+                      canEditContent && page.media_order_available === true && mediaOrderAddressable
                         ? h(
                             "div",
-                            { className: "adm-media-asset__order", "data-media-order-controls": item.asset_id },
+                            { className: "adm-media-asset__order", "data-media-order-controls": item.asset_id, hidden: true },
                             h(
                               "button",
                               {
@@ -11445,15 +11518,16 @@ function ListingEditorBody({ page }) {
                               },
                               h(Icon, { name: "chevron-down", size: 16 }),
                             ),
-                            index === 0
-                              ? h("span", { className: "adm-media-asset__cover", "data-media-cover": "true" }, ui.coverPhoto)
-                              : h(
+                            h("span", { className: "adm-media-asset__cover", "data-media-cover": "true", hidden: index !== 0 }, ui.coverPhoto),
+                            h(
                                   "button",
                                   {
                                     type: "button",
                                     className: "mk-btn mk-btn--ghost mk-btn--sm",
                                     "data-media-move": "front",
                                     "data-media-move-asset": item.asset_id,
+                                    hidden: index === 0,
+                                    disabled: index === 0,
                                   },
                                   ui.makeCoverPhoto,
                                 ),
@@ -11475,18 +11549,21 @@ function ListingEditorBody({ page }) {
                     h(
                       "section",
                       {
-                        key: `forms-${item.asset_id}`,
+                        key: `forms-${item.media_order_entry}`,
                         className: "adm-media-editor",
                         "data-media-asset-forms": item.asset_id,
+                        "data-media-editor-entry": item.media_order_entry,
                         "aria-label": fillTemplate(ui.mediaAssetPosition, {
                           kind: fieldText(ui, `media_kind_${item.kind}`),
                           index: reviewableMedia.filter((other) => other.kind === item.kind).indexOf(item) + 1,
                           total: reviewableMedia.filter((other) => other.kind === item.kind).length,
                         }),
                       },
-                      // The generated id is evidence for whoever needs it, so it
-                      // sits with the editor rather than in the gallery heading.
-                      h("code", { className: "crm-mono adm-id-caption", "data-media-asset-id": item.asset_id }, item.asset_id),
+                      h("h3", { className: "adm-media-editor__fallback-title" }, fillTemplate(ui.mediaAssetPosition, {
+                        kind: fieldText(ui, `media_kind_${item.kind}`),
+                        index: reviewableMedia.filter((other) => other.kind === item.kind).indexOf(item) + 1,
+                        total: reviewableMedia.filter((other) => other.kind === item.kind).length,
+                      })),
                       ...listingMediaAssetForms(page, ui, copy, item, {
                         canEditContent,
                         published: item.is_public === true,
@@ -11521,13 +11598,15 @@ function ListingEditorBody({ page }) {
                     h(
                       "figure",
                       { className: "adm-media-inspector__figure" },
-                      h("img", { alt: "", "data-media-inspector-preview": "true" }),
-                      // The generated id is evidence, not part of the everyday
-                      // interface, so it sits in a detail line under the photo.
+                      h("div", { className: "adm-media-inspector__preview", "data-inspector-image-state": "loading" },
+                        h("img", { alt: "", "data-media-inspector-preview": "true" }),
+                        h("span", { className: "adm-media-inspector__loading", role: "status" }, ui.mediaPreviewLoading),
+                        h("span", { className: "adm-media-inspector__failed", role: "status" }, ui.mediaPreviewUnavailable),
+                      ),
                       h(
                         "figcaption",
                         null,
-                        h("code", { className: "crm-mono adm-id-caption", "data-media-inspector-id": "true" }),
+                        h("a", { "data-media-inspector-source": "true", target: "_blank", rel: "noreferrer" }, h(Icon, { name: "external-link", size: 15 }), ui.sourceAsset),
                       ),
                     ),
                     h("div", { className: "adm-media-inspector__forms", "data-media-inspector-mount": "true" }),
