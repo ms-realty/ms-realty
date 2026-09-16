@@ -240,6 +240,8 @@ test("every lead-backed admin read uses durable leads and filters file or SQLite
     return filePath;
   };
   const routeConfig = config(async () => [durableLead], {
+    // The contact record resolves the listings its enquiries name.
+    payloadListingRuntime: PAYLOAD_DRAFT_RUNTIME,
     leadLedgerPath,
     leadAssignmentLedgerPath: sidecar("lead-assignments"),
     replyOutboxPath: sidecar("reply-outbox"),

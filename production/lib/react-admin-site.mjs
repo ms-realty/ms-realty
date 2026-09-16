@@ -274,6 +274,19 @@ const ADMIN_UI_COPY = {
       followUpOpened: "Задачата е създадена и свързана с обявата.",
       followUpFailed: "Задачата не беше създадена. Провери полетата и опитай пак.",
     },
+    contactRelations: {
+      title: "Свързани записи",
+      enquiries: "Запитвания",
+      listings: "Имоти",
+      viewings: "Огледи",
+      deals: "Сделки",
+      noListings: "Нито едно запитване не посочва конкретен имот.",
+      noViewings: "Няма насрочени огледи.",
+      noDeals: "Няма приключени сделки.",
+      unavailable: "Не може да бъде прочетено в момента.",
+      enquiry: "Запитване",
+      deal: "Сделка",
+    },
     recordSearch: {
       label: "Търсене в работното място",
       placeholder: "Обява, запитване, човек, оглед…",
@@ -1144,6 +1157,19 @@ const ADMIN_UI_COPY = {
       followUpOpened: "Задача создана и привязана к объекту.",
       followUpFailed: "Задача не создана. Проверьте поля и попробуйте ещё раз.",
     },
+    contactRelations: {
+      title: "Связанные записи",
+      enquiries: "Заявки",
+      listings: "Объекты",
+      viewings: "Показы",
+      deals: "Сделки",
+      noListings: "Ни одна заявка не называет конкретный объект.",
+      noViewings: "Показов не назначено.",
+      noDeals: "Закрытых сделок нет.",
+      unavailable: "Сейчас это прочитать не удалось.",
+      enquiry: "Заявка",
+      deal: "Сделка",
+    },
     recordSearch: {
       label: "Поиск по рабочему пространству",
       placeholder: "Объект, заявка, человек, показ…",
@@ -2013,6 +2039,19 @@ const ADMIN_UI_COPY = {
       followUpSubmit: "Create task",
       followUpOpened: "The task was created and linked to this listing.",
       followUpFailed: "The task was not created. Check the fields and try again.",
+    },
+    contactRelations: {
+      title: "Connected records",
+      enquiries: "Enquiries",
+      listings: "Properties",
+      viewings: "Viewings",
+      deals: "Deals",
+      noListings: "No enquiry names a specific property.",
+      noViewings: "No viewings are booked.",
+      noDeals: "No deals are closed.",
+      unavailable: "This could not be read right now.",
+      enquiry: "Enquiry",
+      deal: "Deal",
     },
     recordSearch: {
       label: "Search the workspace",
@@ -7565,13 +7604,89 @@ function contactChannelActions(contact, copy, ui) {
   );
 }
 
+// What this person is connected to, on their record: their enquiries, the
+// properties they asked about or visited, their viewings and their deals, each
+// one click from the related record. A source that could not be read says so
+// instead of looking empty.
+function ContactRelations({ page, contact, ui }) {
+  const words = ui.contactRelations;
+  // A contact rendered without its related sources still opens its enquiries;
+  // it just makes no claim about the rest.
+  const relations = contact.relations || {
+    partial: true,
+    enquiries: (contact.lead_ids || []).map((id) => ({ id })),
+    enquiry_count: contact.lead_ids?.length || 0,
+    sources: { enquiries: { status: "read" } },
+  };
+  const locale = page.workspace?.locale;
+  const when = (value) => (value ? h("time", { dateTime: value }, formatAdminDateTime(value, locale)) : null);
+  const leadHref = (id) => adminHref(`/admin/leads?locale=${locale}#lead-${encodeURIComponent(id)}`, page);
+  const pill = (value) => (value ? h(StatusPill, { tone: "sun" }, statusText(ui, value)) : null);
+  const group = (key, title, count, rows, emptyText, row) =>
+    h(
+      "section",
+      { className: "adm-relations__group", "data-contact-relation": key, "aria-label": title },
+      h("h3", null, title, count !== null && count !== undefined ? h("span", { className: "adm-relations__count" }, String(count)) : null),
+      relations.sources?.[key] && relations.sources[key].status !== "read"
+        ? h("p", { className: "adm-note", role: "note", "data-contact-relation-unavailable": key }, words.unavailable)
+        : rows.length
+          ? row === null
+            ? h("div", { className: "adm-contact-card__leads" }, ...rows)
+            : h("ul", { className: "adm-relations__list" }, ...rows.map(row))
+          : h("p", { className: "adm-empty", "data-contact-relation-empty": key }, emptyText),
+    );
+  // A property opens its record only when that listing exists and the operator
+  // may read content; otherwise the reference is still shown as text.
+  const canOpenListings = pageCan(page, "content:read");
+  const listingChips = (relations.listings || []).map((listing) =>
+    canOpenListings && listing.known === true
+      ? h("a", { key: listing.id, href: payloadAdminListingHref(listing.id, page), "data-contact-listing": listing.id }, listing.id)
+      : h("span", { key: listing.id, "data-contact-listing": listing.id }, listing.id),
+  );
+  return h(
+    "div",
+    { className: "adm-relations", "data-contact-relations": contact.id, "aria-label": words.title },
+    group("enquiries", words.enquiries, relations.enquiry_count, relations.enquiries, "", (row) =>
+      h(
+        "li",
+        { key: row.id, className: "adm-relations__row", "data-contact-lead": row.id },
+        h("a", { href: leadHref(row.id) }, h("strong", null, row.listing_reference || words.enquiry), when(row.received_at)),
+        pill(row.status || row.lead_type),
+      ),
+    ),
+    relations.partial ? null : group("listings", words.listings, relations.listing_count, listingChips, words.noListings, null),
+    relations.partial ? null : group("viewings", words.viewings, relations.viewing_count, relations.viewings, words.noViewings, (row) =>
+      h(
+        "li",
+        { key: row.id, className: "adm-relations__row", "data-contact-viewing": row.id },
+        h("a", { href: adminHref(`/admin/viewings#viewing-${encodeURIComponent(row.id)}`, page) }, h("strong", null, row.listing_reference || words.viewings), when(row.starts_at)),
+        pill(row.status),
+      ),
+    ),
+    // Deals have no screen of their own; a deal opens the enquiry it closed.
+    relations.partial ? null : group("deals", words.deals, relations.deal_count, relations.deals, words.noDeals, (row) =>
+      h(
+        "li",
+        { key: row.id, className: "adm-relations__row", "data-contact-deal": row.id },
+        h("a", { href: leadHref(row.lead_id) }, h("strong", null, [words.deal, row.listing_reference].filter(Boolean).join(" · ")), when(row.closed_at)),
+        pill(row.status),
+      ),
+    ),
+  );
+}
+
 function ContactsBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const locale = page.workspace?.locale;
   const title = label(copy, "contactsWorkspace", "Contacts and accounts");
+  // Where accounts or message threads cannot be read, the contact says so
+  // instead of claiming "no account" or "no message".
+  const accountsUnavailable = adminDataUnavailable(page, "accounts");
+  const threadsUnavailable = adminDataUnavailable(page, "communicationThreads");
+  const unavailableText = ownerConsoleCopy(page).runtime.unavailable;
   const withAccount = page.contacts.filter((contact) => contact.account_id).length;
-  const filterOptions = [
+  const filterOptions = accountsUnavailable ? [] : [
     { value: "all", label: label(copy, "all", "All"), count: page.contacts.length },
     { value: "no_account", label: ui.withoutAccount, count: page.contacts.length - withAccount },
     { value: "with_account", label: ui.withAccount, count: withAccount },
@@ -7601,7 +7716,9 @@ function ContactsBody({ page }) {
       ),
       contact.account_id
         ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
-        : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
+        : accountsUnavailable
+          ? null
+          : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
     ),
     contactChannelActions(contact, copy, ui),
     h(
@@ -7614,7 +7731,13 @@ function ContactsBody({ page }) {
         h(
           "dd",
           null,
-          contact.latest_message ? h("q", { className: "adm-contact-quote" }, contact.latest_message) : h("span", { className: "crm-tbl__muted" }, label(copy, "noMessageBody", "No message body was provided.")),
+          contact.latest_message
+            ? h("q", { className: "adm-contact-quote" }, contact.latest_message)
+            : h(
+                "span",
+                { className: "crm-tbl__muted", ...(threadsUnavailable ? { "data-contact-thread-unavailable": "true" } : {}) },
+                threadsUnavailable ? unavailableText : label(copy, "noMessageBody", "No message body was provided."),
+              ),
           contact.latest_message_at || contact.latest_received_at
             ? h("time", { dateTime: contact.latest_message_at || contact.latest_received_at }, formatAdminDateTime(contact.latest_message_at || contact.latest_received_at, locale))
             : null,
@@ -7643,17 +7766,7 @@ function ContactsBody({ page }) {
         h("dd", null, (contact.assigned_brokers || []).map((broker) => brokerProfileText(page, broker)).join(", ") || ui.notSet),
       ),
     ),
-    h(
-      "div",
-      { className: "adm-contact-card__leads" },
-      ...(contact.lead_ids || []).map((leadId, index) =>
-        h(
-          "a",
-          { key: leadId, href: adminHref(`/admin/leads?locale=${locale}#lead-${encodeURIComponent(leadId)}`, page), "data-contact-lead": leadId },
-          `${label(copy, "openEnquiry", "Open enquiry")}${contact.lead_ids.length > 1 ? ` ${index + 1}` : ""}`,
-        ),
-      ),
-    ),
+    h(ContactRelations, { page, contact, ui }),
     h(AccountLinkForm, { page, contact, copy }),
     h(
       "details",
@@ -7664,7 +7777,7 @@ function ContactsBody({ page }) {
         { className: "crm-tbl__muted" },
         [
           `${contact.lead_count} ${label(copy, "leads", "Enquiries")}`,
-          `${contact.communication_event_count} ${label(copy, "communicationEvents", "Communication events")}`,
+          threadsUnavailable ? null : `${contact.communication_event_count} ${label(copy, "communicationEvents", "Communication events")}`,
           contact.latest_received_at ? `${label(copy, "latestEnquiry", "Latest enquiry")}: ${formatAdminDateTime(contact.latest_received_at, locale)}` : null,
         ].filter(Boolean).join(" · "),
       ),
@@ -7676,17 +7789,18 @@ function ContactsBody({ page }) {
     mainAttrs: { "data-kind": "admin-contacts", "data-react-admin-ui": "contacts", "data-contact-count": page.summary.contacts, "data-account-count": page.summary.accounts, "data-task-led": "true" },
     children: [
       h(PageHeader, { title, subtitle: page.metadata.description },
-        pageCan(page, "operations:write")
+        pageCan(page, "operations:write") && durableRuntimeMutationAvailable(page, "/api/admin/accounts")
           ? h(ActionDisclosure, { summary: ui.newAccountAction, icon: "plus", "data-account-create": "true" }, h(AccountCreateForm, { page, copy }))
           : null),
+      h(DataAvailabilityNotice, { page }),
       h(DailyWorkspace, {
         scope: "contact", page, title,
-        rows: page.contacts.map(contact => ({ ...contact, tags: contact.account_id ? "with_account" : "no_account" })),
+        rows: page.contacts.map(contact => ({ ...contact, tags: accountsUnavailable ? "" : contact.account_id ? "with_account" : "no_account" })),
         filters: filterOptions.filter(option => option.value !== "all"),
         empty: h(EmptyState, { icon: "users", "data-empty-contacts": "true" }, ui.noContacts),
         renderRow: contact => h("div", { className: "adm-contact-directory-row" },
           h("strong", null, contactTitle(contact, ui, copy)),
-          h("span", null, [contact.account_label || ui.withoutAccount, propertiesOfInterest(contact) || null].filter(Boolean).join(" · ")),
+          h("span", null, [contact.account_label || (accountsUnavailable ? null : ui.withoutAccount), propertiesOfInterest(contact) || null].filter(Boolean).join(" · ")),
           h("small", null, [
             `${contact.lead_count} ${label(copy, "leads", "Enquiries")}`,
             contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, locale) : null,
@@ -7694,8 +7808,10 @@ function ContactsBody({ page }) {
         renderDetail: renderContact,
       }),
       h("details", { className: "adm-contact-accounts", "data-contact-accounts": "true" },
-        h("summary", null, h(Icon, { name: "building-2", size: 18 }), label(copy, "accounts", "Accounts"), ` · ${page.accounts.length}`, h(Icon, { name: "chevron-down", size: 16 })),
-        page.accounts.length ? h(
+        h("summary", null, h(Icon, { name: "building-2", size: 18 }), label(copy, "accounts", "Accounts"), accountsUnavailable ? null : ` · ${page.accounts.length}`, h(Icon, { name: "chevron-down", size: 16 })),
+        accountsUnavailable
+          ? h("p", { className: "adm-note", role: "note", "data-contact-accounts-unavailable": "true" }, unavailableText)
+          : page.accounts.length ? h(
                 "ul",
                 { className: "adm-account-list" },
                 ...page.accounts.map((account) =>
