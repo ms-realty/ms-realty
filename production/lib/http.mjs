@@ -64,6 +64,7 @@ import { HermesOwnerCommandError, runHermesOwnerCommand } from "./hermes-owner-c
 import {
   assignableBrokerProfiles,
   getPayloadAdminAuthService,
+  operatorNameIndex,
   payloadAdminOwnerProfile,
   payloadAdminPasswordChangeFailureCode,
 } from "./payload-admin-auth.mjs";
@@ -1244,6 +1245,18 @@ export function createHttpApp({
       return configuredBrokerProfiles;
     }
   };
+  // Names for the operators a record mentions, from the team directory the
+  // session may read; an operator it cannot see stays a reference.
+  const currentOperatorNames = async (payloadSession) => {
+    if (!payloadSession) return {};
+    try {
+      const service = await configuredPayloadAdminAuth();
+      if (typeof service?.listOperators !== "function") return {};
+      return operatorNameIndex(await service.listOperators(payloadSession));
+    } catch {
+      return {};
+    }
+  };
   const currentSeed = () =>
     runtimeDataDurableOnly
       ? seed
@@ -2195,6 +2208,7 @@ export function createHttpApp({
           : null,
       readAudit: () => readAuditLog(auditLogPath || undefined),
     });
+    payload.operatorNames = await currentOperatorNames(payloadSession);
     return runtimeDataDurableOnly
       ? {
           ...payload,
