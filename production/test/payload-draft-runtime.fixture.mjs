@@ -127,6 +127,18 @@ export function createPayloadDraftRuntime(seed = loadCmsSeed(), hooks = {}) {
   let publishedRows = Object.fromEntries(COLLECTIONS.map((collection) => [collection, []]));
   const calls = { begin: 0, commit: 0, rollback: 0, find: [], findByID: [], update: [] };
   let snapshot = null;
+  // Payload keeps a version per draft save for versioned collections. The
+  // fixture does the same, with a clock that only moves forward, so a history
+  // read back from it has a stable order.
+  let versions = [];
+  let clock = Date.parse("2026-09-16T09:00:00.000Z");
+  const tick = () => new Date((clock += 1000)).toISOString();
+  const recordVersion = (collection, doc) => {
+    if (!VERSIONED_COLLECTIONS.has(collection)) return;
+    const at = tick();
+    for (const entry of versions) if (entry.collection === collection && String(entry.parent) === String(doc.id)) entry.latest = false;
+    versions.push({ id: `v-${versions.length + 1}`, collection, parent: doc.id, version: clone(doc), createdAt: at, updatedAt: at, latest: true });
+  };
 
   const mergedDocs = (collection, draft) => {
     if (!VERSIONED_COLLECTIONS.has(collection)) return clone(rows[collection] || []);
@@ -141,7 +153,7 @@ export function createPayloadDraftRuntime(seed = loadCmsSeed(), hooks = {}) {
     db: {
       async beginTransaction() {
         calls.begin += 1;
-        snapshot = { rows: clone(rows), publishedRows: clone(publishedRows) };
+        snapshot = { rows: clone(rows), publishedRows: clone(publishedRows), versions: clone(versions) };
         return `tx-${calls.begin}`;
       },
       async commitTransaction() {
@@ -153,6 +165,7 @@ export function createPayloadDraftRuntime(seed = loadCmsSeed(), hooks = {}) {
         if (snapshot) {
           rows = clone(snapshot.rows);
           publishedRows = clone(snapshot.publishedRows);
+          versions = clone(snapshot.versions);
         }
         snapshot = null;
       },
@@ -167,6 +180,13 @@ export function createPayloadDraftRuntime(seed = loadCmsSeed(), hooks = {}) {
       const doc = mergedDocs(collection, draft === true).find((row) => String(row.id) === String(id));
       return doc ? clone(doc) : null;
     },
+    async findVersions({ collection, where, sort = "-updatedAt", limit = 10 } = {}) {
+      const parent = where?.parent?.equals;
+      const docs = versions
+        .filter((entry) => entry.collection === collection && (parent === undefined || String(entry.parent) === String(parent)))
+        .sort((a, b) => (String(sort).startsWith("-") ? -1 : 1) * a.updatedAt.localeCompare(b.updatedAt));
+      return { docs: clone(docs.slice(0, limit)), hasNextPage: docs.length > limit, totalDocs: docs.length };
+    },
     async create({ collection, data, req }) {
       assert.match(req.transactionID, /^tx-/);
       rows[collection].push(clone(data));
@@ -177,7 +197,12 @@ export function createPayloadDraftRuntime(seed = loadCmsSeed(), hooks = {}) {
       assert.match(req.transactionID, /^tx-/);
       const target = rows[collection].findIndex((row) => String(row.id) === String(id));
       if (target < 0) throw new Error(`Unknown ${collection} id ${id}`);
+      // The document as imported is the first version it ever had.
+      if (!versions.some((entry) => entry.collection === collection && String(entry.parent) === String(id))) {
+        recordVersion(collection, rows[collection][target]);
+      }
       rows[collection][target] = { ...rows[collection][target], ...clone(data), _status: "draft" };
+      recordVersion(collection, rows[collection][target]);
       if (hooks.afterUpdate) await hooks.afterUpdate({ collection, id, rows, publishedRows, calls });
       return clone(rows[collection][target]);
     },
@@ -187,5 +212,6 @@ export function createPayloadDraftRuntime(seed = loadCmsSeed(), hooks = {}) {
     payload,
     currentRows: () => clone(rows),
     currentPublishedRows: () => clone(publishedRows),
+    currentVersions: () => clone(versions),
   };
 }
