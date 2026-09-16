@@ -621,7 +621,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(listingManagerHtml, /data-listing-filter-summary="true"/);
       assert.match(listingManagerHtml, /data-listing-bulk-bar="true"/);
       assert.match(listingManagerHtml, /Поиск по номеру/);
-      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=ru"/);
+      // Opening the row keeps the language and remembers the search it came
+      // from, so "back" returns to these results rather than the whole list.
+      // (The list normalises its query, so the remembered search is lower case.)
+      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-00815&amp;locale=ru&amp;back=%2Fadmin%2Flistings%3Fq%3Dms-00815"/);
       assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
       const listingManagerJson = await listingManagerJsonRoute.GET(
         new Request("https://example.test/api/admin/listings?locale=ru&q=MS-00815", { headers: auth }),

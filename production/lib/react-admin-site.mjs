@@ -234,6 +234,23 @@ const ADMIN_UI_COPY = {
     mediaOrderFailed: "Редът не беше записан. Опитай пак.",
     saveOverNewer: "Запази върху по-новата версия",
     saveOverNewerReady: "Готово за запис върху по-новата версия.",
+    listingRelations: {
+      tab: "Връзки",
+      title: "Свързано с обявата",
+      intro: "Запитванията и огледите за този имот, от твоите собствени запитвания.",
+      enquiries: "Запитвания",
+      viewings: "Огледи",
+      noEnquiries: "Още никой не е питал за този имот.",
+      noViewings: "Няма насрочени огледи за този имот.",
+      unavailable: "Не може да бъде прочетено в момента или нямаш достъп до него.",
+      enquiryWithoutName: "Запитване без име",
+      viewingWithoutName: "Оглед без име",
+      followUpTitle: "Последваща задача",
+      followUpHint: "Задачата се свързва с тази обява и се появява в опашката със задачи.",
+      followUpSubmit: "Създай задача",
+      followUpOpened: "Задачата е създадена и свързана с обявата.",
+      followUpFailed: "Задачата не беше създадена. Провери полетата и опитай пак.",
+    },
     recordSearch: {
       label: "Търсене в работното място",
       placeholder: "Обява, запитване, човек, оглед…",
@@ -1064,6 +1081,23 @@ const ADMIN_UI_COPY = {
     mediaOrderFailed: "Порядок не сохранён. Попробуй ещё раз.",
     saveOverNewer: "Сохранить поверх новой версии",
     saveOverNewerReady: "Готово к записи поверх новой версии.",
+    listingRelations: {
+      tab: "Связи",
+      title: "Связано с объектом",
+      intro: "Заявки и показы по этому объекту — из ваших собственных заявок.",
+      enquiries: "Заявки",
+      viewings: "Показы",
+      noEnquiries: "По этому объекту ещё никто не спрашивал.",
+      noViewings: "Показов по этому объекту не назначено.",
+      unavailable: "Сейчас недоступно или у вас нет к этому доступа.",
+      enquiryWithoutName: "Заявка без имени",
+      viewingWithoutName: "Показ без имени",
+      followUpTitle: "Задача на потом",
+      followUpHint: "Задача будет привязана к этому объекту и появится в очереди задач.",
+      followUpSubmit: "Создать задачу",
+      followUpOpened: "Задача создана и привязана к объекту.",
+      followUpFailed: "Задача не создана. Проверьте поля и попробуйте ещё раз.",
+    },
     recordSearch: {
       label: "Поиск по рабочему пространству",
       placeholder: "Объект, заявка, человек, показ…",
@@ -1894,6 +1928,23 @@ const ADMIN_UI_COPY = {
     mediaOrderFailed: "The gallery order was not saved. Try again.",
     saveOverNewer: "Save over the newer version",
     saveOverNewerReady: "Ready to save over the newer version.",
+    listingRelations: {
+      tab: "Related",
+      title: "Connected to this listing",
+      intro: "Enquiries and viewings for this property, from your own enquiries.",
+      enquiries: "Enquiries",
+      viewings: "Viewings",
+      noEnquiries: "Nobody has asked about this property yet.",
+      noViewings: "No viewings are booked for this property.",
+      unavailable: "This cannot be read right now, or you do not have access to it.",
+      enquiryWithoutName: "Enquiry without a name",
+      viewingWithoutName: "Viewing without a name",
+      followUpTitle: "Follow-up task",
+      followUpHint: "The task is linked to this listing and appears in the task queue.",
+      followUpSubmit: "Create task",
+      followUpOpened: "The task was created and linked to this listing.",
+      followUpFailed: "The task was not created. Check the fields and try again.",
+    },
     recordSearch: {
       label: "Search the workspace",
       placeholder: "Listing, enquiry, person, viewing…",
@@ -8983,6 +9034,17 @@ function ListingManagerBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const canEditContent = pageCan(page, "content:write");
+  // Opening a listing remembers the list it was opened from, so "back" returns
+  // to the same filters and page instead of the top of an unfiltered list.
+  const listReturn = (() => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(page.filters || {})) if (value) search.set(key, String(value));
+    if (page.pagination?.page > 1) search.set("page", String(page.pagination.page));
+    const query = search.toString();
+    return query ? `/admin/listings?${query}` : "";
+  })();
+  const openListingHref = (listingId) =>
+    listReturn ? `${payloadAdminListingHref(listingId, page)}&back=${encodeURIComponent(listReturn)}` : payloadAdminListingHref(listingId, page);
   // Each chip drops its own filter, so narrowing a search stays reversible one
   // step at a time and still works with JavaScript switched off.
   const withoutFilter = (name) => {
@@ -9309,7 +9371,7 @@ function ListingManagerBody({ page }) {
                         h(
                           "div",
                           { className: "adm-task-list__actions" },
-                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: payloadAdminListingHref(row.id, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
+                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: openListingHref(row.id), "data-open-listing": row.id }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
                           page.runtime_data_mode === "durable_only"
                             ? null
                             : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm adm-listing-history-link", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
@@ -10598,7 +10660,7 @@ function editorFieldGroup(copy, ui, title, fields, facts, disabled = false, fact
   );
 }
 
-const LISTING_EDITOR_TAB_KEYS = Object.freeze(["facts", "translations", "media", "seo", "quality"]);
+const LISTING_EDITOR_TAB_KEYS = Object.freeze(["facts", "translations", "media", "seo", "quality", "related"]);
 
 // One record, one document. Every section of the listing is rendered on the page
 // and the tabs only change which one is showing, because rendering a single tab
@@ -10611,11 +10673,12 @@ function editorMainColumn(activeTab, attrs, panel) {
   return h("div", { ...attrs, "data-editor-column": "form", "data-editor-column-tab": owned }, panel);
 }
 
-function editorSupportSection(activeTab, attrs, qualityPanel, translationsPanel, mediaPanel) {
+function editorSupportSection(activeTab, attrs, qualityPanel, translationsPanel, mediaPanel, relatedPanel = null) {
   const panels = [
     ["quality", qualityPanel],
     ["translations", translationsPanel],
     ["media", mediaPanel],
+    ["related", relatedPanel],
   ].filter(([, panel]) => panel);
   if (!panels.length) return null;
   return h(
@@ -10643,6 +10706,124 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
       h("small", null, `${fields.length}`),
     ),
     editorFieldGroup(copy, ui, title, fields, facts, disabled, factReview, assist),
+  );
+}
+
+// What this listing is connected to, on the listing itself: the enquiries that
+// name it, the viewings booked for it, and a follow-up already pointed at it.
+// A source the operator may not read, or that could not be read, says so; an
+// empty list is only shown when the source was actually read.
+function ListingRelationsPanel({ page, ui, copy }) {
+  const words = ui.listingRelations;
+  const relations = page.relations || null;
+  const listingId = page.listing.id;
+  const locale = page.workspace?.locale;
+  const when = (value) => (value ? formatAdminDateTime(value, locale) : "");
+  const section = (key, title, count, rows, emptyText, row) =>
+    h(
+      "section",
+      { className: "adm-relations__group", "data-listing-relation": key, "aria-label": title },
+      h("h3", null, title, count !== null && count !== undefined ? h("span", { className: "adm-relations__count" }, String(count)) : null),
+      !relations || relations.sources?.[key]?.status !== "read"
+        ? h("p", { className: "adm-note", role: "note", "data-listing-relation-unavailable": key }, words.unavailable)
+        : rows.length
+          ? h("ul", { className: "adm-relations__list" }, ...rows.map(row))
+          : h("p", { className: "adm-empty", "data-listing-relation-empty": key }, emptyText),
+    );
+  const operatorId = currentOperatorId(page, "");
+  const tasks = ui.workspaceSettings.tasks;
+  const canFollowUp = pageCan(page, "operations:write") && durableRuntimeMutationAvailable(page, "/api/admin/tasks");
+  return h(
+    Panel,
+    { title: words.title, id: "listing-related", "aria-label": words.title, "data-listing-relations": "true" },
+    h("p", { className: "adm-note" }, words.intro),
+    page.editorOutcome === "task_opened" || page.editorOutcome === "task_failed"
+      ? h(
+          "p",
+          {
+            className: "adm-form__status",
+            role: "status",
+            "data-listing-follow-up-outcome": page.editorOutcome,
+            "data-state": page.editorOutcome === "task_opened" ? "success" : "error",
+          },
+          page.editorOutcome === "task_opened" ? words.followUpOpened : words.followUpFailed,
+        )
+      : null,
+    h(
+      "div",
+      { className: "adm-relations" },
+      section("enquiries", words.enquiries, relations?.enquiry_count, relations?.enquiries || [], words.noEnquiries, (row) =>
+        h(
+          "li",
+          { key: row.id, className: "adm-relations__row", "data-listing-enquiry": row.id },
+          h(
+            "a",
+            { href: adminHref(`/admin/leads#lead-${encodeURIComponent(row.id)}`, page) },
+            h("strong", null, row.name || words.enquiryWithoutName),
+            row.received_at ? h("time", { dateTime: row.received_at }, when(row.received_at)) : null,
+          ),
+          row.status ? h(StatusPill, { tone: "sun" }, statusText(ui, row.status)) : null,
+        ),
+      ),
+      section("viewings", words.viewings, relations?.viewing_count, relations?.viewings || [], words.noViewings, (row) =>
+        h(
+          "li",
+          { key: row.id, className: "adm-relations__row", "data-listing-viewing": row.id },
+          h(
+            "a",
+            { href: adminHref(`/admin/viewings#viewing-${encodeURIComponent(row.id)}`, page) },
+            h("strong", null, row.name || words.viewingWithoutName),
+            row.starts_at ? h("time", { dateTime: row.starts_at }, when(row.starts_at)) : null,
+          ),
+          row.status ? h(StatusPill, { tone: "sun" }, statusText(ui, row.status)) : null,
+        ),
+      ),
+    ),
+    // A follow-up created here is already pointed at this listing, so it
+    // arrives in the task queue with its subject instead of a bare reminder.
+    // Offered only where the task store can keep it.
+    canFollowUp
+      ? h(
+          "section",
+          { className: "adm-relations__follow-up", "aria-label": words.followUpTitle },
+          h("h3", null, words.followUpTitle),
+          h("p", { className: "adm-note" }, words.followUpHint),
+          h(
+            "form",
+            { method: "post", action: "/api/admin/tasks", className: "adm-task-open", "data-task-form": "listing-follow-up" },
+            h("input", { type: "hidden", name: "subjectRef", value: `listing:${listingId}` }),
+            h("input", { type: "hidden", name: "taskType", value: "listing_follow_up" }),
+            h("input", { type: "hidden", name: "reference", value: listingId }),
+            h("input", { type: "hidden", name: "returnLocale", value: locale || "" }),
+            h("label", { htmlFor: "listing-follow-up-id" }, tasks.subject),
+            h("input", { id: "listing-follow-up-id", name: "taskId", type: "text", required: true, maxLength: 160, defaultValue: `follow-up-${listingId}` }),
+            h("label", { htmlFor: "listing-follow-up-owner" }, tasks.owner),
+            h("input", { id: "listing-follow-up-owner", name: "owner", type: "text", required: true, maxLength: 160, autoComplete: "name" }),
+            h("label", { htmlFor: "listing-follow-up-due" }, tasks.due),
+            h("input", { id: "listing-follow-up-due", name: "dueAt", type: "datetime-local" }),
+            h("label", { htmlFor: "listing-follow-up-note" }, tasks.evidence),
+            h("input", { id: "listing-follow-up-note", name: "note", type: "text", maxLength: 1000 }),
+            h(
+              "label",
+              { className: "adm-check", htmlFor: "listing-follow-up-confirm" },
+              h("input", { id: "listing-follow-up-confirm", name: "humanConfirmed", type: "checkbox", value: "true", required: true }),
+              h("span", null, tasks.confirm),
+            ),
+            // The signed-in operator is the actor of record; the id travels with
+            // the form rather than occupying a visible field.
+            operatorId
+              ? h(
+                  "p",
+                  { className: "adm-relations__actor", "data-listing-follow-up-actor": "true" },
+                  h("input", { type: "hidden", name: "actor", value: operatorId }),
+                  ui.mediaReviewerSignedIn,
+                )
+              : h(DailyTaskActor, { page }),
+            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, words.followUpSubmit),
+            h(DailyTaskStatus, { page }),
+          ),
+        )
+      : null,
   );
 }
 
@@ -10951,7 +11132,11 @@ function ListingEditorBody({ page }) {
   // One section per request: the server renders the tab in ?tab= (Facts by
   // default), so a phone gets one form, not a five-section scroll.
   const activeTab = LISTING_EDITOR_TAB_KEYS.includes(page.editorTab) ? page.editorTab : "facts";
-  const editorTabHref = (tab) => `/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}&locale=${encodeURIComponent(page.workspace.locale)}`;
+  const backToList = page.backToList || "";
+  const editorTabHref = (tab) =>
+    `/admin/listings/edit?listingId=${encodeURIComponent(page.listing.id)}&tab=${tab}&locale=${encodeURIComponent(page.workspace.locale)}${
+      backToList ? `&back=${encodeURIComponent(backToList)}` : ""
+    }`;
   const editorTabLink = (tab, text, icon, ariaLabel = text) =>
     h(
       "a",
@@ -10994,7 +11179,16 @@ function ListingEditorBody({ page }) {
           subtitle: listingName || undefined,
           meta: `${title} · ${page.listing.source_domain} · ${String(page.listing.source_locale || "").toUpperCase()}`,
         },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
+        h(
+          "a",
+          {
+            className: "mk-btn mk-btn--secondary mk-btn--sm",
+            href: backToList ? adminHref(backToList, page) : adminHref("/admin/listings", page),
+            "data-editor-back": backToList ? "filtered" : "all",
+          },
+          h(Icon, { name: "arrow-left", size: 16 }),
+          h("span", null, label(copy, "listingManager", "Listings")),
+        ),
         page.runtime_data_mode === "durable_only"
           ? null
           : h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
@@ -11016,6 +11210,7 @@ function ListingEditorBody({ page }) {
         editorTabLink("media", label(copy, "media", "Media"), "camera"),
         editorTabLink("seo", "SEO", "search", ui.seoSettings),
         editorTabLink("quality", label(copy, "quality", "Quality"), "shield-check"),
+        editorTabLink("related", ui.listingRelations.tab, "users"),
       ),
       h(
         "div",
@@ -11755,6 +11950,7 @@ function ListingEditorBody({ page }) {
                 ]
               : null,
           ),
+          h(ListingRelationsPanel, { page, ui, copy }),
         ),
       ),
     ],
