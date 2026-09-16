@@ -66,7 +66,7 @@ import {
   workspaceSettingsStoreConfigured,
   WorkspaceSettingsStoreUnavailableError,
 } from "./workspace-settings.mjs";
-import { assignableBrokerProfiles, getPayloadAdminAuthService, payloadAdminOwnerProfile } from "./payload-admin-auth.mjs";
+import { assignableBrokerProfiles, getPayloadAdminAuthService, operatorNameIndex, payloadAdminOwnerProfile } from "./payload-admin-auth.mjs";
 import {
   ProviderConnectionUnavailableError,
   deleteProviderConnection,
@@ -2324,6 +2324,7 @@ async function listingEditorPayload(registry, url, config) {
         : null,
     readAudit: () => readAuditLog(config.auditLogPath),
   });
+  payload.operatorNames = config.operatorNames || {};
   return config.runtimeDataDurableOnly
     ? {
         ...payload,
@@ -4492,18 +4493,24 @@ async function renderAppAdminResponseInner(request, { config = appAdminConfigFro
     ...config,
     adminPrincipal: principal,
     payloadAdminSession: payloadSession,
-    brokerProfiles: await (async () => {
-      const fallback = Array.isArray(config.brokerProfiles) ? config.brokerProfiles : [];
+    ...(await (async () => {
+      // One directory read serves both the assignable roster and the names a
+      // record's history shows. A directory outage keeps the configured roster.
+      const fallback = { brokerProfiles: Array.isArray(config.brokerProfiles) ? config.brokerProfiles : [], operatorNames: {} };
       if (!payloadSession) return fallback;
       try {
         const service = await payloadAdminAuth();
         if (typeof service?.listOperators !== "function") return fallback;
-        const profiles = assignableBrokerProfiles(await service.listOperators(payloadSession));
-        return profiles.length ? profiles : fallback;
+        const operators = await service.listOperators(payloadSession);
+        const profiles = assignableBrokerProfiles(operators);
+        return {
+          brokerProfiles: profiles.length ? profiles : fallback.brokerProfiles,
+          operatorNames: operatorNameIndex(operators),
+        };
       } catch {
         return fallback;
       }
-    })(),
+    })()),
     adminSessionFingerprint: currentFingerprint,
     adminStepUpActive: stepUpActive,
   };

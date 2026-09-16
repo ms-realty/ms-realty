@@ -10900,11 +10900,12 @@ function editorFieldDisclosure(copy, ui, title, fields, facts, disabled = false,
 function ListingHistorySection({ page, ui, when }) {
   const words = ui.listingHistory;
   const history = page.history || null;
-  // The operator reading the page is named as "you"; anyone else is shown by
-  // the reference the record holds, since the page has no directory to look
-  // their name up in.
+  // The operator reading the page is named as "you"; a teammate the team
+  // directory lets this session see is named; anyone else keeps the reference
+  // the record holds.
   const self = currentOperatorId(page, "");
-  const who = (actor) => (!actor ? words.actorUnrecorded : self && actor === self ? words.you : actor);
+  const names = page.operatorNames || {};
+  const who = (actor) => (!actor ? words.actorUnrecorded : self && actor === self ? words.you : names[actor] || actor);
   const readable = history?.status === "read";
   const events = readable ? history.events || [] : [];
   const describe = (event) => {

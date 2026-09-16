@@ -37,6 +37,19 @@ function safeOperator(value) {
   };
 }
 
+// Display names for the operators a record refers to, keyed the way a session
+// principal is (`payload-<id>`), so an actor stamped on a record can be named.
+// Only operators the reading session may list are included.
+export function operatorNameIndex(operators) {
+  const names = {};
+  for (const operator of Array.isArray(operators) ? operators : []) {
+    const id = String(operator?.id ?? "").trim();
+    const name = String(operator?.name || "").trim() || String(operator?.email || "").trim();
+    if (id && name) names[`payload-${id}`] = name;
+  }
+  return names;
+}
+
 export function assignableBrokerProfiles(operators) {
   return (Array.isArray(operators) ? operators : [])
     .filter(

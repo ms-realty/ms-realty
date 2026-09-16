@@ -159,6 +159,50 @@ test("an edit made through the assistant is marked as such", async () => {
   assert.equal(rows[0].channel, "mcp");
 });
 
+test("teammates the team directory shows the reader are named; anyone else keeps their reference", async () => {
+  const store = createPayloadDraftRuntime(loadCmsSeed());
+  const saveAs = (id, editedAt, patch) =>
+    saveListingDraft(loadCmsSeed(), {
+      payload: store.payload,
+      principal: payloadAdminPrincipal({ id, collection: "admins", email: `operator-${id}@example.test`, role: "editor", workspace_ids: [] }),
+      input: { listingId: "MS-00815", patch },
+      editedAt,
+    });
+  await saveAs(9, "2026-09-16T06:00:00.000Z", { title: "First" });
+  await saveAs(12, "2026-09-16T07:00:00.000Z", { description: "Second" });
+  await saveAs(EDITOR.id, "2026-09-16T07:30:00.000Z", { price_eur: "98000" });
+  const directory = [
+    { id: EDITOR.id, email: EDITOR.email, name: "Owner", role: "admin" },
+    { id: 9, email: "maria@example.test", name: "Maria Ivanova", role: "editor" },
+  ];
+  const withDirectory = (listOperators) => ({
+    async resolve(token) { return token === SESSION ? { user: EDITOR, principal: OPERATOR } : null; },
+    listOperators,
+  });
+  const url = "/admin/listings/edit?listingId=MS-00815&locale=en&tab=related";
+
+  const listed = [];
+  const { standalone, adapter } = runtimes(store, {
+    payloadAdminAuth: withDirectory(async (session) => {
+      listed.push(session.user.id);
+      return directory;
+    }),
+  });
+  for (const [runtime, html] of [["standalone", await standalone.html(url)], ["next-adapter", await adapter.html(url)]]) {
+    // Operator 12 is not in the directory this session may read.
+    assert.deepEqual(historyRows(html).map((row) => row.who), ["You", "payload-12", "Maria Ivanova"], runtime);
+  }
+  assert.ok(listed.length >= 2 && listed.every((id) => id === EDITOR.id), "the directory is read as the signed-in operator");
+
+  // A directory that cannot be read leaves references, and the page still renders.
+  const offline = runtimes(store, {
+    payloadAdminAuth: withDirectory(async () => { throw new Error("directory offline"); }),
+  });
+  for (const [runtime, html] of [["standalone", await offline.standalone.html(url)], ["next-adapter", await offline.adapter.html(url)]]) {
+    assert.deepEqual(historyRows(html).map((row) => row.who), ["You", "payload-12", "payload-9"], runtime);
+  }
+});
+
 test("a Payload runtime that cannot list versions reports the history as unavailable", async () => {
   const store = createPayloadDraftRuntime(loadCmsSeed());
   const { findVersions, ...withoutVersions } = store.payload;
