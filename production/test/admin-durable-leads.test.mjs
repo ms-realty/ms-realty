@@ -345,7 +345,7 @@ test("durable admin leads project durable assignments, snoozes, deals, and viewi
           lead_id: durableLead.lead_id,
           action: "snooze",
           reason: "Waiting for travel dates",
-          until: "2026-09-20T09:00:00.000Z",
+          until: "2099-09-20T09:00:00.000Z",
           actor: "durable_admin",
           recorded_at: "2026-08-10T09:02:00.000Z",
         },
