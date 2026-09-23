@@ -259,13 +259,16 @@ test("Cloudflare Container allows only configured durable lead-authority writes"
   );
 });
 
-test("main deploys automatically with coordinated Worker and origin rollback", () => {
+test("only an explicit production release dispatch deploys, with coordinated Worker and origin rollback", () => {
   assert.match(ciWorkflow, /repository_dispatch:\n\s+types: \[auto_merge_deploy\]/);
   assert.match(ciWorkflow, /workflow_dispatch:\n\s+inputs:\n\s+hermes_update:/);
   assert.match(ciWorkflow, /test "\$HERMES_EXPECTED_HEAD_SHA" = "\$GITHUB_SHA"/);
-  assert.match(ciWorkflow, /github\.event_name == 'repository_dispatch'/);
-  assert.match(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
-  assert.match(ciWorkflow, /github\.event\.client_payload\.merge_sha == github\.sha/);
+  // Merges run the check on main but never deploy (docs/plan.md §1).
+  assert.equal(
+    ciWorkflow.match(/github\.event_name == 'workflow_dispatch' &&\n\s+inputs\.release == 'production'/g)?.length,
+    2,
+  );
+  assert.doesNotMatch(ciWorkflow, /github\.event\.action == 'auto_merge_deploy'/);
   assert.match(ciWorkflow, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
   assert.match(ciWorkflow, /deploy_origin:\n\s+name: Deploy durable origin/);
   assert.match(ciWorkflow, /MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: \$\{\{ secrets\.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY \}\}/);

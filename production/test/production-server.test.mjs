@@ -652,7 +652,7 @@ test("production server forwards durable lead-operation and viewing readers into
           lead_id: "server-forwarded-lead",
           action: "snooze",
           reason: "Waiting for callback time",
-          until: "2026-09-20T08:00:00.000Z",
+          until: "2099-09-20T08:00:00.000Z",
           actor: "payload-server-admin",
           recorded_at: "2026-08-13T08:02:00.000Z",
         },
