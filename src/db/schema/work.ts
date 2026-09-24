@@ -111,7 +111,12 @@ export const partyRelationships = pgTable(
     authorityReviewedAt: instant("authority_reviewed_at"),
     /** Resources and actions granted by invitation (collaborators get exactly these). */
     scope: jsonb("scope").notNull().default({}),
-    validFrom: instant("valid_from").notNull().defaultNow(),
+    // Stamped by the application: authz compares it with the application clock, and a database
+    // clock running ahead would make a just-granted relationship "not yet valid".
+    validFrom: instant("valid_from")
+      .notNull()
+      .defaultNow()
+      .$defaultFn(() => new Date()),
     expiresAt: instant("expires_at"),
     revokedAt: instant("revoked_at"),
     revokedByStaffId: uuid("revoked_by_staff_id").references(() => staffAccounts.id),
