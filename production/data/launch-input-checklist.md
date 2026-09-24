@@ -190,7 +190,6 @@ Blockers: live_services, monitoring_rollback, payload_runtime, r2_media_coverage
 ```bash
 npm run redirects:preflight
 npm run redirects:build
-npm run seo:preflight
 npm run seo:evidence
 npm run seo:preflight:report
 npm run live:provisioning

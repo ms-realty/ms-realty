@@ -18,5 +18,6 @@
 ## Launch Evidence
 
 - Real launch evidence must come from live services and operator inputs, not local smoke fixtures.
-- Required external proof includes Search Console, Yandex Webmaster, backlinks, live Typesense/Meilisearch reports, live Hermes worker report, Payload runtime report, and complete human listing review CSV.
+- Required external proof includes live Typesense/Meilisearch reports, live Hermes worker report, Payload runtime report, and complete human listing review CSV.
+- Search Console, Yandex Webmaster, and backlink exports are optional historical SEO analytics. They are not launch or readiness requirements at any lifecycle stage (owner decision, 2026-09-24).
 - Keep secrets out of committed files. Use env vars and redacted reports only.

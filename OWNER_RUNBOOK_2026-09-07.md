@@ -67,15 +67,17 @@ live status feed. The original Claude worktrees remain intact.
    and the origin sender is `noreply@notifications.makler-realty.com`.
    #194 still needs final CI, deployment and authorized delivery verification.
    Do not send customer messages as a setup test.
-2. Supply or verify Search Console, Yandex Webmaster and backlink evidence.
-   Reports must describe real services, not local fixtures.
-3. Approve public translations, listing-fact reviews and legal/process copy.
+2. Approve public translations, listing-fact reviews and legal/process copy.
    Hermes drafts cannot substitute for those approvals.
-4. Confirm the per-URL `.ru` serve/redirect decision before any host cutover.
+3. Confirm the per-URL `.ru` serve/redirect decision before any host cutover.
    Preserve `.com` and `.ru` crawl parity; do not invent blanket homepage redirects.
-5. Time-based release criteria still require three consecutive successful
+4. Time-based release criteria still require three consecutive successful
    releases and the specified seven successful scheduled checks/drills.
    They cannot be manufactured with a local test run.
+
+Search Console, Yandex Webmaster and backlink evidence are no longer launch or
+readiness inputs (owner decision, 2026-09-24). They remain optional historical
+SEO analytics.
 
 ## Safe recovery and cleanup
 

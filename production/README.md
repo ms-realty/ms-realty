@@ -156,8 +156,6 @@ Fail closed before launch:
 
 ```bash
 npm run redirects:preflight
-npm run seo:preflight:report
-npm run seo:preflight
 npm run listing:preflight:report
 npm run listing:review-pack
 npm run listing:preflight
@@ -172,8 +170,9 @@ npm run launch:preflight
 ```
 
 `redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight:report` and
-`seo:preflight` remain available for optional historical SEO analytics and source analysis; their
-missing-export status does not clear or block the production-origin readiness gates. `listing:preflight:report` writes the current
+`seo:preflight` are not launch gates: they remain available for optional historical SEO analytics
+(Search Console, Yandex Webmaster, backlinks) and source analysis, and their missing-export status
+does not clear or block the production-origin readiness gates. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `listing:review-pack` writes a complete draft review packet
 for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Postgres search

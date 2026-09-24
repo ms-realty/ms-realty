@@ -79,8 +79,9 @@ the evidence for each is reproducible.
   that is then deleted by the operator.
 - `robots.txt`, `sitemap.xml`, hreflang, canonical tags and structured data
   point only at `https://makler-realty.com`. `workers.dev` and the origin host
-  never appear in public HTML. Search Console and Yandex Webmaster have the
-  property verified and the sitemap accepted.
+  never appear in public HTML. Search Console, Yandex Webmaster and backlink
+  evidence are optional historical analytics, not an end-state requirement
+  (owner decision, 2026-09-24).
 - `makler-realty.ru` has an owner decision that is implemented: either it
   serves the site (routes in `wrangler.jsonc`, sitemap and robots pointing at
   its own host or at `.com` per the SEO decision) or it redirects `301` to `.com`
@@ -411,10 +412,7 @@ paths and 10 of each legacy decision class behave as approved, checked live.
 2. Enquiry flows end to end on production, one per intent, with receipts and
    lead-inbox visibility.
 3. Accessibility and performance passes (targets in 1.3); fix, re-measure.
-4. `.ru` decision implemented (serve or redirect); Search Console and Yandex
-   verification and sitemap submission for whatever hosts are canonical.
-5. SEO evidence gate inputs (`npm run seo:preflight`) satisfied with real
-   Search Console / Yandex data.
+4. `.ru` decision implemented (serve or redirect).
 
 Gate: the full canonical-site probe (`probe-canonical-site.mjs`) passes 37/37
 on `.com`; Lighthouse and axe reports are committed under `production/data/`
@@ -500,7 +498,8 @@ command or click; it does not perform them.
 2. DNS and the `.ru` cutover decision.
 3. Confirming the Hermes source-review task (`--confirm-task`).
 4. Creating admin accounts and entering passwords (`/admin/team`).
-5. Search Console and Yandex Webmaster ownership.
+5. Search Console and Yandex Webmaster ownership, if the owner chooses to use
+   them (optional; not a launch requirement).
 6. Approving public translations and listing facts.
 7. Signing the recovery report (private key holder).
 8. Repository visibility, branch protection, Dependabot (needs admin scope
