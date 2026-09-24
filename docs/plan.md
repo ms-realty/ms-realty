@@ -13,7 +13,7 @@ everything that was built around the old screens.
   job; S9 builds the release path, and it runs only when every launch gate in §7 is green.
   Canonical domains are not touched by any merge.
 - **Small, green, merged.** Work lands as short-lived branches → PR → required check
-  `gate` (CI) → auto-merge (squash) → branch deleted. No long-lived branches, no parked
+  `ci / gate` (CI) → auto-merge (squash) → branch deleted. No long-lived branches, no parked
   worktrees. `main` is always buildable and tested.
 - **The spec wins.** Screen (`P`/`C`/`O`), flow (`F`) and acceptance (`A`) IDs from the spec
   appear in route files, tests and PR descriptions so coverage is traceable.

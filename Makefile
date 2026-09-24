@@ -2,10 +2,10 @@
 # npm script of the same name, so package.json stays the one definition of every step.
 #
 #   make check   lint, typecheck, test, build (the CI `make check` job)
-#   make e2e     Playwright; CI runs it in its own job after `make build`
+#   make e2e     Playwright; CI runs it after `make check`, which builds
 #
 # `npm test` runs the integration project only when TEST_DATABASE_URL is set (see
-# AGENTS.md); CI sets it and attaches a Postgres service.
+# AGENTS.md); CI sets it and starts Postgres.
 
 .PHONY: check lint typecheck test build e2e
 

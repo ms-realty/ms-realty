@@ -49,18 +49,18 @@ jobs:
               core.setFailed("The pull-request head changed after this CI run.");
               return;
             }
-            // `gate` is CI's single required check; it must have passed in this very run.
+            // `ci / gate` is CI's single required check; it must have passed in this very run.
             const { data: gate } = await github.rest.checks.listForRef({
               owner,
               repo,
               ref: workflowRun.head_sha,
-              check_name: "gate",
+              check_name: "ci / gate",
             });
             const gatePassed = gate.check_runs.some(
               (run) => run.check_suite?.id === workflowRun.check_suite_id && run.conclusion === "success",
             );
             if (!gatePassed) {
-              core.setFailed("The gate check of this CI run did not succeed.");
+              core.setFailed("The ci / gate check of this CI run did not succeed.");
               return;
             }
             if (!["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {

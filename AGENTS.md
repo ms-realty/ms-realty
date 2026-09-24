@@ -42,7 +42,7 @@ npm test               # Vitest: unit (+ integration when TEST_DATABASE_URL is s
 npm run build          # Next production build
 npm run e2e            # Playwright (builds, then starts on E2E_PORT, default 3100)
 make check             # lint + typecheck + test + build (CI job `make check`; installs deps if stale)
-make e2e               # npm run e2e (CI job `e2e`); CI's required check is `gate`
+make e2e               # npm run e2e (run inside CI after make check); CI's required check is `ci / gate`
 npm run check          # make check's steps, then e2e
 ```
 

@@ -31,7 +31,7 @@ npm run dev                       # http://localhost:3000/bg
 | `npm run db:generate` / `db:migrate` | Generate SQL migrations / apply them to `DATABASE_URL` |
 | `npm run import:legacy` | One-time import of `data/legacy/` |
 | `make check` | Lint, typecheck, tests and build (runs `npm ci` first when the lockfile changed) |
-| `make e2e` | `npm run e2e`; CI runs it as its own job, and `gate` requires both |
+| `make e2e` | `npm run e2e`; CI runs it after `make check` inside `ci / gate` |
 | `npm run check` | `make check`'s steps, then e2e |
 
 Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they are skipped

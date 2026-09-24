@@ -1,22 +1,12 @@
-# CI: a self-contained copy of the Mindburn CI v2 contract.
+# CI v2 contract. Mindburn-Labs/platform-actions can't be called from this
+# repository (another owner), so ci-v2.yml is a byte-identical copy of
+# platform-actions/.github/workflows/ci.yml at tag v2. Keep it identical;
+# refresh it by copying the file again.
 #
-# This repository lives outside the Mindburn-Labs org, so it cannot call
-# Mindburn-Labs/platform-actions/.github/workflows/ci.yml@v2. It carries the
-# same shape inline; the dependency scan is copied from that file at tag v2
-# (d5a0eb5c1ffe8836f94cc679b36ed7a6be3d9e97).
-#
-# Jobs:
-#   check           toolchain setup, then `make check`.
-#   e2e             Playwright against a production build (needs browsers, so
-#                   it runs outside `make check`).
-#   dependency-scan pull requests and merge groups only: fails on a HIGH or
-#                   CRITICAL vulnerability that is present at head and absent
-#                   at base. Inherited findings are Dependabot's job.
-#   gate            always runs; fails if any job it needs failed or was
-#                   cancelled.
-#
-# No path filters, so `gate` reports on every change. The single required
-# status check is `gate`.
+# `ci` starts Postgres (the integration tests need TEST_DATABASE_URL and
+# vitest.config.ts refuses to skip them under CI), runs `make check`, then
+# Playwright e2e against that build, plus the diff-aware dependency scan. The
+# required status check is `ci / gate`.
 #
 # Nothing here deploys (docs/plan.md §1). auto-merge.yml listens to this
 # workflow by its name, CI.
@@ -37,189 +27,34 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  check:
-    name: make check
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    # `npm test` includes the integration project only when TEST_DATABASE_URL
-    # is set, and vitest.config.ts refuses to skip it under CI.
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_PASSWORD: pg
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    env:
-      TEST_DATABASE_URL: postgres://postgres:pg@127.0.0.1:5432/postgres
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: make check
-        run: make check
-
-  e2e:
-    name: e2e
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-          cache: npm
-
-      # Under CI, playwright.config.ts starts the server without building.
-      - name: Build
-        run: make build
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: make e2e
-        run: make e2e
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
-          retention-days: 7
-
-  dependency-scan:
-    name: dependency scan
-    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
-      OSV_SCANNER_VERSION: v2.6.0
-      OSV_SCANNER_SHA256: ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108
-    steps:
-      - name: Check out the change
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          path: head
-          persist-credentials: false
-
-      - name: Check out the base
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ env.BASE_SHA }}
-          path: base
-          persist-credentials: false
-
-      - name: Install osv-scanner
-        run: |
-          bin="${RUNNER_TEMP}/bin"
-          mkdir -p "${bin}"
-          curl --fail --silent --show-error --location --retry 3 --proto '=https' \
-            --output "${bin}/osv-scanner" \
-            "https://github.com/google/osv-scanner/releases/download/${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
-          echo "${OSV_SCANNER_SHA256}  ${bin}/osv-scanner" | sha256sum --check --strict
-          chmod +x "${bin}/osv-scanner"
-          echo "${bin}" >>"${GITHUB_PATH}"
-
-      - name: Scan base and head
-        run: |
-          # Exit 1 means "vulnerabilities found", which the next step judges.
-          # Anything else is a scanner failure and fails the job.
-          scan() {
-            osv-scanner scan source --recursive --no-call-analysis=all --allow-no-lockfiles \
-              --format json --output-file "$2" "$1" || [[ $? -eq 1 ]]
-          }
-          scan base base.json
-          scan head head.json
-
-      - name: Fail on HIGH or CRITICAL vulnerabilities new in this change
-        run: |
-          # One line per (ecosystem, package, advisory) at HIGH or CRITICAL:
-          # CVSS >= 7.0, or a GitHub advisory rated HIGH/CRITICAL. The version
-          # is reported but is not part of the key, so a bump that leaves an
-          # advisory open is not counted as new.
-          findings() {
-            jq -r '
-              .results[]?.packages[]? as $p
-              | $p.groups[]? as $g
-              | select(
-                  ((($g.max_severity // "") | tonumber?) // 0) >= 7
-                  or any(
-                    $p.vulnerabilities[]? | select(.id as $id | $g.ids | index($id));
-                    (.database_specific.severity? // "" | ascii_upcase) | IN("HIGH", "CRITICAL")
-                  )
-                )
-              | $g.ids[] as $id
-              | [$p.package.ecosystem, $p.package.name, $id, $p.package.version, ($g.max_severity // "")]
-              | @tsv
-            ' "$1" | sort -u
-          }
-          findings base.json | cut -f1-3 >base.keys
-          findings head.json >head.tsv
-          awk -F'\t' 'FILENAME == ARGV[1] { seen[$0]; next } !(($1 FS $2 FS $3) in seen)' base.keys head.tsv >new.tsv
-          inherited=$(( $(wc -l <head.tsv) - $(wc -l <new.tsv) ))
-          if [[ "${inherited}" -gt 0 ]]; then
-            echo "::notice::${inherited} HIGH/CRITICAL finding(s) already exist on the base branch; they are not caused by this change"
-          fi
-          if [[ -s new.tsv ]]; then
-            while IFS=$'\t' read -r ecosystem name id version severity; do
-              echo "::error::${ecosystem} ${name}@${version}: ${id} (CVSS ${severity:-n/a}) is new in this change"
-            done <new.tsv
-            exit 1
-          fi
-          echo "no new HIGH/CRITICAL vulnerabilities"
-
-  gate:
-    if: always()
-    needs: [check, e2e, dependency-scan]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Require every job to succeed or be skipped
-        env:
-          NEEDS: ${{ toJSON(needs) }}
-        run: |
-          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"${NEEDS}"
-          jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<<"${NEEDS}" >/dev/null
+  ci:
+    uses: ./.github/workflows/ci-v2.yml
+    with:
+      setup-commands: |
+        docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:17-alpine
+        until docker exec ci-postgres pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
+        echo "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres" >>"${GITHUB_ENV}"
+      # Under CI, playwright.config.ts starts the server without building;
+      # `make check` has just built it.
+      extra-commands: |
+        npx playwright install --with-deps chromium
+        make e2e
 
   # Branch protection on main still requires a check named "npm run check".
-  # This job reports gate's result under that name so merges keep working.
-  # Delete it once protection requires `gate` instead.
+  # This job reports ci's result under that name so merges keep working.
+  # Delete it once protection requires `ci / gate` instead.
   required-check-alias:
     name: npm run check
     if: always()
-    needs: gate
+    needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Mirror gate
+      - name: Mirror ci / gate
         env:
-          GATE_RESULT: ${{ needs.gate.result }}
-        run: test "${GATE_RESULT}" = success
+          CI_RESULT: ${{ needs.ci.result }}
+        run: test "${CI_RESULT}" = success
