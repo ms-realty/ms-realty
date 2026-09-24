@@ -1,50 +1,20 @@
 .DS_Store
-__pycache__/
-*.py[cod]
-.env
-.env.*
 node_modules/
-.next/
-dist/
+.next*/
+next-env.d.ts
+*.tsbuildinfo
 coverage/
-.local-backups/
-.recovery-work/
-migration/external/seo/*.csv
-migration/external/seo/*.provenance.json
-!migration/external/seo/*.csv.example
-production/data/search-engine-sync-report.json
-production/data/search-engine-query-report.json
-production/data/postgres-search-sync-report.json
-production/data/postgres-search-query-report.json
-production/data/hermes-draft-worker-report.json
-production/data/hermes-agent-runtime-report.json
-production/data/hermes-backend.json
-production/data/audit-log.jsonl
-production/data/realty-case-events.jsonl
-production/data/lead-contact-vault.jsonl
-production/data/public-contact-vault.jsonl
-production/data/payload-runtime-report.json
-production/data/listing-quality-source-snapshot.json
-production/data/production-recovery-report.json
-production/data/monitoring-rollback-report.json
-production/data/r2-media-list-objects.json
-production/data/r2-media-coverage-report.json
-production/data/*.sqlite
-production/data/*.sqlite-wal
-production/data/*.sqlite-shm
-production/.runtime/
+test-results/
+playwright-report/
+.env*
+!.env.example
 
-# Local working notes
-deep-end-notes.txt
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
 
-# Machine-local deployment and browser state.
-production/data/media-mirror/
-# Uploaded photo bytes (admin listing editor and public seller intake).
-production/data/media-uploads/
-production/data/media-mirror-manifest.json
-production/data/media-upload-manifest.json
-.playwright-mcp/
-.wrangler/
-
-# Payload regenerates this on every runtime boot; it is not part of the source.
-payload-types.ts
+# Machine-local runtime state the legacy app left in existing checkouts. The legacy
+# code is gone (tag legacy-app-final); these must never be committed.
+/production/
+/migration/
+/search/
+__pycache__/

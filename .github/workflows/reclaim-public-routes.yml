@@ -46,7 +46,11 @@ jobs:
       PUBLIC_ZONE: makler-realty.com
       MS_REALTY_PUBLIC_CONSTRUCTION_HOLD: ${{ vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD }}
     steps:
+      # The legacy app left main in the rebuild (docs/plan.md). This workflow still serves
+      # the live legacy deployment, so it runs the scripts frozen at tag legacy-app-final.
       - uses: actions/checkout@v4
+        with:
+          ref: legacy-app-final
 
       - name: Require deployment authority
         run: |

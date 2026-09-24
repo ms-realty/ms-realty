@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://ms-realty.ms-realty-bg.workers.dev/sitemap.xml
