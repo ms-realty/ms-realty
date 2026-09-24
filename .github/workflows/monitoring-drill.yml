@@ -60,10 +60,15 @@ jobs:
 
       - name: Materialize the protected monitoring probe
         run: |
+          # The probe used to come from main (GITHUB_SHA). The legacy app left main in the
+          # rebuild (docs/plan.md), so the trusted copy is now the one frozen at the
+          # legacy-app-final tag; the release under test is still checked out above.
+          git fetch --no-tags origin "+refs/tags/legacy-app-final:refs/tags/legacy-app-final"
+          control_ref="legacy-app-final^{commit}"
           control_root="$RUNNER_TEMP/monitoring-control"
           mkdir -p "$control_root/production/scripts" "$control_root/workers"
-          git show "${GITHUB_SHA}:production/scripts/probe-production-journeys.mjs" > "$control_root/production/scripts/probe-production-journeys.mjs"
-          git show "${GITHUB_SHA}:workers/preview-host.mjs" > "$control_root/workers/preview-host.mjs"
+          git show "${control_ref}:production/scripts/probe-production-journeys.mjs" > "$control_root/production/scripts/probe-production-journeys.mjs"
+          git show "${control_ref}:workers/preview-host.mjs" > "$control_root/workers/preview-host.mjs"
           node --check "$control_root/production/scripts/probe-production-journeys.mjs"
           echo "MS_REALTY_MONITORING_PROBE=$control_root/production/scripts/probe-production-journeys.mjs" >> "$GITHUB_ENV"
 

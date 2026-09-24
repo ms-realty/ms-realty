@@ -1,7 +1,0 @@
-/* Font markers are consumed by build-design-assets.mjs.
-   Hebrew adds its own sans fallback; other locales use the base request. */
-/* @fonts base */
-@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Sofia+Sans+Semi+Condensed:wght@600;700;800&display=swap');
-
-/* @fonts hebrew */
-@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@400;500;600;700;800&family=Sofia+Sans+Semi+Condensed:wght@600;700;800&display=swap');

@@ -1,7 +1,0 @@
-{
-  "artifact_id": "approved-financing-partners-20260823",
-  "purpose": "Human-approved financing routes for the onboarding financing step. A partner publishes only when a named reviewer approved that exact content and the review date has not passed.",
-  "publishing_note": "This repository holds no approved lender relationships. Add only a real relationship with its exact scope, a named reviewer, approved_at and review_due_at, then recompute source_hash with production/scripts/build-approved-content.mjs.",
-  "generated_at": "2026-08-23T00:00:00Z",
-  "partners": []
-}

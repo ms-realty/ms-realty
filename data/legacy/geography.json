@@ -1,0 +1,3602 @@
+{
+  "schema_version": 1,
+  "artifact_id": "legacy-extract-geography",
+  "generated_at": "2026-09-23T00:00:00Z",
+  "extracted_from_git_tag": "legacy-app-final",
+  "purpose": "The places the legacy listings actually used, resolved against the official registers, with every name the legacy data spelled them by, so place search and ambiguity resolution start from reviewed identities rather than free text.",
+  "summary": {
+    "places": 31,
+    "by_country": {
+      "BG": 24,
+      "GR": 7
+    },
+    "by_level": {
+      "settlement": 29,
+      "municipality": 2
+    },
+    "with_registry_entry": 31,
+    "without_registry_entry": 0,
+    "with_neighborhood_label": 1,
+    "distinct_districts": 2
+  },
+  "districts": [
+    {
+      "code": "BLG",
+      "names": {
+        "latin": "Blagoevgrad",
+        "native": "Благоевград"
+      },
+      "registry_id": "BG:district:BLG"
+    },
+    {
+      "code": "BGS",
+      "names": {
+        "latin": "Burgas",
+        "native": "Бургас"
+      },
+      "registry_id": "BG:district:BGS"
+    }
+  ],
+  "legacy_label_defaults": {
+    "Sandanski": "sandanski",
+    "Petrich": "petrich",
+    "Hotovo": "hotovo"
+  },
+  "coordinates": {
+    "available": false,
+    "decision": {
+      "status": "not_automatable",
+      "scope": "approximate point coordinates for Bulgarian settlements",
+      "reason": "No checked official source both identifies EKATTE settlements and supplies a point or geometry for each settlement."
+    },
+    "checked_at": "2026-07-30",
+    "sources_checked": [
+      {
+        "id": "nsi-ekatte-territorial-units",
+        "authority": "National Statistical Institute of Bulgaria",
+        "url": "https://www.nsi.bg/nrnm/ekatte/territorial-units/json",
+        "format": "JSON",
+        "observed_payload_item_count": 5257,
+        "observed_settlement_record_count": 5256,
+        "settlement_identifier": "ekatte",
+        "observed_fields": [
+          "abc",
+          "altitude",
+          "category",
+          "document",
+          "ekatte",
+          "kind",
+          "kmetstvo",
+          "name",
+          "name_en",
+          "nuts1",
+          "nuts2",
+          "nuts3",
+          "oblast",
+          "oblast_name",
+          "obshtina",
+          "obshtina_name",
+          "t_v_m",
+          "text"
+        ],
+        "coordinate_or_geometry_fields": [],
+        "suitable_for_approximate_settlement_points": false,
+        "reason": "The official settlement register contains EKATTE and administrative metadata, but no latitude, longitude, point, or geometry field."
+      },
+      {
+        "id": "eurostat-gisco-nuts-label-points-2024",
+        "authority": "Eurostat GISCO",
+        "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_LB_2024_4326_LEVL_3.geojson",
+        "format": "GeoJSON",
+        "unit_scope": "NUTS level 3 regional label points",
+        "observed_feature_count": 1345,
+        "observed_bulgarian_feature_count": 28,
+        "required_properties": [
+          "CNTR_CODE",
+          "LEVL_CODE",
+          "NUTS_ID",
+          "LAT",
+          "LON"
+        ],
+        "settlement_identifier": null,
+        "coordinate_or_geometry_fields": [
+          "geometry",
+          "properties.LAT",
+          "properties.LON"
+        ],
+        "suitable_for_approximate_settlement_points": false,
+        "reason": "These are regional labels, not settlement records, and have no EKATTE identifier for a safe settlement join."
+      }
+    ],
+    "prohibited_inferences": [
+      "Do not assign a NUTS label point or regional centroid to a settlement.",
+      "Do not infer coordinates from a settlement name, municipality, district, or elevation category.",
+      "Do not expose viewport, radius, or draw-on-map search until a source with settlement-level geometry and reviewed provenance is approved."
+    ],
+    "evidence": "geography/SETTLEMENT_COORDINATE_SOURCE_EVIDENCE.md"
+  },
+  "official_registers": {
+    "note": "The full BG + GR register (26,775 areas, 9.4 MB) is not copied here. It is a reference dataset, not a legacy fact, and it is reproducible from the official sources below. It stays available at production/data/geography-registry.json under git tag legacy-app-final.",
+    "registry_path": "production/data/geography-registry.json",
+    "registry_sha256": "843ea352c520635b927ffc0073dd75d9e74c8f986b8f89cbb73b4323ee67ac29",
+    "generated_at": "2026-07-30T14:20:00Z",
+    "source_snapshots": [
+      {
+        "source_id": "bg-nsi-ekatte",
+        "revision": "EKATTE 2025",
+        "sha256": "0bf017c6b3bd5683215f9734cc5bb70c15c3b96b2fd9b6dda5d5096e92bae397"
+      },
+      {
+        "source_id": "gr-elstat-census-2021",
+        "revision": "2021 census settlement results published 2024-03-29",
+        "sha256": "7bca25fef57294a7b9a75531658d530187622e03e084460082de3d6be79d5534"
+      },
+      {
+        "source_id": "eu-nuts-2024",
+        "revision": "NUTS 2024",
+        "sha256": "d54c09a22656cff1b9a752fc40356a9d28e176b2a3bc716275a37fe5512a0c8f"
+      }
+    ],
+    "coverage": {
+      "BG": {
+        "scope": "country",
+        "counts": {
+          "NUTS1": 2,
+          "NUTS2": 6,
+          "district": 28,
+          "municipal_district": 35,
+          "municipality": 265,
+          "settlement": 5256
+        }
+      },
+      "GR": {
+        "scope": "country_registry_with_northern_greece_active_market",
+        "active_market_nuts1": [
+          "EL5"
+        ],
+        "counts": {
+          "NUTS1": 4,
+          "community": 6135,
+          "municipal_unit": 1037,
+          "municipality": 333,
+          "region": 13,
+          "regional_unit": 75,
+          "settlement": 13586
+        }
+      }
+    },
+    "authorities": [
+      {
+        "id": "bg-nsi-ekatte",
+        "authority": "National Statistical Institute of the Republic of Bulgaria",
+        "url": "https://www.nsi.bg/nrnm/ekatte/index",
+        "download_url": "https://www.nsi.bg/nrnm/ekatte/zip/download?files_type=json",
+        "format": "zip/json",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "NUTS1",
+          "NUTS2",
+          "district",
+          "municipality",
+          "mayoralty",
+          "municipal_district",
+          "settlement"
+        ],
+        "use": "Authoritative Bulgarian administrative names and identifiers. Capture the source revision on every import."
+      },
+      {
+        "id": "gr-elstat-register",
+        "authority": "Hellenic Statistical Authority (ELSTAT)",
+        "url": "https://www.statistics.gr/en/statistics/-/publication/SKA01/-",
+        "format": "official publication",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "municipality",
+          "municipal_unit",
+          "community",
+          "settlement"
+        ],
+        "use": "Authoritative Greek register for imported municipality and settlement records."
+      },
+      {
+        "id": "eu-nuts-2024",
+        "authority": "Eurostat",
+        "url": "https://ec.europa.eu/eurostat/web/nuts",
+        "format": "official EU territorial classification",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "NUTS1",
+          "NUTS2",
+          "NUTS3"
+        ],
+        "use": "Stable cross-border regional identifiers. NUTS is statistical geography, not a replacement for national property-address validation."
+      },
+      {
+        "id": "eu-gisco-nuts",
+        "authority": "Eurostat GISCO",
+        "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
+        "format": "downloadable GIS geometry",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "map_geometry",
+          "NUTS1",
+          "NUTS2",
+          "NUTS3"
+        ],
+        "use": "Map boundary source for NUTS-level browse surfaces. Keep geometry version and CRS with each imported boundary."
+      },
+      {
+        "id": "gr-elstat-boundaries",
+        "authority": "Hellenic Statistical Authority (ELSTAT)",
+        "url": "https://www.statistics.gr/en/digital-cartographical-data",
+        "format": "official census cartographic data",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "map_geometry",
+          "region",
+          "regional_unit",
+          "municipality",
+          "municipal_unit",
+          "community",
+          "settlement"
+        ],
+        "use": "Greek administrative/census-map import source. These maps are census geography and must not be represented as legal cadastral boundaries."
+      },
+      {
+        "id": "bg-crc-nnp",
+        "authority": "Communications Regulation Commission of Bulgaria",
+        "url": "https://www.crc.bg/en/rubrics/481/numbering",
+        "document_url": "https://www.crc.bg/files/_en/bulgarian_NNP-en-2012.pdf",
+        "format": "national numbering plan",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "telephone_geographic_area_code"
+        ],
+        "use": "Telephone number-area codes only; never infer a listing address from a code."
+      },
+      {
+        "id": "gr-eett-nnp",
+        "authority": "Hellenic Telecommunications and Post Commission (EETT)",
+        "url": "https://www.eett.gr/en/operators/electronic-communications/numbering/allocation-of-numbers/",
+        "document_url": "https://www.eett.gr/opencms/export/sites/default/EETT/Electronic_Communications/Telecoms/Numbering/Doc_GR.pdf",
+        "format": "national numbering plan",
+        "verified_at": "2026-07-29",
+        "coverage": [
+          "telephone_geographic_area_code"
+        ],
+        "use": "Telephone number-area codes only; never infer a listing address from a code."
+      },
+      {
+        "id": "gr-elta-postcodes",
+        "authority": "Hellenic Post (ELTA)",
+        "url": "https://postalcodes.elta.gr/en/",
+        "format": "official postal-code and address lookup",
+        "verified_at": "2026-07-30",
+        "coverage": [
+          "postal_code",
+          "address_lookup"
+        ],
+        "use": "Validate or enrich a submitted Greek address through the official lookup; do not derive a property location solely from a postcode."
+      },
+      {
+        "id": "gr-elstat-census-2021",
+        "authority": "Hellenic Statistical Authority (ELSTAT)",
+        "url": "https://www.statistics.gr/el/2021-census-res-pop-results",
+        "document_url": "https://www.statistics.gr/documents/20181/17286366/MON_PLI_DHM_OIKISN_2021.xlsx/2b5a5f24-4083-ede5-7201-3c4fb109fb44",
+        "format": "official XLSX census hierarchy",
+        "verified_at": "2026-07-30",
+        "coverage": [
+          "regional_unit",
+          "municipality",
+          "municipal_unit",
+          "community",
+          "settlement"
+        ],
+        "use": "Official 2021 census hierarchy and settlement names, published to settlement level on 29 March 2024."
+      }
+    ],
+    "bundled_navigation_areas": 45
+  },
+  "sources": [
+    {
+      "path": "production/data/location-reviews.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "2906a08f6a93dfc2953d6996da7115f2d3d3ddd3b9944094634e4a2a6df42e09",
+      "role": "reviewed place identity per legacy listing location",
+      "reviewed_at": "2026-07-29"
+    },
+    {
+      "path": "production/data/geography-registry.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "843ea352c520635b927ffc0073dd75d9e74c8f986b8f89cbb73b4323ee67ac29",
+      "role": "official BG/GR administrative register the places resolve against"
+    },
+    {
+      "path": "production/data/geography-catalog.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "f4b2b882df72152646f923e4598afadec92e59995d59ba49bfabf5331368fa1b",
+      "role": "register authorities, coverage and bundled navigation areas"
+    },
+    {
+      "path": "geography/official-settlement-coordinate-sources.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "e92bc8ef15b5e754839974dabfa382e248982c9774493aced77d4b7a7070a21d",
+      "role": "the checked coordinate sources and the decision not to derive points"
+    },
+    {
+      "path": "production/data/cms-seed.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "f54e039321e34b93109fc7940febfe5617e706c66f693a26be1c1290efca9507",
+      "role": "the location strings each legacy listing carried"
+    }
+  ],
+  "known_gaps": [
+    "No settlement coordinates exist. No checked official source supplies a point per EKATTE settlement, so map, radius and viewport search cannot be built on legacy data.",
+    "Neighborhood is not a register level. Only one legacy place carries a raw locality label (Дербере, in Sandanski municipality), and it is not a register entry.",
+    "Greek places resolve to ELSTAT identifiers with area-only precision; they carry no EKATTE and no municipality code.",
+    "Aliases are the strings the legacy data actually used plus the official native and transliterated names. No transliteration was generated here.",
+    "Legacy site copy described the agency's coverage as Sandanski, Pirin and the Black Sea coast as separate areas. That coverage claim is unconfirmed and is recorded in content.json, not here."
+  ],
+  "places": [
+    {
+      "place_key": "sandanski",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "ekatte": "65334",
+        "type": "town"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:65334",
+      "registry_entry": {
+        "id": "BG:settlement:65334",
+        "level": "settlement",
+        "official_code": "65334",
+        "names": {
+          "native": "Сандански",
+          "en": "Sandanski"
+        },
+        "settlement_type": "гр.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Сандански",
+        "latin": "Sandanski",
+        "official_native": "Сандански",
+        "official_transliteration": "Sandanski",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Sandanski",
+        "Сандански"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 104,
+      "legacy_listings": [
+        "MS-00046",
+        "MS-00074",
+        "MS-00123",
+        "MS-00191",
+        "MS-00232",
+        "MS-00234",
+        "MS-00242",
+        "MS-00280",
+        "MS-00321",
+        "MS-00340",
+        "MS-00382",
+        "MS-00394",
+        "MS-00432",
+        "MS-00443",
+        "MS-00444",
+        "MS-00628",
+        "MS-00635",
+        "MS-00651",
+        "MS-00657",
+        "MS-00662",
+        "MS-00666",
+        "MS-00671",
+        "MS-00695",
+        "MS-00696",
+        "MS-00697",
+        "MS-00707",
+        "MS-00719",
+        "MS-00731",
+        "MS-00734",
+        "MS-00739",
+        "MS-00750",
+        "MS-00756",
+        "MS-00758",
+        "MS-00760",
+        "MS-00766",
+        "MS-00770",
+        "MS-00778",
+        "MS-00791",
+        "MS-00811",
+        "MS-00812",
+        "MS-00814",
+        "MS-00815",
+        "MS-00816",
+        "MS-00833",
+        "MS-00851",
+        "MS-00858",
+        "MS-00860",
+        "MS-00869",
+        "MS-00870",
+        "MS-00873",
+        "MS-00876",
+        "MS-00879",
+        "MS-00890",
+        "MS-00891",
+        "MS-00894",
+        "MS-00895",
+        "MS-00899",
+        "MS-00900",
+        "MS-00902",
+        "MS-00903",
+        "MS-00905",
+        "MS-00906",
+        "MS-00907",
+        "MS-00911",
+        "MS-00922",
+        "MS-00924",
+        "MS-00931",
+        "MS-00932",
+        "MS-00938",
+        "MS-00939",
+        "MS-00940",
+        "MS-00943",
+        "MS-00944",
+        "MS-00956",
+        "MS-00957",
+        "MS-00959",
+        "MS-00963",
+        "MS-01000",
+        "MS-01001",
+        "MS-01002",
+        "MS-CRAWL-0114",
+        "MS-CRAWL-0115",
+        "MS-CRAWL-0116",
+        "MS-CRAWL-0119",
+        "MS-CRAWL-0121",
+        "MS-CRAWL-0122",
+        "MS-CRAWL-0124",
+        "MS-CRAWL-0125",
+        "MS-CRAWL-0126",
+        "MS-CRAWL-0130",
+        "MS-CRAWL-0132",
+        "MS-CRAWL-0133",
+        "MS-CRAWL-0134",
+        "MS-CRAWL-0138",
+        "MS-CRAWL-0139",
+        "MS-CRAWL-0140",
+        "MS-CRAWL-0143",
+        "MS-CRAWL-0144",
+        "MS-CRAWL-0147",
+        "MS-CRAWL-0149",
+        "MS-CRAWL-0151",
+        "MS-CRAWL-0159",
+        "MS-CRAWL-0161",
+        "MS-CRAWL-0162"
+      ]
+    },
+    {
+      "place_key": "hotovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Hotovo",
+        "native_name": "Хотово",
+        "ekatte": "77361",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:77361",
+      "registry_entry": {
+        "id": "BG:settlement:77361",
+        "level": "settlement",
+        "official_code": "77361",
+        "names": {
+          "native": "Хотово",
+          "en": "Hotovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Хотово",
+        "latin": "Hotovo",
+        "official_native": "Хотово",
+        "official_transliteration": "Hotovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Hotovo",
+        "Хотово"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 5,
+      "legacy_listings": [
+        "MS-00499",
+        "MS-00567",
+        "MS-00567-1",
+        "MS-00945",
+        "MS-CRAWL-0127"
+      ]
+    },
+    {
+      "place_key": "petrich",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Petrich",
+        "native_name": "Петрич",
+        "code": "BLG33"
+      },
+      "settlement": {
+        "name": "Petrich",
+        "native_name": "Петрич",
+        "ekatte": "56126",
+        "type": "town"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:56126",
+      "registry_entry": {
+        "id": "BG:settlement:56126",
+        "level": "settlement",
+        "official_code": "56126",
+        "names": {
+          "native": "Петрич",
+          "en": "Petrich"
+        },
+        "settlement_type": "гр.",
+        "parent_id": "BG:municipality:BLG33",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG33",
+          "level": "municipality",
+          "official_code": "BLG33",
+          "names": {
+            "native": "Петрич",
+            "en": "Petrich"
+          }
+        }
+      ],
+      "names": {
+        "native": "Петрич",
+        "latin": "Petrich",
+        "official_native": "Петрич",
+        "official_transliteration": "Petrich",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Petrich",
+        "Петрич"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 4,
+      "legacy_listings": [
+        "MS-00456",
+        "MS-00619",
+        "MS-00751",
+        "MS-CRAWL-0123"
+      ]
+    },
+    {
+      "place_key": "mikrevo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Strumyani",
+        "native_name": "Струмяни",
+        "code": "BLG49"
+      },
+      "settlement": {
+        "name": "Mikrevo",
+        "native_name": "Микрево",
+        "ekatte": "49686",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:49686",
+      "registry_entry": {
+        "id": "BG:settlement:49686",
+        "level": "settlement",
+        "official_code": "49686",
+        "names": {
+          "native": "Микрево",
+          "en": "Mikrevo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG49",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG49",
+          "level": "municipality",
+          "official_code": "BLG49",
+          "names": {
+            "native": "Струмяни",
+            "en": "Strumyani"
+          }
+        }
+      ],
+      "names": {
+        "native": "Микрево",
+        "latin": "Mikrevo",
+        "official_native": "Микрево",
+        "official_transliteration": "Mikrevo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Mikrevo",
+        "Микрево"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 2,
+      "legacy_listings": [
+        "MS-00898",
+        "MS-00942"
+      ]
+    },
+    {
+      "place_key": "dzhigurovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Dzhigurovo",
+        "native_name": "Джигурово",
+        "ekatte": "20780",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:20780",
+      "registry_entry": {
+        "id": "BG:settlement:20780",
+        "level": "settlement",
+        "official_code": "20780",
+        "names": {
+          "native": "Джигурово",
+          "en": "Dzhigurovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Джигурово",
+        "latin": "Dzhigurovo",
+        "official_native": "Джигурово",
+        "official_transliteration": "Dzhigurovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Dzhigurovo",
+        "Джигурово"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 3,
+      "legacy_listings": [
+        "MS-00803",
+        "MS-00896",
+        "MS-00897"
+      ]
+    },
+    {
+      "place_key": "polenitsa",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Polenitsa",
+        "native_name": "Поленица",
+        "ekatte": "57176",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:57176",
+      "registry_entry": {
+        "id": "BG:settlement:57176",
+        "level": "settlement",
+        "official_code": "57176",
+        "names": {
+          "native": "Поленица",
+          "en": "Polenitsa"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Поленица",
+        "latin": "Polenitsa",
+        "official_native": "Поленица",
+        "official_transliteration": "Polenitsa",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Polenitsa",
+        "Поленица"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 4,
+      "legacy_listings": [
+        "MS-00749",
+        "MS-00865",
+        "MS-00941",
+        "MS-00955"
+      ]
+    },
+    {
+      "place_key": "levunovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Levunovo",
+        "native_name": "Левуново",
+        "ekatte": "43243",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:43243",
+      "registry_entry": {
+        "id": "BG:settlement:43243",
+        "level": "settlement",
+        "official_code": "43243",
+        "names": {
+          "native": "Левуново",
+          "en": "Levunovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Левуново",
+        "latin": "Levunovo",
+        "official_native": "Левуново",
+        "official_transliteration": "Levunovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Levunovo",
+        "Левуново"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 4,
+      "legacy_listings": [
+        "MS-00774",
+        "MS-00788",
+        "MS-CRAWL-0136",
+        "MS-CRAWL-0160"
+      ]
+    },
+    {
+      "place_key": "laskarevo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Laskarevo",
+        "native_name": "Ласкарево",
+        "ekatte": "43150",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:43150",
+      "registry_entry": {
+        "id": "BG:settlement:43150",
+        "level": "settlement",
+        "official_code": "43150",
+        "names": {
+          "native": "Ласкарево",
+          "en": "Laskarevo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Ласкарево",
+        "latin": "Laskarevo",
+        "official_native": "Ласкарево",
+        "official_transliteration": "Laskarevo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Laskarevo",
+        "Ласкарево"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 3,
+      "legacy_listings": [
+        "MS-00362",
+        "MS-00555",
+        "MS-CRAWL-0137"
+      ]
+    },
+    {
+      "place_key": "kulata",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Petrich",
+        "native_name": "Петрич",
+        "code": "BLG33"
+      },
+      "settlement": {
+        "name": "Kulata",
+        "native_name": "Кулата",
+        "ekatte": "40539",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:40539",
+      "registry_entry": {
+        "id": "BG:settlement:40539",
+        "level": "settlement",
+        "official_code": "40539",
+        "names": {
+          "native": "Кулата",
+          "en": "Kulata"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG33",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG33",
+          "level": "municipality",
+          "official_code": "BLG33",
+          "names": {
+            "native": "Петрич",
+            "en": "Petrich"
+          }
+        }
+      ],
+      "names": {
+        "native": "Кулата",
+        "latin": "Kulata",
+        "official_native": "Кулата",
+        "official_transliteration": "Kulata",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Kulata",
+        "Кулата"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00345"
+      ]
+    },
+    {
+      "place_key": "pirin",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Pirin",
+        "native_name": "Пирин",
+        "ekatte": "56410",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:56410",
+      "registry_entry": {
+        "id": "BG:settlement:56410",
+        "level": "settlement",
+        "official_code": "56410",
+        "names": {
+          "native": "Пирин",
+          "en": "Pirin"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Пирин",
+        "latin": "Pirin",
+        "official_native": "Пирин",
+        "official_transliteration": "Pirin",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Pirin",
+        "Пирин"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00908"
+      ]
+    },
+    {
+      "place_key": "spatovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Spatovo",
+        "native_name": "Спатово",
+        "ekatte": "68223",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:68223",
+      "registry_entry": {
+        "id": "BG:settlement:68223",
+        "level": "settlement",
+        "official_code": "68223",
+        "names": {
+          "native": "Спатово",
+          "en": "Spatovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Спатово",
+        "latin": "Spatovo",
+        "official_native": "Спатово",
+        "official_transliteration": "Spatovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Spatovo",
+        "Спатово"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 2,
+      "legacy_listings": [
+        "MS-00927",
+        "MS-CRAWL-0117"
+      ]
+    },
+    {
+      "place_key": "tsaparevo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Strumyani",
+        "native_name": "Струмяни",
+        "code": "BLG49"
+      },
+      "settlement": {
+        "name": "Tsaparevo",
+        "native_name": "Цапарево",
+        "ekatte": "78046",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:78046",
+      "registry_entry": {
+        "id": "BG:settlement:78046",
+        "level": "settlement",
+        "official_code": "78046",
+        "names": {
+          "native": "Цапарево",
+          "en": "Tsaparevo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG49",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG49",
+          "level": "municipality",
+          "official_code": "BLG49",
+          "names": {
+            "native": "Струмяни",
+            "en": "Strumyani"
+          }
+        }
+      ],
+      "names": {
+        "native": "Цапарево",
+        "latin": "Tsaparevo",
+        "official_native": "Цапарево",
+        "official_transliteration": "Tsaparevo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Tsaparevo",
+        "Цапарево"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00904"
+      ]
+    },
+    {
+      "place_key": "strumyani",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Strumyani",
+        "native_name": "Струмяни",
+        "code": "BLG49"
+      },
+      "settlement": {
+        "name": "Strumyani",
+        "native_name": "Струмяни",
+        "ekatte": "69969",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:69969",
+      "registry_entry": {
+        "id": "BG:settlement:69969",
+        "level": "settlement",
+        "official_code": "69969",
+        "names": {
+          "native": "Струмяни",
+          "en": "Strumyani"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG49",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG49",
+          "level": "municipality",
+          "official_code": "BLG49",
+          "names": {
+            "native": "Струмяни",
+            "en": "Strumyani"
+          }
+        }
+      ],
+      "names": {
+        "native": "Струмяни",
+        "latin": "Strumyani",
+        "official_native": "Струмяни",
+        "official_transliteration": "Strumyani",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Strumyani",
+        "Струмяни"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 6,
+      "legacy_listings": [
+        "MS-00286",
+        "MS-00356",
+        "MS-00470",
+        "MS-CRAWL-0153",
+        "MS-CRAWL-0154",
+        "MS-CRAWL-0165"
+      ]
+    },
+    {
+      "place_key": "igralishte",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Strumyani",
+        "native_name": "Струмяни",
+        "code": "BLG49"
+      },
+      "settlement": {
+        "name": "Igralishte",
+        "native_name": "Игралище",
+        "ekatte": "32322",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:32322",
+      "registry_entry": {
+        "id": "BG:settlement:32322",
+        "level": "settlement",
+        "official_code": "32322",
+        "names": {
+          "native": "Игралище",
+          "en": "Igralishte"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG49",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG49",
+          "level": "municipality",
+          "official_code": "BLG49",
+          "names": {
+            "native": "Струмяни",
+            "en": "Strumyani"
+          }
+        }
+      ],
+      "names": {
+        "native": "Игралище",
+        "latin": "Igralishte",
+        "official_native": "Игралище",
+        "official_transliteration": "Igralishte",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Igralishte",
+        "Игралище"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00960"
+      ]
+    },
+    {
+      "place_key": "bansko",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Bansko",
+        "native_name": "Банско",
+        "code": "BLG01"
+      },
+      "settlement": {
+        "name": "Bansko",
+        "native_name": "Банско",
+        "ekatte": "02676",
+        "type": "town"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:02676",
+      "registry_entry": {
+        "id": "BG:settlement:02676",
+        "level": "settlement",
+        "official_code": "02676",
+        "names": {
+          "native": "Банско",
+          "en": "Bansko"
+        },
+        "settlement_type": "гр.",
+        "parent_id": "BG:municipality:BLG01",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG01",
+          "level": "municipality",
+          "official_code": "BLG01",
+          "names": {
+            "native": "Банско",
+            "en": "Bansko"
+          }
+        }
+      ],
+      "names": {
+        "native": "Банско",
+        "latin": "Bansko",
+        "official_native": "Банско",
+        "official_transliteration": "Bansko",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Bansko",
+        "Банско"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 2,
+      "legacy_listings": [
+        "MS-00937",
+        "MS-CRAWL-0135"
+      ]
+    },
+    {
+      "place_key": "kapatovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Petrich",
+        "native_name": "Петрич",
+        "code": "BLG33"
+      },
+      "settlement": {
+        "name": "Kapatovo",
+        "native_name": "Капатово",
+        "ekatte": "36083",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:36083",
+      "registry_entry": {
+        "id": "BG:settlement:36083",
+        "level": "settlement",
+        "official_code": "36083",
+        "names": {
+          "native": "Капатово",
+          "en": "Kapatovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG33",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG33",
+          "level": "municipality",
+          "official_code": "BLG33",
+          "names": {
+            "native": "Петрич",
+            "en": "Petrich"
+          }
+        }
+      ],
+      "names": {
+        "native": "Капатово",
+        "latin": "Kapatovo",
+        "official_native": "Капатово",
+        "official_transliteration": "Kapatovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Kapatovo",
+        "Капатово"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00720"
+      ]
+    },
+    {
+      "place_key": "leshnitsa",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Leshnitsa",
+        "native_name": "Лешница",
+        "ekatte": "43565",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:43565",
+      "registry_entry": {
+        "id": "BG:settlement:43565",
+        "level": "settlement",
+        "official_code": "43565",
+        "names": {
+          "native": "Лешница",
+          "en": "Leshnitsa"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Лешница",
+        "latin": "Leshnitsa",
+        "official_native": "Лешница",
+        "official_transliteration": "Leshnitsa",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Leshnitsa",
+        "Лешница"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 4,
+      "legacy_listings": [
+        "MS-00190",
+        "MS-00296",
+        "MS-00744",
+        "MS-CRAWL-0150"
+      ]
+    },
+    {
+      "place_key": "blagoevgrad",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Blagoevgrad",
+        "native_name": "Благоевград",
+        "code": "BLG03"
+      },
+      "settlement": {
+        "name": "Blagoevgrad",
+        "native_name": "Благоевград",
+        "ekatte": "04279",
+        "type": "town"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:04279",
+      "registry_entry": {
+        "id": "BG:settlement:04279",
+        "level": "settlement",
+        "official_code": "04279",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        },
+        "settlement_type": "гр.",
+        "parent_id": "BG:municipality:BLG03",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG03",
+          "level": "municipality",
+          "official_code": "BLG03",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        }
+      ],
+      "names": {
+        "native": "Благоевград",
+        "latin": "Blagoevgrad",
+        "official_native": "Благоевград",
+        "official_transliteration": "Blagoevgrad",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Blagoevgrad",
+        "Благоевград"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00852"
+      ]
+    },
+    {
+      "place_key": "vinogradi",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Vinogradi",
+        "native_name": "Виногради",
+        "ekatte": "11168",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:11168",
+      "registry_entry": {
+        "id": "BG:settlement:11168",
+        "level": "settlement",
+        "official_code": "11168",
+        "names": {
+          "native": "Виногради",
+          "en": "Vinogradi"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Виногради",
+        "latin": "Vinogradi",
+        "official_native": "Виногради",
+        "official_transliteration": "Vinogradi",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Vinogradi",
+        "Виногради"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 3,
+      "legacy_listings": [
+        "MS-00872",
+        "MS-CRAWL-0129",
+        "MS-CRAWL-0148"
+      ]
+    },
+    {
+      "place_key": "sveti_vlas",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BGS",
+        "level": "district",
+        "official_code": "BGS",
+        "names": {
+          "native": "Бургас",
+          "en": "Burgas"
+        }
+      },
+      "municipality": {
+        "name": "Nesebar",
+        "native_name": "Несебър",
+        "code": "BGS15"
+      },
+      "settlement": {
+        "name": "Sveti Vlas",
+        "native_name": "Свети Влас",
+        "ekatte": "11538",
+        "type": "town"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:11538",
+      "registry_entry": {
+        "id": "BG:settlement:11538",
+        "level": "settlement",
+        "official_code": "11538",
+        "names": {
+          "native": "Свети Влас",
+          "en": "Sveti Vlas"
+        },
+        "settlement_type": "гр.",
+        "parent_id": "BG:municipality:BGS15",
+        "nuts1": "BG3",
+        "nuts2": "BG34",
+        "nuts3": "BG341",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG3",
+          "level": "NUTS1",
+          "official_code": "BG3",
+          "names": {
+            "native": "район \"Северна и Югоизточна България\"",
+            "en": "region \"Severna i Yugoiztochna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG34",
+          "level": "NUTS2",
+          "official_code": "BG34",
+          "names": {
+            "native": "Югоизточен",
+            "en": "Yugoiztochen"
+          }
+        },
+        {
+          "id": "BG:district:BGS",
+          "level": "district",
+          "official_code": "BGS",
+          "names": {
+            "native": "Бургас",
+            "en": "Burgas"
+          }
+        },
+        {
+          "id": "BG:municipality:BGS15",
+          "level": "municipality",
+          "official_code": "BGS15",
+          "names": {
+            "native": "Несебър",
+            "en": "Nesebar"
+          }
+        }
+      ],
+      "names": {
+        "native": "Свети Влас",
+        "latin": "Sveti Vlas",
+        "official_native": "Свети Влас",
+        "official_transliteration": "Sveti Vlas",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Sveti Vlas",
+        "Свети Влас"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00933"
+      ]
+    },
+    {
+      "place_key": "petrovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Petrovo",
+        "native_name": "Петрово",
+        "ekatte": "56174",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:56174",
+      "registry_entry": {
+        "id": "BG:settlement:56174",
+        "level": "settlement",
+        "official_code": "56174",
+        "names": {
+          "native": "Петрово",
+          "en": "Petrovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Петрово",
+        "latin": "Petrovo",
+        "official_native": "Петрово",
+        "official_transliteration": "Petrovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Petrovo",
+        "Петрово"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00935"
+      ]
+    },
+    {
+      "place_key": "lilyanovo",
+      "level": "settlement",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": {
+        "name": "Lilyanovo",
+        "native_name": "Лиляново",
+        "ekatte": "43699",
+        "type": "village"
+      },
+      "neighborhood": null,
+      "geography_id": "BG:settlement:43699",
+      "registry_entry": {
+        "id": "BG:settlement:43699",
+        "level": "settlement",
+        "official_code": "43699",
+        "names": {
+          "native": "Лиляново",
+          "en": "Lilyanovo"
+        },
+        "settlement_type": "с.",
+        "parent_id": "BG:municipality:BLG40",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        },
+        {
+          "id": "BG:municipality:BLG40",
+          "level": "municipality",
+          "official_code": "BLG40",
+          "names": {
+            "native": "Сандански",
+            "en": "Sandanski"
+          }
+        }
+      ],
+      "names": {
+        "native": "Лиляново",
+        "latin": "Lilyanovo",
+        "official_native": "Лиляново",
+        "official_transliteration": "Lilyanovo",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Lilyanovo",
+        "Лиляново"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00920"
+      ]
+    },
+    {
+      "place_key": "petrich_municipality",
+      "level": "municipality",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Petrich",
+        "native_name": "Петрич",
+        "code": "BLG33"
+      },
+      "settlement": null,
+      "neighborhood": null,
+      "geography_id": "BG:municipality:BLG33",
+      "registry_entry": {
+        "id": "BG:municipality:BLG33",
+        "level": "municipality",
+        "official_code": "BLG33",
+        "names": {
+          "native": "Петрич",
+          "en": "Petrich"
+        },
+        "settlement_type": null,
+        "parent_id": "BG:district:BLG",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        }
+      ],
+      "names": {
+        "native": "Община Петрич",
+        "latin": "Petrich Municipality",
+        "official_native": "Петрич",
+        "official_transliteration": "Petrich",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Petrich",
+        "Petrich Municipality",
+        "Община Петрич",
+        "Петрич"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00699"
+      ]
+    },
+    {
+      "place_key": "derbere_sandanski",
+      "level": "municipality",
+      "country": {
+        "code": "BG",
+        "name": "Bulgaria"
+      },
+      "region": {
+        "id": "BG:district:BLG",
+        "level": "district",
+        "official_code": "BLG",
+        "names": {
+          "native": "Благоевград",
+          "en": "Blagoevgrad"
+        }
+      },
+      "municipality": {
+        "name": "Sandanski",
+        "native_name": "Сандански",
+        "code": "BLG40"
+      },
+      "settlement": null,
+      "neighborhood": {
+        "name": "Дербере",
+        "register_entry": false,
+        "note": "Raw locality label from the legacy listing; not a register entry."
+      },
+      "geography_id": "BG:municipality:BLG40",
+      "registry_entry": {
+        "id": "BG:municipality:BLG40",
+        "level": "municipality",
+        "official_code": "BLG40",
+        "names": {
+          "native": "Сандански",
+          "en": "Sandanski"
+        },
+        "settlement_type": null,
+        "parent_id": "BG:district:BLG",
+        "nuts1": "BG4",
+        "nuts2": "BG41",
+        "nuts3": "BG413",
+        "source_id": "bg-nsi-ekatte"
+      },
+      "ancestors": [
+        {
+          "id": "BG:NUTS1:BG4",
+          "level": "NUTS1",
+          "official_code": "BG4",
+          "names": {
+            "native": "район \"Югозападна и Южна централна България\"\"",
+            "en": "region \"Yugozapadna i Yuzhna tsentralna Bulgaria\""
+          }
+        },
+        {
+          "id": "BG:NUTS2:BG41",
+          "level": "NUTS2",
+          "official_code": "BG41",
+          "names": {
+            "native": "Югозападен",
+            "en": "Yugozapaden"
+          }
+        },
+        {
+          "id": "BG:district:BLG",
+          "level": "district",
+          "official_code": "BLG",
+          "names": {
+            "native": "Благоевград",
+            "en": "Blagoevgrad"
+          }
+        }
+      ],
+      "names": {
+        "native": "Дербере, Сандански",
+        "latin": "Derbere, Sandanski",
+        "official_native": "Сандански",
+        "official_transliteration": "Sandanski",
+        "transliteration_source": "bg-nsi-ekatte"
+      },
+      "aliases": [
+        "Derbere, Sandanski",
+        "Sandanski",
+        "Дербере, Сандански",
+        "Сандански"
+      ],
+      "public_location_precision": null,
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00645"
+      ]
+    },
+    {
+      "place_key": "thessaloniki",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL52",
+        "level": "region",
+        "official_code": "EL52",
+        "names": {
+          "native": "Κεντρική Μακεδονία",
+          "en": "Central Macedonia"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Thessaloniki",
+        "native_name": "Солун",
+        "type": "city"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:settlement:EL52:0701010001",
+      "registry_entry": {
+        "id": "GR:settlement:EL52:0701010001",
+        "level": "settlement",
+        "official_code": "0701010001",
+        "names": {
+          "native": "Θεσσαλονίκη",
+          "en": "Thessaloniki"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:community:EL52:07010100",
+        "nuts1": "EL5",
+        "nuts2": "EL52",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL5",
+          "level": "NUTS1",
+          "official_code": "EL5",
+          "names": {
+            "native": "Βόρεια Ελλάδα",
+            "en": "Northern Greece"
+          }
+        },
+        {
+          "id": "GR:region:EL52",
+          "level": "region",
+          "official_code": "EL52",
+          "names": {
+            "native": "Κεντρική Μακεδονία",
+            "en": "Central Macedonia"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL52:07",
+          "level": "regional_unit",
+          "official_code": "07",
+          "names": {
+            "native": "Θεσσαλονικης",
+            "en": "Thessalonikis"
+          }
+        },
+        {
+          "id": "GR:municipality:EL52:0701",
+          "level": "municipality",
+          "official_code": "0701",
+          "names": {
+            "native": "Θεσσαλονικης",
+            "en": "Thessalonikis"
+          }
+        },
+        {
+          "id": "GR:municipal_unit:EL52:070101",
+          "level": "municipal_unit",
+          "official_code": "070101",
+          "names": {
+            "native": "Θεσσαλονικης",
+            "en": "Thessalonikis"
+          }
+        },
+        {
+          "id": "GR:community:EL52:07010100",
+          "level": "community",
+          "official_code": "07010100",
+          "names": {
+            "native": "Ψευδοδημοτικη Κοινοτητα Θεσσαλονικης",
+            "en": "Pseydodimotiki Koinotita Thessalonikis"
+          }
+        }
+      ],
+      "names": {
+        "native": "Солун",
+        "latin": "Thessaloniki",
+        "official_native": "Θεσσαλονίκη",
+        "official_transliteration": "Thessaloniki",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Thessaloniki",
+        "Θεσσαλονίκη",
+        "Солун"
+      ],
+      "public_location_precision": "area_only",
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00101"
+      ]
+    },
+    {
+      "place_key": "eretria_kotroni",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL64",
+        "level": "region",
+        "official_code": "EL64",
+        "names": {
+          "native": "Στερεά Ελλάδα",
+          "en": "Sterea Elláda"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Eretria-Kotroni",
+        "native_name": "Еретрия-Котрони",
+        "type": "locality"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:settlement:EL64:2903010101",
+      "registry_entry": {
+        "id": "GR:settlement:EL64:2903010101",
+        "level": "settlement",
+        "official_code": "2903010101",
+        "names": {
+          "native": "Ερέτρια",
+          "en": "Eretria"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:community:EL64:29030101",
+        "nuts1": "EL6",
+        "nuts2": "EL64",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL6",
+          "level": "NUTS1",
+          "official_code": "EL6",
+          "names": {
+            "native": "Κεντρική Ελλάδα",
+            "en": "Kentriki Elláda"
+          }
+        },
+        {
+          "id": "GR:region:EL64",
+          "level": "region",
+          "official_code": "EL64",
+          "names": {
+            "native": "Στερεά Ελλάδα",
+            "en": "Sterea Elláda"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL64:29",
+          "level": "regional_unit",
+          "official_code": "29",
+          "names": {
+            "native": "Ευβοιας",
+            "en": "Eyvoias"
+          }
+        },
+        {
+          "id": "GR:municipality:EL64:2903",
+          "level": "municipality",
+          "official_code": "2903",
+          "names": {
+            "native": "Ερετριας",
+            "en": "Eretrias"
+          }
+        },
+        {
+          "id": "GR:municipal_unit:EL64:290301",
+          "level": "municipal_unit",
+          "official_code": "290301",
+          "names": {
+            "native": "Ερετριας",
+            "en": "Eretrias"
+          }
+        },
+        {
+          "id": "GR:community:EL64:29030101",
+          "level": "community",
+          "official_code": "29030101",
+          "names": {
+            "native": "Δημοτική Κοινότητα Ερέτριας",
+            "en": "Dimotiki Koinotita Eretrias"
+          }
+        }
+      ],
+      "names": {
+        "native": "Еретрия-Котрони",
+        "latin": "Eretria-Kotroni",
+        "official_native": "Ερέτρια",
+        "official_transliteration": "Eretria",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Eretria",
+        "Eretria-Kotroni",
+        "Ερέτρια",
+        "Еретрия-Котрони"
+      ],
+      "public_location_precision": "approximate",
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00987"
+      ]
+    },
+    {
+      "place_key": "elani_sani",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL52",
+        "level": "region",
+        "official_code": "EL52",
+        "names": {
+          "native": "Κεντρική Μακεδονία",
+          "en": "Central Macedonia"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Elani-Sani, Halkidiki",
+        "native_name": "Елани-Сани, Халкидики",
+        "type": "locality"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:municipality:EL52:1303",
+      "registry_entry": {
+        "id": "GR:municipality:EL52:1303",
+        "level": "municipality",
+        "official_code": "1303",
+        "names": {
+          "native": "Κασσανδρας",
+          "en": "Kassandras"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:regional_unit:EL52:13",
+        "nuts1": "EL5",
+        "nuts2": "EL52",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL5",
+          "level": "NUTS1",
+          "official_code": "EL5",
+          "names": {
+            "native": "Βόρεια Ελλάδα",
+            "en": "Northern Greece"
+          }
+        },
+        {
+          "id": "GR:region:EL52",
+          "level": "region",
+          "official_code": "EL52",
+          "names": {
+            "native": "Κεντρική Μακεδονία",
+            "en": "Central Macedonia"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL52:13",
+          "level": "regional_unit",
+          "official_code": "13",
+          "names": {
+            "native": "Χαλκιδικης",
+            "en": "Chalkidikis"
+          }
+        }
+      ],
+      "names": {
+        "native": "Елани-Сани, Халкидики",
+        "latin": "Elani-Sani, Halkidiki",
+        "official_native": "Κασσανδρας",
+        "official_transliteration": "Kassandras",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Elani-Sani, Halkidiki",
+        "Kassandras",
+        "Κασσανδρας",
+        "Елани-Сани, Халкидики"
+      ],
+      "public_location_precision": "approximate",
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00100"
+      ]
+    },
+    {
+      "place_key": "paralia_ofrinio",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL51",
+        "level": "region",
+        "official_code": "EL51",
+        "names": {
+          "native": "Ανατολική Μακεδονία και Θράκη",
+          "en": "Eastern Macedonia and Thrace"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Paralia Ofrinio",
+        "native_name": "Паралия Офринио",
+        "type": "locality"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:settlement:EL51:0503030502",
+      "registry_entry": {
+        "id": "GR:settlement:EL51:0503030502",
+        "level": "settlement",
+        "official_code": "0503030502",
+        "names": {
+          "native": "Παραλία Οφρυνίου",
+          "en": "Paralia Ofrynioy"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:community:EL51:05030305",
+        "nuts1": "EL5",
+        "nuts2": "EL51",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL5",
+          "level": "NUTS1",
+          "official_code": "EL5",
+          "names": {
+            "native": "Βόρεια Ελλάδα",
+            "en": "Northern Greece"
+          }
+        },
+        {
+          "id": "GR:region:EL51",
+          "level": "region",
+          "official_code": "EL51",
+          "names": {
+            "native": "Ανατολική Μακεδονία και Θράκη",
+            "en": "Eastern Macedonia and Thrace"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL51:05",
+          "level": "regional_unit",
+          "official_code": "05",
+          "names": {
+            "native": "Καβαλας",
+            "en": "Kavalas"
+          }
+        },
+        {
+          "id": "GR:municipality:EL51:0503",
+          "level": "municipality",
+          "official_code": "0503",
+          "names": {
+            "native": "Παγγαιου",
+            "en": "Paggaioy"
+          }
+        },
+        {
+          "id": "GR:municipal_unit:EL51:050303",
+          "level": "municipal_unit",
+          "official_code": "050303",
+          "names": {
+            "native": "Ορφανου",
+            "en": "Orfanoy"
+          }
+        },
+        {
+          "id": "GR:community:EL51:05030305",
+          "level": "community",
+          "official_code": "05030305",
+          "names": {
+            "native": "Δημοτική Κοινότητα Οφρυνίου",
+            "en": "Dimotiki Koinotita Ofrynioy"
+          }
+        }
+      ],
+      "names": {
+        "native": "Паралия Офринио",
+        "latin": "Paralia Ofrinio",
+        "official_native": "Παραλία Οφρυνίου",
+        "official_transliteration": "Paralia Ofrynioy",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Paralia Ofrinio",
+        "Paralia Ofrynioy",
+        "Παραλία Οφρυνίου",
+        "Паралия Офринио"
+      ],
+      "public_location_precision": "area_only",
+      "legacy_listing_count": 2,
+      "legacy_listings": [
+        "MS-00893",
+        "MS-CRAWL-0164"
+      ]
+    },
+    {
+      "place_key": "logari",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL52",
+        "level": "region",
+        "official_code": "EL52",
+        "names": {
+          "native": "Κεντρική Μακεδονία",
+          "en": "Central Macedonia"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Logari",
+        "native_name": "Логари",
+        "type": "locality"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:settlement:EL52:1202020404",
+      "registry_entry": {
+        "id": "GR:settlement:EL52:1202020404",
+        "level": "settlement",
+        "official_code": "1202020404",
+        "names": {
+          "native": "Λογκάρι",
+          "en": "Logkari"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:community:EL52:12020204",
+        "nuts1": "EL5",
+        "nuts2": "EL52",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL5",
+          "level": "NUTS1",
+          "official_code": "EL5",
+          "names": {
+            "native": "Βόρεια Ελλάδα",
+            "en": "Northern Greece"
+          }
+        },
+        {
+          "id": "GR:region:EL52",
+          "level": "region",
+          "official_code": "EL52",
+          "names": {
+            "native": "Κεντρική Μακεδονία",
+            "en": "Central Macedonia"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL52:12",
+          "level": "regional_unit",
+          "official_code": "12",
+          "names": {
+            "native": "Σερρων",
+            "en": "Serron"
+          }
+        },
+        {
+          "id": "GR:municipality:EL52:1202",
+          "level": "municipality",
+          "official_code": "1202",
+          "names": {
+            "native": "Αμφιπολης",
+            "en": "Amfipolis"
+          }
+        },
+        {
+          "id": "GR:municipal_unit:EL52:120202",
+          "level": "municipal_unit",
+          "official_code": "120202",
+          "names": {
+            "native": "Αμφιπολης",
+            "en": "Amfipolis"
+          }
+        },
+        {
+          "id": "GR:community:EL52:12020204",
+          "level": "community",
+          "official_code": "12020204",
+          "names": {
+            "native": "Δημοτική Κοινότητα Νέων Κερδυλίων",
+            "en": "Dimotiki Koinotita Neon Kerdylion"
+          }
+        }
+      ],
+      "names": {
+        "native": "Логари",
+        "latin": "Logari",
+        "official_native": "Λογκάρι",
+        "official_transliteration": "Logkari",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Logari",
+        "Logkari",
+        "Λογκάρι",
+        "Логари"
+      ],
+      "public_location_precision": "area_only",
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00930"
+      ]
+    },
+    {
+      "place_key": "pasalimani_piraeus",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL30",
+        "level": "region",
+        "official_code": "EL30",
+        "names": {
+          "native": "Aττική",
+          "en": "Attiki"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Pasalimani, Piraeus",
+        "native_name": "Пасалимани, Пиреус",
+        "type": "locality"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:settlement:EL30:5101000001",
+      "registry_entry": {
+        "id": "GR:settlement:EL30:5101000001",
+        "level": "settlement",
+        "official_code": "5101000001",
+        "names": {
+          "native": "Πειραιεύς",
+          "en": "Peiraieys"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:community:EL30:51010000",
+        "nuts1": "EL3",
+        "nuts2": "EL30",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL3",
+          "level": "NUTS1",
+          "official_code": "EL3",
+          "names": {
+            "native": "Αττική",
+            "en": "Attiki"
+          }
+        },
+        {
+          "id": "GR:region:EL30",
+          "level": "region",
+          "official_code": "EL30",
+          "names": {
+            "native": "Aττική",
+            "en": "Attiki"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL30:51",
+          "level": "regional_unit",
+          "official_code": "51",
+          "names": {
+            "native": "Πειραιως",
+            "en": "Peiraios"
+          }
+        },
+        {
+          "id": "GR:municipality:EL30:5101",
+          "level": "municipality",
+          "official_code": "5101",
+          "names": {
+            "native": "Πειραιως",
+            "en": "Peiraios"
+          }
+        },
+        {
+          "id": "GR:municipal_unit:EL30:510100",
+          "level": "municipal_unit",
+          "official_code": "510100",
+          "names": {
+            "native": "Πειραιως",
+            "en": "Peiraios"
+          }
+        },
+        {
+          "id": "GR:community:EL30:51010000",
+          "level": "community",
+          "official_code": "51010000",
+          "names": {
+            "native": "Ψευδοδημοτικη Κοινοτητα Πειραιως",
+            "en": "Pseydodimotiki Koinotita Peiraios"
+          }
+        }
+      ],
+      "names": {
+        "native": "Пасалимани, Пиреус",
+        "latin": "Pasalimani, Piraeus",
+        "official_native": "Πειραιεύς",
+        "official_transliteration": "Peiraieys",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Pasalimani, Piraeus",
+        "Peiraieys",
+        "Πειραιεύς",
+        "Пасалимани, Пиреус"
+      ],
+      "public_location_precision": "approximate",
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00543"
+      ]
+    },
+    {
+      "place_key": "nafplio",
+      "level": "settlement",
+      "country": {
+        "code": "GR",
+        "name": "Greece"
+      },
+      "region": {
+        "id": "GR:region:EL65",
+        "level": "region",
+        "official_code": "EL65",
+        "names": {
+          "native": "Πελοπόννησος",
+          "en": "Peloponnisos"
+        }
+      },
+      "municipality": null,
+      "settlement": {
+        "name": "Nafplio",
+        "native_name": "Нафлио",
+        "type": "city"
+      },
+      "neighborhood": null,
+      "geography_id": "GR:settlement:EL65:4101010101",
+      "registry_entry": {
+        "id": "GR:settlement:EL65:4101010101",
+        "level": "settlement",
+        "official_code": "4101010101",
+        "names": {
+          "native": "Ναύπλιον",
+          "en": "Nayplion"
+        },
+        "settlement_type": null,
+        "parent_id": "GR:community:EL65:41010101",
+        "nuts1": "EL6",
+        "nuts2": "EL65",
+        "nuts3": null,
+        "source_id": "gr-elstat-census-2021"
+      },
+      "ancestors": [
+        {
+          "id": "GR:NUTS1:EL6",
+          "level": "NUTS1",
+          "official_code": "EL6",
+          "names": {
+            "native": "Κεντρική Ελλάδα",
+            "en": "Kentriki Elláda"
+          }
+        },
+        {
+          "id": "GR:region:EL65",
+          "level": "region",
+          "official_code": "EL65",
+          "names": {
+            "native": "Πελοπόννησος",
+            "en": "Peloponnisos"
+          }
+        },
+        {
+          "id": "GR:regional_unit:EL65:41",
+          "level": "regional_unit",
+          "official_code": "41",
+          "names": {
+            "native": "Αργολιδας",
+            "en": "Argolidas"
+          }
+        },
+        {
+          "id": "GR:municipality:EL65:4101",
+          "level": "municipality",
+          "official_code": "4101",
+          "names": {
+            "native": "Ναυπλιεων",
+            "en": "Nayplieon"
+          }
+        },
+        {
+          "id": "GR:municipal_unit:EL65:410101",
+          "level": "municipal_unit",
+          "official_code": "410101",
+          "names": {
+            "native": "Ναυπλιεων",
+            "en": "Nayplieon"
+          }
+        },
+        {
+          "id": "GR:community:EL65:41010101",
+          "level": "community",
+          "official_code": "41010101",
+          "names": {
+            "native": "Δημοτική Κοινότητα Ναυπλιέων",
+            "en": "Dimotiki Koinotita Nayplieon"
+          }
+        }
+      ],
+      "names": {
+        "native": "Нафлио",
+        "latin": "Nafplio",
+        "official_native": "Ναύπλιον",
+        "official_transliteration": "Nayplion",
+        "transliteration_source": "gr-elstat-census-2021"
+      },
+      "aliases": [
+        "Nafplio",
+        "Nayplion",
+        "Ναύπλιον",
+        "Нафлио"
+      ],
+      "public_location_precision": "area_only",
+      "legacy_listing_count": 1,
+      "legacy_listings": [
+        "MS-00999"
+      ]
+    }
+  ]
+}
