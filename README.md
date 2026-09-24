@@ -30,7 +30,9 @@ npm run dev                       # http://localhost:3000/bg
 | `npm run e2e` | Playwright smoke and journeys (Chromium desktop + mobile) |
 | `npm run db:generate` / `db:migrate` | Generate SQL migrations / apply them to `DATABASE_URL` |
 | `npm run import:legacy` | One-time import of `data/legacy/` |
-| `npm run check` | Lint, typecheck, tests, build and e2e — the required CI check |
+| `make check` | Lint, typecheck, tests and build (runs `npm ci` first when the lockfile changed) |
+| `make e2e` | `npm run e2e`; CI runs it as its own job, and `gate` requires both |
+| `npm run check` | `make check`'s steps, then e2e |
 
 Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they are skipped
 locally (CI always runs them):

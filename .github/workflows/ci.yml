@@ -1,31 +1,56 @@
+# CI: a self-contained copy of the Mindburn CI v2 contract.
+#
+# This repository lives outside the Mindburn-Labs org, so it cannot call
+# Mindburn-Labs/platform-actions/.github/workflows/ci.yml@v2. It carries the
+# same shape inline; the dependency scan is copied from that file at tag v2
+# (d5a0eb5c1ffe8836f94cc679b36ed7a6be3d9e97).
+#
+# Jobs:
+#   check           toolchain setup, then `make check`.
+#   e2e             Playwright against a production build (needs browsers, so
+#                   it runs outside `make check`).
+#   dependency-scan pull requests and merge groups only: fails on a HIGH or
+#                   CRITICAL vulnerability that is present at head and absent
+#                   at base. Inherited findings are Dependabot's job.
+#   gate            always runs; fails if any job it needs failed or was
+#                   cancelled.
+#
+# No path filters, so `gate` reports on every change. The single required
+# status check is `gate`.
+#
+# Nothing here deploys (docs/plan.md §1). auto-merge.yml listens to this
+# workflow by its name, CI.
 name: CI
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
+  merge_group:
   workflow_dispatch:
-    inputs:
-      release:
-        description: "Type 'production' to request a release. Blocked until every docs/plan.md §7 launch gate is green."
-        required: false
-        default: "none"
+  # auto-merge.yml merges with GITHUB_TOKEN, which fires no `push` run, so it
+  # dispatches this event to test the merged main.
   repository_dispatch:
-    types: [auto_merge_deploy]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    types: [auto_merged]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   check:
-    # Branch protection requires this exact check name.
-    name: npm run check
+    name: make check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
+    # `npm test` includes the integration project only when TEST_DATABASE_URL
+    # is set, and vitest.config.ts refuses to skip it under CI.
     services:
       postgres:
         image: postgres:17-alpine
@@ -39,57 +64,162 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      CI: "true"
       TEST_DATABASE_URL: postgres://postgres:pg@127.0.0.1:5432/postgres
     steps:
-      - uses: actions/checkout@v5
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
 
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - name: make check
+        run: make check
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      # Under CI, playwright.config.ts starts the server without building.
+      - name: Build
+        run: make build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: make e2e
+        run: make e2e
 
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
           path: playwright-report/
           retention-days: 7
 
-  release:
-    name: Release (blocked until launch gates pass)
-    if: github.event_name == 'workflow_dispatch' && inputs.release == 'production'
-    needs: check
+  dependency-scan:
+    name: dependency scan
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+      OSV_SCANNER_VERSION: v2.6.0
+      OSV_SCANNER_SHA256: ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108
+    steps:
+      - name: Check out the change
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: head
+          persist-credentials: false
+
+      - name: Check out the base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: base
+          persist-credentials: false
+
+      - name: Install osv-scanner
+        run: |
+          bin="${RUNNER_TEMP}/bin"
+          mkdir -p "${bin}"
+          curl --fail --silent --show-error --location --retry 3 --proto '=https' \
+            --output "${bin}/osv-scanner" \
+            "https://github.com/google/osv-scanner/releases/download/${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
+          echo "${OSV_SCANNER_SHA256}  ${bin}/osv-scanner" | sha256sum --check --strict
+          chmod +x "${bin}/osv-scanner"
+          echo "${bin}" >>"${GITHUB_PATH}"
+
+      - name: Scan base and head
+        run: |
+          # Exit 1 means "vulnerabilities found", which the next step judges.
+          # Anything else is a scanner failure and fails the job.
+          scan() {
+            osv-scanner scan source --recursive --no-call-analysis=all --allow-no-lockfiles \
+              --format json --output-file "$2" "$1" || [[ $? -eq 1 ]]
+          }
+          scan base base.json
+          scan head head.json
+
+      - name: Fail on HIGH or CRITICAL vulnerabilities new in this change
+        run: |
+          # One line per (ecosystem, package, advisory) at HIGH or CRITICAL:
+          # CVSS >= 7.0, or a GitHub advisory rated HIGH/CRITICAL. The version
+          # is reported but is not part of the key, so a bump that leaves an
+          # advisory open is not counted as new.
+          findings() {
+            jq -r '
+              .results[]?.packages[]? as $p
+              | $p.groups[]? as $g
+              | select(
+                  ((($g.max_severity // "") | tonumber?) // 0) >= 7
+                  or any(
+                    $p.vulnerabilities[]? | select(.id as $id | $g.ids | index($id));
+                    (.database_specific.severity? // "" | ascii_upcase) | IN("HIGH", "CRITICAL")
+                  )
+                )
+              | $g.ids[] as $id
+              | [$p.package.ecosystem, $p.package.name, $id, $p.package.version, ($g.max_severity // "")]
+              | @tsv
+            ' "$1" | sort -u
+          }
+          findings base.json | cut -f1-3 >base.keys
+          findings head.json >head.tsv
+          awk -F'\t' 'FILENAME == ARGV[1] { seen[$0]; next } !(($1 FS $2 FS $3) in seen)' base.keys head.tsv >new.tsv
+          inherited=$(( $(wc -l <head.tsv) - $(wc -l <new.tsv) ))
+          if [[ "${inherited}" -gt 0 ]]; then
+            echo "::notice::${inherited} HIGH/CRITICAL finding(s) already exist on the base branch; they are not caused by this change"
+          fi
+          if [[ -s new.tsv ]]; then
+            while IFS=$'\t' read -r ecosystem name id version severity; do
+              echo "::error::${ecosystem} ${name}@${version}: ${id} (CVSS ${severity:-n/a}) is new in this change"
+            done <new.tsv
+            exit 1
+          fi
+          echo "no new HIGH/CRITICAL vulnerabilities"
+
+  gate:
+    if: always()
+    needs: [check, e2e, dependency-scan]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # No deploy steps exist on purpose (docs/plan.md §1). Replace this step only when
-      # every gate below is green and recorded.
-      - name: Launch gates (docs/plan.md §7)
+      - name: Require every job to succeed or be skipped
+        env:
+          NEEDS: ${{ toJSON(needs) }}
         run: |
-          cat <<'GATES'
-          Deployment is allowed only when all of these are true and recorded (docs/plan.md §7):
-          1. All slices S1-S6 and S8 merged; S7 flags off unless the owner enables a service.
-          2. npm run check green on the release commit; Playwright T1-T5 green in every enabled locale.
-          3. Production data ETL rehearsed on a restored copy of the live database with row-count and
-             checksum reconciliation; backup + isolated restore drill passed within 30 days.
-          4. Security review of auth, authz, uploads, edge and secrets with no open high findings.
-          5. WCAG 2.2 AA task checks (keyboard, screen reader, zoom, RTL) on T1-T5 recorded.
-          6. Core Web Vitals lab budgets met on the preview host for P01, P02, P05.
-          7. Monitoring and alerting live (health, error rate, job queue, outbox failures) with a named
-             on-call owner.
-          8. Owner inputs in spec §23.3 supplied: coverage, enabled locales + reviewers, service hours,
-             response promises, disclosure policies, retention/privacy policy, staff capabilities.
-          9. Owner launch decision recorded; .ru renewed if it is to be routed.
-          GATES
-          echo "::error::Release blocked: the launch gates are not yet green, and this workflow has no deploy steps."
-          exit 1
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"${NEEDS}"
+          jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<<"${NEEDS}" >/dev/null
+
+  # Branch protection on main still requires a check named "npm run check".
+  # This job reports gate's result under that name so merges keep working.
+  # Delete it once protection requires `gate` instead.
+  required-check-alias:
+    name: npm run check
+    if: always()
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Mirror gate
+        env:
+          GATE_RESULT: ${{ needs.gate.result }}
+        run: test "${GATE_RESULT}" = success

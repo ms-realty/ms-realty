@@ -9,11 +9,11 @@ everything that was built around the old screens.
 
 ## 1. Ground rules
 
-- **No deployment until production-ready.** Merges to `main` never deploy. A release is a
-  manual `workflow_dispatch` of CI with `release=production` and runs only when every launch
-  gate in §7 is green. Canonical domains are not touched by any merge.
+- **No deployment until production-ready.** Merges to `main` never deploy. CI has no release
+  job; S9 builds the release path, and it runs only when every launch gate in §7 is green.
+  Canonical domains are not touched by any merge.
 - **Small, green, merged.** Work lands as short-lived branches → PR → required check
-  `npm run check` → auto-merge (squash) → branch deleted. No long-lived branches, no parked
+  `gate` (CI) → auto-merge (squash) → branch deleted. No long-lived branches, no parked
   worktrees. `main` is always buildable and tested.
 - **The spec wins.** Screen (`P`/`C`/`O`), flow (`F`) and acceptance (`A`) IDs from the spec
   appear in route files, tests and PR descriptions so coverage is traceable.
