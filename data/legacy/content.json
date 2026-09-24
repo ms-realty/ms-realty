@@ -1,0 +1,490 @@
+{
+  "schema_version": 1,
+  "artifact_id": "legacy-extract-content",
+  "generated_at": "2026-09-23T00:00:00Z",
+  "extracted_from_git_tag": "legacy-app-final",
+  "scope": "Only content a named human approved. Captured legacy page text is review-only and is not carried forward; nothing here is cleared for publication in the new system without a fresh approval.",
+  "summary": {
+    "area_guides": 2,
+    "guide_documents": 6,
+    "team_profiles": 0,
+    "financing_partners": 0,
+    "purchase_fee_lines": 0,
+    "service_page_content_records": 0,
+    "unapproved_guide_translation_drafts": 15,
+    "excluded_captured_pages": 108
+  },
+  "area_guides": {
+    "artifact_id": "approved-area-guides-20260823",
+    "purpose": "Human-approved area copy for the public location pages, keyed by the same location value the listings carry. Projected rows carry the reviewer, approval date and official source of the approved CMS guide they came from.",
+    "constraint": "An inland area may never be described as a sea destination; the legacy validator refused that.",
+    "guides": [
+      {
+        "id": "hotovo-bg",
+        "type": "area_guide",
+        "area_key": "Hotovo",
+        "locale": "bg",
+        "source_locale": "bg",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-29T00:00:00Z",
+        "review_due_at": null,
+        "derived_from_document_id": "hotovo-locality-official-context",
+        "title": "Хотово: официален контекст за населеното място",
+        "sea_access": false,
+        "sections": {
+          "what_it_is": [
+            {
+              "text": "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин.",
+              "claim_id": "hotovo-locality",
+              "source_id": "sandanski-hotovo-locality"
+            }
+          ]
+        },
+        "sources": [
+          {
+            "id": "sandanski-hotovo-locality",
+            "publisher": "Община Сандански",
+            "label": "Хотово",
+            "url": "https://sandanski.bg/%D0%BE%D0%B1%D1%89%D0%B8%D0%BD%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8-%D0%BC%D0%B5%D1%81%D1%82%D0%B0/%D1%85%D0%BE%D1%82%D0%BE%D0%B2%D0%BE/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "hotovo-locality"
+            ]
+          }
+        ],
+        "source_hash": "5956c53052ccc43fe5d100882c4f4ffd228de9f7e55538e1d2b5ce45897f99bc"
+      },
+      {
+        "id": "petrich-bg",
+        "type": "area_guide",
+        "area_key": "Petrich",
+        "locale": "bg",
+        "source_locale": "bg",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-29T00:00:00Z",
+        "review_due_at": null,
+        "derived_from_document_id": "petrich-municipality-official-context",
+        "title": "Петрич: официален контекст за общината",
+        "sea_access": false,
+        "sections": {
+          "what_it_is": [
+            {
+              "text": "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин.",
+              "claim_id": "petrich-municipality-geography",
+              "source_id": "petrich-municipality-geography"
+            }
+          ]
+        },
+        "sources": [
+          {
+            "id": "petrich-municipality-geography",
+            "publisher": "Община Петрич",
+            "label": "За нас",
+            "url": "https://petrich.bg/bg/administraciya/za-nas/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "petrich-municipality-geography"
+            ]
+          }
+        ],
+        "source_hash": "cf6c42a3c1d8e00fddc117ffb6607c4f4a55f28bc24ec54cc42c826e86275d95"
+      }
+    ]
+  },
+  "guide_documents": {
+    "generated_at": "2026-07-29T00:00:00Z",
+    "note": "Approved buyer guides. Every legal, tax and process claim carries a named reviewer and an approval date.",
+    "documents": [
+      {
+        "id": "foreign-buyers-bg-land-ownership",
+        "type": "guide",
+        "guide_key": "foreign-buyers-bg-land-ownership",
+        "locale": "en",
+        "source_locale": "en",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-06T00:00:00Z",
+        "legacy_migration": true,
+        "source_hash": "d8bc20780f103ce7782105bdf901cd054120b577826b805435c711fd05e61974",
+        "title": "Foreign buyers and Bulgarian land ownership",
+        "path": "/en/guides/foreign-buyers",
+        "keywords": [
+          "foreign",
+          "non-eu",
+          "non eu",
+          "land",
+          "company",
+          "ood",
+          "ownership"
+        ],
+        "facts": [
+          "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+          "For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD.",
+          "EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing."
+        ]
+      },
+      {
+        "id": "foreign-buyers-financing-gap",
+        "type": "guide",
+        "guide_key": "foreign-buyers-financing-gap",
+        "locale": "en",
+        "source_locale": "en",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-06T00:00:00Z",
+        "legacy_migration": true,
+        "source_hash": "5dc709f987d37e6dfaa1914da9710115f421c87739f9494f6bbda788a36bc91f",
+        "title": "Foreign-buyer financing checks",
+        "path": "/en/guides/foreign-buyers",
+        "keywords": [
+          "foreign",
+          "mortgage",
+          "bank",
+          "financing",
+          "loan"
+        ],
+        "facts": [
+          "Foreign-national mortgage availability can be limited in Bulgaria.",
+          "MS Realty treats financing as an early qualification item, not a late-stage surprise."
+        ]
+      },
+      {
+        "id": "buyer-due-diligence-liens",
+        "type": "guide",
+        "guide_key": "buyer-due-diligence-liens",
+        "locale": "en",
+        "source_locale": "en",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-06T00:00:00Z",
+        "legacy_migration": true,
+        "source_hash": "de5204863e5dba0db97692c9f7173a08b956ad321da49f2cec5335229d60e98a",
+        "title": "Title and encumbrance checks",
+        "path": "/en/guides/buying-process",
+        "keywords": [
+          "title",
+          "lien",
+          "liens",
+          "mortgage",
+          "encumbrance",
+          "deposit",
+          "due diligence"
+        ],
+        "facts": [
+          "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+          "MS Realty treats title and encumbrance checks as part of the buying process before a buyer relies on the deal."
+        ],
+        "sources_label": "Official sources",
+        "sources": [
+          {
+            "id": "registry-property-register",
+            "publisher": "Registry Agency of the Republic of Bulgaria",
+            "label": "Property Registry services",
+            "url": "https://portal.registryagency.bg/en/home-pr",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "property-register",
+              "property-certificate"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sandanski-property-official-sources",
+        "type": "guide",
+        "guide_key": "sandanski-property-official-sources",
+        "locale": "bg",
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-29T00:00:00Z",
+        "source_hash": "43b6e9abb5893cb848beb2f59bfd49dbb1b8552fb55b2d669645f4f10b7fb848",
+        "title": "Сандански: официални източници при проверка на имот",
+        "path": "/bg/guides/proverka-na-imot-sandanski",
+        "keywords": [
+          "Сандански",
+          "имотен регистър",
+          "кадастър",
+          "KAIS",
+          "удостоверение за тежести"
+        ],
+        "facts": [
+          "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+          "Имотният регистър съдържа актове за възникване, прехвърляне, изменение или прекратяване на вещни права върху недвижими имоти, както и възбрани и ипотеки.",
+          "Удостоверението от Имотния регистър отразява вписванията, отбелязванията и заличаванията за тежести и права към момента на издаването му."
+        ],
+        "sources_label": "Официални източници",
+        "sources": [
+          {
+            "id": "kais-cadastre",
+            "publisher": "Агенция по геодезия, картография и кадастър",
+            "label": "Кадастрален портал KAIS",
+            "url": "https://kais.cadastre.bg/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "cadastre-portal"
+            ]
+          },
+          {
+            "id": "registry-property-register",
+            "publisher": "Агенция по вписванията",
+            "label": "Имотен регистър",
+            "url": "https://www.registryagency.bg/bg/registri/imoten-registar/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "property-register"
+            ]
+          },
+          {
+            "id": "registry-property-certificates",
+            "publisher": "Агенция по вписванията",
+            "label": "Удостоверения от Имотния регистър",
+            "url": "https://www.registryagency.bg/bg/registri/imoten-registar/udostovereniya/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "property-certificates"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hotovo-locality-official-context",
+        "type": "guide",
+        "guide_key": "hotovo-locality-official-context",
+        "locale": "bg",
+        "source_locale": "bg",
+        "location": "Hotovo",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-29T00:00:00Z",
+        "source_hash": "c73cf15bcc5b6104784354901503fc42d074f27a020c01c38ad219f2c2c792b3",
+        "title": "Хотово: официален контекст за населеното място",
+        "path": "/bg/guides/hotovo-obstinski-kontekst",
+        "keywords": [
+          "Хотово",
+          "Община Сандански",
+          "Среден Пирин",
+          "местност"
+        ],
+        "facts": [
+          "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин."
+        ],
+        "sources_label": "Официален източник",
+        "sources": [
+          {
+            "id": "sandanski-hotovo-locality",
+            "publisher": "Община Сандански",
+            "label": "Хотово",
+            "url": "https://sandanski.bg/%D0%BE%D0%B1%D1%89%D0%B8%D0%BD%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8-%D0%BC%D0%B5%D1%81%D1%82%D0%B0/%D1%85%D0%BE%D1%82%D0%BE%D0%B2%D0%BE/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "hotovo-locality"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "petrich-municipality-official-context",
+        "type": "guide",
+        "guide_key": "petrich-municipality-official-context",
+        "locale": "bg",
+        "source_locale": "bg",
+        "location": "Petrich",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "editor_bg",
+        "approved_at": "2026-07-29T00:00:00Z",
+        "source_hash": "2cba13e59ac3224c05d9164d08771461183cbcc6b3cf9f56e818cafed93a0228",
+        "title": "Петрич: официален контекст за общината",
+        "path": "/bg/guides/petrich-obstinski-kontekst",
+        "keywords": [
+          "Петрич",
+          "Община Петрич",
+          "Санданско-Петричка котловина",
+          "Беласица"
+        ],
+        "facts": [
+          "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин."
+        ],
+        "sources_label": "Официален източник",
+        "sources": [
+          {
+            "id": "petrich-municipality-geography",
+            "publisher": "Община Петрич",
+            "label": "За нас",
+            "url": "https://petrich.bg/bg/administraciya/za-nas/",
+            "checked_at": "2026-07-29",
+            "claim_ids": [
+              "petrich-municipality-geography"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "team_profiles": {
+    "artifact_id": "approved-team-profiles-20260823",
+    "approved": [],
+    "note": "This repository holds no approved staff records. Add only real profiles with a named reviewer and approved_at, then recompute source_hash with production/scripts/build-approved-content.mjs."
+  },
+  "financing_partners": {
+    "artifact_id": "approved-financing-partners-20260823",
+    "approved": [],
+    "note": "This repository holds no approved lender relationships. Add only a real relationship with its exact scope, a named reviewer, approved_at and review_due_at, then recompute source_hash with production/scripts/build-approved-content.mjs."
+  },
+  "purchase_fees": {
+    "artifact_id": "approved-purchase-fees-20260823",
+    "approved": [],
+    "note": "This repository holds no approved fee rates. Add only current, sourced fee lines with a named reviewer and approved_at, then recompute source_hash with production/scripts/build-approved-content.mjs. Until then the estimator must refuse to total."
+  },
+  "service_pages": {
+    "approved_content_records": [],
+    "note": "The legacy app rendered its contact, seller-intake, location and search surfaces from code, not from approved content records. No service-page copy exists as an approved, reviewable record.",
+    "legacy_public_routes": {
+      "contact": 7,
+      "seller": 7,
+      "location": 6,
+      "search": 7,
+      "home": 7
+    },
+    "legacy_guide_routes": [
+      {
+        "path": "/bg/guides/hotovo-obstinski-kontekst",
+        "locale": "bg",
+        "sitemap_indexable": true
+      },
+      {
+        "path": "/bg/guides/petrich-obstinski-kontekst",
+        "locale": "bg",
+        "sitemap_indexable": true
+      },
+      {
+        "path": "/bg/guides/proverka-na-imot-sandanski",
+        "locale": "bg",
+        "sitemap_indexable": true
+      },
+      {
+        "path": "/en/guides/buying-process",
+        "locale": "en",
+        "sitemap_indexable": true
+      },
+      {
+        "path": "/en/guides/foreign-buyers",
+        "locale": "en",
+        "sitemap_indexable": true
+      }
+    ]
+  },
+  "brand_contact": {
+    "phone": "+359879696870",
+    "phone_display": "+359 879 69 68 70",
+    "whatsapp": "https://wa.me/359879696870",
+    "viber": "viber://chat?number=%2B359879696870",
+    "email": "ms.realty.bg@gmail.com",
+    "offices": [
+      "Sandanski"
+    ],
+    "provenance": "production/lib/public-site.mjs#BRAND_CONTACT. The agency line was verified against the live legacy site header and footer on 2026-08-09; the single Sandanski office was confirmed by the owner.",
+    "status": "business_contact_only"
+  },
+  "legacy_coverage_claim": {
+    "status": "unconfirmed",
+    "claim_text": "Недвижими имоти в Сандански, Ахелой, Бяла, Несебър, Поморие, Равда, Свети Влас, Созопол, Слънчев бряг, Черноморец - апартаменти, къщи, вили, земи | MS Realty",
+    "claim_source": {
+      "artifact": "production/data/migration-records.json",
+      "record_id": "url-0001",
+      "url": "https://makler-realty.com",
+      "field": "source_seo.meta_description",
+      "captured_at": "2026-07-04T21:11:55"
+    },
+    "reading": "The legacy homepage advertised Sandanski together with Black Sea coast settlements as separate coverage areas. Sandanski itself is inland: it is in the Struma valley below Pirin, and no coverage claim may describe it as a sea or beach destination.",
+    "action_required": "The owner must confirm which areas the agency actually covers before any coverage claim is published again."
+  },
+  "exclusions": [
+    {
+      "artifact": "production/data/legacy-archive.json",
+      "rows": 108,
+      "reason": "Captured legacy page bodies. Review-only crawl text that no human approved, and it contains partner names, phone numbers and email addresses. Not carried forward in any form."
+    },
+    {
+      "artifact": "production/data/broker-contacts.jsonl",
+      "reason": "Named staff contact records. Personal data; team profiles must be re-entered with a named reviewer."
+    },
+    {
+      "artifact": "production/data/draft-guide-translations.json",
+      "rows": 15,
+      "reason": "Finished guide translations that no human translator approved. Drafts only; they may not be published or indexed."
+    },
+    {
+      "artifact": "migration/content-evidence/",
+      "reason": "Content parity evidence for the freeze decision, not publishable copy."
+    }
+  ],
+  "sources": [
+    {
+      "path": "production/data/approved-area-guides.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "f6cc8f314702ecb3000225df710ce480efa5da26298eb08fdee7de01528d1978",
+      "role": "human-approved area guide copy"
+    },
+    {
+      "path": "production/data/approved-cms-content.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "8c7d6e1ca515ffdf73e0babf1c65cae9bd3d6f2641576622ece327d7c14cd514",
+      "role": "human-approved buyer guide documents"
+    },
+    {
+      "path": "production/data/approved-team-profiles.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "36288a907fe9248ea1a8e4ccf8a174656b65f0baeb57512a12878cd0b1af8e76",
+      "role": "team profiles (none approved)"
+    },
+    {
+      "path": "production/data/approved-financing-partners.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "be804d961e043a8389937a4c0934a593c85761e0e783234da54bb7bcd80768e7",
+      "role": "financing partners (none approved)"
+    },
+    {
+      "path": "production/data/approved-purchase-fees.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "76a10635846d3020bb2240f8b0d6ba61f93ca0c44042bbde8b6e9baaaf20513b",
+      "role": "purchase fee lines (none approved)"
+    },
+    {
+      "path": "production/data/draft-guide-translations.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "f64a2a57f682a267659b3295100289d4e6d46c4889866ee84e515637f71853e4",
+      "role": "counted as excluded drafts"
+    },
+    {
+      "path": "production/data/app-route-manifest.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "c1e9825e934578207afdbbc702f73a0efce5b84621da44fdc21425649d01fe64",
+      "role": "the public surfaces the legacy app served"
+    },
+    {
+      "path": "production/data/migration-records.json",
+      "git_tag": "legacy-app-final",
+      "sha256": "15e8f9d9ec3a08e600b1593dc93260feedb4b6e6e42cec396230f8d312300291",
+      "role": "the legacy homepage coverage claim, as crawled"
+    }
+  ],
+  "known_gaps": [
+    "Only two area guides were ever approved (Hotovo and Petrich, Bulgarian only). Every other area page needs authored, approved copy.",
+    "No team profile, financing partner or purchase-fee line was ever approved, so the cost estimator and the financing step have nothing to publish.",
+    "Six approved buyer guides exist in English and Bulgarian only; the other five public locales have unapproved drafts.",
+    "No approved service-page copy exists in any form.",
+    "The legacy coverage claim is unconfirmed and must not be republished as written."
+  ]
+}

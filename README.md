@@ -1,48 +1,45 @@
 # MS Realty
 
-Rebuild of the historical **makler-realty.com** + **makler-realty.ru** sites (family real-estate
-agency, Sandanski, Bulgaria) into a multilingual, SEO-safe, phone-first property-search and
-broker-operations platform. The sole indexable public authority is
-`https://makler-realty.com`; the workers.dev endpoint remains the noindex operator/admin and
-deployment origin, while `.ru` remains source, crawl, media, and redirect compatibility data.
+The MS Realty real-estate agency platform: a public site, a client space and an agency
+workspace in one Next.js application backed by PostgreSQL.
 
-**The one hard constraint:** the historical domains' 13-year search equity is the asset. Preserve
-every indexed URL first; add product on top. Nothing launches until a crawl proves
-URL/metadata/content parity against the old sites.
+This is the rebuild described in [`docs/plan.md`](docs/plan.md), which implements the
+target-state specification in [`docs/spec.md`](docs/spec.md). The previous application is
+preserved at git tag `legacy-app-final`; the facts it held that are imported once live in
+[`data/legacy/`](data/legacy/README.md).
 
-## Facts
+## Local setup
 
-- **Public production origin:** `https://makler-realty.com` (indexable public pages).
-- **Operator/deployment origin:** `https://ms-realty.ms-realty-bg.workers.dev` (noindex, with direct `/admin` and OAuth callbacks).
-- **Historical source domain:** `makler-realty.ru` (crawl, media, and redirect compatibility pending a separate approved cutover).
-- **Crawl universe:** 457 URLs (278 `.com` + 179 `.ru`) · 165 listings · 11,859 media rows.
-- **Locales:** public BG, EN, DE, NL, RU, EL (Greek), HE (Hebrew RTL); admin CMS/CRM BG, RU, EN.
-- **Target stack:** Next.js + Payload CMS + PostgreSQL (including canonical public search) + MapLibre GL JS +
-  Photo Sphere Viewer + the **Hermes Agent** AI layer (self-hosted Nous Research open-weight Hermes
-  models + function-calling format; draft-only, human-approved). `production/` holds the executable
-  contracts, and `app/` now exposes them through build-checked Next App Router handlers.
+Requires Node.js 22.13 or newer (CI uses Node 24) and Docker for the database.
 
-## Where the truth lives
-
-- **[`SOURCE_OF_TRUTH.md`](SOURCE_OF_TRUTH.md)** — the single canonical doc: strategy, product,
-  stack, data model, migration plan, phases, and current status.
-- Code-local docs describe each subsystem: [`production/`](production/README.md),
-  [`migration/`](migration/README.md), [`search/`](search/README.md), [`locales/`](locales/README.md),
-  [`makler-realty-design-system/`](makler-realty-design-system/project/readme.md), `prototypes/`, `qa/`.
-
-Running code + `production/data/*` + crawl artifacts are authoritative; if a doc disagrees, the code wins.
-
-## Run
-
-```bash
-npm run check                                # tests + full validate pipeline
-MS_REALTY_ADMIN_TOKEN=replace-me MS_REALTY_ADMIN_ACTOR=operations_lead MS_REALTY_ADMIN_ROLES=admin npm start
+```sh
+npm ci
+npx playwright install chromium   # once, for end-to-end tests
+cp .env.example .env.local        # then fill in local values
+npm run dev                       # http://localhost:3000/bg
 ```
 
-`npm start` binds `127.0.0.1` by default. Binding a public interface
-(`MS_REALTY_HOST=0.0.0.0`) requires `NODE_ENV=production` and a
-`MS_REALTY_ADMIN_CREDENTIALS_JSON` operator registry, or the server
-refuses to start — a bare start can never expose a mutation-capable
-admin on the network.
+## Commands
 
-Requires Node ≥ 22 and Python 3.
+| Command | What it does |
+|---|---|
+| `npm run dev` / `build` / `start` | Next.js dev server, production build, production server |
+| `npm run lint` / `format` | Biome check / apply fixes |
+| `npm run typecheck` | Generate route types and run `tsc --noEmit` |
+| `npm test` | All Vitest projects (`test:unit`, `test:integration`) |
+| `npm run e2e` | Playwright smoke and journeys (Chromium desktop + mobile) |
+| `npm run db:generate` / `db:migrate` | Generate SQL migrations / apply them to `DATABASE_URL` |
+| `npm run import:legacy` | One-time import of `data/legacy/` |
+| `npm run check` | Lint, typecheck, tests, build and e2e — the required CI check |
+
+Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they are skipped
+locally (CI always runs them):
+
+```sh
+docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:17-alpine
+TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres npm run test:integration
+docker stop ms-realty-test-pg
+```
+
+Every environment variable is documented in [`.env.example`](.env.example). Agent and
+contributor rules are in [`AGENTS.md`](AGENTS.md).

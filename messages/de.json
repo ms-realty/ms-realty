@@ -1,0 +1,176 @@
+{
+  "common": {
+    "brand": "MS Realty",
+    "agencyKind": "Immobilienagentur",
+    "homeHeading": "MS Realty",
+    "homeIntro": "Immobilien kaufen, mieten, verkaufen oder vermieten mit dem Team von MS Realty.",
+    "workspaceHeading": "Heute",
+    "languageSuggestion": {
+      "label": "Sprachvorschlag",
+      "message": "Diese Seite gibt es auch auf Deutsch.",
+      "switch": "Auf Deutsch weiter",
+      "dismiss": "Vorschlag ausblenden"
+    }
+  },
+  "nav": {
+    "primaryLabel": "Hauptnavigation",
+    "utilitiesLabel": "Werkzeuge",
+    "home": "Startseite von MS Realty",
+    "buy": "Kaufen",
+    "rent": "Mieten",
+    "sellLet": "Verkaufen / Vermieten",
+    "areas": "Regionen",
+    "howWeHelp": "So helfen wir",
+    "saved": "Gemerkt",
+    "language": "Sprache",
+    "contact": "Kontakt",
+    "myJourney": "Mein Vorgang",
+    "menu": "Menü",
+    "journey": {
+      "label": "Mein Vorgang",
+      "overview": "Übersicht",
+      "properties": "Immobilien",
+      "appointments": "Termine",
+      "messages": "Nachrichten",
+      "documents": "Dokumente",
+      "caseSwitcher": "Vorgang",
+      "help": "Hilfe"
+    },
+    "workspace": {
+      "label": "Arbeitsbereich",
+      "secondaryLabel": "Verwaltung",
+      "today": "Heute",
+      "inbox": "Posteingang",
+      "cases": "Vorgänge",
+      "properties": "Immobilien",
+      "calendar": "Kalender",
+      "contentApprovals": "Inhalte & Freigaben",
+      "serviceOperations": "Servicebetrieb",
+      "reports": "Berichte",
+      "settings": "Einstellungen",
+      "more": "Mehr",
+      "search": "Datensätze durchsuchen",
+      "interfaceLanguage": "Sprache der Oberfläche",
+      "applyLanguage": "Übernehmen"
+    }
+  },
+  "footer": {
+    "label": "Informationen zur Agentur",
+    "agencyName": "MS Realty",
+    "agencyKind": "Immobilienagentur",
+    "callLabel": "Rufen Sie uns an",
+    "call": "{phone} anrufen",
+    "help": "Hilfe",
+    "privacy": "Datenschutz",
+    "accessibility": "Barrierefreiheit",
+    "copyright": "© {year} MS Realty"
+  },
+  "states": {
+    "loading": { "title": "Wird geladen", "body": "Die aktuellen Informationen werden geladen." },
+    "refreshing": {
+      "title": "Wird aktualisiert",
+      "body": "Bis die Seite aktualisiert ist, sehen Sie die zuvor geladenen Informationen."
+    },
+    "emptyNew": {
+      "title": "Hier ist noch nichts",
+      "body": "Sobald es etwas zu zeigen gibt, erscheint es hier."
+    },
+    "emptyFiltered": {
+      "title": "Keine Treffer für diese Kriterien",
+      "body": "{count, plural, one {# Filter ist} other {# Filter sind}} aktiv. Ändern oder entfernen Sie einen Filter, um mehr zu sehen."
+    },
+    "partial": {
+      "title": "Einige Bereiche konnten nicht geladen werden",
+      "body": "Der Rest der Seite ist aktuell. Laden Sie die fehlenden Bereiche erneut."
+    },
+    "stale": { "title": "Möglicherweise nicht aktuell", "body": "Zuletzt bestätigt: {date}." },
+    "permissionLimited": {
+      "title": "Sie haben keinen Zugriff darauf",
+      "body": "Bitten Sie die zuständige Person, Ihnen Zugriff zu geben."
+    },
+    "sessionExpired": {
+      "title": "Ihre Sitzung ist abgelaufen",
+      "body": "Melden Sie sich erneut an, um fortzufahren. Es wurde nichts in Ihrem Namen gesendet."
+    },
+    "offline": {
+      "title": "Sie sind offline",
+      "body": "Änderungen bleiben vorerst auf diesem Gerät und werden erst nach der Wiederverbindung gesendet."
+    },
+    "slow": {
+      "title": "Das dauert länger als üblich",
+      "body": "Wir arbeiten noch daran. Sie können hier warten oder später nachsehen."
+    },
+    "validationError": {
+      "title": "{count, plural, one {# Feld braucht} other {# Felder brauchen}} Ihre Aufmerksamkeit",
+      "body": "Korrigieren Sie die markierten Felder. Alle anderen Angaben bleiben erhalten."
+    },
+    "serverRejection": {
+      "title": "Das konnte nicht abgeschlossen werden",
+      "body": "{reason} Referenz: {reference}."
+    },
+    "unknownOutcome": {
+      "title": "Wir prüfen, ob das abgeschlossen wurde",
+      "body": "Bitte noch nicht erneut senden. Referenz: {reference}."
+    },
+    "versionConflict": {
+      "title": "Jemand anderes hat das geändert",
+      "body": "Ihre Version bleibt erhalten. Prüfen Sie die neuesten Änderungen, bevor Sie Ihre übernehmen."
+    },
+    "dirtyDraft": {
+      "title": "Ungespeicherte Änderungen",
+      "body": "Ihre Änderungen sind noch nicht gespeichert."
+    },
+    "savedDraft": {
+      "title": "Entwurf gespeichert",
+      "body": "Gespeichert {time}. Nicht gesendet oder veröffentlicht."
+    },
+    "success": { "title": "Erledigt", "body": "Ihre Änderung ist bestätigt." },
+    "revoked": {
+      "title": "Nicht mehr verfügbar",
+      "body": "Der Zugriff wurde entzogen oder der Eintrag gelöscht."
+    },
+    "rateLimited": {
+      "title": "Zu viele Versuche",
+      "body": "Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut. Ihre Eingaben bleiben erhalten."
+    },
+    "unsupported": {
+      "title": "Hier nicht verfügbar",
+      "body": "Das wird hier nicht angeboten. Rufen Sie das Team an, wir helfen auf anderem Weg."
+    },
+    "retry": "Erneut versuchen",
+    "checkForUpdates": "Auf Aktualisierungen prüfen",
+    "requestAccess": "Zugriff anfragen",
+    "signInAgain": "Erneut anmelden"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "body": "Die Adresse ist vielleicht falsch geschrieben oder die Seite wurde verschoben.",
+      "home": "Zur Startseite"
+    },
+    "generic": {
+      "title": "Diese Seite konnte nicht angezeigt werden",
+      "body": "Versuchen Sie es erneut. Wenn es wieder passiert, rufen Sie uns an und nennen Sie die Referenz.",
+      "reference": "Referenz: {reference}",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "forms": {
+    "required": "Pflichtfeld",
+    "optional": "Optional",
+    "errorSummary": "{count, plural, one {# Angabe muss} other {# Angaben müssen}} korrigiert werden",
+    "charactersLeft": "{count, plural, one {Noch # Zeichen} other {Noch # Zeichen}}",
+    "choose": "Auswählen…",
+    "saveDraft": "Entwurf speichern",
+    "cancel": "Abbrechen"
+  },
+  "a11y": {
+    "skipToContent": "Zum Hauptinhalt springen",
+    "currentPage": "aktuelle Seite",
+    "opensPhoneApp": "öffnet Ihre Telefon-App",
+    "languageList": "Sprache wählen",
+    "currentLanguage": "Aktuelle Sprache: {language}",
+    "closeMenu": "Menü schließen",
+    "openMenu": "Menü öffnen"
+  }
+}

@@ -6,28 +6,15 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      hermes_update:
-        description: "Run the fenced Hermes upstream compatibility gate"
+      release:
+        description: "Type 'production' to request a release. Blocked until every docs/plan.md §7 launch gate is green."
         required: false
-        default: "false"
-      pull_request_number:
-        description: "Hermes updater pull request number"
-        required: false
-        default: ""
-      expected_head_sha:
-        description: "Exact updater commit to validate"
-        required: false
-        default: ""
-      release_tag:
-        description: "Stable Hermes release tag to validate"
-        required: false
-        default: ""
+        default: "none"
   repository_dispatch:
     types: [auto_merge_deploy]
 
 concurrency:
   group: ci-${{ github.ref }}
-  # Never cancel a production deployment halfway through its health check or rollback.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -35,630 +22,74 @@ permissions:
 
 jobs:
   check:
+    # Branch protection requires this exact check name.
     name: npm run check
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: pg
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       CI: "true"
+      TEST_DATABASE_URL: postgres://postgres:pg@127.0.0.1:5432/postgres
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Validate Hermes updater dispatch fence
-        if: github.event_name == 'workflow_dispatch' && inputs.hermes_update == 'true'
-        env:
-          HERMES_UPDATE_BRANCH: automation/hermes-agent-updater
-          HERMES_EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
-          HERMES_PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
-          HERMES_RELEASE_TAG: ${{ inputs.release_tag }}
-        run: |
-          set -euo pipefail
-          test "$GITHUB_REF" = "refs/heads/$HERMES_UPDATE_BRANCH"
-          test "$HERMES_EXPECTED_HEAD_SHA" = "$GITHUB_SHA"
-          node -e 'if (!/^[0-9a-f]{40}$/i.test(process.argv[1])) process.exit(1)' "$HERMES_EXPECTED_HEAD_SHA"
-          node -e 'if (!/^[1-9][0-9]*$/.test(process.argv[1])) process.exit(1)' "$HERMES_PULL_REQUEST_NUMBER"
-          node -e 'if (!/^v20[0-9]{2}\.(?:[1-9]|1[0-2])\.(?:[1-9]|[12][0-9]|3[01])(?:\.[0-9]+)?$/.test(process.argv[1])) process.exit(1)' "$HERMES_RELEASE_TAG"
-          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
-            git fetch --no-tags --unshallow origin "+refs/heads/main:refs/remotes/origin/main"
-          else
-            git fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
-          fi
-          git merge-base --is-ancestor origin/main HEAD
-          expected_paths=(
-            SOURCE_OF_TRUTH.md
-            production/data/hermes-provider-provisioning-report.json
-            production/data/hermes-upstream-provenance.json
-            production/docker-compose.local-production.yml
-            production/lib/hermes-provider-provisioning.mjs
-          )
-          mapfile -t changed_entries < <(git diff --name-status --no-renames origin/main...HEAD)
-          test "${#changed_entries[@]}" -eq "${#expected_paths[@]}"
-          for index in "${!expected_paths[@]}"; do
-            IFS=$'\t' read -r status changed_path extra <<< "${changed_entries[$index]}"
-            test "$status" = "M"
-            test "$changed_path" = "${expected_paths[$index]}"
-            test -z "${extra:-}"
-          done
-
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
 
-      - name: Runtime dependency audit
-        run: npm run audit
-
-      # No NODE_ENV/tokens here: the test suite relies on the local
-      # non-production admin-token fallback and fixture defaults.
-      - name: Generate runtime reports (gitignored, tests expect them)
-        run: npm run payload:runtime
-
-      - name: Tests and validation
-        run: npm test && npm run validate
-
-      # next build sets NODE_ENV=production itself; Payload config wants
-      # these present at build time. Dummy non-secret values, build-only.
-      - name: Next.js production build
-        run: npm run next:build
-        env:
-          PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
-          DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
-
-      - name: Smoke built Next runtime
-        run: npm run next:smoke
-        env:
-          PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
-          DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
-
-      - name: Build and smoke deployable container
-        id: container_smoke
-        run: |
-          image="ms-realty-ci:${GITHUB_SHA}"
-          DOCKER_BUILDKIT=1 docker build --build-arg "MS_REALTY_BUILD_MARKER=$GITHUB_SHA" --tag "$image" .
-          container_id="$(docker run --detach --publish 127.0.0.1::8080 \
-            --env PAYLOAD_SECRET=ci-build-secret-not-a-real-secret-0123456789 \
-            --env DATABASE_URL=postgresql://localhost:5432/ms_realty_ci \
-            "$image")"
-          echo "container_id=$container_id" >> "$GITHUB_OUTPUT"
-          port="$(docker port "$container_id" 8080/tcp | sed -n 's/.*:\([0-9][0-9]*\)$/\1/p')"
-          test -n "$port"
-          for _ in $(seq 1 30); do
-            if curl --fail --silent "http://127.0.0.1:${port}/api/health" > /tmp/ms-realty-health.json; then
-              break
-            fi
-            sleep 1
-          done
-          test -s /tmp/ms-realty-health.json
-          node -e 'const d=JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); if (d.build_marker !== process.env.GITHUB_SHA) process.exit(1)' /tmp/ms-realty-health.json
-          expected_ready_status="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync("/tmp/ms-realty-health.json", "utf8")).launch_ready ? "200" : "503")')"
-          ready_status="$(curl --silent --show-error --output /tmp/ms-realty-ready.json --write-out '%{http_code}' "http://127.0.0.1:${port}/api/ready")"
-          test "$ready_status" = "$expected_ready_status"
-
-      - name: Show deployable container logs on failure
-        if: failure() && steps.container_smoke.outputs.container_id != ''
-        run: docker logs "${{ steps.container_smoke.outputs.container_id }}"
-
-      - name: Stop deployable container
-        if: always() && steps.container_smoke.outputs.container_id != ''
-        run: docker rm --force "${{ steps.container_smoke.outputs.container_id }}"
-
-  hermes_compatibility:
-    name: Hermes compatibility smoke
-    if: >-
-      (github.event_name == 'workflow_dispatch' &&
-      inputs.hermes_update == 'true' &&
-      github.ref == 'refs/heads/automation/hermes-agent-updater') ||
-      (github.event_name == 'pull_request' &&
-      github.head_ref == 'automation/hermes-agent-updater')
-    needs: check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Verify exact workflow-dispatch head
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          HERMES_EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
-          HERMES_PULL_REQUEST_NUMBER: ${{ inputs.pull_request_number }}
-          HERMES_RELEASE_TAG: ${{ inputs.release_tag }}
-        run: |
-          set -euo pipefail
-          test "$GITHUB_REF" = "refs/heads/automation/hermes-agent-updater"
-          test "$HERMES_EXPECTED_HEAD_SHA" = "$GITHUB_SHA"
-          test "$HERMES_PULL_REQUEST_NUMBER" != ""
-          test "$HERMES_RELEASE_TAG" != ""
-
-      - name: Run exact Hermes image compatibility smoke
-        run: npm run hermes:compatibility
-
-  deploy_origin:
-    name: Deploy durable origin
-    if: >-
-      vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD != 'true' &&
-      github.ref == 'refs/heads/main' &&
-      (github.event_name == 'push' ||
-      (github.event_name == 'repository_dispatch' &&
-      github.event.action == 'auto_merge_deploy' &&
-      github.event.client_payload.merge_sha == github.sha))
-    needs: check
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    outputs:
-      previous_release: ${{ steps.previous_origin.outputs.release }}
-      previous_marker: ${{ steps.previous_origin.outputs.marker }}
-      previous_ready: ${{ steps.previous_origin.outputs.ready }}
-      previous_blockers: ${{ steps.previous_origin.outputs.blockers }}
-      previous_monitoring_valid: ${{ steps.previous_monitoring.outputs.valid }}
-      workers_dev_url: ${{ steps.workers_dev.outputs.url }}
-    env:
-      MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
-      MS_REALTY_DEPLOY_KNOWN_HOSTS: ${{ secrets.MS_REALTY_DEPLOY_KNOWN_HOSTS }}
-      MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Require origin deployment credentials
-        run: |
-          test -n "$MS_REALTY_DEPLOY_HOST"
-          test -n "$MS_REALTY_DEPLOY_KNOWN_HOSTS"
-          test -n "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test "${#GITHUB_SHA}" = 40
-
-      - name: Prepare pinned SSH identity
-        run: |
-          install -d -m 0700 "$RUNNER_TEMP/ssh"
-          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
-          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
-          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
-
-      - name: Resolve workers.dev health endpoint
-        id: workers_dev
-        run: |
-          response="$(curl --fail --silent --show-error --max-time 20 \
-            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain")"
-          subdomain="$(node -e 'const d=JSON.parse(process.argv[1]); const value=d.success && d.result?.subdomain; if (typeof value !== "string" || !/^[a-z0-9-]{1,63}$/i.test(value)) process.exit(1); process.stdout.write(value)' "$response")"
-          echo "url=https://ms-realty.${subdomain}.workers.dev/api/health" >> "$GITHUB_OUTPUT"
-
-      - name: Capture active origin release and readiness
-        id: previous_origin
-        run: |
-          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
-          release="$(ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'set -e; target="$(readlink -f /opt/ms-realty/current)"; case "$target" in /opt/ms-realty/releases/*) basename "$target" ;; *) exit 1 ;; esac')"
-          [[ "$release" =~ ^[0-9a-f]{40}$ ]]
-          health_url="${{ steps.workers_dev.outputs.url }}"
-          marker=""
-          for attempt in $(seq 1 100); do
-            if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/previous-health.json" &&
-              marker="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ok") process.exit(1); if (d.build_marker === undefined || d.build_marker === "unversioned") process.stdout.write("legacy"); else if (typeof d.build_marker === "string" && /^[0-9a-f]{40}$/i.test(d.build_marker)) process.stdout.write(d.build_marker); else process.exit(1)' "$RUNNER_TEMP/previous-health.json")"; then
-              break
-            fi
-            echo "Pre-activation health check attempt $attempt/100 failed; retrying."
-            sleep 10
-          done
-          test -n "$marker"
-          if [ "$marker" = "legacy" ]; then marker=""; fi
-          ready="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); process.stdout.write(d.launch_ready === true ? "true" : "false")' "$RUNNER_TEMP/previous-health.json")"
-          blockers="$(node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const rows=Array.isArray(d.blockers) ? d.blockers : []; if (!rows.every((value) => typeof value === "string" && /^[a-z0-9_:-]+$/.test(value))) process.exit(1); process.stdout.write([...rows].sort().join(","))' "$RUNNER_TEMP/previous-health.json")"
-          {
-            echo "release=$release"
-            echo "marker=$marker"
-            echo "ready=$ready"
-            echo "blockers=$blockers"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Capture validated monitoring evidence for rollback
-        id: previous_monitoring
-        run: |
-          blockers="${{ steps.previous_origin.outputs.blockers }}"
-          if [[ ",$blockers," == *",monitoring_rollback,"* ]]; then
-            echo "valid=false" >> "$GITHUB_OUTPUT"
-            echo "Prior release already has monitoring_rollback; no passing report will be preserved."
-            exit 0
-          fi
-          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
-          local_report="$RUNNER_TEMP/previous-monitoring-rollback-report.json"
-          remote_report="/opt/ms-realty/incoming/previous-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
-          # Runner values are intentionally expanded before SSH.
-          # shellcheck disable=SC2029
-          # The prior report is validated on the origin before it is copied. An
-          # expired or invalid one means there is nothing to preserve for a
-          # rollback; it must not stop the release (three releases died here
-          # on 2026-09-09 while the drill could not refresh the report).
-          if ! ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; install -d -m 0700 /opt/ms-realty/incoming; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker exec --user 1001:1001 \"\$container\" node production/scripts/validate-monitoring-rollback-report.mjs >/dev/null; docker cp \"\${container}:/runtime-evidence/monitoring-rollback-report.json\" '$remote_report'; chmod 0600 '$remote_report'"; then
-            echo "Prior monitoring report did not validate on the origin; no report will be preserved for rollback."
-            echo "valid=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          # The validated temporary path is runner-controlled.
-          # shellcheck disable=SC2029
-          if ! scp "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST:$remote_report" "$local_report"; then
-            # The validated temporary path is runner-controlled.
-            # shellcheck disable=SC2029
-            ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'" || true
-            exit 1
-          fi
-          # The validated temporary path is runner-controlled.
-          # shellcheck disable=SC2029
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'"
-          chmod 0600 "$local_report"
-          # The report must outlast this release and its rollback (both jobs
-          # are capped at 60 minutes): evidence that expires mid-release leaves
-          # the rollback unable to reproduce the readiness it started from.
-          if MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=7200000 npm run monitoring:preflight; then
-            echo "valid=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Prior monitoring report did not validate; no report will be preserved for rollback."
-            echo "valid=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Preserve validated monitoring evidence for rollback
-        if: steps.previous_monitoring.outputs.valid == 'true'
+      - name: Upload Playwright report
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: rollback-monitoring-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/previous-monitoring-rollback-report.json
-          if-no-files-found: error
-          retention-days: 1
-
-      # The release verification requires launch_ready, so a release started
-      # without monitoring evidence that outlasts the release + rollback window
-      # can only fail verification and roll back. Refuse it here, before any
-      # origin or Worker mutation, and name the real drill that refreshes it.
-      - name: Require monitoring evidence that outlasts the release window
-        if: steps.previous_monitoring.outputs.valid != 'true'
-        run: |
-          echo "::error::Monitoring rollback evidence is missing, expired, or would expire within the 120-minute release + rollback window. Run the monitoring drill (monitoring-drill.yml, confirm_alert_drill=true) for the serving release, then dispatch the release again."
-          exit 1
-
-      - name: Capture exact-release R2 media coverage
-        run: |
-          node production/scripts/repair-missing-r2-media.mjs \
-            --list-only \
-            --listing-output "$RUNNER_TEMP/r2-media-objects.json"
-          node production/scripts/build-r2-media-coverage.mjs \
-            --input "$RUNNER_TEMP/r2-media-objects.json" \
-            --output production/data/r2-media-coverage-report.json \
-            --release-sha "$GITHUB_SHA"
-          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.status !== "pass" || d.release_sha !== process.argv[2] || d.missing_count !== 0) process.exit(1)' production/data/r2-media-coverage-report.json "$GITHUB_SHA"
-
-      - name: Preserve exact R2 report for the Worker image
-        uses: actions/upload-artifact@v4
-        with:
-          name: r2-media-coverage-${{ github.sha }}
-          path: production/data/r2-media-coverage-report.json
-          if-no-files-found: error
+          name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: playwright-report/
           retention-days: 7
 
-      - name: Upload and activate exact origin release
-        run: |
-          # Every command names itself and its exit code: two deploys in a row
-          # died inside this step with exit 1 and not one line of output, which
-          # left nothing to debug. Never let this step fail silently again.
-          step() { echo "::group::$1"; shift; "$@" && rc=0 || rc=$?; echo "::endgroup::"; if [ "$rc" -ne 0 ]; then echo "FAILED ($rc): $*" >&2; exit "$rc"; fi; }
-          archive="$RUNNER_TEMP/ms-realty-${GITHUB_SHA}.tar.gz"
-          step "pack release archive" tar --exclude-vcs --exclude=node_modules --exclude=.next --exclude=.local-backups --exclude=.recovery-work -czf "$archive" .
-          ls -l "$archive"
-          df -h "$RUNNER_TEMP" | tail -1
-          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
-          step "prepare incoming dir" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" 'install -d -m 0700 /opt/ms-realty/incoming; df -h /opt /var/lib/containerd 2>/dev/null | tail -2'
-          step "upload archive" scp "${ssh_args[@]}" "$archive" "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.tar.gz"
-          step "upload deploy script" scp "${ssh_args[@]}" production/scripts/deploy-production-review.sh "root@$MS_REALTY_DEPLOY_HOST:/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh"
-          step "activate release" ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; trap 'rm -f /opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' EXIT; bash -x '/opt/ms-realty/incoming/${GITHUB_SHA}.deploy.sh' '$GITHUB_SHA' </dev/null; test \"\$(readlink -f /opt/ms-realty/current)\" = '/opt/ms-realty/releases/${GITHUB_SHA}'"
-
-  deploy:
-    name: Deploy production
-    permissions:
-      contents: read
-      # The rollback dispatches the real monitoring drill when its preserved evidence expired.
-      actions: write
-    if: >-
-      vars.MS_REALTY_PUBLIC_CONSTRUCTION_HOLD != 'true' &&
-      github.ref == 'refs/heads/main' &&
-      (github.event_name == 'push' ||
-      (github.event_name == 'repository_dispatch' &&
-      github.event.action == 'auto_merge_deploy' &&
-      github.event.client_payload.merge_sha == github.sha))
-    needs: [check, deploy_origin]
+  release:
+    name: Release (blocked until launch gates pass)
+    if: github.event_name == 'workflow_dispatch' && inputs.release == 'production'
+    needs: check
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
-      MS_REALTY_DEPLOY_HOST: ${{ vars.MS_REALTY_DEPLOY_HOST }}
-      MS_REALTY_DEPLOY_KNOWN_HOSTS: ${{ secrets.MS_REALTY_DEPLOY_KNOWN_HOSTS }}
-      MS_REALTY_DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.MS_REALTY_DEPLOY_SSH_PRIVATE_KEY }}
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Prepare pinned SSH identity for coordinated rollback
+      # No deploy steps exist on purpose (docs/plan.md §1). Replace this step only when
+      # every gate below is green and recorded.
+      - name: Launch gates (docs/plan.md §7)
         run: |
-          test -n "$MS_REALTY_DEPLOY_HOST"
-          test -n "$MS_REALTY_DEPLOY_KNOWN_HOSTS"
-          test -n "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY"
-          install -d -m 0700 "$RUNNER_TEMP/ssh"
-          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
-          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
-          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
-
-      - name: Restore exact R2 report from the origin release
-        uses: actions/download-artifact@v4
-        with:
-          name: r2-media-coverage-${{ github.sha }}
-          path: production/data
-
-      - name: Restore validated monitoring evidence for rollback
-        if: needs.deploy_origin.outputs.previous_monitoring_valid == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: rollback-monitoring-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/rollback-evidence
-
-      # The origin is already on the new release. This job may have waited in
-      # the queue, so the preserved evidence is checked again against this
-      # job's own 60-minute cap before the Worker changes: if it cannot last
-      # the job, fail now, and the rollback below runs while the evidence is
-      # still valid instead of discovering it expired at the end.
-      - name: Require the preserved evidence to outlast this job
-        run: |
-          local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
-          test -s "$local_report"
-          MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_MONITORING_EVIDENCE_REQUIRED_REMAINING_MS=3600000 npm run monitoring:preflight
-
-      - name: Verify exact R2 report for the Worker image
-        run: >-
-          node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.status !== "pass" || d.release_sha !== process.argv[2] || d.missing_count !== 0) process.exit(1)'
-          production/data/r2-media-coverage-report.json "$GITHUB_SHA"
-
-      - name: Require deployment credentials
-        run: |
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test "${#MS_REALTY_ORIGIN_TOKEN}" -ge 32
-
-      - name: Capture active Worker version
-        id: previous
-        run: |
-          status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
-          version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
-      - name: Set exact Container image marker
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from "node:fs";
-
-          const marker = process.env.GITHUB_SHA;
-          const placeholder = "__MS_REALTY_BUILD_MARKER__";
-          const configPath = "wrangler.jsonc";
-          if (!/^[0-9a-f]{40}$/i.test(marker)) throw new Error("GITHUB_SHA must be a full commit SHA");
-          const config = fs.readFileSync(configPath, "utf8");
-          if (config.split(placeholder).length !== 3) throw new Error("Expected Container and edge image marker placeholders");
-          fs.writeFileSync(configPath, config.replaceAll(placeholder, marker));
-          NODE
-
-      - name: Validate Worker secret bindings
-        run: |
-          secrets="$(npx --yes wrangler@4.117.0 secret list --name ms-realty --format json)"
-          node --input-type=module - "$secrets" <<'NODE'
-          import fs from "node:fs";
-
-          const rows = JSON.parse(process.argv[2]);
-          if (!Array.isArray(rows) || !rows.every((row) => row && typeof row.name === "string")) {
-            throw new Error("Worker secret list must contain secret names");
-          }
-          if (!rows.some(({ name }) => name === "MS_REALTY_ORIGIN_TOKEN")) {
-            throw new Error("MS_REALTY_ORIGIN_TOKEN Worker secret is required");
-          }
-
-          const config = fs.readFileSync("wrangler.jsonc", "utf8");
-          const varsSource = config.match(/"vars"\s*:\s*\{([\s\S]*?)^\s*\},/m)?.[1];
-          if (varsSource === undefined) throw new Error("wrangler vars are required");
-          const checkedInVars = new Set(
-            [...varsSource.matchAll(/^\s*"([^"]+)"\s*:/gm)].map(([, name]) => name),
-          );
-          const allowedMigrationNames = new Set([
-            "MS_REALTY_LEAD_DURABLE_STORE_ENABLED",
-            "MS_REALTY_WORKSPACE_ID",
-          ]);
-          const collisions = rows
-            .map(({ name }) => name)
-            .filter((name) => checkedInVars.has(name));
-          const unexpectedCollisions = collisions.filter((name) => !allowedMigrationNames.has(name));
-          if (collisions.length > 2 || unexpectedCollisions.length > 0) {
-            throw new Error(`Worker secret/var collisions are not allowlisted: ${unexpectedCollisions.join(", ")}`);
-          }
-          NODE
-
-      - name: Deploy exact main commit
-        id: deploy
-        run: >-
-          npx --yes wrangler@4.117.0 deploy
-          --keep-vars
-          --containers-rollout immediate
-          --tag "$GITHUB_SHA"
-          --message "Automated production deploy $GITHUB_SHA"
-
-      - name: Verify deployed Worker
-        run: |
-          health_url="${{ needs.deploy_origin.outputs.workers_dev_url }}"
-          ready_url="${health_url%/api/health}/api/ready"
-          verification_deadline=$((SECONDS + 900))
-          attempt=0
-          while [ "$SECONDS" -lt "$verification_deadline" ]; do
-            attempt=$((attempt + 1))
-            if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/health.json" &&
-              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const expected=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== expected || d.origin_build_marker !== expected) process.exit(1)' "$RUNNER_TEMP/health.json" "$GITHUB_SHA" &&
-              curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$ready_url" --output "$RUNNER_TEMP/ready.json" &&
-              node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); if (d.service !== "ms-realty" || d.status !== "ready" || d.launch_ready !== true || !Array.isArray(d.blockers) || d.blockers.length !== 0) process.exit(1)' "$RUNNER_TEMP/ready.json"; then
-              exit 0
-            fi
-            echo "Expected exact markers $GITHUB_SHA and ready status; attempt $attempt did not match."
-            sleep 10
-          done
-          exit 1
-
-      # The Worker is verified on workers.dev above; the canonical zone routes
-      # it re-asserts take a few seconds longer to answer for makler-realty.com.
-      # Run 34252720734 probed too early, read the legacy host's HTML at
-      # /api/health, and rolled back an otherwise ready release. Give the zone
-      # five minutes to converge before calling the release broken.
-      - name: Verify canonical production journeys
-        env:
-          MS_REALTY_EXPECTED_BUILD_MARKER: ${{ github.sha }}
-          MS_REALTY_PRODUCTION_URL: https://makler-realty.com
-        run: |
-          for attempt in $(seq 1 15); do
-            if node production/scripts/probe-production-journeys.mjs; then exit 0; fi
-            echo "Canonical journeys attempt $attempt/15 did not pass; retrying in 20s."
-            sleep 20
-          done
-          exit 1
-
-      # The journey probe proves production is alive in eight checks. This
-      # proves the site is usable: every public page type in every public
-      # locale, the SEO files on the real domain, one legacy URL of each
-      # approved decision class, and the operator surface reachable but closed.
-      # A release that renders home while Greek search 500s or an approved 301
-      # breaks does not reach the agency's customers.
-      - name: Verify the whole public site on the canonical domain
-        env:
-          MS_REALTY_PUBLIC_URL: https://makler-realty.com
-        run: |
-          for attempt in $(seq 1 6); do
-            if node production/scripts/probe-canonical-site.mjs; then exit 0; fi
-            echo "Canonical site attempt $attempt/6 did not pass; retrying in 30s."
-            sleep 30
-          done
-          exit 1
-
-      - name: Roll back failed deployment
-        if: failure() && needs.deploy_origin.outputs.previous_release != ''
-        run: |
-          previous_version="${{ steps.previous.outputs.version }}"
-          previous_origin="${{ needs.deploy_origin.outputs.previous_release }}"
-          expected_marker="${{ needs.deploy_origin.outputs.previous_marker }}"
-          expected_ready="${{ needs.deploy_origin.outputs.previous_ready }}"
-          expected_blockers="${{ needs.deploy_origin.outputs.previous_blockers }}"
-          previous_monitoring_valid="${{ needs.deploy_origin.outputs.previous_monitoring_valid }}"
-          [[ "$expected_ready" =~ ^(true|false)$ ]]
-          [[ "$previous_monitoring_valid" =~ ^(true|false)$ ]]
-          install -d -m 0700 "$RUNNER_TEMP/ssh"
-          printf '%s\n' "$MS_REALTY_DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/ssh/id_ed25519"
-          printf '%s\n' "$MS_REALTY_DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
-          chmod 0600 "$RUNNER_TEMP/ssh/id_ed25519" "$RUNNER_TEMP/ssh/known_hosts"
-          if [ -n "$previous_version" ]; then
-            status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
-            version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-            if [ "$version" != "$previous_version" ]; then
-              npx --yes wrangler@4.117.0 rollback "$previous_version" --name ms-realty --message "Automatic rollback after failed release verification for $GITHUB_SHA" --yes
-              status="$(npx --yes wrangler@4.117.0 deployments status --name ms-realty --json)"
-              version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v) process.exit(1); process.stdout.write(v.version_id)' "$status")"
-            fi
-            test "$version" = "$previous_version"
-          fi
-          [[ "$previous_origin" =~ ^[0-9a-f]{40}$ ]]
-          ssh_args=(-i "$RUNNER_TEMP/ssh/id_ed25519" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/ssh/known_hosts")
-          # Reconcile IDs with the previous seed before starting older code;
-          # relationships and operator edits survive this reverse rekey.
-          # shellcheck disable=SC2029
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml node '/opt/ms-realty/releases/$GITHUB_SHA/production/scripts/local-production.mjs' identities '/opt/ms-realty/releases/$previous_origin/production/data/cms-seed.json'"
-          # Validated release and run identifiers expand on the runner.
-          # shellcheck disable=SC2029
-          ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -e; release='$previous_origin'; target='/opt/ms-realty/releases/$previous_origin'; test -f \"\$target/.ms-realty-release-sha\"; test \"\$(cat \"\$target/.ms-realty-release-sha\")\" = \"\$release\"; link='/opt/ms-realty/.current-rollback-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}'; ln -s \"\$target\" \"\$link\"; mv -Tf \"\$link\" /opt/ms-realty/current; cd \"\$target\"; MS_REALTY_ENV_FILE=/opt/ms-realty/shared/.env.production-review MS_REALTY_COMPOSE_OVERRIDE=production/docker-compose.production-review.yml MS_REALTY_BUILD_MARKER=\"\$release\" npm run docker:up; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\""
-          # Preserved evidence is re-attached only if it still covers the
-          # rollback verification window. If the queue or the run consumed it,
-          # the honest recovery is the real drill for the restored release:
-          # readiness then truthfully shows monitoring_rollback blocked until
-          # the drill lands. Exact markers are verified either way.
-          evidence_action="none"
-          if [ "$previous_monitoring_valid" = "true" ]; then
-            local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
-            test -s "$local_report"
-            evidence_action="$(MS_REALTY_MONITORING_ROLLBACK_REPORT_PATH="$local_report" MS_REALTY_ROLLBACK_WINDOW_MS=900000 node production/scripts/rollback-evidence-action.mjs)"
-          fi
-          if [ "$evidence_action" = "preserve" ]; then
-              local_report="$RUNNER_TEMP/rollback-evidence/previous-monitoring-rollback-report.json"
-              remote_report="/opt/ms-realty/incoming/rollback-monitoring-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
-              test -s "$local_report"
-              # The validated temporary path is runner-controlled.
-              # shellcheck disable=SC2029
-              scp "${ssh_args[@]}" "$local_report" "root@$MS_REALTY_DEPLOY_HOST:$remote_report"
-              # Validated release and temporary paths expand on the runner.
-              # shellcheck disable=SC2029
-              if ! ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "set -euo pipefail; report='$remote_report'; trap 'rm -f \"\$report\"' EXIT; target='/opt/ms-realty/releases/$previous_origin'; test \"\$(readlink -f /opt/ms-realty/current)\" = \"\$target\"; container=\"\$(docker ps --filter 'label=com.docker.compose.project=ms-realty-production-review' --filter 'label=com.docker.compose.service=app' --format '{{.ID}}')\"; [[ \"\$container\" =~ ^[0-9a-f]+$ ]]; docker cp \"\$report\" \"\${container}:/runtime-evidence/.monitoring-rollback-report.json\"; docker exec --user 0 \"\$container\" sh -c 'chmod 0444 /runtime-evidence/.monitoring-rollback-report.json && mv -f /runtime-evidence/.monitoring-rollback-report.json /runtime-evidence/monitoring-rollback-report.json'; docker exec --user 1001:1001 \"\$container\" sh -c 'node production/scripts/validate-monitoring-rollback-report.mjs && node production/scripts/build-launch-readiness.mjs'"; then
-                # The validated temporary path is runner-controlled.
-                # shellcheck disable=SC2029
-                ssh "${ssh_args[@]}" "root@$MS_REALTY_DEPLOY_HOST" "rm -f '$remote_report'" || true
-                exit 1
-              fi
-          elif [ "$previous_monitoring_valid" = "true" ] || [ "$expected_ready" = "true" ]; then
-            evidence_action="drill"
-          fi
-          if [ "$evidence_action" = "drill" ]; then
-            echo "Preserved monitoring evidence no longer covers the rollback window; dispatching the real monitoring drill for $previous_origin."
-            GH_TOKEN="${{ github.token }}" gh workflow run monitoring-drill.yml --repo "$GITHUB_REPOSITORY" --ref main -f release_sha="$previous_origin" -f confirm_alert_drill=true
-            echo "rollback_readiness_recovery=drill" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          health_url="${{ needs.deploy_origin.outputs.workers_dev_url }}"
-          if [ -z "$health_url" ]; then health_url="https://ms-realty.ms-realty-bg.workers.dev/api/health"; fi
-          ready_url="${health_url%/api/health}/api/ready"
-          rollback_deadline=$((SECONDS + 900))
-          attempt=0
-          while [ "$SECONDS" -lt "$rollback_deadline" ]; do
-            attempt=$((attempt + 1))
-            if curl --fail --silent --show-error --max-time 20 --header "Cache-Control: no-cache" "$health_url" --output "$RUNNER_TEMP/rollback-health.json"; then
-              health_matches=false
-              if [ -n "$expected_marker" ]; then
-                if node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const edge=process.argv[2], origin=process.argv[3]; if (d.service !== "ms-realty" || d.status !== "ok" || d.build_marker !== edge || d.origin_build_marker !== origin) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$expected_marker" "$previous_origin"; then
-                  health_matches=true
-                fi
-              elif node -e 'const d=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); const origin=process.argv[2]; if (d.service !== "ms-realty" || d.status !== "ok" || (d.build_marker !== undefined && d.build_marker !== "unversioned") || d.origin_build_marker !== origin) process.exit(1)' "$RUNNER_TEMP/rollback-health.json" "$previous_origin"; then
-                health_matches=true
-              fi
-              if ! ready_status="$(curl --silent --show-error --max-time 20 --header "Cache-Control: no-cache" --output "$RUNNER_TEMP/rollback-ready.json" --write-out '%{http_code}' "$ready_url")"; then
-                ready_status=000
-              fi
-              # Readiness is read from the restored release and compared to the
-              # pre-release snapshot; in drill recovery the snapshot with
-              # monitoring_rollback added is the only other acceptable state.
-              if [ "$health_matches" = true ] &&
-                node production/scripts/rollback-readiness-matches.mjs "$RUNNER_TEMP/rollback-ready.json" "$ready_status" "$expected_ready" "$expected_blockers" "$evidence_action"; then
-                if [ -z "$expected_marker" ]; then
-                  echo "Rollback target predates exact image markers; confirmed its legacy unversioned health response."
-                fi
-                exit 0
-              fi
-            fi
-            echo "rollback_expected edge=${expected_marker:-legacy} origin=$previous_origin ready=$expected_ready blockers=${expected_blockers:-none}"
-            # JavaScript expands its own template literal.
-            # shellcheck disable=SC2016
-            node -e 'const fs=require("node:fs"); const read=(p)=>{try{return JSON.parse(fs.readFileSync(p,"utf8"))}catch{return {}}}; const marker=(v)=>typeof v==="string"&&(/^[0-9a-f]{40}$/i.test(v)||v==="unversioned")?v:"invalid"; const h=read(process.argv[1]),r=read(process.argv[2]); const blockers=Array.isArray(r.blockers)&&r.blockers.every((v)=>typeof v==="string"&&/^[a-z0-9_:-]+$/.test(v))?[...r.blockers].sort().join(",")||"none":"invalid"; const ready=r.launch_ready===true?"true":r.launch_ready===false?"false":"invalid"; console.log(`rollback_state edge=${marker(h.build_marker)} origin=${marker(h.origin_build_marker)} ready=${ready} blockers=${blockers}`)' "$RUNNER_TEMP/rollback-health.json" "$RUNNER_TEMP/rollback-ready.json"
-            echo "Rollback verification attempt $attempt did not match the prior edge/origin markers and readiness."
-            sleep 10
-          done
+          cat <<'GATES'
+          Deployment is allowed only when all of these are true and recorded (docs/plan.md §7):
+          1. All slices S1-S6 and S8 merged; S7 flags off unless the owner enables a service.
+          2. npm run check green on the release commit; Playwright T1-T5 green in every enabled locale.
+          3. Production data ETL rehearsed on a restored copy of the live database with row-count and
+             checksum reconciliation; backup + isolated restore drill passed within 30 days.
+          4. Security review of auth, authz, uploads, edge and secrets with no open high findings.
+          5. WCAG 2.2 AA task checks (keyboard, screen reader, zoom, RTL) on T1-T5 recorded.
+          6. Core Web Vitals lab budgets met on the preview host for P01, P02, P05.
+          7. Monitoring and alerting live (health, error rate, job queue, outbox failures) with a named
+             on-call owner.
+          8. Owner inputs in spec §23.3 supplied: coverage, enabled locales + reviewers, service hours,
+             response promises, disclosure policies, retention/privacy policy, staff capabilities.
+          9. Owner launch decision recorded; .ru renewed if it is to be routed.
+          GATES
+          echo "::error::Release blocked: the launch gates are not yet green, and this workflow has no deploy steps."
           exit 1

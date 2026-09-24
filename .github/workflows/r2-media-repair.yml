@@ -18,7 +18,11 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
+      # The legacy app left main in the rebuild (docs/plan.md). This workflow still serves
+      # the live legacy deployment, so it runs the scripts frozen at tag legacy-app-final.
       - uses: actions/checkout@v4
+        with:
+          ref: legacy-app-final
 
       - uses: actions/setup-node@v4
         with:

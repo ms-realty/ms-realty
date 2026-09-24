@@ -1,8 +1,0 @@
-import { renderAppApiResponse } from "../../../_ms-realty/api.js";
-
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
-
-export async function GET(request) {
-  return renderAppApiResponse(request);
-}

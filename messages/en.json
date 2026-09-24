@@ -1,0 +1,185 @@
+{
+  "common": {
+    "brand": "MS Realty",
+    "agencyKind": "Real estate agency",
+    "homeHeading": "MS Realty",
+    "homeIntro": "Buy, rent, sell or let property with the MS Realty team.",
+    "workspaceHeading": "Today",
+    "languageSuggestion": {
+      "label": "Language suggestion",
+      "message": "This page is also available in English.",
+      "switch": "Continue in English",
+      "dismiss": "Hide this suggestion"
+    }
+  },
+  "nav": {
+    "primaryLabel": "Main",
+    "utilitiesLabel": "Site tools",
+    "home": "MS Realty home page",
+    "buy": "Buy",
+    "rent": "Rent",
+    "sellLet": "Sell / Let",
+    "areas": "Areas",
+    "howWeHelp": "How we help",
+    "saved": "Saved",
+    "language": "Language",
+    "contact": "Contact",
+    "myJourney": "My journey",
+    "menu": "Menu",
+    "journey": {
+      "label": "My journey",
+      "overview": "Overview",
+      "properties": "Properties",
+      "appointments": "Appointments",
+      "messages": "Messages",
+      "documents": "Documents",
+      "caseSwitcher": "Case",
+      "help": "Help"
+    },
+    "workspace": {
+      "label": "Workspace",
+      "secondaryLabel": "Management",
+      "today": "Today",
+      "inbox": "Inbox",
+      "cases": "Cases",
+      "properties": "Properties",
+      "calendar": "Calendar",
+      "contentApprovals": "Content & approvals",
+      "serviceOperations": "Service operations",
+      "reports": "Reports",
+      "settings": "Settings",
+      "more": "More",
+      "search": "Search records",
+      "interfaceLanguage": "Interface language",
+      "applyLanguage": "Apply"
+    }
+  },
+  "footer": {
+    "label": "Agency information",
+    "agencyName": "MS Realty",
+    "agencyKind": "Real estate agency",
+    "callLabel": "Call us",
+    "call": "Call {phone}",
+    "help": "Help",
+    "privacy": "Privacy",
+    "accessibility": "Accessibility",
+    "copyright": "© {year} MS Realty"
+  },
+  "states": {
+    "loading": {
+      "title": "Loading",
+      "body": "Loading the latest information."
+    },
+    "refreshing": {
+      "title": "Updating",
+      "body": "Showing what was loaded before while the page updates."
+    },
+    "emptyNew": {
+      "title": "Nothing here yet",
+      "body": "When there is something to show, it will appear here."
+    },
+    "emptyFiltered": {
+      "title": "No matches for these criteria",
+      "body": "{count, plural, one {# filter is} other {# filters are}} active. Change or remove a filter to see more."
+    },
+    "partial": {
+      "title": "Some sections could not load",
+      "body": "The rest of the page is up to date. Try the missing sections again."
+    },
+    "stale": {
+      "title": "This may be out of date",
+      "body": "Last confirmed {date}."
+    },
+    "permissionLimited": {
+      "title": "You don't have access to this",
+      "body": "Ask the person who manages it to give you access."
+    },
+    "sessionExpired": {
+      "title": "Your session has ended",
+      "body": "Sign in again to continue. Nothing was sent on your behalf."
+    },
+    "offline": {
+      "title": "You're offline",
+      "body": "Changes you make now stay on this device and are not sent until you reconnect."
+    },
+    "slow": {
+      "title": "This is taking longer than usual",
+      "body": "We're still working on it. You can wait here or check again later."
+    },
+    "validationError": {
+      "title": "{count, plural, one {# field needs} other {# fields need}} attention",
+      "body": "Correct the marked fields. Everything else you entered is kept."
+    },
+    "serverRejection": {
+      "title": "This could not be completed",
+      "body": "{reason} Reference: {reference}."
+    },
+    "unknownOutcome": {
+      "title": "We're checking whether this completed",
+      "body": "Don't send it again yet. Reference: {reference}."
+    },
+    "versionConflict": {
+      "title": "Someone else changed this",
+      "body": "Your version is kept. Review the latest changes before applying yours."
+    },
+    "dirtyDraft": {
+      "title": "Unsaved changes",
+      "body": "Your changes are not saved yet."
+    },
+    "savedDraft": {
+      "title": "Draft saved",
+      "body": "Saved {time}. Not sent or published."
+    },
+    "success": {
+      "title": "Done",
+      "body": "Your change is confirmed."
+    },
+    "revoked": {
+      "title": "No longer available",
+      "body": "Access was removed or the item was deleted."
+    },
+    "rateLimited": {
+      "title": "Too many attempts",
+      "body": "Try again in {minutes, plural, one {# minute} other {# minutes}}. What you entered is kept."
+    },
+    "unsupported": {
+      "title": "Not available here",
+      "body": "This isn't offered here. Call the team and we'll help another way."
+    },
+    "retry": "Try again",
+    "checkForUpdates": "Check for updates",
+    "requestAccess": "Request access",
+    "signInAgain": "Sign in again"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "body": "The address may be mistyped, or the page may have moved.",
+      "home": "Go to the home page"
+    },
+    "generic": {
+      "title": "This page could not be shown",
+      "body": "Try again. If it keeps happening, call us and quote the reference.",
+      "reference": "Reference: {reference}",
+      "retry": "Try again"
+    }
+  },
+  "forms": {
+    "required": "Required",
+    "optional": "Optional",
+    "errorSummary": "{count, plural, one {# answer needs} other {# answers need}} correcting",
+    "charactersLeft": "{count, plural, one {# character left} other {# characters left}}",
+    "choose": "Choose…",
+    "saveDraft": "Save draft",
+    "cancel": "Cancel"
+  },
+  "a11y": {
+    "skipToContent": "Skip to main content",
+    "currentPage": "current page",
+    "opensPhoneApp": "opens your phone app",
+    "languageList": "Choose a language",
+    "currentLanguage": "Current language: {language}",
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu"
+  }
+}

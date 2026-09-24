@@ -1,7 +1,0 @@
-{
-  "artifact_id": "approved-team-profiles-20260823",
-  "purpose": "Human-approved team profiles for the public about-and-team page. A profile publishes only when a named reviewer approved that exact content and the recorded source_hash still matches.",
-  "publishing_note": "This repository holds no approved staff records. Add only real profiles with a named reviewer and approved_at, then recompute source_hash with production/scripts/build-approved-content.mjs.",
-  "generated_at": "2026-08-23T00:00:00Z",
-  "profiles": []
-}
