@@ -48,6 +48,16 @@ check("listings active at freeze", listings.summary.lifecycle_at_freeze.active, 
 check("listings archived at freeze", listings.summary.lifecycle_at_freeze.archived, 135);
 check("listings with an area on the legacy record", listings.summary.with_area_on_the_listing_record, 0);
 check("listings with a recorded room count", listings.summary.with_recorded_rooms, 0);
+check("listings with a recorded bedroom count", listings.summary.with_recorded_bedrooms, 74);
+check(
+  "recorded bedroom counts match the summary",
+  listings.listings.filter((l) => l.bedrooms.recorded).length,
+  listings.summary.with_recorded_bedrooms,
+);
+assert(
+  "no zero-value placeholder is carried as a recorded bedroom count",
+  listings.listings.every((l) => !(l.bedrooms.zero_value_placeholder && l.bedrooms.recorded)),
+);
 check("listings merged into another listing", listings.summary.merged_into_another_listing, 38);
 check("translation records excluding the source locale", listings.summary.translation_records_excluding_source_locale, 990);
 check("translations human-approved (non-source locale)", listings.summary.translations_human_approved_excluding_source_locale, 0);

@@ -19,7 +19,12 @@ if (!databaseUrl) {
 }
 
 const shared = {
-  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "server-only": fileURLToPath(new URL("./src/test/server-only.ts", import.meta.url)),
+    },
+  },
 };
 
 export default defineConfig({

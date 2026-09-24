@@ -40,7 +40,7 @@
     "merged_into_another_listing": 38,
     "price_on_request": 31,
     "with_price_amount": 134,
-    "with_recorded_bedrooms": 82,
+    "with_recorded_bedrooms": 74,
     "with_recorded_rooms": 0,
     "with_area_on_the_listing_record": 0,
     "area_extraction_status": {
@@ -69,7 +69,13 @@
     "translations_public_indexable_excluding_source_locale": 0,
     "translation_states_excluding_source_locale": {
       "human_edited": 990
-    }
+    },
+    "bedrooms_property_verification_state": {
+      "entered_pending_review": 71,
+      "not_applicable": 84,
+      "unknown": 10
+    },
+    "bedrooms_zero_value_placeholders": 8
   },
   "approvals": {
     "listing_publication": {
@@ -187,7 +193,10 @@
     "38 listings are archived duplicates merged into a .com listing. They keep their own .ru URL, and that URL's 301 resolves to the archived duplicate, not to the surviving listing.",
     "Those same 38 listings are still keyed by their crawl placeholder id (MS-CRAWL-nnnn): the lot number they carry is the one the surviving .com listing uses, so lot number alone is not a unique legacy key.",
     "The 990 non-source-locale translation records are all unapproved and non-indexable. Nothing here may be published or indexed without a new human approval.",
-    "Rent listings record an amount but no rent period."
+    "Rent listings record an amount but no rent period.",
+    "Eight listing records held bedrooms 0 as a placeholder default (MS-00101, MS-00903, MS-00943, MS-00960, MS-00937, MS-00959, MS-00635, MS-CRAWL-0135): the property record has no count, its verification state is unknown and zero_value_audit lists bedrooms_count. They are carried as not recorded, with zero_value_placeholder: true.",
+    "bedrooms.property_verification_state carries the legacy property's own fact_verification state for bedrooms_count. It says not_applicable for 84 properties, while only 4 listing records set bedrooms_not_applicable; for MS-00873, MS-CRAWL-0122 and MS-CRAWL-0129 the listing record holds a count the property marks not_applicable. The two records disagree and neither is preferred here.",
+    "MS-CRAWL-0148, MS-CRAWL-0149 and MS-CRAWL-0162 are recorded as purpose sale, but their Russian source headlines advertise a rental (Сдается / Aренда, the last with a Latin A) and MS-CRAWL-0148's text gives 330 EUR per month. The recorded purpose and amounts are kept as they are; the amount is not a known sale price."
   ],
   "listings": [
     {
@@ -245,7 +254,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -1245,7 +1256,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -2027,7 +2040,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -2989,7 +3004,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -3867,7 +3884,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -4745,7 +4764,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -5507,7 +5528,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -6363,7 +6386,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -7879,7 +7904,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -8757,7 +8784,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -9747,7 +9776,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -10786,7 +10817,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -11566,7 +11599,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -12416,7 +12451,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -13252,7 +13289,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -14313,7 +14352,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -15354,7 +15395,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -16274,7 +16317,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -17428,7 +17473,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -18360,7 +18407,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -19163,7 +19212,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -20298,7 +20349,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -21731,7 +21784,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -23187,10 +23242,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -24098,7 +24156,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -25136,7 +25196,9 @@
         "count": 4,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 4
+        "property_record_count": 4,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -26596,7 +26658,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -27434,7 +27498,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -28379,10 +28445,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -29243,10 +29312,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -30124,7 +30196,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -31043,7 +31117,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -32278,7 +32354,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -33206,7 +33284,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -34075,7 +34155,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -35436,7 +35518,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -36238,7 +36322,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -37606,7 +37692,9 @@
         "count": 4,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -39851,7 +39939,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -40625,7 +40715,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -41755,7 +41847,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": true,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -42978,7 +43072,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -43817,7 +43913,9 @@
         "count": 6,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 6
+        "property_record_count": 6,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -44790,7 +44888,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": true,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -45607,7 +45707,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -46514,7 +46616,9 @@
         "count": 7,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 7
+        "property_record_count": 7,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -47412,7 +47516,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -48731,7 +48837,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -49707,7 +49815,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -50807,7 +50917,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -51713,7 +51825,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -52625,7 +52739,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -53958,7 +54074,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -55103,7 +55221,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -56093,7 +56213,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -56918,7 +57040,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -57687,7 +57811,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -58489,7 +58615,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -59670,7 +59798,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -60467,7 +60597,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -61269,7 +61401,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -62702,7 +62836,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -63657,10 +63793,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -64497,7 +64636,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": true,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -65308,10 +65449,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -66690,7 +66834,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -68388,7 +68534,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -69266,7 +69414,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -70012,7 +70162,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -71179,7 +71331,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -71945,7 +72099,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -73126,7 +73282,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -74011,7 +74169,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -75247,7 +75407,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -76315,7 +76477,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -77334,7 +77498,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -78626,10 +78792,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -79521,7 +79690,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -80413,7 +80584,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -81417,7 +81590,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -82552,7 +82727,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -83789,7 +83966,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -84535,7 +84714,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -86059,7 +86240,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -87050,7 +87233,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -87921,7 +88106,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -89316,7 +89503,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -90628,7 +90817,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -91786,7 +91977,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -93216,7 +93409,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -94661,7 +94856,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -96111,7 +96308,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -97578,7 +97777,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -98437,7 +98638,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -99259,7 +99462,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -100600,7 +100805,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -101502,7 +101709,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -102324,7 +102533,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -103629,7 +103840,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -105334,7 +105547,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -106245,7 +106460,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -107871,7 +108088,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -108833,7 +109052,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -109725,7 +109946,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -111319,7 +111542,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -113229,10 +113454,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -114194,7 +114422,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -115161,7 +115391,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -116519,7 +116751,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -118062,7 +118296,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -118982,7 +119218,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -120052,7 +120290,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -120812,7 +121052,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -122466,7 +122708,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -123428,7 +123672,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -124459,7 +124705,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -125380,7 +125628,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -126313,7 +126563,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -127276,7 +127528,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -128376,7 +128630,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -129520,7 +129776,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -130335,7 +130593,9 @@
         "count": 4,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -131704,7 +131964,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -132646,7 +132908,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -133769,7 +134033,9 @@
         "count": 4,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 4
+        "property_record_count": 4,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -134772,7 +135038,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -135609,7 +135877,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -136460,7 +136730,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -137355,7 +137627,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -138318,7 +138592,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -139287,7 +139563,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -140250,7 +140528,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -141253,7 +141533,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -142079,7 +142361,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -143008,10 +143292,13 @@
         }
       },
       "bedrooms": {
-        "count": 0,
-        "recorded": true,
+        "count": null,
+        "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "note": "The legacy record held 0, a placeholder default (property zero_value_audit lists bedrooms_count, the property count is null and its verification state is unknown); no bedroom count was recorded.",
+        "zero_value_placeholder": true,
+        "property_verification_state": "unknown"
       },
       "areas": {
         "unit": "sqm",
@@ -143971,7 +144258,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -144836,7 +145125,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -145659,7 +145950,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -146537,7 +146830,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -147423,7 +147718,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -148642,7 +148939,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -149522,7 +149821,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": true,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -150445,7 +150746,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -151380,7 +151683,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -152231,7 +152536,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -153028,7 +153335,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -153844,7 +154153,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -154860,7 +155171,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -155858,7 +156171,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -156830,7 +157145,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -157681,7 +157998,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -158567,7 +158886,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -159448,7 +159769,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -160327,7 +160650,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -161262,7 +161587,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -162087,7 +162414,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -162968,7 +163297,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -163793,7 +164124,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -164674,7 +165007,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
@@ -165700,7 +166035,9 @@
         "count": 3,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 3
+        "property_record_count": 3,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -166619,7 +166956,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -167516,7 +167855,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -168602,7 +168943,9 @@
         "count": 1,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 1
+        "property_record_count": 1,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -169620,7 +169963,9 @@
         "count": 2,
         "recorded": true,
         "not_applicable": false,
-        "property_record_count": 2
+        "property_record_count": 2,
+        "zero_value_placeholder": false,
+        "property_verification_state": "entered_pending_review"
       },
       "areas": {
         "unit": "sqm",
@@ -170709,7 +171054,9 @@
         "count": null,
         "recorded": false,
         "not_applicable": false,
-        "property_record_count": null
+        "property_record_count": null,
+        "zero_value_placeholder": false,
+        "property_verification_state": "not_applicable"
       },
       "areas": {
         "unit": "sqm",
