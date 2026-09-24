@@ -52,7 +52,7 @@ Sources at `legacy-app-final`:
 
 Counts: 165 listings — 139 sale / 26 rent; 30 active and 135 archived at the freeze
 (`pass` 30, `review` 75, `hold` 52, `source_unavailable` 8); source locale `bg` 113,
-`ru` 52; 134 with a price amount and 31 `price_on_request`; 82 with a recorded bedroom
+`ru` 52; 134 with a price amount and 31 `price_on_request`; 74 with a recorded bedroom
 count; 203 legacy URL entries over 165 distinct URLs; 6 224 media entries (3 333 photo,
 3 floorplan, 2 888 site chrome) referencing 1 712 R2 objects; 1 155 translation records,
 990 of them outside the source locale.
@@ -67,6 +67,17 @@ Caveats and gaps:
 - **31 listings are `price_on_request`**, not 28. The 28 in the rebuild brief predates the
   full-catalogue publication approval; `production/data/cms-seed.json` records 31 listings
   with no `price_eur`, and that is the number carried here.
+- **Eight bedroom counts of 0 were placeholders.** The legacy listing record held `0` where
+  the property record had no count, an `unknown` verification state and `bedrooms_count` in
+  its `zero_value_audit`. They are carried as not recorded (`zero_value_placeholder: true`).
+- **The property's bedroom verification state is carried separately.**
+  `bedrooms.property_verification_state` is the legacy property's `fact_verification` state
+  (84 `not_applicable`). Only 4 listing records set `bedrooms_not_applicable`, and 3 listing
+  records (MS-00873, MS-CRAWL-0122, MS-CRAWL-0129) hold a count their property marks
+  `not_applicable`; the two records disagree and neither is preferred.
+- **Three `sale` records are rental adverts.** MS-CRAWL-0148, MS-CRAWL-0149 and MS-CRAWL-0162
+  have Russian headlines offering a rental; their amounts (330, 440, 250 EUR) are not sale
+  prices. Purpose and amount stay as recorded.
 - **Rent listings record no rent period.** `price.period` is `null` with
   `period_recorded: false` on all 26.
 - **No total room count, no coordinates, no amenity list.** `rooms.count` is `null` on all

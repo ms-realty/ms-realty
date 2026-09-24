@@ -1,0 +1,158 @@
+{
+  "common": {
+    "brand": "MS Realty",
+    "agencyKind": "משרד תיווך נדל״ן",
+    "homeHeading": "MS Realty",
+    "homeIntro": "קנייה, שכירות, מכירה או השכרה של נכס עם הצוות של MS Realty.",
+    "workspaceHeading": "היום",
+    "languageSuggestion": {
+      "label": "הצעת שפה",
+      "message": "הדף הזה זמין גם בעברית.",
+      "switch": "להמשיך בעברית",
+      "dismiss": "להסתיר את ההצעה"
+    }
+  },
+  "nav": {
+    "primaryLabel": "ניווט ראשי",
+    "utilitiesLabel": "כלים",
+    "home": "דף הבית של MS Realty",
+    "buy": "קנייה",
+    "rent": "שכירות",
+    "sellLet": "מכירה / השכרה",
+    "areas": "אזורים",
+    "howWeHelp": "איך אנחנו עוזרים",
+    "saved": "שמורים",
+    "language": "שפה",
+    "contact": "יצירת קשר",
+    "myJourney": "התהליך שלי",
+    "menu": "תפריט",
+    "journey": {
+      "label": "התהליך שלי",
+      "overview": "סקירה",
+      "properties": "נכסים",
+      "appointments": "פגישות",
+      "messages": "הודעות",
+      "documents": "מסמכים",
+      "caseSwitcher": "תיק",
+      "help": "עזרה"
+    },
+    "workspace": {
+      "label": "סביבת עבודה",
+      "secondaryLabel": "ניהול",
+      "today": "היום",
+      "inbox": "תיבת דואר",
+      "cases": "תיקים",
+      "properties": "נכסים",
+      "calendar": "יומן",
+      "contentApprovals": "תוכן ואישורים",
+      "serviceOperations": "תפעול שירותים",
+      "reports": "דוחות",
+      "settings": "הגדרות",
+      "more": "עוד",
+      "search": "חיפוש ברשומות",
+      "interfaceLanguage": "שפת הממשק",
+      "applyLanguage": "החלה"
+    }
+  },
+  "footer": {
+    "label": "מידע על המשרד",
+    "agencyName": "MS Realty",
+    "agencyKind": "משרד תיווך נדל״ן",
+    "callLabel": "התקשרו אלינו",
+    "call": "להתקשר אל {phone}",
+    "help": "עזרה",
+    "privacy": "פרטיות",
+    "accessibility": "נגישות",
+    "copyright": "© {year} MS Realty"
+  },
+  "states": {
+    "loading": { "title": "טוען", "body": "המידע העדכני נטען." },
+    "refreshing": { "title": "מתעדכן", "body": "מוצג המידע שנטען קודם, בזמן שהדף מתעדכן." },
+    "emptyNew": { "title": "אין כאן עדיין כלום", "body": "כשיהיה מה להציג, זה יופיע כאן." },
+    "emptyFiltered": {
+      "title": "אין תוצאות לקריטריונים האלה",
+      "body": "{count, plural, one {מסנן אחד פעיל} two {שני מסננים פעילים} other {# מסננים פעילים}}. שנו או הסירו מסנן כדי לראות עוד."
+    },
+    "partial": {
+      "title": "חלק מהאזורים לא נטענו",
+      "body": "שאר הדף מעודכן. נסו לטעון שוב את האזורים החסרים."
+    },
+    "stale": { "title": "ייתכן שהמידע אינו עדכני", "body": "אושר לאחרונה: {date}." },
+    "permissionLimited": { "title": "אין לכם גישה לזה", "body": "בקשו מהאחראי לתת לכם גישה." },
+    "sessionExpired": {
+      "title": "ההתחברות הסתיימה",
+      "body": "התחברו שוב כדי להמשיך. דבר לא נשלח בשמכם."
+    },
+    "offline": {
+      "title": "אין חיבור לאינטרנט",
+      "body": "שינויים שתבצעו עכשיו יישמרו במכשיר הזה ולא יישלחו עד שהחיבור יחזור."
+    },
+    "slow": {
+      "title": "זה לוקח יותר זמן מהרגיל",
+      "body": "אנחנו עדיין מטפלים בזה. אפשר לחכות כאן או לבדוק שוב מאוחר יותר."
+    },
+    "validationError": {
+      "title": "{count, plural, one {שדה אחד דורש} two {שני שדות דורשים} other {# שדות דורשים}} תשומת לב",
+      "body": "תקנו את השדות המסומנים. כל השאר שהזנתם נשמר."
+    },
+    "serverRejection": {
+      "title": "לא ניתן היה להשלים את הפעולה",
+      "body": "{reason} מספר אסמכתה: {reference}."
+    },
+    "unknownOutcome": {
+      "title": "אנחנו בודקים אם הפעולה הושלמה",
+      "body": "אל תשלחו שוב בינתיים. מספר אסמכתה: {reference}."
+    },
+    "versionConflict": {
+      "title": "מישהו אחר שינה את זה",
+      "body": "הגרסה שלכם נשמרה. עברו על השינויים האחרונים לפני שתחילו את שלכם."
+    },
+    "dirtyDraft": { "title": "שינויים שלא נשמרו", "body": "השינויים שלכם עדיין לא נשמרו." },
+    "savedDraft": { "title": "הטיוטה נשמרה", "body": "נשמר {time}. לא נשלח ולא פורסם." },
+    "success": { "title": "בוצע", "body": "השינוי שלכם אושר." },
+    "revoked": { "title": "כבר לא זמין", "body": "הגישה הוסרה או שהפריט נמחק." },
+    "rateLimited": {
+      "title": "יותר מדי ניסיונות",
+      "body": "נסו שוב בעוד {minutes, plural, one {דקה} two {שתי דקות} other {# דקות}}. מה שהזנתם נשמר."
+    },
+    "unsupported": {
+      "title": "לא זמין כאן",
+      "body": "האפשרות הזו לא מוצעת כאן. התקשרו לצוות ונעזור בדרך אחרת."
+    },
+    "retry": "לנסות שוב",
+    "checkForUpdates": "לבדוק אם יש עדכונים",
+    "requestAccess": "לבקש גישה",
+    "signInAgain": "להתחבר שוב"
+  },
+  "errors": {
+    "notFound": {
+      "title": "הדף לא נמצא",
+      "body": "ייתכן שהכתובת שגויה או שהדף הועבר.",
+      "home": "לדף הבית"
+    },
+    "generic": {
+      "title": "לא ניתן להציג את הדף",
+      "body": "נסו שוב. אם זה חוזר, התקשרו אלינו ומסרו את מספר האסמכתה.",
+      "reference": "מספר אסמכתה: {reference}",
+      "retry": "לנסות שוב"
+    }
+  },
+  "forms": {
+    "required": "חובה",
+    "optional": "רשות",
+    "errorSummary": "{count, plural, one {תשובה אחת דורשת} two {שתי תשובות דורשות} other {# תשובות דורשות}} תיקון",
+    "charactersLeft": "{count, plural, one {נותר תו אחד} two {נותרו שני תווים} other {נותרו # תווים}}",
+    "choose": "בחרו…",
+    "saveDraft": "לשמור טיוטה",
+    "cancel": "ביטול"
+  },
+  "a11y": {
+    "skipToContent": "דילוג לתוכן הראשי",
+    "currentPage": "הדף הנוכחי",
+    "opensPhoneApp": "פותח את אפליקציית הטלפון",
+    "languageList": "בחירת שפה",
+    "currentLanguage": "השפה הנוכחית: {language}",
+    "closeMenu": "סגירת התפריט",
+    "openMenu": "פתיחת התפריט"
+  }
+}

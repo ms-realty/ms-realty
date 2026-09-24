@@ -1,0 +1,176 @@
+{
+  "common": {
+    "brand": "MS Realty",
+    "agencyKind": "Vastgoedkantoor",
+    "homeHeading": "MS Realty",
+    "homeIntro": "Vastgoed kopen, huren, verkopen of verhuren met het team van MS Realty.",
+    "workspaceHeading": "Vandaag",
+    "languageSuggestion": {
+      "label": "Taalsuggestie",
+      "message": "Deze pagina is ook in het Nederlands beschikbaar.",
+      "switch": "Verder in het Nederlands",
+      "dismiss": "Suggestie verbergen"
+    }
+  },
+  "nav": {
+    "primaryLabel": "Hoofdnavigatie",
+    "utilitiesLabel": "Hulpmiddelen",
+    "home": "Startpagina van MS Realty",
+    "buy": "Kopen",
+    "rent": "Huren",
+    "sellLet": "Verkopen / Verhuren",
+    "areas": "Gebieden",
+    "howWeHelp": "Hoe we helpen",
+    "saved": "Bewaard",
+    "language": "Taal",
+    "contact": "Contact",
+    "myJourney": "Mijn traject",
+    "menu": "Menu",
+    "journey": {
+      "label": "Mijn traject",
+      "overview": "Overzicht",
+      "properties": "Woningen",
+      "appointments": "Afspraken",
+      "messages": "Berichten",
+      "documents": "Documenten",
+      "caseSwitcher": "Dossier",
+      "help": "Hulp"
+    },
+    "workspace": {
+      "label": "Werkruimte",
+      "secondaryLabel": "Beheer",
+      "today": "Vandaag",
+      "inbox": "Inbox",
+      "cases": "Dossiers",
+      "properties": "Woningen",
+      "calendar": "Agenda",
+      "contentApprovals": "Inhoud & goedkeuringen",
+      "serviceOperations": "Servicebeheer",
+      "reports": "Rapporten",
+      "settings": "Instellingen",
+      "more": "Meer",
+      "search": "Records doorzoeken",
+      "interfaceLanguage": "Taal van de interface",
+      "applyLanguage": "Toepassen"
+    }
+  },
+  "footer": {
+    "label": "Informatie over het kantoor",
+    "agencyName": "MS Realty",
+    "agencyKind": "Vastgoedkantoor",
+    "callLabel": "Bel ons",
+    "call": "Bel {phone}",
+    "help": "Hulp",
+    "privacy": "Privacy",
+    "accessibility": "Toegankelijkheid",
+    "copyright": "© {year} MS Realty"
+  },
+  "states": {
+    "loading": { "title": "Laden", "body": "De actuele informatie wordt geladen." },
+    "refreshing": {
+      "title": "Bijwerken",
+      "body": "U ziet de eerder geladen informatie terwijl de pagina wordt bijgewerkt."
+    },
+    "emptyNew": {
+      "title": "Hier staat nog niets",
+      "body": "Zodra er iets te tonen is, verschijnt het hier."
+    },
+    "emptyFiltered": {
+      "title": "Geen resultaten voor deze criteria",
+      "body": "{count, plural, one {# filter is} other {# filters zijn}} actief. Wijzig of verwijder een filter om meer te zien."
+    },
+    "partial": {
+      "title": "Sommige onderdelen zijn niet geladen",
+      "body": "De rest van de pagina is actueel. Probeer de ontbrekende onderdelen opnieuw."
+    },
+    "stale": { "title": "Mogelijk niet actueel", "body": "Laatst bevestigd: {date}." },
+    "permissionLimited": {
+      "title": "U hebt hier geen toegang toe",
+      "body": "Vraag de beheerder om u toegang te geven."
+    },
+    "sessionExpired": {
+      "title": "Uw sessie is verlopen",
+      "body": "Meld u opnieuw aan om verder te gaan. Er is niets namens u verzonden."
+    },
+    "offline": {
+      "title": "U bent offline",
+      "body": "Wijzigingen blijven op dit apparaat en worden pas verzonden als u weer verbinding hebt."
+    },
+    "slow": {
+      "title": "Dit duurt langer dan normaal",
+      "body": "We zijn er nog mee bezig. U kunt hier wachten of later terugkomen."
+    },
+    "validationError": {
+      "title": "{count, plural, one {# veld vraagt} other {# velden vragen}} aandacht",
+      "body": "Corrigeer de gemarkeerde velden. Al het andere dat u hebt ingevuld, blijft bewaard."
+    },
+    "serverRejection": {
+      "title": "Dit kon niet worden voltooid",
+      "body": "{reason} Referentie: {reference}."
+    },
+    "unknownOutcome": {
+      "title": "We controleren of dit is voltooid",
+      "body": "Verstuur het nog niet opnieuw. Referentie: {reference}."
+    },
+    "versionConflict": {
+      "title": "Iemand anders heeft dit gewijzigd",
+      "body": "Uw versie blijft bewaard. Bekijk de nieuwste wijzigingen voordat u de uwe toepast."
+    },
+    "dirtyDraft": {
+      "title": "Niet-opgeslagen wijzigingen",
+      "body": "Uw wijzigingen zijn nog niet opgeslagen."
+    },
+    "savedDraft": {
+      "title": "Concept opgeslagen",
+      "body": "Opgeslagen {time}. Niet verzonden of gepubliceerd."
+    },
+    "success": { "title": "Klaar", "body": "Uw wijziging is bevestigd." },
+    "revoked": {
+      "title": "Niet meer beschikbaar",
+      "body": "De toegang is ingetrokken of het item is verwijderd."
+    },
+    "rateLimited": {
+      "title": "Te veel pogingen",
+      "body": "Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw. Wat u hebt ingevuld, blijft bewaard."
+    },
+    "unsupported": {
+      "title": "Hier niet beschikbaar",
+      "body": "Dit wordt hier niet aangeboden. Bel het team, dan helpen we u op een andere manier."
+    },
+    "retry": "Opnieuw proberen",
+    "checkForUpdates": "Controleren op updates",
+    "requestAccess": "Toegang aanvragen",
+    "signInAgain": "Opnieuw aanmelden"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Pagina niet gevonden",
+      "body": "Het adres is mogelijk verkeerd getypt of de pagina is verplaatst.",
+      "home": "Naar de startpagina"
+    },
+    "generic": {
+      "title": "Deze pagina kan niet worden getoond",
+      "body": "Probeer het opnieuw. Blijft het gebeuren, bel ons dan en noem de referentie.",
+      "reference": "Referentie: {reference}",
+      "retry": "Opnieuw proberen"
+    }
+  },
+  "forms": {
+    "required": "Verplicht",
+    "optional": "Optioneel",
+    "errorSummary": "{count, plural, one {# antwoord moet} other {# antwoorden moeten}} worden gecorrigeerd",
+    "charactersLeft": "{count, plural, one {Nog # teken} other {Nog # tekens}}",
+    "choose": "Kies…",
+    "saveDraft": "Concept opslaan",
+    "cancel": "Annuleren"
+  },
+  "a11y": {
+    "skipToContent": "Naar de hoofdinhoud",
+    "currentPage": "huidige pagina",
+    "opensPhoneApp": "opent uw telefoonapp",
+    "languageList": "Kies een taal",
+    "currentLanguage": "Huidige taal: {language}",
+    "closeMenu": "Menu sluiten",
+    "openMenu": "Menu openen"
+  }
+}

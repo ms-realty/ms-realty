@@ -28,6 +28,8 @@ export default defineConfig({
     command: `${isCI ? "" : "npm run build && "}npm run start -- --hostname 127.0.0.1 --port ${port}`,
     url: `${baseURL}/api/health`,
     reuseExistingServer: !isCI,
+    // Serves the design-system specimen (e2e/design-system.spec.ts); off everywhere else.
+    env: { ENABLE_DESIGN_SPECIMEN: "1" },
     timeout: 300_000,
   },
 });
