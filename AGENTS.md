@@ -41,7 +41,9 @@ npm run typecheck      # next typegen + tsc --noEmit
 npm test               # Vitest: unit (+ integration when TEST_DATABASE_URL is set)
 npm run build          # Next production build
 npm run e2e            # Playwright (builds, then starts on E2E_PORT, default 3100)
-npm run check          # everything CI runs
+make check             # lint + typecheck + test + build (CI job `make check`; installs deps if stale)
+make e2e               # npm run e2e (run inside CI after make check); CI's required check is `ci / gate`
+npm run check          # make check's steps, then e2e
 ```
 
 Concurrent builds or e2e runs need their own output dir and port:

@@ -9,6 +9,7 @@ permissions:
   contents: write
   pull-requests: write
   actions: read
+  checks: read
 
 jobs:
   merge:
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -46,6 +47,20 @@ jobs:
             }
             if (pull.head.sha !== workflowRun.head_sha) {
               core.setFailed("The pull-request head changed after this CI run.");
+              return;
+            }
+            // `ci / gate` is CI's single required check; it must have passed in this very run.
+            const { data: gate } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: workflowRun.head_sha,
+              check_name: "ci / gate",
+            });
+            const gatePassed = gate.check_runs.some(
+              (run) => run.check_suite?.id === workflowRun.check_suite_id && run.conclusion === "success",
+            );
+            if (!gatePassed) {
+              core.setFailed("The ci / gate check of this CI run did not succeed.");
               return;
             }
             if (!["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {
@@ -80,7 +95,7 @@ jobs:
             await github.rest.repos.createDispatchEvent({
               owner,
               repo,
-              event_type: "auto_merge_deploy",
+              event_type: "auto_merged",
               client_payload: { merge_sha: result.sha },
             });
 

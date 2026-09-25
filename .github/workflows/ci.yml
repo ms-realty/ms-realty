@@ -1,95 +1,60 @@
+# CI v2 contract. Mindburn-Labs/platform-actions can't be called from this
+# repository (another owner), so ci-v2.yml is a byte-identical copy of
+# platform-actions/.github/workflows/ci.yml at tag v2. Keep it identical;
+# refresh it by copying the file again.
+#
+# `ci` starts Postgres (the integration tests need TEST_DATABASE_URL and
+# vitest.config.ts refuses to skip them under CI), runs `make check`, then
+# Playwright e2e against that build, plus the diff-aware dependency scan. The
+# required status check is `ci / gate`.
+#
+# Nothing here deploys (docs/plan.md §1). auto-merge.yml listens to this
+# workflow by its name, CI.
 name: CI
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
+  merge_group:
   workflow_dispatch:
-    inputs:
-      release:
-        description: "Type 'production' to request a release. Blocked until every docs/plan.md §7 launch gate is green."
-        required: false
-        default: "none"
+  # auto-merge.yml merges with GITHUB_TOKEN, which fires no `push` run, so it
+  # dispatches this event to test the merged main.
   repository_dispatch:
-    types: [auto_merge_deploy]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    types: [auto_merged]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  check:
-    # Branch protection requires this exact check name.
+  ci:
+    uses: ./.github/workflows/ci-v2.yml
+    with:
+      setup-commands: |
+        docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:17-alpine
+        until docker exec ci-postgres pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
+        echo "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres" >>"${GITHUB_ENV}"
+      # Under CI, playwright.config.ts starts the server without building;
+      # `make check` has just built it.
+      extra-commands: |
+        npx playwright install --with-deps chromium
+        make e2e
+
+  # Branch protection on main still requires a check named "npm run check".
+  # This job reports ci's result under that name so merges keep working.
+  # Delete it once protection requires `ci / gate` instead.
+  required-check-alias:
     name: npm run check
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_PASSWORD: pg
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    env:
-      CI: "true"
-      TEST_DATABASE_URL: postgres://postgres:pg@127.0.0.1:5432/postgres
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
-          retention-days: 7
-
-  release:
-    name: Release (blocked until launch gates pass)
-    if: github.event_name == 'workflow_dispatch' && inputs.release == 'production'
-    needs: check
+    if: always()
+    needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # No deploy steps exist on purpose (docs/plan.md §1). Replace this step only when
-      # every gate below is green and recorded.
-      - name: Launch gates (docs/plan.md §7)
-        run: |
-          cat <<'GATES'
-          Deployment is allowed only when all of these are true and recorded (docs/plan.md §7):
-          1. All slices S1-S6 and S8 merged; S7 flags off unless the owner enables a service.
-          2. npm run check green on the release commit; Playwright T1-T5 green in every enabled locale.
-          3. Production data ETL rehearsed on a restored copy of the live database with row-count and
-             checksum reconciliation; backup + isolated restore drill passed within 30 days.
-          4. Security review of auth, authz, uploads, edge and secrets with no open high findings.
-          5. WCAG 2.2 AA task checks (keyboard, screen reader, zoom, RTL) on T1-T5 recorded.
-          6. Core Web Vitals lab budgets met on the preview host for P01, P02, P05.
-          7. Monitoring and alerting live (health, error rate, job queue, outbox failures) with a named
-             on-call owner.
-          8. Owner inputs in spec §23.3 supplied: coverage, enabled locales + reviewers, service hours,
-             response promises, disclosure policies, retention/privacy policy, staff capabilities.
-          9. Owner launch decision recorded; .ru renewed if it is to be routed.
-          GATES
-          echo "::error::Release blocked: the launch gates are not yet green, and this workflow has no deploy steps."
-          exit 1
+      - name: Mirror ci / gate
+        env:
+          CI_RESULT: ${{ needs.ci.result }}
+        run: test "${CI_RESULT}" = success
