@@ -385,7 +385,7 @@ jobs:
           steps.canary.outcome == 'success' &&
           steps.alert-probe.outcome == 'failure' &&
           steps.rollback.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
           RUN_URL: ${{ steps.identity.outputs.run_url }}
