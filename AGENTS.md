@@ -1,12 +1,16 @@
 # MS Realty agent context
 
-Product authority: `docs/spec.md`. Plan, architecture decisions and slices: `docs/plan.md`.
-Use spec IDs (P/C/O screens, F flows, A acceptance scenarios) in route files, test names and PRs.
+Product authority: `docs/architecture.md` (final architecture), with the implementation
+deviations in `docs/adr/0002-implementation-deviations.md` and UX/frontend contracts in
+`docs/ux-spec.md`. Delivery order and status: `docs/plan.md`. Glossary: `CONTEXT.md`.
+Use architecture IDs (P/C/O screens, F flows, AT/UX acceptance, R gates) in route files, test
+names and PRs.
 
 ## Launch boundary
 
-- The launch authority is `docs/plan.md` §7. Do not call the system production-ready, and do
-  not deploy, while any gate there is not green and recorded. Merges to `main` never deploy.
+- The release gates are R00–R12 in `docs/architecture.md` §20.3. Do not call the system
+  production-ready, and do not deploy, while any gate is not passed with exact-release
+  evidence. Merges to `main` never deploy.
 - Real launch evidence comes from live services and operator inputs, not local fixtures.
 - Preserve crawl parity for `makler-realty.com` and `makler-realty.ru`. Legacy URL mappings
   must rest on recorded evidence (`data/legacy/url-decisions.json`); never invent homepage or
