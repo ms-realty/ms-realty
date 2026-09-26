@@ -170,7 +170,16 @@ export type SpecimenCopy = {
     ask: string;
   };
   price: { perMonth: string; onRequest: string; vat: string };
+  criteria: {
+    label: string;
+    remove: string;
+    assist: [string, string, string];
+    question: string;
+    add: string;
+    draft: string;
+  };
   card: {
+    meta: [string, string, string];
     titles: [string, string, string];
     localities: [string, string, string];
     facts: [string[], string[], string[]];
@@ -392,7 +401,20 @@ const en: SpecimenCopy = {
     ask: "Ask us to confirm",
   },
   price: { perMonth: "per month", onRequest: "Price on request", vat: "No VAT applies" },
+  criteria: {
+    label: "Interpreted criteria",
+    remove: "Remove",
+    assist: ["Sandanski", "Apartment", "Up to €220,000"],
+    question: "Parking: required or preferred?",
+    add: "More criteria",
+    draft: "Draft from the assistant · needs review",
+  },
   card: {
+    meta: [
+      "MSR-EX-2041 · updated 3 days ago",
+      "MSR-EX-2042 · updated yesterday",
+      "MSR-EX-2043 · updated today",
+    ],
     titles: ["Two-bedroom apartment", "House with garden", "Studio near the park"],
     localities: [
       "Sandanski, Blagoevgrad Province",
@@ -643,7 +665,20 @@ const bg: SpecimenCopy = {
     ask: "Помолете ни да потвърдим",
   },
   price: { perMonth: "на месец", onRequest: "Цена при запитване", vat: "Без ДДС" },
+  criteria: {
+    label: "Разбрани критерии",
+    remove: "Премахни",
+    assist: ["Сандански", "Апартамент", "До 220 000 €"],
+    question: "Паркомясто: задължително или желано?",
+    add: "Още критерии",
+    draft: "Чернова от асистента · нужен е преглед",
+  },
   card: {
+    meta: [
+      "MSR-EX-2041 · обновено преди 3 дни",
+      "MSR-EX-2042 · обновено вчера",
+      "MSR-EX-2043 · обновено днес",
+    ],
     titles: ["Двустаен апартамент", "Къща с двор", "Студио до парка"],
     localities: [
       "Сандански, област Благоевград",
@@ -900,7 +935,20 @@ const he: SpecimenCopy = {
     ask: "בקשו שנאשר",
   },
   price: { perMonth: "לחודש", onRequest: "מחיר לפי בקשה", vat: "ללא מע״מ" },
+  criteria: {
+    label: "קריטריונים שזוהו",
+    remove: "הסרה",
+    assist: ["סנדנסקי", "דירה", "עד 220,000 €"],
+    question: "חניה: חובה או רצוי?",
+    add: "קריטריונים נוספים",
+    draft: "טיוטה מהעוזר · נדרשת בדיקה",
+  },
   card: {
+    meta: [
+      "MSR-EX-2041 · עודכן לפני 3 ימים",
+      "MSR-EX-2042 · עודכן אתמול",
+      "MSR-EX-2043 · עודכן היום",
+    ],
     titles: ["דירת שני חדרי שינה", "בית עם גינה", "סטודיו ליד הפארק"],
     localities: ["סנדנסקי, מחוז בלאגואבגרד", "אלכסנדרובו, מחוז לובץ'", "סנדנסקי, מחוז בלאגואבגרד"],
     facts: [

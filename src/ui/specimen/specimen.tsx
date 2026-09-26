@@ -7,6 +7,7 @@ import { announce } from "../announce";
 import { Breadcrumbs } from "../breadcrumbs";
 import { Button } from "../button";
 import { Checkbox, CheckboxGroup } from "../checkbox";
+import { Chip, ChipList } from "../chip";
 import { ComboBox } from "../combobox";
 import { DateField, DatePicker } from "../date-picker";
 import { Dialog, DialogTrigger } from "../dialog";
@@ -526,6 +527,22 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
               <StatusBadge family="delivery" tone="negative" label={copy.status.delivery[2]} />
               <StatusBadge family="delivery" tone="pending" label={copy.status.delivery[3]} />
             </Cell>
+            <Cell label="assist">
+              <StatusBadge family="approval" tone="draft" label={copy.criteria.draft} />
+              <ChipList label={copy.criteria.label}>
+                {copy.criteria.assist.map((label) => (
+                  <Chip
+                    key={label}
+                    kind="assist"
+                    label={label}
+                    removeLabel={copy.criteria.remove}
+                    onRemove={() => {}}
+                  />
+                ))}
+                <Chip kind="question" label={copy.criteria.question} onPress={() => {}} />
+                <Chip kind="add" label={copy.criteria.add} onPress={() => {}} />
+              </ChipList>
+            </Cell>
           </div>
           <div className="flex flex-col gap-3">
             <Notice tone="info" title={copy.status.notices.info} />
@@ -684,6 +701,7 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
                 }
                 locality={copy.card.localities[0]}
                 facts={copy.card.facts[0]}
+                meta={copy.card.meta[0]}
                 availability={
                   <StatusBadge
                     family="availability"
@@ -718,6 +736,7 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
                 }
                 locality={copy.card.localities[1]}
                 facts={copy.card.facts[1]}
+                meta={copy.card.meta[1]}
                 availability={
                   <StatusBadge
                     family="availability"
@@ -744,6 +763,7 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
                 }
                 locality={copy.card.localities[2]}
                 facts={copy.card.facts[2]}
+                meta={copy.card.meta[2]}
                 noPhotoLabel={copy.card.noPhoto}
                 saveLabel={copy.card.save}
                 compareLabel={copy.card.compare}
@@ -762,12 +782,14 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
                 owner={copy.tasks.owner}
                 due={{ dateTime: "2026-09-24T12:00:00+03:00", label: copy.tasks.due }}
                 overdueLabel={copy.tasks.overdue}
+                severity="due"
               />
               <TaskRow
                 href="#work"
                 action={copy.tasks.rows[1]}
                 owner={copy.tasks.unassigned}
                 isUnassigned
+                severity="consequential"
               />
               <TaskRow
                 href="#work"
