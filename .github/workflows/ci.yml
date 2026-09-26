@@ -1,7 +1,4 @@
-# CI v2 contract. Mindburn-Labs/platform-actions can't be called from this
-# repository (another owner), so ci-v2.yml is a byte-identical copy of
-# platform-actions/.github/workflows/ci.yml at tag v2. Keep it identical;
-# refresh it by copying the file again.
+# CI v2 contract: `ci` calls Mindburn-Labs/platform-actions ci.yml@v2.
 #
 # `ci` starts Postgres (the integration tests need TEST_DATABASE_URL and
 # vitest.config.ts refuses to skip them under CI), runs `make check`, then
@@ -32,7 +29,7 @@ concurrency:
 
 jobs:
   ci:
-    uses: ./.github/workflows/ci-v2.yml
+    uses: Mindburn-Labs/platform-actions/.github/workflows/ci.yml@v2
     with:
       setup-commands: |
         docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:17-alpine
