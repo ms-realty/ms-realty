@@ -22,7 +22,18 @@ compose several of them into one transaction.
   delivered | failed | outcome unknown) and the `MessageProvider` seam with a test provider.
 - `http/` — correlation id, same-origin check for cookie-authenticated mutations, session actor and safe
   error responses (`request.ts`), plus Next.js route/action wrappers and cookie writes (`next.ts`).
-- `testing.ts` — fixtures for integration tests only.
+- `references.ts` — `nextReference()`: yearly human references (RQ-, RL-, …) inside the caller's transaction.
+- `staff/` — `createStaffAccount()` (idempotent by email, role-preset grants) and the `staff:create` CLI.
+- `listings/` — the S2 publication path (`publication.ts`: confirm facts → submit → approve the exact
+  version by hash → release to the website, and withdraw; each step a recorded human operation) with the
+  `listings:publish` CLI; public read models over the released version only (`published.ts`, `detail.ts`
+  `getPublicListing`, `home.ts` `getHomeOverview`) and their view models (`view-models.ts`).
+- `search/` — `projection.ts` writes/removes a listing's `listing_search_documents` row when what is live
+  changes; `search.ts` `searchListings()` / `listPlacesForSearch()` apply the domain F02 predicates.
+- `media/` — public media URLs (`MEDIA_PUBLIC_BASE_URL`) for cleared, reviewed, disclosed public renditions only.
+- `inquiries/` — `submitInquiry()` (idempotent by client operation id, rate-limited per IP) and
+  `getInquiryReceipt()`; `app/api/inquiries/route.ts` is its POST endpoint.
+- `testing.ts`, `listings/testing.ts` — fixtures for integration tests only.
 
 The email-link confirm route must live at `emailLinkPath` (`/sign-in/confirm`): GET renders a confirm page
 from `inspectEmailLink()`, and only its POST calls `consumeEmailLink()`.
