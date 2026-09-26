@@ -48,7 +48,7 @@ jobs:
     steps:
       # The legacy app left main in the rebuild (docs/plan.md). This workflow still serves
       # the live legacy deployment, so it runs the scripts frozen at tag legacy-app-final.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: legacy-app-final
 

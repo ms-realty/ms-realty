@@ -32,7 +32,7 @@ jobs:
       MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.release_sha }}
