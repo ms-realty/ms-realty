@@ -116,7 +116,7 @@ jobs:
 
       - name: Preserve holding route receipts
         if: ${{ always() && inputs.restore_construction_hold }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: public-hold-routes
           path: public-hold-*.json
@@ -134,7 +134,7 @@ jobs:
 
       - name: Preserve released route receipts
         if: ${{ always() && inputs.release_construction_hold }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: public-release-routes
           path: public-release-*.json
