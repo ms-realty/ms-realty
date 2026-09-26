@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { Button } from "./button";
+import { Chip, ChipList } from "./chip";
 import { ComboBox } from "./combobox";
 import { ErrorSummary, type ErrorSummaryItem } from "./error-summary";
 import { ExternalAppLink } from "./link";
@@ -11,6 +12,7 @@ import { PriceDisplay } from "./price-display";
 import { PropertyCard } from "./property-card";
 import { Sheet, useSheet } from "./sheet";
 import { StatusBadge } from "./status-badge";
+import { TaskList, TaskRow } from "./task-row";
 import { TextField } from "./text-field";
 
 // Vitest runs without globals here, so Testing Library cannot register its own cleanup.
@@ -254,5 +256,56 @@ describe("PriceDisplay (protected price fact)", () => {
       />,
     );
     expect(screen.getByText("€99,999.50")).toBeInTheDocument();
+  });
+});
+
+describe("Chip (F01/F02 criteria)", () => {
+  it("names each remove control after its criterion and keeps assist chips visibly distinct", async () => {
+    const user = userEvent.setup();
+    function Criteria() {
+      const [chips, setChips] = useState(["Sandanski", "Up to €220,000"]);
+      return (
+        <ChipList label="Interpreted criteria">
+          {chips.map((label) => (
+            <Chip
+              key={label}
+              kind="assist"
+              label={label}
+              removeLabel="Remove"
+              onRemove={() => setChips((all) => all.filter((chip) => chip !== label))}
+            />
+          ))}
+          <Chip kind="question" label="Parking: required or preferred?" onPress={() => {}} />
+        </ChipList>
+      );
+    }
+    render(<Criteria />);
+    const list = screen.getByRole("list", { name: "Interpreted criteria" });
+    expect(within(list).getAllByRole("listitem")).toHaveLength(3);
+    expect(list.querySelector('[data-kind="assist"]')).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: "Remove: Sandanski" }));
+    expect(screen.queryByText("Sandanski")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Parking: required or preferred?" })).toBeVisible();
+  });
+});
+
+describe("TaskRow (O01 commitment row)", () => {
+  it("states severity through structure and text, and keeps one direct action", () => {
+    render(
+      <TaskList label="Needs intervention">
+        <TaskRow
+          href="/workspace/inquiries/1"
+          action="Message to the client was not delivered"
+          reason="WhatsApp returned an error 40 minutes ago"
+          owner="You"
+          severity="consequential"
+          directAction={<a href="/workspace/inquiries/1#reply">Send by email</a>}
+        />
+      </TaskList>,
+    );
+    const row = screen.getByRole("listitem");
+    expect(row).toHaveAttribute("data-severity", "consequential");
+    expect(within(row).getByText("WhatsApp returned an error 40 minutes ago")).toBeVisible();
+    expect(within(row).getAllByRole("link")).toHaveLength(2);
   });
 });

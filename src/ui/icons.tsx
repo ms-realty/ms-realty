@@ -158,6 +158,85 @@ export const HistoryIcon = icon(
   "HistoryIcon",
 );
 
+export const HomeIcon = icon(
+  <path d="M4 11l8-6.5 8 6.5M6 9.5V19a1 1 0 0 0 1 1h3.5v-5h3v5H17a1 1 0 0 0 1-1V9.5" />,
+  "HomeIcon",
+);
+export const InboxIcon = icon(
+  <path d="M4 13.5l2.5-8h11l2.5 8M4 13.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4.5M4 13.5h4.5l1.5 2.5h4l1.5-2.5H20" />,
+  "InboxIcon",
+);
+export const CaseIcon = icon(
+  <>
+    <rect x="3.5" y="7.5" width="17" height="12" rx="2" />
+    <path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 13h17" />
+  </>,
+  "CaseIcon",
+);
+export const BuildingIcon = icon(
+  <path d="M5 20V5.5A1.5 1.5 0 0 1 6.5 4h7A1.5 1.5 0 0 1 15 5.5V20M15 10h3.5a1.5 1.5 0 0 1 1.5 1.5V20M3.5 20h17M8.5 8h3M8.5 11.5h3M8.5 15h3" />,
+  "BuildingIcon",
+);
+/** Marks interpreted criteria and AI drafts: content a person still has to review. */
+export const AssistIcon = icon(
+  <>
+    <path d="M11 3.5l1.9 5.1 5.1 1.9-5.1 1.9L11 17.5l-1.9-5.1L4 10.5l5.1-1.9z" />
+    <path d="M18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" />
+  </>,
+  "AssistIcon",
+);
+export const MapIcon = icon(
+  <path d="M9 5L3.5 7v12L9 17l6 2 5.5-2V5L15 7 9 5zM9 5v12M15 7v12" />,
+  "MapIcon",
+);
+export const FiltersIcon = icon(
+  <path d="M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4" />,
+  "FiltersIcon",
+);
+export const PhoneIcon = icon(
+  <path d="M6.5 4h3l1.5 4-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15.5 15.5 0 0 1 4.5 6a2 2 0 0 1 2-2z" />,
+  "PhoneIcon",
+);
+export const MessageIcon = icon(
+  <path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5v-3.5H5A1.5 1.5 0 0 1 3.5 16V7A1.5 1.5 0 0 1 5 5.5z" />,
+  "MessageIcon",
+);
+export const UserIcon = icon(
+  <>
+    <circle cx="12" cy="8.5" r="3.5" />
+    <path d="M5 20a7 7 0 0 1 14 0" />
+  </>,
+  "UserIcon",
+);
+export const BedIcon = icon(
+  <path d="M3.5 18.5v-12M3.5 14h17v4.5M20.5 14v-2.5A2.5 2.5 0 0 0 18 9h-7v5M7.5 11.5h.01" />,
+  "BedIcon",
+);
+export const AreaIcon = icon(
+  <>
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <path d="M4 9h3M4 14h3M9 4v3M14 4v3" />
+  </>,
+  "AreaIcon",
+);
+export const PinIcon = icon(
+  <>
+    <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
+    <circle cx="12" cy="10" r="2.3" />
+  </>,
+  "PinIcon",
+);
+export const PhotoIcon = icon(
+  <>
+    <rect x="3.5" y="5" width="17" height="14" rx="2" />
+    <circle cx="9" cy="10" r="1.6" />
+    <path d="M4 17l5-5 4 4 2.5-2.5L20 18" />
+  </>,
+  "PhotoIcon",
+);
+/** Points to the inline end; pass `directional` so it mirrors in RTL. */
+export const ArrowEndIcon = icon(<path d="M5 12h14M13 6l6 6-6 6" />, "ArrowEndIcon");
+
 export function Spinner({ className }: { className?: string }) {
   return (
     <svg
