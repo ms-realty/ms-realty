@@ -22,6 +22,10 @@ compose several of them into one transaction.
   delivered | failed | outcome unknown) and the `MessageProvider` seam with a test provider.
 - `http/` — correlation id, same-origin check for cookie-authenticated mutations, session actor and safe
   error responses (`request.ts`), plus Next.js route/action wrappers and cookie writes (`next.ts`).
+- `search/interpret-service.ts` — `interpretSearchText()`: free search text → reviewable chips (F01/F02, F29) via the
+  pure `src/domain/search/interpret.ts`; places cached in-process for 5 min. Optional provider assistance
+  (`ASSIST_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`) sees only redacted unparsed fragments, is validated against
+  known places and feature keys, never replaces a rules chip, and falls back silently (`assistStatus`).
 - `testing.ts` — fixtures for integration tests only.
 
 The email-link confirm route must live at `emailLinkPath` (`/sign-in/confirm`): GET renders a confirm page
