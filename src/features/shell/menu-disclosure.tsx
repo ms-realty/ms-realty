@@ -11,11 +11,14 @@ export function MenuDisclosure({
   children,
   className,
   panelClassName,
+  quiet = false,
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   className?: string;
   panelClassName?: string;
+  /** A full-width, borderless trigger for preferences inside a sidebar. */
+  quiet?: boolean;
 }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
@@ -28,7 +31,11 @@ export function MenuDisclosure({
       onExpandedChange={setExpanded}
       className={cx("contents", className)}
     >
-      <Button slot="trigger" variant="secondary" className="px-3">
+      <Button
+        slot="trigger"
+        variant={quiet ? "tertiary" : "secondary"}
+        className={quiet ? "w-full justify-between px-2.5 text-start text-text" : "px-3"}
+      >
         {label}
         <icons.ChevronDownIcon
           className={cx("size-4 transition-transform", expanded && "rotate-180")}
