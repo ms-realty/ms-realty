@@ -8,6 +8,7 @@ const production = {
   APP_ORIGIN: "https://makler-realty.com/",
   CANONICAL_ORIGIN: "https://makler-realty.com",
   AUTH_SECRET: "x".repeat(32),
+  MEDIA_PUBLIC_BASE_URL: "https://makler-realty.com/media/",
 };
 
 describe("parseEnv", () => {
@@ -28,12 +29,16 @@ describe("parseEnv", () => {
       production: true,
       appOrigin: "https://makler-realty.com",
       webauthn: { rpId: "makler-realty.com" },
+      mediaPublicBaseUrl: "https://makler-realty.com/media",
     });
   });
 
   it("fails fast in production, naming variables but never values", () => {
     const run = () => parseEnv({ ...production, DATABASE_URL: "", AUTH_SECRET: undefined });
     expect(run).toThrow(/DATABASE_URL is required.*AUTH_SECRET is required/);
+    expect(() => parseEnv({ ...production, MEDIA_PUBLIC_BASE_URL: "" })).toThrow(
+      /MEDIA_PUBLIC_BASE_URL is required/,
+    );
     expect(() => parseEnv({ ...production, APP_ORIGIN: "http://makler-realty.com" })).toThrow(
       /APP_ORIGIN must be https/,
     );
