@@ -22,6 +22,10 @@ compose several of them into one transaction.
   delivered | failed | outcome unknown) and the `MessageProvider` seam with a test provider.
 - `http/` — correlation id, same-origin check for cookie-authenticated mutations, session actor and safe
   error responses (`request.ts`), plus Next.js route/action wrappers and cookie writes (`next.ts`).
+- `work/` — agency work surfaces (S2): `getToday` (O01, F19), `listInbox` (O02), `getInquiryWorkspace`
+  and the triage commands (O03, F18), `getContactRecord` (O06) and tasks (O18). View models live in
+  `work/types.ts`; commands run through `runOperation` with an expected version, replies are queued
+  in the outbox by a human sender, and the AI service can only save reply drafts.
 - `testing.ts` — fixtures for integration tests only.
 
 The email-link confirm route must live at `emailLinkPath` (`/sign-in/confirm`): GET renders a confirm page
