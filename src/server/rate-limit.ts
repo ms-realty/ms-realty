@@ -25,6 +25,8 @@ export const rateLimitPolicies = {
   "sign_in.ip": { capacity: 20, refillPerSecond: 1 / 30 },
   /** Passkey ceremonies per client IP. */
   "passkey.ip": { capacity: 30, refillPerSecond: 1 / 10 },
+  /** Search-text interpretation per client IP: 30 at once, then one every 4 seconds. */
+  "search.interpret.ip": { capacity: 30, refillPerSecond: 1 / 4 },
 } as const satisfies Record<string, RateLimitPolicy>;
 
 export type RateLimitPurpose = keyof typeof rateLimitPolicies;

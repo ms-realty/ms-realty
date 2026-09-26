@@ -52,6 +52,30 @@ describe("parseEnv", () => {
     expect(() => parseEnv({ NODE_ENV: "test", APP_ORIGIN: "ftp://files.example" })).toThrow();
   });
 
+  it("enables search assistance only with a provider and a key", () => {
+    expect(parseEnv({ NODE_ENV: "test" }).assist).toBeUndefined();
+    expect(parseEnv({ NODE_ENV: "test", ANTHROPIC_API_KEY: "test-key" }).assist).toBeUndefined();
+    expect(parseEnv({ NODE_ENV: "test", ASSIST_PROVIDER: "anthropic" }).assist).toBeUndefined();
+    expect(
+      parseEnv({ NODE_ENV: "test", ASSIST_PROVIDER: "off", ANTHROPIC_API_KEY: "test-key" }).assist,
+    ).toBeUndefined();
+    expect(
+      parseEnv({ NODE_ENV: "test", ASSIST_PROVIDER: "anthropic", ANTHROPIC_API_KEY: "test-key" })
+        .assist,
+    ).toEqual({ provider: "anthropic", apiKey: "test-key", model: "claude-sonnet-5" });
+    expect(
+      parseEnv({
+        NODE_ENV: "test",
+        ASSIST_PROVIDER: "anthropic",
+        ANTHROPIC_API_KEY: "test-key",
+        ASSIST_MODEL: "claude-haiku-4-5",
+      }).assist?.model,
+    ).toBe("claude-haiku-4-5");
+    expect(() => parseEnv({ NODE_ENV: "test", ASSIST_PROVIDER: "other" })).toThrow(
+      /ASSIST_PROVIDER/,
+    );
+  });
+
   it("requires R2 settings all together", () => {
     expect(() => parseEnv({ NODE_ENV: "test", R2_BUCKET: "ms-realty-media" })).toThrow(
       /all-or-none/,

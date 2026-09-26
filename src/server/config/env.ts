@@ -43,6 +43,11 @@ const schema = z
     R2_ACCESS_KEY_ID: optional,
     R2_SECRET_ACCESS_KEY: optional,
     R2_BUCKET: optional,
+    /** Optional AI assistance for search interpretation (F29); unset or "off" = rules only. */
+    ASSIST_PROVIDER: z.preprocess(blankAsUnset, z.enum(["anthropic", "off"]).optional()),
+    ANTHROPIC_API_KEY: optional,
+    /** Model for search assistance; defaults to claude-sonnet-5. */
+    ASSIST_MODEL: optional,
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === "production") {
@@ -84,6 +89,10 @@ export interface ServerEnv {
         readonly bucket: string;
       }
     | undefined;
+  /** Present only when ASSIST_PROVIDER=anthropic and ANTHROPIC_API_KEY are both set. */
+  readonly assist:
+    | { readonly provider: "anthropic"; readonly apiKey: string; readonly model: string }
+    | undefined;
 }
 
 const devOrigin = "http://localhost:3000";
@@ -118,6 +127,14 @@ export function parseEnv(source: Record<string, string | undefined>): ServerEnv 
             accessKeyId: env.R2_ACCESS_KEY_ID,
             secretAccessKey: env.R2_SECRET_ACCESS_KEY,
             bucket: env.R2_BUCKET,
+          }
+        : undefined,
+    assist:
+      env.ASSIST_PROVIDER === "anthropic" && env.ANTHROPIC_API_KEY
+        ? {
+            provider: "anthropic",
+            apiKey: env.ANTHROPIC_API_KEY,
+            model: env.ASSIST_MODEL ?? "claude-sonnet-5",
           }
         : undefined,
   };
