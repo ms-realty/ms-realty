@@ -28,8 +28,8 @@ function request(
   };
 }
 
-describe("universal transition contract (§07.7)", () => {
-  it("A47: applies an evidenced transition, bumps the version and records a human-readable event", () => {
+describe("universal transition contract (architecture §5.1)", () => {
+  it("applies an evidenced transition, bumps the version and records a human-readable event", () => {
     const result = applyTransition(inquiryTransitions, record, request({ reason: "Duty broker" }));
     expect(result.outcome).toBe("applied");
     if (result.outcome !== "applied") return;
@@ -49,14 +49,14 @@ describe("universal transition contract (§07.7)", () => {
     });
   });
 
-  it("A47: denies a transition without its required evidence", () => {
+  it("denies a transition without its required evidence", () => {
     expect(applyTransition(inquiryTransitions, record, request({ evidence: {} }))).toEqual({
       outcome: "denied",
       code: "owner_required",
     });
   });
 
-  it("returns a version conflict with the current snapshot instead of last-write-wins", () => {
+  it("AT19: returns a revision conflict with the current snapshot instead of last-write-wins", () => {
     expect(applyTransition(inquiryTransitions, record, request({ expectedVersion: 2 }))).toEqual({
       outcome: "version_conflict",
       current: record,
@@ -73,7 +73,7 @@ describe("universal transition contract (§07.7)", () => {
     ).toEqual({ outcome: "denied", code: "missing_capability" });
   });
 
-  it("A66: the AI service cannot transition records even when handed staff grants", () => {
+  it("AT52: the AI service cannot transition records even when handed staff grants", () => {
     const result = applyTransition(
       inquiryTransitions,
       record,
@@ -83,7 +83,7 @@ describe("universal transition contract (§07.7)", () => {
   });
 
   it("rejects transitions outside the table", () => {
-    expect(applyTransition(inquiryTransitions, record, request({ to: "case_linked" }))).toEqual({
+    expect(applyTransition(inquiryTransitions, record, request({ to: "linked_to_case" }))).toEqual({
       outcome: "denied",
       code: "transition_not_allowed",
     });

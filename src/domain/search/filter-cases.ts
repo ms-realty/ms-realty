@@ -1,4 +1,4 @@
-// Shared F02 filter-semantics cases. The pure predicates and the SQL search layer both run
+// Shared filter-semantics cases (architecture §10). The pure predicates and the SQL search layer both run
 // this table, so the two implementations cannot disagree. Listings are fictional.
 import { absent, area, known, money, type Provenance } from "../facts";
 import type { FilterResult, ListingSearchView, SearchCriteria } from "./filters";
@@ -127,8 +127,8 @@ export const filterCases: readonly FilterCase[] = [
   },
   {
     id: "price-period-must-match",
-    name: "a yearly rent is not compared with a monthly budget",
-    listing: rent({ price: known(money(720_000, "EUR", "year"), source) }),
+    name: "a rent recorded with a total period is not compared with a monthly budget",
+    listing: rent({ price: known(money(720_000, "EUR", "total"), source) }),
     criteria: { purpose: "long_term_rent", price: { max: 70_000, currency: "EUR" } },
     expected: "needs_confirmation",
     returned: false,
@@ -168,7 +168,7 @@ export const filterCases: readonly FilterCase[] = [
   {
     id: "bedrooms-unknown",
     name: "an unknown bedroom count needs confirmation",
-    listing: { ...baseListing, bedrooms: absent("not_provided") },
+    listing: { ...baseListing, bedrooms: absent("not_supplied") },
     criteria: { ...sale, bedrooms: { min: 2 } },
     expected: "needs_confirmation",
     returned: false,
@@ -206,16 +206,16 @@ export const filterCases: readonly FilterCase[] = [
     returned: true,
   },
   {
-    id: "A05-must-have-unknown",
-    name: "A05: unknown step-free access does not satisfy a must-have",
+    id: "AT04-must-have-unknown",
+    name: "AT04: unknown step-free access does not satisfy a must-have",
     listing: baseListing,
     criteria: { ...sale, mustHave: ["step_free_access"] },
     expected: "needs_confirmation",
     returned: false,
   },
   {
-    id: "A05-must-have-opt-in",
-    name: "A05: unknown access is shown only with include-needing-confirmation",
+    id: "AT04-must-have-opt-in",
+    name: "AT04: unknown access is shown only with include-needing-confirmation",
     listing: baseListing,
     criteria: { ...sale, mustHave: ["step_free_access"], includeNeedsConfirmation: true },
     expected: "needs_confirmation",
@@ -240,8 +240,8 @@ export const filterCases: readonly FilterCase[] = [
   {
     id: "availability-or",
     name: "availability OR: available or under negotiation",
-    listing: { ...baseListing, commercial: "under_negotiation" },
-    criteria: { ...sale, availability: ["available", "under_negotiation"] },
+    listing: { ...baseListing, commercial: "negotiating" },
+    criteria: { ...sale, availability: ["available", "negotiating"] },
     expected: "match",
     returned: true,
   },

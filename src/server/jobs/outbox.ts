@@ -1,23 +1,24 @@
-// Transactional outbox for external messages (AD11, spec §07.5). Enqueueing happens in the
-// same transaction as the business change. Dispatch marks the row outcome_unknown *before*
-// calling the provider, so a crash or timeout mid-call can never lead to a silent re-send:
-// only an explicit provider answer moves it on, and unknown outcomes wait for reconciliation.
+// Email delivery through the external-action ledger (architecture §9, §15). Enqueueing happens
+// in the same transaction as the business change and stores the payload and its digest before
+// any provider call. Dispatch marks the action `attempting` before calling the provider, so a
+// crash or timeout mid-call can never lead to a silent re-send: only an explicit provider answer
+// moves it on, and unknown outcomes wait for reconciliation. Provider acceptance is recorded as
+// `acknowledged`, delivery as `verified`: accepted is not delivered.
 import "server-only";
+import { createHash } from "node:crypto";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
-import { outboxMessages } from "@/db/schema";
+import { externalActions } from "@/db/schema";
+import { canonicalJson } from "@/domain/approval";
+import type { ExternalActionState } from "@/domain/external-action";
 import { type MessageChannel, maxDeliveryAttempts } from "@/domain/message";
 import type { Executor } from "../db";
 import type { MessageProvider } from "./provider";
 import type { JobQueue } from "./queue";
 
-export type OutboxState =
-  | "queued"
-  | "provider_accepted"
-  | "delivered"
-  | "failed"
-  | "outcome_unknown";
+export type OutboxState = ExternalActionState;
 
 export interface NewOutboxMessage {
+  /** Logical send identity; also the provider idempotency key for every retry. */
   readonly idempotencyKey: string;
   readonly channel: MessageChannel;
   readonly recipient: string;
@@ -29,43 +30,55 @@ export interface NewOutboxMessage {
   readonly messageId?: string;
 }
 
+interface EmailPayload {
+  readonly channel: MessageChannel;
+  readonly recipient: string;
+  readonly template: string;
+  readonly params: Record<string, unknown>;
+}
+
 /**
- * Adds a message unless one with the same idempotency key exists, and returns the logical
- * message id either way. With a queue, a dispatch job is enqueued in the same transaction.
+ * Adds a logical send unless one with the same key exists, and returns its id either way. With
+ * a queue, a dispatch job is enqueued in the same transaction.
  */
 export async function enqueueMessage(
   db: Executor,
   message: NewOutboxMessage,
   queue?: JobQueue,
 ): Promise<{ id: string; created: boolean }> {
+  const payload: EmailPayload = {
+    channel: message.channel,
+    recipient: message.recipient,
+    template: message.template,
+    params: message.params ?? {},
+  };
   const [inserted] = await db
-    .insert(outboxMessages)
+    .insert(externalActions)
     .values({
-      idempotencyKey: message.idempotencyKey,
-      channel: message.channel,
-      recipient: message.recipient,
-      template: message.template,
-      params: message.params ?? {},
-      secretParams: message.secretParams ?? null,
-      messageId: message.messageId,
+      kind: "email_send",
+      effectKey: message.idempotencyKey,
+      ...(message.messageId ? { subjectType: "message", subjectId: message.messageId } : {}),
+      payload,
+      payloadDigest: createHash("sha256").update(canonicalJson(payload)).digest("hex"),
+      secretPayload: message.secretParams ?? null,
     })
-    .onConflictDoNothing({ target: outboxMessages.idempotencyKey })
-    .returning({ id: outboxMessages.id });
+    .onConflictDoNothing({ target: externalActions.effectKey })
+    .returning({ id: externalActions.id });
   if (inserted) {
     await queue?.send("outbox.dispatch", { outboxId: inserted.id }, { db });
     return { id: inserted.id, created: true };
   }
   const [existing] = await db
-    .select({ id: outboxMessages.id })
-    .from(outboxMessages)
-    .where(eq(outboxMessages.idempotencyKey, message.idempotencyKey));
-  if (!existing) throw new Error("Outbox message vanished after a key conflict.");
+    .select({ id: externalActions.id })
+    .from(externalActions)
+    .where(eq(externalActions.effectKey, message.idempotencyKey));
+  if (!existing) throw new Error("External action vanished after a key conflict.");
   return { id: existing.id, created: false };
 }
 
 /**
- * Sends one queued message. Idempotent: anything not queued is left alone and its current
- * state returned, so duplicate jobs and sweeps are harmless.
+ * Sends one queued email. Idempotent: anything not queued is left alone and its current state
+ * returned, so duplicate jobs and sweeps are harmless.
  */
 export async function dispatchMessage(
   db: Executor,
@@ -76,35 +89,37 @@ export async function dispatchMessage(
   const claimed = await db.transaction(async (tx) => {
     const [row] = await tx
       .select()
-      .from(outboxMessages)
-      .where(eq(outboxMessages.id, outboxId))
+      .from(externalActions)
+      .where(eq(externalActions.id, outboxId))
       .for("update");
     if (row?.state !== "queued") return { row, claimed: false as const };
     await tx
-      .update(outboxMessages)
+      .update(externalActions)
       .set({
-        state: "outcome_unknown",
-        attempts: sql`${outboxMessages.attempts} + 1`,
+        state: "attempting",
+        attempts: sql`${externalActions.attempts} + 1`,
         provider: provider.name,
-        dispatchStartedAt: now,
-        secretParams: null,
-        version: sql`${outboxMessages.version} + 1`,
+        firstAttemptAt: row.firstAttemptAt ?? now,
+        lastAttemptAt: now,
+        secretPayload: null,
+        version: sql`${externalActions.version} + 1`,
       })
-      .where(eq(outboxMessages.id, outboxId));
+      .where(eq(externalActions.id, outboxId));
     return { row, claimed: true as const };
   });
-  if (!claimed.row) throw new Error(`Outbox message ${outboxId} does not exist.`);
-  if (!claimed.claimed) return claimed.row.state as OutboxState;
+  if (!claimed.row) throw new Error(`External action ${outboxId} does not exist.`);
+  if (!claimed.claimed) return claimed.row.state;
   const row = claimed.row;
+  const payload = row.payload as EmailPayload;
 
   const finish = async (
     state: OutboxState,
-    values: Partial<typeof outboxMessages.$inferInsert>,
+    values: Partial<typeof externalActions.$inferInsert>,
   ) => {
     await db
-      .update(outboxMessages)
-      .set({ state, ...values, version: sql`${outboxMessages.version} + 1` })
-      .where(and(eq(outboxMessages.id, outboxId), eq(outboxMessages.state, "outcome_unknown")));
+      .update(externalActions)
+      .set({ state, ...values, version: sql`${externalActions.version} + 1` })
+      .where(and(eq(externalActions.id, outboxId), eq(externalActions.state, "attempting")));
     return state;
   };
 
@@ -112,48 +127,51 @@ export async function dispatchMessage(
   try {
     result = await provider.send({
       outboxId,
-      idempotencyKey: row.idempotencyKey,
-      channel: row.channel,
-      recipient: row.recipient,
-      template: row.template,
-      params: row.params as Record<string, unknown>,
-      secretParams: row.secretParams as Record<string, unknown> | null,
+      idempotencyKey: row.effectKey,
+      channel: payload.channel,
+      recipient: payload.recipient,
+      template: payload.template,
+      params: payload.params,
+      secretParams: row.secretPayload as Record<string, unknown> | null,
     });
   } catch {
-    // Stays outcome_unknown for reconciliation; the error text may carry provider detail.
+    // Unknown: reconciled, never resent; the error text may carry provider detail.
     return finish("outcome_unknown", { lastErrorCode: "provider_unreachable" });
   }
   if (result.status === "accepted") {
-    return finish("provider_accepted", {
-      providerMessageId: result.providerMessageId,
-      acceptedAt: now,
+    return finish("acknowledged", {
+      providerReference: result.providerMessageId,
+      acknowledgedAt: now,
       lastErrorCode: null,
     });
   }
   if (result.retryable && row.attempts + 1 < maxDeliveryAttempts) {
     // The provider definitely did not take it: put it back, secrets included.
-    return finish("queued", { lastErrorCode: result.code, secretParams: row.secretParams });
+    return finish("queued", { lastErrorCode: result.code, secretPayload: row.secretPayload });
   }
   return finish("failed", { lastErrorCode: result.code, failedAt: now });
 }
 
-/** Dispatches every queued message, oldest first. The worker runs this as a safety sweep. */
+/** Dispatches every queued email, oldest first. The worker runs this as a safety sweep. */
 export async function dispatchQueued(
   db: Executor,
   provider: MessageProvider,
   limit = 50,
 ): Promise<number> {
   const rows = await db
-    .select({ id: outboxMessages.id })
-    .from(outboxMessages)
-    .where(eq(outboxMessages.state, "queued"))
-    .orderBy(asc(outboxMessages.createdAt))
+    .select({ id: externalActions.id })
+    .from(externalActions)
+    .where(and(eq(externalActions.kind, "email_send"), eq(externalActions.state, "queued")))
+    .orderBy(asc(externalActions.createdAt))
     .limit(limit);
   for (const { id } of rows) await dispatchMessage(db, provider, id);
   return rows.length;
 }
 
-/** Applies a provider delivery report (webhook). Returns false for an unknown message. */
+/**
+ * Applies an authenticated provider delivery report. A delivery never overwrites a recorded
+ * failure. Returns false for an unknown or already settled action.
+ */
 export async function recordDeliveryReport(
   db: Executor,
   report: {
@@ -166,47 +184,57 @@ export async function recordDeliveryReport(
 ): Promise<boolean> {
   const at = report.at ?? new Date();
   const rows = await db
-    .update(outboxMessages)
+    .update(externalActions)
     .set({
-      state: report.status,
+      state: report.status === "delivered" ? "verified" : "failed",
       ...(report.status === "delivered"
-        ? { deliveredAt: at }
+        ? { verifiedAt: at }
         : { failedAt: at, lastErrorCode: report.code ?? "delivery_failed" }),
-      version: sql`${outboxMessages.version} + 1`,
+      version: sql`${externalActions.version} + 1`,
     })
     .where(
       and(
-        eq(outboxMessages.provider, report.provider),
-        eq(outboxMessages.providerMessageId, report.providerMessageId),
-        inArray(outboxMessages.state, ["provider_accepted", "outcome_unknown"]),
+        eq(externalActions.provider, report.provider),
+        eq(externalActions.providerReference, report.providerMessageId),
+        inArray(externalActions.state, ["acknowledged", "outcome_unknown"]),
       ),
     )
-    .returning({ id: outboxMessages.id });
+    .returning({ id: externalActions.id });
   return rows.length > 0;
 }
 
 /**
- * Records what a person established for an outcome_unknown message (from the provider's
- * console, or the recipient). It never re-sends; a new message needs a new idempotency key.
+ * Records what a person established for an unknown outcome (from the provider's console, or
+ * the recipient). It never re-sends; a new send needs a new logical key.
  */
 export async function reconcileMessage(
   db: Executor,
   outboxId: string,
   finding:
-    | { state: "provider_accepted" | "delivered"; providerMessageId?: string }
+    | { state: "acknowledged" | "verified"; providerMessageId?: string }
     | { state: "failed"; code: string },
   now: Date = new Date(),
 ): Promise<boolean> {
   const values =
     finding.state === "failed"
       ? { failedAt: now, lastErrorCode: finding.code }
-      : finding.state === "delivered"
-        ? { deliveredAt: now, providerMessageId: finding.providerMessageId }
-        : { acceptedAt: now, providerMessageId: finding.providerMessageId };
+      : finding.state === "verified"
+        ? { verifiedAt: now, providerReference: finding.providerMessageId }
+        : { acknowledgedAt: now, providerReference: finding.providerMessageId };
   const rows = await db
-    .update(outboxMessages)
-    .set({ state: finding.state, ...values, version: sql`${outboxMessages.version} + 1` })
-    .where(and(eq(outboxMessages.id, outboxId), eq(outboxMessages.state, "outcome_unknown")))
-    .returning({ id: outboxMessages.id });
+    .update(externalActions)
+    .set({
+      state: finding.state,
+      ...values,
+      reconciledAt: now,
+      version: sql`${externalActions.version} + 1`,
+    })
+    .where(
+      and(
+        eq(externalActions.id, outboxId),
+        inArray(externalActions.state, ["attempting", "outcome_unknown"]),
+      ),
+    )
+    .returning({ id: externalActions.id });
   return rows.length === 1;
 }

@@ -14,6 +14,7 @@ const broker = { kind: "staff", id: "staff-1" } as const;
 const terms: ProposalTerms = {
   amountMinor: 9_000_000,
   currency: "EUR",
+  period: "total",
   paymentBasis: "Bank transfer at notary deed",
   conditions: ["Subject to title review"],
   inclusions: ["Kitchen appliances"],
@@ -22,7 +23,7 @@ const terms: ProposalTerms = {
   deadlineTimezone: "Europe/Sofia",
 };
 
-describe("proposals (§07.6, F16)", () => {
+describe("proposal revisions (architecture §6.5)", () => {
   it("changing amount, conditions, parties or deadline is material; inclusions wording is not", () => {
     expect(
       materialChanges(terms, { ...terms, amountMinor: 9_100_000, partyIds: ["p1", "p2"] }),
@@ -30,7 +31,7 @@ describe("proposals (§07.6, F16)", () => {
     expect(materialChanges(terms, { ...terms, inclusions: ["Kitchen"] })).toEqual([]);
   });
 
-  it("A40: a material change invalidates the prior approval before submission", () => {
+  it("AT34: a material change invalidates the prior approval before submission", () => {
     const approved = proposalApprovalContent(terms);
     const changed = proposalApprovalContent({ ...terms, amountMinor: 9_100_000 });
     expect(
@@ -51,7 +52,7 @@ describe("proposals (§07.6, F16)", () => {
     ).toBe("allowed");
   });
 
-  it("A40: expired or superseded proposals reject stale actions", () => {
+  it("AT34: expired or superseded proposals reject stale actions", () => {
     const content = proposalApprovalContent(terms);
     expect(
       guardProposalTransition(
@@ -84,12 +85,12 @@ describe("proposals (§07.6, F16)", () => {
     ).toBe("allowed");
   });
 
-  it("'agreed for next step' is not labeled as a completed purchase", () => {
+  it("AT35: 'agreed for next step' is not labeled as a completed purchase", () => {
     expect(proposalStates).not.toContain("purchased");
     expect(proposalStates).toContain("agreed_for_next_step");
   });
 
-  it("F16: an authorized client submits or responds with the portal capability, never reviews", () => {
+  it("an authorized client submits or responds with the portal capability, never reviews", () => {
     const client = { kind: "client", id: "client-1" } as const;
     const content = proposalApprovalContent(terms);
     const transition = (

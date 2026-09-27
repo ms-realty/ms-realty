@@ -1,9 +1,14 @@
-// Legacy extraction -> import items (spec F32). Pure: no IO. Every value comes from the
-// extraction; a value the legacy system never held becomes an explicit non-known fact state,
-// never a zero, false or guess.
+// Legacy extraction -> import items (architecture §13, §18.2). Pure: no IO. Every value comes
+// from the extraction; a value the legacy system never held becomes an explicit non-known fact
+// state, never a zero, false or guess.
 import { createHash } from "node:crypto";
 import { canonicalJson } from "../../domain/approval";
-import type { FactState, ListingPurpose, PropertyType } from "../../domain/facts";
+import type {
+  FactState,
+  ListingPurpose,
+  LocationPrecision,
+  PropertyType,
+} from "../../domain/facts";
 import { propertyTypes } from "../../domain/facts";
 import type { PublicLocale } from "../../domain/ids";
 import { isCurrencyCode, isPublicLocale } from "../../domain/ids";
@@ -67,11 +72,12 @@ export interface TranslationInput {
 }
 
 export interface ApprovalInput {
-  readonly kind: "legacy_owner_publication_approval" | "legacy_content_approval";
+  readonly kind: "legacy_source_as_is" | "legacy_content_approval";
   readonly decidedById: string;
   readonly decidedAt: string;
   readonly decisionNote: string;
   readonly scope: Record<string, unknown>;
+  readonly evidence: Record<string, unknown>;
 }
 
 export interface ListingItem {
@@ -92,18 +98,31 @@ export interface ListingItem {
     region: string;
     settlement: string;
     neighborhood: string | null;
-    publicPrecision: "settlement" | "region";
+    publicPrecision: LocationPrecision;
   };
   readonly listing: {
     purpose: ListingPurpose;
     commercialState: CommercialState;
+    /** Why the availability is what it is; the freeze is not a new availability confirmation. */
+    availabilityBasis: string;
     editorialState: EditorialState;
-    availabilityCheckedAt: string | null;
+    /** Explicit legacy-identity map: ids, lifecycle, URLs and provenance (§4). */
+    legacyIdentity: Record<string, unknown>;
   };
-  readonly facts: FactInput[];
+  /** Revision 1 of the property's facts; empty for a merged duplicate. */
+  readonly propertyFacts: FactInput[];
+  /** Digest of the fact revision the listing revision binds (the survivor's for a duplicate). */
+  factDigest: string;
   readonly observedAt: string;
   readonly sourceUrl: string;
-  readonly version: { snapshot: Record<string, unknown>; contentHash: string };
+  /** ListingRevision 1: commercial terms, BG copy, disclosure and the ordered media manifest. */
+  readonly revision: {
+    terms: Record<string, unknown>;
+    sourceCopy: Record<string, unknown>;
+    disclosure: Record<string, unknown>;
+    media: { originalKey: string; position: number; kind: MediaKind | null }[];
+    contentDigest: string;
+  };
   readonly approval: ApprovalInput | null;
   readonly translations: TranslationInput[];
   readonly mediaKeys: string[];
@@ -583,12 +602,21 @@ export function buildListingItem(
   }
 
   const active = l.lifecycle_at_freeze.state === "active";
-  const commercialState: CommercialState = active ? "availability_unconfirmed" : "withdrawn";
-  const commercialReason = active
+  // Never available: the freeze confirmed nothing in the new system (§7.1).
+  const commercialState: CommercialState = active ? "confirmation_required" : "withdrawn";
+  const availabilityBasis = active
     ? `Active at launch freeze ${l.lifecycle_at_freeze.freeze_approval_id}; availability not reconfirmed since.`
     : `Archived at launch freeze ${l.lifecycle_at_freeze.freeze_approval_id}: ${l.lifecycle_at_freeze.reason} (${l.lifecycle_at_freeze.source_review_status}).`;
 
   const facts = listingFacts(l, issues, purpose);
+  const propertyFacts = facts.filter((f) => f.subject === "property");
+  const factSnapshot = (list: FactInput[]) =>
+    Object.fromEntries(
+      list.map((f) => [
+        f.fieldKey,
+        { state: f.state, value: f.value, unit: f.unit, basis: f.basis, note: f.note },
+      ]),
+    );
 
   const bg = l.translations.find((t) => t.locale === "bg");
   const source = l.translations.find((t) => t.is_source_locale);
@@ -607,11 +635,33 @@ export function buildListingItem(
   const photoEntries = l.media.filter((m) => m.r2_key !== null);
   const mediaKeys = [...new Set(photoEntries.map((m) => m.r2_key as string))];
 
-  const snapshot: Record<string, unknown> = {
-    reference,
+  const terms: Record<string, unknown> = {
     purpose,
-    propertyType,
-    legacyPropertyType: l.property_type,
+    facts: factSnapshot(facts.filter((f) => f.subject === "listing")),
+    availability: { state: commercialState, basis: availabilityBasis },
+  };
+  const sourceCopy: Record<string, unknown> = {
+    locale: "bg",
+    text: bg
+      ? {
+          origin: bgIsSource ? "legacy_source" : "legacy_translation_draft",
+          humanReviewed: bgIsSource,
+          draftedByAi: isAiTranslator(bg),
+          ...text(bg),
+          sourceUrl: l.source_description.source_url,
+        }
+      : null,
+    // Original evidence keeps its original language.
+    legacySource:
+      source && !bgIsSource
+        ? { locale: source.locale, h1: l.source_description.h1, ...text(source) }
+        : null,
+  };
+  const placeLevel = placeKeyValue ? ctx.placeLevelFor(placeKeyValue) : undefined;
+  const publicPrecision: LocationPrecision =
+    placeLevel === "municipality" ? "region" : "settlement";
+  const disclosure: Record<string, unknown> = {
+    publicPrecision,
     location: {
       country: l.location.country.code,
       region: l.location.region.name,
@@ -622,56 +672,33 @@ export function buildListingItem(
       legacyReviewStatus: l.location.review_status,
       legacyPublicPrecision: l.location.public_precision,
     },
-    facts: Object.fromEntries(
-      facts.map((f) => [
-        f.fieldKey,
-        { state: f.state, value: f.value, unit: f.unit, basis: f.basis, note: f.note },
-      ]),
-    ),
-    commercial: { state: commercialState, reason: commercialReason },
-    text: bg
-      ? {
-          locale: "bg",
-          origin: bgIsSource ? "legacy_source" : "legacy_translation_draft",
-          humanReviewed: bgIsSource,
-          draftedByAi: isAiTranslator(bg),
-          ...text(bg),
-          sourceUrl: l.source_description.source_url,
-        }
-      : null,
-    legacySource:
-      source && !bgIsSource
-        ? { locale: source.locale, h1: l.source_description.h1, ...text(source) }
-        : null,
-    media: mediaKeys.map((key, position) => ({
-      r2Key: key,
-      position,
-      kind: mediaKindMap[photoEntries.find((m) => m.r2_key === key)?.type ?? ""] ?? null,
-    })),
-    legacy: {
-      ids: l.legacy_ids,
-      lifecycleAtFreeze: l.lifecycle_at_freeze,
-      urls: l.legacy_urls.map((u) => ({ domain: u.domain, path: u.slug.path, ...u.decision })),
-      provenance: l.provenance,
-    },
   };
+  const media = mediaKeys.map((key, position) => ({
+    originalKey: key,
+    position,
+    kind: mediaKindMap[photoEntries.find((m) => m.r2_key === key)?.type ?? ""] ?? null,
+  }));
 
   const pa = l.publication_approval;
   const approval: ApprovalInput | null =
     pa?.covers_this_listing === true
       ? {
-          kind: "legacy_owner_publication_approval",
+          // Source-as-is publication evidence only: not factual review, translation approval,
+          // indexability or media review (§18.2, §21.2).
+          kind: "legacy_source_as_is",
           decidedById: `legacy:${pa.approved_by}`,
           decidedAt: pa.approved_at,
           decisionNote: pa.boundary,
           scope: {
-            evidenceReference: pa.approval_id,
-            evidenceArtifact: "production/data/listing-publication-approval.json",
             legacyScope: pa.scope,
             decision: pa.decision,
             coveredSurface: pa.covered_surface,
             coveredTextLocale: source?.locale ?? null,
             doesNotCover: ctx.notCovered,
+          },
+          evidence: {
+            evidenceReference: pa.approval_id,
+            evidenceArtifact: "production/data/listing-publication-approval.json",
           },
         }
       : null;
@@ -687,7 +714,8 @@ export function buildListingItem(
     });
   }
 
-  return {
+  const merged = l.legacy_ids.merged_into !== null;
+  const item: ListingItem = {
     type: "listing",
     sourceKey: `listing:${reference}`,
     issues,
@@ -701,27 +729,59 @@ export function buildListingItem(
       region: l.location.region.name,
       settlement: l.location.settlement.name,
       neighborhood: l.location.neighborhood.recorded ? l.location.neighborhood.name : null,
-      publicPrecision:
-        placeKeyValue && ctx.placeLevelFor(placeKeyValue) === "municipality"
-          ? "region"
-          : "settlement",
+      publicPrecision,
     },
     listing: {
       purpose,
       commercialState,
+      availabilityBasis,
       editorialState: l.open_work.enrichment_task?.state === "pending" ? "needs_facts" : "draft",
-      availabilityCheckedAt: active ? l.lifecycle_at_freeze.freeze_at : null,
+      legacyIdentity: {
+        ids: l.legacy_ids,
+        lifecycleAtFreeze: l.lifecycle_at_freeze,
+        urls: l.legacy_urls.map((u) => ({ domain: u.domain, path: u.slug.path, ...u.decision })),
+        provenance: l.provenance,
+        legacyPropertyType: l.property_type,
+        // A duplicate's own property facts stay here as evidence; its survivor's facts stand.
+        ...(merged ? { propertyFactsAsRecorded: factSnapshot(propertyFacts) } : {}),
+      },
     },
-    // A duplicate's property facts stay in its version snapshot as evidence only.
-    facts: l.legacy_ids.merged_into ? facts.filter((f) => f.subject === "listing") : facts,
+    propertyFacts: merged ? [] : propertyFacts,
+    factDigest: factRevisionDigest(propertyFacts),
     observedAt: crawlInstant(l.provenance.crawl_captured_at),
     sourceUrl: l.provenance.source_url,
-    version: { snapshot, contentHash: sha256Json(snapshot) },
+    revision: { terms, sourceCopy, disclosure, media, contentDigest: "" },
     approval,
     translations,
     mediaKeys,
-    summary: `Imported from the legacy site. ${commercialReason}`,
+    summary: `Imported from the legacy site. ${availabilityBasis}`,
   };
+  sealRevision(item);
+  return item;
+}
+
+/** Binds the listing revision digest to its content and the fact revision it references. */
+function sealRevision(item: ListingItem): void {
+  const { terms, sourceCopy, disclosure, media } = item.revision;
+  item.revision.contentDigest = sha256Json({
+    factDigest: item.factDigest,
+    terms,
+    sourceCopy,
+    disclosure,
+    media,
+  });
+}
+
+/** Digest of a fact revision's content, as stored on property_fact_revisions. */
+export function factRevisionDigest(facts: readonly FactInput[]): string {
+  return sha256Json(
+    Object.fromEntries(
+      facts.map((f) => [
+        f.fieldKey,
+        { state: f.state, value: f.value, unit: f.unit, basis: f.basis, note: f.note },
+      ]),
+    ),
+  );
 }
 
 // Media.
@@ -940,12 +1000,8 @@ export function buildContentItem(
           decidedById: `legacy:${record.reviewer}`,
           decidedAt: record.approved_at,
           decisionNote: `Approved in the legacy system (status ${record.status}); recorded as evidence, not as new-system publication approval.`,
-          scope: {
-            evidenceArtifact: contentArtifacts[kind],
-            evidenceReference: record.id,
-            legacySourceHash: record.source_hash,
-            locale: record.locale,
-          },
+          scope: { legacySourceHash: record.source_hash, locale: record.locale },
+          evidence: { evidenceArtifact: contentArtifacts[kind], evidenceReference: record.id },
         }
       : null;
   return {
@@ -994,9 +1050,21 @@ export function buildImportItems(sources: LegacySources): ImportItem[] {
       );
       continue;
     }
-    const facts = (i: ListingItem) => i.version.snapshot.facts as Record<string, unknown>;
-    const differing = Object.keys(facts(duplicate)).filter(
-      (key) => canonicalJson(facts(duplicate)[key]) !== canonicalJson(facts(survivor)[key]),
+    // The duplicate's revision binds its survivor's fact revision.
+    duplicate.factDigest = survivor.factDigest;
+    sealRevision(duplicate);
+    const own = (duplicate.listing.legacyIdentity.propertyFactsAsRecorded ?? {}) as Record<
+      string,
+      unknown
+    >;
+    const survivorFacts = Object.fromEntries(
+      survivor.propertyFacts.map((f) => [
+        f.fieldKey,
+        { state: f.state, value: f.value, unit: f.unit, basis: f.basis, note: f.note },
+      ]),
+    );
+    const differing = Object.keys(own).filter(
+      (key) => canonicalJson(own[key]) !== canonicalJson(survivorFacts[key]),
     );
     if (differing.length) {
       duplicate.issues.push(

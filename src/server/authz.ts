@@ -1,10 +1,16 @@
-// Capability checks over records (spec §03, AD5). Effective grants combine role presets and
-// single-capability grants (optionally narrowed to one record or locale) with party
-// relationships, which give clients access to exactly the cases and properties they are part
-// of. The AI service is draft-only whatever it is granted (A66).
+// Capability checks over records (architecture §8.2). Effective grants combine role presets
+// and single-capability grants (optionally narrowed to one record or locale) with Case
+// participation and property relationships, which give clients access to exactly the cases and
+// properties they are part of. The AI service is draft-only whatever it is granted (AT52).
 import "server-only";
 import { and, eq, gt, isNull, lte, or } from "drizzle-orm";
-import { capabilityGrants, clientAccounts, partyRelationships, staffAccounts } from "@/db/schema";
+import {
+  caseParticipants,
+  grants as grantRows,
+  principals,
+  propertyRelationships,
+  staffMemberships,
+} from "@/db/schema";
 import {
   type Actor,
   type Capability,
@@ -18,7 +24,7 @@ import {
   systemJobCapabilities,
 } from "@/domain/capabilities";
 import type { PublicLocale } from "@/domain/ids";
-import type { Audience, PartyRelationshipRole } from "@/domain/parties";
+import type { Audience, ParticipantRole } from "@/domain/parties";
 import type { Executor } from "./db";
 import { AppError } from "./errors";
 
@@ -40,20 +46,23 @@ export interface Resource {
  */
 const propertyRecordTypes: readonly string[] = ["property", "listing"];
 
-const sellerSideRoles: readonly PartyRelationshipRole[] = [
+const sellerSideRoles: readonly ParticipantRole[] = [
   "seller",
   "landlord",
   "authorized_representative",
 ];
 
 /** Acting for a principal: only principals respond to proposals or approve listings. */
-const principalOnly: readonly Capability[] = ["portal.proposal.respond", "portal.listing.approve"];
+const principalOnly: readonly Capability[] = [
+  "portal.proposal.respond",
+  "portal.listing.acknowledge",
+];
 
 /**
  * Invited, non-principal parties get exactly what the invitation grants on top of a floor
  * (§03): an adviser or a stay guest is not automatically authorized for the whole case.
  */
-const invitedRolePresets: Partial<Record<PartyRelationshipRole, readonly Capability[]>> = {
+const invitedRolePresets: Partial<Record<ParticipantRole, readonly Capability[]>> = {
   collaborator: rolePresets.invited_collaborator,
   adviser: rolePresets.invited_collaborator,
   guest: ["portal.case.read"],
@@ -62,7 +71,7 @@ const invitedRolePresets: Partial<Record<PartyRelationshipRole, readonly Capabil
 
 /** Capabilities a party relationship confers on its case or property. */
 function relationshipCapabilities(
-  role: PartyRelationshipRole,
+  role: ParticipantRole,
   authorityReviewed: boolean,
   invited: readonly Capability[],
 ): readonly Capability[] {
@@ -73,8 +82,9 @@ function relationshipCapabilities(
     return [...floor, ...portal];
   }
   return rolePresets.verified_client.filter(
-    // Approving a listing preview needs seller-side authority that staff reviewed (A29).
-    (c) => c !== "portal.listing.approve" || (sellerSideRoles.includes(role) && authorityReviewed),
+    // Acknowledging a listing preview needs seller-side authority that staff reviewed (AT18).
+    (c) =>
+      c !== "portal.listing.acknowledge" || (sellerSideRoles.includes(role) && authorityReviewed),
   );
 }
 
@@ -102,7 +112,7 @@ function scopedTo(
   return Object.keys(scope).length ? scope : undefined;
 }
 
-function expandGrant(row: typeof capabilityGrants.$inferSelect): CapabilityGrant[] {
+function expandGrant(row: typeof grantRows.$inferSelect): CapabilityGrant[] {
   const scope = scopedTo(row.recordType, row.recordId, row.locales, row.expiresAt);
   const granted: readonly Capability[] = row.role
     ? rolePresets[row.role as Role]
@@ -113,10 +123,7 @@ function expandGrant(row: typeof capabilityGrants.$inferSelect): CapabilityGrant
 }
 
 const liveGrant = (now: Date) =>
-  and(
-    isNull(capabilityGrants.revokedAt),
-    or(isNull(capabilityGrants.expiresAt), gt(capabilityGrants.expiresAt, now)),
-  );
+  and(isNull(grantRows.revokedAt), or(isNull(grantRows.expiresAt), gt(grantRows.expiresAt, now)));
 
 /** Every grant the actor holds right now, each with its record/locale/expiry scope. */
 export async function resolveGrants(
@@ -134,45 +141,70 @@ export async function resolveGrants(
     case "ai_service": {
       const rows = await db
         .select()
-        .from(capabilityGrants)
-        .where(and(eq(capabilityGrants.serviceName, actor.id), liveGrant(now)));
+        .from(grantRows)
+        .where(and(eq(grantRows.serviceName, actor.id), liveGrant(now)));
       return rows.flatMap(expandGrant);
     }
     case "staff": {
+      // Staff access needs an active staff principal with an active membership (§8.1).
       const [account] = await db
-        .select({ status: staffAccounts.status })
-        .from(staffAccounts)
-        .where(eq(staffAccounts.id, actor.id));
-      if (account?.status !== "active") return [];
+        .select({
+          status: principals.status,
+          kind: principals.kind,
+          membership: staffMemberships.state,
+        })
+        .from(principals)
+        .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+        .where(eq(principals.id, actor.id));
+      if (account?.status !== "active" || account.kind !== "staff") return [];
+      if (account.membership !== "active") return [];
       const rows = await db
         .select()
-        .from(capabilityGrants)
-        .where(and(eq(capabilityGrants.staffAccountId, actor.id), liveGrant(now)));
+        .from(grantRows)
+        .where(and(eq(grantRows.principalId, actor.id), liveGrant(now)));
       return rows.flatMap(expandGrant);
     }
     case "client": {
       const [account] = await db
-        .select({ status: clientAccounts.status, personId: clientAccounts.personId })
-        .from(clientAccounts)
-        .where(eq(clientAccounts.id, actor.id));
-      if (account?.status !== "active") return [];
-      const grantRows = await db
+        .select({ status: principals.status, kind: principals.kind, partyId: principals.partyId })
+        .from(principals)
+        .where(eq(principals.id, actor.id));
+      if (account?.status !== "active" || account.kind !== "client") return [];
+      const rows = await db
         .select()
-        .from(capabilityGrants)
-        .where(and(eq(capabilityGrants.clientAccountId, actor.id), liveGrant(now)));
+        .from(grantRows)
+        .where(and(eq(grantRows.principalId, actor.id), liveGrant(now)));
       // Client grants are always record-scoped; an unscoped one would reach every case.
-      const grants = grantRows.filter((row) => row.recordId).flatMap(expandGrant);
-      const relationships = await db
+      const grants = rows.filter((row) => row.recordId).flatMap(expandGrant);
+      const participations = await db
         .select()
-        .from(partyRelationships)
+        .from(caseParticipants)
         .where(
           and(
-            eq(partyRelationships.personId, account.personId),
-            isNull(partyRelationships.revokedAt),
-            lte(partyRelationships.validFrom, now),
-            or(isNull(partyRelationships.expiresAt), gt(partyRelationships.expiresAt, now)),
+            eq(caseParticipants.partyId, account.partyId),
+            isNull(caseParticipants.revokedAt),
+            lte(caseParticipants.validFrom, now),
+            or(isNull(caseParticipants.expiresAt), gt(caseParticipants.expiresAt, now)),
           ),
         );
+      const propertyLinks = await db
+        .select()
+        .from(propertyRelationships)
+        .where(
+          and(
+            eq(propertyRelationships.partyId, account.partyId),
+            isNull(propertyRelationships.revokedAt),
+            lte(propertyRelationships.validFrom, now),
+            or(isNull(propertyRelationships.expiresAt), gt(propertyRelationships.expiresAt, now)),
+          ),
+        );
+      const relationships = [
+        ...participations.map((p) => ({ ...p, target: ["case", p.caseId] as [string, string] })),
+        ...propertyLinks.map((p) => ({
+          ...p,
+          target: ["property", p.propertyId] as [string, string],
+        })),
+      ];
       for (const rel of relationships) {
         // Specialist access is time-limited by definition; without an expiry it grants nothing.
         if (rel.role === "specialist" && !rel.expiresAt) continue;
@@ -185,10 +217,7 @@ export async function resolveGrants(
           ? invitation.resources.flatMap((r: { type?: unknown; id?: unknown }) =>
               typeof r?.type === "string" && typeof r?.id === "string" ? [[r.type, r.id]] : [],
             )
-          : [
-              ...(rel.caseId ? [["case", rel.caseId] as [string, string]] : []),
-              ...(rel.propertyId ? [["property", rel.propertyId] as [string, string]] : []),
-            ];
+          : [rel.target];
         for (const [recordType, recordId] of targets) {
           const scope = scopedTo(recordType, recordId, null, rel.expiresAt);
           for (const capability of conferred) grants.push({ capability, scope });

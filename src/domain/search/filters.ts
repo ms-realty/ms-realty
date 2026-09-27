@@ -1,14 +1,15 @@
-// F02 filter semantics as pure predicates over the listing search view-model (AD10).
+// Filter semantics as pure predicates over the listing search view-model (architecture §10).
 // OR within a category, AND across categories. Unknown values never satisfy a constraint:
-// they make a listing "needs confirmation", shown only when the visitor opts in (A05).
-import type {
-  Area,
-  AreaBasis,
-  Fact,
-  ListingPurpose,
-  Money,
-  PricePeriod,
-  PropertyType,
+// they make a listing "needs confirmation", shown only when the visitor opts in (AT04).
+import {
+  type Area,
+  type AreaBasis,
+  type Fact,
+  type ListingPurpose,
+  type Money,
+  type PricePeriod,
+  type PropertyType,
+  pricePeriodByPurpose,
 } from "../facts";
 import type { CurrencyCode } from "../ids";
 import type { CommercialState } from "../listing";
@@ -49,11 +50,7 @@ export interface SearchCriteria {
 }
 
 /** The price period a budget refers to for each purpose. */
-export const searchPricePeriod: Record<ListingPurpose, PricePeriod> = {
-  sale: "total",
-  long_term_rent: "month",
-  short_stay: "night",
-};
+export const searchPricePeriod: Record<ListingPurpose, PricePeriod> = pricePeriodByPurpose;
 
 export type FilterResult = "match" | "needs_confirmation" | "no_match";
 

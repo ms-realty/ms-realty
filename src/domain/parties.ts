@@ -1,5 +1,8 @@
-// Parties, contact methods and relationships (spec §04, §03.1, F11, F30).
-// Contact verification, consent and authority to act are separate attributes.
+// Parties, contact methods and participation (architecture §4.1, §6.3, §8.2). Contact
+// verification, consent and authority to act are separate facts; none is a sign-in permission.
+
+export const partyKinds = ["person", "organization"] as const;
+export type PartyKind = (typeof partyKinds)[number];
 
 export const contactMethodKinds = ["email", "phone", "whatsapp", "viber", "postal"] as const;
 export type ContactMethodKind = (typeof contactMethodKinds)[number];
@@ -8,27 +11,25 @@ export type ContactMethodKind = (typeof contactMethodKinds)[number];
 export const contactVerificationStates = ["unverified", "pending", "verified", "failed"] as const;
 export type ContactVerificationState = (typeof contactVerificationStates)[number];
 
-export const consentPurposes = ["service_updates", "search_alerts", "marketing"] as const;
-export type ConsentPurpose = (typeof consentPurposes)[number];
-
-export const consentStates = ["not_asked", "granted", "withdrawn"] as const;
-export type ConsentState = (typeof consentStates)[number];
-
-export const partyRelationshipRoles = [
+/**
+ * Explicitly scoped roles a party holds in a Case (CaseParticipant) or towards a Property.
+ * Letting uses tenant/landlord labels on the same foundation as buying and selling.
+ */
+export const participantRoles = [
   "buyer",
   "co_buyer",
-  "seller",
-  "authorized_representative",
-  "landlord",
   "tenant",
-  "guest",
+  "seller",
+  "landlord",
+  "authorized_representative",
   "adviser",
   "collaborator",
   "specialist",
+  "guest",
 ] as const;
-export type PartyRelationshipRole = (typeof partyRelationshipRoles)[number];
+export type ParticipantRole = (typeof participantRoles)[number];
 
-/** Self-declared authority is never presented as reviewed authority (A29). */
+/** Self-declared authority is never presented as reviewed authority (AT18). */
 export const authorityStates = [
   "not_claimed",
   "self_declared",
@@ -42,9 +43,6 @@ export function hasReviewedAuthority(state: AuthorityState): boolean {
   return state === "reviewed";
 }
 
-export const accountStatuses = ["active", "suspended", "deactivated"] as const;
-export type AccountStatus = (typeof accountStatuses)[number];
-
-/** Who can see a private item (§03.1). */
+/** Who can see a private item (§8.2). Participation in a Case does not imply every audience. */
 export const audiences = ["internal", "case_participants", "specialist", "public"] as const;
 export type Audience = (typeof audiences)[number];

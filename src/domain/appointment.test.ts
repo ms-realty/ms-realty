@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  type AppointmentEvidence,
   appointmentMachine,
   appointmentTransitions,
   effectiveSlot,
@@ -21,48 +22,67 @@ const next: Slot = {
   timezone: "Europe/Sofia",
 };
 
-describe("appointments (§07.5, F07, F22)", () => {
-  it("A20: a request is not a confirmation; confirming needs host, access and timezone", () => {
-    expect(
-      guardAppointmentTransition(
-        "requested",
-        "confirmed",
-        { slot, hostAvailable: true },
-        coordinator,
-      ),
-    ).toEqual({
+const ready = {
+  slot,
+  hostAvailable: true,
+  propertyAccess: "confirmed",
+  participantCount: 1,
+  externalBusyChecked: true,
+  resourcesFree: true,
+  availabilityConfirmed: true,
+} as const;
+
+describe("appointments (architecture §6.4)", () => {
+  it("AT29: a request is never confirmed before host, access, participant and resource checks", () => {
+    const confirm = (evidence: AppointmentEvidence) =>
+      guardAppointmentTransition("requested", "confirmed", { ...ready, ...evidence }, coordinator);
+    expect(confirm({}).outcome).toBe("allowed");
+    expect(confirm({ propertyAccess: "requested" })).toEqual({
       outcome: "denied",
       code: "property_access_unconfirmed",
     });
+    expect(confirm({ hostAvailable: false })).toEqual({
+      outcome: "denied",
+      code: "host_unavailable",
+    });
+    expect(confirm({ participantCount: 0 })).toEqual({
+      outcome: "denied",
+      code: "participants_required",
+    });
+    expect(confirm({ resourcesFree: false })).toEqual({
+      outcome: "denied",
+      code: "appointment_conflict",
+    });
+    // Published is not available: an expired availability confirmation needs the broker first.
+    expect(confirm({ availabilityConfirmed: false })).toEqual({
+      outcome: "denied",
+      code: "availability_reconfirmation_required",
+    });
+    // The client's request is not a confirmation, whoever sends it.
     expect(
-      guardAppointmentTransition(
-        "requested",
-        "confirmed",
-        { slot, hostAvailable: true, propertyAccess: "confirmed" },
-        coordinator,
-      ).outcome,
-    ).toBe("allowed");
+      guardAppointmentTransition("requested", "confirmed", ready, { kind: "client", id: "c1" }),
+    ).toEqual({ outcome: "denied", code: "staff_required" });
   });
 
-  it("A51: a stale calendar sync prevents confirmation", () => {
+  it("AT29: the manual external-calendar check is an explicit confirmation step", () => {
     expect(
       guardAppointmentTransition(
         "proposed",
         "confirmed",
-        { slot, hostAvailable: true, propertyAccess: "confirmed", calendarSyncCurrent: false },
+        { ...ready, externalBusyChecked: false },
         coordinator,
       ),
-    ).toEqual({ outcome: "denied", code: "calendar_sync_stale" });
+    ).toEqual({ outcome: "denied", code: "external_busy_check_required" });
   });
 
-  it("A21: a reschedule request keeps the confirmed arrangement until the replacement is agreed", () => {
+  it("AT32: a reschedule request keeps the confirmed arrangement until the replacement is agreed", () => {
     expect(
       effectiveSlot({ state: "reschedule_requested", confirmedSlot: slot, proposedSlot: next }),
     ).toEqual(slot);
     expect(effectiveSlot({ state: "proposed", proposedSlot: next })).toBeNull();
   });
 
-  it("A22: no-show starts with a factual check and cancellation keeps a reason", () => {
+  it("AT33: no-show starts with a factual check and cancellation keeps a reason", () => {
     expect(guardAppointmentTransition("confirmed", "no_show", {}, coordinator)).toEqual({
       outcome: "denied",
       code: "factual_check_required",
@@ -74,7 +94,7 @@ describe("appointments (§07.5, F07, F22)", () => {
     expect(appointmentMachine.isTerminal("cancelled")).toBe(true);
   });
 
-  it("A21: the confirmed viewing can still take place or be missed while a reschedule is pending", () => {
+  it("AT32: the confirmed viewing can still take place or be missed while a reschedule is pending", () => {
     expect(appointmentMachine.check("reschedule_requested", "completed").outcome).toBe("allowed");
     expect(appointmentMachine.check("reschedule_requested", "no_show").outcome).toBe("allowed");
     expect(
@@ -90,13 +110,13 @@ describe("appointments (§07.5, F07, F22)", () => {
       guardAppointmentTransition(
         "reschedule_requested",
         "confirmed",
-        { calendarSyncCurrent: false },
+        { externalBusyChecked: false },
         coordinator,
       ).outcome,
     ).toBe("allowed");
   });
 
-  it("F07 step 6: a client cancels or asks to reschedule through the same record, nothing more", () => {
+  it("a client cancels or asks to reschedule through the same record, nothing more", () => {
     const client = { kind: "client", id: "client-1" } as const;
     const record = { id: "apt-1", state: "confirmed" as const, version: 1 };
     const request = (to: "cancelled" | "reschedule_requested" | "completed") =>

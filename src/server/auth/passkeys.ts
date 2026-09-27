@@ -13,7 +13,7 @@ import {
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
 import { and, eq, gt, isNull } from "drizzle-orm";
-import { passkeys, staffAccounts, webauthnChallenges } from "@/db/schema";
+import { passkeys, principals, webauthnChallenges } from "@/db/schema";
 import { recordAudit } from "../audit";
 import { getEnv } from "../config/env";
 import type { Executor } from "../db";
@@ -35,12 +35,12 @@ async function storeChallenge(
   challenge: string,
   purpose: ChallengePurpose,
   now: Date,
-  staffAccountId?: string,
+  principalId?: string,
 ): Promise<void> {
   await db.insert(webauthnChallenges).values({
     challenge,
     purpose,
-    staffAccountId,
+    principalId,
     createdAt: now,
     expiresAt: new Date(now.getTime() + challengeTtlMs),
   });
@@ -52,7 +52,7 @@ async function consumeChallenge(
   challenge: string,
   purpose: ChallengePurpose,
   now: Date,
-  staffAccountId?: string,
+  principalId?: string,
 ): Promise<boolean> {
   const rows = await db
     .update(webauthnChallenges)
@@ -63,7 +63,7 @@ async function consumeChallenge(
         eq(webauthnChallenges.purpose, purpose),
         isNull(webauthnChallenges.consumedAt),
         gt(webauthnChallenges.expiresAt, now),
-        ...(staffAccountId ? [eq(webauthnChallenges.staffAccountId, staffAccountId)] : []),
+        ...(principalId ? [eq(webauthnChallenges.principalId, principalId)] : []),
       ),
     )
     .returning({ id: webauthnChallenges.id });
@@ -85,14 +85,14 @@ export async function startPasskeyRegistration(
   requireFreshAuth(session, now);
   const env = getEnv();
   const [account] = await db
-    .select({ email: staffAccounts.email, displayName: staffAccounts.displayName })
-    .from(staffAccounts)
-    .where(eq(staffAccounts.id, staffId));
+    .select({ email: principals.email, displayName: principals.displayName })
+    .from(principals)
+    .where(eq(principals.id, staffId));
   if (!account) throw new AppError("unauthenticated");
   const existing = await db
     .select({ id: passkeys.credentialId, transports: passkeys.transports })
     .from(passkeys)
-    .where(and(eq(passkeys.staffAccountId, staffId), isNull(passkeys.revokedAt)));
+    .where(and(eq(passkeys.principalId, staffId), isNull(passkeys.revokedAt)));
   const options = await generateRegistrationOptions({
     rpName: env.webauthn.rpName,
     rpID: env.webauthn.rpId,
@@ -138,7 +138,7 @@ export async function finishPasskeyRegistration(
     const [row] = await tx
       .insert(passkeys)
       .values({
-        staffAccountId: staffId,
+        principalId: staffId,
         credentialId: info.credential.id,
         publicKey: info.credential.publicKey,
         signCount: info.credential.counter,
@@ -153,7 +153,7 @@ export async function finishPasskeyRegistration(
     await recordAudit(tx, {
       action: "passkey.register",
       actor: session.actor,
-      recordType: "staff_account",
+      recordType: "principal",
       recordId: staffId,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
       payload: { passkeyId: row.id, deviceType: info.credentialDeviceType },
@@ -194,15 +194,18 @@ export async function finishPasskeyAuthentication(
       publicKey: passkeys.publicKey,
       signCount: passkeys.signCount,
       transports: passkeys.transports,
-      staffAccountId: passkeys.staffAccountId,
-      status: staffAccounts.status,
+      principalId: passkeys.principalId,
+      kind: principals.kind,
+      status: principals.status,
     })
     .from(passkeys)
-    .innerJoin(staffAccounts, eq(staffAccounts.id, passkeys.staffAccountId))
+    .innerJoin(principals, eq(principals.id, passkeys.principalId))
     .where(and(eq(passkeys.credentialId, response.id), isNull(passkeys.revokedAt)));
   // One answer for unknown, revoked and inactive credentials alike.
-  if (!passkey?.staffAccountId || passkey.status !== "active") throw new AppError("passkey_failed");
-  const staffId = passkey.staffAccountId;
+  if (passkey?.kind !== "staff" || passkey.status !== "active") {
+    throw new AppError("passkey_failed");
+  }
+  const staffId = passkey.principalId;
 
   let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
   try {
@@ -234,7 +237,7 @@ export async function finishPasskeyAuthentication(
     await recordAudit(tx, {
       action: "session.sign_in",
       actor: issued.session.actor,
-      recordType: "staff_account",
+      recordType: "principal",
       recordId: staffId,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
       payload: { method: "passkey", passkeyId: passkey.id, sessionId: issued.session.id },

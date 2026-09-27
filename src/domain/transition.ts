@@ -1,4 +1,5 @@
-// Universal transition contract (spec §07.7, §19.4, AD4, AD6).
+// Universal transition contract (architecture §5, §5.1): capability, expected revision,
+// transition table and evidence guard, with separate activity and audit entries.
 import type { Actor, Capability, CapabilityGrant } from "./capabilities";
 import { hasCapability } from "./capabilities";
 import type { PublicLocale } from "./ids";

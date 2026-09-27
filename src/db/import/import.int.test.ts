@@ -1,10 +1,11 @@
-// F32 legacy import against a real Postgres: A71 (dry run changes nothing live) and A72
-// (per-item outcomes, stable batch identity, resumable without duplicates).
+// AT55 legacy import against a real PostgreSQL: a dry run changes nothing live; an applied
+// batch preserves reviewed fields, gives per-row outcomes and resumes without duplicates.
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { and, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { firstPartyIssuers } from "../../domain/records";
 import * as s from "../schema";
 import { createTestDatabase, type TestDatabase } from "../test-utils";
 import { applyBatch, findBatch, stageBatch } from "./pipeline";
@@ -56,7 +57,7 @@ async function classifications(t: TestDatabase, reference: string) {
   return { batch, rows, tally };
 }
 
-describe("legacy import pipeline (F32)", () => {
+describe("legacy import pipeline (AT55)", () => {
   let t: TestDatabase;
 
   beforeAll(async () => {
@@ -67,7 +68,7 @@ describe("legacy import pipeline (F32)", () => {
     await t?.drop();
   });
 
-  it("A71: a dry run classifies every row and makes no live change", async () => {
+  it("AT55: a dry run classifies every row and makes no live change", async () => {
     const before = await liveCounts(t);
     const out = await mkdtemp(join(tmpdir(), "import-report-"));
     const { reference } = await stageBatch(t.db, sources, { mode: "dry_run" });
@@ -81,7 +82,7 @@ describe("legacy import pipeline (F32)", () => {
     expect(report.report.reviewReasons).toEqual({ shared_between_properties: 53 });
     const markdown = await readFile(report.markdown, "utf8");
     expect(markdown).toContain("## Classification");
-    expect(markdown).toContain("No property, listing, fact, media");
+    expect(markdown).toContain("No property, fact revision, listing, listing revision");
   }, 120_000);
 
   it("applies the created rows with the expected record counts", async () => {
@@ -92,8 +93,15 @@ describe("legacy import pipeline (F32)", () => {
     expect(result.outcomes).toEqual({ pending: 66, applied: 2334, skipped: 0, failed: 0 });
     // 127 physical properties: the 38 archived duplicates join their survivor's property.
     expect(await count(t, "properties")).toBe(127);
+    expect(await count(t, "property_fact_revisions")).toBe(127);
     expect(await count(t, "listings")).toBe(165);
-    expect(await count(t, "listing_versions")).toBe(165);
+    expect(await count(t, "listing_revisions")).toBe(165);
+    // Every listing revision binds its property's fact revision 1, duplicates included.
+    const [bound] = await t.sql<{ n: number }[]>`
+      select count(*)::int as n from listing_revisions r
+      join listings l on l.id = r.listing_id
+      join property_fact_revisions f on f.id = r.fact_revision_id and f.property_id = l.property_id`;
+    expect(bound?.n).toBe(165);
     const [shared] = await t.sql<{ n: number }[]>`
       select count(*)::int as n from (
         select property_id from listings group by property_id having count(*) > 1) shared`;
@@ -107,30 +115,65 @@ describe("legacy import pipeline (F32)", () => {
     expect(await count(t, "geography_places", "level = 'settlement'")).toBe(28);
     expect(await count(t, "content_pages")).toBe(8);
     expect(await count(t, "media_assets")).toBe(1659);
+    expect(await count(t, "media_relations")).toBeGreaterThanOrEqual(1659);
+    expect(await count(t, "listing_revision_media")).toBe(await count(t, "media_relations"));
 
-    // Nothing the import creates is published, approved for language, indexable or cleared.
-    expect(await count(t, "listings", "distribution_state <> 'never_published'")).toBe(0);
-    expect(await count(t, "listings", "commercial_state = 'availability_unconfirmed'")).toBe(30);
+    // Nothing the import creates is published, available, reviewed, approved or cleared.
+    for (const table of [
+      "publication_manifests",
+      "current_publications",
+      "destination_deliveries",
+    ]) {
+      expect(await count(t, table)).toBe(0);
+    }
+    expect(await count(t, "listings", "publication_generation <> 0")).toBe(0);
+    expect(await count(t, "listings", "commercial_state = 'confirmation_required'")).toBe(30);
     expect(await count(t, "listings", "commercial_state = 'withdrawn'")).toBe(135);
-    expect(await count(t, "translations")).toBe(990);
-    expect(await count(t, "translations", "state <> 'draft'")).toBe(0);
-    expect(await count(t, "media_assets", "rights <> 'unknown' or storage_area <> 'staging'")).toBe(
-      0,
-    );
-    expect(await count(t, "media_assets", "byte_size is not null or sha256 is not null")).toBe(0);
-    expect(await count(t, "facts", "source_class <> 'legacy_import'")).toBe(0);
-    expect(await count(t, "facts", "state = 'withheld' and field_key = 'price'")).toBe(31);
+    expect(await count(t, "listings", "availability_confirmed_at is not null")).toBe(0);
+    expect(await count(t, "listings", "legacy_identity is null")).toBe(0);
+    expect(await count(t, "properties", "approved_fact_revision_id is not null")).toBe(0);
+    expect(await count(t, "property_facts", "reviewed_by_id is not null")).toBe(0);
+    expect(await count(t, "property_facts", "source_class <> 'legacy_import'")).toBe(0);
+    expect(await count(t, "localized_revisions")).toBe(990);
+    expect(await count(t, "localized_revisions", "state <> 'draft'")).toBe(0);
+    expect(
+      await count(
+        t,
+        "media_assets",
+        "rights <> 'unknown' or audience <> 'private' or scan <> 'pending' or review <> 'pending'",
+      ),
+    ).toBe(0);
+    expect(
+      await count(
+        t,
+        "media_assets",
+        "byte_size is not null or sha256 is not null or sealed_key is not null",
+      ),
+    ).toBe(0);
+    expect(
+      await count(t, "listing_revisions", "terms->'facts'->'price'->>'state' = 'withheld'"),
+    ).toBe(31);
 
     const approvals = await t.db
       .select()
       .from(s.approvals)
-      .innerJoin(s.listingVersions, eq(s.listingVersions.id, s.approvals.subjectId))
-      .where(eq(s.approvals.kind, "legacy_owner_publication_approval"));
+      .innerJoin(s.listingRevisions, eq(s.listingRevisions.id, s.approvals.subjectId))
+      .where(eq(s.approvals.kind, "legacy_source_as_is"));
     expect(approvals).toHaveLength(165);
     for (const a of approvals) {
-      expect(a.approvals.subjectHash).toBe(a.listing_versions.contentHash);
-      expect(a.approvals.scope).toMatchObject({ evidenceReference: "MSR-LISTING-PUBLICATION-1" });
+      expect(a.approvals.subjectHash).toBe(a.listing_revisions.contentDigest);
+      expect(a.approvals.evidence).toMatchObject({
+        evidenceReference: "MSR-LISTING-PUBLICATION-1",
+      });
+      expect(a.approvals.scope).toMatchObject({
+        decision: "publish_source_as_is",
+        doesNotCover: expect.arrayContaining(["listing fact verification", "translation approval"]),
+      });
     }
+    // No other approval kind is created for listings: no factual, editorial or language approval.
+    expect(
+      await count(t, "approvals", "kind not in ('legacy_source_as_is', 'legacy_content_approval')"),
+    ).toBe(0);
     expect(await count(t, "approvals", "kind = 'legacy_content_approval'")).toBe(8);
   }, 180_000);
 
@@ -147,14 +190,17 @@ describe("legacy import pipeline (F32)", () => {
   }, 120_000);
 
   it("proposes, never overwrites, a change to a human-verified value", async () => {
-    const [person] = await t.db
-      .insert(s.persons)
-      .values({ displayName: "Test Reviewer" })
+    const [party] = await t.db
+      .insert(s.parties)
+      .values({ kind: "person", displayName: "Test Reviewer" })
       .returning();
     const [staff] = await t.db
-      .insert(s.staffAccounts)
+      .insert(s.principals)
       .values({
-        personId: person?.id as string,
+        kind: "staff",
+        issuer: firstPartyIssuers.staff,
+        subject: "test-reviewer",
+        partyId: party?.id as string,
         email: "reviewer@example.test",
         displayName: "Test Reviewer",
       })
@@ -162,15 +208,44 @@ describe("legacy import pipeline (F32)", () => {
     const listing = (
       await t.db.select().from(s.listings).where(eq(s.listings.reference, "MS-00815"))
     )[0];
-    const factWhere = and(
-      eq(s.facts.propertyId, listing?.propertyId as string),
-      eq(s.facts.fieldKey, "area.usable"),
-    );
+    const propertyId = listing?.propertyId as string;
+    const [first] = await t.db
+      .select()
+      .from(s.propertyFactRevisions)
+      .where(eq(s.propertyFactRevisions.propertyId, propertyId));
+    const facts = await t.db
+      .select()
+      .from(s.propertyFacts)
+      .where(eq(s.propertyFacts.factRevisionId, first?.id as string));
+    // A reviewer corrects the area in a new, reviewed fact revision; revision 1 stays as it was.
     const verified = { value: 1400, unit: "m2", basis: "usable" };
-    await t.db
-      .update(s.facts)
-      .set({ value: verified, reviewedByStaffId: staff?.id, reviewedAt: new Date() })
-      .where(factWhere);
+    const [second] = await t.db
+      .insert(s.propertyFactRevisions)
+      .values({
+        propertyId,
+        revisionNumber: 2,
+        basedOnRevisionId: first?.id,
+        contentDigest: "sha256-reviewed",
+        materialChange: "material",
+        materialKeys: ["area.usable"],
+        createdByKind: "staff",
+        createdById: staff?.id as string,
+      })
+      .returning();
+    await t.db.insert(s.propertyFacts).values(
+      facts.map(({ id: _id, ...f }) => ({
+        ...f,
+        factRevisionId: second?.id as string,
+        ...(f.fieldKey === "area.usable"
+          ? {
+              value: verified,
+              reviewedById: staff?.id,
+              reviewedAt: new Date(),
+              reviewScope: "site measurement",
+            }
+          : {}),
+      })),
+    );
 
     const { reference } = await stageBatch(t.db, sources, { mode: "apply" });
     const { rows, tally } = await classifications(t, reference);
@@ -194,12 +269,16 @@ describe("legacy import pipeline (F32)", () => {
       outcome: "skipped",
       errorCode: "update_proposal",
     });
-    const [fact] = await t.db.select().from(s.facts).where(factWhere);
-    expect(fact?.value).toEqual(verified);
+    const current = await t.db
+      .select()
+      .from(s.propertyFacts)
+      .where(eq(s.propertyFacts.factRevisionId, second?.id as string));
+    expect(current.find((f) => f.fieldKey === "area.usable")?.value).toEqual(verified);
+    expect(await count(t, "property_fact_revisions", `property_id = '${propertyId}'`)).toBe(2);
   }, 120_000);
 });
 
-describe("legacy import recovery (A72)", () => {
+describe("legacy import recovery (AT55)", () => {
   let t: TestDatabase;
 
   beforeAll(async () => {
@@ -252,8 +331,8 @@ describe("legacy import recovery (A72)", () => {
         n: sql<number>`count(*)::int`,
         distinct: sql<number>`count(distinct record_id)::int`,
       })
-      .from(s.auditLog)
-      .where(eq(s.auditLog.action, "import.row_applied"));
+      .from(s.auditEvents)
+      .where(eq(s.auditEvents.action, "import.row_applied"));
     expect(audit).toEqual({ n: 2334, distinct: 2334 });
 
     // A third run over the finished batch changes nothing.

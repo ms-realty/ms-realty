@@ -1,4 +1,4 @@
-// Operation receipts (spec §19.4, AD6, A18, A40, A72). One idempotency key per actor and
+// Operations (architecture §5.1, AT10, AT11). One idempotency key per principal and
 // operation type yields one logical outcome across reloads, second tabs and retries.
 
 export const operationStatuses = [

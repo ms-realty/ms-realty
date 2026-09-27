@@ -12,7 +12,7 @@ import {
   relate,
 } from "./testing";
 
-// Spec §03 role matrix, enforced on the server (AD5). A66: the AI service drafts only.
+// Spec §03 role matrix, enforced on the server (AD5). AT52: the AI service drafts only.
 let t: TestDatabase;
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -26,7 +26,7 @@ const expectCan = async (actor: Actor, capability: Capability, resource = {}) =>
 const expectCannot = async (actor: Actor, capability: Capability, resource = {}) =>
   expect(await can(t.db, actor, capability, { type: "case", ...resource })).toBe(false);
 
-describe("§03 roles", () => {
+describe("§8.2 roles (AT40)", () => {
   it("visitor: submits own inquiry, reads nothing private", async () => {
     const visitor: Actor = { kind: "visitor", id: "submission-1" };
     expect(await can(t.db, visitor, "inquiry.submit")).toBe(true);
@@ -39,7 +39,7 @@ describe("§03 roles", () => {
     const client = await createClient(t.db);
     const own = await createCase(t.db);
     const other = await createCase(t.db);
-    await relate(t.db, { personId: client.personId, role: "buyer", caseId: own });
+    await relate(t.db, { partyId: client.partyId, role: "buyer", caseId: own });
     await expectCan(client.actor, "portal.case.read", { id: own });
     await expectCan(client.actor, "portal.message.write", { id: own });
     // A document inside the case is covered through its parent case.
@@ -50,7 +50,7 @@ describe("§03 roles", () => {
     await expectCannot(client.actor, "case.read_internal", { id: own });
     await expectCannot(client.actor, "document.read_restricted", { id: own });
     // A buyer never approves a listing preview.
-    await expectCannot(client.actor, "portal.listing.approve", { id: own });
+    await expectCannot(client.actor, "portal.listing.acknowledge", { id: own });
   });
 
   it("verified client: an unauthorized private read behaves as not found", async () => {
@@ -61,29 +61,31 @@ describe("§03 roles", () => {
     ).rejects.toMatchObject({ code: "not_found", status: 404 });
   });
 
-  it("seller: listing approval only with reviewed authority (A29)", async () => {
+  it("seller: listing approval only with reviewed authority (AT18)", async () => {
     const reviewer = await createStaff(t.db, { roles: ["assigned_broker"] });
     const declared = await createClient(t.db);
     const reviewed = await createClient(t.db);
     const property = await createProperty(t.db);
     await relate(t.db, {
-      personId: declared.personId,
+      partyId: declared.partyId,
       role: "seller",
       propertyId: property,
       authority: "self_declared",
     });
     await relate(t.db, {
-      personId: reviewed.personId,
+      partyId: reviewed.partyId,
       role: "seller",
       propertyId: property,
       authority: "reviewed",
       reviewedBy: reviewer.id,
     });
     const listingOfProperty = { type: "listing", id: property, propertyId: property };
-    expect(await can(t.db, declared.actor, "portal.listing.approve", listingOfProperty)).toBe(
+    expect(await can(t.db, declared.actor, "portal.listing.acknowledge", listingOfProperty)).toBe(
       false,
     );
-    expect(await can(t.db, reviewed.actor, "portal.listing.approve", listingOfProperty)).toBe(true);
+    expect(await can(t.db, reviewed.actor, "portal.listing.acknowledge", listingOfProperty)).toBe(
+      true,
+    );
   });
 
   it("property relationships reach the property and its listing, never other parties' records", async () => {
@@ -92,8 +94,8 @@ describe("§03 roles", () => {
     const property = await createProperty(t.db);
     const landlordCase = await createCase(t.db);
     const buyerCase = await createCase(t.db);
-    await relate(t.db, { personId: tenant.personId, role: "tenant", propertyId: property });
-    await relate(t.db, { personId: seller.personId, role: "seller", propertyId: property });
+    await relate(t.db, { partyId: tenant.partyId, role: "tenant", propertyId: property });
+    await relate(t.db, { partyId: seller.partyId, role: "seller", propertyId: property });
     expect(
       await can(t.db, tenant.actor, "portal.case.read", {
         type: "listing",
@@ -122,7 +124,7 @@ describe("§03 roles", () => {
   it("internal records stay closed to clients inside their own case", async () => {
     const client = await createClient(t.db);
     const caseId = await createCase(t.db);
-    await relate(t.db, { personId: client.personId, role: "buyer", caseId });
+    await relate(t.db, { partyId: client.partyId, role: "buyer", caseId });
     const document = { type: "document", id: crypto.randomUUID(), caseId };
     expect(await can(t.db, client.actor, "portal.case.read", document)).toBe(true);
     expect(
@@ -139,7 +141,7 @@ describe("§03 roles", () => {
     for (const role of ["adviser", "guest"] as const) {
       const party = await createClient(t.db);
       await relate(t.db, {
-        personId: party.personId,
+        partyId: party.partyId,
         role,
         caseId,
         // An invitation cannot hand over the principal's proposal response.
@@ -152,7 +154,7 @@ describe("§03 roles", () => {
     }
     // A co-buyer is a principal in their own right.
     const coBuyer = await createClient(t.db);
-    await relate(t.db, { personId: coBuyer.personId, role: "co_buyer", caseId });
+    await relate(t.db, { partyId: coBuyer.partyId, role: "co_buyer", caseId });
     await expectCan(coBuyer.actor, "portal.proposal.respond", { id: caseId });
   });
 
@@ -161,13 +163,13 @@ describe("§03 roles", () => {
     const revokedCase = await createCase(t.db);
     const expiredCase = await createCase(t.db);
     await relate(t.db, {
-      personId: client.personId,
+      partyId: client.partyId,
       role: "buyer",
       caseId: revokedCase,
       revokedAt: new Date(),
     });
     await relate(t.db, {
-      personId: client.personId,
+      partyId: client.partyId,
       role: "buyer",
       caseId: expiredCase,
       expiresAt: new Date(Date.now() - 1000),
@@ -177,7 +179,7 @@ describe("§03 roles", () => {
 
     const suspended = await createClient(t.db, { status: "suspended" });
     const caseId = await createCase(t.db);
-    await relate(t.db, { personId: suspended.personId, role: "buyer", caseId });
+    await relate(t.db, { partyId: suspended.partyId, role: "buyer", caseId });
     await expectCannot(suspended.actor, "portal.case.read", { id: caseId });
   });
 
@@ -186,7 +188,7 @@ describe("§03 roles", () => {
     const caseId = await createCase(t.db);
     const shortlistId = crypto.randomUUID();
     await relate(t.db, {
-      personId: collaborator.personId,
+      partyId: collaborator.partyId,
       role: "collaborator",
       caseId,
       scope: {
@@ -196,7 +198,7 @@ describe("§03 roles", () => {
       },
     });
     const shortlist = { type: "shortlist", id: shortlistId };
-    expect(await can(t.db, collaborator.actor, "portal.shortlist.manage", shortlist)).toBe(true);
+    expect(await can(t.db, collaborator.actor, "portal.interest.respond", shortlist)).toBe(true);
     expect(await can(t.db, collaborator.actor, "portal.message.write", shortlist)).toBe(true);
     expect(await can(t.db, collaborator.actor, "document.read_restricted", shortlist)).toBe(false);
     expect(await can(t.db, collaborator.actor, "access.grant", shortlist)).toBe(false);
@@ -210,13 +212,13 @@ describe("§03 roles", () => {
     const shared = await createCase(t.db);
     const unlimited = await createCase(t.db);
     await relate(t.db, {
-      personId: specialist.personId,
+      partyId: specialist.partyId,
       role: "specialist",
       caseId: shared,
       expiresAt: new Date(Date.now() + 86_400_000),
     });
     // Specialist access without an expiry is not honoured.
-    await relate(t.db, { personId: specialist.personId, role: "specialist", caseId: unlimited });
+    await relate(t.db, { partyId: specialist.partyId, role: "specialist", caseId: unlimited });
     await expectCan(specialist.actor, "portal.document.upload", { id: shared });
     await expectCannot(specialist.actor, "portal.message.write", { id: shared });
     await expectCannot(specialist.actor, "portal.case.read", { id: unlimited });
@@ -231,7 +233,7 @@ describe("§03 roles", () => {
     await expectCannot(broker.actor, "publication.release");
     await expectCannot(broker.actor, "claim.approve");
     await expectCannot(broker.actor, "access.grant");
-    await expectCannot(broker.actor, "spending.approve");
+    await expectCannot(broker.actor, "settings.manage");
   });
 
   it("assigned broker narrowed to one case by a record-scoped role grant", async () => {
@@ -300,6 +302,14 @@ describe("§03 roles", () => {
     await expectCannot(suspended.actor, "report.read");
   });
 
+  it("AT36: a staff principal without an active staff membership holds nothing", async () => {
+    const ended = await createStaff(t.db, { roles: ["manager"], membership: "ended" });
+    await expectCannot(ended.actor, "report.read");
+    // A client identity never authenticates staff work, whatever its id.
+    const client = await createClient(t.db);
+    expect(await can(t.db, { kind: "staff", id: client.id }, "inquiry.submit")).toBe(false);
+  });
+
   it("claim.approve comes only from an individual grant, never a preset", async () => {
     const qualified = await createStaff(t.db, { grants: [{ capability: "claim.approve" }] });
     await expectCan(qualified.actor, "claim.approve");
@@ -308,7 +318,7 @@ describe("§03 roles", () => {
 
 describe("system jobs", () => {
   it("hold only their own job's capabilities; unknown jobs hold nothing", async () => {
-    const release: Actor = { kind: "system", id: "publication-release" };
+    const release: Actor = { kind: "system", id: "publication-delivery" };
     await expectCan(release, "publication.release", { type: "listing" });
     await expectCannot(release, "listing.edit", { type: "listing" });
     await expectCannot({ kind: "system", id: "legacy-import" }, "publication.release", {
@@ -317,7 +327,7 @@ describe("system jobs", () => {
   });
 });
 
-describe("ai_service (A66)", () => {
+describe("ai_service (AT52)", () => {
   it("drafts, and never publishes, indexes, sends or approves", async () => {
     await grantService(t.db, "hermes", { role: "ai_service" });
     const hermes: Actor = { kind: "ai_service", id: "hermes" };

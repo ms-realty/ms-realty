@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   type Approval,
+  approvalCapability,
   canonicalJson,
   guardApprovalDecision,
   invalidateIfChanged,
@@ -8,21 +9,21 @@ import {
 } from "./approval";
 
 const pending: Approval = {
-  kind: "owner_instruction",
-  subject: { type: "listing_version", id: "lv1", version: 3, hash: "h-price-95000" },
+  kind: "owner_acknowledgment",
+  subject: { type: "listing_revision", id: "lr1", version: 3, hash: "h-price-95000" },
   state: "pending",
 };
 const owner = { kind: "client", id: "owner-1" } as const;
 
-describe("approvals bound to a subject version", () => {
-  it("A31: an owner approves the exact version they saw", () => {
+describe("approvals bound to a subject revision (architecture §7.2)", () => {
+  it("AT18: an owner acknowledges the exact revision they saw", () => {
     expect(
       guardApprovalDecision(pending, "approved", { actor: owner, currentHash: "h-price-95000" })
         .outcome,
     ).toBe("allowed");
   });
 
-  it("A31: a changed price makes the pending approval refuse and an existing one invalid", () => {
+  it("AT23: a changed price makes the pending approval refuse and an existing one invalid", () => {
     expect(
       guardApprovalDecision(pending, "approved", { actor: owner, currentHash: "h-price-99000" }),
     ).toEqual({
@@ -35,7 +36,7 @@ describe("approvals bound to a subject version", () => {
     expect(invalidateIfChanged(approved, "h-price-95000")).toBe(approved);
   });
 
-  it("A66: the AI service cannot approve", () => {
+  it("AT52: the AI service cannot approve", () => {
     expect(
       guardApprovalDecision(pending, "approved", {
         actor: { kind: "ai_service", id: "hermes" },
@@ -44,7 +45,7 @@ describe("approvals bound to a subject version", () => {
     ).toEqual({ outcome: "denied", code: "human_required" });
   });
 
-  it("enforces a second reviewer when policy requires one, without inventing one", () => {
+  it("AT22: enforces a second reviewer only when policy requires one, without inventing one", () => {
     const factual: Approval = { ...pending, kind: "factual" };
     expect(
       guardApprovalDecision(factual, "approved", {
@@ -70,6 +71,28 @@ describe("approvals bound to a subject version", () => {
         independentReviewRequired: true,
       }).outcome,
     ).toBe("allowed");
+  });
+
+  it("AT22: same-person editing and review is allowed and recorded as a separate decision", () => {
+    const editorial: Approval = { ...pending, kind: "editorial" };
+    expect(
+      guardApprovalDecision(editorial, "approved", {
+        actor: { kind: "staff", id: "editor-1" },
+        currentHash: "h-price-95000",
+        authorId: "editor-1",
+      }).outcome,
+    ).toBe("allowed");
+    // A language approval is never factual, legal or publishing authority.
+    expect(approvalCapability.language).toBe("translation.review");
+    expect(approvalCapability.publication).toBe("publication.release");
+    expect(approvalCapability.legal_process_claim).toBe("claim.approve");
+  });
+
+  it("an expiring approval fails closed without a clock and lapses at expiry", () => {
+    const approved = { ...pending, state: "approved" as const, expiresAt: "2026-10-01T00:00:00Z" };
+    expect(isApprovalValid(approved, "h-price-95000", "2026-09-30T00:00:00Z")).toBe(true);
+    expect(isApprovalValid(approved, "h-price-95000", "2026-10-01T00:00:00Z")).toBe(false);
+    expect(isApprovalValid(approved, "h-price-95000")).toBe(false);
   });
 
   it("canonical JSON is independent of key order", () => {

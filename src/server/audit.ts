@@ -1,7 +1,7 @@
-// Restricted technical audit trail (spec §07.7), readable only with `audit.read`. Written in
+// Restricted technical audit trail (architecture §4.1, AuditEvent), readable only with `audit.read`. Written in
 // the same transaction as the change so a rolled-back change leaves no audit claim behind.
 import "server-only";
-import { auditLog } from "@/db/schema";
+import { auditEvents } from "@/db/schema";
 import type { Actor, Capability } from "@/domain/capabilities";
 import type { Executor } from "./db";
 
@@ -21,7 +21,7 @@ export interface AuditEntry {
 
 export async function recordAudit(db: Executor, entry: AuditEntry): Promise<string> {
   const [row] = await db
-    .insert(auditLog)
+    .insert(auditEvents)
     .values({
       action: entry.action,
       operationId: entry.operationId,
@@ -34,7 +34,7 @@ export async function recordAudit(db: Executor, entry: AuditEntry): Promise<stri
       correlationId: entry.correlationId,
       ...(entry.at ? { occurredAt: entry.at } : {}),
     })
-    .returning({ id: auditLog.id });
+    .returning({ id: auditEvents.id });
   if (!row) throw new Error("Audit insert returned no row.");
   return row.id;
 }

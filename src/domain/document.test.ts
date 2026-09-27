@@ -3,20 +3,38 @@ import { documentMachine, guardDocumentTransition, isDocumentExposable } from ".
 
 const reviewer = { kind: "staff", id: "rev-1" } as const;
 
-describe("documents (§07.5, F15)", () => {
-  it("A37: an interrupted upload is never labeled uploaded", () => {
+describe("documents (architecture §13)", () => {
+  it("AT42: an interrupted upload is never labeled uploaded", () => {
     expect(
       guardDocumentTransition(
         "uploading",
         "uploaded",
-        { byteSize: 1000, bytesReceived: 600, sha256: "x" },
+        { byteSize: 1000, bytesReceived: 600 },
         reviewer,
       ),
     ).toEqual({ outcome: "denied", code: "upload_incomplete" });
     expect(documentMachine.check("uploading", "selected").outcome).toBe("allowed");
   });
 
-  it("A38: scanning, human review and professional validation stay separate", () => {
+  it("AT42: only a server-sealed copy with its own digest is scanned", () => {
+    expect(documentMachine.check("uploaded", "scanning").outcome).toBe("denied");
+    expect(
+      guardDocumentTransition("uploaded", "sealed", { sealedKey: "sealed/x" }, reviewer),
+    ).toEqual({
+      outcome: "denied",
+      code: "sealed_digest_required",
+    });
+    expect(
+      guardDocumentTransition(
+        "uploaded",
+        "sealed",
+        { sealedKey: "sealed/x", sealedSha256: "sha256-sealed" },
+        reviewer,
+      ).outcome,
+    ).toBe("allowed");
+  });
+
+  it("AT42: scanning, human review and professional validation stay separate", () => {
     expect(documentMachine.check("scanning", "reviewed").outcome).toBe("denied");
     expect(
       guardDocumentTransition("scanning", "ready_for_review", { scan: "infected" }, reviewer),
@@ -30,7 +48,7 @@ describe("documents (§07.5, F15)", () => {
     });
   });
 
-  it("A38: unsafe or unscanned files are not exposed", () => {
+  it("AT42: unsafe or unscanned files are not exposed", () => {
     expect(isDocumentExposable("scanning", "pending")).toBe(false);
     expect(isDocumentExposable("rejected", "infected")).toBe(false);
     expect(isDocumentExposable("ready_for_review", "clean")).toBe(true);

@@ -38,7 +38,7 @@ Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they a
 locally (CI always runs them):
 
 ```sh
-docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:17-alpine
+docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:18-alpine
 TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres npm run test:integration
 docker stop ms-realty-test-pg
 ```

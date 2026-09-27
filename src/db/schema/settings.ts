@@ -1,10 +1,10 @@
-// Operational settings and rate limiting (spec F25, §23.3, AD9, A58).
+// Locale, service policy and rate limiting (architecture §3.2, §6.1, §7.1).
 import { sql } from "drizzle-orm";
 import { boolean, check, integer, jsonb, pgTable, real, text, uuid } from "drizzle-orm/pg-core";
-import { staffAccounts } from "./accounts";
 import { approvals } from "./approvals";
 import { instant, mutable } from "./columns";
 import { publicLocaleEnum } from "./enums";
+import { principals } from "./identity";
 
 /** A locale is routable when enabled and indexable only with a recorded human approval. */
 export const localeSettings = pgTable(
@@ -14,7 +14,7 @@ export const localeSettings = pgTable(
     enabled: boolean("enabled").notNull().default(false),
     indexable: boolean("indexable").notNull().default(false),
     indexableApprovalId: uuid("indexable_approval_id").references(() => approvals.id),
-    reviewerStaffId: uuid("reviewer_staff_id").references(() => staffAccounts.id),
+    reviewerId: uuid("reviewer_id").references(() => principals.id),
     version: integer("version").notNull().default(1),
     updatedAt: instant("updated_at")
       .notNull()
@@ -31,7 +31,7 @@ export const localeSettings = pgTable(
 
 /**
  * Versioned service policy. A new row takes effect from its instant; promises already made
- * keep the version they were made under, so a change never rewrites them (A58).
+ * keep the version they were made under, so a change never rewrites them.
  */
 export const servicePolicies = pgTable("service_policies", {
   ...mutable(),
@@ -43,7 +43,11 @@ export const servicePolicies = pgTable("service_policies", {
   coverage: jsonb("coverage").notNull(),
   /** Acknowledgment/response promise rules (next business period by default). */
   responsePolicy: jsonb("response_policy").notNull(),
-  approvedByStaffId: uuid("approved_by_staff_id").references(() => staffAccounts.id),
+  /** Availability-review interval in days per listing purpose (§7.1 defaults 14 and 7). */
+  availabilityReviewDays: jsonb("availability_review_days")
+    .notNull()
+    .default({ sale: 14, long_term_rent: 7 }),
+  approvedById: uuid("approved_by_id").references(() => principals.id),
 });
 
 /** Token buckets for public endpoints (inquiry, sign-in); keys hold no personal data. */

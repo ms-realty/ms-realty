@@ -1,16 +1,16 @@
-// Capability catalog and role presets (spec §03, AD5, AD14).
+// Capability catalog and role presets (architecture §8.2).
 import type { PublicLocale } from "./ids";
 
 export const capabilities = [
   // Visitors and clients (always record-scoped for clients).
   "inquiry.submit",
   "portal.case.read",
-  "portal.shortlist.manage",
+  "portal.interest.respond",
   "portal.message.write",
   "portal.document.upload",
   "portal.appointment.request",
   "portal.proposal.respond",
-  "portal.listing.approve",
+  "portal.listing.acknowledge",
   // Agency work.
   "inquiry.read",
   "inquiry.assign",
@@ -19,7 +19,7 @@ export const capabilities = [
   "case.read_internal",
   "case.transition",
   "task.manage",
-  "match.manage",
+  "interest.manage",
   "listing.read",
   "listing.edit",
   "listing.review_facts",
@@ -36,9 +36,6 @@ export const capabilities = [
   "document.read_restricted",
   "document.review",
   "proposal.manage",
-  "service_request.manage",
-  "spending.approve",
-  "reservation.manage",
   "access.grant",
   "report.read",
   "settings.manage",
@@ -82,15 +79,15 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
   verified_client: [
     "inquiry.submit",
     "portal.case.read",
-    "portal.shortlist.manage",
+    "portal.interest.respond",
     "portal.message.write",
     "portal.document.upload",
     "portal.appointment.request",
     "portal.proposal.respond",
-    "portal.listing.approve",
+    "portal.listing.acknowledge",
   ],
   // Exactly what the invitation grants; the preset is the floor, never household-wide access.
-  invited_collaborator: ["portal.case.read", "portal.shortlist.manage"],
+  invited_collaborator: ["portal.case.read", "portal.interest.respond"],
   assigned_broker: [
     "inquiry.read",
     "inquiry.assign",
@@ -99,7 +96,7 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
     "case.read_internal",
     "case.transition",
     "task.manage",
-    "match.manage",
+    "interest.manage",
     "listing.read",
     "listing.edit",
     "media.manage",
@@ -119,8 +116,6 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
     "listing.read",
     "appointment.manage",
     "message.draft",
-    "service_request.manage",
-    "reservation.manage",
   ],
   content_editor: [
     "listing.read",
@@ -144,7 +139,6 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
     "settings.manage",
     "import.run",
     "privacy.manage",
-    "spending.approve",
     "audit.read",
   ],
   external_specialist: ["portal.case.read", "portal.document.upload"],
@@ -157,7 +151,7 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
  * reference), and every human-only step stays staff-only whatever a job holds.
  */
 export const systemJobCapabilities: Readonly<Record<string, readonly Capability[]>> = {
-  "publication-release": ["publication.release"],
+  "publication-delivery": ["publication.release"],
   "document-scanner": ["portal.document.upload", "document.review"],
   "message-outbox": ["message.send_external"],
   "message-provider-callback": ["message.send_external"],
@@ -207,7 +201,7 @@ export function isDraftOnly(capability: Capability): boolean {
 
 /**
  * Server-side capability check. The AI service never holds a consequential capability,
- * whatever grants are presented for it: content cannot confer authority (A66).
+ * whatever grants are presented for it: content cannot confer authority (AT52).
  */
 export function hasCapability(
   actor: Actor,

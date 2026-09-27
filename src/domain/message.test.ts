@@ -1,96 +1,109 @@
 import { describe, expect, it } from "vitest";
 import {
+  checkLogicalSend,
   clientDeliveryLabel,
   guardMessageTransition,
+  guardRetry,
   messageMachine,
+  messageStates,
   switchComposer,
 } from "./message";
 
 const broker = { kind: "staff", id: "staff-1" } as const;
 const hermes = { kind: "ai_service", id: "hermes" } as const;
+const caseMessage = { kind: "case_message" } as const;
 
-describe("messages (§07.5, F17)", () => {
-  it("A41: switching composer mode never carries internal note text into a customer message", () => {
+describe("messages (architecture §9)", () => {
+  it("matches the architecture's states; there is no unconditional read state", () => {
+    expect([...messageStates]).toEqual([
+      "draft",
+      "approved",
+      "queued",
+      "attempting",
+      "provider_accepted",
+      "delivered",
+      "bounced",
+      "failed",
+      "outcome_unknown",
+    ]);
+  });
+
+  it("switching composer mode never carries internal note text into a client message", () => {
     const { active, kept } = switchComposer(
       { kind: "internal_note", body: "Seller may accept less" },
-      "external",
+      "case_message",
     );
-    expect(active).toEqual({ kind: "external", body: "" });
+    expect(active).toEqual({ kind: "case_message", body: "" });
     expect(kept.body).toBe("Seller may accept less");
   });
 
-  it("A41: an internal note cannot enter the send pipeline", () => {
+  it("an internal note cannot enter the send pipeline", () => {
     expect(
       guardMessageTransition(
         "draft",
-        "human_approved",
-        { kind: "internal_note", contentHash: "h" },
+        "approved",
+        { kind: "internal_note", payloadDigest: "h" },
         broker,
       ),
     ).toEqual({ outcome: "denied", code: "internal_note_not_sendable" });
   });
 
-  it("A66: AI drafts; only a human approves, and approval binds the exact content", () => {
+  it("AT52: Hermes drafts; only a human approves, and approval binds the exact payload", () => {
+    expect(
+      guardMessageTransition("draft", "approved", { ...caseMessage, payloadDigest: "h" }, hermes),
+    ).toEqual({ outcome: "denied", code: "human_required" });
     expect(
       guardMessageTransition(
-        "draft",
-        "human_approved",
-        { kind: "external", contentHash: "h" },
-        hermes,
-      ),
-    ).toEqual({
-      outcome: "denied",
-      code: "human_required",
-    });
-    expect(
-      guardMessageTransition(
-        "human_approved",
+        "approved",
         "queued",
-        { kind: "external", contentHash: "h2", approvedContentHash: "h1" },
+        { ...caseMessage, payloadDigest: "h2", approvedDigest: "h1" },
         broker,
       ),
-    ).toEqual({ outcome: "denied", code: "approval_does_not_match_content" });
+    ).toEqual({ outcome: "denied", code: "approval_does_not_match_payload" });
   });
 
-  it("A42: provider accepted, delivered and outcome unknown are distinct and source-supported", () => {
+  it("AT46: one logical send is bound to one payload; a changed payload is refused", () => {
+    const sent = { logicalSendId: "send-1", payloadDigest: "h1" };
+    expect(checkLogicalSend(sent, sent)).toEqual({ outcome: "allowed", replay: true });
+    expect(checkLogicalSend(sent, { ...sent, payloadDigest: "h2" })).toEqual({
+      outcome: "denied",
+      code: "payload_changed",
+    });
+    expect(checkLogicalSend(null, sent).outcome).toBe("allowed");
+  });
+
+  it("provider accepted, delivered and bounced are distinct and never regress", () => {
     expect(messageMachine.check("queued", "delivered").outcome).toBe("denied");
-    expect(
-      guardMessageTransition("queued", "provider_accepted", { kind: "external" }, broker),
-    ).toEqual({
+    expect(guardMessageTransition("attempting", "provider_accepted", caseMessage, broker)).toEqual({
       outcome: "denied",
       code: "provider_reference_required",
     });
-    expect(guardMessageTransition("delivered", "read", { kind: "external" }, broker)).toEqual({
-      outcome: "denied",
-      code: "read_receipts_unsupported",
-    });
+    // A late bounce is kept; nothing moves from bounced back to delivered.
+    expect(messageMachine.check("delivered", "bounced").outcome).toBe("allowed");
+    expect(messageMachine.check("bounced", "delivered").outcome).toBe("denied");
     expect(clientDeliveryLabel.provider_accepted).not.toMatch(/^Delivered/);
     expect(clientDeliveryLabel.outcome_unknown).toBe("Delivery is not yet confirmed");
   });
 
-  it("A42: an unknown outcome is reconciled before retry; retries stop on duplicate risk", () => {
+  it("AT47: an unknown outcome is reconciled, never resent; replay past the 24 h window is refused", () => {
     expect(messageMachine.check("outcome_unknown", "queued").outcome).toBe("denied");
     const retry = {
-      kind: "external",
-      contentHash: "h",
-      approvedContentHash: "h",
+      ...caseMessage,
       attempts: 1,
-    } as const;
-    expect(guardMessageTransition("failed", "queued", retry, broker)).toEqual({
+      duplicateRiskResolved: true,
+      firstAttemptAt: "2026-09-24T09:00:00Z",
+    };
+    expect(guardRetry({ ...retry, now: "2026-09-24T20:00:00Z" }).outcome).toBe("allowed");
+    expect(guardRetry({ ...retry, now: "2026-09-25T09:00:00Z" })).toEqual({
       outcome: "denied",
-      code: "duplicate_risk_unresolved",
+      code: "idempotency_window_passed",
     });
     expect(
-      guardMessageTransition("failed", "queued", { ...retry, duplicateRiskResolved: true }, broker)
-        .outcome,
-    ).toBe("allowed");
-    expect(
-      guardMessageTransition(
-        "failed",
-        "queued",
-        { ...retry, attempts: 3, duplicateRiskResolved: true },
-        broker,
-      ),
-    ).toEqual({ outcome: "denied", code: "retry_limit_reached" });
+      guardRetry({ ...retry, duplicateRiskResolved: false, now: "2026-09-24T10:00:00Z" }),
+    ).toEqual({ outcome: "denied", code: "duplicate_risk_unresolved" });
+    expect(guardRetry({ ...retry, attempts: 3, now: "2026-09-24T10:00:00Z" })).toEqual({
+      outcome: "denied",
+      code: "retry_limit_reached",
+    });
   });
 });

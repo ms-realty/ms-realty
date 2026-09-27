@@ -1,7 +1,8 @@
-// Documents and evidence (spec §07.5, F15, A37, A38). Uploading, malware scanning, human
+// Documents and evidence (architecture §13, AT42). Uploading, sealing, malware scanning, human
 // review and professional validation are separate facts; a clean scan proves neither
-// authenticity nor legal sufficiency.
+// authenticity nor legal sufficiency. A client completion callback proves nothing.
 import type { Actor } from "./capabilities";
+import type { ScanState } from "./media";
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
 import type { TransitionSpec } from "./transition";
 
@@ -9,6 +10,7 @@ export const documentStates = [
   "selected",
   "uploading",
   "uploaded",
+  "sealed",
   "scanning",
   "ready_for_review",
   "reviewed",
@@ -18,9 +20,6 @@ export const documentStates = [
   "superseded",
 ] as const;
 export type DocumentState = (typeof documentStates)[number];
-
-export const scanStates = ["pending", "clean", "infected", "failed"] as const;
-export type ScanState = (typeof scanStates)[number];
 
 /** The precise review performed, shown as such in the UI. */
 export const documentReviewTypes = [
@@ -52,7 +51,9 @@ export const documentMachine = defineMachine<DocumentState>(documentStates, {
   selected: ["uploading"],
   // An interrupted upload returns to selected; it never appears complete.
   uploading: ["uploaded", "selected"],
-  uploaded: ["scanning"],
+  // The server copies the staging object under a new server-only key and verifies its digest.
+  uploaded: ["sealed", "rejected"],
+  sealed: ["scanning"],
   scanning: ["ready_for_review", "rejected"],
   ready_for_review: ["reviewed", "rejected", "needs_replacement"],
   reviewed: ["needs_replacement", "expired", "superseded"],
@@ -65,7 +66,9 @@ export const documentMachine = defineMachine<DocumentState>(documentStates, {
 export interface DocumentEvidence {
   readonly bytesReceived?: number;
   readonly byteSize?: number;
-  readonly sha256?: string;
+  /** Digest the server computed over the sealed copy; a client-asserted digest is not used. */
+  readonly sealedSha256?: string;
+  readonly sealedKey?: string;
   readonly scan?: ScanState;
   readonly reviewType?: DocumentReviewType;
   readonly reason?: string;
@@ -85,7 +88,11 @@ export function guardDocumentTransition(
           evidence.byteSize !== undefined && evidence.bytesReceived === evidence.byteSize,
           "upload_incomplete",
         ),
-        need(evidence.sha256, "checksum_required"),
+      );
+    case "sealed":
+      return firstDenial(
+        need(evidence.sealedKey, "sealed_key_required"),
+        need(evidence.sealedSha256, "sealed_digest_required"),
       );
     case "ready_for_review":
       return need(evidence.scan === "clean", "scan_not_clean");
@@ -114,7 +121,7 @@ export const documentTransitions: TransitionSpec<DocumentState, DocumentEvidence
   guard: guardDocumentTransition,
 };
 
-/** Only scanned-clean content may be exposed to its audience (A38). */
+/** Only scanned-clean content may be exposed to its audience (AT42). */
 export function isDocumentExposable(state: DocumentState, scan: ScanState): boolean {
   return scan === "clean" && (state === "ready_for_review" || state === "reviewed");
 }

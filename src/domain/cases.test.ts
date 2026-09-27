@@ -1,159 +1,217 @@
 import { describe, expect, it } from "vitest";
-import { buyerCaseMachine, buyerCaseStages, guardBuyerCaseTransition } from "./buyer-case";
-import type { Actor } from "./capabilities";
-import { guardRentalCaseTransition, rentalCaseStages } from "./rental-case";
-import { guardSellerCaseTransition } from "./seller-case";
+import { grantsForRoles } from "./capabilities";
+import {
+  caseStageTransitions,
+  demandMachine,
+  demandStages,
+  guardDemandStage,
+  guardDisposition,
+  guardSupplyStage,
+  isAccountablyOwned,
+  serviceIntakeMachine,
+  stagesByKind,
+  supplyStages,
+} from "./case";
+import { applyTransition } from "./transition";
 
-const broker: Actor = { kind: "staff", id: "staff-1" };
-const hermes: Actor = { kind: "ai_service", id: "hermes" };
+const broker = { kind: "staff", id: "staff-1" } as const;
 
-describe("buyer case (§07.2)", () => {
-  it("A47: entering needs agreed requires an acknowledged brief, broker and contact route", () => {
-    expect(
-      guardBuyerCaseTransition(
-        "closed",
-        "needs_agreed",
-        { reason: "New search", acknowledgedBriefId: "b1" },
-        broker,
-      ),
-    ).toEqual({ outcome: "denied", code: "responsible_broker_required" });
+describe("buyer and tenant cases (architecture §6.2)", () => {
+  it("follow the architecture's stage sequence; tenants use the same foundation", () => {
+    expect([...demandStages]).toEqual([
+      "needs_agreed",
+      "evaluating",
+      "viewing",
+      "proposal_preparation",
+      "proposal_active",
+      "coordination",
+      "completed",
+    ]);
+    expect(stagesByKind.tenant).toBe(stagesByKind.buyer);
+    // Paused and closed are a separate disposition, not stages.
+    expect(demandStages).not.toContain("paused" as never);
   });
 
-  it("A47: viewing requires an appointment workflow", () => {
-    expect(guardBuyerCaseTransition("evaluating", "viewing", {}, broker)).toEqual({
+  it("AT15: moving back to evaluating is allowed from any active stage and needs a reason", () => {
+    for (const from of [
+      "viewing",
+      "proposal_preparation",
+      "proposal_active",
+      "coordination",
+    ] as const) {
+      expect(demandMachine.check(from, "evaluating").outcome).toBe("allowed");
+    }
+    expect(guardDemandStage("coordination", "evaluating", {}, broker)).toEqual({
       outcome: "denied",
-      code: "appointment_required",
+      code: "reason_required",
     });
+  });
+
+  it("evaluating needs an acknowledged brief, a broker and an interest or sourcing task", () => {
     expect(
-      guardBuyerCaseTransition("evaluating", "viewing", { appointmentId: "a1" }, broker).outcome,
+      guardDemandStage("needs_agreed", "evaluating", { responsibleBrokerId: "b1" }, broker),
+    ).toEqual({ outcome: "denied", code: "acknowledged_brief_required" });
+    expect(
+      guardDemandStage(
+        "needs_agreed",
+        "evaluating",
+        { acknowledgedBriefRevisionId: "br1", responsibleBrokerId: "b1", reviewedInterestCount: 5 },
+        broker,
+      ).outcome,
     ).toBe("allowed");
   });
 
-  it("A47: completion is recorded only by a human with evidence", () => {
+  it("AT35: completion is a human-recorded outcome with evidence and remaining obligations", () => {
     expect(
-      guardBuyerCaseTransition(
+      guardDemandStage("coordination", "completed", { completionEvidenceIds: ["d1"] }, broker),
+    ).toEqual({ outcome: "denied", code: "obligations_not_reviewed" });
+    expect(
+      guardDemandStage(
         "coordination",
         "completed",
-        { completionEvidenceIds: ["d1"] },
-        hermes,
+        { completionEvidenceIds: ["d1"], remainingObligations: [] },
+        { kind: "system", id: "timer" },
       ),
-    ).toEqual({
+    ).toEqual({ outcome: "denied", code: "human_required" });
+    // Coordination starts from a proposal agreed for the next step, not from a completed sale.
+    expect(guardDemandStage("proposal_active", "coordination", {}, broker)).toEqual({
       outcome: "denied",
-      code: "human_required",
-    });
-    expect(guardBuyerCaseTransition("coordination", "completed", {}, broker)).toEqual({
-      outcome: "denied",
-      code: "completion_evidence_required",
+      code: "agreed_proposal_required",
     });
   });
+});
 
-  it("A48: pausing or closing needs a reason and an explicit review of remaining obligations", () => {
+describe("seller and landlord cases (architecture §6.3)", () => {
+  it("follow the architecture's stage sequence", () => {
+    expect([...supplyStages]).toEqual([
+      "request_received",
+      "scope_authority_review",
+      "assessment",
+      "instructions_agreed",
+      "preparing",
+      "marketing",
+      "proposal_coordination",
+      "completion_handover",
+    ]);
+    expect(stagesByKind.landlord).toBe(stagesByKind.seller);
+  });
+
+  it("AT18: intake does not infer ownership; assessment needs reviewed authority", () => {
+    expect(guardSupplyStage("scope_authority_review", "assessment", {}, broker)).toEqual({
+      outcome: "denied",
+      code: "reviewed_authority_required",
+    });
     expect(
-      guardBuyerCaseTransition("evaluating", "closed", { reason: "Client paused search" }, broker),
-    ).toEqual({
+      guardSupplyStage("scope_authority_review", "assessment", { authorityReviewed: true }, broker)
+        .outcome,
+    ).toBe("allowed");
+  });
+
+  it("AT18: instructions need a SellerInstruction; marketing needs the preview acknowledgment", () => {
+    expect(guardSupplyStage("assessment", "instructions_agreed", {}, broker)).toEqual({
+      outcome: "denied",
+      code: "seller_instruction_required",
+    });
+    expect(guardSupplyStage("preparing", "marketing", {}, broker)).toEqual({
+      outcome: "denied",
+      code: "preview_acknowledgment_required",
+    });
+  });
+});
+
+describe("service intake (architecture §3.2)", () => {
+  it("is a bounded consultation with no booking or statement stages", () => {
+    expect([...serviceIntakeMachine.states]).toEqual([
+      "request_received",
+      "consultation",
+      "concluded",
+    ]);
+    expect(stagesByKind.service_intake).not.toContain("confirmed" as never);
+  });
+});
+
+describe("case disposition (architecture §6.2, §6.6)", () => {
+  it("a pause has a reason, a dependency and a review date", () => {
+    expect(guardDisposition("active", "paused", { reason: "Travelling" }, broker)).toEqual({
+      outcome: "denied",
+      code: "dependency_required",
+    });
+    expect(
+      guardDisposition(
+        "active",
+        "paused",
+        { reason: "Travelling", waitingOn: "client return", reviewAt: "2026-10-15T09:00:00Z" },
+        broker,
+      ).outcome,
+    ).toBe("allowed");
+  });
+
+  it("closure records an outcome and a disposition for every open commitment", () => {
+    expect(guardDisposition("active", "closed", { outcome: "Bought elsewhere" }, broker)).toEqual({
       outcome: "denied",
       code: "obligations_not_reviewed",
     });
     expect(
-      guardBuyerCaseTransition(
-        "evaluating",
+      guardDisposition(
+        "active",
         "closed",
-        { reason: "Client paused search", outstandingObligations: ["task-7"] },
-        broker,
-      ).outcome,
-    ).toBe("allowed");
-  });
-
-  it("A48: a closed case can be reopened, a completed one becomes a new linked service", () => {
-    expect(buyerCaseMachine.check("closed", "needs_agreed").outcome).toBe("allowed");
-    expect(buyerCaseMachine.isTerminal("completed")).toBe(true);
-  });
-
-  it("a failed proposal returns the buyer to evaluating instead of closing the case", () => {
-    expect(buyerCaseMachine.check("failed", "evaluating").outcome).toBe("allowed");
-  });
-});
-
-describe("seller case (§07.3)", () => {
-  it("A29: self-declared ownership does not confirm scope and authority", () => {
-    expect(
-      guardSellerCaseTransition(
-        "request_received",
-        "scope_authority_confirmed",
-        { responsibleBrokerId: "s1", authorityState: "self_declared" },
+        {
+          outcome: "Bought elsewhere",
+          openCommitmentIds: ["t1", "t2"],
+          commitmentDispositions: { t1: "done" },
+        },
         broker,
       ),
-    ).toEqual({ outcome: "denied", code: "reviewed_authority_required" });
-    expect(
-      guardSellerCaseTransition(
-        "request_received",
-        "scope_authority_confirmed",
-        { responsibleBrokerId: "s1", authorityState: "reviewed" },
-        broker,
-      ).outcome,
-    ).toBe("allowed");
-  });
-
-  it("A30: instructions need a service agreement and recorded publication permissions", () => {
-    expect(
-      guardSellerCaseTransition(
-        "assessment",
-        "instructions_agreed",
-        { serviceAgreementId: "sa1" },
-        broker,
-      ),
-    ).toEqual({ outcome: "denied", code: "publication_permissions_required" });
-  });
-
-  it("A31: marketing starts only with the owner's approval of the exact preview", () => {
-    expect(guardSellerCaseTransition("preparing", "marketing", {}, broker)).toEqual({
+    ).toEqual({ outcome: "denied", code: "commitment_disposition_required" });
+    expect(guardDisposition("closed", "active", {}, broker)).toEqual({
       outcome: "denied",
-      code: "owner_approval_required",
+      code: "reason_required",
     });
   });
-});
 
-describe("rental case (F26)", () => {
-  it("uses rental stage labels, not buyer/seller vocabulary (dispositions aside)", () => {
-    const shared = rentalCaseStages.filter((stage) =>
-      (buyerCaseStages as readonly string[]).includes(stage),
-    );
-    expect(shared).toEqual(["paused", "closed"]);
+  it("every active case has an accountable broker and a next action or a dated dependency", () => {
+    const base = {
+      disposition: "active",
+      ownerId: "b1",
+      nextAction: null,
+      waitingOn: null,
+      reviewAt: null,
+    } as const;
+    expect(isAccountablyOwned(base)).toBe(false);
+    expect(isAccountablyOwned({ ...base, nextAction: "Send shortlist" })).toBe(true);
+    expect(
+      isAccountablyOwned({ ...base, waitingOn: "mortgage offer", reviewAt: "2026-10-01" }),
+    ).toBe(true);
+    expect(isAccountablyOwned({ ...base, ownerId: null, nextAction: "x" })).toBe(false);
+    expect(isAccountablyOwned({ ...base, disposition: "closed" })).toBe(true);
   });
 
-  it("A60: a viewing precedes application document collection", () => {
-    expect(
-      guardRentalCaseTransition(
-        "viewing_arranged",
-        "application_review",
-        { applicationChecklistId: "c1" },
-        broker,
-      ),
-    ).toEqual({ outcome: "denied", code: "viewing_required_before_application" });
-  });
-
-  it("A60: only a human declines an application, with a policy reason", () => {
-    expect(
-      guardRentalCaseTransition(
-        "application_review",
-        "application_declined",
-        { declineReasonCode: "r1" },
-        hermes,
-      ),
-    ).toEqual({ outcome: "denied", code: "human_required" });
-  });
-
-  it("a tenancy starts only with an inventory record and start evidence", () => {
-    expect(
-      guardRentalCaseTransition(
-        "handover",
-        "tenancy_started",
-        { startEvidenceIds: ["e1"] },
-        broker,
-      ),
-    ).toEqual({
-      outcome: "denied",
-      code: "inventory_record_required",
+  it("the stage contract picks the kind's pipeline", () => {
+    const record = { id: "c1", state: "request_received" as const, version: 1 };
+    const result = applyTransition(caseStageTransitions("landlord"), record, {
+      actor: broker,
+      capabilities: grantsForRoles(["assigned_broker"]),
+      expectedVersion: 1,
+      to: "scope_authority_review",
+      evidence: { responsibleBrokerId: "staff-1" },
+      operationId: "op-1",
+      at: "2026-09-26T09:00:00Z",
     });
+    expect(result.outcome).toBe("applied");
+    expect(
+      applyTransition(
+        caseStageTransitions("buyer"),
+        { ...record, state: "needs_agreed" },
+        {
+          actor: broker,
+          capabilities: grantsForRoles(["assigned_broker"]),
+          expectedVersion: 1,
+          to: "scope_authority_review",
+          evidence: {},
+          operationId: "op-2",
+          at: "2026-09-26T09:00:00Z",
+        },
+      ),
+    ).toEqual({ outcome: "denied", code: "transition_not_allowed" });
   });
 });
