@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "Основная навигация",
+  "utilitiesLabel": "Инструменты",
+  "home": "Главная страница MS Realty",
+  "buy": "Купить",
+  "rent": "Арендовать",
+  "sellLet": "Продать / Сдать",
+  "areas": "Районы",
+  "aboutContact": "О нас и контакты",
+  "saved": "Сохранённое",
+  "language": "Язык",
+  "contact": "Контакты",
+  "myJourney": "Мой путь",
+  "menu": "Меню",
+  "journey": {
+    "label": "Мой путь",
+    "overview": "Обзор",
+    "properties": "Объекты",
+    "appointments": "Встречи",
+    "messages": "Сообщения",
+    "documents": "Документы",
+    "caseSwitcher": "Дело",
+    "help": "Помощь",
+    "broker": "Ваш брокер",
+    "team": "Команда MS Realty"
+  }
+}

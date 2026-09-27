@@ -54,6 +54,7 @@ const sellerSideRoles: readonly ParticipantRole[] = [
 
 /** Acting for a principal: only principals respond to proposals or approve listings. */
 const principalOnly: readonly Capability[] = [
+  "portal.brief.acknowledge",
   "portal.proposal.respond",
   "portal.listing.acknowledge",
 ];
@@ -70,7 +71,7 @@ const invitedRolePresets: Partial<Record<ParticipantRole, readonly Capability[]>
 };
 
 /** Capabilities a party relationship confers on its case or property. */
-function relationshipCapabilities(
+export function relationshipCapabilities(
   role: ParticipantRole,
   authorityReviewed: boolean,
   invited: readonly Capability[],
@@ -84,7 +85,10 @@ function relationshipCapabilities(
   return rolePresets.verified_client.filter(
     // Acknowledging a listing preview needs seller-side authority that staff reviewed (AT18).
     (c) =>
-      c !== "portal.listing.acknowledge" || (sellerSideRoles.includes(role) && authorityReviewed),
+      (c !== "portal.listing.acknowledge" ||
+        (sellerSideRoles.includes(role) && authorityReviewed)) &&
+      (c !== "portal.brief.acknowledge" ||
+        ["buyer", "co_buyer", "tenant", "seller", "landlord"].includes(role)),
   );
 }
 

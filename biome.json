@@ -9,6 +9,7 @@
       "!**/next-env.d.ts",
       "!db/migrations/meta",
       "!data/legacy",
+      "!production/data",
       "!playwright-report",
       "!test-results",
       "!coverage"

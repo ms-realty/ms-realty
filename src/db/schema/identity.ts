@@ -18,6 +18,7 @@ import { draftOnlyCapabilities } from "../../domain/capabilities";
 import { bytea, createdAt, id, instant, mutable, sqlList } from "./columns";
 import {
   capabilityEnum,
+  invitationKindEnum,
   principalKindEnum,
   principalStatusEnum,
   publicLocaleEnum,
@@ -175,6 +176,8 @@ export const emailSignInTokens = pgTable(
     tokenHash: text("token_hash").notNull().unique(),
     purpose: signInTokenPurposeEnum("purpose").notNull(),
     principalKind: principalKindEnum("principal_kind").notNull(),
+    /** Bind a link to an immutable account, not an address that may later be reassigned. */
+    principalId: uuid("principal_id").references(() => principals.id),
     email: text("email").notNull(),
     /** Relative path to return to after verification. */
     returnTo: text("return_to"),
@@ -186,4 +189,47 @@ export const emailSignInTokens = pgTable(
     revokedAt: instant("revoked_at"),
   },
   (t) => [index("email_sign_in_tokens_email_idx").on(sql`lower(${t.email})`)],
+);
+
+/**
+ * Invitations (§8.3): recipient-bound, 72 hours, redeemed only by an explicit POST; a reissue
+ * revokes the one it replaces. Staff enrolment and recovery carry an emailed single-use token
+ * (hash only); a client invitation carries none, because only its signed-in recipient can
+ * open or accept it. At most one outcome is ever recorded.
+ */
+export const invitations = pgTable(
+  "invitations",
+  {
+    id: id(),
+    kind: invitationKindEnum("kind").notNull(),
+    /** The recipient. Staff kinds need a staff principal, client_access a client one. */
+    principalId: uuid("principal_id")
+      .notNull()
+      .references(() => principals.id),
+    /** Address the invitation was sent to. */
+    email: text("email").notNull(),
+    tokenHash: text("token_hash").unique(),
+    /** staff_enrolment: { roles }; client_access: { caseId, role, capabilities }. */
+    scope: jsonb("scope").notNull().default({}),
+    /** Null only for the break-glass bootstrap, which is audited as a system action. */
+    invitedById: uuid("invited_by_id").references(() => principals.id),
+    locale: publicLocaleEnum("locale").notNull().default("bg"),
+    createdAt: createdAt(),
+    expiresAt: instant("expires_at").notNull(),
+    acceptedAt: instant("accepted_at"),
+    declinedAt: instant("declined_at"),
+    /** Reissued, withdrawn, or superseded by recovery. */
+    revokedAt: instant("revoked_at"),
+  },
+  (t) => [
+    check(
+      "invitations_one_outcome",
+      sql`num_nonnulls(${t.acceptedAt}, ${t.declinedAt}, ${t.revokedAt}) <= 1`,
+    ),
+    check(
+      "invitations_staff_token",
+      sql`${t.kind} = 'client_access' or ${t.tokenHash} is not null`,
+    ),
+    index("invitations_principal_idx").on(t.principalId),
+  ],
 );

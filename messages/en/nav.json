@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "Main",
+  "utilitiesLabel": "Site tools",
+  "home": "MS Realty home page",
+  "buy": "Buy",
+  "rent": "Rent",
+  "sellLet": "Sell / Let",
+  "areas": "Areas",
+  "aboutContact": "About & contact",
+  "saved": "Saved",
+  "language": "Language",
+  "contact": "Contact",
+  "myJourney": "My journey",
+  "menu": "Menu",
+  "journey": {
+    "label": "My journey",
+    "overview": "Overview",
+    "properties": "Properties",
+    "appointments": "Appointments",
+    "messages": "Messages",
+    "documents": "Documents",
+    "caseSwitcher": "Case",
+    "help": "Help",
+    "broker": "Your broker",
+    "team": "The MS Realty team"
+  }
+}

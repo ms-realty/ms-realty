@@ -55,8 +55,8 @@ const toneIcon = {
 // Each family has its own shape so "available" and "approved" never read as the same pill:
 // availability is a soft pill, approval a bordered stamp, delivery plain inline text.
 const familyClass: Record<StatusFamily, string> = {
-  availability: "rounded-md px-2 py-0.5",
-  approval: "rounded-[3px] border border-current bg-surface px-2 py-0.5",
+  availability: "rounded-control px-2 py-0.5",
+  approval: "rounded-control border border-current bg-surface px-2 py-0.5",
   delivery: "",
 };
 
@@ -83,7 +83,7 @@ export function StatusBadge({ family, tone, label, className }: StatusBadgeProps
         "inline-flex w-fit items-center gap-1.5 text-caption font-semibold",
         toneText[tone],
         (family === "availability" || tone === "draft") && toneSoft[tone],
-        tone === "draft" && "rounded-md border border-dashed border-assist-line px-2 py-0.5",
+        tone === "draft" && "rounded-control border border-dashed border-assist-line px-2 py-0.5",
         familyClass[family],
         "forced-colors:border forced-colors:border-[CanvasText]",
         className,

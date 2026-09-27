@@ -3,9 +3,14 @@
 // translations) and a helper that publishes it through the real human commands. Fictional
 // data only.
 import { randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { eq } from "drizzle-orm";
+import sharp from "sharp";
 import {
   approvals,
+  documents,
+  documentVersions,
   geographyPlaceAliases,
   geographyPlaces,
   listingRevisionMedia,
@@ -14,9 +19,11 @@ import {
   localizedRevisions,
   mediaAssets,
   mediaRelations,
+  parties,
   properties,
   propertyFactRevisions,
   propertyFacts,
+  propertyRelationships,
   sellerInstructions,
 } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
@@ -32,6 +39,8 @@ import type { PublicLocale } from "@/domain/ids";
 import type { CommercialState, EditorialState } from "@/domain/listing";
 import { sha256Hex } from "../crypto";
 import type { Executor } from "../db";
+import { digestOf, LocalFileStorage } from "../files/storage";
+import { nextReference } from "../references";
 import {
   activateManifest,
   approveFactRevision,
@@ -46,6 +55,10 @@ const next = () => {
   return sequence;
 };
 const opId = () => `op-${randomUUID()}`;
+// Explicit local fixture storage. Production command defaults always use configured storage.
+export const publicationFixtureStorage = new LocalFileStorage(
+  process.env.E2E_FILE_STORAGE_ROOT ?? join(tmpdir(), `msr-publication-fixtures-${process.pid}`),
+);
 
 export async function insertPlace(
   db: Executor,
@@ -221,6 +234,7 @@ export async function createListingFixture(
     })
     .returning({ id: properties.id });
   if (!property) throw new Error("property insert failed");
+  const fixturePropertyId = property.id;
   const facts = options.facts ?? defaultFacts;
   const [factRevision] = await db
     .insert(propertyFactRevisions)
@@ -298,6 +312,13 @@ export async function createListingFixture(
   const assetIds: string[] = [];
   for (let position = 0; position < (options.photos ?? 1); position++) {
     const key = `${reference}-${position}-${randomUUID()}`;
+    const bytes = await sharp({
+      create: { width: 32, height: 24, channels: 3, background: "#90a4ae" },
+    })
+      .webp()
+      .toBuffer();
+    await publicationFixtureStorage.writeImmutable(`sealed/${key}`, bytes);
+    await publicationFixtureStorage.writeImmutable(`derivatives/${key}.webp`, bytes);
     const [asset] = await db
       .insert(mediaAssets)
       .values({
@@ -306,12 +327,18 @@ export async function createListingFixture(
         kind: "photo",
         originalKey: `staging/${key}.webp`,
         sealedKey: `sealed/${key}`,
-        sha256: sha256Hex(key),
+        sha256: digestOf(bytes),
         contentType: "image/webp",
-        byteSize: 1000,
-        width: 1600,
-        height: 1200,
+        byteSize: bytes.length,
+        width: 32,
+        height: 24,
         scan: "clean",
+        scannedAt: new Date(),
+        scannerVersion: "synthetic-test-scanner",
+        scannedSha256: digestOf(bytes),
+        derivativeKey: `derivatives/${key}.webp`,
+        derivativeSha256: digestOf(bytes),
+        derivativeContentType: "image/webp",
         processing: "ready",
         rights: "cleared",
         rightsReference: "Owner media licence (fixture)",
@@ -337,20 +364,85 @@ export async function createListingFixture(
   }
 
   if (options.sellerInstruction !== false) {
+    const [seller] = await db
+      .insert(parties)
+      .values({ kind: "person", displayName: "Synthetic seller" })
+      .returning();
+    if (!seller) throw new Error("seller insert failed");
+    async function reviewedDocument(purpose: string) {
+      const [document] = await db
+        .insert(documents)
+        .values({
+          reference: await nextReference(db, "document"),
+          propertyId: fixturePropertyId,
+          purpose,
+          classification: "contract",
+          currentVersionNumber: 1,
+        })
+        .returning();
+      if (!document) throw new Error("document insert failed");
+      const key = `sealed/${randomUUID()}`;
+      const bytes = Buffer.from(`Synthetic ${purpose} evidence, no legal validity.`);
+      await publicationFixtureStorage.writeImmutable(key, bytes);
+      const [version] = await db
+        .insert(documentVersions)
+        .values({
+          documentId: document.id,
+          versionNumber: 1,
+          state: "reviewed",
+          sealedKey: key,
+          sha256: digestOf(bytes),
+          fileName: "synthetic-evidence.txt",
+          contentType: "text/plain",
+          byteSize: bytes.length,
+          uploadedByKind: "staff",
+          uploadedById: options.reviewerId,
+          scan: "clean",
+          scannedAt: new Date(),
+          scannerVersion: "synthetic-test-scanner",
+          scannedSha256: digestOf(bytes),
+          reviewType: "accepted_for_purpose",
+          reviewedById: options.reviewerId,
+          reviewedAt: new Date(),
+        })
+        .returning();
+      if (!version) throw new Error("document version insert failed");
+      return { document, version };
+    }
+    const authority = await reviewedDocument("seller_authority");
+    const agreement = await reviewedDocument("seller_instruction");
+    const [relationship] = await db
+      .insert(propertyRelationships)
+      .values({
+        propertyId: property.id,
+        partyId: seller.id,
+        role: purpose === "sale" ? "seller" : "landlord",
+        authority: "reviewed",
+        authorityReviewedById: options.reviewerId,
+        authorityReviewedAt: new Date(),
+        scope: { documentVersionId: authority.version.id, digest: authority.version.sha256 },
+      })
+      .returning();
+    if (!relationship) throw new Error("relationship insert failed");
     await db.insert(sellerInstructions).values({
       reference: `SI-2026-${String(900_000 + n)}`,
       propertyId: property.id,
       listingId: listing.id,
       revisionNumber: 1,
       state: "agreed",
-      commercialTerms: { price: price.value ?? null },
+      commercialTerms: {
+        price: price.value ?? null,
+        sellerPartyId: seller.id,
+        authorityRelationshipId: relationship.id,
+        agreement: { documentVersionId: agreement.version.id, digest: agreement.version.sha256 },
+      },
       disclosure,
       mediaUsageRights: { granted: true },
       representationScope: purpose === "sale" ? "sale" : "letting",
       commissionTerms: "Commission as agreed in the fixture brokerage agreement.",
       publicationPermission: true,
       contentDigest: sha256Hex(`instruction-${n}`),
-      evidenceDocumentIds: ["fixture-agreement"],
+      evidenceDocumentIds: [agreement.document.id],
       agreedAt: new Date("2026-09-01T09:00:00Z"),
       recordedById: options.reviewerId,
     });
@@ -480,19 +572,27 @@ export async function publishLocales(
   const manifests: string[] = [];
   for (const locale of locales) {
     const { generation } = await listingVersion(db, fixture.listingId);
-    const prepared = await prepareManifest(db, {
-      actor,
-      operationId: opId(),
-      expectedRevision: generation,
-      reference: fixture.reference,
-      locale,
-    });
-    await activateManifest(db, {
-      actor,
-      operationId: opId(),
-      expectedRevision: generation,
-      manifestId: prepared.outcome.manifestId,
-    });
+    const prepared = await prepareManifest(
+      db,
+      {
+        actor,
+        operationId: opId(),
+        expectedRevision: generation,
+        reference: fixture.reference,
+        locale,
+      },
+      { storage: publicationFixtureStorage },
+    );
+    await activateManifest(
+      db,
+      {
+        actor,
+        operationId: opId(),
+        expectedRevision: generation,
+        manifestId: prepared.outcome.manifestId,
+      },
+      { storage: publicationFixtureStorage },
+    );
     manifests.push(prepared.outcome.manifestId);
   }
   return manifests;

@@ -1,0 +1,11 @@
+{
+  "label": "Информация за агенцията",
+  "agencyName": "MS Realty",
+  "agencyKind": "Агенция за недвижими имоти",
+  "callLabel": "Обадете ни се",
+  "call": "Обадете се на {phone}",
+  "help": "Помощ",
+  "privacy": "Поверителност",
+  "accessibility": "Достъпност",
+  "copyright": "© {year} MS Realty"
+}

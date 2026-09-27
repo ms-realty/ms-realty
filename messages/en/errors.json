@@ -1,0 +1,13 @@
+{
+  "notFound": {
+    "title": "Page not found",
+    "body": "The address may be mistyped, or the page may have moved.",
+    "home": "Go to the home page"
+  },
+  "generic": {
+    "title": "This page could not be shown",
+    "body": "Try again. If it keeps happening, call us and quote the reference.",
+    "reference": "Reference: {reference}",
+    "retry": "Try again"
+  }
+}

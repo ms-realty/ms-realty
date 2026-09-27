@@ -1,0 +1,21 @@
+{
+  "label": "Работно пространство",
+  "secondaryLabel": "Управление",
+  "today": "Днес",
+  "inquiries": "Запитвания",
+  "cases": "Случаи",
+  "calendar": "Календар",
+  "inventory": "Имоти",
+  "reviews": "Прегледи",
+  "content": "Съдържание",
+  "operations": "Операции",
+  "settings": "Настройки",
+  "more": "Още",
+  "search": "Търсене в записите",
+  "interfaceLanguage": "Език на интерфейса",
+  "todayHeading": "Днес",
+  "account": "Профил",
+  "session": "Сесия",
+  "manageAccess": "Управление на достъпа",
+  "signOut": "Изход"
+}

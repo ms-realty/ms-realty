@@ -1,5 +1,5 @@
 {
-  "$comment": "Human review status per public catalog. Only a named reviewer and date can mark a catalog approved; a draft never makes a locale indexable (src/i18n/config.ts).",
+  "$comment": "Human review status per catalog set: `locales` for the public/client catalogs (messages/<locale>/), `staff` for the staff catalogs (messages/staff/<locale>/). Only a named reviewer and date can mark a catalog approved; a draft never makes a locale indexable (src/i18n/config.ts).",
   "locales": {
     "bg": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
     "en": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
@@ -8,5 +8,10 @@
     "nl": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
     "el": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
     "he": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null }
+  },
+  "staff": {
+    "bg": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+    "en": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+    "ru": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null }
   }
 }

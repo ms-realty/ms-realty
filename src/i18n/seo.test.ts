@@ -19,12 +19,12 @@ describe("crawl and index metadata (§20.4)", () => {
     expect(canonicalOrigin({ CANONICAL_ORIGIN: "not a url" })).toBeNull();
   });
 
-  it("uses the forwarded host when a proxy sits in front", () => {
+  it("does not make an untrusted origin canonical from a forwarded header", () => {
     const headers = new Headers({
       host: "origin.internal:3000",
       "x-forwarded-host": canonicalHost,
     });
-    expect(requestHost(headers)).toBe(canonicalHost);
+    expect(requestHost(headers)).toBe("origin.internal:3000");
     expect(requestHost(new Headers({ host: "preview.workers.dev" }))).toBe("preview.workers.dev");
   });
 

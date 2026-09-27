@@ -21,7 +21,8 @@ describe("parseEnv", () => {
       production: false,
       appOrigin: "http://localhost:3000",
       canonicalOrigin: "http://localhost:3000",
-      webauthn: { rpId: "localhost", rpName: "MS Realty" },
+      webauthn: { rpName: "MS Realty" },
+      testOutbox: false,
       hosts: {
         public: "http://localhost:3000",
         client: "http://my.localhost:3000",
@@ -41,7 +42,6 @@ describe("parseEnv", () => {
         client: "https://my.makler-realty.com",
         staff: "https://app.makler-realty.com",
       },
-      webauthn: { rpId: "makler-realty.com" },
       mediaPublicBaseUrl: "https://makler-realty.com/media",
     });
   });
@@ -64,6 +64,27 @@ describe("parseEnv", () => {
     } catch (error) {
       expect(String(error)).not.toContain("short-secret-value");
     }
+  });
+
+  it("allows plain http in production only on loopback names", () => {
+    const local = {
+      ...production,
+      APP_ORIGIN: "http://localhost:3100",
+      CANONICAL_ORIGIN: "http://localhost:3100",
+      PUBLIC_ORIGIN: "http://localhost:3100",
+      CLIENT_ORIGIN: "http://my.localhost:3100",
+      STAFF_ORIGIN: "http://app.localhost:3100",
+    };
+    expect(parseEnv(local).hosts.staff).toBe("http://app.localhost:3100");
+    expect(() => parseEnv({ ...local, STAFF_ORIGIN: "http://app.localhost.evil.example" })).toThrow(
+      /STAFF_ORIGIN must be https/,
+    );
+  });
+
+  it("serves the test outbox only when asked for and every host is loopback", () => {
+    expect(parseEnv({ NODE_ENV: "test", ENABLE_TEST_OUTBOX: "1" }).testOutbox).toBe(true);
+    expect(parseEnv({ ...production, ENABLE_TEST_OUTBOX: "1" }).testOutbox).toBe(false);
+    expect(parseEnv({ NODE_ENV: "test" }).testOutbox).toBe(false);
   });
 
   it("treats blank variables copied from .env.example as unset", () => {

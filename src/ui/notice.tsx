@@ -28,7 +28,7 @@ export function Notice({ tone, title, children, action, role, className }: Notic
   return (
     <div
       role={role}
-      className={cx("flex gap-3 rounded-card border p-4 text-compact", box, className)}
+      className={cx("flex gap-3 rounded-panel border p-4 text-compact", box, className)}
     >
       <Icon className={cx("mt-0.5", icon)} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">

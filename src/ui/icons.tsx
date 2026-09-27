@@ -35,6 +35,7 @@ export const CheckIcon = icon(<path d="M5 12.5l4.5 4.5L19 7.5" />, "CheckIcon");
 export const MinusIcon = icon(<path d="M5 12h14" />, "MinusIcon");
 export const PlusIcon = icon(<path d="M12 5v14M5 12h14" />, "PlusIcon");
 export const CloseIcon = icon(<path d="M6 6l12 12M18 6L6 18" />, "CloseIcon");
+export const MenuIcon = icon(<path d="M4 6h16M4 12h16M4 18h16" />, "MenuIcon");
 export const ChevronDownIcon = icon(<path d="M6 9l6 6 6-6" />, "ChevronDownIcon");
 export const ChevronUpIcon = icon(<path d="M6 15l6-6 6 6" />, "ChevronUpIcon");
 /** Points to the inline start; pass `directional` so it mirrors in RTL. */

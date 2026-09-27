@@ -1,0 +1,21 @@
+{
+  "label": "Workspace",
+  "secondaryLabel": "Management",
+  "today": "Today",
+  "inquiries": "Inquiries",
+  "cases": "Cases",
+  "calendar": "Calendar",
+  "inventory": "Inventory",
+  "reviews": "Reviews",
+  "content": "Content",
+  "operations": "Operations",
+  "settings": "Settings",
+  "more": "More",
+  "search": "Search records",
+  "interfaceLanguage": "Interface language",
+  "todayHeading": "Today",
+  "account": "Account",
+  "session": "Session",
+  "manageAccess": "Manage access",
+  "signOut": "Sign out"
+}

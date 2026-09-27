@@ -2,11 +2,15 @@
 // Inquiries · Cases · Calendar · Inventory · Reviews · Content · Operations; secondary:
 // Settings. On phones Today, Inquiries and Calendar stay on screen and the rest sits under More.
 
+import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
-import { cx, icons, SkipLink } from "@/ui";
+import { cx } from "@/ui/cx";
+import * as icons from "@/ui/icons";
+import { SkipLink } from "@/ui/skip-link";
 import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
 import { NavLink } from "./nav-link";
@@ -44,6 +48,7 @@ export async function WorkspaceShell({
   search,
   counts,
   account,
+  mayManageAccess = false,
   children,
 }: {
   locale: StaffLocale;
@@ -53,13 +58,30 @@ export async function WorkspaceShell({
   counts?: Partial<Record<WorkspaceNavLabel, number>>;
   /** Signed-in operator: name and office. */
   account?: { name: string; detail?: string };
+  mayManageAccess?: boolean;
   children: ReactNode;
 }) {
-  const t = await getTranslations({ locale, namespace: "nav.workspace" });
+  const t = await getTranslations({ locale, namespace: "workspace" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
   const common = await getTranslations({ locale, namespace: "common" });
   const primary = linked(workspacePrimaryNav, locale);
   const secondary = linked(workspaceSecondaryNav, locale);
+  const accountActions = (
+    <div className="flex flex-col gap-2 px-2">
+      {mayManageAccess ? (
+        <a href={`/${locale}/access/manage`} className="text-compact text-action underline">
+          {t("manageAccess")}
+        </a>
+      ) : null}
+      {account ? (
+        <form action={`/${locale}/access/signout`} method="post">
+          <button type="submit" className="min-h-control text-compact text-action underline">
+            {t("signOut")}
+          </button>
+        </form>
+      ) : null}
+    </div>
+  );
   const mobileMore = [...primary.filter((item) => !item.mobilePrimary), ...secondary];
 
   // A preference, not a destination. Staff URLs carry the locale (§03.1), so choosing a
@@ -93,81 +115,85 @@ export async function WorkspaceShell({
   );
 
   return (
-    <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
-      <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
+    <PrivatePageGuard locale={locale} verification={randomUUID()}>
+      <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
 
-      {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
-      <header className="hidden border-e border-divider bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto lg:px-3 lg:py-4">
-        <p className="flex items-center gap-2.5 px-2">
-          <Image src="/brand/logo-ms-realty.png" alt={common("brand")} width={56} height={29} />
-          <span className="text-dense font-medium text-text-muted">{t("label")}</span>
-        </p>
-        {search ? <search aria-label={t("search")}>{search}</search> : null}
-        <nav aria-label={t("label")}>{list(primary, sideLinkClass, true)}</nav>
-        {secondary.length > 0 ? (
-          <nav aria-label={t("secondaryLabel")} className="border-t border-divider pt-4">
-            {list(secondary, sideLinkClass, true)}
-          </nav>
-        ) : null}
-        <div className="mt-auto flex flex-col gap-3 border-t border-divider pt-4">
-          {account ? (
-            <p className="flex items-center gap-2.5 px-2">
-              <span
-                aria-hidden="true"
-                className="inline-flex size-8 items-center justify-center rounded-full bg-selected text-dense font-semibold text-action"
-              >
-                {initials(account.name)}
-              </span>
-              <span className="flex flex-col">
-                <span className="text-operational font-medium text-text">{account.name}</span>
-                {account.detail ? (
-                  <span className="text-caption text-text-muted">{account.detail}</span>
-                ) : null}
-              </span>
-            </p>
-          ) : null}
-          {languageSwitcher}
-        </div>
-      </header>
-
-      {/* Phones and tablets: brand bar, Today/Inquiries/Calendar tabs, the rest under More. */}
-      <header className="border-b border-divider bg-surface lg:hidden">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2">
-          <p className="me-auto">
-            <span className="font-semibold">{common("brand")}</span>{" "}
-            <span className="text-caption text-text-muted">{t("label")}</span>
+        {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
+        <header className="hidden border-e border-divider bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto lg:px-3 lg:py-4">
+          <p className="flex items-center gap-2.5 px-2">
+            <Image src="/brand/logo-ms-realty.png" alt={common("brand")} width={56} height={29} />
+            <span className="text-dense font-medium text-text-muted">{t("label")}</span>
           </p>
-          {mobileMore.length > 0 ? (
-            <MenuDisclosure label={t("more")} panelClassName="flex flex-col gap-4 pb-3">
-              <nav aria-label={t("secondaryLabel")}>{list(mobileMore, tabLinkClass)}</nav>
-            </MenuDisclosure>
+          {search ? <search aria-label={t("search")}>{search}</search> : null}
+          <nav aria-label={t("label")}>{list(primary, sideLinkClass, true)}</nav>
+          {secondary.length > 0 ? (
+            <nav aria-label={t("secondaryLabel")} className="border-t border-divider pt-4">
+              {list(secondary, sideLinkClass, true)}
+            </nav>
           ) : null}
-          {languageSwitcher}
-        </div>
-        {search ? (
-          <search aria-label={t("search")} className="block px-gutter pb-2">
-            {search}
-          </search>
-        ) : null}
-        <nav aria-label={t("label")} className="overflow-x-auto px-gutter">
-          <ul className="flex gap-1">
-            {primary
-              .filter((item) => item.mobilePrimary)
-              .map((item) => (
-                <li key={item.label}>
-                  <NavLink href={item.href} className={tabLinkClass}>
-                    {t(item.label)}
-                  </NavLink>
-                </li>
-              ))}
-          </ul>
-        </nav>
-      </header>
+          <div className="mt-auto flex flex-col gap-3 border-t border-divider pt-4">
+            {account ? (
+              <p className="flex items-center gap-2.5 px-2">
+                <span
+                  aria-hidden="true"
+                  className="inline-flex size-8 items-center justify-center rounded-full bg-selected text-dense font-semibold text-action"
+                >
+                  {initials(account.name)}
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-operational font-medium text-text">{account.name}</span>
+                  {account.detail ? (
+                    <span className="text-caption text-text-muted">{account.detail}</span>
+                  ) : null}
+                </span>
+              </p>
+            ) : null}
+            {languageSwitcher}
+            {accountActions}
+          </div>
+        </header>
 
-      <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
-        {children}
-      </main>
-    </div>
+        {/* Phones and tablets: brand bar, Today/Inquiries/Calendar tabs, the rest under More. */}
+        <header className="border-b border-divider bg-surface lg:hidden">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2">
+            <p className="me-auto">
+              <span className="font-semibold">{common("brand")}</span>{" "}
+              <span className="text-caption text-text-muted">{t("label")}</span>
+            </p>
+            {mobileMore.length > 0 || account ? (
+              <MenuDisclosure label={t("more")} panelClassName="flex flex-col gap-4 pb-3">
+                <nav aria-label={t("secondaryLabel")}>{list(mobileMore, tabLinkClass)}</nav>
+                {accountActions}
+              </MenuDisclosure>
+            ) : null}
+            {languageSwitcher}
+          </div>
+          {search ? (
+            <search aria-label={t("search")} className="block px-gutter pb-2">
+              {search}
+            </search>
+          ) : null}
+          <nav aria-label={t("label")} className="overflow-x-auto px-gutter">
+            <ul className="flex gap-1">
+              {primary
+                .filter((item) => item.mobilePrimary)
+                .map((item) => (
+                  <li key={item.label}>
+                    <NavLink href={item.href} className={tabLinkClass}>
+                      {t(item.label)}
+                    </NavLink>
+                  </li>
+                ))}
+            </ul>
+          </nav>
+        </header>
+
+        <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
+          {children}
+        </main>
+      </div>
+    </PrivatePageGuard>
   );
 }
 

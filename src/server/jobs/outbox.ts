@@ -11,7 +11,8 @@ import { externalActions, outboxEvents } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
 import type { ExternalActionState } from "@/domain/external-action";
 import { type MessageChannel, maxDeliveryAttempts } from "@/domain/message";
-import type { Executor } from "../db";
+import type { Database, Executor } from "../db";
+import { alertSubjectType, alertTemplate } from "../subscriptions/template";
 import type { MessageProvider } from "./provider";
 import type { JobQueue } from "./queue";
 
@@ -113,11 +114,21 @@ export async function enqueueMessage(
  * returned, so duplicate jobs and sweeps are harmless.
  */
 export async function dispatchMessage(
-  db: Executor,
+  db: Database,
   provider: MessageProvider,
   outboxId: string,
   now: Date = new Date(),
 ): Promise<OutboxState> {
+  // Consequential dispatch uses a pool: the attempting state must commit before I/O.
+  // Optional digests have stricter current-consent/publication gates than access emails.
+  const [subject] = await db
+    .select({ type: externalActions.subjectType })
+    .from(externalActions)
+    .where(eq(externalActions.id, outboxId));
+  if (subject?.type === alertSubjectType) {
+    const { dispatchSearchAlert } = await import("../subscriptions/alerts");
+    return dispatchSearchAlert(db, provider, outboxId, { now });
+  }
   const claimed = await db.transaction(async (tx) => {
     const [row] = await tx
       .select()
@@ -125,6 +136,29 @@ export async function dispatchMessage(
       .where(eq(externalActions.id, outboxId))
       .for("update");
     if (row?.state !== "queued") return { row, claimed: false as const };
+    const template = (row.payload as Partial<EmailPayload> | null)?.template;
+    // Optional notifications may only pass through their consent-aware dispatcher.
+    // A malformed/mistagged ledger row must never fall back to generic access mail.
+    if (
+      template === alertTemplate ||
+      row.payloadDigest !== createHash("sha256").update(canonicalJson(row.payload)).digest("hex")
+    ) {
+      const code =
+        template === alertTemplate
+          ? "guarded_template_subject_mismatch"
+          : "payload_digest_mismatch";
+      await tx
+        .update(externalActions)
+        .set({
+          state: "cancelled",
+          lastErrorCode: code,
+          secretPayload: null,
+          updatedAt: now,
+          version: sql`${externalActions.version} + 1`,
+        })
+        .where(eq(externalActions.id, outboxId));
+      return { row: { ...row, state: "cancelled" as const }, claimed: false as const };
+    }
     await tx
       .update(externalActions)
       .set({
@@ -186,7 +220,7 @@ export async function dispatchMessage(
 
 /** Dispatches every queued email, oldest first. The worker runs this as a safety sweep. */
 export async function dispatchQueued(
-  db: Executor,
+  db: Database,
   provider: MessageProvider,
   limit = 50,
 ): Promise<number> {
@@ -228,7 +262,12 @@ export async function recordDeliveryReport(
       and(
         eq(externalActions.provider, report.provider),
         eq(externalActions.providerReference, report.providerMessageId),
-        inArray(externalActions.state, ["acknowledged", "outcome_unknown"]),
+        inArray(
+          externalActions.state,
+          report.status === "failed"
+            ? ["acknowledged", "outcome_unknown", "verified"]
+            : ["acknowledged", "outcome_unknown"],
+        ),
       ),
     )
     .returning({ id: externalActions.id });

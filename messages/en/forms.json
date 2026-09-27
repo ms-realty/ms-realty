@@ -1,0 +1,9 @@
+{
+  "required": "Required",
+  "optional": "Optional",
+  "errorSummary": "{count, plural, one {# answer needs} other {# answers need}} correcting",
+  "charactersLeft": "{count, plural, one {# character left} other {# characters left}}",
+  "choose": "Choose…",
+  "saveDraft": "Save draft",
+  "cancel": "Cancel"
+}

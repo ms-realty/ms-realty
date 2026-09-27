@@ -2,7 +2,7 @@
 import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Button } from "./button";
 import { Chip, ChipList } from "./chip";
 import { ComboBox } from "./combobox";
@@ -194,12 +194,27 @@ describe("ComboBox (A04)", () => {
   });
 });
 
-describe("Button", () => {
-  it("explains why it is disabled", () => {
-    render(<Button disabledReason="Add a phone number or email first.">Request a viewing</Button>);
+describe("Button (UI05)", () => {
+  it("stays focusable when disabled with a reason, explains it and does nothing", async () => {
+    const user = userEvent.setup();
+    const onPress = vi.fn();
+    const onSubmit = vi.fn((event: Event) => event.preventDefault());
+    render(
+      <form onSubmit={(event) => onSubmit(event.nativeEvent)}>
+        <Button type="submit" onPress={onPress} disabledReason="Add a phone number or email first.">
+          Request a viewing
+        </Button>
+      </form>,
+    );
     const button = screen.getByRole("button", { name: "Request a viewing" });
-    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-disabled", "true");
     expect(button).toHaveAccessibleDescription("Add a phone number or email first.");
+    await user.tab();
+    expect(button).toHaveFocus();
+    await user.keyboard("{Enter}");
+    await user.click(button);
+    expect(onPress).not.toHaveBeenCalled();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("shows its pending label and stays focusable while pending", () => {
@@ -208,7 +223,7 @@ describe("Button", () => {
         Request a viewing
       </Button>,
     );
-    const button = screen.getByRole("button", { name: /Sending request/ });
+    const button = screen.getByRole("button", { name: "Sending request…" });
     expect(button).toHaveAttribute("aria-disabled", "true");
     button.focus();
     expect(button).toHaveFocus();

@@ -41,7 +41,9 @@ function routePatterns(host: Host): RegExp[] {
 }
 
 function routeExists(host: Host, href: string): boolean {
-  return routePatterns(host).some((pattern) => pattern.test(href));
+  return routePatterns(host).some((pattern) =>
+    pattern.test(new URL(href, "https://test.invalid").pathname),
+  );
 }
 
 describe("navigation registry (§06)", () => {
@@ -67,7 +69,7 @@ describe("navigation registry (§06)", () => {
       "rent",
       "sellLet",
       "areas",
-      "howWeHelp",
+      "aboutContact",
     ]);
     expect(publicUtilityNav.map((item) => item.label)).toEqual(["saved", "contact"]);
     expect(journeyNav.map((item) => item.label)).toEqual([

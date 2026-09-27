@@ -2092,7 +2092,7 @@ These slices define dependency and proof, not a calendar or permission to ship a
 | R11 Cutover verification | Actual hosts/login/intake/media/mail/legacy/SEO observations recorded | Local browser preview or build success |
 | R12 Operating acceptance | Complete staffed cycle including scheduled overnight/backup work, support handoff and no unresolved release-severity incident | Launch-day screenshot or elapsed time without evidence |
 
-The architecture's authority-reconciliation requirement remains: PostgreSQL is the selected runtime search, but the existing Typesense/Meilisearch report obligation is not silently waived. Search Console, Yandex, backlinks, human listing review, live Hermes/Payload evidence and signed recovery obligations retain their required authority until explicitly reconciled. This document does not change those files or claim the current live system passed.
+The architecture's authority-reconciliation requirement remains: PostgreSQL is the selected runtime search, but the existing Typesense/Meilisearch report obligation is not silently waived. Search Console, Yandex Webmaster and backlink exports are optional at every lifecycle stage by the owner decision of 2026-09-24. Human listing review, live service/runtime evidence, crawl parity and signed recovery obligations retain their required authority until explicitly reconciled. This document does not change those files or claim the current live system passed.
 
 ### 24.3 Operational usability is part of release
 

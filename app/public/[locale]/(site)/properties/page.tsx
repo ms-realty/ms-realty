@@ -1,0 +1,90 @@
+// P02/P03/P04/P22: committed URL filters; optional map failure never blocks the list.
+import { notFound } from "next/navigation";
+import { getDb } from "@/db/client";
+import { discoveryCopy } from "@/features/discovery/copy";
+import { ListingGrid } from "@/features/discovery/listing-card";
+import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import {
+  ambiguousFilters,
+  filterUrl,
+  type QueryParams,
+  readFilters,
+  searchInput,
+} from "@/features/discovery/query";
+import { SearchForm } from "@/features/discovery/search-form";
+import { isRoutableLocale } from "@/i18n/config";
+import { formatNumber } from "@/i18n/format";
+import { AppError, isAppError } from "@/server/errors";
+import { type SearchResponse, searchListings } from "@/server/search/search";
+import { buttonClass } from "@/ui/button-class";
+import { Notice } from "@/ui/notice";
+export const metadata = discoveryMetadata;
+export default async function PropertiesPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<QueryParams>;
+}) {
+  const { locale } = await params;
+  if (!isRoutableLocale(locale)) notFound();
+  const copy = discoveryCopy(locale),
+    query = await searchParams,
+    values = readFilters(query);
+  let result: SearchResponse | null = null;
+  let invalid = false;
+  try {
+    if (ambiguousFilters(query)) throw new AppError("validation_failed");
+    result = await searchListings(
+      getDb(),
+      searchInput(locale, values, typeof query.cursor === "string" ? query.cursor : undefined),
+    );
+  } catch (error) {
+    invalid = isAppError(error) && error.code === "validation_failed";
+  }
+  return (
+    <DiscoveryPage>
+      <h1 className="text-title font-semibold">{copy.search}</h1>
+      <SearchForm locale={locale} copy={copy} values={values} />
+      <p className="text-compact text-text-muted">{copy.mapUnavailable}</p>
+      {result ? (
+        <>
+          <h2 className="text-heading font-semibold">
+            {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
+            {formatNumber(locale, result.count.value)}
+          </h2>
+          {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
+          {result.items.length ? (
+            <ListingGrid items={result.items} locale={locale} copy={copy} />
+          ) : (
+            <div className="space-y-4">
+              <p>{copy.none}</p>
+              <a className="underline" href={`/${locale}/inquire`}>
+                {copy.ask}
+              </a>
+              {locale !== "bg" ? (
+                <p>
+                  <a className="underline" href={filterUrl("bg", values)} hrefLang="bg">
+                    {copy.source}
+                  </a>
+                </p>
+              ) : null}
+            </div>
+          )}
+          {result.nextCursor ? (
+            <a
+              className={buttonClass("secondary", "self-start")}
+              href={filterUrl(locale, values, result.nextCursor)}
+            >
+              {copy.more}
+            </a>
+          ) : null}
+        </>
+      ) : (
+        <Notice tone="warning" title={invalid ? copy.check : copy.failed}>
+          <p>{invalid ? copy.invalid : copy.retained}</p>
+        </Notice>
+      )}
+    </DiscoveryPage>
+  );
+}

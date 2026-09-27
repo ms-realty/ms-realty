@@ -6,8 +6,7 @@ import { sql } from "drizzle-orm";
 import { fromDrizzle, PgBoss } from "pg-boss";
 import type { PublicLocale } from "@/domain/ids";
 import { issueEmailLink } from "../auth/email-link";
-import type { AccountKind } from "../auth/sessions";
-import type { Executor } from "../db";
+import type { Database, Executor } from "../db";
 import { pruneRateLimits } from "../rate-limit";
 import { dispatchMessage, dispatchQueued } from "./outbox";
 import type { MessageProvider } from "./provider";
@@ -15,13 +14,17 @@ import type { MessageProvider } from "./provider";
 export interface JobPayloads {
   "auth.email_link": {
     email: string;
-    accountKind: AccountKind;
     returnTo: string | null;
     locale: PublicLocale;
   };
   "outbox.dispatch": { outboxId: string };
   "outbox.sweep": Record<string, never>;
   "rate_limit.prune": Record<string, never>;
+  "files.process": { kind: "media" | "document"; id: string };
+  "ai.draft": { runId: string };
+  "inbox.reconcile": Record<string, never>;
+  "worker.heartbeat": Record<string, never>;
+  "search_alerts.sweep": { afterId?: string };
 }
 export type JobName = keyof JobPayloads;
 
@@ -31,6 +34,11 @@ const queueOptions: Record<JobName, { retryLimit: number; retryDelay?: number; c
   "outbox.dispatch": { retryLimit: 3, retryDelay: 30 },
   "outbox.sweep": { retryLimit: 0, cron: "* * * * *" },
   "rate_limit.prune": { retryLimit: 0, cron: "17 * * * *" },
+  "files.process": { retryLimit: 3, retryDelay: 60 },
+  "ai.draft": { retryLimit: 0 },
+  "inbox.reconcile": { retryLimit: 0, cron: "* * * * *" },
+  "worker.heartbeat": { retryLimit: 0, cron: "* * * * *" },
+  "search_alerts.sweep": { retryLimit: 0, cron: "*/15 * * * *" },
 };
 
 export interface SendOptions {
@@ -43,8 +51,15 @@ export interface SendOptions {
 export class JobQueue {
   readonly #boss: PgBoss;
 
-  constructor(connectionString: string) {
-    this.#boss = new PgBoss({ connectionString });
+  /**
+   * `producer` only enqueues (the web process): no supervision or cron in that process. The
+   * worker process omits it.
+   */
+  constructor(connectionString: string, options: { producer?: boolean } = {}) {
+    this.#boss = new PgBoss({
+      connectionString,
+      ...(options.producer ? { supervise: false, schedule: false } : {}),
+    });
     this.#boss.on("error", (error) => console.error("[jobs]", error));
   }
 
@@ -92,7 +107,7 @@ export class JobQueue {
 }
 
 export interface WorkerDependencies {
-  readonly db: Executor;
+  readonly db: Database;
   readonly provider: MessageProvider;
 }
 
@@ -109,5 +124,38 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
   });
   await queue.work("rate_limit.prune", async () => {
     await pruneRateLimits(deps.db);
+  });
+  await queue.work("files.process", async ({ kind, id }) => {
+    const { processFileWorker } = await import("../files/process");
+    const { fileServices } = await import("../files/config");
+    await processFileWorker(
+      deps.db,
+      fileServices(),
+      { kind: "system", id: "file-scanner" },
+      kind,
+      id,
+    );
+  });
+  await queue.work("ai.draft", async ({ runId }) => {
+    const { processAssistanceRun } = await import("../ai/assistance");
+    await processAssistanceRun(deps.db, runId);
+  });
+  await queue.work("inbox.reconcile", async () => {
+    const { reconcileResendInbox } = await import("./resend-inbox");
+    await reconcileResendInbox(deps.db);
+  });
+  await queue.work("worker.heartbeat", async () => {
+    const { recordWorkerProgress } = await import("./heartbeat");
+    await recordWorkerProgress(deps.db);
+  });
+  await queue.work("search_alerts.sweep", async ({ afterId }) => {
+    const { sweepSearchAlerts } = await import("../subscriptions/alerts");
+    const result = await sweepSearchAlerts(deps.db, deps.provider, { afterId });
+    if (result.nextCursor)
+      await queue.send(
+        "search_alerts.sweep",
+        { afterId: result.nextCursor },
+        { singletonKey: `search-alerts:${result.nextCursor}` },
+      );
   });
 }

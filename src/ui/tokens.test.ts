@@ -1,9 +1,10 @@
-// Spec §16.2 / §20.1: every foreground/background token pair the components use meets
-// WCAG 2.2 AA contrast. Values are read from tokens.css, the single source of truth.
+// Architecture §11.3: every foreground/background token pair the components use meets
+// WCAG 2.2 AA contrast. CSS is generated from the DTCG source in design/tokens.json.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const css = readFileSync(new URL("./tokens.css", import.meta.url), "utf8");
+const base = readFileSync(new URL("./base.css", import.meta.url), "utf8");
 const colors = new Map(
   [...css.matchAll(/--color-([a-z-]+):\s*(#[0-9a-f]{6})\s*;/gi)].map((m) => [m[1], m[2]]),
 );
@@ -133,9 +134,9 @@ describe("design tokens (spec §16.2)", () => {
     expect(css).toMatch(/--spacing:\s*0\.25rem/);
   });
 
-  it("defines the type roles from spec §16.1", () => {
+  it("uses the architecture's 16px body and readable secondary type roles", () => {
     const roles = {
-      body: ["1.125rem", "1.75rem"],
+      body: ["1rem", "1.625rem"],
       compact: ["1rem", "1.5rem"],
       operational: ["0.9375rem", "1.375rem"],
       dense: ["0.875rem", "1.25rem"],
@@ -147,16 +148,15 @@ describe("design tokens (spec §16.2)", () => {
     }
   });
 
-  it("defines the public display roles and the display face", () => {
-    expect(css).toContain("--text-display: 3.5rem;");
-    expect(css).toContain("--text-title: 2.25rem;");
-    expect(css).toMatch(/--font-display:/);
-    // Hebrew display text must reach the Hebrew face before any Latin fallback.
-    expect(css).toMatch(/:lang\(he\) \.font-display/);
+  it("shares Noto Sans across surfaces and gives Hebrew its own first face", () => {
+    expect(css).toContain("--text-title: 2rem;");
+    expect(css).toContain('--font-sans: "Noto Sans", "Noto Sans Hebrew"');
+    expect(base).toMatch(/:lang\(he\)\s*\{\s*font-family: "Noto Sans Hebrew"/);
+    expect(css).toContain("--focus-width: 3px;");
   });
 
   it("honours reduced motion and forced colours", () => {
-    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
-    expect(css).toMatch(/@media \(forced-colors: active\)/);
+    expect(base).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
+    expect(base).toMatch(/@media \(forced-colors: active\)/);
   });
 });

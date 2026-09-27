@@ -1,27 +1,70 @@
-// P01 Home — placeholder until slice S2.
-import type { Metadata } from "next";
-import { headers } from "next/headers";
+// P01: intent entry using the same approved inventory projection as P02.
 import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getDb } from "@/db/client";
+import { discoveryCopy } from "@/features/discovery/copy";
+import { ListingGrid } from "@/features/discovery/listing-card";
+import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { readFilters } from "@/features/discovery/query";
+import { SearchForm } from "@/features/discovery/search-form";
 import { isRoutableLocale } from "@/i18n/config";
-import { localizedMetadata, requestHost } from "@/i18n/seo";
-
-export async function generateMetadata({ params }: PageProps<"/public/[locale]">): Promise<Metadata> {
-  const { locale } = await params;
-  if (!isRoutableLocale(locale)) return {};
-  return localizedMetadata({ locale, path: "/", host: requestHost(await headers()) });
-}
-
-export default async function HomePage({ params }: PageProps<"/public/[locale]">) {
+import { searchListings } from "@/server/search/search";
+import { buttonClass } from "@/ui/button-class";
+export const metadata = discoveryMetadata;
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRoutableLocale(locale)) notFound();
-  setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "common" });
+  const copy = discoveryCopy(locale);
+  let result: Awaited<ReturnType<typeof searchListings>> | null = null;
+  try {
+    result = await searchListings(getDb(), {
+      locale,
+      purpose: "sale",
+      pageSize: 3,
+      sort: "newest",
+    });
+  } catch {
+    /* Keep the inquiry entry available during a search outage. */
+  }
 
   return (
-    <div className="mx-auto flex max-w-page flex-col gap-3 px-gutter py-12 lg:px-gutter-wide">
-      <h1 className="text-title font-semibold">{t("homeHeading")}</h1>
-      <p className="max-w-prose text-body text-text-muted">{t("homeIntro")}</p>
-    </div>
+    <DiscoveryPage>
+      <header className="max-w-reading space-y-4">
+        <p className="text-compact font-semibold">MS Realty</p>
+        <h1 className="text-title font-semibold">{copy.properties}</h1>
+        <p className="text-body text-text-muted">{copy.intro}</p>
+      </header>
+      <SearchForm locale={locale} copy={copy} values={readFilters({})} compact />
+      <nav aria-label={copy.purpose} className="flex flex-wrap gap-3">
+        <a className={buttonClass("secondary")} href={`/${locale}/properties?purpose=sale`}>
+          {copy.buy}
+        </a>
+        <a
+          className={buttonClass("secondary")}
+          href={`/${locale}/properties?purpose=long_term_rent`}
+        >
+          {copy.rent}
+        </a>
+        <a
+          className={buttonClass("secondary")}
+          href={`/${locale}/inquire?purpose=seller_consultation`}
+        >
+          {copy.sell}
+        </a>
+        <a
+          className={buttonClass("secondary")}
+          href={`/${locale}/inquire?purpose=landlord_consultation`}
+        >
+          {copy.let}
+        </a>
+      </nav>
+      {result?.items.length ? (
+        <ListingGrid items={result.items} locale={locale} copy={copy} />
+      ) : (
+        <p>{result ? copy.none : copy.failed}</p>
+      )}
+      <a className="self-start font-semibold underline" href={`/${locale}/inquire`}>
+        {copy.ask}
+      </a>
+    </DiscoveryPage>
   );
 }

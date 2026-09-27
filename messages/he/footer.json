@@ -1,0 +1,11 @@
+{
+  "label": "מידע על המשרד",
+  "agencyName": "MS Realty",
+  "agencyKind": "משרד תיווך נדל״ן",
+  "callLabel": "התקשרו אלינו",
+  "call": "להתקשר אל {phone}",
+  "help": "עזרה",
+  "privacy": "פרטיות",
+  "accessibility": "נגישות",
+  "copyright": "© {year} MS Realty"
+}

@@ -1,10 +1,13 @@
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { externalActions, inquiries, outboxEvents } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { GET as readReceiptRoute } from "../../../app/api/inquiries/[submission]/route";
 import { GET as issueRoute, POST } from "../../../app/api/inquiries/route";
+import { getEnv } from "../config/env";
 import { AppError } from "../errors";
+import { loadPublishedListings } from "../publication/presentation";
 import {
   createListingFixture,
   createPlaces,
@@ -68,6 +71,28 @@ const inquiriesFor = (key: string) =>
   t.db.select().from(inquiries).where(eq(inquiries.submissionKey, key));
 
 describe("submitInquiry", () => {
+  it("AT27: rejects an outdated observed manifest without accepting intent and records the canonical source on a fresh request", async () => {
+    const stale = question({ observedManifestId: randomUUID() });
+    const error = await rejection(
+      submitInquiry(t.db, stale, { ip: ip(), receiptSession: newReceiptSession() }),
+    );
+    expect(error).toMatchObject({
+      code: "version_conflict",
+      current: { reason: "listing_changed" },
+    });
+    expect(await inquiriesFor(stale.submissionKey)).toEqual([]);
+    const [published] = await loadPublishedListings(t.db, { references: [live.reference] }, "bg");
+    const reviewed = question({ observedManifestId: published?.manifestId });
+    await submitInquiry(t.db, reviewed, { ip: ip(), receiptSession: newReceiptSession() });
+    const [row] = await inquiriesFor(reviewed.submissionKey);
+    expect(row?.context).toMatchObject({
+      listing: {
+        manifestId: published?.manifestId,
+        sourceUrl: `${getEnv().canonicalOrigin}/bg/properties/${live.reference}/${live.reference.toLowerCase()}`,
+      },
+    });
+  });
+
   it("AT10: a retried or double-tapped submission yields one Inquiry and one receipt", async () => {
     const input = question();
     const session = newReceiptSession();

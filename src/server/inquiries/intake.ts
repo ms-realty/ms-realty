@@ -14,7 +14,7 @@ import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { contactMethods, inquiries, parties } from "@/db/schema";
+import { contactMethods, inquiries, listings, parties } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { type PublicLocale, parseReference, publicLocales } from "@/domain/ids";
 import { type InquiryPurpose, inquiryPurposes } from "@/domain/inquiry";
@@ -27,7 +27,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { recordOutboxEvent } from "../jobs/outbox";
 import { findOperation, runOperation } from "../operations";
-import { loadPublishedListings } from "../publication/presentation";
+import { listingSlug, loadPublishedListings } from "../publication/presentation";
 import { enforceRateLimit } from "../rate-limit";
 import { nextReference } from "../references";
 import { normalizeSearch } from "../search/search";
@@ -64,7 +64,7 @@ const receiptSessionPattern = /^[A-Za-z0-9_-]{43}$/;
 const receiptSessionDays = 30;
 
 export function receiptCookieName(env: ServerEnv): string {
-  return env.production ? "__Host-msr_receipt" : "msr_receipt";
+  return env.hosts.public.startsWith("https://") ? "__Host-msr_receipt" : "msr_receipt";
 }
 
 export function newReceiptSession(): string {
@@ -80,7 +80,7 @@ export function validReceiptSession(value: string | undefined): string | null {
 export function receiptSetCookie(env: ServerEnv, token: string, now: Date = new Date()): string {
   const options: CookieOptions = {
     httpOnly: true,
-    secure: env.production || env.hosts.public.startsWith("https://"),
+    secure: env.hosts.public.startsWith("https://"),
     sameSite: "lax",
     path: "/",
     expires: new Date(now.getTime() + receiptSessionDays * 86_400_000),
@@ -109,7 +109,8 @@ export function normalizePhone(value: string): string | null {
   return e164Pattern.test(phone) ? phone : null;
 }
 
-const inquirySchema = z
+/** The inquiry payload; the transport registry (src/server/transport) publishes it as is. */
+export const inquirySchema = z
   .object({
     submissionKey: z.string("required").trim().refine(isIssuedSubmissionKey, "invalid"),
     purpose: z.enum(inquiryPurposes, "required"),
@@ -126,6 +127,8 @@ const inquirySchema = z
     ),
     message: text(4000),
     listingReference: text(20),
+    /** The approved page the visitor actually reviewed. Optional for older/general clients. */
+    observedManifestId: z.preprocess(blankAsUnset, z.uuid().optional()),
     /** The search the visitor asked from, as its public filters (never a private brief). */
     criteria: z.record(z.string(), z.unknown()).optional(),
     /** A preference in an explicit timezone, not an appointment. */
@@ -155,6 +158,9 @@ const inquirySchema = z
     }
     if (input.listingReference && parseReference(input.listingReference)?.kind !== "listing") {
       issue(["listingReference"], "invalid_reference");
+    }
+    if (input.observedManifestId && !input.listingReference) {
+      issue(["listingReference"], "required");
     }
   });
 
@@ -260,19 +266,42 @@ export async function submitInquiry(
   const requestHash = hashRequest({ ...payload, criteria });
 
   // A retry of an accepted submission is answered from its receipt, never rate limited.
-  let listing: Awaited<ReturnType<typeof resolveListing>> | null = null;
   if (!(await findOperation(db, actor, operationType, submissionKey))) {
     await enforceRateLimit(db, "inquiry.ip", context.ip);
     // Checked before the operation starts so a correctable mistake is not stored as its outcome.
-    listing = input.listingReference
-      ? await resolveListing(db, input.listingReference, input.locale)
-      : null;
+    if (input.listingReference && !input.observedManifestId) {
+      await resolveListing(db, input.listingReference, input.locale);
+    }
   }
 
   const result = await runOperation(
     db,
     { actor, type: operationType, idempotencyKey: submissionKey, requestHash },
     async ({ tx, operationId }) => {
+      let listing: Awaited<ReturnType<typeof resolveListing>> | null = null;
+      if (input.listingReference) {
+        // Publication commands take this row's update lock. Hold a share lock through the
+        // inquiry commit, so approval/current-manifest changes cannot race the snapshot.
+        await tx
+          .select({ id: listings.id })
+          .from(listings)
+          .where(eq(listings.reference, parseReference(input.listingReference)?.reference ?? ""))
+          .for("share");
+        try {
+          listing = await resolveListing(tx, input.listingReference, input.locale);
+        } catch (error) {
+          if (
+            !input.observedManifestId ||
+            !(error instanceof AppError) ||
+            error.code !== "validation_failed"
+          )
+            throw error;
+          throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
+        }
+        if (input.observedManifestId && listing.manifestId !== input.observedManifestId) {
+          throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
+        }
+      }
       const now = context.now ?? new Date();
       const kind = input.contact.kind;
       const normalized =
@@ -328,6 +357,7 @@ export async function submitInquiry(
                   manifestId: listing.manifestId,
                   title: listing.title,
                   locale: listing.locale,
+                  sourceUrl: `${getEnv().canonicalOrigin}/${listing.locale}/properties/${listing.reference}/${listingSlug(listing.reference)}`,
                 }
               : null,
             criteria,

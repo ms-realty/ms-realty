@@ -4,10 +4,10 @@
 // left out: no dead-end teasers.
 import type { PublicLocale } from "@/i18n/config";
 
-type Nav = typeof import("../../../messages/en.json")["nav"];
+type Nav = typeof import("../../../messages/bg/nav.json");
 export type PublicNavLabel = Exclude<keyof Nav, "journey" | "workspace">;
 export type JourneyNavLabel = keyof Nav["journey"];
-export type WorkspaceNavLabel = keyof Nav["workspace"];
+export type WorkspaceNavLabel = keyof typeof import("../../../messages/staff/bg/workspace.json");
 export type FooterLabel = "help" | "privacy" | "accessibility";
 
 export interface NavItem<Label extends string> {
@@ -24,37 +24,37 @@ export interface WorkspaceNavItem extends NavItem<WorkspaceNavLabel> {
 }
 
 export const publicPrimaryNav: readonly NavItem<PublicNavLabel>[] = [
-  { label: "buy", screen: "P02", path: null },
-  { label: "rent", screen: "P02", path: null },
-  { label: "sellLet", screen: "P17", path: null },
+  { label: "buy", screen: "P02", path: "/properties?purpose=sale" },
+  { label: "rent", screen: "P02", path: "/properties?purpose=long_term_rent" },
+  { label: "sellLet", screen: "P17", path: "/sell" },
   { label: "areas", screen: "P15", path: null },
-  { label: "howWeHelp", screen: "P16", path: null },
+  { label: "aboutContact", screen: "P20", path: "/contact" },
 ];
 
 export const publicUtilityNav: readonly NavItem<PublicNavLabel>[] = [
-  { label: "saved", screen: "P08", path: null },
-  { label: "contact", screen: "P20", path: null },
+  { label: "saved", screen: "P08", path: "/saved" },
+  { label: "contact", screen: "P20", path: "/contact" },
 ];
 
 /** Shown only to a returning verified client; the destination is on the client host. */
 export const myJourneyNav: NavItem<PublicNavLabel> = {
   label: "myJourney",
   screen: "C03",
-  path: null,
+  path: "/overview",
 };
 
 export const footerNav: readonly NavItem<FooterLabel>[] = [
-  { label: "help", screen: "P24", path: null },
-  { label: "privacy", screen: "P24", path: null },
-  { label: "accessibility", screen: "P24", path: null },
+  { label: "help", screen: "P24", path: "/help/general" },
+  { label: "privacy", screen: "P24", path: "/help/privacy" },
+  { label: "accessibility", screen: "P24", path: "/help/accessibility" },
 ];
 
 export const journeyNav: readonly NavItem<JourneyNavLabel>[] = [
-  { label: "overview", screen: "C03", path: null },
-  { label: "properties", screen: "C05", path: null },
-  { label: "appointments", screen: "C06", path: null },
-  { label: "messages", screen: "C07", path: null },
-  { label: "documents", screen: "C08", path: null },
+  { label: "overview", screen: "C03", path: "/overview" },
+  { label: "properties", screen: "C05", path: "/properties" },
+  { label: "appointments", screen: "C06", path: "/appointments" },
+  { label: "messages", screen: "C07", path: "/messages" },
+  { label: "documents", screen: "C08", path: "/documents" },
 ];
 
 export const journeyHelpNav: NavItem<JourneyNavLabel> = {
@@ -67,13 +67,13 @@ export const journeyHelpNav: NavItem<JourneyNavLabel> = {
  * Operations; settings stays secondary. */
 export const workspacePrimaryNav: readonly WorkspaceNavItem[] = [
   { label: "today", screen: "O01", path: "/today", mobilePrimary: true },
-  { label: "inquiries", screen: "O02", path: null, mobilePrimary: true },
-  { label: "cases", screen: "O04", path: null },
-  { label: "calendar", screen: "O08", path: null, mobilePrimary: true },
-  { label: "inventory", screen: "O10", path: null },
+  { label: "inquiries", screen: "O02", path: "/inquiries", mobilePrimary: true },
+  { label: "cases", screen: "O04", path: "/cases" },
+  { label: "calendar", screen: "O08", path: "/calendar", mobilePrimary: true },
+  { label: "inventory", screen: "O10", path: "/inventory" },
   { label: "reviews", screen: "O15", path: null },
-  { label: "content", screen: "O21", path: null },
-  { label: "operations", screen: "O22", path: null },
+  { label: "content", screen: "O21", path: "/content" },
+  { label: "operations", screen: "O22", path: "/operations" },
 ];
 
 export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [

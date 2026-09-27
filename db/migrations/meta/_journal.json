@@ -29,6 +29,62 @@
       "when": 1790514332989,
       "tag": "0003_search_projection_per_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790520374206,
+      "tag": "0004_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790521689419,
+      "tag": "0005_bind_email_link_principal",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790524227969,
+      "tag": "0006_file_intake_provenance",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790524925075,
+      "tag": "0007_source_bound_assistance",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790526618917,
+      "tag": "0008_worker_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790527590750,
+      "tag": "0009_case_operating_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790528624560,
+      "tag": "0010_review_replacement",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790529186949,
+      "tag": "0011_intake_and_review_history",
+      "breakpoints": true
     }
   ]
 }

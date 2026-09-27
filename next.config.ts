@@ -14,12 +14,19 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(process.env.BUILD_STANDALONE === "1" ? { output: "standalone" as const } : {}),
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   reactStrictMode: true,
+  // Listing renditions already come from the sealed-media pipeline; the small bundled
+  // brand asset needs no optimizer. Internal optimizer fetches lack the gateway identity.
+  images: { unoptimized: true },
   // No typedRoutes: proxy.ts rewrites each host's URLs to app/{public,client,staff}, so the
   // generated route types would describe internal paths, not the hrefs pages link to.
   experimental: {
+    // Native media intake is bounded at 25 MiB (+ multipart overhead) by its handler.
+    // Proxy must buffer that whole request; its 10 MiB default silently truncates it.
+    proxyClientMaxBodySize: "26mb",
     // Also type-checks page/layout props. With it, next-env.d.ts imports the route types
     // from whichever NEXT_DIST_DIR is active, so tsconfig.json never has to be rewritten.
     strictRouteTypes: true,

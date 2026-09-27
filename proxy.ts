@@ -18,12 +18,19 @@ import {
   hostContextFor,
   hostOrigins,
   isPublicWwwHost,
+  servesApi,
 } from "@/server/config/hosts";
+import { originHeaders } from "@/server/config/origin";
 
 // One app, three hosts (architecture §11.1): every page request is rewritten to the route tree
 // of the host it was addressed to, app/{public,client,staff}/[locale]/…. The internal prefix is
 // always added, never trusted from the URL, so `/staff/bg/today` on any host resolves to
 // `/<context>/staff/bg/today` and 404s: a route of one host is unreachable from another.
+//
+// Do not bind the server to a loopback IP (`next start --hostname 127.0.0.1`): Next keeps a
+// proxy rewrite internal, and a redirect relative to the browser's host, only when its URL has
+// the server's own origin, and `nextUrl` renames every loopback host to `localhost`. Bind to
+// `localhost`, a real interface or all interfaces.
 
 // Nonce-based CSP as documented for Next 16: Next reads the nonce from the request's
 // Content-Security-Policy header and applies it to its own scripts. Pages must render
@@ -65,7 +72,9 @@ function entryLocale(request: NextRequest, context: HostContext): string {
   const chosen = request.cookies.get(contextLocaleCookie(context))?.value;
   if (chosen && isContextLocale(context, chosen)) return chosen;
   if (context === "staff") return defaultStaffLocale;
-  return negotiateLocale(request.headers.get("accept-language"), routableLocales()) ?? defaultLocale;
+  return (
+    negotiateLocale(request.headers.get("accept-language"), routableLocales()) ?? defaultLocale
+  );
 }
 
 /**
@@ -90,9 +99,9 @@ function explicitLocaleChoice(request: NextRequest, context: HostContext): strin
   }
 }
 
-function localeRedirect(request: NextRequest, pathname: string): NextResponse {
-  const url = request.nextUrl.clone();
-  url.pathname = pathname;
+function localeRedirect(request: NextRequest, pathname: string, origin: string): NextResponse {
+  const url = new URL(pathname, origin);
+  url.search = request.nextUrl.search;
   // Query parameters (utm_*, gclid, …) pass through untouched.
   const response = NextResponse.redirect(url, 307);
   response.headers.set("Vary", "Accept-Language, Cookie");
@@ -102,28 +111,55 @@ function localeRedirect(request: NextRequest, pathname: string): NextResponse {
 
 export function proxy(request: NextRequest) {
   const origins = hostOrigins();
-  const host = requestHost(request.headers);
+  const trustedHeaders = originHeaders(request.headers, origins);
+  if (!trustedHeaders)
+    return new NextResponse(null, {
+      status: 404,
+      headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" },
+    });
+  const host = requestHost(trustedHeaders);
   const { pathname, search } = request.nextUrl;
 
   // ponytail: www → apex is the only host redirect; the legacy URL decisions record none for
   // www. Legacy .com/.ru path decisions are applied by the migration stage, not here.
   if (isPublicWwwHost(host, origins)) {
-    return NextResponse.redirect(new URL(`${pathname}${search}`, origins.public), 301);
+    const canonical = new URL(origins.public);
+    canonical.pathname = pathname;
+    canonical.search = search;
+    return NextResponse.redirect(canonical, 301);
   }
   const context = hostContextFor(host, origins);
   // Not one of the three configured hosts: nothing of any context is served there.
   if (!context) return new NextResponse(null, { status: 404 });
 
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/__nextjs") ||
+    pathname.startsWith("/brand/") ||
+    pathname.startsWith("/fonts/") ||
+    ["/favicon.ico", "/robots.txt", "/sitemap.xml"].includes(pathname)
+  )
+    return NextResponse.next({ request: { headers: trustedHeaders } });
+
   const segments = pathname.split("/");
   const first = segments[1] ?? "";
+  if (first === "api") {
+    return servesApi(context, pathname)
+      ? NextResponse.next({ request: { headers: trustedHeaders } })
+      : new NextResponse(null, { status: 404 });
+  }
   const hasLocale = isContextLocale(context, first);
 
   // `/` opens the negotiated locale; a private host's bare `/{locale}` opens its home.
   if (pathname === "/") {
-    return localeRedirect(request, `/${entryLocale(request, context)}${homePaths[context]}`);
+    return localeRedirect(
+      request,
+      `/${entryLocale(request, context)}${homePaths[context]}`,
+      origins[context],
+    );
   }
   if (hasLocale && segments.length === 2 && homePaths[context]) {
-    return localeRedirect(request, `/${first}${homePaths[context]}`);
+    return localeRedirect(request, `/${first}${homePaths[context]}`, origins[context]);
   }
 
   const chosen = explicitLocaleChoice(request, context);
@@ -132,19 +168,23 @@ export function proxy(request: NextRequest) {
 
   const nonce = btoa(crypto.randomUUID());
   const csp = contentSecurityPolicy(nonce);
-  const requestHeaders = new Headers(request.headers);
+  const requestHeaders = new Headers(trustedHeaders);
+  requestHeaders.set("x-forwarded-host", host ?? "");
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp);
   requestHeaders.set(appLocaleHeader, hasLocale ? first : entryLocale(request, context));
   requestHeaders.set(appSurfaceHeader, context);
 
-  const url = request.nextUrl.clone();
   // A first segment that is not a locale of this host names no page. It goes straight to
   // Next's not-found route: under /<context>/[locale] a notFound() thrown by the layout would
   // leave the server HTML an empty error document.
+  const url = request.nextUrl.clone();
   url.pathname = hasLocale ? `/${context}${pathname}` : "/_not-found";
   const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+  // Mutable public truth and every private document must be re-read on the next request.
+  response.headers.set("Cache-Control", "private, no-store");
+  if (context !== "public") response.headers.set("X-Robots-Tag", "noindex, nofollow");
   if (chosen) {
     response.cookies.set(contextLocaleCookie(context), chosen, {
       path: "/",
@@ -157,7 +197,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Router prefetches pass through too: without the rewrite they would address no route.
-  // Next's own assets and dev endpoints (`/_next/*`, `/__nextjs*`) are host-neutral.
-  matcher: ["/((?!api|_next/|__nextjs|brand/|favicon.ico|robots.txt|sitemap.xml).*)"],
+  // Even static/crawl paths authenticate origin transport; only minimal health is exempt.
+  matcher: ["/((?!api/health$).*)"],
 };

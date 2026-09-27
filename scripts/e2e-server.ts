@@ -1,0 +1,63 @@
+// One freshly migrated database per browser run. Playwright owns this process and stops it
+// after the suite; the finally block drops only the generated msr_e2e_* database.
+import { type ChildProcess, spawn } from "node:child_process";
+import { rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import postgres from "postgres";
+import { runMigrations } from "../src/db/migrate";
+
+const adminUrl = process.env.TEST_DATABASE_URL;
+const databaseUrl = process.env.E2E_DATABASE_URL;
+if (!adminUrl || !databaseUrl) throw new Error("E2E requires a disposable TEST_DATABASE_URL.");
+const target = new URL(databaseUrl);
+const source = new URL(adminUrl);
+const database = target.pathname.slice(1);
+if (
+  !/^msr_e2e_[a-f0-9]{32}$/.test(database) ||
+  target.host !== source.host ||
+  target.protocol !== source.protocol ||
+  target.username !== source.username ||
+  target.password !== source.password
+) {
+  throw new Error("Refusing an E2E database outside the generated disposable-test scope.");
+}
+const admin = postgres(adminUrl, { max: 1, onnotice: () => {} });
+let child: ChildProcess | undefined;
+let stopping = false;
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.on(signal, () => {
+    stopping = true;
+    child?.kill(signal);
+  });
+}
+
+async function next(args: string[]): Promise<number> {
+  if (stopping) return 0;
+  return new Promise((resolve, reject) => {
+    child = spawn(process.execPath, ["node_modules/next/dist/bin/next", ...args], {
+      stdio: "inherit",
+      env: { ...process.env, DATABASE_URL: databaseUrl },
+    });
+    child.once("error", reject);
+    child.once("exit", (code) => resolve(code ?? (stopping ? 0 : 1)));
+  });
+}
+
+let created = false;
+try {
+  await admin.unsafe(`create database "${database}"`);
+  created = true;
+  await runMigrations(databaseUrl);
+  console.log("Fresh disposable browser database migrated.");
+  const built = process.env.CI || process.env.E2E_SKIP_BUILD === "1" ? 0 : await next(["build"]);
+  process.exitCode =
+    built ||
+    (await next(["start", "--hostname", "localhost", "--port", process.env.E2E_PORT ?? "3100"]));
+} finally {
+  if (created) await admin.unsafe(`drop database if exists "${database}" with (force)`);
+  await admin.end();
+  const ownFiles = join(tmpdir(), `msr-e2e-files-${database.slice("msr_e2e_".length)}`);
+  if (process.env.E2E_FILE_STORAGE_ROOT === ownFiles)
+    await rm(ownFiles, { recursive: true, force: true });
+}

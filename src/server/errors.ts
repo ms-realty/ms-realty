@@ -137,6 +137,24 @@ const definitions = {
     retryable: false,
     outcome: "not_applied",
   },
+  invitation_expired: {
+    status: 410,
+    message: "This invitation has expired. Ask the person who invited you for a new one.",
+    retryable: false,
+    outcome: "not_applied",
+  },
+  invitation_used: {
+    status: 410,
+    message: "This invitation was already answered.",
+    retryable: false,
+    outcome: "not_applied",
+  },
+  invitation_revoked: {
+    status: 410,
+    message: "This invitation is no longer valid. A newer one may have replaced it.",
+    retryable: false,
+    outcome: "not_applied",
+  },
   passkey_failed: {
     status: 400,
     message: "We could not verify this passkey. Try again or use an email link.",

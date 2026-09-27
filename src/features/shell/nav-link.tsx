@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { cx } from "@/ui";
+import { cx } from "@/ui/cx";
 
 /** A navigation link that marks itself as the current page. */
 export function NavLink({

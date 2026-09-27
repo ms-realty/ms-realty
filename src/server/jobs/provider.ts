@@ -1,5 +1,5 @@
-// The seam between the outbox and a real delivery provider (email, SMS, messengers). No real
-// provider is wired yet; the test provider records what it was asked to send.
+// The seam between the outbox and delivery providers. Resend is selected explicitly by the
+// standalone worker; the test provider records local requests without external effects.
 import "server-only";
 import type { MessageChannel } from "@/domain/message";
 

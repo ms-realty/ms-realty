@@ -15,7 +15,9 @@ export interface CookieOptions {
 }
 
 export function sessionCookieName(env: ServerEnv, context: PrivateHostContext): string {
-  return env.production ? `__Host-msr_${context}_session` : `msr_${context}_session`;
+  return env.hosts[context].startsWith("https://")
+    ? `__Host-msr_${context}_session`
+    : `msr_${context}_session`;
 }
 
 export function sessionCookieOptions(
@@ -26,7 +28,7 @@ export function sessionCookieOptions(
   return {
     httpOnly: true,
     // Plain-http local development cannot hold a Secure cookie in every browser.
-    secure: env.production || env.hosts[context].startsWith("https://"),
+    secure: env.hosts[context].startsWith("https://"),
     sameSite: "lax",
     path: "/",
     expires,

@@ -5,14 +5,19 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
-export const migrationsFolder = fileURLToPath(new URL("../../db/migrations", import.meta.url));
+export const migrationsFolder =
+  process.env.MIGRATIONS_FOLDER ?? fileURLToPath(new URL("../../db/migrations", import.meta.url));
 
 export async function runMigrations(url: string): Promise<void> {
   // A single connection: the migrator applies pending migrations in one transaction.
   const client = postgres(url, { max: 1, onnotice: () => {} });
   try {
+    // One migrator per database, including concurrently restarted deployment jobs. This
+    // session lock spans the migration transaction and is released if the process dies.
+    await client`select pg_advisory_lock(1297306181)`;
     await migrate(drizzle(client), { migrationsFolder });
   } finally {
+    await client`select pg_advisory_unlock(1297306181)`.catch(() => {});
     await client.end();
   }
 }

@@ -1,11 +1,7 @@
-"use client";
-
 import { type ReactNode, useId } from "react";
-import { ToggleButton } from "react-aria-components";
 import { cx } from "./cx";
-import { AreaIcon, BedIcon, BuildingIcon, CheckIcon, NoPhotoIcon, SaveIcon } from "./icons";
-import { Link } from "./link";
-import { VisuallyHidden } from "./visually-hidden";
+import { AreaIcon, BedIcon, BuildingIcon, NoPhotoIcon } from "./icons";
+import { CardCompareControl, CardSaveControl } from "./property-card-actions";
 
 /** A key fact on the card. `unknown` renders muted so an unconfirmed value never reads as known. */
 export type CardFact =
@@ -73,14 +69,14 @@ export function PropertyCard({
       aria-labelledby={titleId}
       data-compared={isCompared || undefined}
       className={cx(
-        "group relative flex flex-col overflow-hidden rounded-card border border-divider bg-surface shadow-raised",
+        "group relative flex flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised",
         "transition-[box-shadow,border-color] duration-(--duration-base) ease-(--ease-out)",
-        "has-[a:hover]:shadow-hover",
+        "has-[a:hover]:border-border",
         "data-compared:border-action data-compared:ring-1 data-compared:ring-action",
         "has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-focus",
       )}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-subtle [&_img]:size-full [&_img]:object-cover [&_img]:transition-transform [&_img]:duration-(--duration-slow) [&_img]:ease-(--ease-out) group-has-[a:hover]:[&_img]:scale-[1.02]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-subtle [&_img]:size-full [&_img]:object-cover [&_img]:transition-transform [&_img]:duration-(--duration-base) [&_img]:ease-(--ease-out) group-has-[a:hover]:[&_img]:scale-[1.02]">
         {image ?? (
           <div className="flex size-full flex-col items-center justify-center gap-2 text-caption text-text-muted">
             <NoPhotoIcon className="size-8" />
@@ -88,35 +84,26 @@ export function PropertyCard({
           </div>
         )}
         {availability ? (
-          <div className="absolute start-3 top-3 rounded-md bg-surface/95 shadow-raised">
+          <div className="absolute start-3 top-3 rounded-control bg-surface/95 shadow-raised">
             {availability}
           </div>
         ) : null}
       </div>
-      <ToggleButton
-        isSelected={isSaved}
+      <CardSaveControl
+        title={title}
+        label={saveLabel}
+        selected={isSaved}
         onChange={onSavedChange}
-        className={cx(
-          "absolute end-3 top-3 z-10 inline-flex size-11 cursor-pointer items-center justify-center rounded-full bg-surface text-text shadow-raised",
-          "data-hovered:text-action data-selected:text-action",
-          "forced-colors:border forced-colors:border-[ButtonText]",
-        )}
-      >
-        <SaveIcon className={isSaved ? "fill-current" : undefined} />
-        <VisuallyHidden>
-          {saveLabel}: {title}
-        </VisuallyHidden>
-      </ToggleButton>
+      />
       <div className="flex flex-1 flex-col gap-1.5 px-5 pt-4 pb-4">
         {price}
         <Heading id={titleId} className="text-compact font-semibold text-text">
-          <Link
+          <a
             href={href}
-            variant="plain"
-            className="text-text outline-none after:absolute after:inset-0 after:content-[''] data-hovered:underline"
+            className="text-text outline-none after:absolute after:inset-0 after:content-[''] hover:underline"
           >
             {title}
-          </Link>
+          </a>
         </Heading>
         <p className="text-caption text-text-muted">{locality}</p>
         {facts.length > 0 ? (
@@ -145,7 +132,7 @@ export function PropertyCard({
             {highlights.map((highlight) => (
               <li
                 key={highlight}
-                className="rounded-md bg-subtle px-2 py-0.5 text-caption text-text"
+                className="rounded-control bg-subtle px-2 py-0.5 text-caption text-text"
               >
                 {highlight}
               </li>
@@ -155,23 +142,12 @@ export function PropertyCard({
       </div>
       <div className="relative flex items-center gap-2 border-t border-divider ps-5 pe-2 py-1">
         <p className="me-auto min-w-0 text-caption text-text-muted">{meta}</p>
-        <ToggleButton
-          isSelected={isCompared}
+        <CardCompareControl
+          title={title}
+          label={compareLabel}
+          selected={isCompared}
           onChange={onComparedChange}
-          className={cx(
-            "group/compare inline-flex min-h-control cursor-pointer items-center gap-2 rounded-control px-2 text-caption font-medium text-text",
-            "data-hovered:bg-subtle data-selected:text-action",
-          )}
-        >
-          <span
-            aria-hidden="true"
-            className="inline-flex size-[1.125rem] items-center justify-center rounded-[4px] border-[1.5px] border-border bg-surface text-text-inverse group-data-selected/compare:border-action group-data-selected/compare:bg-action"
-          >
-            {isCompared ? <CheckIcon className="size-3.5" /> : null}
-          </span>
-          {compareLabel}
-          <VisuallyHidden>: {title}</VisuallyHidden>
-        </ToggleButton>
+        />
       </div>
     </article>
   );

@@ -39,7 +39,7 @@ import {
 import { principals } from "./identity";
 import { listingRevisions, listings, properties } from "./inventory";
 import { parties } from "./parties";
-import { externalActions } from "./records";
+import { externalActions, operations } from "./records";
 import { cases, inquiries, interests } from "./work";
 
 export const appointments = pgTable(
@@ -212,6 +212,43 @@ export const proposalRevisions = pgTable(
   ],
 );
 
+/** Append-only decisions by the exact parties of one proposal revision (AT34). */
+export const proposalResponses = pgTable(
+  "proposal_responses",
+  {
+    id: id(),
+    createdAt: createdAt(),
+    revisionId: uuid("revision_id")
+      .notNull()
+      .references(() => proposalRevisions.id),
+    partyId: uuid("party_id")
+      .notNull()
+      .references(() => parties.id),
+    actorKind: actorKindEnum("actor_kind").notNull(),
+    actorId: text("actor_id").notNull(),
+    decision: text("decision").$type<"agree" | "decline" | "counter">().notNull(),
+    reason: text("reason").notNull(),
+    /** Digest of every exact term, party snapshot and listing source at response time. */
+    termsHash: text("terms_hash").notNull(),
+    operationId: uuid("operation_id")
+      .notNull()
+      .references(() => operations.id),
+    evidenceDocumentVersionId: uuid("evidence_document_version_id").references(
+      (): AnyPgColumn => documentVersions.id,
+    ),
+  },
+  (t) => [
+    uniqueIndex("proposal_responses_party_revision_idx").on(t.revisionId, t.partyId),
+    check("proposal_responses_human", sql`${t.actorKind} in ('staff', 'client')`),
+    check("proposal_responses_decision", sql`${t.decision} in ('agree', 'decline', 'counter')`),
+    check("proposal_responses_exact_terms", sql`${t.termsHash} ~ '^[a-f0-9]{64}$'`),
+    check(
+      "proposal_responses_staff_evidence",
+      sql`${t.actorKind} <> 'staff' or ${t.evidenceDocumentVersionId} is not null`,
+    ),
+  ],
+);
+
 /** One logical message with an explicit audience; delivery attempts are separate rows. */
 export const messages = pgTable(
   "messages",
@@ -318,6 +355,8 @@ export const documentVersions = pgTable(
     uploadedById: text("uploaded_by_id").notNull(),
     scan: scanStateEnum("scan").notNull().default("pending"),
     scannedAt: instant("scanned_at"),
+    scannerVersion: text("scanner_version"),
+    scannedSha256: text("scanned_sha256"),
     reviewType: documentReviewTypeEnum("review_type"),
     reviewedById: uuid("reviewed_by_id").references(() => principals.id),
     reviewedAt: instant("reviewed_at"),

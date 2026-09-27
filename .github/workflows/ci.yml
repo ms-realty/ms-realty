@@ -38,8 +38,20 @@ jobs:
       # Under CI, playwright.config.ts starts the server without building;
       # `make check` has just built it.
       extra-commands: |
-        npx playwright install --with-deps chromium
-        make e2e
+        npx playwright install --with-deps chromium webkit
+        npm run tokens:check
+        npm run openapi:generate
+        npm run release:schemas
+        git diff --exit-code -- docs/api/openapi.json release/schemas
+        docker run -d --name ci-clamav --memory=6g --memory-swap=6g -e TZ=UTC -p 127.0.0.1:53317:3310 clamav/clamav@sha256:0e31ce089574268aefa0b543767d66b70240ab51ed49eec53e07f18d5629d817
+        export CLAMAV_HOST=127.0.0.1 CLAMAV_PORT=53317 REAL_CLAMAV_PORT=53317 E2E_REAL_SCAN=1
+        node --conditions=react-server --import tsx scripts/wait-clamav.ts
+        npm run test:integration -- src/server/files/workflow.int.test.ts
+        npm run e2e
+        docker stop ci-clamav
+        bash scripts/visual-docker.sh check
+        docker build --build-arg BUILD_SHA="$GITHUB_SHA" -t msr-delivery:ci .
+        node scripts/container-smoke.mjs msr-delivery:ci
 
   # Branch protection on main still requires a check named "npm run check".
   # This job reports ci's result under that name so merges keep working.

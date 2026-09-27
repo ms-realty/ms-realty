@@ -1,0 +1,135 @@
+"use client";
+import { controlClass, fieldClass } from "@/ui/field-class";
+import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
+import { ActionForm } from "@/ui/form/form";
+import { FormField } from "@/ui/form/form-field";
+import { workCopy } from "../work/copy";
+export type WorkflowField = {
+  name: string;
+  label: string;
+  type?: "textarea" | "text" | "datetime-local" | "number" | "checkbox" | "select" | "hidden";
+  hint?: string;
+  required?: boolean;
+  options?: { value: string; label: string }[];
+};
+export function WorkflowForm({
+  locale,
+  initialState,
+  fields,
+  action,
+  path,
+  status,
+  submit,
+}: {
+  locale: string;
+  initialState: FormState<FormValues>;
+  fields: WorkflowField[];
+  action: FormAction<FormValues>;
+  path: string;
+  status: { href: string; label: string };
+  submit: string;
+}) {
+  return (
+    <ActionForm
+      action={action}
+      initialState={initialState}
+      permalink={path}
+      reconciliation={status}
+      copy={workCopy(locale).form}
+      labels={Object.fromEntries(fields.map((field) => [field.name, field.label]))}
+      submitLabel={submit}
+    >
+      {(form) => (
+        <>
+          {fields.map((definition) => {
+            const field = form.field(definition.name);
+            if (definition.type === "hidden")
+              return <input key={field.name} type="hidden" name={field.name} value={field.value} />;
+            const errorId = field.error ? `${field.id}-error` : undefined;
+            const hintId = definition.hint ? `${field.id}-hint` : undefined;
+            const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
+            if (definition.type === "select")
+              return (
+                <div key={field.name} className={fieldClass}>
+                  <label htmlFor={field.id} className="font-semibold">
+                    {definition.label}
+                  </label>
+                  <select
+                    id={field.id}
+                    name={field.name}
+                    value={field.value}
+                    disabled={field.readOnly}
+                    onChange={(e) => form.setValue(field.name, e.target.value)}
+                    className={controlClass}
+                    aria-invalid={Boolean(field.error) || undefined}
+                    aria-describedby={describedBy}
+                    required={definition.required}
+                  >
+                    {definition.options?.map((option) => (
+                      <option value={option.value} key={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {definition.hint ? <p id={hintId}>{definition.hint}</p> : null}
+                  {field.error ? (
+                    <p id={errorId} className="text-error">
+                      {field.error}
+                    </p>
+                  ) : null}
+                </div>
+              );
+            if (definition.type === "checkbox")
+              return (
+                <div key={field.name} className={fieldClass}>
+                  <label htmlFor={field.id} className="flex items-start gap-3">
+                    <input
+                      id={field.id}
+                      name={field.name}
+                      type="checkbox"
+                      value="true"
+                      checked={field.value === "true"}
+                      disabled={field.readOnly}
+                      onChange={(e) => form.setValue(field.name, e.target.checked ? "true" : "")}
+                      className="mt-1 size-5 shrink-0"
+                      aria-invalid={Boolean(field.error) || undefined}
+                      aria-describedby={describedBy}
+                      required={definition.required}
+                    />
+                    {definition.label}
+                  </label>
+                  {definition.hint ? <p id={hintId}>{definition.hint}</p> : null}
+                  {field.error ? (
+                    <p id={errorId} className="text-error">
+                      {field.error}
+                    </p>
+                  ) : null}
+                </div>
+              );
+            return definition.type === "textarea" ? (
+              <FormField
+                key={field.name}
+                {...field}
+                label={definition.label}
+                hint={definition.hint}
+                required={definition.required}
+                multiline
+                maxLength={6000}
+              />
+            ) : (
+              <FormField
+                key={field.name}
+                {...field}
+                label={definition.label}
+                hint={definition.hint}
+                required={definition.required}
+                type={definition.type ?? "text"}
+                maxLength={6000}
+              />
+            );
+          })}
+        </>
+      )}
+    </ActionForm>
+  );
+}

@@ -14,10 +14,13 @@ export function canonicalOrigin(env: Record<string, string | undefined> = proces
   }
 }
 
-/** Host a request was addressed to, as seen before any proxy in front of the app. */
+/**
+ * The addressed host. Forwarded headers are client-controlled unless authenticated by the
+ * gateway, so they cannot choose an identity context or make an origin indexable. The
+ * deployment gateway must preserve Host after checking its allowlist.
+ */
 export function requestHost(headers: Pick<Headers, "get">): string | null {
-  const forwarded = headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-  return forwarded || headers.get("host");
+  return headers.get("host");
 }
 
 export function isCanonicalHost(host: string | null, origin: URL | null): boolean {

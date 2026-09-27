@@ -7,7 +7,7 @@ export function TaskList({ label, children }: { label: string; children: ReactNo
   return (
     <ul
       aria-label={label}
-      className="flex flex-col divide-y divide-divider rounded-card border border-divider bg-surface"
+      className="flex flex-col divide-y divide-divider rounded-panel border border-divider bg-surface"
     >
       {children}
     </ul>
@@ -91,7 +91,7 @@ export function TaskRow({
           <span
             aria-hidden="true"
             className={cx(
-              "inline-flex size-8 shrink-0 items-center justify-center rounded-lg",
+              "inline-flex size-8 shrink-0 items-center justify-center rounded-control",
               severityTile[severity],
             )}
           >

@@ -43,6 +43,25 @@ describe("submission keys", () => {
 });
 
 describe("receipt session cookie", () => {
+  it.each([false, true])(
+    "uses the served protocol, including production=%s loopback",
+    (production) => {
+      const env = getEnv();
+      const local = receiptSetCookie(
+        { ...env, production, hosts: { ...env.hosts, public: "http://localhost:3100" } },
+        "a".repeat(43),
+      );
+      expect(local).toMatch(/^msr_receipt=/);
+      expect(local).not.toContain("Secure");
+      const https = receiptSetCookie(
+        { ...env, production, hosts: { ...env.hosts, public: "https://makler-realty.com" } },
+        "a".repeat(43),
+      );
+      expect(https).toMatch(/^__Host-msr_receipt=/);
+      expect(https).toContain("; Secure");
+    },
+  );
+
   it("is host-only, HttpOnly and SameSite=Lax, and never names a Domain", () => {
     const cookie = receiptSetCookie(getEnv(), "a".repeat(43), new Date("2026-09-27T00:00:00Z"));
     expect(cookie).toMatch(/^msr_receipt=a{43}; Path=\/; Expires=/);

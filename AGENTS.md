@@ -8,10 +8,17 @@ names and PRs.
 
 ## Launch boundary
 
+- `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`
+  remain the current launch authority. They are preserved verbatim from the primary
+  checkout; their historical pass entries are not fresh evidence for this rebuild.
+  R00 must explicitly approve the successor mapping before legacy runtime obligations
+  can be replaced. A green local test or CI run does not grant this approval.
 - The release gates are R00–R12 in `docs/architecture.md` §20.3. Do not call the system
   production-ready, and do not deploy, while any gate is not passed with exact-release
   evidence. Merges to `main` never deploy.
 - Real launch evidence comes from live services and operator inputs, not local fixtures.
+- Search Console, Yandex Webmaster and backlink exports are optional historical analytics at
+  every lifecycle stage (owner decision, 2026-09-24). URL/crawl parity remains required.
 - Preserve crawl parity for `makler-realty.com` and `makler-realty.ru`. Legacy URL mappings
   must rest on recorded evidence (`data/legacy/url-decisions.json`); never invent homepage or
   search-page redirect assumptions.

@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "Агентство недвижимости",
+  "homeHeading": "MS Realty",
+  "homeIntro": "Покупка, аренда, продажа и сдача недвижимости вместе с командой MS Realty.",
+  "clientAccessHeading": "Вход в «Мой путь»",
+  "staffAccessHeading": "Вход для сотрудников",
+  "languageSuggestion": {
+    "label": "Предложение языка",
+    "message": "Эта страница доступна и на русском языке.",
+    "switch": "Продолжить на русском",
+    "dismiss": "Скрыть предложение"
+  }
+}

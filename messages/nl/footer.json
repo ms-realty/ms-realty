@@ -1,0 +1,11 @@
+{
+  "label": "Informatie over het kantoor",
+  "agencyName": "MS Realty",
+  "agencyKind": "Vastgoedkantoor",
+  "callLabel": "Bel ons",
+  "call": "Bel {phone}",
+  "help": "Hulp",
+  "privacy": "Privacy",
+  "accessibility": "Toegankelijkheid",
+  "copyright": "© {year} MS Realty"
+}
