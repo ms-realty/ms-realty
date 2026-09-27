@@ -41,6 +41,8 @@ export async function readCase(db: Executor, session: Session, id: string) {
   const { row, live, resource } = await caseFor(db, session, id);
   const staff = live.account.kind === "staff";
   const internal = staff && (await can(db, live.actor, "case.read_internal", resource));
+  const active = row.disposition === "active";
+  const canTransition = staff && (await can(db, live.actor, "case.transition", resource));
   const [owner] = row.ownerId
     ? await db
         .select({ name: principals.displayName })
@@ -80,12 +82,14 @@ export async function readCase(db: Executor, session: Session, id: string) {
   const permittedInterests = await Promise.all(
     interestRows.map(async (interest) => ({
       ...interest,
-      canRespond: await can(db, live.actor, staff ? "interest.manage" : "portal.interest.respond", {
-        type: "interest",
-        id: interest.id,
-        caseId: id,
-        audience: "case_participants",
-      }),
+      canRespond:
+        active &&
+        (await can(db, live.actor, staff ? "interest.manage" : "portal.interest.respond", {
+          type: "interest",
+          id: interest.id,
+          caseId: id,
+          audience: "case_participants",
+        })),
     })),
   );
   const participants = staff
@@ -139,21 +143,31 @@ export async function readCase(db: Executor, session: Session, id: string) {
       stage: row.stage,
       disposition: row.disposition,
       ownerName: owner?.name ?? null,
-      nextAction: internal ? row.nextAction : row.clientSummary,
-      dueAt: internal || row.clientSummary ? row.nextActionDueAt : null,
-      clientSummary: row.clientSummary,
-      ...(internal ? { waitingOn: row.waitingOn, reviewAt: row.reviewAt } : {}),
+      nextAction: active ? (internal ? row.nextAction : row.clientSummary) : null,
+      dueAt: active && (internal || row.clientSummary) ? row.nextActionDueAt : null,
+      clientSummary: active ? row.clientSummary : null,
+      ...(internal
+        ? {
+            dispositionReason: active ? null : row.dispositionReason,
+            closureOutcome: row.disposition === "closed" ? row.closureOutcome : null,
+            waitingOn: row.disposition === "closed" ? null : row.waitingOn,
+            reviewAt: row.disposition === "closed" ? null : row.reviewAt,
+          }
+        : {}),
     },
     brief,
     interests: permittedInterests,
     participants,
-    canManage: staff && (await can(db, live.actor, "case.transition", resource)),
-    canAcknowledge: !staff && (await can(db, live.actor, "portal.brief.acknowledge", resource)),
-    canRequestProposal: !staff && (await can(db, live.actor, "portal.proposal.respond", resource)),
-    canPropose: staff && (await can(db, live.actor, "proposal.manage", resource)),
+    canManage: active && canTransition,
+    canManageContinuity: internal && canTransition,
+    canAcknowledge:
+      active && !staff && (await can(db, live.actor, "portal.brief.acknowledge", resource)),
+    canRequestProposal:
+      active && !staff && (await can(db, live.actor, "portal.proposal.respond", resource)),
+    canPropose: active && staff && (await can(db, live.actor, "proposal.manage", resource)),
     canReviewProcess: staff && (await can(db, live.actor, "compliance.review", resource)),
-    canManageNext: internal && (await can(db, live.actor, "case.transition", resource)),
-    canAddInterest: staff && (await can(db, live.actor, "interest.manage", resource)),
+    canManageNext: active && internal && canTransition,
+    canAddInterest: active && staff && (await can(db, live.actor, "interest.manage", resource)),
     canPost: await can(
       db,
       live.actor,
@@ -161,12 +175,14 @@ export async function readCase(db: Executor, session: Session, id: string) {
       resource,
     ),
     canNote: internal && (await can(db, live.actor, "message.draft", resource)),
-    canRequest: await can(
-      db,
-      live.actor,
-      staff ? "appointment.manage" : "portal.appointment.request",
-      resource,
-    ),
+    canRequest:
+      active &&
+      (await can(
+        db,
+        live.actor,
+        staff ? "appointment.manage" : "portal.appointment.request",
+        resource,
+      )),
   };
 }
 

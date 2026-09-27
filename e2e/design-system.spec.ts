@@ -83,11 +83,15 @@ for (const { locale, dir, heading, primary, skip } of locales) {
 
     test(`shows keyboard focus and keeps primary controls at 44 px in ${locale}`, async ({
       page,
+      browserName,
     }) => {
       await openSpecimen(page, locale);
 
-      // The first Tab reaches the skip link, which becomes visible.
-      await page.keyboard.press("Tab");
+      // macOS WebKit includes links in keyboard traversal with Option+Tab; plain
+      // Tab follows Safari's default form-controls mode. This is native traversal.
+      await page.keyboard.press(
+        browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab",
+      );
       const skipLink = page.getByRole("link", { name: skip, exact: true });
       await expect(skipLink).toBeFocused();
       await expect(skipLink).toBeInViewport();

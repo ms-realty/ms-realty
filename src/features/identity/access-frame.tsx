@@ -1,9 +1,12 @@
 // L05 access layout: one task, one heading, nothing private around it. The staff host uses it
 // on its own (outside the workspace shell); the client host inside the journey shell.
 import Image from "next/image";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { LocaleSwitcher } from "@/features/shell/language-switcher";
+import { isStaffLocale, staffLocales } from "@/i18n/config";
 
-export function AccessFrame({
+export async function AccessFrame({
   title,
   lead,
   standalone = false,
@@ -16,10 +19,22 @@ export function AccessFrame({
   children?: ReactNode;
 }) {
   const Root = standalone ? "main" : "div";
+  const locale = standalone ? await getLocale() : null;
+  const workspace = standalone ? await getTranslations("workspace") : null;
   return (
     <Root className="mx-auto flex w-full max-w-prose flex-col gap-6 px-gutter py-12 lg:px-gutter-wide">
       {standalone ? (
-        <Image src="/brand/logo-ms-realty.png" alt="MS Realty" width={86} height={44} priority />
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Image src="/brand/logo-ms-realty.png" alt="MS Realty" width={86} height={44} priority />
+          {locale && isStaffLocale(locale) && workspace ? (
+            <LocaleSwitcher
+              locale={locale}
+              locales={staffLocales}
+              label={workspace("interfaceLanguage")}
+              align="end"
+            />
+          ) : null}
+        </div>
       ) : null}
       <div className="flex flex-col gap-3">
         <h1 className="text-title font-semibold">{title}</h1>

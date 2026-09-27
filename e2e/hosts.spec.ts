@@ -6,7 +6,7 @@ import { hostUrl, origins } from "./hosts";
 
 test.describe("each host serves its own routes (§11.1)", () => {
   for (const { context, path, heading } of [
-    { context: "public", path: "/bg", heading: "MS Realty" },
+    { context: "public", path: "/bg", heading: "Имоти" },
     { context: "client", path: "/bg/access", heading: "Вашият клиентски профил в MS Realty" },
     { context: "staff", path: "/bg/access", heading: "Вход за служители" },
     { context: "staff", path: "/en/access", heading: "Staff sign-in" },
@@ -61,11 +61,11 @@ test.describe("cross-host isolation (§11.1, §8.1)", () => {
     }) => {
       for (const { owner, path } of routes) {
         if (owner === context) continue;
-        const response = await page.goto(hostUrl(context, path));
+        const response = await page.goto(hostUrl(context, path), { waitUntil: "domcontentloaded" });
         expect(response?.status(), `${context} ${path}`).toBe(404);
       }
       for (const path of ["/public/bg", "/client/bg/access", "/staff/bg/today", "/_not-found"]) {
-        const response = await page.goto(hostUrl(context, path));
+        const response = await page.goto(hostUrl(context, path), { waitUntil: "domcontentloaded" });
         expect(response?.status(), `${context} ${path}`).toBe(404);
       }
     });
@@ -151,7 +151,13 @@ test.describe("unknown query parameters never error (§03.3)", () => {
     test(`${context} ${path} keeps working with unknown parameters`, async ({ page }) => {
       const response = await page.goto(hostUrl(context, `${path}${query}`));
       expect(response?.status()).toBe(200);
-      expect(new URL(page.url()).searchParams.get("unknown")).toBe("1");
+      // Canonical locale redirects preserve query context. A private-home sign-in
+      // boundary deliberately drops untrusted query payloads before showing access.
+      if (context === "client" && path === "/") {
+        expect(new URL(page.url()).pathname).toMatch(/^\/[a-z]{2}\/access$/);
+      } else {
+        expect(new URL(page.url()).searchParams.get("unknown")).toBe("1");
+      }
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
   }

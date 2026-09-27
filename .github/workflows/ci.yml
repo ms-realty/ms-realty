@@ -43,12 +43,8 @@ jobs:
         npm run openapi:generate
         npm run release:schemas
         git diff --exit-code -- docs/api/openapi.json release/schemas
-        docker run -d --name ci-clamav --memory=6g --memory-swap=6g -e TZ=UTC -p 127.0.0.1:53317:3310 clamav/clamav@sha256:0e31ce089574268aefa0b543767d66b70240ab51ed49eec53e07f18d5629d817
-        export CLAMAV_HOST=127.0.0.1 CLAMAV_PORT=53317 REAL_CLAMAV_PORT=53317 E2E_REAL_SCAN=1
-        node --conditions=react-server --import tsx scripts/wait-clamav.ts
-        npm run test:integration -- src/server/files/workflow.int.test.ts
-        npm run e2e
-        docker stop ci-clamav
+        node --test scripts/ci-clamav.test.mjs
+        node scripts/ci-clamav.mjs bash -euo pipefail -c 'npm run test:integration -- src/server/files/workflow.int.test.ts; npm run e2e'
         bash scripts/visual-docker.sh check
         docker build --build-arg BUILD_SHA="$GITHUB_SHA" -t msr-delivery:ci .
         node scripts/container-smoke.mjs msr-delivery:ci

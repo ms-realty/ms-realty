@@ -17,7 +17,7 @@ import { createListingFixture, publishForTest } from "../publication/testing";
 import { nextReference } from "../references";
 import { createClient } from "../testing";
 import { changeTask } from "../work/commands";
-import { addInterest, reviseBrief } from "./commands";
+import { addInterest, reviseBrief, updateNextAction } from "./commands";
 import {
   acknowledgeBrief,
   caseWorkSnapshot,
@@ -25,6 +25,7 @@ import {
   handoverCase,
   transitionCaseStage,
 } from "./lifecycle";
+import { readCase } from "./queries";
 import { caseFixture, staffFixture } from "./testing";
 
 let t: TestDatabase;
@@ -271,13 +272,55 @@ describe("accountable Case lifecycle", () => {
   });
   it("pause preserves commitments; closure requires individual outcomes; reopening preserves immutable closeout history", async () => {
     const f = await caseFixture(t.db);
-    await changeCaseDisposition(t.db, f.staff.session, {
+    const oldDueAt = new Date(Date.now() + 3600000).toISOString();
+    const reviewAt = new Date(Date.now() + 86400000).toISOString();
+    await updateNextAction(t.db, f.staff.session, {
       ...command(f.record.id, 1),
+      nextAction: "Review the client's previous requirements",
+      dueAt: oldDueAt,
+      clientSummary: "Review the previously suggested property",
+    });
+    await changeCaseDisposition(t.db, f.staff.session, {
+      ...command(f.record.id, 2),
       ...disposition,
       state: "paused",
       waitingOn: "Client availability",
-      reviewAt: new Date(Date.now() + 86400000).toISOString(),
+      reviewAt,
     });
+    const paused = await readCase(t.db, f.staff.session, f.record.id);
+    expect(paused).toMatchObject({
+      canManage: false,
+      canManageNext: false,
+      canManageContinuity: true,
+      canAddInterest: false,
+      canRequest: false,
+      canPropose: false,
+      record: {
+        disposition: "paused",
+        nextAction: null,
+        dueAt: null,
+        clientSummary: null,
+        dispositionReason: disposition.reason,
+        waitingOn: "Client availability",
+        reviewAt: new Date(reviewAt),
+        closureOutcome: null,
+      },
+    });
+    const pausedClient = await readCase(t.db, f.client.session, f.record.id);
+    expect(pausedClient).toMatchObject({
+      canAcknowledge: false,
+      canRequestProposal: false,
+      record: { nextAction: null, dueAt: null, clientSummary: null },
+    });
+    expect(pausedClient.record).not.toHaveProperty("dispositionReason");
+    expect(pausedClient.record).not.toHaveProperty("waitingOn");
+    await expect(
+      reviseBrief(t.db, f.staff.session, {
+        ...command(f.record.id, 3),
+        requirements: "An inactive case cannot revise requirements",
+        preferences: "",
+      }),
+    ).rejects.toMatchObject({ code: "transition_denied" });
     const task = (await caseWorkSnapshot(t.db, f.record.id)).commitments[0];
     if (!task) throw new Error("Pause dropped the task");
     const closing = {
@@ -288,20 +331,44 @@ describe("accountable Case lifecycle", () => {
       aftercare: "No remaining agency obligations",
     };
     await expect(
-      changeCaseDisposition(t.db, f.staff.session, { ...command(f.record.id, 2), ...closing }),
+      changeCaseDisposition(t.db, f.staff.session, { ...command(f.record.id, 3), ...closing }),
     ).rejects.toMatchObject({ code: "transition_denied" });
     await changeTask(t.db, f.staff.session, {
       ...command(task.id, task.version),
       state: "cancelled",
       note: "Client withdrew the intake request",
     });
-    await changeCaseDisposition(t.db, f.staff.session, { ...command(f.record.id, 2), ...closing });
+    await changeCaseDisposition(t.db, f.staff.session, { ...command(f.record.id, 3), ...closing });
     const [closed] = await t.db.select().from(cases).where(eq(cases.id, f.record.id));
     expect(closed?.commitmentDispositions).toEqual({
       [task.id]: "cancelled: Client withdrew the intake request",
     });
+    expect(await readCase(t.db, f.staff.session, f.record.id)).toMatchObject({
+      canManage: false,
+      canManageNext: false,
+      canManageContinuity: true,
+      record: {
+        disposition: "closed",
+        nextAction: null,
+        dueAt: null,
+        closureOutcome: closing.outcome,
+        waitingOn: null,
+        reviewAt: null,
+      },
+    });
+    const closedClient = await readCase(t.db, f.client.session, f.record.id);
+    expect(closedClient.record).toMatchObject({ nextAction: null, dueAt: null });
+    expect(closedClient.record).not.toHaveProperty("closureOutcome");
+    await expect(
+      updateNextAction(t.db, f.staff.session, {
+        ...command(f.record.id, 4),
+        nextAction: "An inactive case cannot set a next action",
+        dueAt: reviewAt,
+        clientSummary: "",
+      }),
+    ).rejects.toMatchObject({ code: "transition_denied" });
     await changeCaseDisposition(t.db, f.staff.session, {
-      ...command(f.record.id, 3),
+      ...command(f.record.id, 4),
       ...disposition,
       state: "active",
       reason: "Client explicitly asked to resume",
@@ -319,6 +386,16 @@ describe("accountable Case lifecycle", () => {
       disposition: "active",
       stage: "needs_agreed",
       nextAction: "Review changed requirements",
+    });
+    expect(await readCase(t.db, f.staff.session, f.record.id)).toMatchObject({
+      canManage: true,
+      canManageNext: true,
+      canManageContinuity: true,
+      record: {
+        nextAction: "Review changed requirements",
+        dispositionReason: null,
+        closureOutcome: null,
+      },
     });
   });
   it("does not treat an outcome note as completion evidence", async () => {

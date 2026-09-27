@@ -5,6 +5,14 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { operations } from "@/db/schema";
 import { inventoryCopy } from "@/features/inventory/copy";
+import {
+  type InventoryDecisionContext,
+  type InventoryDecisionValues,
+  inventoryDecisionIntents,
+  inventoryDecisionSection,
+} from "@/features/inventory/decision-contract";
+import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
+import { inventoryDecisionFeedback } from "@/features/inventory/decision-feedback";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess } from "@/server/auth/pages";
@@ -169,7 +177,7 @@ export async function saveInventory(
   };
 }
 
-export async function inventoryDecision(form: FormData): Promise<void> {
+async function runInventoryDecision(form: FormData, preserveDraft = false) {
   const locale = String(form.get("locale") ?? "");
   if (!isStaffLocale(locale)) throw new AppError("not_found");
   const reference = String(form.get("reference") ?? "");
@@ -189,6 +197,19 @@ export async function inventoryDecision(form: FormData): Promise<void> {
       };
       if (!/^[0-9a-f-]{36}$/.test(key) || !Number.isSafeInteger(common.expectedRevision))
         throw new AppError("validation_failed");
+      // Input validation happens before a durable command starts, so a corrected draft may
+      // retain this operation key. A recorded rejection must be reviewed as a new decision.
+      if (preserveDraft && intent !== "freeze") {
+        const fieldErrors: Record<string, string[]> = {};
+        const note = String(form.get("scope") ?? "").trim();
+        if (note.length < 5 || note.length > 1000) fieldErrors.scope = ["review_note_required"];
+        if (form.get("confirmed") !== "yes")
+          fieldErrors.confirmed = ["review_confirmation_required"];
+        if (intent === "prepare" && !isPublicLocale(String(form.get("publicationLocale"))))
+          fieldErrors.publicationLocale = ["supported_locale_required"];
+        if (Object.keys(fieldErrors).length)
+          throw new AppError("validation_failed", { fieldErrors });
+      }
       if (intent === "freeze") return freezeListingDraft(db, common);
       if (form.get("confirmed") !== "yes") throw new AppError("validation_failed");
       if (intent === "availability")
@@ -256,9 +277,7 @@ export async function inventoryDecision(form: FormData): Promise<void> {
           ) {
             throw new AppError("publication_ineligible", {
               fieldErrors: {
-                publication: [
-                  "Restrict the existing publication before approving a changed factual revision.",
-                ],
+                publication: ["restrict_affected_publications_first"],
               },
             });
           }
@@ -294,6 +313,15 @@ export async function inventoryDecision(form: FormData): Promise<void> {
     },
     { requireSession: true },
   );
+  return result;
+}
+
+/** Legacy evidence forms retain their native adapter; workbench decisions use typed state. */
+export async function inventoryDecision(form: FormData): Promise<void> {
+  const locale = String(form.get("locale") ?? ""),
+    reference = String(form.get("reference") ?? ""),
+    key = String(form.get("operationId") ?? "");
+  const result = await runInventoryDecision(form);
   if (!result.ok) {
     if (result.error.code === "STEP_UP_REQUIRED")
       redirect(
@@ -302,4 +330,88 @@ export async function inventoryDecision(form: FormData): Promise<void> {
     redirect(`/${locale}/inventory/${reference}?error=${encodeURIComponent(result.error.code)}`);
   }
   redirect(`/${locale}/inventory/operations/${key}?reference=${encodeURIComponent(reference)}`);
+}
+
+/** O12/O16: progressive enhancement preserves one draft and command identity per decision. */
+export async function submitInventoryDecision(
+  context: InventoryDecisionContext,
+  _previous: FormState<InventoryDecisionValues>,
+  form: FormData,
+): Promise<FormState<InventoryDecisionValues>> {
+  if (!isStaffLocale(context.locale) || !inventoryDecisionIntents.includes(context.intent))
+    throw new AppError("not_found");
+  const values: InventoryDecisionValues = {
+    scope: String(form.get("scope") ?? ""),
+    confirmed: form.get("confirmed") === "yes" ? "yes" : "",
+    publicationLocale: String(form.get("publicationLocale") ?? "bg"),
+  };
+  const copy = inventoryCopy(context.locale),
+    feedback = inventoryDecisionCopy(context.locale);
+  const operationId = String(form.get(formFields.operationId) ?? "");
+  const expectedRevision = Number(form.get(formFields.expectedRevision));
+  const reconciliation = {
+    href: `/${context.locale}/inventory/operations/${encodeURIComponent(operationId)}?reference=${encodeURIComponent(context.reference)}`,
+    label: copy.operation,
+  };
+  const state: FormState<InventoryDecisionValues> = {
+    values,
+    operationId,
+    expectedRevision,
+    reconciliation,
+    responseId: randomUUID(),
+    outcome: { kind: "idle" },
+  };
+  const command = new FormData();
+  for (const [key, value] of Object.entries(values)) command.set(key, value);
+  for (const [key, value] of Object.entries(context))
+    if (value !== undefined) command.set(key, value);
+  command.set("operationId", operationId);
+  command.set("expectedRevision", String(expectedRevision));
+  const result = await runInventoryDecision(command, true);
+  if (!result.ok)
+    return {
+      ...state,
+      outcome: inventoryDecisionFeedback(result.error, context, values, reconciliation),
+    };
+  const receipt = await action(
+    async ({ db }) => {
+      const [row] = await db
+        .select({ completedAt: operations.completedAt })
+        .from(operations)
+        .where(eq(operations.id, result.data.operationId));
+      if (!row?.completedAt) throw new AppError("outcome_unknown");
+      return row.completedAt.toISOString();
+    },
+    { requireSession: true },
+  );
+  if (!receipt.ok)
+    return {
+      ...state,
+      outcome: {
+        kind: "unknown",
+        code: "OUTCOME_UNKNOWN",
+        message: copy.form.unknown,
+        status: reconciliation,
+      },
+    };
+  return {
+    ...state,
+    outcome: {
+      kind: "confirmed",
+      receipt: {
+        title: copy.succeeded,
+        reference: context.reference,
+        recordedAt: {
+          dateTime: receipt.data,
+          label: new Date(receipt.data).toLocaleString(context.locale),
+        },
+        nextStep: feedback.next,
+        destination: {
+          // Force a fresh GET even for hydrated actions, then return to the same section.
+          href: `/${context.locale}/inventory/${context.reference}?operation=${operationId}#${inventoryDecisionSection(context.intent)}`,
+          label: copy.open,
+        },
+      },
+    },
+  };
 }

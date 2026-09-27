@@ -202,6 +202,7 @@ describe("Case continuity", () => {
     expect(view.record.nextAction).toBeNull();
     expect(view.canManage).toBe(true);
     expect(view.canManageNext).toBe(false);
+    expect(view.canManageContinuity).toBe(false);
     await expect(
       updateNextAction(t.db, f.staff.session, {
         id: f.record.id,

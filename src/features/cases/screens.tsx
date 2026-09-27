@@ -274,15 +274,47 @@ export async function CaseScreen(
           {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
             ? c.needsReview
             : row.stage.replaceAll("_", " ")}{" "}
-          · {row.disposition}
+          ·{" "}
+          {row.disposition === "paused"
+            ? lifecycleCopy(props.locale).pause
+            : lifecycleCopy(props.locale)[row.disposition]}
         </p>
-        {view.canManageNext ? (
+        {view.canManageContinuity ? (
           <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/continuity`}>
-            {lifecycleCopy(props.locale).title}
+            {row.disposition === "active" ? lifecycleCopy(props.locale).title : c.reviewReopening}
           </a>
         ) : null}
-        <p>{row.nextAction ?? c.noAction}</p>
-        <WorkflowTime value={row.dueAt} locale={props.locale} />
+        {row.disposition === "active" ? (
+          <>
+            <p>{row.nextAction ?? c.noAction}</p>
+            <WorkflowTime value={row.dueAt} locale={props.locale} />
+          </>
+        ) : (
+          <div className="space-y-3 rounded-control border border-border p-4">
+            <p>{row.disposition === "closed" ? c.closedSummary : c.pausedSummary}</p>
+            {row.dispositionReason ? (
+              <p>
+                <strong>{c.dispositionReason}:</strong> {row.dispositionReason}
+              </p>
+            ) : null}
+            {row.closureOutcome ? (
+              <p>
+                <strong>{c.closureOutcome}:</strong> {row.closureOutcome}
+              </p>
+            ) : null}
+            {row.waitingOn ? (
+              <p>
+                <strong>{c.waitingOn}:</strong> {row.waitingOn}
+              </p>
+            ) : null}
+            {row.reviewAt ? (
+              <p>
+                <strong>{c.reviewAt}:</strong>{" "}
+                <WorkflowTime value={row.reviewAt} locale={props.locale} />
+              </p>
+            ) : null}
+          </div>
+        )}
       </div>
       {view.ownerPreviews.map((reference) => (
         <a
@@ -308,7 +340,9 @@ export async function CaseScreen(
                 </li>
               ))}
             </ul>
-            {!staff ? <p>{c.requirementMessage}</p> : null}
+            {!staff && row.disposition === "active" && view.canPost ? (
+              <p>{c.requirementMessage}</p>
+            ) : null}
             {view.canAcknowledge &&
             brief &&
             !brief.clientAcknowledgedAt &&

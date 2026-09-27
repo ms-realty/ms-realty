@@ -82,7 +82,7 @@ async function staffSession(context: BrowserContext) {
 }
 
 test.use({ javaScriptEnabled: false });
-test("staff prepares an immutable reviewed candidate and a source-bound human translation without publishing", async ({
+test("O12/O16 native decisions retain drafts and operation identity with mobile section recovery", async ({
   page,
   context,
 }) => {
@@ -113,11 +113,60 @@ test("staff prepares an immutable reviewed candidate and a source-bound human tr
   await page.getByRole("button", { name: "Freeze review candidate", exact: true }).click();
   await expect(page.getByText("The action was recorded.")).toBeVisible();
   await page.getByRole("link", { name: "Open listing", exact: true }).click();
-  for (const label of [
-    "Approve factual revision",
-    "Submit editorial review",
-    "Approve source revision",
-  ]) {
+  await expect(page).toHaveURL(/#inventory-draft$/);
+  await expect(page.getByRole("heading", { name: "Working draft", exact: true })).toBeInViewport();
+  const sections = page.getByRole("navigation", { name: "Listing sections", exact: true });
+  await sections.getByRole("link", { name: "Review and publication", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Review and publication", exact: true }),
+  ).toBeInViewport();
+  const factual = page.locator('[data-inventory-decision="facts"]');
+  const factualKey = await factual.locator('input[name="_operationId"]').inputValue();
+  const reviewNote = "Synthetic exact source review retained through native validation.";
+  await factual.getByLabel("Review scope or reason", { exact: true }).fill(reviewNote);
+  // noValidate deliberately reaches server validation with the explicit confirmation missing.
+  await factual.getByRole("button", { name: "Approve factual revision", exact: true }).click();
+  const summary = factual.getByRole("region", { name: "Check the form", exact: true });
+  await expect(summary).toBeVisible();
+  await expect(factual.getByLabel("Review scope or reason", { exact: true })).toHaveValue(
+    reviewNote,
+  );
+  await expect(factual.locator('input[name="_operationId"]')).toHaveValue(factualKey);
+  await expect(
+    page
+      .locator('[data-inventory-decision="availability"]')
+      .getByLabel("Review scope or reason", { exact: true }),
+  ).toHaveValue("");
+  await expect(
+    page
+      .locator('[data-inventory-decision="submit"]')
+      .getByRole("region", { name: "Check the form", exact: true }),
+  ).toHaveCount(0);
+  expect(
+    await db
+      .select()
+      .from(schema.operations)
+      .where(eq(schema.operations.idempotencyKey, factualKey)),
+  ).toHaveLength(0);
+  const checkboxId = await factual.getByRole("checkbox").getAttribute("id");
+  await summary.getByRole("link").click();
+  await expect(factual.getByRole("checkbox")).toBeInViewport();
+  expect(decodeURIComponent(new URL(page.url()).hash)).toBe(`#${checkboxId}`);
+  await factual.getByRole("checkbox").check();
+  await factual.getByRole("button", { name: "Approve factual revision", exact: true }).click();
+  await expect(page.getByText("The action was recorded.", { exact: true })).toBeVisible();
+  expect(
+    await db
+      .select({ status: schema.operations.status })
+      .from(schema.operations)
+      .where(eq(schema.operations.idempotencyKey, factualKey)),
+  ).toEqual([{ status: "succeeded" }]);
+  await page.getByRole("link", { name: "Open listing", exact: true }).click();
+  await expect(page).toHaveURL(/#inventory-review$/);
+  await expect(
+    page.getByRole("heading", { name: "Review and publication", exact: true }),
+  ).toBeInViewport();
+  for (const label of ["Submit editorial review", "Approve source revision"]) {
     const form = page
       .locator("form")
       .filter({ has: page.getByRole("button", { name: label, exact: true }) });
@@ -160,15 +209,53 @@ test("staff prepares an immutable reviewed candidate and a source-bound human tr
     ),
   ).toBeVisible();
   await page.goto(hostUrl("staff", `/en/inventory/${reference}`));
-  const release = page.locator("form").filter({
-    has: page.getByRole("button", { name: "Prepare publication", exact: true }),
-  });
+  await sections.getByRole("link", { name: "Review and publication", exact: true }).click();
+  const release = page.locator('[data-inventory-decision="prepare"]');
+  const releaseKey = await release.locator('input[name="_operationId"]').inputValue();
+  await release.getByLabel("Publication language", { exact: true }).selectOption("en");
   await release
     .getByLabel("Review scope or reason", { exact: true })
     .fill("Synthetic attempt without media or consent evidence");
   await release.getByRole("checkbox").check();
   await release.getByRole("button", { name: "Prepare publication", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("This action could not be completed.");
+  await expect(
+    release.getByText("Current reviewed seller permission for these exact terms is required.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(release.getByLabel("Review scope or reason", { exact: true })).toHaveValue(
+    "Synthetic attempt without media or consent evidence",
+  );
+  await expect(release.getByRole("checkbox")).toBeChecked();
+  await expect(release.getByLabel("Publication language", { exact: true })).toHaveValue("en");
+  await expect(release.locator('input[name="_operationId"]')).toHaveValue(releaseKey);
+  await expect(
+    release.getByRole("link", { name: "Review seller evidence", exact: true }),
+  ).toHaveAttribute("href", `/en/inventory/${reference}/evidence`);
+  await expect(
+    release.getByRole("link", { name: "Operation receipt", exact: true }),
+  ).toHaveAttribute("href", `/en/inventory/operations/${releaseKey}?reference=${reference}`);
+  await expect(
+    release.getByRole("button", { name: "Prepare publication", exact: true }),
+  ).toHaveCount(0);
+  expect(
+    await db
+      .select({ status: schema.operations.status })
+      .from(schema.operations)
+      .where(eq(schema.operations.idempotencyKey, releaseKey)),
+  ).toEqual([{ status: "failed" }]);
+  await page
+    .locator("#inventory-review")
+    .getByRole("link", { name: "Back to listing sections", exact: true })
+    .click();
+  await expect(sections).toBeInViewport();
+  await sections.getByRole("link", { name: "Working draft", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Working draft", exact: true })).toBeInViewport();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+    ),
+  ).toBe(true);
   const [listing] = await db
     .select()
     .from(schema.listings)

@@ -97,6 +97,57 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
       .fill("Client acknowledged the current brief and the reviewed option.");
     await stage.getByRole("button", { name: "Record stage change", exact: true }).click();
     await recorded(page);
+    const [beforePause] = await db.select().from(schema.cases).where(eq(schema.cases.id, f.caseId));
+    if (!beforePause?.nextAction || !beforePause.nextActionDueAt)
+      throw new Error("The active case must have a next action before pausing.");
+    await page.goto(continuity);
+    const disposition = page
+      .locator("form")
+      .filter({ has: page.getByRole("button", { name: "Record disposition", exact: true }) });
+    await disposition.getByLabel("Case disposition", { exact: true }).selectOption("paused");
+    await disposition.getByLabel("Reason", { exact: true }).fill("Client requested a pause");
+    await disposition.getByLabel("Waiting for", { exact: true }).fill("Client availability");
+    await disposition
+      .getByLabel("Review date (UTC)", { exact: true })
+      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await disposition.getByRole("button", { name: "Record disposition", exact: true }).click();
+    await recorded(page);
+    await expect(
+      page.getByText(
+        "This case is paused. Requirements and property actions can resume after reopening.",
+        {
+          exact: true,
+        },
+      ),
+    ).toBeVisible();
+    await expect(page.getByText("Waiting for: Client availability", { exact: true })).toBeVisible();
+    await expect(page.getByText(beforePause.nextAction, { exact: true })).toHaveCount(0);
+    await expect(
+      page.locator(`time[datetime="${beforePause.nextActionDueAt.toISOString()}"]`),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Record a new requirements revision", exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Record next action", exact: true })).toHaveCount(
+      0,
+    );
+    await page.getByRole("link", { name: "Review reopening", exact: true }).click();
+    await disposition.getByLabel("Case disposition", { exact: true }).selectOption("active");
+    await disposition.getByLabel("Reason", { exact: true }).fill("Client asked to resume");
+    await disposition
+      .getByLabel("Next action when reopening", { exact: true })
+      .fill("Review the resumed case with the client");
+    await disposition
+      .getByLabel("Next action due (UTC)", { exact: true })
+      .fill(new Date(Date.now() + 172800000).toISOString().slice(0, 16));
+    await disposition.getByRole("button", { name: "Record disposition", exact: true }).click();
+    await recorded(page);
+    await expect(
+      page.getByRole("button", { name: "Record a new requirements revision", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Record next action", exact: true }),
+    ).toBeVisible();
     await page.goto(continuity);
     const transfer = page
       .locator("form")
@@ -183,6 +234,47 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
       closureOutcome: "No transaction occurred",
     });
     expect(closed?.commitmentDispositions).toHaveProperty(f.taskId);
+    await expect(
+      receiver.getByText(
+        "This case is closed. Its requirements and recorded activity remain available.",
+        {
+          exact: true,
+        },
+      ),
+    ).toBeVisible();
+    await expect(
+      receiver.getByText("Recorded outcome: No transaction occurred", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      receiver.getByRole("link", { name: "Review reopening", exact: true }),
+    ).toHaveAttribute("href", `/en/cases/${f.caseId}/continuity`);
+    for (const name of [
+      "Record a new requirements revision",
+      "Record next action",
+      "Suggest a property",
+      "Record feedback",
+      "Request a viewing",
+    ])
+      await expect(receiver.getByRole("button", { name, exact: true })).toHaveCount(0);
+    await expect(
+      receiver.getByRole("button", { name: "Post in this case", exact: true }),
+    ).toBeVisible();
+    await client.reload();
+    await expect(
+      client.getByText(
+        "This case is closed. Its requirements and recorded activity remain available.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      client.getByText("Recorded outcome: No transaction occurred", { exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      client.getByText("Recorded reason: Client chose not to proceed", { exact: true }),
+    ).toHaveCount(0);
+    await expect(client.getByRole("link", { name: "Review reopening", exact: true })).toHaveCount(
+      0,
+    );
     await receiver.screenshot({
       path: testInfo.outputPath("recorded-closeout.png"),
       fullPage: true,

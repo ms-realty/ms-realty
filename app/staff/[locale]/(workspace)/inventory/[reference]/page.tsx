@@ -4,6 +4,13 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { publicLocales } from "@/domain/ids";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
+import {
+  type InventoryDecisionContext,
+  type InventoryDecisionIntent,
+  inventorySections,
+} from "@/features/inventory/decision-contract";
+import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
+import { InventoryDecisionForm } from "@/features/inventory/decision-form";
 import { InventoryEditor, type InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
@@ -13,9 +20,7 @@ import { isAppError } from "@/server/errors";
 import { inventoryDetail } from "@/server/inventory/commands";
 import { draftSchema, emptyDraft } from "@/server/inventory/contracts";
 import { publicationReadiness } from "@/server/publication/commands";
-import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
-import { inventoryDecision, saveInventory } from "../actions";
+import { saveInventory, submitInventoryDecision } from "../actions";
 
 export default async function InventoryDetailPage({
   params,
@@ -33,6 +38,7 @@ export default async function InventoryDetailPage({
   });
   const { listing, property, revision } = data;
   const copy = inventoryCopy(locale);
+  const decisionCopy = inventoryDecisionCopy(locale);
   const evidence = evidenceCopy(locale);
   const readiness = await publicationReadiness(db, session.actor, reference);
   const resource = { type: "listing", id: listing.id, propertyId: property.id };
@@ -49,71 +55,33 @@ export default async function InventoryDetailPage({
     settlement: property.settlement,
     exactAddress: property.exactAddress ?? "",
   };
-  function decision(intent: string, label: string, expectedRevision: number, manifestId?: string) {
-    const decisionId = `${intent}-${manifestId ?? "current"}`;
+  function decision(
+    intent: InventoryDecisionIntent,
+    label: string,
+    expectedRevision: number,
+    manifestId?: string,
+  ) {
+    const context: InventoryDecisionContext = {
+      locale,
+      reference,
+      intent,
+      revisionId: revision?.id ?? "",
+      ...(manifestId ? { manifestId } : {}),
+    };
     return (
-      <form
-        action={inventoryDecision}
-        className="space-y-3 rounded-panel border border-divider bg-surface p-5"
-        key={intent}
-      >
-        <input type="hidden" name="locale" value={locale} />
-        <input type="hidden" name="reference" value={reference} />
-        <input type="hidden" name="operationId" value={randomUUID()} />
-        <input type="hidden" name="intent" value={intent} />
-        <input type="hidden" name="expectedRevision" value={expectedRevision} />
-        <input type="hidden" name="revisionId" value={revision?.id ?? ""} />
-        {manifestId ? <input type="hidden" name="manifestId" value={manifestId} /> : null}
-        {intent === "prepare" ? (
-          <label className="grid gap-2">
-            {locale === "bg"
-              ? "Език на публикацията"
-              : locale === "ru"
-                ? "Язык публикации"
-                : "Publication language"}
-            <select name="publicationLocale" defaultValue="bg" className={controlClass}>
-              {publicLocales.map((language) => (
-                <option key={language} value={language}>
-                  {language.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        <h3 className="font-semibold">{label}</h3>
-        {intent !== "freeze" ? (
-          <>
-            <label className="flex flex-col gap-2" htmlFor={`scope-${decisionId}`}>
-              {copy.scope}
-              <input
-                id={`scope-${decisionId}`}
-                className={controlClass}
-                name="scope"
-                required
-                maxLength={1000}
-              />
-            </label>
-            <label className="flex items-start gap-2">
-              <input
-                type="checkbox"
-                name="confirmed"
-                value="yes"
-                required
-                className="mt-1 size-5"
-              />
-              {copy.confirm}
-            </label>
-          </>
-        ) : null}
-        <button
-          className={buttonClass(
-            intent === "withdraw" || intent === "restrict" ? "secondary" : "primary",
-          )}
-          type="submit"
-        >
-          {label}
-        </button>
-      </form>
+      <InventoryDecisionForm
+        key={`${intent}-${manifestId ?? "current"}`}
+        context={context}
+        title={label}
+        action={submitInventoryDecision.bind(null, context)}
+        initialState={{
+          values: { scope: "", confirmed: "", publicationLocale: "bg" },
+          operationId: randomUUID(),
+          expectedRevision,
+          responseId: randomUUID(),
+          outcome: { kind: "idle" },
+        }}
+      />
     );
   }
   const manifests = publicLocales.flatMap((language) => {
@@ -136,8 +104,40 @@ export default async function InventoryDetailPage({
           {copy.revision} {listing.version}
         </p>
       </header>
-      <section className="space-y-4 rounded-panel border border-divider bg-surface p-5">
-        <h2 className="text-section font-semibold">{evidence.readiness}</h2>
+      <nav
+        id={inventorySections.navigation}
+        aria-label={decisionCopy.navigation}
+        className="scroll-mt-6 rounded-panel border border-divider bg-surface p-4"
+      >
+        <ul className="flex flex-wrap gap-x-5 gap-y-2">
+          {[
+            [inventorySections.readiness, evidence.readiness],
+            [inventorySections.draft, copy.edit],
+            ...(listing.approvedRevisionId
+              ? [[inventorySections.locales, decisionCopy.locales]]
+              : []),
+            [inventorySections.review, copy.review],
+          ].map(([id, label]) => (
+            <li key={id}>
+              <a
+                className="inline-flex min-h-control items-center text-action underline"
+                href={`#${id}`}
+              >
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <section
+        id={inventorySections.readiness}
+        className="scroll-mt-6 space-y-4 rounded-panel border border-divider bg-surface p-5"
+        aria-labelledby="readiness-heading"
+        tabIndex={-1}
+      >
+        <h2 id="readiness-heading" className="text-section font-semibold">
+          {evidence.readiness}
+        </h2>
         <dl className="grid gap-2 sm:grid-cols-2">
           {[
             [evidence.factual, readiness.input.factReviewValid],
@@ -178,8 +178,10 @@ export default async function InventoryDetailPage({
       </section>
       {listing.approvedRevisionId ? (
         <nav
+          id={inventorySections.locales}
+          tabIndex={-1}
           aria-label={locale === "bg" ? "Преводи" : locale === "ru" ? "Переводы" : "Translations"}
-          className="flex flex-wrap gap-4"
+          className="flex scroll-mt-6 flex-wrap gap-4"
         >
           {publicLocales
             .filter((language) => language !== "bg")
@@ -199,7 +201,12 @@ export default async function InventoryDetailPage({
           {copy.blocked}
         </p>
       ) : null}
-      <section className="space-y-4" aria-labelledby="draft-heading">
+      <section
+        id={inventorySections.draft}
+        className="scroll-mt-6 space-y-4"
+        aria-labelledby="draft-heading"
+        tabIndex={-1}
+      >
         <h2 id="draft-heading" className="text-section font-semibold">
           {copy.edit}
         </h2>
@@ -222,8 +229,19 @@ export default async function InventoryDetailPage({
           <p>{copy.permissions}</p>
         )}
         {mayEdit ? decision("freeze", copy.prepare, listing.version) : null}
+        <a
+          href={`#${inventorySections.navigation}`}
+          className="inline-flex min-h-control items-center text-action underline"
+        >
+          {decisionCopy.backToSections}
+        </a>
       </section>
-      <section className="space-y-4 border-t border-divider pt-6" aria-labelledby="review-heading">
+      <section
+        id={inventorySections.review}
+        className="scroll-mt-6 space-y-4 border-t border-divider pt-6"
+        aria-labelledby="review-heading"
+        tabIndex={-1}
+      >
         <h2 id="review-heading" className="text-section font-semibold">
           {copy.review}
         </h2>
@@ -283,6 +301,12 @@ export default async function InventoryDetailPage({
             {decision("withdraw", copy.withdraw, listing.publicationGeneration)}
           </div>
         ) : null}
+        <a
+          href={`#${inventorySections.navigation}`}
+          className="inline-flex min-h-control items-center text-action underline"
+        >
+          {decisionCopy.backToSections}
+        </a>
       </section>
     </div>
   );

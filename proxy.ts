@@ -10,6 +10,7 @@ import {
   routableLocales,
   staffLocaleCookie,
 } from "@/i18n/config";
+import { explicitLocaleChoice } from "@/i18n/locale-choice";
 import { negotiateLocale } from "@/i18n/negotiate";
 import { requestHost } from "@/i18n/seo";
 import {
@@ -82,23 +83,6 @@ function entryLocale(request: NextRequest, context: HostContext): string {
  * suggestion banner, a "read in English" link) is an explicit choice. Deep links from
  * elsewhere never are. The cookie is host-only, so each host remembers its own choice.
  */
-function explicitLocaleChoice(request: NextRequest, context: HostContext): string | null {
-  const target = request.nextUrl.pathname.split("/")[1] ?? "";
-  if (!isContextLocale(context, target)) return null;
-  if (request.headers.get("sec-fetch-site") !== "same-origin") return null;
-  if (request.headers.get("sec-fetch-dest") !== "document") return null;
-  const referer = request.headers.get("referer");
-  if (!referer) return null;
-  // Sec-Fetch-Site already vouches for the origin; `nextUrl.origin` is not the public
-  // origin behind a proxy, so it is not compared here.
-  try {
-    const source = new URL(referer).pathname.split("/")[1] ?? "";
-    return isContextLocale(context, source) && source !== target ? target : null;
-  } catch {
-    return null;
-  }
-}
-
 function localeRedirect(request: NextRequest, pathname: string, origin: string): NextResponse {
   const url = new URL(pathname, origin);
   url.search = request.nextUrl.search;
@@ -162,7 +146,7 @@ export function proxy(request: NextRequest) {
     return localeRedirect(request, `/${first}${homePaths[context]}`, origins[context]);
   }
 
-  const chosen = explicitLocaleChoice(request, context);
+  const chosen = explicitLocaleChoice(request.headers, pathname, context);
   // Visible to this render too, so the page does not suggest the language just left.
   if (chosen) request.cookies.set(contextLocaleCookie(context), chosen);
 
