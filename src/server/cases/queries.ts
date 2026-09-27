@@ -165,6 +165,9 @@ export async function readCase(db: Executor, session: Session, id: string) {
     canRequestProposal:
       active && !staff && (await can(db, live.actor, "portal.proposal.respond", resource)),
     canPropose: active && staff && (await can(db, live.actor, "proposal.manage", resource)),
+    canManageAccess: staff && (await can(db, live.actor, "access.grant", resource)),
+    canReadRequestedDocuments:
+      staff && (await can(db, live.actor, "document.read_restricted", resource)),
     canReviewProcess: staff && (await can(db, live.actor, "compliance.review", resource)),
     canManageNext: active && internal && canTransition,
     canAddInterest: active && staff && (await can(db, live.actor, "interest.manage", resource)),

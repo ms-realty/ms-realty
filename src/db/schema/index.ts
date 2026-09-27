@@ -2,6 +2,7 @@
 // and inbox events here are the business journal.
 export * from "./approvals";
 export * from "./assistance";
+export * from "./collaboration";
 export * from "./compliance";
 export * from "./coordination";
 export * from "./enums";

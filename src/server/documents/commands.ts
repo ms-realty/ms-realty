@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { documents, documentVersions, fileUploads, listings } from "@/db/schema";
+import { documentRequests, documents, documentVersions, fileUploads, listings } from "@/db/schema";
 import { documentClassifications, documentReviewTypes } from "@/domain/document";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
@@ -223,7 +223,7 @@ export async function documentsForListing(db: Executor, session: Session, refere
 
 export async function reviewDocument(
   db: Executor,
-  command: FileCommand & { versionId: string; input: unknown },
+  command: FileCommand & { versionId: string; input: unknown; requestId?: string },
 ) {
   parseFileInput(envelope, command);
   const input = parseFileInput(
@@ -235,7 +235,15 @@ export async function reviewDocument(
     }),
     command.input,
   );
-  await documentAccess(db, command.session, command.versionId, "review");
+  const access = await documentAccess(db, command.session, command.versionId, "review");
+  // Requested evidence must be reviewed through its request: the recipient outcome and
+  // owned task are committed together by reviewRequestedDocument. HTTP callers never
+  // forward a requestId into this internal command.
+  const [request] = await db
+    .select({ id: documentRequests.id })
+    .from(documentRequests)
+    .where(eq(documentRequests.documentId, access.document.id));
+  if (request && command.requestId !== request.id) throw new AppError("transition_denied");
   return runOperation(
     db,
     {

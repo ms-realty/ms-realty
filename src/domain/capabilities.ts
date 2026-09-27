@@ -5,6 +5,7 @@ export const capabilities = [
   // Visitors and clients (always record-scoped for clients).
   "inquiry.submit",
   "portal.case.read",
+  "portal.access.request",
   "portal.brief.acknowledge",
   "portal.interest.respond",
   "portal.message.write",
@@ -83,6 +84,7 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
   verified_client: [
     "inquiry.submit",
     "portal.case.read",
+    "portal.access.request",
     "portal.brief.acknowledge",
     "portal.interest.respond",
     "portal.message.write",

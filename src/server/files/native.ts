@@ -30,7 +30,7 @@ import { digestOf, MAX_IMAGE_BYTES } from "./storage";
 import { finalizeUpload, receiveUpload, uploadAuthorization } from "./uploads";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "");
-async function boundedForm(request: Request) {
+export async function boundedFileForm(request: Request) {
   const limit = MAX_IMAGE_BYTES + 64 * 1024;
   if (Number(request.headers.get("content-length")) > limit)
     throw new AppError("validation_failed");
@@ -141,7 +141,7 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
       const db = getDb();
       const session = requireSession(await identify(db, request.headers, env));
       if (context === "case") await caseDocumentAccess(db, session, reference);
-      const form = await boundedForm(request);
+      const form = await boundedFileForm(request);
       const intent = text(form, "intent");
       const command = {
         session,

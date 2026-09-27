@@ -1,11 +1,20 @@
 import "server-only";
-import { and, eq, isNull } from "drizzle-orm";
-import { documents, documentVersions, listings, mediaAssets, mediaRelations } from "@/db/schema";
+import { and, eq, gt, isNull, lte, or, sql } from "drizzle-orm";
+import {
+  caseParticipants,
+  documents,
+  documentVersions,
+  listings,
+  mediaAssets,
+  mediaRelations,
+  principals,
+} from "@/db/schema";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, requireLiveSession, type Session } from "../auth/sessions";
 import { can } from "../authz";
 import type { Executor } from "../db";
 import { caseDocumentPurposes } from "../documents/purposes";
+import { assertRequestedDocumentAccess } from "../documents/request-access";
 import { AppError } from "../errors";
 
 export type FileKind = "media" | "document";
@@ -49,7 +58,7 @@ export async function documentAccess(
   versionId: string,
   action: "read" | "upload" | "review" = "read",
 ) {
-  await fileSession(db, session, true);
+  session = await fileSession(db, session, true);
   const [row] = await db
     .select({ document: documents, file: documentVersions })
     .from(documentVersions)
@@ -85,8 +94,28 @@ export async function documentAccess(
       : "portal.document.upload";
   if (action === "review" && session.actor.kind !== "staff") throw new AppError("not_found");
   if (!(await can(db, session.actor, capability, resource))) throw new AppError("not_found");
+  if (session.actor.kind === "client" && row.document.caseId) {
+    const now = new Date();
+    const [participation] = await db
+      .select({ id: caseParticipants.id })
+      .from(caseParticipants)
+      .innerJoin(principals, eq(principals.partyId, caseParticipants.partyId))
+      .where(
+        and(
+          eq(principals.id, session.actor.id),
+          eq(caseParticipants.caseId, row.document.caseId),
+          isNull(caseParticipants.revokedAt),
+          lte(caseParticipants.validFrom, now),
+          or(isNull(caseParticipants.expiresAt), gt(caseParticipants.expiresAt, now)),
+          sql`(${caseParticipants.role} <> 'specialist' or ${caseParticipants.expiresAt} is not null)`,
+        ),
+      )
+      .limit(1);
+    if (!participation) throw new AppError("not_found");
+  }
   if (action !== "read" && row.file.versionNumber !== row.document.currentVersionNumber)
     throw new AppError("version_conflict");
+  await assertRequestedDocumentAccess(db, session, row.document.id, action);
   return row;
 }
 

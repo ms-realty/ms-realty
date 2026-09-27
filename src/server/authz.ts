@@ -54,6 +54,7 @@ const sellerSideRoles: readonly ParticipantRole[] = [
 
 /** Acting for a principal: only principals respond to proposals or approve listings. */
 const principalOnly: readonly Capability[] = [
+  "portal.access.request",
   "portal.brief.acknowledge",
   "portal.proposal.respond",
   "portal.listing.acknowledge",

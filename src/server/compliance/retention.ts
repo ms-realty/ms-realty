@@ -6,6 +6,9 @@ import {
   caseProcessReviews,
   caseStageHistory,
   cases,
+  documentRequests,
+  documentVersions,
+  principals,
   processPolicies,
   serviceAgreements,
   suspicionReports,
@@ -63,6 +66,23 @@ export async function hasPrivacyRetentionHold(
     )
     .limit(1);
   if (agreement) return true;
+  const [requestedEvidence] = await db
+    .select({ id: documentRequests.id })
+    .from(documentRequests)
+    .innerJoin(principals, eq(principals.id, documentRequests.recipientId))
+    .innerJoin(cases, eq(cases.id, documentRequests.caseId))
+    .innerJoin(processPolicies, eq(processPolicies.id, documentRequests.policyId))
+    .where(
+      and(
+        eq(principals.partyId, partyId),
+        lifetimeHold(sql`greatest(${documentRequests.updatedAt}, coalesce(
+        (select max(${documentVersions.updatedAt}) from ${documentVersions}
+          where ${documentVersions.documentId} = ${documentRequests.documentId}),
+        ${documentRequests.updatedAt}))`),
+      ),
+    )
+    .limit(1);
+  if (requestedEvidence) return true;
   const [item] = await db
     .select({ id: caseProcessItems.id })
     .from(caseProcessItems)

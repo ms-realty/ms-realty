@@ -3,7 +3,14 @@
 import "server-only";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { documentVersions, fileUploads, mediaAssets } from "@/db/schema";
+import {
+  cases,
+  documentRequests,
+  documents,
+  documentVersions,
+  fileUploads,
+  mediaAssets,
+} from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
@@ -18,6 +25,47 @@ import { inspectFile } from "./inspect";
 import { digestOf, MAX_DOCUMENT_BYTES, MAX_IMAGE_BYTES } from "./storage";
 
 const tokenFor = (id: string) => keyedHash(getEnv().authSecret, `file-upload:${id}`);
+/** Case access mutations lock the Case first. Keep a transfer/finalization within that
+ * boundary so a revocation either precedes the authorization check or follows the write. */
+async function lockUploadCase(db: Executor, session: Session, uploadId: string) {
+  const [upload] = await db.select().from(fileUploads).where(eq(fileUploads.id, uploadId));
+  if (!upload || upload.actorKind !== session.actor.kind || upload.actorId !== session.actor.id)
+    throw new AppError("not_found");
+  if (upload.targetType !== "document") return;
+  const [document] = await db
+    .select({ caseId: documents.caseId })
+    .from(documentVersions)
+    .innerJoin(documents, eq(documents.id, documentVersions.documentId))
+    .where(eq(documentVersions.id, upload.targetId));
+  if (document?.caseId)
+    await db
+      .select({ id: cases.id })
+      .from(cases)
+      .where(eq(cases.id, document.caseId))
+      .for("update");
+}
+async function requestedLimits(
+  db: Executor,
+  kind: FileKind,
+  targetId: string,
+  measured?: { byteSize: number; contentType: string },
+) {
+  if (kind !== "document") return MAX_IMAGE_BYTES;
+  const [request] = await db
+    .select({ maxBytes: documentRequests.maxBytes, allowed: documentRequests.allowedContentTypes })
+    .from(documentRequests)
+    .innerJoin(documentVersions, eq(documentVersions.documentId, documentRequests.documentId))
+    .where(eq(documentVersions.id, targetId));
+  if (
+    request &&
+    measured &&
+    (measured.byteSize > request.maxBytes || !request.allowed.includes(measured.contentType))
+  )
+    throw new AppError("validation_failed", {
+      fieldErrors: { file: ["File does not match this request's type or size limit."] },
+    });
+  return request?.maxBytes ?? MAX_DOCUMENT_BYTES;
+}
 export async function reserveUpload(
   db: Executor,
   actor: Actor,
@@ -73,7 +121,7 @@ export async function verifyUploadRequest(
     throw new AppError("not_found");
   await targetAccess(db, session, upload.targetType as FileKind, upload.targetId);
   if (upload.completedAt || upload.expiresAt <= new Date()) throw new AppError("transition_denied");
-  return { maxBytes: upload.targetType === "media" ? MAX_IMAGE_BYTES : MAX_DOCUMENT_BYTES };
+  return { maxBytes: await requestedLimits(db, upload.targetType as FileKind, upload.targetId) };
 }
 
 export async function receiveUpload(
@@ -83,6 +131,7 @@ export async function receiveUpload(
   input: { uploadId: string; token: string; bytes: Buffer },
 ) {
   return db.transaction(async (tx) => {
+    await lockUploadCase(tx, session, input.uploadId);
     const [upload] = await tx
       .select()
       .from(fileUploads)
@@ -99,6 +148,7 @@ export async function receiveUpload(
     if (upload.completedAt || upload.expiresAt <= new Date())
       throw new AppError("transition_denied");
     const measured = await inspectFile(input.bytes, upload.targetType as FileKind);
+    await requestedLimits(tx, upload.targetType as FileKind, upload.targetId, measured);
     await services.storage.writeStaging(upload.stagingKey, input.bytes);
     await tx
       .update(fileUploads)
@@ -121,6 +171,7 @@ export async function finalizeUpload(
   queue?: JobQueue,
 ) {
   return db.transaction(async (tx) => {
+    await lockUploadCase(tx, session, uploadId);
     const [upload] = await tx
       .select()
       .from(fileUploads)
@@ -140,6 +191,7 @@ export async function finalizeUpload(
       kind === "media" ? MAX_IMAGE_BYTES : MAX_DOCUMENT_BYTES,
     );
     const measured = await inspectFile(staged, kind);
+    await requestedLimits(tx, kind, upload.targetId, measured);
     if (measured.byteSize !== upload.byteSize || measured.contentType !== upload.contentType)
       throw new AppError("validation_failed");
     const sha256 = digestOf(staged);

@@ -7,6 +7,7 @@ import {
   listClientDocuments,
 } from "@/server/documents/client";
 import { isAppError } from "@/server/errors";
+import { documentRequestCopy } from "../document-requests/copy";
 import { fileLabel, filesCopy } from "../files/copy";
 import {
   type ScreenProps,
@@ -146,6 +147,9 @@ export async function ClientDocumentsScreen(props: ScreenProps & { id?: string }
   );
   return (
     <WorkflowPage {...props} title={c.title}>
+      <a className={workflowLink} href={`/${locale}/documents/requests`}>
+        {documentRequestCopy(locale).requests}
+      </a>
       {rows.length ? (
         rows.map((document) => <FileDetail key={document.id} locale={locale} document={document} />)
       ) : (

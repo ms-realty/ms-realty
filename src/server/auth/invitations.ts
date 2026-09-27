@@ -13,7 +13,7 @@
 // The inviter's authority is re-checked when the invitation is redeemed.
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   caseParticipants,
@@ -678,6 +678,8 @@ export interface ClientInvitationRequest {
   readonly role: ParticipantRole;
   /** Portal actions on top of the role's floor (authz.ts decides what they can widen). */
   readonly capabilities?: readonly Capability[];
+  /** The end of Case access, distinct from the invitation's 72-hour acceptance window. */
+  readonly accessExpiresAt?: string | null;
   readonly locale?: PublicLocale;
   readonly now?: Date;
   readonly queue?: JobQueue;
@@ -696,6 +698,7 @@ export async function issueClientInvitation(
   if (!participantRoles.includes(request.role)) {
     throw new AppError("validation_failed", { fieldErrors: { role: ["invalid_role"] } });
   }
+  const accessExpiresAt = invitationAccessExpiry(request.role, request.accessExpiresAt, now);
   const invited = [...new Set(request.capabilities ?? [])];
   if (invited.some((c) => !portalCapabilities.includes(c))) {
     throw new AppError("validation_failed", {
@@ -705,29 +708,40 @@ export async function issueClientInvitation(
   const locale = request.locale ?? "bg";
   return db.transaction(async (tx) => {
     const [target] = await tx
-      .select({ id: cases.id })
+      .select({ id: cases.id, version: cases.version })
       .from(cases)
-      .where(eq(cases.id, request.caseId));
+      .where(eq(cases.id, request.caseId))
+      .for("update");
     if (!target) throw new AppError("not_found");
+    // All Case invitation/participation writes lock the Case before their child rows.
+    // Recheck after waiting: a cached session or revoked manager grant cannot issue access.
+    const at = request.now ?? new Date();
+    await assertMayGrant(tx, request.session, at, { type: "case", id: target.id });
+    invitationAccessExpiry(request.role, request.accessExpiresAt, at);
     const principal = await ensurePrincipal(tx, "client", email, displayName, locale);
     await revokePending(
       tx,
       principal.id,
       ["client_access"],
-      now,
+      at,
       sql`${invitations.scope}->>'caseId' = ${request.caseId}`,
     );
-    const expiresAt = new Date(now.getTime() + invitationTtlMs);
+    const expiresAt = new Date(at.getTime() + invitationTtlMs);
     const [row] = await tx
       .insert(invitations)
       .values({
         kind: "client_access",
         principalId: principal.id,
         email,
-        scope: { caseId: request.caseId, role: request.role, capabilities: invited },
+        scope: {
+          caseId: request.caseId,
+          role: request.role,
+          capabilities: invited,
+          accessExpiresAt: accessExpiresAt?.toISOString() ?? null,
+        },
         invitedById: request.session.account.id,
         locale,
-        createdAt: now,
+        createdAt: at,
         expiresAt,
       })
       .returning({ id: invitations.id });
@@ -760,9 +774,14 @@ export async function issueClientInvitation(
         caseId: request.caseId,
         role: request.role,
         capabilities: invited,
+        accessExpiresAt: accessExpiresAt?.toISOString() ?? null,
       },
-      at: now,
+      at,
     });
+    await tx
+      .update(cases)
+      .set({ version: target.version + 1 })
+      .where(eq(cases.id, target.id));
     return { invitationId: row.id, expiresAt };
   });
 }
@@ -783,9 +802,24 @@ export async function revokeInvitation(
     row.kind === "client_access" && caseId ? { type: "case", id: caseId } : undefined,
   );
   await db.transaction(async (tx) => {
+    if (row.kind === "client_access" && caseId) {
+      const [target] = await tx
+        .select({ id: cases.id })
+        .from(cases)
+        .where(eq(cases.id, caseId))
+        .for("update");
+      if (!target) throw new AppError("not_found");
+    }
+    const at = request.now ?? new Date();
+    await assertMayGrant(
+      tx,
+      request.session,
+      at,
+      row.kind === "client_access" && caseId ? { type: "case", id: caseId } : undefined,
+    );
     const updated = await tx
       .update(invitations)
-      .set({ revokedAt: now })
+      .set({ revokedAt: at })
       .where(
         and(
           eq(invitations.id, row.id),
@@ -806,15 +840,56 @@ export async function revokeInvitation(
       recordType: "invitation",
       recordId: row.id,
       ...(request.correlationId ? { correlationId: request.correlationId } : {}),
-      at: now,
+      at,
     });
+    if (row.kind === "client_access" && caseId)
+      await tx
+        .update(cases)
+        .set({ version: sql`${cases.version} + 1` })
+        .where(eq(cases.id, caseId));
   });
 }
 
-interface ClientScope {
-  readonly caseId: string;
-  readonly role: ParticipantRole;
-  readonly capabilities: Capability[];
+const clientScopeSchema = z.object({
+  caseId: z.uuid(),
+  role: z.enum(participantRoles),
+  capabilities: z.array(z.enum(capabilities)).default([]),
+  accessExpiresAt: z.iso.datetime({ offset: true }).nullable().optional(),
+  acceptedParticipantId: z.uuid().optional(),
+});
+export type ClientInvitationScope = z.infer<typeof clientScopeSchema>;
+
+export function clientInvitationScope(value: unknown): ClientInvitationScope | null {
+  const parsed = clientScopeSchema.safeParse(value);
+  if (!parsed.success || (parsed.data.role === "specialist" && !parsed.data.accessExpiresAt))
+    return null;
+  return parsed.data;
+}
+
+function invitationAccessExpiry(
+  role: ParticipantRole,
+  value: string | null | undefined,
+  now: Date,
+) {
+  if (!value) {
+    if (role === "specialist")
+      throw new AppError("validation_failed", { fieldErrors: { accessExpiresAt: ["required"] } });
+    return null;
+  }
+  if (!z.iso.datetime({ offset: true }).safeParse(value).success || new Date(value) <= now)
+    throw new AppError("validation_failed", {
+      fieldErrors: { accessExpiresAt: ["future_expiry_required"] },
+    });
+  return new Date(value);
+}
+
+/** New acceptance may shorten existing access, never silently extend it. */
+function narrowerExpiry(invited: string | null | undefined, existing: readonly (Date | null)[]) {
+  const times = [
+    ...existing.filter((value): value is Date => value !== null).map((value) => value.getTime()),
+    ...(invited ? [new Date(invited).getTime()] : []),
+  ];
+  return times.length ? new Date(Math.min(...times)) : null;
 }
 
 export interface ClientInvitationDetails {
@@ -826,6 +901,7 @@ export interface ClientInvitationDetails {
   readonly capabilities: readonly Capability[];
   readonly recipientEmail: string;
   readonly expiresAt: Date;
+  readonly accessExpiresAt: Date | null;
 }
 
 export type ClientInvitationView =
@@ -872,7 +948,31 @@ export async function viewClientInvitation(
   if (!row) return { status: "unavailable" };
   const state = invitationState(row, now);
   if (state === "expired" || state === "revoked" || state === "declined") return { status: state };
-  const scope = row.scope as ClientScope;
+  const scope = clientInvitationScope(row.scope);
+  if (!scope) return { status: "unavailable" };
+  if (scope.accessExpiresAt && new Date(scope.accessExpiresAt) <= now) return { status: "expired" };
+  const [recipient] = await db
+    .select({ partyId: principals.partyId })
+    .from(principals)
+    .where(eq(principals.id, session.account.id));
+  if (!recipient) return { status: "unavailable" };
+  const current = await db
+    .select()
+    .from(caseParticipants)
+    .where(
+      and(
+        eq(caseParticipants.caseId, scope.caseId),
+        eq(caseParticipants.partyId, recipient.partyId),
+        eq(caseParticipants.role, scope.role),
+        isNull(caseParticipants.revokedAt),
+        lte(caseParticipants.validFrom, now),
+        or(isNull(caseParticipants.expiresAt), gt(caseParticipants.expiresAt, now)),
+        state === "accepted" && scope.acceptedParticipantId
+          ? eq(caseParticipants.id, scope.acceptedParticipantId)
+          : undefined,
+      ),
+    );
+  if (state === "accepted" && !current.length) return { status: "unavailable" };
   if (
     state === "accepted" &&
     !(await can(
@@ -906,10 +1006,27 @@ export async function viewClientInvitation(
       caseTitle: target.title,
       role: scope.role,
       capabilities: [
-        ...new Set(relationshipCapabilities(scope.role, false, scope.capabilities ?? [])),
+        ...new Set(
+          state === "accepted"
+            ? current.flatMap((participant) => {
+                const invited = (participant.scope as { capabilities?: unknown }).capabilities;
+                return relationshipCapabilities(
+                  participant.role,
+                  participant.authority === "reviewed",
+                  Array.isArray(invited)
+                    ? invited.filter((value): value is Capability => capabilities.includes(value))
+                    : [],
+                );
+              })
+            : relationshipCapabilities(scope.role, false, scope.capabilities),
+        ),
       ],
       recipientEmail: row.email,
       expiresAt: row.expiresAt,
+      accessExpiresAt: narrowerExpiry(
+        scope.accessExpiresAt,
+        current.map((participant) => participant.expiresAt),
+      ),
     },
   };
 }
@@ -934,27 +1051,34 @@ export async function respondToClientInvitation(
   if (!row) throw new AppError("not_found");
   const state = invitationState(row, now);
   if (state !== "pending") throw new AppError(stateErrors[state]);
-  const scope = row.scope as ClientScope;
+  const initialScope = clientInvitationScope(row.scope);
+  if (!initialScope) throw new AppError("not_found");
 
   return db.transaction(async (tx) => {
-    await requireLiveSession(tx, session, now);
-    const updated = await tx
-      .update(invitations)
-      .set(decision === "accept" ? { acceptedAt: now } : { declinedAt: now })
-      .where(
-        and(
-          eq(invitations.id, row.id),
-          isNull(invitations.acceptedAt),
-          isNull(invitations.declinedAt),
-          isNull(invitations.revokedAt),
-          gt(invitations.expiresAt, now),
-        ),
-      )
-      .returning({ id: invitations.id });
-    // A concurrent answer or reissue won.
-    if (!updated.length) throw new AppError("invitation_used");
+    const [target] = await tx
+      .select({ id: cases.id, version: cases.version })
+      .from(cases)
+      .where(eq(cases.id, initialScope.caseId))
+      .for("update");
+    if (!target) throw new AppError("not_found");
+    const at = options.now ?? new Date();
+    await requireLiveSession(tx, session, at);
+    const [locked] = await tx
+      .select()
+      .from(invitations)
+      .where(eq(invitations.id, row.id))
+      .for("update");
+    if (!locked || locked.principalId !== session.account.id) throw new AppError("not_found");
+    const currentState = invitationState(locked, at);
+    if (currentState !== "pending") throw new AppError(stateErrors[currentState]);
+    const scope = clientInvitationScope(locked.scope);
+    if (!scope || scope.caseId !== initialScope.caseId) throw new AppError("not_found");
+    if (scope.accessExpiresAt && new Date(scope.accessExpiresAt) <= at)
+      throw new AppError("invitation_expired");
+    let acceptedParticipantId: string | undefined;
+    let accessExpiresAt: Date | null = null;
     if (decision === "accept") {
-      if (!(await inviterStillAuthorized(tx, row, now, { type: "case", id: scope.caseId }))) {
+      if (!(await inviterStillAuthorized(tx, locked, at, { type: "case", id: scope.caseId }))) {
         throw new AppError("invitation_revoked");
       }
       const [principal] = await tx
@@ -962,8 +1086,8 @@ export async function respondToClientInvitation(
         .from(principals)
         .where(eq(principals.id, session.account.id));
       if (!principal) throw new AppError("not_found");
-      const [existing] = await tx
-        .select({ id: caseParticipants.id })
+      const existing = await tx
+        .select({ id: caseParticipants.id, expiresAt: caseParticipants.expiresAt })
         .from(caseParticipants)
         .where(
           and(
@@ -971,32 +1095,80 @@ export async function respondToClientInvitation(
             eq(caseParticipants.partyId, principal.partyId),
             eq(caseParticipants.role, scope.role),
             isNull(caseParticipants.revokedAt),
+            lte(caseParticipants.validFrom, at),
+            or(isNull(caseParticipants.expiresAt), gt(caseParticipants.expiresAt, at)),
           ),
-        );
-      if (!existing) {
-        await tx.insert(caseParticipants).values({
-          caseId: scope.caseId,
-          partyId: principal.partyId,
-          role: scope.role,
-          scope: { capabilities: scope.capabilities ?? [] },
-          validFrom: now,
-        });
+        )
+        .for("update");
+      const expiresAt = narrowerExpiry(
+        scope.accessExpiresAt,
+        existing.map((participant) => participant.expiresAt),
+      );
+      accessExpiresAt = expiresAt;
+      if (!existing.length) {
+        const [created] = await tx
+          .insert(caseParticipants)
+          .values({
+            caseId: scope.caseId,
+            partyId: principal.partyId,
+            role: scope.role,
+            scope: { capabilities: scope.capabilities ?? [] },
+            validFrom: at,
+            expiresAt,
+          })
+          .returning({ id: caseParticipants.id });
+        if (!created) throw new Error("Participation insert failed");
+        acceptedParticipantId = created.id;
       } else {
         // A replacement invitation is an explicit scope review, including any narrowing.
         await tx
           .update(caseParticipants)
-          .set({ scope: { capabilities: scope.capabilities ?? [] } })
-          .where(eq(caseParticipants.id, existing.id));
+          .set({
+            scope: { capabilities: scope.capabilities ?? [] },
+            expiresAt,
+            version: sql`${caseParticipants.version} + 1`,
+          })
+          .where(
+            inArray(
+              caseParticipants.id,
+              existing.map((participant) => participant.id),
+            ),
+          );
+        acceptedParticipantId = existing[0]?.id;
       }
     }
+    await tx
+      .update(invitations)
+      .set(
+        decision === "accept"
+          ? {
+              acceptedAt: at,
+              scope: {
+                ...scope,
+                accessExpiresAt: accessExpiresAt?.toISOString() ?? null,
+                acceptedParticipantId,
+              },
+            }
+          : { declinedAt: at },
+      )
+      .where(eq(invitations.id, locked.id));
+    await tx
+      .update(cases)
+      .set({ version: target.version + 1 })
+      .where(eq(cases.id, target.id));
     await recordAudit(tx, {
       action: decision === "accept" ? "invitation.accept" : "invitation.decline",
       actor: session.actor,
       recordType: "invitation",
       recordId: row.id,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
-      payload: { caseId: scope.caseId, role: scope.role },
-      at: now,
+      payload: {
+        caseId: scope.caseId,
+        role: scope.role,
+        accessExpiresAt: accessExpiresAt?.toISOString() ?? null,
+        participantId: acceptedParticipantId,
+      },
+      at,
     });
     return { caseId: scope.caseId };
   });

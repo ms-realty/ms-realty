@@ -13,6 +13,8 @@ import { getEnv } from "@/server/config/env";
 import { findOperation } from "@/server/operations";
 import { listTasks, readInquiry } from "@/server/work/queries";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { caseAccessCopy } from "../case-access/copy";
+import { documentRequestCopy } from "../document-requests/copy";
 import { privateRead } from "../work/screens";
 import { workflowAction } from "./actions";
 import {
@@ -254,6 +256,19 @@ export async function CaseScreen(
           {staff ? (
             <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/documents`}>
               {c.documents}
+            </a>
+          ) : null}
+          {!staff || view.canManageAccess ? (
+            <a
+              className={workflowLink}
+              href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.id}/participants`}
+            >
+              {caseAccessCopy(props.locale).title}
+            </a>
+          ) : null}
+          {view.canReadRequestedDocuments ? (
+            <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/document-requests`}>
+              {documentRequestCopy(props.locale).title}
             </a>
           ) : null}
           {view.canReviewProcess ? (
