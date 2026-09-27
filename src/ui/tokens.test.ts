@@ -59,6 +59,13 @@ const textPairs: Array<[string, string]> = [
   ["text-inverse", "error-pressed"],
   // Tooltip: inverse text on ink.
   ["text-inverse", "text"],
+  // Dark bands (footer, owner band, compare tray).
+  ["text-inverse", "ink"],
+  ["text-on-ink-muted", "ink"],
+  // Assistance: interpreted criteria and drafts.
+  ["assist", "assist-soft"],
+  ["assist", "surface"],
+  ["text", "assist-soft"],
   ["disabled-text", "disabled"],
 ] as Array<[string, string]>;
 
@@ -76,6 +83,7 @@ const nonTextPairs: Array<[string, string]> = [
   ["warning", "warning-soft"],
   ["error", "error-soft"],
   ["info", "info-soft"],
+  ["assist", "assist-soft"],
   // The focus ring is offset 2px, so it sits on the page surface, never on the button fill.
   ["disabled-text", "disabled"],
 ] as Array<[string, string]>;
@@ -102,6 +110,10 @@ describe("design tokens (spec §16.2)", () => {
       "warning",
       "error",
       "info",
+      "ink",
+      "assist",
+      "assist-soft",
+      "assist-line",
     ]) {
       expect(colors.has(role), role).toBe(true);
     }
@@ -133,6 +145,14 @@ describe("design tokens (spec §16.2)", () => {
       expect(css).toContain(`--text-${role}: ${size};`);
       expect(css).toContain(`--text-${role}--line-height: ${leading};`);
     }
+  });
+
+  it("defines the public display roles and the display face", () => {
+    expect(css).toContain("--text-display: 3.5rem;");
+    expect(css).toContain("--text-title: 2.25rem;");
+    expect(css).toMatch(/--font-display:/);
+    // Hebrew display text must reach the Hebrew face before any Latin fallback.
+    expect(css).toMatch(/:lang\(he\) \.font-display/);
   });
 
   it("honours reduced motion and forced colours", () => {

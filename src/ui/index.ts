@@ -3,6 +3,7 @@ export { announce } from "./announce";
 export { type BreadcrumbItem, Breadcrumbs } from "./breadcrumbs";
 export { Button, type ButtonProps, type ButtonVariant, buttonClass } from "./button";
 export { Checkbox, CheckboxGroup, type CheckboxGroupProps, type CheckboxProps } from "./checkbox";
+export { Chip, type ChipKind, ChipList, type ChipProps } from "./chip";
 export { ComboBox, type ComboBoxProps, type PlaceOption } from "./combobox";
 export { cx } from "./cx";
 export { DateField, type DateFieldProps, DatePicker, type DatePickerProps } from "./date-picker";
@@ -31,7 +32,7 @@ export { LoadMore, type LoadMoreProps, Pagination, type PaginationProps } from "
 export { Popover, type PopoverProps } from "./popover";
 export { type Price, PriceDisplay, type PriceDisplayProps } from "./price-display";
 export { Progress, type ProgressProps } from "./progress";
-export { PropertyCard, type PropertyCardProps } from "./property-card";
+export { type CardFact, PropertyCard, type PropertyCardProps } from "./property-card";
 export { Radio, RadioGroup, type RadioGroupProps, type RadioProps } from "./radio-group";
 export { Receipt, type ReceiptProps } from "./receipt";
 export { Select, type SelectOption, type SelectProps } from "./select";
@@ -47,7 +48,7 @@ export {
 export { Switch, type SwitchProps } from "./switch";
 export { Table, type TableColumn, type TableProps, type TableRow, type TableSort } from "./table";
 export { type TabItem, Tabs, type TabsProps } from "./tabs";
-export { TaskList, TaskRow, type TaskRowProps } from "./task-row";
+export { TaskList, TaskRow, type TaskRowProps, type TaskSeverity } from "./task-row";
 export { TextArea, type TextAreaProps, TextField, type TextFieldProps } from "./text-field";
 export { Timeline, TimelineItem, type TimelineItemProps, type TimelineKind } from "./timeline";
 export { Tooltip, type TooltipProps } from "./tooltip";

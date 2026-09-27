@@ -1,5 +1,6 @@
 import { cx } from "./cx";
 import {
+  AssistIcon,
   ErrorIcon,
   InfoIcon,
   NeutralIcon,
@@ -11,7 +12,15 @@ import {
 } from "./icons";
 
 export type StatusFamily = "availability" | "approval" | "delivery";
-export type StatusTone = "positive" | "attention" | "negative" | "info" | "pending" | "neutral";
+export type StatusTone =
+  | "positive"
+  | "attention"
+  | "negative"
+  | "info"
+  | "pending"
+  | "neutral"
+  /** Proposed by the assistant or otherwise unreviewed: a person still has to decide. */
+  | "draft";
 
 const toneText: Record<StatusTone, string> = {
   positive: "text-success",
@@ -20,6 +29,7 @@ const toneText: Record<StatusTone, string> = {
   info: "text-info",
   pending: "text-text-muted",
   neutral: "text-text-muted",
+  draft: "text-assist",
 };
 
 const toneSoft: Record<StatusTone, string> = {
@@ -29,6 +39,7 @@ const toneSoft: Record<StatusTone, string> = {
   info: "bg-info-soft",
   pending: "bg-subtle",
   neutral: "bg-subtle",
+  draft: "bg-assist-soft",
 };
 
 const toneIcon = {
@@ -38,12 +49,13 @@ const toneIcon = {
   info: InfoIcon,
   pending: PendingIcon,
   neutral: NeutralIcon,
+  draft: AssistIcon,
 } satisfies Record<StatusTone, unknown>;
 
 // Each family has its own shape so "available" and "approved" never read as the same pill:
 // availability is a soft pill, approval a bordered stamp, delivery plain inline text.
 const familyClass: Record<StatusFamily, string> = {
-  availability: "rounded-full px-2.5 py-0.5",
+  availability: "rounded-md px-2 py-0.5",
   approval: "rounded-[3px] border border-current bg-surface px-2 py-0.5",
   delivery: "",
 };
@@ -70,7 +82,8 @@ export function StatusBadge({ family, tone, label, className }: StatusBadgeProps
       className={cx(
         "inline-flex w-fit items-center gap-1.5 text-caption font-semibold",
         toneText[tone],
-        family === "availability" && toneSoft[tone],
+        (family === "availability" || tone === "draft") && toneSoft[tone],
+        tone === "draft" && "rounded-md border border-dashed border-assist-line px-2 py-0.5",
         familyClass[family],
         "forced-colors:border forced-colors:border-[CanvasText]",
         className,

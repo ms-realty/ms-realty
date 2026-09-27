@@ -16,6 +16,16 @@ const origin = z.preprocess(
     .optional(),
 );
 
+/** An http(s) base URL; a trailing slash is dropped so paths can be appended. */
+const baseUrl = z.preprocess(
+  blankAsUnset,
+  z
+    .url()
+    .refine((value) => /^https?:\/\//.test(value), "must be an http(s) URL")
+    .transform((value) => value.replace(/\/+$/, ""))
+    .optional(),
+);
+
 const optional = z
   .string()
   .trim()
@@ -43,6 +53,8 @@ const schema = z
     R2_ACCESS_KEY_ID: optional,
     R2_SECRET_ACCESS_KEY: optional,
     R2_BUCKET: optional,
+    /** Base URL public media renditions are served from (the edge's media path). */
+    MEDIA_PUBLIC_BASE_URL: baseUrl,
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === "production") {
@@ -51,6 +63,7 @@ const schema = z
         "APP_ORIGIN",
         "CANONICAL_ORIGIN",
         "AUTH_SECRET",
+        "MEDIA_PUBLIC_BASE_URL",
       ] as const) {
         if (!env[key]) ctx.addIssue({ code: "custom", path: [key], message: "is required" });
       }
@@ -84,6 +97,8 @@ export interface ServerEnv {
         readonly bucket: string;
       }
     | undefined;
+  /** Unset outside production: media then has no public URL and is not shown. */
+  readonly mediaPublicBaseUrl: string | undefined;
 }
 
 const devOrigin = "http://localhost:3000";
@@ -120,6 +135,7 @@ export function parseEnv(source: Record<string, string | undefined>): ServerEnv 
             bucket: env.R2_BUCKET,
           }
         : undefined,
+    mediaPublicBaseUrl: env.MEDIA_PUBLIC_BASE_URL,
   };
 }
 

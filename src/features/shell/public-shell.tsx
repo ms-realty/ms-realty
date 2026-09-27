@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { isolateText, Ltr } from "@/i18n/bidi";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { agencyYear } from "@/i18n/format";
-import { ButtonLink, SkipLink } from "@/ui";
+import { ButtonLink, icons, SkipLink } from "@/ui";
 import { brandPhone } from "./agency";
 import { LanguageSuggestion } from "./language-suggestion";
 import { LocaleSwitcher } from "./language-switcher";
@@ -18,7 +18,7 @@ import { languageSuggestionFor } from "./suggestion";
 export const mainId = "main";
 
 const navLinkClass =
-  "inline-flex min-h-control items-center rounded-control px-3 text-compact font-medium text-text no-underline hover:bg-subtle aria-[current=page]:font-semibold aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8";
+  "inline-flex min-h-control items-center rounded-control px-3 text-compact font-semibold text-text no-underline transition-colors duration-(--duration-fast) hover:bg-subtle aria-[current=page]:bg-selected aria-[current=page]:text-action";
 
 export async function PublicShell({
   locale,
@@ -53,8 +53,8 @@ export async function PublicShell({
       {suggestion ? (
         <LanguageSuggestion suggested={suggestion.locale} copy={suggestion.copy} />
       ) : null}
-      <header className="border-b border-divider bg-surface">
-        <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-gutter py-2 lg:px-gutter-wide">
+      <header className="sticky top-0 z-(--z-header) border-b border-divider bg-canvas/95 backdrop-blur supports-[backdrop-filter]:bg-canvas/85">
+        <div className="mx-auto flex min-h-18 max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-gutter py-2 lg:px-gutter-wide">
           <Link
             href={`/${locale}`}
             aria-label={t("home")}
@@ -71,6 +71,7 @@ export async function PublicShell({
             {utilities.map((item) => (
               <li key={item.label} className="hidden sm:block">
                 <NavLink href={item.href} className={navLinkClass}>
+                  {item.label === "saved" ? <icons.SaveIcon className="me-2" /> : null}
                   {t(item.label)}
                 </NavLink>
               </li>
@@ -80,9 +81,14 @@ export async function PublicShell({
             </li>
             {utilities.some((item) => item.label === "contact") ? null : (
               <li>
-                <ButtonLink href={`tel:${brandPhone.e164}`} variant="secondary">
-                  {footer("callLabel")}
-                  <span className="hidden text-text md:inline">
+                <ButtonLink
+                  href={`tel:${brandPhone.e164}`}
+                  variant="secondary"
+                  className="px-3 md:px-4"
+                >
+                  <icons.PhoneIcon className="size-[1.125rem]" />
+                  <span className="sr-only">{footer("callLabel")}</span>
+                  <span className="max-md:sr-only">
                     <Ltr>{brandPhone.display}</Ltr>
                   </span>
                 </ButtonLink>
@@ -100,26 +106,32 @@ export async function PublicShell({
         {children}
       </main>
       <footer className="border-t border-divider bg-surface">
-        <div className="mx-auto grid max-w-page gap-6 px-gutter py-8 text-compact sm:grid-cols-[1fr_auto] lg:px-gutter-wide">
-          <div className="flex flex-col gap-1">
-            <p className="font-semibold text-text">{footer("agencyName")}</p>
-            <p className="text-text-muted">{footer("agencyKind")}</p>
-            <p className="pt-3">
-              <span className="block text-caption text-text-muted">{footer("callLabel")}</span>
-              <a
-                href={`tel:${brandPhone.e164}`}
-                className="text-subheading font-semibold text-link"
-              >
-                {footer("call", { phone: isolateText(brandPhone.display, "ltr") })}
-              </a>
-            </p>
+        <div className="mx-auto grid max-w-page gap-10 px-gutter pt-14 pb-10 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:px-gutter-wide">
+          <div className="flex max-w-sm flex-col gap-3">
+            <Image
+              src="/brand/logo-ms-realty.png"
+              alt={footer("agencyName")}
+              width={86}
+              height={44}
+            />
+            <p className="text-compact text-text-muted">{footer("agencyKind")}</p>
+            <a
+              href={`tel:${brandPhone.e164}`}
+              className="inline-flex w-fit items-center gap-2 text-compact font-semibold text-link no-underline hover:underline"
+            >
+              <icons.PhoneIcon className="size-[1.125rem]" />
+              {footer("call", { phone: isolateText(brandPhone.display, "ltr") })}
+            </a>
           </div>
           {footerLinks.length > 0 ? (
-            <nav>
-              <ul className="flex flex-col gap-1">
+            <nav aria-label={footer("label")}>
+              <ul className="grid gap-2.5 sm:grid-cols-2">
                 {footerLinks.map((item) => (
                   <li key={item.label}>
-                    <NavLink href={item.href} className="text-link">
+                    <NavLink
+                      href={item.href}
+                      className="text-compact text-text no-underline hover:underline"
+                    >
                       {footer(item.label)}
                     </NavLink>
                   </li>
@@ -127,7 +139,7 @@ export async function PublicShell({
               </ul>
             </nav>
           ) : null}
-          <p className="text-caption text-text-muted sm:col-span-2">
+          <p className="border-t border-divider pt-6 text-caption text-text-muted sm:col-span-2">
             {footer("copyright", { year: agencyYear() })}
           </p>
         </div>

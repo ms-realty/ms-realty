@@ -2,30 +2,57 @@
 // Calendar; secondary: Content & approvals · Service operations · Reports · Settings. On
 // phones Today, Inbox and Calendar stay on screen and the rest sits under More.
 
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { localeEndonyms, type StaffLocale, staffLocales } from "@/i18n/config";
-import { Button, Select, SkipLink } from "@/ui";
+import { Button, cx, icons, Select, SkipLink } from "@/ui";
 import { MenuDisclosure } from "./menu-disclosure";
 import { NavLink } from "./nav-link";
-import { linked, workspacePrimaryNav, workspaceSecondaryNav } from "./navigation";
+import {
+  linked,
+  type WorkspaceNavLabel,
+  workspacePrimaryNav,
+  workspaceSecondaryNav,
+} from "./navigation";
 import { setStaffLocale } from "./staff-locale-action";
 
 export const workspaceMainId = "main";
 
-const sideLinkClass =
-  "flex min-h-control items-center rounded-control px-3 text-operational font-medium text-text-inverse no-underline hover:bg-white/10 focus-visible:outline-white aria-[current=page]:bg-white/15 aria-[current=page]:font-semibold";
+const sideLinkClass = cx(
+  "flex min-h-10 items-center gap-2.5 rounded-lg border border-transparent px-2.5 text-operational font-medium text-text no-underline",
+  "transition-colors duration-(--duration-fast) hover:bg-divider",
+  "aria-[current=page]:border-divider aria-[current=page]:bg-surface aria-[current=page]:shadow-raised",
+);
+
+const navIcons: Partial<Record<WorkspaceNavLabel, typeof icons.HomeIcon>> = {
+  today: icons.HomeIcon,
+  inbox: icons.InboxIcon,
+  cases: icons.CaseIcon,
+  properties: icons.BuildingIcon,
+  calendar: icons.CalendarIcon,
+  contentApprovals: icons.StampIcon,
+  serviceOperations: icons.FolderIcon,
+  reports: icons.HistoryIcon,
+  settings: icons.FiltersIcon,
+};
 const tabLinkClass =
   "inline-flex min-h-control items-center border-b-2 border-transparent px-3 text-operational font-medium text-text no-underline aria-[current=page]:border-action aria-[current=page]:font-semibold aria-[current=page]:text-action";
 
 export async function WorkspaceShell({
   locale,
   search,
+  counts,
+  account,
   children,
 }: {
   locale: StaffLocale;
   /** Global search over authorized records (§06.3); supplied once search exists. */
   search?: ReactNode;
+  /** Owned, actionable work per destination: navigation aids, never decoration (L07). */
+  counts?: Partial<Record<WorkspaceNavLabel, number>>;
+  /** Signed-in operator: name and office. */
+  account?: { name: string; detail?: string };
   children: ReactNode;
 }) {
   const t = await getTranslations({ locale, namespace: "nav.workspace" });
@@ -35,11 +62,11 @@ export async function WorkspaceShell({
   const secondary = linked(workspaceSecondaryNav);
   const mobileMore = [...primary.filter((item) => !item.mobilePrimary), ...secondary];
 
-  // Design-system controls are drawn for light surfaces, so the form keeps its own panel.
+  // A preference, not a destination: it sits behind a disclosure under the account.
   const languageForm = (
     <form
       action={setStaffLocale}
-      className="flex flex-col gap-3 rounded-card bg-surface p-3 text-text"
+      className="flex flex-col gap-3 rounded-card border border-divider bg-surface p-3 text-text"
     >
       <Select
         name="locale"
@@ -57,15 +84,27 @@ export async function WorkspaceShell({
     </form>
   );
 
-  const list = (items: typeof primary, className: string) => (
+  const list = (items: typeof primary, className: string, withIcons = false) => (
     <ul className="flex flex-col gap-0.5">
-      {items.map((item) => (
-        <li key={item.label}>
-          <NavLink href={item.href} exact={item.href === "/workspace"} className={className}>
-            {t(item.label)}
-          </NavLink>
-        </li>
-      ))}
+      {items.map((item) => {
+        const Icon = withIcons ? navIcons[item.label] : null;
+        const count = counts?.[item.label];
+        return (
+          <li key={item.label}>
+            <NavLink href={item.href} exact={item.href === "/workspace"} className={className}>
+              {Icon ? (
+                <Icon className="size-[1.125rem] text-text-muted group-data-current:text-action" />
+              ) : null}
+              <span className="flex-1">{t(item.label)}</span>
+              {count ? (
+                <span className="min-w-6 rounded-full bg-subtle px-1.5 text-center text-caption font-semibold text-text-muted tabular-nums group-data-current:bg-action group-data-current:text-text-inverse">
+                  {count}
+                </span>
+              ) : null}
+            </NavLink>
+          </li>
+        );
+      })}
     </ul>
   );
 
@@ -73,20 +112,54 @@ export async function WorkspaceShell({
     <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
       <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
 
-      {/* Wide screens: persistent side navigation. */}
-      <header className="hidden bg-text text-text-inverse lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-6 lg:overflow-y-auto lg:p-4">
-        <p className="px-3 pt-2">
-          <span className="block text-subheading font-semibold">{common("brand")}</span>
-          <span className="block text-caption text-white/80">{t("label")}</span>
+      {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
+      <header className="hidden border-e border-divider bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto lg:px-3 lg:py-4">
+        <p className="flex items-center gap-2.5 px-2">
+          <Image src="/brand/logo-ms-realty.png" alt={common("brand")} width={56} height={29} />
+          <span className="text-dense font-medium text-text-muted">{t("label")}</span>
         </p>
         {search ? <search aria-label={t("search")}>{search}</search> : null}
-        <nav aria-label={t("label")}>{list(primary, sideLinkClass)}</nav>
+        <nav aria-label={t("label")}>{list(primary, sideLinkClass, true)}</nav>
         {secondary.length > 0 ? (
-          <nav aria-label={t("secondaryLabel")} className="border-t border-white/20 pt-4">
-            {list(secondary, sideLinkClass)}
+          <nav aria-label={t("secondaryLabel")} className="border-t border-divider pt-4">
+            {list(secondary, sideLinkClass, true)}
           </nav>
         ) : null}
-        <div className="mt-auto border-t border-white/20 px-1 pt-4">{languageForm}</div>
+        <div className="mt-auto flex flex-col gap-3 border-t border-divider pt-4">
+          {account ? (
+            <p className="flex items-center gap-2.5 px-2">
+              <span
+                aria-hidden="true"
+                className="inline-flex size-8 items-center justify-center rounded-full bg-selected text-dense font-semibold text-action"
+              >
+                {initials(account.name)}
+              </span>
+              <span className="flex flex-col">
+                <span className="text-operational font-medium text-text">{account.name}</span>
+                {account.detail ? (
+                  <span className="text-caption text-text-muted">{account.detail}</span>
+                ) : null}
+              </span>
+            </p>
+          ) : null}
+          <MenuDisclosure
+            quiet
+            label={
+              <span className="flex items-center gap-2.5">
+                <icons.LanguageIcon className="size-[1.125rem] text-text-muted" />
+                <span className="flex flex-col">
+                  <span className="text-caption font-normal text-text-muted">
+                    {t("interfaceLanguage")}
+                  </span>
+                  <span className="text-operational">{localeEndonyms[locale]}</span>
+                </span>
+              </span>
+            }
+            panelClassName="pt-2"
+          >
+            {languageForm}
+          </MenuDisclosure>
+        </div>
       </header>
 
       {/* Phones and tablets: brand bar, Today/Inbox/Calendar tabs, everything else under More. */}
@@ -132,4 +205,13 @@ export async function WorkspaceShell({
       </main>
     </div>
   );
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }

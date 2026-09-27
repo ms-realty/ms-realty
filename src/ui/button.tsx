@@ -12,13 +12,14 @@ const variants: Record<ButtonVariant, string> = {
   primary: cx(
     "border-transparent bg-action text-text-inverse data-hovered:bg-action-hover data-pressed:bg-action-pressed",
   ),
+  // Neutral edge at rest; the action colour arrives on hover so one primary stays dominant.
   secondary: cx(
-    "border-action bg-surface text-action data-hovered:bg-selected",
+    "border-border bg-surface text-action data-hovered:border-action data-hovered:bg-selected",
     "data-pressed:border-action-pressed data-pressed:bg-selected data-pressed:text-action-pressed",
   ),
   tertiary: cx(
-    "border-transparent bg-transparent text-action underline decoration-1 underline-offset-4",
-    "data-hovered:bg-subtle data-pressed:bg-selected",
+    "border-transparent bg-transparent text-action",
+    "data-hovered:bg-subtle data-pressed:bg-divider",
   ),
   destructive: cx(
     "border-transparent bg-error text-text-inverse data-hovered:bg-error-hover data-pressed:bg-error-pressed",
@@ -28,7 +29,7 @@ const variants: Record<ButtonVariant, string> = {
 export const buttonClass = (variant: ButtonVariant = "primary", className?: string) =>
   cx(
     "inline-flex min-h-control min-w-control select-none items-center justify-center gap-2 rounded-control border px-5 py-2",
-    "text-compact font-semibold transition-colors duration-(--duration-fast) cursor-pointer",
+    "text-compact font-semibold transition-[color,background-color,border-color,box-shadow] duration-(--duration-fast) ease-(--ease-out) cursor-pointer",
     variants[variant],
     "data-pending:cursor-wait",
     "data-disabled:cursor-not-allowed data-disabled:border-disabled data-disabled:bg-disabled data-disabled:text-disabled-text data-disabled:no-underline",

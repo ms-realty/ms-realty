@@ -23,15 +23,21 @@ export function LanguageSwitcher({ label, current, options }: LanguageSwitcherPr
   const currentOption = options.find((option) => option.locale === current);
   return (
     <DialogTrigger>
-      <Button className="inline-flex min-h-control cursor-pointer items-center gap-2 rounded-control border border-transparent px-3 text-compact font-semibold text-text data-hovered:bg-subtle data-pressed:bg-selected">
+      <Button className="inline-flex min-h-control cursor-pointer items-center gap-1.5 rounded-control border border-transparent px-2.5 sm:gap-2 sm:px-3 text-compact font-semibold text-text data-hovered:bg-subtle data-pressed:bg-selected">
         <LanguageIcon />
         <VisuallyHidden>{label}: </VisuallyHidden>
-        <span lang={current}>{currentOption?.endonym ?? current}</span>
+        {/* Narrow screens show the code; the endonym stays the accessible text. */}
+        <span lang={current} className="max-sm:sr-only">
+          {currentOption?.endonym ?? current}
+        </span>
+        <span aria-hidden="true" className="uppercase sm:hidden">
+          {current}
+        </span>
         <ChevronDownIcon className="size-4 text-text-muted" />
       </Button>
       <Popover
         offset={4}
-        className="z-(--z-popover) min-w-48 rounded-control border border-border bg-surface py-1 shadow-overlay"
+        className="z-(--z-popover) min-w-48 rounded-card border border-divider bg-surface py-1.5 shadow-overlay"
       >
         <Dialog aria-label={label} className="outline-none">
           <ul>

@@ -19,6 +19,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "import:legacy": "tsx src/db/import/cli.ts",
+    "staff:create": "tsx --conditions=react-server src/server/staff/cli.ts",
+    "listings:publish": "tsx --conditions=react-server src/server/listings/cli.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run e2e"
   },
   "dependencies": {

@@ -96,6 +96,7 @@ describe("session cookie", () => {
       APP_ORIGIN: origin,
       CANONICAL_ORIGIN: origin,
       AUTH_SECRET: "s".repeat(32),
+      MEDIA_PUBLIC_BASE_URL: `${origin}/media`,
     });
     const cookie = sessionSetCookie(env, "tok", new Date("2026-10-01T00:00:00Z"));
     expect(cookie).toBe(

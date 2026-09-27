@@ -341,8 +341,15 @@ test.describe("workspace shell (§06.3)", () => {
 
   test("changing the interface language keeps the address", async ({ page }) => {
     await page.goto("/workspace");
+    // Phones keep the preference under More; wide screens keep it under the account.
     const more = page.getByRole("button", { name: "Още" });
     if (await more.isVisible()) await more.click();
+    else
+      await page
+        .getByRole("button", { name: /Език на интерфейса/ })
+        .filter({ visible: true })
+        .first()
+        .click();
     const form = page.locator("form:visible");
     await form.getByRole("button", { name: /Език на интерфейса/ }).click();
     await page.getByRole("option", { name: "English" }).click();
