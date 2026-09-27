@@ -135,6 +135,7 @@ export async function offerContext(
   caseId: string,
   interestId: string,
   clientPartyId?: string,
+  additionalPartyIds: readonly string[] = [],
 ) {
   const [interest] = await db
     .select()
@@ -197,14 +198,29 @@ export async function offerContext(
     throw new AppError("validation_failed", {
       fieldErrors: { clientPartyId: ["current_principal_party_required"] },
     });
+  const selectedIds = buyer
+    ? [buyer.partyId, ...additionalPartyIds.filter((id) => id !== buyer.partyId).sort()]
+    : [];
+  if (
+    selectedIds.length > 19 ||
+    new Set(selectedIds).size !== selectedIds.length ||
+    selectedIds.some((id) => id === owner.id || !buyers.some((p) => p.partyId === id))
+  )
+    throw new AppError("validation_failed", {
+      fieldErrors: { additionalPartyIds: ["current_principal_party_required"] },
+    });
   const snapshot: ProposalParty[] = buyer
     ? [
-        {
-          partyId: buyer.partyId,
-          name: buyer.name,
-          role: buyer.role as "buyer" | "co_buyer" | "tenant",
-          required: true,
-        },
+        ...selectedIds.map((partyId) => {
+          const party = buyers.find((p) => p.partyId === partyId);
+          if (!party) throw new AppError("validation_failed");
+          return {
+            partyId,
+            name: party.name,
+            role: party.role as "buyer" | "co_buyer" | "tenant",
+            required: true as const,
+          };
+        }),
         {
           partyId: owner.id,
           name: owner.name,
@@ -247,7 +263,16 @@ export async function validProposalSource(
   if (!snapshot.success) throw new AppError("approval_stale");
   const buyer = snapshot.data.find((p) => ["buyer", "co_buyer", "tenant"].includes(p.role));
   if (!buyer) throw new AppError("approval_stale");
-  const context = await offerContext(db, proposal.caseId, proposal.interestId, buyer.partyId);
+  const additional = snapshot.data
+    .filter((p) => ["buyer", "co_buyer", "tenant"].includes(p.role) && p.partyId !== buyer.partyId)
+    .map((p) => p.partyId);
+  const context = await offerContext(
+    db,
+    proposal.caseId,
+    proposal.interestId,
+    buyer.partyId,
+    additional,
+  );
   if (
     context.listing.id !== proposal.listingId ||
     context.published.listingRevisionId !== revision.sourceListingRevisionId ||

@@ -26,16 +26,23 @@ import {
 } from "./shared";
 import { partySnapshotsSchema, termInputSchema } from "./terms";
 
+const additionalParties = z
+  .array(z.uuid())
+  .max(18)
+  .refine((ids) => new Set(ids).size === ids.length, "duplicate_party")
+  .optional();
 const createSchema = z.object({
   ...commandEnvelope,
   interestId: z.uuid(),
   clientPartyId: z.uuid(),
+  additionalPartyIds: additionalParties,
   ...termInputSchema.shape,
 });
 const revisionSchema = z.object({
   ...commandEnvelope,
   revisionId: z.uuid(),
   clientPartyId: z.uuid(),
+  additionalPartyIds: additionalParties,
   reason: z.string().trim().min(3).max(1500),
   ...termInputSchema.shape,
 });
@@ -138,7 +145,13 @@ export async function createProposal(
       const { row } = await authorize(ctx.tx, true);
       version(row, input.expectedVersion);
       if (row.disposition !== "active") throw new AppError("transition_denied");
-      const context = await offerContext(ctx.tx, row.id, input.interestId, input.clientPartyId);
+      const context = await offerContext(
+        ctx.tx,
+        row.id,
+        input.interestId,
+        input.clientPartyId,
+        input.additionalPartyIds,
+      );
       await assertCan(ctx.tx, live.actor, "listing.read", {
         type: "listing",
         id: context.listing.id,
@@ -221,6 +234,7 @@ export async function reviseProposal(
       if (!proposal.interestId) throw new AppError("transition_denied");
       if (termsDigest(revision) !== revision.termsHash) throw new AppError("approval_stale");
       const client = live.account.kind === "client";
+      let additionalPartyIds = input.additionalPartyIds ?? [];
       if (client) {
         currentRevision(revision, input.revisionId);
         allow(proposalMachine.check(revision.state, "countered"));
@@ -228,6 +242,19 @@ export async function reviseProposal(
         const priorParties = partySnapshotsSchema.parse(revision.parties);
         const buyer = priorParties.find((p) => ["buyer", "co_buyer", "tenant"].includes(p.role));
         if (!buyer || input.clientPartyId !== buyer.partyId) throw new AppError("forbidden");
+        const priorAdditional = priorParties
+          .filter(
+            (p) => ["buyer", "co_buyer", "tenant"].includes(p.role) && p.partyId !== buyer.partyId,
+          )
+          .map((p) => p.partyId)
+          .sort();
+        if (
+          input.additionalPartyIds &&
+          hashRequest([...input.additionalPartyIds].filter((id) => id !== buyer.partyId).sort()) !==
+            hashRequest(priorAdditional)
+        )
+          throw new AppError("forbidden");
+        additionalPartyIds = priorAdditional;
         const [existing] = await ctx.tx
           .select({ id: proposalResponses.id })
           .from(proposalResponses)
@@ -244,6 +271,7 @@ export async function reviseProposal(
         proposal.caseId,
         proposal.interestId,
         input.clientPartyId,
+        additionalPartyIds,
       );
       if (client && hashRequest(context.snapshot) !== hashRequest(revision.parties))
         throw new AppError("approval_stale");

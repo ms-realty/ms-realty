@@ -169,6 +169,13 @@ export async function NewProposalScreen(
             required: true,
             options: context.buyers.map((p) => ({ value: p.partyId, label: p.name })),
           },
+          {
+            name: "additionalPartyIds",
+            label: c.additionalParties,
+            hint: c.additionalHint,
+            type: "checkbox-group",
+            options: context.buyers.map((p) => ({ value: p.partyId, label: p.name })),
+          },
           ...termFields(props.locale),
         ]}
         values={{
@@ -408,12 +415,29 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                     options: buyers.map((p) => ({ value: p.partyId, label: p.name })),
                   }
                 : { name: "clientPartyId", label: "", type: "hidden" },
+              staff
+                ? {
+                    name: "additionalPartyIds",
+                    label: c.additionalParties,
+                    hint: c.additionalHint,
+                    type: "checkbox-group",
+                    options: buyers.map((p) => ({ value: p.partyId, label: p.name })),
+                  }
+                : { name: "additionalPartyIds", label: "", type: "hidden" },
               ...termFields(props.locale),
               { name: "reason", label: c.reason, type: "textarea", required: true },
             ]}
             values={{
               ...revisionValues,
               clientPartyId: buyer?.partyId ?? "",
+              additionalPartyIds: row.parties
+                .filter(
+                  (p) =>
+                    ["buyer", "co_buyer", "tenant"].includes(p.role) &&
+                    p.partyId !== buyer?.partyId,
+                )
+                .map((p) => p.partyId)
+                .join("\n"),
               amount: (row.amountMinor / 100).toFixed(2),
               currency: row.currency,
               period: row.period,

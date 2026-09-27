@@ -6,6 +6,7 @@ import postgres from "postgres";
 import * as schema from "@/db/schema";
 import { digestOf, LocalFileStorage } from "../files/storage";
 import { nextReference } from "../references";
+import { createClient } from "../testing";
 import { prepareProposalAgreement, proposalCounterparty, proposalFixture } from "./testing";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -38,6 +39,18 @@ try {
       .where(eq(schema.sellerInstructions.listingId, f.listing.listingId));
     return f;
   });
+  const coParty = process.argv.includes("--co-party")
+    ? await createClient(db, { email: `coparty-${randomUUID()}@example.test` })
+    : null;
+  if (coParty) {
+    await db
+      .update(schema.parties)
+      .set({ displayName: "Synthetic additional buyer" })
+      .where(eq(schema.parties.id, coParty.partyId));
+    await db
+      .insert(schema.caseParticipants)
+      .values({ caseId: f.record.id, partyId: coParty.partyId, role: "co_buyer" });
+  }
   const seller = await proposalCounterparty(db, f);
   await prepareProposalAgreement(db, f);
   const [document] = await db
@@ -87,6 +100,7 @@ try {
     .returning();
   console.log(
     JSON.stringify({
+      coPartyId: coParty?.partyId ?? null,
       proposalId: f.proposal.id,
       revisionId: f.revision.id,
       caseId: f.record.id,

@@ -7,7 +7,15 @@ import { workCopy } from "../work/copy";
 export type WorkflowField = {
   name: string;
   label: string;
-  type?: "textarea" | "text" | "datetime-local" | "number" | "checkbox" | "select" | "hidden";
+  type?:
+    | "textarea"
+    | "text"
+    | "datetime-local"
+    | "number"
+    | "checkbox"
+    | "checkbox-group"
+    | "select"
+    | "hidden";
   hint?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
@@ -48,6 +56,50 @@ export function WorkflowForm({
             const errorId = field.error ? `${field.id}-error` : undefined;
             const hintId = definition.hint ? `${field.id}-hint` : undefined;
             const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
+            if (definition.type === "checkbox-group") {
+              const selected = field.value.split("\n").filter(Boolean);
+              return (
+                <fieldset
+                  key={field.name}
+                  id={field.id}
+                  tabIndex={-1}
+                  className={fieldClass}
+                  aria-invalid={Boolean(field.error) || undefined}
+                  aria-describedby={describedBy}
+                  disabled={field.readOnly}
+                >
+                  <legend className="font-semibold">{definition.label}</legend>
+                  {definition.hint ? <p id={hintId}>{definition.hint}</p> : null}
+                  {definition.options?.map((option) => (
+                    <label key={option.value} className="flex min-h-control items-center gap-3">
+                      <input
+                        type="checkbox"
+                        name={field.name}
+                        value={option.value}
+                        checked={selected.includes(option.value)}
+                        onChange={(e) =>
+                          form.setValue(
+                            field.name,
+                            (e.target.checked
+                              ? [...selected, option.value]
+                              : selected.filter((value) => value !== option.value)
+                            ).join("\n"),
+                          )
+                        }
+                        aria-invalid={Boolean(field.error) || undefined}
+                        className="size-5"
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                  {field.error ? (
+                    <p id={errorId} className="text-error">
+                      {field.error}
+                    </p>
+                  ) : null}
+                </fieldset>
+              );
+            }
             if (definition.type === "select")
               return (
                 <div key={field.name} className={fieldClass}>

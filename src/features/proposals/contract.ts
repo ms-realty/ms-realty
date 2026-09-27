@@ -10,6 +10,7 @@ export const proposalTypes = {
 export type ProposalCommand = keyof typeof proposalTypes;
 const terms = [
   "clientPartyId",
+  "additionalPartyIds",
   "amount",
   "currency",
   "period",

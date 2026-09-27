@@ -48,6 +48,12 @@ export async function proposalAction(
   const fields = proposalFields[command],
     values = readFormValues<FormValues>(data, fields),
     envelope = readFormEnvelope(data, scope);
+  if (command === "create" || command === "revise")
+    values.additionalPartyIds = data
+      .getAll("additionalPartyIds")
+      .flatMap((value) => (typeof value === "string" ? value.split("\n") : []))
+      .filter(Boolean)
+      .join("\n");
   const operationId = envelope?.operationId ?? issueFormOperation(scope);
   const status = { href: proposalStatus(locale, command, id, operationId), label: c.status };
   const state: FormState<FormValues> = {
@@ -71,6 +77,7 @@ export async function proposalAction(
       };
       const terms = {
         clientPartyId: values.clientPartyId ?? "",
+        additionalPartyIds: (values.additionalPartyIds ?? "").split("\n").filter(Boolean),
         amountMinor: amountToMinor(values.amount ?? ""),
         currency: values.currency as "EUR",
         period: values.period as "total",

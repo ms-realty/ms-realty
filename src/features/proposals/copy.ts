@@ -9,6 +9,9 @@ const en = {
   terms: "Exact terms",
   parties: "Parties to this revision",
   buyer: "Buyer or tenant",
+  additionalParties: "Additional buyers or tenants",
+  additionalHint:
+    "Select every additional party whose agreement is required. The primary party is included automatically. Changing the parties requires a new review.",
   seller: "Recorded seller or landlord",
   amount: "Amount",
   currency: "Currency",
@@ -75,6 +78,9 @@ const bg: Copy = {
   terms: "Точни условия",
   parties: "Страни по тази версия",
   buyer: "Купувач или наемател",
+  additionalParties: "Допълнителни купувачи или наематели",
+  additionalHint:
+    "Изберете всички допълнителни страни, чието съгласие е необходимо. Основната страна се включва автоматично. Промяната на страните изисква нов преглед.",
   seller: "Записан продавач или наемодател",
   amount: "Сума",
   currency: "Валута",
@@ -120,6 +126,9 @@ const ru: Copy = {
   terms: "Точные условия",
   parties: "Стороны этой версии",
   buyer: "Покупатель или арендатор",
+  additionalParties: "Дополнительные покупатели или арендаторы",
+  additionalHint:
+    "Выберите все дополнительные стороны, согласие которых необходимо. Основная сторона включается автоматически. Изменение состава требует новой проверки.",
   seller: "Записанный продавец или арендодатель",
   amount: "Сумма",
   currency: "Валюта",
