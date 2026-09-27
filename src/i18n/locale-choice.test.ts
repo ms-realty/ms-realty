@@ -5,7 +5,7 @@ const navigation = () =>
   new Headers({
     "sec-fetch-site": "same-origin",
     "sec-fetch-dest": "document",
-    "sec-fetch-user": "?1",
+    "sec-fetch-mode": "navigate",
   });
 describe("explicit locale choice with private sign-in referrer protection", () => {
   it("remembers a same-origin user navigation without sending a private referrer", () => {
@@ -21,9 +21,9 @@ describe("explicit locale choice with private sign-in referrer protection", () =
   });
   it("excludes background, non-document and unsupported staff locale requests", () => {
     const headers = navigation();
-    headers.delete("sec-fetch-user");
+    headers.delete("sec-fetch-mode");
     expect(explicitLocaleChoice(headers, "/en/access", "staff")).toBeNull();
-    headers.set("sec-fetch-user", "?1");
+    headers.set("sec-fetch-mode", "navigate");
     headers.set("sec-fetch-dest", "empty");
     expect(explicitLocaleChoice(headers, "/en/access", "staff")).toBeNull();
     expect(explicitLocaleChoice(navigation(), "/de/access", "staff")).toBeNull();

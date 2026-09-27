@@ -14,7 +14,7 @@ export function explicitLocaleChoice(
   if (headers.get("sec-fetch-dest") !== "document") return null;
   const referer = headers.get("referer");
   if (!referer)
-    return context !== "public" && headers.get("sec-fetch-user") === "?1" ? target : null;
+    return context !== "public" && headers.get("sec-fetch-mode") === "navigate" ? target : null;
   try {
     const source = new URL(referer).pathname.split("/")[1] ?? "";
     return valid(source) && source !== target ? target : null;
