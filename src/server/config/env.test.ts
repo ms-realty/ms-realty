@@ -7,6 +7,9 @@ const production = {
   DATABASE_URL: "postgres://app@db/app",
   APP_ORIGIN: "https://makler-realty.com/",
   CANONICAL_ORIGIN: "https://makler-realty.com",
+  PUBLIC_ORIGIN: "https://makler-realty.com",
+  CLIENT_ORIGIN: "https://my.makler-realty.com",
+  STAFF_ORIGIN: "https://app.makler-realty.com",
   AUTH_SECRET: "x".repeat(32),
   MEDIA_PUBLIC_BASE_URL: "https://makler-realty.com/media/",
 };
@@ -19,6 +22,11 @@ describe("parseEnv", () => {
       appOrigin: "http://localhost:3000",
       canonicalOrigin: "http://localhost:3000",
       webauthn: { rpId: "localhost", rpName: "MS Realty" },
+      hosts: {
+        public: "http://localhost:3000",
+        client: "http://my.localhost:3000",
+        staff: "http://app.localhost:3000",
+      },
       r2: undefined,
     });
     expect(env.authSecret.length).toBeGreaterThanOrEqual(32);
@@ -28,6 +36,11 @@ describe("parseEnv", () => {
     expect(parseEnv(production)).toMatchObject({
       production: true,
       appOrigin: "https://makler-realty.com",
+      hosts: {
+        public: "https://makler-realty.com",
+        client: "https://my.makler-realty.com",
+        staff: "https://app.makler-realty.com",
+      },
       webauthn: { rpId: "makler-realty.com" },
       mediaPublicBaseUrl: "https://makler-realty.com/media",
     });
@@ -41,6 +54,10 @@ describe("parseEnv", () => {
     );
     expect(() => parseEnv({ ...production, APP_ORIGIN: "http://makler-realty.com" })).toThrow(
       /APP_ORIGIN must be https/,
+    );
+    expect(() => parseEnv({ ...production, STAFF_ORIGIN: "" })).toThrow(/STAFF_ORIGIN is required/);
+    expect(() => parseEnv({ ...production, CLIENT_ORIGIN: "http://my.makler-realty.com" })).toThrow(
+      /CLIENT_ORIGIN must be https/,
     );
     try {
       parseEnv({ ...production, AUTH_SECRET: "short-secret-value" });

@@ -358,34 +358,6 @@ describe("database schema (architecture §4)", () => {
       },
       "listingRevisionId",
     );
-    await roundTrip(
-      s.listingSearchDocuments,
-      {
-        listingId: listing.id,
-        reference: "MS-00100",
-        purpose: "sale",
-        propertyType: "apartment",
-        commercialState: "available",
-        placeIds: [bulgaria.id, sandanski.id],
-        priceState: "known",
-        priceAmountMinor: 9_500_000,
-        priceCurrency: "EUR",
-        pricePeriod: "total",
-        priceBasis: "asking",
-        bedroomsState: "conflicting",
-        roomsState: "known",
-        rooms: 3,
-        livingAreaState: "known",
-        livingArea: "68.00",
-        builtAreaState: "unknown",
-        totalAreaState: "unknown",
-        landAreaState: "not_applicable",
-        features: { lift: "false" },
-        searchText: "MS-00100 Сандански Sandanski апартамент",
-      },
-      "listingId",
-    );
-
     // Approvals, localized copy and publication.
     const editorial = await roundTrip(s.approvals, {
       kind: "editorial",
@@ -454,6 +426,35 @@ describe("database schema (architecture §4)", () => {
       activatedAt: at,
       activatedById: staff.id,
     });
+    await roundTrip(
+      s.listingSearchDocuments,
+      {
+        listingId: listing.id,
+        locale: "en",
+        manifestId: manifest.id,
+        reference: "MS-00100",
+        purpose: "sale",
+        propertyType: "apartment",
+        placeIds: [bulgaria.id, sandanski.id],
+        priceState: "known",
+        priceAmountMinor: 9_500_000,
+        priceCurrency: "EUR",
+        pricePeriod: "total",
+        priceBasis: "asking",
+        bedroomsState: "conflicting",
+        roomsState: "known",
+        rooms: 3,
+        livingAreaState: "known",
+        livingArea: "68.00",
+        builtAreaState: "unknown",
+        totalAreaState: "unknown",
+        landAreaState: "not_applicable",
+        features: { lift: "false" },
+        searchText: "MS-00100 Сандански Sandanski апартамент",
+      },
+      "listingId",
+    );
+
     const operation = await roundTrip(s.operations, {
       actorKind: "staff",
       actorId: staff.id,

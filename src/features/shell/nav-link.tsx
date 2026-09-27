@@ -1,6 +1,5 @@
 "use client";
 
-import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -17,14 +16,14 @@ export function NavLink({
   href: string;
   children: ReactNode;
   className?: string;
-  /** Match only this path, not its descendants (for section roots like /workspace). */
+  /** Match only this path, not its descendants (for section roots). */
   exact?: boolean;
 }) {
   const pathname = usePathname();
   const current = pathname === href || (!exact && pathname.startsWith(`${href}/`));
   return (
     <Link
-      href={href as Route}
+      href={href}
       aria-current={current ? "page" : undefined}
       className={cx("group", className)}
       data-current={current || undefined}

@@ -5,6 +5,8 @@
     "homeHeading": "MS Realty",
     "homeIntro": "Vastgoed kopen, huren, verkopen of verhuren met het team van MS Realty.",
     "workspaceHeading": "Vandaag",
+    "clientAccessHeading": "Inloggen bij Mijn traject",
+    "staffAccessHeading": "Aanmelden voor medewerkers",
     "languageSuggestion": {
       "label": "Taalsuggestie",
       "message": "Deze pagina is ook in het Nederlands beschikbaar.",
@@ -40,18 +42,17 @@
       "label": "Werkruimte",
       "secondaryLabel": "Beheer",
       "today": "Vandaag",
-      "inbox": "Inbox",
+      "inquiries": "Aanvragen",
       "cases": "Dossiers",
-      "properties": "Woningen",
       "calendar": "Agenda",
-      "contentApprovals": "Inhoud & goedkeuringen",
-      "serviceOperations": "Servicebeheer",
-      "reports": "Rapporten",
+      "inventory": "Aanbod",
+      "reviews": "Beoordelingen",
+      "content": "Inhoud",
+      "operations": "Bedrijfsvoering",
       "settings": "Instellingen",
       "more": "Meer",
       "search": "Records doorzoeken",
-      "interfaceLanguage": "Taal van de interface",
-      "applyLanguage": "Toepassen"
+      "interfaceLanguage": "Taal van de interface"
     }
   },
   "footer": {
@@ -66,7 +67,10 @@
     "copyright": "© {year} MS Realty"
   },
   "states": {
-    "loading": { "title": "Laden", "body": "De actuele informatie wordt geladen." },
+    "loading": {
+      "title": "Laden",
+      "body": "De actuele informatie wordt geladen."
+    },
     "refreshing": {
       "title": "Bijwerken",
       "body": "U ziet de eerder geladen informatie terwijl de pagina wordt bijgewerkt."
@@ -83,7 +87,10 @@
       "title": "Sommige onderdelen zijn niet geladen",
       "body": "De rest van de pagina is actueel. Probeer de ontbrekende onderdelen opnieuw."
     },
-    "stale": { "title": "Mogelijk niet actueel", "body": "Laatst bevestigd: {date}." },
+    "stale": {
+      "title": "Mogelijk niet actueel",
+      "body": "Laatst bevestigd: {date}."
+    },
     "permissionLimited": {
       "title": "U hebt hier geen toegang toe",
       "body": "Vraag de beheerder om u toegang te geven."
@@ -124,7 +131,10 @@
       "title": "Concept opgeslagen",
       "body": "Opgeslagen {time}. Niet verzonden of gepubliceerd."
     },
-    "success": { "title": "Klaar", "body": "Uw wijziging is bevestigd." },
+    "success": {
+      "title": "Klaar",
+      "body": "Uw wijziging is bevestigd."
+    },
     "revoked": {
       "title": "Niet meer beschikbaar",
       "body": "De toegang is ingetrokken of het item is verwijderd."

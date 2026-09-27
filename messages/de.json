@@ -5,6 +5,8 @@
     "homeHeading": "MS Realty",
     "homeIntro": "Immobilien kaufen, mieten, verkaufen oder vermieten mit dem Team von MS Realty.",
     "workspaceHeading": "Heute",
+    "clientAccessHeading": "Anmelden bei „Mein Vorgang“",
+    "staffAccessHeading": "Anmeldung für Mitarbeitende",
     "languageSuggestion": {
       "label": "Sprachvorschlag",
       "message": "Diese Seite gibt es auch auf Deutsch.",
@@ -40,18 +42,17 @@
       "label": "Arbeitsbereich",
       "secondaryLabel": "Verwaltung",
       "today": "Heute",
-      "inbox": "Posteingang",
+      "inquiries": "Anfragen",
       "cases": "Vorgänge",
-      "properties": "Immobilien",
       "calendar": "Kalender",
-      "contentApprovals": "Inhalte & Freigaben",
-      "serviceOperations": "Servicebetrieb",
-      "reports": "Berichte",
+      "inventory": "Bestand",
+      "reviews": "Prüfungen",
+      "content": "Inhalte",
+      "operations": "Betrieb",
       "settings": "Einstellungen",
       "more": "Mehr",
       "search": "Datensätze durchsuchen",
-      "interfaceLanguage": "Sprache der Oberfläche",
-      "applyLanguage": "Übernehmen"
+      "interfaceLanguage": "Sprache der Oberfläche"
     }
   },
   "footer": {
@@ -66,7 +67,10 @@
     "copyright": "© {year} MS Realty"
   },
   "states": {
-    "loading": { "title": "Wird geladen", "body": "Die aktuellen Informationen werden geladen." },
+    "loading": {
+      "title": "Wird geladen",
+      "body": "Die aktuellen Informationen werden geladen."
+    },
     "refreshing": {
       "title": "Wird aktualisiert",
       "body": "Bis die Seite aktualisiert ist, sehen Sie die zuvor geladenen Informationen."
@@ -83,7 +87,10 @@
       "title": "Einige Bereiche konnten nicht geladen werden",
       "body": "Der Rest der Seite ist aktuell. Laden Sie die fehlenden Bereiche erneut."
     },
-    "stale": { "title": "Möglicherweise nicht aktuell", "body": "Zuletzt bestätigt: {date}." },
+    "stale": {
+      "title": "Möglicherweise nicht aktuell",
+      "body": "Zuletzt bestätigt: {date}."
+    },
     "permissionLimited": {
       "title": "Sie haben keinen Zugriff darauf",
       "body": "Bitten Sie die zuständige Person, Ihnen Zugriff zu geben."
@@ -124,7 +131,10 @@
       "title": "Entwurf gespeichert",
       "body": "Gespeichert {time}. Nicht gesendet oder veröffentlicht."
     },
-    "success": { "title": "Erledigt", "body": "Ihre Änderung ist bestätigt." },
+    "success": {
+      "title": "Erledigt",
+      "body": "Ihre Änderung ist bestätigt."
+    },
     "revoked": {
       "title": "Nicht mehr verfügbar",
       "body": "Der Zugriff wurde entzogen oder der Eintrag gelöscht."

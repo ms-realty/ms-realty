@@ -55,6 +55,7 @@ import {
 import { geographyPlaces } from "./geography";
 import { principals } from "./identity";
 import { parties } from "./parties";
+import { publicationManifests } from "./publication";
 
 export const properties = pgTable(
   "properties",
@@ -405,20 +406,27 @@ export const mediaRelations = pgTable(
 );
 
 /**
- * Typed projection for public search (§10). Every filterable fact keeps its state next to its
- * value so SQL applies the same unknown semantics as src/domain/search/filters.ts. Rebuilt from
- * the eligible current publication only.
+ * Typed projection for public search (§10): one row per listing and locale, projected from the
+ * manifest behind that locale's active website publication. Every filterable fact keeps its
+ * state next to its value so SQL applies the same unknown semantics as
+ * src/domain/search/filters.ts. Written when a manifest is activated and removed when the
+ * publication is restricted or withdrawn; queries still re-check the current pointer and
+ * generation, and read availability from the listing itself (published is not available).
  */
 export const listingSearchDocuments = pgTable(
   "listing_search_documents",
   {
     listingId: uuid("listing_id")
-      .primaryKey()
+      .notNull()
       .references(() => listings.id),
+    locale: publicLocaleEnum("locale").notNull(),
+    /** The manifest the row was projected from. */
+    manifestId: uuid("manifest_id")
+      .notNull()
+      .references((): AnyPgColumn => publicationManifests.id),
     reference: text("reference").notNull(),
     purpose: listingPurposeEnum("purpose").notNull(),
     propertyType: propertyTypeEnum("property_type").notNull(),
-    commercialState: commercialStateEnum("commercial_state").notNull(),
     /** The listing's place and all of its ancestors. */
     placeIds: uuid("place_ids").array().notNull(),
     priceState: factStateEnum("price_state").notNull(),
@@ -440,19 +448,19 @@ export const listingSearchDocuments = pgTable(
     landArea: numeric("land_area", { precision: 12, scale: 2 }),
     /** Feature key -> fact state, with known booleans as "true"/"false" states. */
     features: jsonb("features").notNull().default({}),
-    /** Reference, place names and approved source text for full-text search. */
+    /** Reference, place names and aliases and the locale's approved title. */
     searchText: text("search_text").notNull().default(""),
     searchVector: tsvector("search_vector").generatedAlwaysAs(
       sql`to_tsvector('simple', immutable_unaccent(search_text))`,
     ),
-    /** The manifest the row was projected from. */
-    manifestId: uuid("manifest_id"),
     updatedAt: instant("updated_at").notNull().defaultNow(),
   },
   (t) => [
+    primaryKey({ columns: [t.listingId, t.locale] }),
     index("listing_search_vector_idx").using("gin", t.searchVector),
     index("listing_search_reference_trgm_idx").using("gin", t.reference.op("gin_trgm_ops")),
+    index("listing_search_text_trgm_idx").using("gin", t.searchText.op("gin_trgm_ops")),
     index("listing_search_place_ids_idx").using("gin", t.placeIds),
-    index("listing_search_filter_idx").on(t.purpose, t.commercialState, t.propertyType),
+    index("listing_search_filter_idx").on(t.locale, t.purpose, t.propertyType),
   ],
 );

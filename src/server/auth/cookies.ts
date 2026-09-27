@@ -1,7 +1,10 @@
-// Session cookie: HttpOnly, Secure, SameSite=Lax, host-only. In production the `__Host-`
-// prefix makes the browser enforce Secure, Path=/ and no Domain attribute.
+// Session cookies: HttpOnly, Secure, SameSite=Lax, host-only, one name per private host
+// context (§8.1): the staff host and the client host each hold their own, and the public host
+// receives neither. In production the `__Host-` prefix makes the browser enforce Secure,
+// Path=/ and no Domain attribute.
 import "server-only";
 import type { ServerEnv } from "../config/env";
+import type { PrivateHostContext } from "../config/hosts";
 
 export interface CookieOptions {
   readonly httpOnly: true;
@@ -11,22 +14,27 @@ export interface CookieOptions {
   readonly expires: Date;
 }
 
-export function sessionCookieName(env: ServerEnv): string {
-  return env.production ? "__Host-msr_session" : "msr_session";
+export function sessionCookieName(env: ServerEnv, context: PrivateHostContext): string {
+  return env.production ? `__Host-msr_${context}_session` : `msr_${context}_session`;
 }
 
-export function sessionCookieOptions(env: ServerEnv, expires: Date): CookieOptions {
+export function sessionCookieOptions(
+  env: ServerEnv,
+  context: PrivateHostContext,
+  expires: Date,
+): CookieOptions {
   return {
     httpOnly: true,
     // Plain-http local development cannot hold a Secure cookie in every browser.
-    secure: env.production || env.appOrigin.startsWith("https://"),
+    secure: env.production || env.hosts[context].startsWith("https://"),
     sameSite: "lax",
     path: "/",
     expires,
   };
 }
 
-function serialize(name: string, value: string, options: CookieOptions): string {
+/** A Set-Cookie value with these attributes; no Domain, so the cookie stays host-only. */
+export function serializeCookie(name: string, value: string, options: CookieOptions): string {
   return [
     `${name}=${value}`,
     `Path=${options.path}`,
@@ -38,13 +46,26 @@ function serialize(name: string, value: string, options: CookieOptions): string 
 }
 
 /** Set-Cookie value that stores a session token until the session's absolute expiry. */
-export function sessionSetCookie(env: ServerEnv, token: string, expires: Date): string {
-  return serialize(sessionCookieName(env), token, sessionCookieOptions(env, expires));
+export function sessionSetCookie(
+  env: ServerEnv,
+  context: PrivateHostContext,
+  token: string,
+  expires: Date,
+): string {
+  return serializeCookie(
+    sessionCookieName(env, context),
+    token,
+    sessionCookieOptions(env, context, expires),
+  );
 }
 
 /** Set-Cookie value that removes the session cookie. */
-export function sessionClearCookie(env: ServerEnv): string {
-  return serialize(sessionCookieName(env), "", sessionCookieOptions(env, new Date(0)));
+export function sessionClearCookie(env: ServerEnv, context: PrivateHostContext): string {
+  return serializeCookie(
+    sessionCookieName(env, context),
+    "",
+    sessionCookieOptions(env, context, new Date(0)),
+  );
 }
 
 /** Reads one cookie from a Cookie header. */

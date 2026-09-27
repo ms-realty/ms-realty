@@ -5,6 +5,8 @@
     "homeHeading": "MS Realty",
     "homeIntro": "Купете, наемете, продайте или отдайте под наем имот с екипа на MS Realty.",
     "workspaceHeading": "Днес",
+    "clientAccessHeading": "Вход към „Моят път“",
+    "staffAccessHeading": "Вход за служители",
     "languageSuggestion": {
       "label": "Предложение за език",
       "message": "Тази страница е достъпна и на български.",
@@ -40,18 +42,17 @@
       "label": "Работно пространство",
       "secondaryLabel": "Управление",
       "today": "Днес",
-      "inbox": "Входящи",
+      "inquiries": "Запитвания",
       "cases": "Случаи",
-      "properties": "Имоти",
       "calendar": "Календар",
-      "contentApprovals": "Съдържание и одобрения",
-      "serviceOperations": "Услуги",
-      "reports": "Отчети",
+      "inventory": "Имоти",
+      "reviews": "Прегледи",
+      "content": "Съдържание",
+      "operations": "Операции",
       "settings": "Настройки",
       "more": "Още",
       "search": "Търсене в записите",
-      "interfaceLanguage": "Език на интерфейса",
-      "applyLanguage": "Приложи"
+      "interfaceLanguage": "Език на интерфейса"
     }
   },
   "footer": {

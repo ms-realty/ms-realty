@@ -1,12 +1,13 @@
-// Agency workspace shell (spec §06.3, L07). Primary: Today · Inbox · Cases · Properties ·
-// Calendar; secondary: Content & approvals · Service operations · Reports · Settings. On
-// phones Today, Inbox and Calendar stay on screen and the rest sits under More.
+// Agency workspace shell on the staff host (architecture §11.1, L07). Primary: Today ·
+// Inquiries · Cases · Calendar · Inventory · Reviews · Content · Operations; secondary:
+// Settings. On phones Today, Inquiries and Calendar stay on screen and the rest sits under More.
 
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
-import { localeEndonyms, type StaffLocale, staffLocales } from "@/i18n/config";
-import { Button, cx, icons, Select, SkipLink } from "@/ui";
+import { type StaffLocale, staffLocales } from "@/i18n/config";
+import { cx, icons, SkipLink } from "@/ui";
+import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
 import { NavLink } from "./nav-link";
 import {
@@ -15,7 +16,6 @@ import {
   workspacePrimaryNav,
   workspaceSecondaryNav,
 } from "./navigation";
-import { setStaffLocale } from "./staff-locale-action";
 
 export const workspaceMainId = "main";
 
@@ -27,13 +27,13 @@ const sideLinkClass = cx(
 
 const navIcons: Partial<Record<WorkspaceNavLabel, typeof icons.HomeIcon>> = {
   today: icons.HomeIcon,
-  inbox: icons.InboxIcon,
+  inquiries: icons.InboxIcon,
   cases: icons.CaseIcon,
-  properties: icons.BuildingIcon,
   calendar: icons.CalendarIcon,
-  contentApprovals: icons.StampIcon,
-  serviceOperations: icons.FolderIcon,
-  reports: icons.HistoryIcon,
+  inventory: icons.BuildingIcon,
+  reviews: icons.StampIcon,
+  content: icons.FolderIcon,
+  operations: icons.HistoryIcon,
   settings: icons.FiltersIcon,
 };
 const tabLinkClass =
@@ -58,30 +58,14 @@ export async function WorkspaceShell({
   const t = await getTranslations({ locale, namespace: "nav.workspace" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
   const common = await getTranslations({ locale, namespace: "common" });
-  const primary = linked(workspacePrimaryNav);
-  const secondary = linked(workspaceSecondaryNav);
+  const primary = linked(workspacePrimaryNav, locale);
+  const secondary = linked(workspaceSecondaryNav, locale);
   const mobileMore = [...primary.filter((item) => !item.mobilePrimary), ...secondary];
 
-  // A preference, not a destination: it sits behind a disclosure under the account.
-  const languageForm = (
-    <form
-      action={setStaffLocale}
-      className="flex flex-col gap-3 rounded-card border border-divider bg-surface p-3 text-text"
-    >
-      <Select
-        name="locale"
-        label={t("interfaceLanguage")}
-        defaultSelectedKey={locale}
-        options={staffLocales.map((option) => ({
-          id: option,
-          label: localeEndonyms[option],
-          lang: option,
-        }))}
-      />
-      <Button type="submit" variant="secondary" className="self-start">
-        {t("applyLanguage")}
-      </Button>
-    </form>
+  // A preference, not a destination. Staff URLs carry the locale (§03.1), so choosing a
+  // language opens the same address in it.
+  const languageSwitcher = (
+    <LocaleSwitcher locale={locale} locales={staffLocales} label={t("interfaceLanguage")} />
   );
 
   const list = (items: typeof primary, className: string, withIcons = false) => (
@@ -91,7 +75,7 @@ export async function WorkspaceShell({
         const count = counts?.[item.label];
         return (
           <li key={item.label}>
-            <NavLink href={item.href} exact={item.href === "/workspace"} className={className}>
+            <NavLink href={item.href} className={className}>
               {Icon ? (
                 <Icon className="size-[1.125rem] text-text-muted group-data-current:text-action" />
               ) : null}
@@ -142,39 +126,23 @@ export async function WorkspaceShell({
               </span>
             </p>
           ) : null}
-          <MenuDisclosure
-            quiet
-            label={
-              <span className="flex items-center gap-2.5">
-                <icons.LanguageIcon className="size-[1.125rem] text-text-muted" />
-                <span className="flex flex-col">
-                  <span className="text-caption font-normal text-text-muted">
-                    {t("interfaceLanguage")}
-                  </span>
-                  <span className="text-operational">{localeEndonyms[locale]}</span>
-                </span>
-              </span>
-            }
-            panelClassName="pt-2"
-          >
-            {languageForm}
-          </MenuDisclosure>
+          {languageSwitcher}
         </div>
       </header>
 
-      {/* Phones and tablets: brand bar, Today/Inbox/Calendar tabs, everything else under More. */}
+      {/* Phones and tablets: brand bar, Today/Inquiries/Calendar tabs, the rest under More. */}
       <header className="border-b border-divider bg-surface lg:hidden">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2">
           <p className="me-auto">
             <span className="font-semibold">{common("brand")}</span>{" "}
             <span className="text-caption text-text-muted">{t("label")}</span>
           </p>
-          <MenuDisclosure label={t("more")} panelClassName="flex flex-col gap-4 pb-3">
-            {mobileMore.length > 0 ? (
+          {mobileMore.length > 0 ? (
+            <MenuDisclosure label={t("more")} panelClassName="flex flex-col gap-4 pb-3">
               <nav aria-label={t("secondaryLabel")}>{list(mobileMore, tabLinkClass)}</nav>
-            ) : null}
-            {languageForm}
-          </MenuDisclosure>
+            </MenuDisclosure>
+          ) : null}
+          {languageSwitcher}
         </div>
         {search ? (
           <search aria-label={t("search")} className="block px-gutter pb-2">
@@ -187,11 +155,7 @@ export async function WorkspaceShell({
               .filter((item) => item.mobilePrimary)
               .map((item) => (
                 <li key={item.label}>
-                  <NavLink
-                    href={item.href}
-                    exact={item.href === "/workspace"}
-                    className={tabLinkClass}
-                  >
+                  <NavLink href={item.href} className={tabLinkClass}>
                     {t(item.label)}
                   </NavLink>
                 </li>

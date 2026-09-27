@@ -5,6 +5,8 @@
     "homeHeading": "MS Realty",
     "homeIntro": "Buy, rent, sell or let property with the MS Realty team.",
     "workspaceHeading": "Today",
+    "clientAccessHeading": "Sign in to My journey",
+    "staffAccessHeading": "Staff sign-in",
     "languageSuggestion": {
       "label": "Language suggestion",
       "message": "This page is also available in English.",
@@ -40,18 +42,17 @@
       "label": "Workspace",
       "secondaryLabel": "Management",
       "today": "Today",
-      "inbox": "Inbox",
+      "inquiries": "Inquiries",
       "cases": "Cases",
-      "properties": "Properties",
       "calendar": "Calendar",
-      "contentApprovals": "Content & approvals",
-      "serviceOperations": "Service operations",
-      "reports": "Reports",
+      "inventory": "Inventory",
+      "reviews": "Reviews",
+      "content": "Content",
+      "operations": "Operations",
       "settings": "Settings",
       "more": "More",
       "search": "Search records",
-      "interfaceLanguage": "Interface language",
-      "applyLanguage": "Apply"
+      "interfaceLanguage": "Interface language"
     }
   },
   "footer": {

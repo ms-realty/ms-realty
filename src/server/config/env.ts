@@ -2,6 +2,7 @@
 // tests get safe local defaults so nothing needs configuring to run the suite.
 import "server-only";
 import { z } from "zod";
+import { type HostOrigins, parseHostOrigins } from "./hosts";
 
 // An empty variable (as copied from .env.example) counts as unset.
 const blankAsUnset = (value: unknown) =>
@@ -43,6 +44,10 @@ const schema = z
     APP_ORIGIN: origin,
     /** Public canonical origin for links in emails and metadata. */
     CANONICAL_ORIGIN: origin,
+    /** The three hosts of the one app (§11.1): public, client (`my.`) and staff (`app.`). */
+    PUBLIC_ORIGIN: origin,
+    CLIENT_ORIGIN: origin,
+    STAFF_ORIGIN: origin,
     /** Secret for keyed hashes of rate-limit identifiers (IP addresses, emails). */
     AUTH_SECRET: optional,
     WEBAUTHN_RP_ID: optional,
@@ -62,13 +67,19 @@ const schema = z
         "DATABASE_URL",
         "APP_ORIGIN",
         "CANONICAL_ORIGIN",
+        "PUBLIC_ORIGIN",
+        "CLIENT_ORIGIN",
+        "STAFF_ORIGIN",
         "AUTH_SECRET",
         "MEDIA_PUBLIC_BASE_URL",
       ] as const) {
         if (!env[key]) ctx.addIssue({ code: "custom", path: [key], message: "is required" });
       }
-      if (env.APP_ORIGIN && !env.APP_ORIGIN.startsWith("https://")) {
-        ctx.addIssue({ code: "custom", path: ["APP_ORIGIN"], message: "must be https" });
+      for (const key of ["APP_ORIGIN", "PUBLIC_ORIGIN", "CLIENT_ORIGIN", "STAFF_ORIGIN"] as const) {
+        const value = env[key];
+        if (value && !value.startsWith("https://")) {
+          ctx.addIssue({ code: "custom", path: [key], message: "must be https" });
+        }
       }
     }
     if (env.AUTH_SECRET && env.AUTH_SECRET.length < 32) {
@@ -86,6 +97,8 @@ export interface ServerEnv {
   readonly databaseUrl: string | undefined;
   readonly appOrigin: string;
   readonly canonicalOrigin: string;
+  /** Origin of each host context; private session cookies and Origin checks bind to them. */
+  readonly hosts: HostOrigins;
   readonly authSecret: string;
   readonly webauthn: { readonly rpId: string; readonly rpName: string };
   readonly email: { readonly from: string | undefined; readonly provider: string | undefined };
@@ -120,6 +133,7 @@ export function parseEnv(source: Record<string, string | undefined>): ServerEnv 
     databaseUrl: env.DATABASE_URL,
     appOrigin,
     canonicalOrigin: env.CANONICAL_ORIGIN ?? appOrigin,
+    hosts: parseHostOrigins(source),
     authSecret: env.AUTH_SECRET ?? devSecret,
     webauthn: {
       rpId: env.WEBAUTHN_RP_ID ?? new URL(appOrigin).hostname,

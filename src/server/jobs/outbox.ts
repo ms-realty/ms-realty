@@ -7,7 +7,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
-import { externalActions } from "@/db/schema";
+import { externalActions, outboxEvents } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
 import type { ExternalActionState } from "@/domain/external-action";
 import { type MessageChannel, maxDeliveryAttempts } from "@/domain/message";
@@ -16,6 +16,38 @@ import type { MessageProvider } from "./provider";
 import type { JobQueue } from "./queue";
 
 export type OutboxState = ExternalActionState;
+
+export interface NewOutboxEvent {
+  /** Dotted business event, e.g. `inquiry.received` or `publication.withdrawn`. */
+  readonly eventType: string;
+  readonly subjectType: string;
+  readonly subjectId: string;
+  /** Identifiers only: consumers re-read the records, so no personal data travels here. */
+  readonly payload?: Record<string, unknown>;
+  /** Publication generation (or other fence) the intent was created under. */
+  readonly sourceGeneration?: number;
+  readonly operationId?: string;
+}
+
+/**
+ * Records durable business intent in the caller's transaction (§5, §15): it commits with the
+ * change it describes or not at all. The dispatcher binds it to queue work later.
+ */
+export async function recordOutboxEvent(db: Executor, event: NewOutboxEvent): Promise<string> {
+  const [row] = await db
+    .insert(outboxEvents)
+    .values({
+      eventType: event.eventType,
+      subjectType: event.subjectType,
+      subjectId: event.subjectId,
+      payload: event.payload ?? {},
+      sourceGeneration: event.sourceGeneration ?? null,
+      operationId: event.operationId ?? null,
+    })
+    .returning({ id: outboxEvents.id });
+  if (!row) throw new Error("Outbox event insert returned no row.");
+  return row.id;
+}
 
 export interface NewOutboxMessage {
   /** Logical send identity; also the provider idempotency key for every retry. */

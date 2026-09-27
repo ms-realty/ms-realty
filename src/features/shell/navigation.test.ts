@@ -24,30 +24,41 @@ function pageFiles(dir: string): string[] {
   });
 }
 
-/** Routes with their own page; catch-all 404 pages do not count as a destination. */
-const routePatterns = pageFiles(appDir)
-  .map((file) => relative(appDir, file).split(sep).slice(0, -1))
-  .filter((segments) => !segments.some((segment) => segment.startsWith("[...")))
-  .map((segments) => {
-    const parts = segments
-      .filter((segment) => !/^\(.*\)$/.test(segment))
-      .map((segment) => (/^\[.*\]$/.test(segment) ? "[^/]+" : segment));
-    return new RegExp(`^/${parts.join("/")}$`);
-  });
+type Host = "public" | "client" | "staff";
 
-function routeExists(href: string): boolean {
-  return routePatterns.some((pattern) => pattern.test(href));
+/** Routes of one host that have their own page, as public URL patterns (no host prefix). */
+function routePatterns(host: Host): RegExp[] {
+  const root = join(appDir, host);
+  return pageFiles(root)
+    .map((file) => relative(root, file).split(sep).slice(0, -1))
+    .filter((segments) => !segments.some((segment) => segment.startsWith("[...")))
+    .map((segments) => {
+      const parts = segments
+        .filter((segment) => !/^\(.*\)$/.test(segment))
+        .map((segment) => (/^\[.*\]$/.test(segment) ? "[^/]+" : segment));
+      return new RegExp(`^/${parts.join("/")}$`);
+    });
+}
+
+function routeExists(host: Host, href: string): boolean {
+  return routePatterns(host).some((pattern) => pattern.test(href));
 }
 
 describe("navigation registry (§06)", () => {
-  it("links only routes that have a page", () => {
-    const hrefs = [
-      ...linked([...publicPrimaryNav, ...publicUtilityNav, myJourneyNav, ...footerNav], "bg"),
-      ...linked([...journeyNav, journeyHelpNav], "bg"),
-      ...linked([...workspacePrimaryNav, ...workspaceSecondaryNav]),
-    ].map((item) => item.href);
+  it("links only routes that have a page on the item's host", () => {
+    const hrefs: [Host, string][] = [
+      ...linked([...publicPrimaryNav, ...publicUtilityNav, ...footerNav], "bg").map(
+        (item) => ["public", item.href] as [Host, string],
+      ),
+      ...linked([myJourneyNav, ...journeyNav, journeyHelpNav], "bg").map(
+        (item) => ["client", item.href] as [Host, string],
+      ),
+      ...linked([...workspacePrimaryNav, ...workspaceSecondaryNav], "bg").map(
+        (item) => ["staff", item.href] as [Host, string],
+      ),
+    ];
     expect(hrefs.length).toBeGreaterThan(0);
-    for (const href of hrefs) expect(routeExists(href), href).toBe(true);
+    for (const [host, href] of hrefs) expect(routeExists(host, href), `${host} ${href}`).toBe(true);
   });
 
   it("keeps the spec's destinations and order", () => {
@@ -68,23 +79,21 @@ describe("navigation registry (§06)", () => {
     ]);
     expect(workspacePrimaryNav.map((item) => item.label)).toEqual([
       "today",
-      "inbox",
+      "inquiries",
       "cases",
-      "properties",
       "calendar",
+      "inventory",
+      "reviews",
+      "content",
+      "operations",
     ]);
-    expect(workspaceSecondaryNav.map((item) => item.label)).toEqual([
-      "contentApprovals",
-      "serviceOperations",
-      "reports",
-      "settings",
-    ]);
+    expect(workspaceSecondaryNav.map((item) => item.label)).toEqual(["settings"]);
   });
 
-  it("keeps Today, Inbox and Calendar primary on phones", () => {
+  it("keeps Today, Inquiries and Calendar primary on phones", () => {
     expect(
       workspacePrimaryNav.filter((item) => item.mobilePrimary).map((item) => item.label),
-    ).toEqual(["today", "inbox", "calendar"]);
+    ).toEqual(["today", "inquiries", "calendar"]);
   });
 
   it("prefixes public items with the locale and leaves unbuilt items out", () => {

@@ -7,7 +7,7 @@ import {
   requiredFactKeys,
 } from "./listing-readiness";
 
-// §18.1 required facts and F03 "What to confirm".
+// Required facts before editorial review (§7.1 needs_facts) and F03 "What to confirm".
 const fact = (
   fieldKey: string,
   state: FactRecord["state"],
@@ -45,12 +45,12 @@ describe("missingRequiredFacts", () => {
   it("never lets an unknown price or location through: a missing price is not zero", () => {
     const facts = [
       fact("price", "unknown"),
-      fact("location", "not_provided"),
+      fact("location", "not_supplied"),
       fact("area.land", "known", reviewed),
     ];
     expect(missingRequiredFacts("plot", facts)).toEqual([
       { key: "price", problem: "undecided", state: "unknown" },
-      { key: "location", problem: "undecided", state: "not_provided" },
+      { key: "location", problem: "undecided", state: "not_supplied" },
     ]);
   });
 

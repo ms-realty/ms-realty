@@ -1,10 +1,11 @@
-// Client journey shell (spec §06.2, L06): Overview · Properties · Appointments · Messages ·
-// Documents, a case switcher slot naming purpose and property/area, and help.
+// Client journey shell on the client host (§11.1, L06): Overview · Properties · Appointments ·
+// Messages · Documents, a case switcher slot naming purpose and property/area, and help.
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
+import { homePaths } from "@/server/config/hosts";
 import { SkipLink } from "@/ui";
 import { LocaleSwitcher } from "./language-switcher";
 import { NavLink } from "./nav-link";
@@ -36,7 +37,7 @@ export async function JourneyShell({
       <header className="border-b border-divider bg-surface">
         <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2 lg:px-gutter-wide">
           <Link
-            href={`/${locale}`}
+            href={`/${locale}${homePaths.client}`}
             aria-label={t("home")}
             className="inline-flex min-h-control items-center rounded-control"
           >
