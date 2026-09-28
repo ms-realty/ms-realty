@@ -426,28 +426,31 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
     .returning();
   if (!privacy) throw new Error("Missing privacy fixture");
   await page.goto(hostUrl("staff", "/en/operations/privacy"));
-  await page.getByLabel("Next state").selectOption("verifying");
-  await page
+  const privacyForm = page
+    .locator("form")
+    .filter({ has: page.locator(`input[name="id"][value="${privacy.id}"]`) });
+  await privacyForm.getByLabel("Next state").selectOption("verifying");
+  await privacyForm
     .getByLabel(
       "I reviewed the policy, scope, owner, due condition and evidence for this transition.",
     )
     .check();
-  await page.getByRole("button", { name: "Record human review" }).click();
+  await privacyForm.getByRole("button", { name: "Record human review" }).click();
   await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("receipt")));
-  await page.getByLabel("Next state").selectOption("in_progress");
-  await page
+  await privacyForm.getByLabel("Next state").selectOption("in_progress");
+  await privacyForm
     .getByLabel("Approved policy reference")
     .fill("Synthetic reviewed test policy reference");
-  await page
+  await privacyForm
     .getByLabel("Reviewed response date")
     .fill(new Date(Date.now() + 86400000 * 10).toISOString().slice(0, 10));
-  await page.getByLabel("I reviewed identity and the stated scope.").check();
-  await page
+  await privacyForm.getByLabel("I reviewed identity and the stated scope.").check();
+  await privacyForm
     .getByLabel(
       "I reviewed the policy, scope, owner, due condition and evidence for this transition.",
     )
     .check();
-  await page.getByRole("button", { name: "Record human review" }).click();
+  await privacyForm.getByRole("button", { name: "Record human review" }).click();
   await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("receipt")));
   const [assessed] =
     await sql`select state, due_at, scope from privacy_requests where id = ${privacy.id}`;
@@ -470,6 +473,10 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
     await route.continue();
   });
   await sql`update sessions set revoked_at = now() where principal_id = ${account.id}`;
+  await expect(page.locator("[data-private-content]")).toHaveAttribute(
+    "data-private-ready",
+    "true",
+  );
   const immediatelyConcealed = await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
     document.dispatchEvent(new Event("visibilitychange"));

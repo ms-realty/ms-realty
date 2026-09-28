@@ -107,6 +107,7 @@ export function WorkflowForm({
                     {definition.label}
                   </label>
                   <select
+                    style={{ width: 0, minWidth: "100%" }}
                     id={field.id}
                     name={field.name}
                     value={field.value}

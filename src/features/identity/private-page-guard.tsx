@@ -63,7 +63,10 @@ export function PrivatePageGuard({
     };
     window.addEventListener("pageshow", onPageShow);
     document.addEventListener("visibilitychange", onVisibility);
+    const element = content.current;
+    if (element) element.dataset.privateReady = "true";
     return () => {
+      if (element) delete element.dataset.privateReady;
       window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVisibility);
     };

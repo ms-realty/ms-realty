@@ -15,7 +15,10 @@ export function MenuDisclosure({
   panelClassName?: string;
 }) {
   return (
-    <details data-dismissible="" className={cx("group/menu relative", className)}>
+    <details
+      data-dismissible=""
+      className={cx("group/menu relative [&:not([open])>div]:hidden", className)}
+    >
       {/* biome-ignore lint/a11y/useSemanticElements: summary is the native no-JS disclosure control; explicit role fixes its observed generic accessibility mapping. */}
       <summary
         role="button"
@@ -24,7 +27,14 @@ export function MenuDisclosure({
         <MenuIcon />
         {label}
       </summary>
-      <div className={cx("min-w-56 border-t border-divider pt-3", panelClassName)}>{children}</div>
+      <div
+        className={cx(
+          "absolute end-0 z-20 w-56 max-w-[calc(100vw-2rem)] rounded-control border border-divider bg-surface p-3",
+          panelClassName,
+        )}
+      >
+        {children}
+      </div>
     </details>
   );
 }

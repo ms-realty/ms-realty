@@ -11,4 +11,4 @@ export const controlClass = cx(
   "forced-colors:group-data-disabled:border-[GrayText] forced-colors:group-data-disabled:text-[GrayText]",
 );
 
-export const fieldClass = "group flex flex-col gap-1.5";
+export const fieldClass = "group flex min-w-0 w-full flex-col gap-1.5";
