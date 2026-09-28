@@ -108,7 +108,11 @@ test("a reachable daemon with fresh version cannot pass after a scan error or in
     await daemon(mode, async (port, scans) => {
       const result = await run(readiness, { CLAMAV_HOST: "127.0.0.1", CLAMAV_PORT: port });
       assert.equal(result.code, 1, result.output);
-      assert.equal(scans.length, 1);
+      // Readiness polls until its deadline; a fast runner can complete more than one
+      // rejected scan. The contract is failure after real complete probes, not one attempt.
+      if (mode === "infected") assert.equal(scans.length, 1);
+      else assert.ok(scans.length >= 1);
+      assert.ok(scans.every((bytes) => bytes === "MS Realty CI scanner readiness probe"));
       assert.match(result.output, mode === "infected" ? /malware/ : /unavailable/);
     });
 });
