@@ -37,6 +37,7 @@ import { locationPrecisions } from "@/domain/facts";
 import type { PublicLocale } from "@/domain/ids";
 import { assessFreshness, type CommercialState, type FreshnessState } from "@/domain/listing";
 import type { MediaKind, MediaModification } from "@/domain/media";
+import { type PublicMapPoint, parsePublicMapPoint } from "@/domain/public-map";
 import { derivePublicPresentation, type PublicPresentation } from "@/domain/publication";
 import { localePolicy } from "@/i18n/config";
 import type { Executor } from "../db";
@@ -209,6 +210,7 @@ export function publicPlace(
     settlement: settlementPrecisions.includes(precision) ? at("settlement") : null,
     neighborhood: neighborhoodPrecisions.includes(precision) ? disclosure.neighborhood : null,
     precision,
+    mapPoint: parsePublicMapPoint(disclosure.mapPoint, precision),
   };
 }
 
@@ -216,6 +218,7 @@ export function publicPlace(
 
 /** What the manifest discloses about the location; the exact address and point never do. */
 export interface ManifestDisclosure {
+  readonly mapPoint?: PublicMapPoint | null;
   readonly country: string;
   readonly placeId: string | null;
   readonly precision: LocationPrecision;
@@ -251,6 +254,7 @@ export function parseDisclosure(value: unknown): ManifestDisclosure {
     placeId: typeof d.placeId === "string" ? d.placeId : null,
     precision,
     neighborhood: typeof d.neighborhood === "string" ? d.neighborhood : null,
+    mapPoint: parsePublicMapPoint(d.mapPoint, precision),
   };
 }
 

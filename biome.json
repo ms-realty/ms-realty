@@ -12,7 +12,8 @@
       "!production/data",
       "!playwright-report",
       "!test-results",
-      "!coverage"
+      "!coverage",
+      "!gateway/worker-configuration.d.ts"
     ]
   },
   "formatter": {

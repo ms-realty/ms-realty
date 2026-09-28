@@ -34,3 +34,9 @@ __pycache__/
 /storybook-static/
 /dist-runtime/
 /deploy/*.generated.json
+
+# Generated from the pinned MapLibre package before build/dev.
+/public/map-runtime/
+
+# Local synthetic map fixture; real assets are a separate immutable R2 release.
+/public/maps/

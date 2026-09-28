@@ -1,5 +1,7 @@
 // Thin Cloudflare gateway: no catalogue, user identity, permissions or listing database.
 // Deploy only with the exact reviewed route artifact bound to the release manifest.
+import { type MapAssetsEnv, mapAsset } from "./map-assets";
+
 export interface LegacyRoute {
   host: string;
   path: string;
@@ -8,7 +10,7 @@ export interface LegacyRoute {
   targetPath?: string;
   targetHost?: string;
 }
-export interface GatewayEnv {
+export interface GatewayEnv extends MapAssetsEnv {
   ORIGIN_URL: string;
   ORIGIN_VERIFY_SECRET: string;
   PUBLIC_ORIGIN: string;
@@ -115,6 +117,10 @@ export async function gateway(
   if (url.protocol !== "https:") {
     url.protocol = "https:";
     return Response.redirect(url, 308);
+  }
+  if (url.pathname.startsWith("/maps/")) {
+    if (host !== publicOrigin.host) return denied();
+    return mapAsset(request, env);
   }
   // Historical route dispositions are read semantics; a POST must not become a GET redirect
   // or be submitted to a retained page which never accepted that operation.

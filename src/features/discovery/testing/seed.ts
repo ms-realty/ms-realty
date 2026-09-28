@@ -42,6 +42,11 @@ try {
       nameNative: `Синтетично място ${suffix}`,
       nameLatin: `Synthetic place ${suffix}`,
     });
+    if (command === "map")
+      await db
+        .update(schema.geographyPlaces)
+        .set({ latitude: "41.55", longitude: "23.28" })
+        .where(eq(schema.geographyPlaces.id, placeId));
     const make = async (label: string) => {
       const title = `Synthetic ${label} ${suffix}`;
       const f = await db.transaction(async (tx) => {

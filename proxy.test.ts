@@ -36,6 +36,21 @@ function target(host: string, path: string): string | null {
 }
 
 describe("host routing (§11.1)", () => {
+  it("serves only the configured public map release and isolates private hosts", () => {
+    const release = "a".repeat(64);
+    vi.stubEnv("MAP_RELEASE_ID", release);
+    for (const path of [
+      `/maps/${release}/basemap.pmtiles`,
+      "/map-runtime/v6.11.2/maplibre-gl-worker.mjs",
+    ]) {
+      expect(run(hosts.public, path).headers.get("x-middleware-next")).toBe("1");
+      expect(run(hosts.client, path).status).toBe(404);
+      expect(run(hosts.staff, path).status).toBe(404);
+    }
+    expect(run(hosts.public, `/maps/${"b".repeat(64)}/basemap.pmtiles`).status).toBe(404);
+    vi.stubEnv("MAP_RELEASE_ID", "");
+    expect(run(hosts.public, `/maps/${release}/basemap.pmtiles`).status).toBe(404);
+  });
   it("rewrites each host's locale routes into its own route tree", () => {
     expect(target(hosts.public, "/bg")).toBe("/public/bg");
     expect(target(hosts.public, "/he/properties")).toBe("/public/he/properties");

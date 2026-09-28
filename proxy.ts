@@ -49,6 +49,7 @@ function contentSecurityPolicy(nonce: string): string {
     "img-src 'self' blob: data:",
     "font-src 'self'",
     "connect-src 'self'",
+    "worker-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -115,6 +116,16 @@ export function proxy(request: NextRequest) {
   const context = hostContextFor(host, origins);
   // Not one of the three configured hosts: nothing of any context is served there.
   if (!context) return new NextResponse(null, { status: 404 });
+
+  if (pathname.startsWith("/maps/") || pathname.startsWith("/map-runtime/")) {
+    const release = process.env.MAP_RELEASE_ID;
+    const allowed =
+      pathname.startsWith("/map-runtime/v6.11.2/") ||
+      (release && /^[a-f0-9]{64}$/.test(release) && pathname.startsWith(`/maps/${release}/`));
+    return context === "public" && allowed
+      ? NextResponse.next({ request: { headers: trustedHeaders } })
+      : new NextResponse(null, { status: 404 });
+  }
 
   if (
     pathname.startsWith("/_next/") ||

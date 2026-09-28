@@ -13,6 +13,9 @@ test-results
 playwright-report
 e2e/**
 !e2e/hosts.ts
+!e2e/support/
+!e2e/support/map-fixture.mjs
+!e2e/support/map-fixture.d.mts
 docs
 graft
 *.tsbuildinfo
@@ -23,3 +26,6 @@ storybook-static
 .storybook
 production
 deploy/*.generated.json
+
+# Browser-only synthetic atlas must never ship in the application image.
+public/maps

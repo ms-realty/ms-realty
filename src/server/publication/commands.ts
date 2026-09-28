@@ -55,6 +55,7 @@ import { verifyPublicationMedia } from "../media/verify";
 import { type OperationSuccess, runOperation } from "../operations";
 import { writeSearchDocument } from "../search/projection";
 import { executeTransition, tableStore } from "../transitions";
+import { prepareMapPoint } from "./map-point";
 import {
   loadPublishedListings,
   type ManifestDisclosure,
@@ -782,6 +783,7 @@ export async function currentEligibility(
     ? (disclosed as LocationPrecision)
     : property.publicPrecision;
   const disclosure: ManifestDisclosure = {
+    mapPoint: await prepareMapPoint(tx, property.placeId, property.country, precision),
     country: property.country,
     placeId: property.placeId,
     precision,

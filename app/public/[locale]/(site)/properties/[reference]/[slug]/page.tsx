@@ -5,10 +5,13 @@ import { ApprovedGallery } from "@/features/discovery/approved-media";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { Availability, ListingFacts, ListingGrid } from "@/features/discovery/listing-card";
 import { LocalActions } from "@/features/discovery/local-selection";
+import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
 import { listingHref, locality, priceText } from "@/features/discovery/presentation";
+import { SearchMap } from "@/features/discovery/search-map";
 import { isRoutableLocale } from "@/i18n/config";
 import { getPublicListing } from "@/server/listings/detail";
+import { publicMapRelease } from "@/server/publication/map-config";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
 export const metadata = discoveryMetadata;
@@ -96,7 +99,24 @@ export default async function PropertyPage({
               {listing.description}
             </p>
           ) : null}
-          <p className="text-compact text-text-muted">{copy.mapUnavailable}</p>
+          <SearchMap
+            locale={locale}
+            copy={mapCopy(locale, "listing")}
+            release={publicMapRelease()}
+            listHref={`/${locale}/properties`}
+            items={
+              listing.place.mapPoint
+                ? [
+                    {
+                      reference: listing.reference,
+                      href: listingHref(listing, locale),
+                      label: `${listing.reference} · ${locality(listing)}`,
+                      point: listing.place.mapPoint,
+                    },
+                  ]
+                : []
+            }
+          />
         </div>
         <aside className="flex flex-col gap-5 self-start rounded-panel border border-border bg-surface p-5">
           <p className="font-semibold">{listing.responsibleTeam.label}</p>

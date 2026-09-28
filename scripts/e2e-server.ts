@@ -5,6 +5,7 @@ import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import postgres from "postgres";
+import { mapFixtureRelease, writeMapFixture } from "../e2e/support/map-fixture.mjs";
 import { runMigrations } from "../src/db/migrate";
 
 const adminUrl = process.env.TEST_DATABASE_URL;
@@ -50,6 +51,8 @@ try {
   created = true;
   await runMigrations(databaseUrl);
   console.log("Fresh disposable browser database migrated.");
+  await writeMapFixture();
+  process.env.MAP_RELEASE_ID = mapFixtureRelease;
   const built = process.env.CI || process.env.E2E_SKIP_BUILD === "1" ? 0 : await next(["build"]);
   process.exitCode =
     built ||

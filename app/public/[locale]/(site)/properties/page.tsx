@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { ListingGrid } from "@/features/discovery/listing-card";
+import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { listingHref, locality } from "@/features/discovery/presentation";
 import {
   ambiguousFilters,
   filterUrl,
@@ -12,9 +14,11 @@ import {
   searchInput,
 } from "@/features/discovery/query";
 import { SearchForm } from "@/features/discovery/search-form";
+import { SearchMap } from "@/features/discovery/search-map";
 import { isRoutableLocale } from "@/i18n/config";
 import { formatNumber } from "@/i18n/format";
 import { AppError, isAppError } from "@/server/errors";
+import { publicMapRelease } from "@/server/publication/map-config";
 import { type SearchResponse, searchListings } from "@/server/search/search";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
@@ -46,16 +50,34 @@ export default async function PropertiesPage({
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.search}</h1>
       <SearchForm locale={locale} copy={copy} values={values} />
-      <p className="text-compact text-text-muted">{copy.mapUnavailable}</p>
       {result ? (
         <>
-          <h2 className="text-heading font-semibold">
+          <h2 id="results-heading" tabIndex={-1} className="text-heading font-semibold">
             {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
             {formatNumber(locale, result.count.value)}
           </h2>
+          <SearchMap
+            locale={locale}
+            release={publicMapRelease()}
+            copy={mapCopy(locale)}
+            items={result.items.flatMap((item) =>
+              item.place.mapPoint
+                ? [
+                    {
+                      reference: item.reference,
+                      href: listingHref(item, locale),
+                      label: `${item.reference} · ${locality(item)}`,
+                      point: item.place.mapPoint,
+                    },
+                  ]
+                : [],
+            )}
+          />
           {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
           {result.items.length ? (
-            <ListingGrid items={result.items} locale={locale} copy={copy} />
+            <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
+              <ListingGrid items={result.items} locale={locale} copy={copy} />
+            </section>
           ) : (
             <div className="space-y-4">
               <p>{copy.none}</p>

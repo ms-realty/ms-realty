@@ -32,7 +32,9 @@
     "auth:bootstrap": "tsx --conditions=react-server scripts/bootstrap-staff.ts",
     "tokens:check": "node scripts/tokens-build.mjs --check",
     "test:visual:docker": "bash scripts/visual-docker.sh check",
-    "test:visual:docker:update": "bash scripts/visual-docker.sh update"
+    "test:visual:docker:update": "bash scripts/visual-docker.sh update",
+    "prebuild": "node scripts/map-runtime.mjs",
+    "predev": "node scripts/map-runtime.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1141.0",

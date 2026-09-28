@@ -43,9 +43,7 @@ test("AT01/AT05/AT27: published search, local save/compare and withdrawal rechec
   const data = fixture();
   await page.goto(`/en/properties?q=${data.published.reference}`);
   await expect(page.getByRole("link", { name: data.published.title, exact: true })).toBeVisible();
-  await expect(
-    page.getByText("The map is unavailable. The list and filters remain available."),
-  ).toBeVisible();
+  await expect(page.getByText("No published map locations on this page.")).toBeVisible();
   await page.getByRole("link", { name: data.published.title, exact: true }).click();
   await expect(page.getByRole("heading", { name: data.published.title })).toBeVisible();
   const approvedPhoto = page.locator('img[src*="/api/media/"]').first();
