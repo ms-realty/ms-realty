@@ -112,7 +112,7 @@ export function WorkflowForm({
                     value={field.value}
                     disabled={field.readOnly}
                     onChange={(e) => form.setValue(field.name, e.target.value)}
-                    className={controlClass}
+                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
                     aria-invalid={Boolean(field.error) || undefined}
                     aria-describedby={describedBy}
                     required={definition.required}

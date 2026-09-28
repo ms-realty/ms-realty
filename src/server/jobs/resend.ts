@@ -1,6 +1,7 @@
 // Resend's fixed API, with no provider-side template fetching or arbitrary message rendering.
 import "server-only";
 import { z } from "zod";
+import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
 import { renderSearchAlert } from "../subscriptions/template";
 import type { MessageProvider, OutboundMessage, ProviderResult } from "./provider";
@@ -101,7 +102,11 @@ export class ResendMessageProvider implements MessageProvider {
   async send(message: OutboundMessage): Promise<ProviderResult> {
     const email =
       authEmail(message, this.config.hosts, new Date()) ??
-      renderSearchAlert(message, this.config.hosts);
+      renderSearchAlert(message, this.config.hosts) ??
+      renderCaseEmail(
+        message,
+        caseEmailConfig()?.from === this.config.from ? caseEmailConfig() : null,
+      );
     if (!email || !message.idempotencyKey || message.idempotencyKey.length > 256)
       return { status: "rejected", code: "unsupported_or_expired_message", retryable: false };
     // There is deliberately no network retry here. A timeout or ambiguous server response

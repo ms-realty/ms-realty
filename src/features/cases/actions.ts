@@ -15,6 +15,7 @@ import {
   reviseBrief,
   updateNextAction,
 } from "@/server/cases/commands";
+import { approveCaseEmail, draftCaseEmail } from "@/server/cases/email";
 import {
   acknowledgeBrief,
   changeCaseDisposition,
@@ -86,6 +87,25 @@ export async function workflowAction(
       const s = ctx.session,
         db = ctx.db;
       switch (command) {
+        case "emailDraft":
+          return (
+            await draftCaseEmail(db, s, {
+              ...base,
+              subscriptionId: values.subscriptionId ?? "",
+              subject: values.subject ?? "",
+              body: values.body ?? "",
+            })
+          ).outcome;
+        case "emailApprove":
+          return (
+            await approveCaseEmail(db, s, {
+              ...base,
+              messageId: values.messageId ?? "",
+              messageVersion: Number(values.messageVersion),
+              reviewHash: values.reviewHash ?? "",
+              reviewed: values.reviewed === "true",
+            })
+          ).outcome;
         case "sellerBind":
           return (
             await bindSellerCase(db, s, {
@@ -254,7 +274,7 @@ export async function workflowAction(
   );
   if (result.ok) {
     const appointment = ["request", "arrange", "appointment"].includes(command);
-    const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}`;
+    const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {
       ...state,
       outcome: {

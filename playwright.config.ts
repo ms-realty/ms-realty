@@ -62,6 +62,10 @@ export default defineConfig({
       CLIENT_ORIGIN: origins.client,
       STAFF_ORIGIN: origins.staff,
       AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+      // Synthetic sender only; browser tests do not run an email worker.
+      CASE_EMAIL_ENABLED: "1",
+      CASE_REPLY_DOMAIN: "reply.example.test",
+      EMAIL_FROM: "MS Realty <service@example.test>",
       MEDIA_PUBLIC_BASE_URL: `${origins.public}/media`,
     },
     timeout: 300_000,

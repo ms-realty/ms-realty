@@ -75,3 +75,69 @@ describe("Resend boundary", () => {
     }
   });
 });
+
+it("renders only the reviewed Case sender, recipient and opaque reply address", async () => {
+  vi.stubEnv("CASE_EMAIL_ENABLED", "1");
+  vi.stubEnv("CASE_REPLY_DOMAIN", "reply.example.test");
+  vi.stubEnv("EMAIL_FROM", config.from);
+  try {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(JSON.stringify({ id: randomUUID() }), { status: 200 }));
+    const input: OutboundMessage = {
+      outboxId: randomUUID(),
+      idempotencyKey: randomUUID(),
+      channel: "email",
+      recipient: "recipient@example.test",
+      template: "case.reviewed-email.v1",
+      secretParams: null,
+      params: {
+        messageId: randomUUID(),
+        caseId: randomUUID(),
+        subject: "Reviewed subject",
+        body: "Literal text <script> is not HTML",
+        from: config.from,
+        replyTo: `m-${"a".repeat(40)}@reply.example.test`,
+        recipient: {
+          subscriptionId: randomUUID(),
+          subscriptionVersion: 1,
+          partyId: randomUUID(),
+          contactId: randomUUID(),
+          contactVersion: 1,
+          address: "recipient@example.test",
+          policyVersion: "synthetic",
+        },
+      },
+    };
+    const provider = new ResendMessageProvider(config, fetcher);
+    expect((await provider.send({ ...input, recipient: "different@example.test" })).status).toBe(
+      "rejected",
+    );
+    expect(
+      (await provider.send({ ...input, params: { ...input.params, from: "changed@example.test" } }))
+        .status,
+    ).toBe("rejected");
+    expect(
+      (
+        await provider.send({
+          ...input,
+          params: { ...input.params, replyTo: "arbitrary@reply.example.test" },
+        })
+      ).status,
+    ).toBe("rejected");
+    expect(fetcher).not.toHaveBeenCalled();
+    expect((await provider.send(input)).status).toBe("accepted");
+    expect(JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body))).toMatchObject({
+      from: config.from,
+      to: [input.recipient],
+      subject: input.params.subject,
+      text: input.params.body,
+      reply_to: input.params.replyTo,
+    });
+    vi.stubEnv("CASE_EMAIL_ENABLED", "");
+    expect((await provider.send(input)).status).toBe("rejected");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});

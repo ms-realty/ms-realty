@@ -6,8 +6,8 @@
 // `acknowledged`, delivery as `verified`: accepted is not delivered.
 import "server-only";
 import { createHash } from "node:crypto";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
-import { externalActions, outboxEvents } from "@/db/schema";
+import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { externalActions, messageAttempts, messages, outboxEvents } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
 import type { ExternalActionState } from "@/domain/external-action";
 import {
@@ -15,7 +15,8 @@ import {
   maxDeliveryAttempts,
   providerIdempotencyWindowMs,
 } from "@/domain/message";
-import type { Database, Executor } from "../db";
+import { caseEmailConfig, caseEmailTemplate } from "../cases/email-contract";
+import { type Database, type Executor, inTransaction } from "../db";
 import { AppError } from "../errors";
 import { alertSubjectType, alertTemplate } from "../subscriptions/template";
 import type { MessageProvider } from "./provider";
@@ -151,6 +152,10 @@ export async function dispatchMessage(
     const { dispatchSearchAlert } = await import("../subscriptions/alerts");
     return dispatchSearchAlert(db, provider, outboxId, { now });
   }
+  if (subject?.type === "message") {
+    const { dispatchCaseEmail } = await import("../cases/email-dispatch");
+    return dispatchCaseEmail(db, provider, outboxId, { now });
+  }
   const claimed = await db.transaction(async (tx) => {
     const [row] = await tx
       .select()
@@ -185,11 +190,12 @@ export async function dispatchMessage(
     // A malformed/mistagged ledger row must never fall back to generic access mail.
     if (
       template === alertTemplate ||
+      template === caseEmailTemplate ||
       secretChanged ||
       row.payloadDigest !== createHash("sha256").update(canonicalJson(row.payload)).digest("hex")
     ) {
       const code =
-        template === alertTemplate
+        template === alertTemplate || template === caseEmailTemplate
           ? "guarded_template_subject_mismatch"
           : secretChanged
             ? "secret_digest_mismatch"
@@ -274,7 +280,15 @@ export async function dispatchQueued(
   const rows = await db
     .select({ id: externalActions.id })
     .from(externalActions)
-    .where(and(eq(externalActions.kind, "email_send"), eq(externalActions.state, "queued")))
+    .where(
+      and(
+        eq(externalActions.kind, "email_send"),
+        eq(externalActions.state, "queued"),
+        caseEmailConfig()
+          ? undefined
+          : or(isNull(externalActions.subjectType), ne(externalActions.subjectType, "message")),
+      ),
+    )
     .orderBy(asc(externalActions.createdAt))
     .limit(limit);
   for (const { id } of rows) await dispatchMessage(db, provider, id);
@@ -295,30 +309,33 @@ export async function recordDeliveryReport(
     at?: Date;
   },
 ): Promise<boolean> {
-  const at = report.at ?? new Date();
-  const rows = await db
-    .update(externalActions)
-    .set({
-      state: report.status === "delivered" ? "verified" : "failed",
-      ...(report.status === "delivered"
-        ? { verifiedAt: at }
-        : { failedAt: at, lastErrorCode: report.code ?? "delivery_failed" }),
-      version: sql`${externalActions.version} + 1`,
-    })
-    .where(
-      and(
-        eq(externalActions.provider, report.provider),
-        eq(externalActions.providerReference, report.providerMessageId),
-        inArray(
-          externalActions.state,
-          report.status === "failed"
-            ? ["acknowledged", "outcome_unknown", "verified"]
-            : ["acknowledged", "outcome_unknown"],
+  return inTransaction(db, async (db) => {
+    const at = report.at ?? new Date();
+    const rows = await db
+      .update(externalActions)
+      .set({
+        state: report.status === "delivered" ? "verified" : "failed",
+        ...(report.status === "delivered"
+          ? { verifiedAt: at }
+          : { failedAt: at, lastErrorCode: report.code ?? "delivery_failed" }),
+        version: sql`${externalActions.version} + 1`,
+      })
+      .where(
+        and(
+          eq(externalActions.provider, report.provider),
+          eq(externalActions.providerReference, report.providerMessageId),
+          inArray(
+            externalActions.state,
+            report.status === "failed"
+              ? ["acknowledged", "outcome_unknown", "verified"]
+              : ["acknowledged", "outcome_unknown"],
+          ),
         ),
-      ),
-    )
-    .returning({ id: externalActions.id });
-  return rows.length > 0;
+      )
+      .returning();
+    for (const row of rows) await syncMessageOutcome(db, row, at, report.code);
+    return rows.length > 0;
+  });
 }
 
 /**
@@ -333,26 +350,70 @@ export async function reconcileMessage(
     | { state: "failed"; code: string },
   now: Date = new Date(),
 ): Promise<boolean> {
-  const values =
-    finding.state === "failed"
-      ? { failedAt: now, lastErrorCode: finding.code }
-      : finding.state === "verified"
-        ? { verifiedAt: now, providerReference: finding.providerMessageId }
-        : { acknowledgedAt: now, providerReference: finding.providerMessageId };
-  const rows = await db
-    .update(externalActions)
+  return inTransaction(db, async (db) => {
+    const values =
+      finding.state === "failed"
+        ? { failedAt: now, lastErrorCode: finding.code }
+        : finding.state === "verified"
+          ? { verifiedAt: now, providerReference: finding.providerMessageId }
+          : { acknowledgedAt: now, providerReference: finding.providerMessageId };
+    const rows = await db
+      .update(externalActions)
+      .set({
+        state: finding.state,
+        ...values,
+        reconciledAt: now,
+        version: sql`${externalActions.version} + 1`,
+      })
+      .where(
+        and(
+          eq(externalActions.id, outboxId),
+          inArray(externalActions.state, ["attempting", "outcome_unknown"]),
+        ),
+      )
+      .returning();
+    for (const row of rows)
+      await syncMessageOutcome(db, row, now, finding.state === "failed" ? finding.code : undefined);
+    return rows.length === 1;
+  });
+}
+
+async function syncMessageOutcome(
+  db: Executor,
+  row: typeof externalActions.$inferSelect,
+  at: Date,
+  code?: string,
+) {
+  if (row.subjectType !== "message" || !row.subjectId) return;
+  const state =
+    row.state === "verified"
+      ? "delivered"
+      : row.state === "acknowledged"
+        ? "provider_accepted"
+        : code === "email.bounced"
+          ? "bounced"
+          : "failed";
+  await db
+    .update(messages)
+    .set({ state, updatedAt: at, version: sql`${messages.version}+1` })
+    .where(eq(messages.id, row.subjectId));
+  await db
+    .update(messageAttempts)
     .set({
-      state: finding.state,
-      ...values,
-      reconciledAt: now,
-      version: sql`${externalActions.version} + 1`,
+      state,
+      providerReference: row.providerReference,
+      errorCode: code ?? null,
+      ...(state === "delivered"
+        ? { deliveredAt: at }
+        : state === "provider_accepted"
+          ? { acceptedAt: at }
+          : { failedAt: at }),
+      version: sql`${messageAttempts.version}+1`,
     })
     .where(
       and(
-        eq(externalActions.id, outboxId),
-        inArray(externalActions.state, ["attempting", "outcome_unknown"]),
+        eq(messageAttempts.externalActionId, row.id),
+        eq(messageAttempts.attemptNumber, row.attempts),
       ),
-    )
-    .returning({ id: externalActions.id });
-  return rows.length === 1;
+    );
 }

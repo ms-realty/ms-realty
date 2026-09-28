@@ -12,6 +12,7 @@ import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
 import { findOperation } from "@/server/operations";
 import { listTasks, readInquiry } from "@/server/work/queries";
+import type { FormReceipt } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { caseAccessCopy } from "../case-access/copy";
 import { documentRequestCopy } from "../document-requests/copy";
@@ -25,6 +26,7 @@ import {
   workflowTypes,
 } from "./contract";
 import { caseCopy } from "./copy";
+import { caseEmailCopy } from "./email-copy";
 import { type WorkflowField, WorkflowForm } from "./form";
 import { lifecycleCopy } from "./lifecycle-copy";
 import { ownerPreviewCopy } from "./owner-preview-copy";
@@ -118,6 +120,7 @@ export function BoundWorkflowForm({
   values = {},
   path,
   submit,
+  receipt,
 }: ScreenProps & {
   command: WorkflowCommand;
   id: string;
@@ -126,12 +129,14 @@ export function BoundWorkflowForm({
   values?: Record<string, string>;
   path: string;
   submit: string;
+  receipt?: FormReceipt;
 }) {
   const initial = initialFormState(
     workflowScope(command, id),
     Object.fromEntries(workflowFields[command].map((name) => [name, values[name] ?? ""])),
     revision,
   );
+  if (receipt) initial.outcome = { kind: "confirmed", receipt };
   return (
     <WorkflowForm
       locale={locale}
@@ -269,6 +274,11 @@ export async function CaseScreen(
           {view.canReadRequestedDocuments ? (
             <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/document-requests`}>
               {documentRequestCopy(props.locale).title}
+            </a>
+          ) : null}
+          {view.canNote ? (
+            <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/email`}>
+              {caseEmailCopy(props.locale).title}
             </a>
           ) : null}
           {view.canReviewProcess ? (
@@ -746,6 +756,10 @@ export async function WorkflowStatusScreen(
     await privateRead(() => caseFor(getDb(), props.session, id));
     destination = `/${props.locale}/${props.session.account.kind === "staff" ? "cases" : "overview"}/${id}`;
   }
+  if (command === "emailDraft" || command === "emailApprove") {
+    if (props.session.account.kind !== "staff") notFound();
+    destination += "/email";
+  }
   const receipt = await findOperation(
     getDb(),
     props.session.actor,
@@ -756,7 +770,7 @@ export async function WorkflowStatusScreen(
   if (receipt?.status === "succeeded") {
     const outcome = z.object({ id: z.uuid() }).safeParse(receipt.outcome);
     if (outcome.success)
-      destination = `/${props.locale}/${["request", "arrange", "appointment"].includes(command) ? (props.session.account.kind === "staff" ? "calendar" : "appointments") : props.session.account.kind === "staff" ? "cases" : "overview"}/${outcome.data.id}`;
+      destination = `/${props.locale}/${["request", "arrange", "appointment"].includes(command) ? (props.session.account.kind === "staff" ? "calendar" : "appointments") : props.session.account.kind === "staff" ? "cases" : "overview"}/${outcome.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
   }
   return (
     <WorkflowPage {...props} title={c.status}>

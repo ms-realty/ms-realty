@@ -1,4 +1,6 @@
 export const workflowTypes = {
+  emailDraft: "case.email.draft",
+  emailApprove: "case.email.approve",
   create: "case.create_from_inquiry",
   next: "case.next_action",
   brief: "case.brief.revise",
@@ -19,6 +21,8 @@ export const workflowTypes = {
 } as const;
 export type WorkflowCommand = keyof typeof workflowTypes;
 export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
+  emailDraft: ["subscriptionId", "subject", "body"],
+  emailApprove: ["messageId", "messageVersion", "reviewHash", "reviewed"],
   create: ["kind", "title", "nextAction", "dueAt", "requirements", "preferences"],
   next: ["nextAction", "dueAt", "clientSummary"],
   brief: ["requirements", "preferences"],
