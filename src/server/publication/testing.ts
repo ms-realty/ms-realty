@@ -69,6 +69,7 @@ export async function insertPlace(
     nameNative: string;
     nameLatin: string;
     aliases?: readonly string[];
+    country?: "BG" | "GR";
   },
 ): Promise<string> {
   const [row] = await db
@@ -77,7 +78,7 @@ export async function insertPlace(
       ...(values.id ? { id: values.id } : {}),
       level: values.level,
       parentId: values.parentId,
-      countryCode: "BG",
+      countryCode: values.country ?? "BG",
       slug: `${values.level}-${values.nameLatin.toLowerCase()}-${next()}`,
       nameNative: values.nameNative,
       nameLatin: values.nameLatin,
@@ -155,6 +156,7 @@ export const defaultFacts: Readonly<Record<string, FactFixture>> = {
 };
 
 export interface ListingFixtureOptions {
+  readonly country?: "BG" | "GR";
   readonly reviewerId: string;
   readonly placeId?: string | null;
   readonly propertyType?: PropertyType;
@@ -223,7 +225,7 @@ export async function createListingFixture(
       reference: `PR-2026-${String(900_000 + n)}`,
       propertyType: options.propertyType ?? "apartment",
       placeId: options.placeId ?? null,
-      country: "BG",
+      country: options.country ?? "BG",
       region: "Blagoevgrad",
       settlement: "Sandanski",
       neighborhood: options.neighborhood ?? "Center",

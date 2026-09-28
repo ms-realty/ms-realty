@@ -35,3 +35,31 @@ Regenerate scoped Worker declarations with `node scripts/gateway-types.mjs` (pin
 Before release, additionally verify the actual gateway/R2 binding and approved atlas on all supported browsers and locales: range/caching headers, remote read-back checksums, glyphs, sprites, attribution, coverage and loading/failure recovery. Test keyboard, mobile and Hebrew direction; review desktop/mobile screenshots and network logs. Obtain source/usage and provider acceptance under the normal release gates. A local fixture or successful CI run cannot satisfy those live checks.
 
 Primary implementation references: [PMTiles MapLibre integration](https://docs.protomaps.com/pmtiles/maplibre), [Protomaps styles and self-hosted assets](https://docs.protomaps.com/basemaps/maplibre), [Cloudflare R2 Workers API](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/), [Workers best practices](https://developers.cloudflare.com/workers/best-practices/workers-best-practices/).
+
+## Local candidate preparation and browser qualification
+
+`node scripts/map-release.mjs seal ASSET_DIR SOURCE.json` creates a write-once
+`release-manifest.json` containing the supplied source/coverage metadata and every file's
+size and SHA-256. Its SHA-256 is the release ID. `verify ASSET_DIR` checks the complete
+inventory, rejects changed/missing/additional files and symlinks, and prints that ID.
+Required files include all sprites, licence receipts, and Latin, Greek, Cyrillic and
+Hebrew glyph ranges in each of the three style fonts. This verifies bytes and required
+paths; it does not certify glyph contents, map accuracy, legal approval or live hosting.
+Run `pmtiles verify` and record the archive header before sealing. Keep the source
+metadata truthful: a regional extract cannot verify the upstream whole-planet BLAKE3 hash.
+
+For a sealed local candidate, run:
+
+```sh
+TEST_DATABASE_URL=postgres://... E2E_PORT=3169 NEXT_DIST_DIR=.next-real-atlas \
+E2E_MAP_ASSETS_DIR=/absolute/path/to/sealed-candidate \
+npx playwright test e2e/map.spec.ts --workers=1
+```
+
+The browser harness verifies the manifest and copied bytes, selects its hash as
+`MAP_RELEASE_ID`, and uses only a disposable database with synthetic approved listings.
+The optional qualification test checks Sandanski and Thessaloniki in seven locales on
+Chromium desktop/mobile and WebKit mobile, including real font/sprite requests, same-origin
+network traffic, failure/retry and no-JavaScript list fallback. It saves screenshots for
+visual review. Without `E2E_MAP_ASSETS_DIR`, CI uses the small synthetic archive and
+explicitly skips real-atlas qualification. Never interpret that skip as geographic proof.

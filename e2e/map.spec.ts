@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { publicLocales } from "../src/domain/ids";
+import { mapCopy } from "../src/features/discovery/map-copy";
 import { origins } from "./hosts";
 
 // Covers two bounded map attempts plus database setup and the native fallback journey.
@@ -78,6 +80,51 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await page.reload();
   await expect(page.getByRole("button", { name: "Show map" })).not.toBeVisible();
   await expect(page.locator(".msr-map-marker")).toHaveCount(0);
+});
+
+// Explicit local-asset qualification. CI's synthetic archive does not satisfy this check.
+test("prepared atlas renders local glyphs and sprites across seven locales", async ({ page }) => {
+  test.skip(!process.env.E2E_MAP_ASSETS_DIR, "Requires a sealed real atlas candidate.");
+  test.setTimeout(180_000);
+  for (const country of ["bg", "gr"] as const) {
+    const data = fixture(country === "gr" ? "map-gr" : "map");
+    for (const locale of publicLocales) {
+      const copy = mapCopy(locale);
+      const failed: string[] = [],
+        external: string[] = [],
+        assets: string[] = [];
+      const response = (r: import("@playwright/test").Response) => {
+        if (!r.url().includes("/maps/")) return;
+        assets.push(r.url());
+        if (r.status() !== 200 && r.status() !== 206) failed.push(`${r.status()} ${r.url()}`);
+      };
+      const request = (r: import("@playwright/test").Request) => {
+        if (/^https?:/.test(r.url()) && new URL(r.url()).origin !== origins.public)
+          external.push(r.url());
+      };
+      page.on("response", response);
+      page.on("request", request);
+      await page.goto(`/${locale}/properties?q=${encodeURIComponent(data.published.reference)}`);
+      await page.getByRole("button", { name: copy.show, exact: true }).click();
+      const canvas = page.locator(".maplibregl-canvas");
+      await expect(canvas).toBeVisible();
+      await expect(page.getByText(copy.loading, { exact: true })).not.toBeVisible({
+        timeout: 20000,
+      });
+      await expect(page.getByText(copy.error, { exact: true })).not.toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("dir", locale === "he" ? "rtl" : "ltr");
+      await expect(page.locator(".msr-map-marker")).toBeVisible();
+      await page
+        .locator(".maplibregl-map")
+        .screenshot({ path: test.info().outputPath(`atlas-${country}-${locale}.png`) });
+      expect(failed).toEqual([]);
+      expect(external).toEqual([]);
+      expect(assets.some((url) => url.includes("/fonts/") && url.endsWith(".pbf"))).toBe(true);
+      expect(assets.some((url) => /\/sprites\/light(?:@2x)?\.png$/.test(url))).toBe(true);
+      page.off("response", response);
+      page.off("request", request);
+    }
+  }
 });
 
 test("map failure and retry leave the listing usable; no-JavaScript list still works", async ({

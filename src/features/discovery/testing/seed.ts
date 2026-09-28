@@ -4,6 +4,7 @@ import { eq, sql as statement } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
+import { publicLocales } from "@/domain/ids";
 import { restrictPublication, withdrawPublication } from "@/server/publication/commands";
 import { createListingFixture, insertPlace, publishForTest } from "@/server/publication/testing";
 import { createStaff } from "@/server/testing";
@@ -19,6 +20,8 @@ try {
     email: `synthetic-${randomUUID()}@example.test`,
   });
   const command = process.argv[2];
+  const isMap = command === "map" || command === "map-gr";
+  const country = command === "map-gr" ? "GR" : "BG";
   if (command === "withdraw") {
     const reference = process.argv[3] ?? "";
     const [listing] = await db
@@ -37,15 +40,20 @@ try {
   } else {
     const suffix = randomUUID().slice(0, 8);
     const placeId = await insertPlace(db, {
+      country,
       level: "settlement",
       parentId: null,
       nameNative: `Синтетично място ${suffix}`,
       nameLatin: `Synthetic place ${suffix}`,
     });
-    if (command === "map")
+    if (isMap)
       await db
         .update(schema.geographyPlaces)
-        .set({ latitude: "41.55", longitude: "23.28" })
+        .set(
+          country === "GR"
+            ? { latitude: "40.64", longitude: "22.94" }
+            : { latitude: "41.55", longitude: "23.28" },
+        )
         .where(eq(schema.geographyPlaces.id, placeId));
     const make = async (label: string) => {
       const title = `Synthetic ${label} ${suffix}`;
@@ -56,13 +64,18 @@ try {
           statement`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))`,
         );
         const fixture = await createListingFixture(tx, {
+          country,
+          facts: { location: { state: "known", value: { country } } },
           reviewerId: staff.id,
           placeId,
           title,
           description: "Synthetic test property. Not a real offer.",
-          translations: {
-            en: { title, description: "Synthetic test property. Not a real offer." },
-          },
+          translations: Object.fromEntries(
+            (isMap ? publicLocales.filter((locale) => locale !== "bg") : ["en"]).map((locale) => [
+              locale,
+              { title, description: "Synthetic test property. Not a real offer." },
+            ]),
+          ),
         });
         const number = randomBytes(6).readUIntBE(0, 6).toString();
         const reference = `MS-${number}`;
@@ -80,7 +93,7 @@ try {
           .where(eq(schema.sellerInstructions.listingId, fixture.listingId));
         return { ...fixture, reference };
       });
-      await publishForTest(db, staff.actor, f, ["bg", "en"]);
+      await publishForTest(db, staff.actor, f, isMap ? [...publicLocales] : ["bg", "en"]);
       return { reference: f.reference, title, id: f.listingId };
     };
     const published = await make("published"),
