@@ -30,6 +30,10 @@ const en = {
   email: "Email",
   phone: "Phone",
   optional: "Optional messages",
+  purposeChoices: "Messages by purpose",
+  serviceChoice:
+    "I reviewed these terms and want service emails about my cases. This does not enable marketing or search alerts.",
+  enableService: "Enable case service emails",
   noTerms: "Opt-in is unavailable until reviewed terms are published in this language.",
   noContact:
     "A verified email route is required. Confirm a new sign-in link for your current account first.",
@@ -50,7 +54,7 @@ const en = {
   saveSearch: "Save search preferences",
   resume: "Resume",
   withdraw: "Unsubscribe",
-  none: "No optional subscriptions.",
+  none: "No message subscriptions.",
   staffLead:
     "Review each request under the approved policy. Record the owner, reviewed due date and evidence. These controls record a human decision; they do not erase data or export records automatically.",
   state: "Next state",
@@ -100,6 +104,10 @@ const bg: typeof en = {
   email: "Имейл",
   phone: "Телефон",
   optional: "Незадължителни съобщения",
+  purposeChoices: "Съобщения по цел",
+  serviceChoice:
+    "Прегледах тези условия и желая имейли за моите случаи. Това не включва маркетинг или известия за търсене.",
+  enableService: "Включи имейли по случаите",
   noTerms: "Абонирането не е налично без публикувани прегледани условия на този език.",
   noContact: "Нужен е потвърден имейл. Потвърдете нова връзка за вход за текущия профил.",
   reverify: "Потвърдете текущия имейл",
@@ -119,7 +127,7 @@ const bg: typeof en = {
   saveSearch: "Запазете предпочитанията за търсене",
   resume: "Възобновете",
   withdraw: "Отпишете се",
-  none: "Няма незадължителни абонаменти.",
+  none: "Няма абонаменти за съобщения.",
   staffLead:
     "Прегледайте искането по одобрената политика. Запишете отговорник, прегледан срок и доказателства. Контролите записват човешко решение; не изтриват или експортират данни автоматично.",
   state: "Следващо състояние",
@@ -151,7 +159,7 @@ const names: Record<string, [string, string]> = {
   rejected: ["Refused with a recorded reason", "Отказано със записана причина"],
   search_alerts: ["Saved-search alerts", "Известия за запазено търсене"],
   marketing: ["Marketing messages", "Маркетингови съобщения"],
-  service_updates: ["Necessary service updates", "Необходими служебни съобщения"],
+  service_updates: ["Case service emails", "Имейли по случаите"],
   active: ["Active", "Активен"],
   paused: ["Paused", "На пауза"],
   withdrawn: ["Unsubscribed", "Отписан"],

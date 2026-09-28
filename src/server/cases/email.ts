@@ -12,6 +12,7 @@ import {
   parties,
   subscriptions,
 } from "@/db/schema";
+import { publicLocales } from "@/domain/ids";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
 import { getEnv } from "../config/env";
@@ -20,6 +21,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { enqueueMessage } from "../jobs/outbox";
 import { runOperation } from "../operations";
+import { consentPolicyKey, consentTerms } from "../privacy/preferences";
 import { commandEnvelope, parseInput, version } from "../work/shared";
 import {
   caseEmailConfig,
@@ -45,6 +47,11 @@ export async function eligibleCaseRecipient(
     !subscription.policyVersion
   )
     return null;
+  const locale = z.enum(publicLocales).safeParse(subscription.policyVersion.split(":").at(-1));
+  const terms = locale.success
+    ? await consentTerms(db, "service_updates", locale.data, lock)
+    : null;
+  if (!terms || consentPolicyKey(terms) !== subscription.policyVersion) return null;
   const cq = db
     .select()
     .from(contactMethods)

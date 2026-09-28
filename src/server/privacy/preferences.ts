@@ -19,8 +19,10 @@ import { parseInput } from "../work/shared";
 import { privacyClient } from "./access";
 
 export const optionalPurposes = ["search_alerts", "marketing"] as const;
-type OptionalPurpose = (typeof optionalPurposes)[number];
+export const preferencePurposes = ["service_updates", ...optionalPurposes] as const;
+type PreferencePurpose = (typeof preferencePurposes)[number];
 const consentSlug = {
+  service_updates: "service-email-preferences",
   search_alerts: "search-alert-consent",
   marketing: "marketing-consent",
 } as const;
@@ -37,11 +39,11 @@ const timezone = z
   });
 export const consentTerms = (
   db: Executor,
-  purpose: OptionalPurpose,
+  purpose: PreferencePurpose,
   locale: PublicLocale,
   lock = false,
 ) => readApprovedContent(db, "help", consentSlug[purpose], locale, { lock });
-const policyKey = (terms: NonNullable<Awaited<ReturnType<typeof consentTerms>>>) =>
+export const consentPolicyKey = (terms: NonNullable<Awaited<ReturnType<typeof consentTerms>>>) =>
   `${terms.version.id}:${terms.version.number}:${terms.version.contentHash}:${terms.locale}`;
 const searchSummary = (search: NormalizedSearch) =>
   [
@@ -97,6 +99,7 @@ export async function getPreferences(db: Executor, session: Session, locale: Pub
     contacts,
     subscriptions: choices,
     terms: {
+      service_updates: await consentTerms(db, "service_updates", locale),
       search_alerts: await consentTerms(db, "search_alerts", locale),
       marketing: await consentTerms(db, "marketing", locale),
     },
@@ -162,7 +165,7 @@ export async function optIn(db: Executor, session: Session, input: unknown) {
     z.object({
       operationId: z.uuid(),
       contactMethodId: z.uuid(),
-      purpose: z.enum(optionalPurposes),
+      purpose: z.enum(preferencePurposes),
       locale: z.enum(publicLocales),
       termsVersionId: z.uuid(),
       confirmed: z.literal(true),
@@ -199,10 +202,15 @@ export async function optIn(db: Executor, session: Session, input: unknown) {
           ),
         )
         .for("share");
-      if (contact?.kind !== "email" || contact.verification !== "verified" || !contact.verifiedAt)
+      if (
+        contact?.kind !== "email" ||
+        contact.verification !== "verified" ||
+        !contact.verifiedAt ||
+        contact.lastFailureAt
+      )
         throw new AppError("validation_failed");
       // Serialize this party's choices, so retries/concurrent requests cannot create two
-      // active optional streams for the same contact and purpose.
+      // active purpose-specific streams for the same contact and purpose.
       await tx
         .select({ id: parties.id })
         .from(parties)
@@ -221,7 +229,7 @@ export async function optIn(db: Executor, session: Session, input: unknown) {
       if (existing.some((row) => row.state !== "withdrawn"))
         throw new AppError("transition_denied");
       const id = randomUUID();
-      const key = policyKey(terms);
+      const key = consentPolicyKey(terms);
       const summary = search ? searchSummary(search) : null;
       await tx.insert(subscriptions).values({
         id,
@@ -287,7 +295,7 @@ export async function changeSubscription(db: Executor, session: Session, input: 
         .from(subscriptions)
         .where(and(eq(subscriptions.id, value.id), eq(subscriptions.partyId, person.partyId)))
         .for("update");
-      if (!row || !optionalPurposes.includes(row.purpose as OptionalPurpose))
+      if (!row || !preferencePurposes.includes(row.purpose as PreferencePurpose))
         throw new AppError("not_found");
       if (row.version !== value.expectedVersion) throw new AppError("version_conflict");
       if (subscriptionMachine.check(row.state, value.state).outcome !== "allowed")
@@ -295,7 +303,7 @@ export async function changeSubscription(db: Executor, session: Session, input: 
       if (value.state === "active") {
         const locale = z.enum(publicLocales).safeParse(row.policyVersion.split(":").at(-1));
         const terms = locale.success
-          ? await consentTerms(tx, row.purpose as OptionalPurpose, locale.data, true)
+          ? await consentTerms(tx, row.purpose as PreferencePurpose, locale.data, true)
           : null;
         const [contact] = await tx
           .select()
@@ -303,11 +311,12 @@ export async function changeSubscription(db: Executor, session: Session, input: 
           .where(eq(contactMethods.id, row.contactMethodId));
         if (
           !terms ||
-          policyKey(terms) !== row.policyVersion ||
+          consentPolicyKey(terms) !== row.policyVersion ||
           contact?.kind !== "email" ||
           contact.partyId !== row.partyId ||
           contact?.verification !== "verified" ||
-          !contact.verifiedAt
+          !contact.verifiedAt ||
+          contact.lastFailureAt
         )
           throw new AppError("approval_stale");
       }
@@ -414,7 +423,7 @@ export async function editSearchSubscription(db: Executor, session: Session, inp
                 ...(value.maxPrice === null ? {} : { max: value.maxPrice }),
               },
       });
-      const policyVersion = policyKey(terms);
+      const policyVersion = consentPolicyKey(terms);
       await tx
         .update(subscriptions)
         .set({
@@ -454,12 +463,12 @@ export async function editSearchSubscription(db: Executor, session: Session, inp
   );
 }
 
-/** Optional-message workers call immediately before dispatch. A previous queue snapshot
+/** Purpose-specific message workers call immediately before dispatch. A previous queue snapshot
  * never substitutes for current purpose, consent, verified channel and approved terms. */
 export async function eligibleSubscriptionRecipient(
   db: Executor,
   id: string,
-  purpose: OptionalPurpose,
+  purpose: PreferencePurpose,
 ) {
   const [row] = await db
     .select({ subscription: subscriptions, contact: contactMethods })
@@ -475,11 +484,12 @@ export async function eligibleSubscriptionRecipient(
     row.contact.verification !== "verified" ||
     row.contact.kind !== "email" ||
     !row.contact.verifiedAt ||
+    row.contact.lastFailureAt ||
     row.contact.partyId !== row.subscription.partyId
   )
     return null;
   const locale = z.enum(publicLocales).safeParse(row.subscription.policyVersion.split(":").at(-1));
   const terms = locale.success ? await consentTerms(db, purpose, locale.data) : null;
-  if (!terms || policyKey(terms) !== row.subscription.policyVersion) return null;
+  if (!terms || consentPolicyKey(terms) !== row.subscription.policyVersion) return null;
   return { recipient: row.contact.value, subscription: row.subscription };
 }

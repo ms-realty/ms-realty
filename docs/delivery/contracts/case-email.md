@@ -43,8 +43,11 @@ service-eligibility versions, subject and full body. `CASE_EMAIL_ENABLED` is dis
 default and requires `EMAIL_FROM` plus the qualified `CASE_REPLY_DOMAIN`. No deployment
 configuration was enabled. No new service eligibility is inferred from a marketing/search
 subscription or portal login. Where the corresponding verified `service_updates` record
-is absent, the screen truthfully has no eligible recipient. Capturing that eligibility through
-an approved client-facing policy remains separate work.
+is absent, the screen truthfully has no eligible recipient. Clients can now explicitly enable, pause, resume or withdraw this purpose from Preferences.
+The displayed `help/service-email-preferences` revision must carry current human editorial,
+publication and claim approvals; no policy text is seeded in deployment. The same exact
+policy revision is rechecked under a lock before email handoff. Marketing and saved-search
+choices remain independent.
 
 Native approval forms remain mounted after the state transition, preserving the operation
 receipt with JavaScript disabled. The persisted approval timestamp supplies the receipt on
@@ -63,7 +66,7 @@ option; the browser regression asserts viewport containment. TypeScript and full
 Biome passed. Evidence is retained under
 `/Users/ivan/Code/.artifacts/ms-realty/case-email/20260928`.
 
-Outstanding broader communication requirements: approved service-eligibility capture,
-attachments, multi-recipient revisions, ICS notification dispatch and safe inbound triage.
+Outstanding broader communication requirements: owner-authored and human-approved live
+service terms, attachments, multi-recipient revisions, ICS notification dispatch and safe inbound triage.
 The current reply token is a correlation address, not an implemented inbound Case importer.
 Live provider delivery, sender/reply DNS and owner release evidence remain unqualified.

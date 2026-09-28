@@ -20,6 +20,8 @@ import {
   recordDeliveryReport,
 } from "../jobs/outbox";
 import type { MessageProvider } from "../jobs/provider";
+import { consentPolicyKey } from "../privacy/preferences";
+import { syntheticServiceEmailTerms } from "../privacy/testing";
 import { approveCaseEmail, caseEmailWorkbench, draftCaseEmail } from "./email";
 import { dispatchCaseEmail } from "./email-dispatch";
 import { caseFixture } from "./testing";
@@ -33,6 +35,7 @@ afterAll(async () => {
   await t?.drop();
 });
 async function fixture() {
+  const terms = await syntheticServiceEmailTerms(t.db);
   const f = await caseFixture(t.db);
   const address = `synthetic-${randomUUID()}@example.test`;
   const [contact] = await t.db
@@ -56,7 +59,7 @@ async function fixture() {
       state: "active",
       verifiedAt: new Date(),
       timezone: "Europe/Sofia",
-      policyVersion: "synthetic-explicit-service-eligibility",
+      policyVersion: consentPolicyKey(terms),
       unsubscribeTokenHash: randomUUID(),
     })
     .returning();
@@ -352,4 +355,20 @@ it("disabled Case email cannot starve access emails in a bounded queue sweep", a
   } finally {
     vi.unstubAllEnvs();
   }
+});
+
+it("withdrawn human policy approval invalidates already queued Case email", async () => {
+  const f = await queued(),
+    p = provider();
+  const policyId = f.subscription.policyVersion.split(":")[0];
+  await t.db
+    .update(approvals)
+    .set({
+      state: "invalidated",
+      invalidatedAt: new Date(),
+      invalidationReason: "Synthetic policy withdrawal",
+    })
+    .where(and(eq(approvals.subjectId, policyId ?? ""), eq(approvals.kind, "legal_process_claim")));
+  expect(await dispatchCaseEmail(t.db, p, f.actionId, { config })).toBe("cancelled");
+  expect(p.send).not.toHaveBeenCalled();
 });

@@ -129,3 +129,95 @@ for (const javaScriptEnabled of [true, false]) {
     }
   });
 }
+
+test("native client service-email choice enables only reviewed case mail and can be withdrawn", async ({
+  browser,
+}, testInfo) => {
+  const f = JSON.parse(
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "src/server/cases/email-browser-seed.ts"],
+      {
+        env: {
+          ...process.env,
+          E2E_CASE_EMAIL_OPT_IN: "1",
+          AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+          DATABASE_URL: url,
+        },
+        encoding: "utf8",
+      },
+    ),
+  ) as {
+    caseId: string;
+    staffToken: string;
+    clientToken: string;
+    address: string;
+    contactId: string;
+  };
+  const context = await browser.newContext({ ...testInfo.project.use, javaScriptEnabled: false });
+  try {
+    await context.addCookies([
+      {
+        name: "msr_client_session",
+        value: f.clientToken,
+        url: origins.client,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    const page = await context.newPage();
+    await page.goto(hostUrl("client", "/bg/preferences"));
+    const choice = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Имейли по случаите", exact: true }) });
+    await choice.locator("summary").click();
+    await expect(
+      choice.getByText(
+        "Само тест: изричен избор за имейли по случай. Това не е реална правна политика.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await choice.getByRole("checkbox").check();
+    await choice.getByRole("button", { name: "Включи имейли по случаите", exact: true }).click();
+    await expect(page).toHaveURL(/\/bg\/preferences\?receipt=/);
+    const subscriptions = await db
+      .select()
+      .from(schema.subscriptions)
+      .where(eq(schema.subscriptions.contactMethodId, f.contactId));
+    expect(subscriptions).toHaveLength(1);
+    expect(subscriptions[0]?.purpose).toBe("service_updates");
+    const active = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "Имейли по случаите · Активен", exact: true }),
+    });
+    await expect(active).toBeVisible();
+    await active.getByRole("button", { name: "Отпишете се", exact: true }).click();
+    await expect(page).toHaveURL(/\/bg\/preferences\?receipt=/);
+    expect(
+      (
+        await db
+          .select()
+          .from(schema.subscriptions)
+          .where(eq(schema.subscriptions.contactMethodId, f.contactId))
+      )[0]?.state,
+    ).toBe("withdrawn");
+    await context.clearCookies();
+    await context.addCookies([
+      {
+        name: "msr_staff_session",
+        value: f.staffToken,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    await page.goto(hostUrl("staff", `/en/cases/${f.caseId}/email`));
+    await expect(
+      page.getByText(
+        "No eligible recipient. A current case participant needs a verified email address and recorded service-message eligibility.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+  } finally {
+    await context.close();
+  }
+});

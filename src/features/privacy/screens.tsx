@@ -4,7 +4,7 @@ import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
 import type { Session } from "@/server/auth/sessions";
 import { privateReceipt } from "@/server/privacy/native";
-import { getPreferences, optionalPurposes } from "@/server/privacy/preferences";
+import { getPreferences, preferencePurposes } from "@/server/privacy/preferences";
 import {
   clientPrivacyRequests,
   privacyOwners,
@@ -72,7 +72,7 @@ function SearchEditor({
           {c.searchPurpose}
           <select
             name="searchPurpose"
-            className={controlClass}
+            className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
             defaultValue={current?.criteria?.purpose ?? "sale"}
           >
             <option value="sale">{c.sale}</option>
@@ -95,7 +95,7 @@ function SearchEditor({
           {c.frequency}
           <select
             name="frequency"
-            className={controlClass}
+            className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
             defaultValue={subscription.frequency ?? "daily"}
           >
             <option value="daily">{c.daily}</option>
@@ -131,7 +131,10 @@ export async function ClientPrivacyScreen({
         <Envelope intent="request" />
         <label className="grid gap-1">
           {c.type}
-          <select name="kind" className={controlClass}>
+          <select
+            name="kind"
+            className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+          >
             {privacyRequestKinds.map((kind) => (
               <option key={kind} value={kind}>
                 {privacyLabel(locale, kind)}
@@ -220,7 +223,7 @@ export async function PreferencesScreen({
         <label className="grid gap-1">
           {c.language}
           <select
-            className={controlClass}
+            className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
             name="preferredLocale"
             defaultValue={data.party.preferredLocale ?? locale}
           >
@@ -241,7 +244,7 @@ export async function PreferencesScreen({
           {c.channel}
           <select
             name="channel"
-            className={controlClass}
+            className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
             defaultValue={preferences.channel ?? "email"}
           >
             <option value="email">{c.email}</option>
@@ -251,8 +254,8 @@ export async function PreferencesScreen({
         <TextField name="contactWindow" label={c.window} value={preferences.contactWindow} />
         <Submit>{c.save}</Submit>
       </form>
-      <h2 className="text-section font-semibold">{c.optional}</h2>
-      {optionalPurposes.map((purpose) => {
+      <h2 className="text-section font-semibold">{c.purposeChoices}</h2>
+      {preferencePurposes.map((purpose) => {
         const terms = data.terms[purpose];
         return (
           <section
@@ -281,7 +284,10 @@ export async function PreferencesScreen({
                 <input type="hidden" name="termsVersionId" value={terms.version.id} />
                 <label className="grid gap-1">
                   {c.email}
-                  <select name="contactMethodId" className={controlClass}>
+                  <select
+                    name="contactMethodId"
+                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                  >
                     {verified.map((contact) => (
                       <option key={contact.id} value={contact.id}>
                         {contact.value}
@@ -299,7 +305,10 @@ export async function PreferencesScreen({
                   <>
                     <label className="grid gap-1">
                       {c.searchPurpose}
-                      <select name="searchPurpose" className={controlClass}>
+                      <select
+                        name="searchPurpose"
+                        className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                      >
                         <option value="sale">{c.sale}</option>
                         <option value="rent">{c.rent}</option>
                       </select>
@@ -308,15 +317,20 @@ export async function PreferencesScreen({
                     <TextField name="maxPrice" label={c.maxPrice} type="number" />
                     <label className="grid gap-1">
                       {c.frequency}
-                      <select name="frequency" className={controlClass}>
+                      <select
+                        name="frequency"
+                        className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                      >
                         <option value="daily">{c.daily}</option>
                         <option value="weekly">{c.weekly}</option>
                       </select>
                     </label>
                   </>
                 ) : null}
-                <Check name="confirmed">{c.consent}</Check>
-                <Submit>{c.optIn}</Submit>
+                <Check name="confirmed">
+                  {purpose === "service_updates" ? c.serviceChoice : c.consent}
+                </Check>
+                <Submit>{purpose === "service_updates" ? c.enableService : c.optIn}</Submit>
               </form>
             ) : null}
           </section>
@@ -344,7 +358,7 @@ export async function PreferencesScreen({
             />
           ) : null}
           <div className="flex flex-wrap gap-3">
-            {subscription.purpose !== "service_updates" && subscription.state !== "withdrawn"
+            {subscription.state !== "withdrawn"
               ? (subscription.state === "active"
                   ? ["paused", "withdrawn"]
                   : subscription.state === "paused"
@@ -420,7 +434,10 @@ export async function StaffPrivacyScreen({
                 <Envelope intent="review" id={record.id} version={record.version} />
                 <label className="grid gap-1">
                   {c.state}
-                  <select name="to" className={controlClass}>
+                  <select
+                    name="to"
+                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                  >
                     {next.map((state) => (
                       <option key={state} value={state}>
                         {privacyLabel(locale, state)}
@@ -432,7 +449,7 @@ export async function StaffPrivacyScreen({
                   {c.owner}
                   <select
                     name="responsibleId"
-                    className={controlClass}
+                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
                     defaultValue={record.responsibleId ?? ""}
                   >
                     {owners.map((owner) => (

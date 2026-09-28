@@ -35,6 +35,7 @@ import {
   staffPrivacyRequests,
   submitPrivacyRequest,
 } from "./requests";
+import { syntheticServiceEmailTerms } from "./testing";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -338,7 +339,11 @@ describe("purpose-specific optional consent", () => {
     const preferences = await getPreferences(t.db, person.session, "bg");
     expect(preferences.party.version).toBe(2);
     expect(preferences.subscriptions).toEqual([]);
-    expect(preferences.terms).toEqual({ search_alerts: null, marketing: null });
+    expect(preferences.terms).toEqual({
+      search_alerts: null,
+      marketing: null,
+      service_updates: null,
+    });
     await expect(
       optIn(t.db, person.session, {
         operationId: randomUUID(),
@@ -513,4 +518,63 @@ describe("purpose-specific optional consent", () => {
       await t.db.select().from(subscriptions).where(eq(subscriptions.purpose, "marketing")),
     ).toEqual([]);
   });
+});
+
+it("service email is an explicit verified purpose choice, independent of optional messages", async () => {
+  const terms = await syntheticServiceEmailTerms(t.db),
+    person = await client(),
+    other = await client();
+  const input = {
+    operationId: randomUUID(),
+    purpose: "service_updates",
+    contactMethodId: person.contact.id,
+    locale: "bg",
+    termsVersionId: terms.version.id,
+    confirmed: true,
+    timezone: "Europe/Sofia",
+  };
+  await expect(optIn(t.db, other.session, input)).rejects.toMatchObject({
+    code: "validation_failed",
+  });
+  await expect(optIn(t.db, person.session, { ...input, confirmed: false })).rejects.toMatchObject({
+    code: "validation_failed",
+  });
+  const saved = await optIn(t.db, person.session, input);
+  expect((await optIn(t.db, person.session, input)).outcome).toEqual(saved.outcome);
+  const choices = (await getPreferences(t.db, person.session, "bg")).subscriptions;
+  expect(choices).toHaveLength(1);
+  expect(choices[0]?.purpose).toBe("service_updates");
+  expect(await eligibleSubscriptionRecipient(t.db, saved.outcome.id, "marketing")).toBeNull();
+  expect(
+    await eligibleSubscriptionRecipient(t.db, saved.outcome.id, "service_updates"),
+  ).not.toBeNull();
+  expect(
+    await t.db
+      .select()
+      .from(consentEvents)
+      .where(eq(consentEvents.subscriptionId, saved.outcome.id)),
+  ).toHaveLength(2);
+  await changeSubscription(t.db, person.session, {
+    operationId: randomUUID(),
+    id: saved.outcome.id,
+    expectedVersion: 1,
+    state: "paused",
+  });
+  expect(await eligibleSubscriptionRecipient(t.db, saved.outcome.id, "service_updates")).toBeNull();
+  await changeSubscription(t.db, person.session, {
+    operationId: randomUUID(),
+    id: saved.outcome.id,
+    expectedVersion: 2,
+    state: "active",
+  });
+  expect(
+    await eligibleSubscriptionRecipient(t.db, saved.outcome.id, "service_updates"),
+  ).not.toBeNull();
+  await changeSubscription(t.db, person.session, {
+    operationId: randomUUID(),
+    id: saved.outcome.id,
+    expectedVersion: 3,
+    state: "withdrawn",
+  });
+  expect(await eligibleSubscriptionRecipient(t.db, saved.outcome.id, "service_updates")).toBeNull();
 });
