@@ -10,8 +10,13 @@ import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { externalActions, outboxEvents } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
 import type { ExternalActionState } from "@/domain/external-action";
-import { type MessageChannel, maxDeliveryAttempts } from "@/domain/message";
+import {
+  type MessageChannel,
+  maxDeliveryAttempts,
+  providerIdempotencyWindowMs,
+} from "@/domain/message";
 import type { Database, Executor } from "../db";
+import { AppError } from "../errors";
 import { alertSubjectType, alertTemplate } from "../subscriptions/template";
 import type { MessageProvider } from "./provider";
 import type { JobQueue } from "./queue";
@@ -68,6 +73,8 @@ interface EmailPayload {
   readonly recipient: string;
   readonly template: string;
   readonly params: Record<string, unknown>;
+  /** Commitment to high-entropy access-link parameters, retained after the secret is erased. */
+  readonly secretDigest?: string;
 }
 
 /**
@@ -84,6 +91,13 @@ export async function enqueueMessage(
     recipient: message.recipient,
     template: message.template,
     params: message.params ?? {},
+    ...(message.secretParams
+      ? {
+          secretDigest: createHash("sha256")
+            .update(canonicalJson(message.secretParams))
+            .digest("hex"),
+        }
+      : {}),
   };
   const [inserted] = await db
     .insert(externalActions)
@@ -102,10 +116,18 @@ export async function enqueueMessage(
     return { id: inserted.id, created: true };
   }
   const [existing] = await db
-    .select({ id: externalActions.id })
+    .select()
     .from(externalActions)
     .where(eq(externalActions.effectKey, message.idempotencyKey));
   if (!existing) throw new Error("External action vanished after a key conflict.");
+  if (
+    existing.kind !== "email_send" ||
+    existing.subjectType !== (message.messageId ? "message" : null) ||
+    existing.subjectId !== (message.messageId ?? null) ||
+    existing.payloadDigest !== createHash("sha256").update(canonicalJson(payload)).digest("hex") ||
+    canonicalJson(existing.payload) !== canonicalJson(payload)
+  )
+    throw new AppError("idempotency_key_reused");
   return { id: existing.id, created: false };
 }
 
@@ -136,17 +158,42 @@ export async function dispatchMessage(
       .where(eq(externalActions.id, outboxId))
       .for("update");
     if (row?.state !== "queued") return { row, claimed: false as const };
-    const template = (row.payload as Partial<EmailPayload> | null)?.template;
+    if (
+      row.firstAttemptAt &&
+      now.getTime() - row.firstAttemptAt.getTime() >= providerIdempotencyWindowMs
+    ) {
+      await tx
+        .update(externalActions)
+        .set({
+          state: "cancelled",
+          lastErrorCode: "retry_window_expired",
+          secretPayload: null,
+          updatedAt: now,
+          version: sql`${externalActions.version} + 1`,
+        })
+        .where(eq(externalActions.id, row.id));
+      return { row: { ...row, state: "cancelled" as const }, claimed: false as const };
+    }
+    const payload = row.payload as Partial<EmailPayload> | null;
+    const template = payload?.template;
+    const secretChanged =
+      payload?.secretDigest !== undefined &&
+      (!row.secretPayload ||
+        payload.secretDigest !==
+          createHash("sha256").update(canonicalJson(row.secretPayload)).digest("hex"));
     // Optional notifications may only pass through their consent-aware dispatcher.
     // A malformed/mistagged ledger row must never fall back to generic access mail.
     if (
       template === alertTemplate ||
+      secretChanged ||
       row.payloadDigest !== createHash("sha256").update(canonicalJson(row.payload)).digest("hex")
     ) {
       const code =
         template === alertTemplate
           ? "guarded_template_subject_mismatch"
-          : "payload_digest_mismatch";
+          : secretChanged
+            ? "secret_digest_mismatch"
+            : "payload_digest_mismatch";
       await tx
         .update(externalActions)
         .set({
