@@ -126,3 +126,38 @@ describe("Resend signed durable inbox", () => {
     expect(JSON.stringify(row?.payload)).not.toContain("untrusted");
   });
 });
+it("denies a signed inbound receipt without its provider email identity", async () => {
+  const eventId = `msg_${randomUUID()}`,
+    at = new Date(),
+    raw = JSON.stringify({ type: "email.received", created_at: at.toISOString(), data: {} });
+  const headers = new Headers({
+    "svix-id": eventId,
+    "svix-timestamp": String(Math.floor(at.getTime() / 1000)),
+    "svix-signature": new Webhook(secret).sign(eventId, at, raw),
+  });
+  await expect(receiveResendWebhook(t.db, raw, headers, secret)).rejects.toMatchObject({
+    code: "validation_failed",
+  });
+  expect(
+    await t.db.select().from(inboxEvents).where(eq(inboxEvents.eventId, eventId)),
+  ).toHaveLength(0);
+});
+it("inbound intake cannot starve outgoing delivery reconciliation", async () => {
+  const id = randomUUID(),
+    early = signed("email.delivered", id);
+  await receiveResendWebhook(t.db, early.raw, early.headers, secret);
+  const outboxId = await accepted(id);
+  await t.db.insert(inboxEvents).values({
+    provider: "resend",
+    eventId: randomUUID(),
+    eventType: "email.received",
+    signatureVerified: true,
+    payload: { emailId: randomUUID() },
+    state: "received",
+    receivedAt: new Date(0),
+  });
+  await reconcileResendInbox(t.db, 1);
+  expect(
+    (await t.db.select().from(externalActions).where(eq(externalActions.id, outboxId)))[0]?.state,
+  ).toBe("verified");
+});

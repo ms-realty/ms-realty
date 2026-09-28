@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   briefRevisions,
@@ -18,8 +18,12 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { caseFor, caseVisibility, liveParticipation } from "./shared";
 
-export async function listCases(db: Executor, session: Session) {
+export async function listCases(db: Executor, session: Session, search = "") {
   const visibility = await caseVisibility(db, session);
+  const term = (typeof search === "string" ? search : "")
+    .trim()
+    .slice(0, 120)
+    .replace(/[\\%_]/g, "\\$&");
   return db
     .select({
       id: cases.id,
@@ -32,7 +36,12 @@ export async function listCases(db: Executor, session: Session) {
     })
     .from(cases)
     .leftJoin(principals, eq(principals.id, cases.ownerId))
-    .where(visibility)
+    .where(
+      and(
+        visibility,
+        term ? or(ilike(cases.reference, `%${term}%`), ilike(cases.title, `%${term}%`)) : undefined,
+      ),
+    )
     .orderBy(desc(cases.updatedAt), asc(cases.id))
     .limit(50);
 }

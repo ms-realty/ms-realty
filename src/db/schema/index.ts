@@ -9,6 +9,7 @@ export * from "./enums";
 export * from "./files";
 export * from "./geography";
 export * from "./identity";
+export * from "./inbound";
 export * from "./inventory";
 export * from "./migration";
 export * from "./parties";

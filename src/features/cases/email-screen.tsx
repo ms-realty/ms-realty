@@ -2,6 +2,8 @@ import "server-only";
 import { getDb } from "@/db/client";
 import { caseEmailWorkbench } from "@/server/cases/email";
 import { emailRecipient } from "@/server/cases/email-contract";
+import { readCaseInboundEmails } from "@/server/inbound/service";
+import { inboundCopy } from "../inbound/copy";
 import { privateRead } from "../work/screens";
 import { caseCopy } from "./copy";
 import { caseEmailCopy } from "./email-copy";
@@ -15,6 +17,8 @@ import {
 
 export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
   const view = await privateRead(() => caseEmailWorkbench(getDb(), props.session, props.id));
+  const incoming = await readCaseInboundEmails(getDb(), props.session, props.id),
+    inbound = inboundCopy(props.locale);
   const c = caseEmailCopy(props.locale),
     path = `/${props.locale}/cases/${props.id}/email`;
   return (
@@ -140,6 +144,27 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
               </article>
             );
           })
+        )}
+      </WorkflowSection>
+      <WorkflowSection title={inbound.title}>
+        <p>{inbound.assigned}</p>
+        {incoming.length ? (
+          incoming.map((item) => (
+            <article key={item.id} className="space-y-3 border-t border-border py-4">
+              <h3 className="font-semibold">{item.subject}</h3>
+              <p>
+                {inbound.from}: <bdi>{item.sender}</bdi>
+              </p>
+              <p>
+                {inbound.party}: {item.participant}
+              </p>
+              <p className="whitespace-pre-wrap break-words" dir="auto">
+                {item.body}
+              </p>
+            </article>
+          ))
+        ) : (
+          <p>{inbound.empty}</p>
         )}
       </WorkflowSection>
     </WorkflowPage>

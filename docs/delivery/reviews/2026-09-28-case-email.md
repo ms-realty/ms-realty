@@ -30,3 +30,12 @@ Three broader requirement groups remain partial; this slice does not close all o
 
 Findings remaining: Standards 0; Spec 3 partial requirement groups, with inbound handling
 and service-eligibility capture preventing complete communication/release acceptance.
+
+## Follow-up, 29 September
+
+The service-eligibility capture/policy path was implemented in 14f8a87e. Private inbound
+triage is now locally qualified; see `../contracts/inbound-email.md` and the separate inbound
+review. These supersede the corresponding missing-implementation observations above.
+They do not close live policy/provider approval, email attachments/multi-recipient revision,
+ICS dispatch or full communication acceptance. Linux CI on 14f8a87e exposed browser defects;
+its findings and the local fixes are recorded separately.

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import type { Capability } from "@/domain/capabilities";
 import { DiscoveryPage } from "@/features/discovery/page";
+import { inboundCopy } from "@/features/inbound/copy";
 import { isStaffLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
@@ -39,7 +40,13 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const session = await requireStaffPage(locale);
   const db = getDb();
   const c = copy[locale];
+  const inbound = inboundCopy(locale);
   const destinations: { path: string; label: string; capabilities: Capability[] }[] = [
+    {
+      path: "/operations/inbound",
+      label: inbound.title,
+      capabilities: ["inquiry.assign", "case.read_internal", "message.draft"],
+    },
     { path: "/operations/jobs", label: c.jobs, capabilities: ["report.read"] },
     { path: "/operations/privacy", label: c.privacy, capabilities: ["privacy.manage"] },
     {

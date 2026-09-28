@@ -1,7 +1,7 @@
 // Signature validation precedes persistence. The inbox keeps identifiers only; payloads may
 // contain arbitrary customer text and are never interpreted as authority or account identity.
 import "server-only";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { Webhook } from "svix";
 import { z } from "zod";
 import { externalActions, inboxEvents } from "@/db/schema";
@@ -40,7 +40,11 @@ export async function receiveResendWebhook(
     throw new AppError("unauthenticated");
   }
   const parsed = eventSchema.safeParse(verified);
-  if (!parsed.success || (supported(parsed.data.type) && !parsed.data.data.email_id))
+  if (
+    !parsed.success ||
+    ((supported(parsed.data.type) || parsed.data.type === "email.received") &&
+      !parsed.data.data.email_id)
+  )
     throw new AppError("validation_failed");
   const event = parsed.data;
   const payload = { emailId: event.data.email_id ?? null, occurredAt: event.created_at };
@@ -130,7 +134,13 @@ export async function reconcileResendInbox(db: Executor, limit = 100) {
   const events = await db
     .select({ id: inboxEvents.id })
     .from(inboxEvents)
-    .where(and(eq(inboxEvents.provider, "resend"), eq(inboxEvents.state, "received")))
+    .where(
+      and(
+        eq(inboxEvents.provider, "resend"),
+        eq(inboxEvents.state, "received"),
+        inArray(inboxEvents.eventType, [delivered, ...failures]),
+      ),
+    )
     .orderBy(asc(inboxEvents.receivedAt))
     .limit(limit);
   for (const event of events) await processResendEvent(db, event.id);

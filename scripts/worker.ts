@@ -8,6 +8,8 @@ import { TestMessageProvider } from "../src/server/jobs/provider";
 import { JobQueue, registerWorkers } from "../src/server/jobs/queue";
 import { ResendMessageProvider } from "../src/server/jobs/resend";
 
+import { ResendReceivingProvider } from "../src/server/jobs/resend-receiving";
+
 const env = getEnv();
 if (!env.databaseUrl) throw new Error("DATABASE_URL is required");
 const provider = env.testOutbox
@@ -23,6 +25,26 @@ if (!provider)
   throw new Error(
     "Set EMAIL_PROVIDER=resend, EMAIL_FROM and RESEND_API_KEY, or enable the loopback-only test outbox",
   );
+const receiving =
+  process.env.CASE_INBOUND_ENABLED === "1"
+    ? (() => {
+        if (
+          env.testOutbox ||
+          env.email.provider !== "resend" ||
+          !process.env.RESEND_API_KEY ||
+          !/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/.test(
+            process.env.CASE_REPLY_DOMAIN ?? "",
+          )
+        )
+          throw new Error(
+            "Inbound receiving requires explicit Resend credentials and reply domain outside test outbox",
+          );
+        return {
+          provider: new ResendReceivingProvider(process.env.RESEND_API_KEY),
+          replyDomain: process.env.CASE_REPLY_DOMAIN ?? "",
+        };
+      })()
+    : undefined;
 const client = postgres(env.databaseUrl, {
   max: 8,
   idle_timeout: 20,
@@ -50,7 +72,7 @@ for (const signal of ["SIGTERM", "SIGINT"] as const)
   });
 try {
   await queue.start();
-  await registerWorkers(queue, { db, provider });
+  await registerWorkers(queue, { db, provider, receiving });
   await queue.scheduleRecurring();
   await queue.send("worker.heartbeat", {});
   console.log("MS Realty queue worker started");

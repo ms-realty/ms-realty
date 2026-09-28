@@ -361,14 +361,85 @@ it("withdrawn human policy approval invalidates already queued Case email", asyn
   const f = await queued(),
     p = provider();
   const policyId = f.subscription.policyVersion.split(":")[0];
-  await t.db
-    .update(approvals)
-    .set({
-      state: "invalidated",
-      invalidatedAt: new Date(),
-      invalidationReason: "Synthetic policy withdrawal",
+  const condition = and(
+    eq(approvals.subjectId, policyId ?? ""),
+    eq(approvals.kind, "legal_process_claim"),
+  );
+  const previous = await t.db.select().from(approvals).where(condition);
+  try {
+    await t.db
+      .update(approvals)
+      .set({
+        state: "invalidated",
+        invalidatedAt: new Date(),
+        invalidationReason: "Synthetic policy withdrawal",
+      })
+      .where(
+        and(eq(approvals.subjectId, policyId ?? ""), eq(approvals.kind, "legal_process_claim")),
+      );
+    expect(await dispatchCaseEmail(t.db, p, f.actionId, { config })).toBe("cancelled");
+    expect(p.send).not.toHaveBeenCalled();
+  } finally {
+    for (const row of previous)
+      await t.db
+        .update(approvals)
+        .set({
+          state: row.state,
+          invalidatedAt: row.invalidatedAt,
+          invalidationReason: row.invalidationReason,
+        })
+        .where(eq(approvals.id, row.id));
+  }
+});
+it("an exact approved reply token suggests a Case but never assigns an incoming sender", async () => {
+  const { inboundEmails, inboxEvents } = await import("@/db/schema");
+  const { retrieveInboundEmail } = await import("../inbound/service");
+  const f = await queued();
+  if (!f.item.content) throw new Error("Missing approved snapshot");
+  const id = randomUUID();
+  const [event] = await t.db
+    .insert(inboxEvents)
+    .values({
+      provider: "resend",
+      eventId: randomUUID(),
+      eventType: "email.received",
+      signatureVerified: true,
+      payload: { emailId: id },
+      state: "received",
     })
-    .where(and(eq(approvals.subjectId, policyId ?? ""), eq(approvals.kind, "legal_process_claim")));
-  expect(await dispatchCaseEmail(t.db, p, f.actionId, { config })).toBe("cancelled");
-  expect(p.send).not.toHaveBeenCalled();
+    .returning();
+  if (!event) throw new Error("Missing receipt");
+  const reply = f.item.content.replyTo;
+  await retrieveInboundEmail(
+    t.db,
+    {
+      name: "resend",
+      retrieve: async () => ({
+        id,
+        from: "spoofed@example.test",
+        senderAddress: "spoofed@example.test",
+        recipients: [reply],
+        subject: "Synthetic reply",
+        text: "Untrusted reply",
+        receivedAt: new Date().toISOString(),
+        htmlOmitted: false,
+        authentication: { dmarc: "fail" },
+        attachments: [],
+      }),
+    },
+    event.id,
+    config.replyDomain,
+  );
+  const [incoming] = await t.db
+    .select()
+    .from(inboundEmails)
+    .where(eq(inboundEmails.providerEmailId, id));
+  expect(incoming).toMatchObject({
+    state: "triage",
+    originatingMessageId: f.approve.messageId,
+    suggestedCaseId: f.record.id,
+    caseId: null,
+    senderPartyId: null,
+    messageId: null,
+  });
 });

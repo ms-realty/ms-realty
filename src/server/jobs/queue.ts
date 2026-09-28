@@ -10,6 +10,7 @@ import type { Database, Executor } from "../db";
 import { pruneRateLimits } from "../rate-limit";
 import { dispatchMessage, dispatchQueued } from "./outbox";
 import type { MessageProvider } from "./provider";
+import type { ReceivingProvider } from "./resend-receiving";
 
 export interface JobPayloads {
   "auth.email_link": {
@@ -22,7 +23,7 @@ export interface JobPayloads {
   "rate_limit.prune": Record<string, never>;
   "files.process": { kind: "media" | "document"; id: string };
   "ai.draft": { runId: string };
-  "inbox.reconcile": Record<string, never>;
+  "inbox.reconcile": { afterId?: string };
   "worker.heartbeat": Record<string, never>;
   "search_alerts.sweep": { afterId?: string };
 }
@@ -109,6 +110,7 @@ export class JobQueue {
 export interface WorkerDependencies {
   readonly db: Database;
   readonly provider: MessageProvider;
+  readonly receiving?: { provider: ReceivingProvider; replyDomain: string };
 }
 
 /** Wires every job name to its handler; the job worker process calls this once. */
@@ -140,9 +142,24 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
     const { processAssistanceRun } = await import("../ai/assistance");
     await processAssistanceRun(deps.db, runId);
   });
-  await queue.work("inbox.reconcile", async () => {
+  await queue.work("inbox.reconcile", async ({ afterId }) => {
     const { reconcileResendInbox } = await import("./resend-inbox");
     await reconcileResendInbox(deps.db);
+    if (deps.receiving) {
+      const { sweepInboundEmails } = await import("../inbound/service");
+      const result = await sweepInboundEmails(
+        deps.db,
+        deps.receiving.provider,
+        deps.receiving.replyDomain,
+        afterId,
+      );
+      if (result.nextCursor)
+        await queue.send(
+          "inbox.reconcile",
+          { afterId: result.nextCursor },
+          { singletonKey: `inbound:${result.nextCursor}` },
+        );
+    }
   });
   await queue.work("worker.heartbeat", async () => {
     const { recordWorkerProgress } = await import("./heartbeat");
