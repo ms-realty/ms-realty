@@ -2,6 +2,17 @@ export function offboardingCopy(locale: string) {
   const s = (bg: string, ru: string, en: string) =>
     locale === "bg" ? bg : locale === "ru" ? ru : en;
   return {
+    person: s("Служител", "Сотрудник", "Staff member"),
+    notApplied: s(
+      "Достъпът не е променен от тази операция.",
+      "Эта операция не изменила доступ.",
+      "This operation did not change access.",
+    ),
+    reviewAgain: s(
+      "Нов преглед преди действие",
+      "Проверить заново перед действием",
+      "Review again before acting",
+    ),
     former: s(
       "Последни 50 бивши служители · предаване",
       "Последние 50 бывших сотрудников · передача",

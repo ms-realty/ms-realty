@@ -27,7 +27,7 @@ export type FormOutcome<V extends FormValues> =
       code: "REVISION_CONFLICT" | "IDEMPOTENCY_KEY_REUSED";
       message: string;
       /** An explicitly authorized projection, never a raw internal record. */
-      latest?: { revision: number; values: V };
+      latest?: { revision: number; values: V; details?: { label: string; value: string }[] };
       /** A new server-issued key for an explicit, reviewed intent; never an automatic retry. */
       reapply?: { operationId: string; expectedRevision: number; status: RecoveryLink };
       recovery?: RecoveryLink;

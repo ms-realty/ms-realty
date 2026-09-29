@@ -53,6 +53,8 @@ export type ActionFormProps<V extends FormValues> = {
   permalink: string;
   /** A server-authorized status URL for this logical operation; safe on lost acknowledgment. */
   reconciliation: RecoveryLink;
+  /** Preserve a signed operation reference before the request can lose its acknowledgment. */
+  pendingReferenceCookie?: string;
   copy: FormCopy;
   labels: Record<keyof V, string>;
   submitLabel: string;
@@ -130,6 +132,7 @@ function FormSession<V extends FormValues>({
   initialState,
   permalink,
   reconciliation,
+  pendingReferenceCookie,
   copy,
   labels,
   submitLabel,
@@ -240,6 +243,11 @@ function FormSession<V extends FormValues>({
           snapshot.current.operationId = conflict.reapply.operationId;
           snapshot.current.reconciliation = conflict.reapply.status;
         }
+        if (pendingReferenceCookie) {
+          // The reference must exist synchronously before React sends the native action.
+          // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store is asynchronous and unavailable on supported HTTP test hosts.
+          document.cookie = `${pendingReferenceCookie}=${encodeURIComponent(snapshot.current.operationId)}; Path=/; SameSite=Strict${location.protocol === "https:" ? "; Secure" : ""}`;
+        }
       }}
     >
       <input type="hidden" name={formFields.operationId} value={state.operationId} />
@@ -285,17 +293,25 @@ function FormSession<V extends FormValues>({
                 <p>
                   {copy.revision}: {conflict.latest.revision}
                 </p>
-                {Object.keys(labels).map((name) => (
-                  <dl key={name} className="border-t border-border pt-2">
-                    <dt className="font-semibold">{labels[name]}</dt>
-                    <dd className="whitespace-pre-wrap break-words">
-                      {copy.yourValue}: {values[name]}
-                    </dd>
-                    <dd className="whitespace-pre-wrap break-words">
-                      {copy.latestValue}: {conflict.latest?.values[name]}
-                    </dd>
+                {conflict.latest.details?.map(({ label, value }) => (
+                  <dl key={label} className="border-t border-border pt-2">
+                    <dt className="font-semibold">{label}</dt>
+                    <dd className="whitespace-pre-wrap break-words">{value}</dd>
                   </dl>
                 ))}
+                {Object.keys(labels)
+                  .filter((name) => Object.hasOwn(conflict.latest?.values ?? {}, name))
+                  .map((name) => (
+                    <dl key={name} className="border-t border-border pt-2">
+                      <dt className="font-semibold">{labels[name]}</dt>
+                      <dd className="whitespace-pre-wrap break-words">
+                        {copy.yourValue}: {values[name]}
+                      </dd>
+                      <dd className="whitespace-pre-wrap break-words">
+                        {copy.latestValue}: {conflict.latest?.values[name]}
+                      </dd>
+                    </dl>
+                  ))}
               </div>
             ) : null}
             {conflict.recovery ? (

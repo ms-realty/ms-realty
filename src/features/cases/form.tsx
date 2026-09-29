@@ -28,6 +28,7 @@ export function WorkflowForm({
   path,
   status,
   submit,
+  pendingReferenceCookie,
 }: {
   locale: string;
   initialState: FormState<FormValues>;
@@ -36,6 +37,7 @@ export function WorkflowForm({
   path: string;
   status: { href: string; label: string };
   submit: string;
+  pendingReferenceCookie?: string;
 }) {
   return (
     <ActionForm
@@ -43,6 +45,7 @@ export function WorkflowForm({
       initialState={initialState}
       permalink={path}
       reconciliation={status}
+      pendingReferenceCookie={pendingReferenceCookie}
       copy={workCopy(locale).form}
       labels={Object.fromEntries(fields.map((field) => [field.name, field.label]))}
       submitLabel={submit}

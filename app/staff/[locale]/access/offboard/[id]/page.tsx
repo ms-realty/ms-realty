@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/db/client";
 import { operations } from "@/db/schema";
@@ -10,20 +11,21 @@ import { AccessFrame } from "@/features/identity/access-frame";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { offboardingAction } from "@/features/offboarding/action";
 import { offboardingCopy } from "@/features/offboarding/copy";
+import { offboardingReferenceCookie } from "@/features/offboarding/reference";
 import { isStaffLocale } from "@/i18n/config";
 import { readOffboarding } from "@/server/auth/grants";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { can } from "@/server/authz";
 import { isAppError } from "@/server/errors";
-import { initialFormState } from "@/ui/form/server";
+import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 export default async function Page({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ receipt?: string }>;
+  searchParams: Promise<{ receipt?: string; review?: string }>;
 }) {
   const { locale, id } = await params;
   if (!isStaffLocale(locale)) notFound();
@@ -38,10 +40,18 @@ export default async function Page({
     }),
     c = offboardingCopy(locale);
   const query = await searchParams;
+  const referenceCookie = offboardingReferenceCookie(session.actor.id, id);
+  const pendingReference = (await cookies()).get(referenceCookie)?.value;
+  if (
+    !query.receipt &&
+    pendingReference &&
+    isIssuedFormOperation(`staff.offboard:${id}`, pendingReference)
+  )
+    redirect(`${path}?receipt=${encodeURIComponent(pendingReference)}`);
   const [receipt] =
     typeof query.receipt === "string"
       ? await db
-          .select({ id: operations.id, outcome: operations.outcome })
+          .select({ id: operations.id, outcome: operations.outcome, status: operations.status })
           .from(operations)
           .where(
             and(
@@ -49,12 +59,19 @@ export default async function Page({
               eq(operations.actorKind, "staff"),
               eq(operations.actorId, session.actor.id),
               eq(operations.idempotencyKey, query.receipt),
-              eq(operations.status, "succeeded"),
             ),
           )
           .limit(1)
       : [];
-  const confirmed = receipt && (receipt.outcome as { principalId?: string })?.principalId === id;
+  const confirmed =
+    receipt?.status === "succeeded" &&
+    (receipt.outcome as { principalId?: string })?.principalId === id;
+  // The signature binds even a failed receipt (which has no result record) to this target.
+  const notApplied =
+    receipt?.status === "failed" &&
+    typeof query.receipt === "string" &&
+    isIssuedFormOperation(`staff.offboard:${id}`, query.receipt);
+  const reviewing = notApplied && query.review === "1";
   const initial = initialFormState(
     `staff.offboard:${id}`,
     { reason: "", reviewed: "" },
@@ -71,8 +88,34 @@ export default async function Page({
             {c.recorded}: <bdi>{receipt.id}</bdi>
           </Notice>
         ) : null}
-        {query.receipt && !confirmed ? (
-          <Notice tone="warning">{caseCopy(locale).statusUnknown}</Notice>
+        {notApplied ? (
+          <Notice tone="error">
+            <p>{c.notApplied}</p>
+            <p className="break-all">
+              <bdi>{receipt.id}</bdi>
+            </p>
+            {!reviewing ? (
+              <a
+                className={workflowLink}
+                href={`${path}?receipt=${encodeURIComponent(query.receipt ?? "")}&review=1`}
+              >
+                {c.reviewAgain}
+              </a>
+            ) : null}
+          </Notice>
+        ) : query.receipt && !confirmed ? (
+          <Notice tone="warning">
+            <p>{caseCopy(locale).statusUnknown}</p>
+            <p className="break-all">
+              <bdi>{query.receipt}</bdi>
+            </p>
+            <a
+              className={workflowLink}
+              href={`${path}?receipt=${encodeURIComponent(query.receipt)}`}
+            >
+              {caseCopy(locale).status}
+            </a>
+          </Notice>
         ) : null}
         <section className="space-y-3">
           <h2 className="text-subheading font-semibold">{c.retained}</h2>
@@ -91,7 +134,7 @@ export default async function Page({
             </a>
           ) : null}
         </section>
-        {query.receipt && !confirmed ? null : person.state !== "active" ? (
+        {query.receipt && !confirmed && !reviewing ? null : person.state !== "active" ? (
           <p>{c.ended}</p>
         ) : person.id === session.actor.id ? (
           <p>{c.self}</p>
@@ -99,6 +142,7 @@ export default async function Page({
           <WorkflowForm
             locale={locale}
             initialState={initial}
+            pendingReferenceCookie={referenceCookie}
             action={offboardingAction.bind(null, locale, id)}
             path={path}
             status={{
