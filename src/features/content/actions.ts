@@ -1,5 +1,6 @@
 "use server";
 import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
 import { isStaffLocale } from "@/i18n/config";
 import { requireAuthHost } from "@/server/auth/pages";
 import {
@@ -236,7 +237,9 @@ export async function decideContentAction(
     },
     { requireSession: true },
   );
-  if (result.ok) return saved(base, locale, result.data);
+  // A native POST may change the sibling review forms and their React identities. Use the
+  // persisted actor-bound operation, not transient form state, as the success destination.
+  if (result.ok) redirect(status(locale, "decide", id, base.operationId).href);
   if (result.error.outcome === "unknown")
     return {
       ...base,

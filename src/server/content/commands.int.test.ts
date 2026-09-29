@@ -5,7 +5,13 @@ import { approvals, contentPages, contentPageVersions, grants, passkeys } from "
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "../auth/sessions";
 import { createStaff } from "../testing";
-import { createContent, decideContent, readContentWorkbench, saveContent } from "./commands";
+import {
+  createContent,
+  decideContent,
+  readContentOperation,
+  readContentWorkbench,
+  saveContent,
+} from "./commands";
 import { readApprovedContent } from "./public";
 
 let t: TestDatabase;
@@ -58,6 +64,54 @@ async function publish(actor: Awaited<ReturnType<typeof staff>>, id: string) {
   }
 }
 describe("O21 editorial content authority", () => {
+  it("reads a durable decision receipt only for its actor, exact page and current authority", async () => {
+    const actor = await staff(),
+      other = await staff();
+    const { outcome } = await createContent(t.db, actor.session, draft());
+    const second = await createContent(t.db, actor.session, draft());
+    const input = {
+      id: outcome.id,
+      expectedVersion: 1,
+      operationId: randomUUID(),
+      decision: "claims" as const,
+      note: "Synthetic reviewed edition",
+      reviewed: true as const,
+      expiresAt: expiry(),
+    };
+    const done = await decideContent(t.db, actor.session, input);
+    const receipt = await readContentOperation(
+      t.db,
+      actor.session,
+      "decide",
+      input.operationId,
+      outcome.id,
+    );
+    expect(receipt).toMatchObject({
+      status: "succeeded",
+      id: outcome.id,
+      operationId: done.operationId,
+      recordedAt: done.outcome.recordedAt,
+    });
+    expect(
+      await readContentOperation(t.db, actor.session, "decide", input.operationId, outcome.id),
+    ).toEqual(receipt);
+    expect(
+      await readContentOperation(t.db, other.session, "decide", input.operationId, outcome.id),
+    ).toBeNull();
+    expect(
+      await readContentOperation(t.db, actor.session, "decide", randomUUID(), outcome.id),
+    ).toBeNull();
+    await expect(
+      readContentOperation(t.db, actor.session, "decide", input.operationId, second.outcome.id),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await t.db
+      .update(grants)
+      .set({ revokedAt: new Date() })
+      .where(eq(grants.principalId, actor.id));
+    await expect(
+      readContentOperation(t.db, actor.session, "decide", input.operationId, outcome.id),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
   it("drafts are private; separate exact reviews release BG text; a new draft leaves the published edition intact", async () => {
     const actor = await staff(),
       input = draft();

@@ -2,6 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
+import { workCopy } from "@/features/work/copy";
 import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { getEnv } from "@/server/config/env";
@@ -10,6 +11,7 @@ import { contentBody } from "@/server/content/public";
 import { AppError } from "@/server/errors";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
+import { Receipt } from "@/ui/receipt";
 import {
   type ContentValues,
   type DecisionValues,
@@ -266,10 +268,23 @@ export async function ContentOperationScreen({
     result = await readContentOperation(getDb(), session, kind, operationKey, id).catch(
       privateError,
     );
+  const formCopy = workCopy(locale).form;
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.check}</h1>
-      <Notice tone="info" title={result ? result.status : copy.statusMissing} />
+      {result?.status === "succeeded" && result.id && result.recordedAt ? (
+        <Receipt
+          title={copy.saved}
+          reference={result.operationId}
+          referenceLabel={formCopy.reference}
+          recordedAt={{ dateTime: result.recordedAt, label: result.recordedAt }}
+          recordedAtLabel={formCopy.recordedAt}
+        >
+          <p>{copy.next}</p>
+        </Receipt>
+      ) : (
+        <Notice tone="info" title={result ? result.status : copy.statusMissing} />
+      )}
       <a
         className="underline"
         href={result?.id || id ? `/${locale}/content/${result?.id ?? id}` : `/${locale}/content`}

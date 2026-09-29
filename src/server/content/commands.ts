@@ -136,10 +136,18 @@ export async function readContentOperation(
   if (id) await pageFor(db, session, id);
   else await assertCan(db, live.actor, "content.edit", resource());
   const operation = await findOperation(db, live.actor, `content.${kind}`, key);
-  const outcome = operation?.outcome as { id?: string } | null;
-  if (operation?.status === "succeeded" && outcome?.id) await pageFor(db, session, outcome.id);
+  const outcome = operation?.outcome as { id?: string; recordedAt?: string } | null;
+  if (operation?.status === "succeeded" && outcome?.id) {
+    if (id && outcome.id !== id) throw new AppError("not_found");
+    await pageFor(db, session, outcome.id);
+  }
   return operation
-    ? { status: operation.status, id: operation.status === "succeeded" ? outcome?.id : undefined }
+    ? {
+        status: operation.status,
+        id: operation.status === "succeeded" ? outcome?.id : undefined,
+        operationId: operation.operationId,
+        recordedAt: operation.status === "succeeded" ? (outcome?.recordedAt ?? null) : null,
+      }
     : null;
 }
 
