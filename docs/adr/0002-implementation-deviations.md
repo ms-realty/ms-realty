@@ -23,7 +23,7 @@ Everything else in §2 is adopted as written: Next.js/React/TypeScript modular a
 (D01 minus Payload), PostgreSQL search (D04), DigitalOcean App Platform Frankfurt with HA
 Managed PostgreSQL (D06), Cloudflare gateway and EU-jurisdiction R2 (D07), Resend (D09),
 application-owned calendar and ICS (D10), Hermes as draft-only bounded tasks behind one
-adapter, OpenAI Responses first (D12), shared tokens with isolated contexts (D13), release
+adapter (D12's OpenAI-first provider choice is superseded by [ADR 0003](0003-openrouter-jev.md)), shared tokens with isolated contexts (D13), release
 manifest and machine-evaluated gates (D14), Better Stack monitoring (D15) and the
 independent S3 recovery archive (D16). Provider accounts, plans and DNS are operator inputs
 (§21.4); the code is written against the chosen providers and tested with local fakes until

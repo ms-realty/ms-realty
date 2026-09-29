@@ -53,7 +53,7 @@ description below is the 26 September baseline, not a fresh live-service observa
 
 ## 4. Implementation decisions
 
-Architecture §2 as amended by ADR 0002. In practice:
+Architecture §2 as amended by ADR 0002 and [ADR 0003](adr/0003-openrouter-jev.md). In practice:
 
 | Concern | Choice |
 |---|---|
@@ -65,7 +65,7 @@ Architecture §2 as amended by ADR 0002. In practice:
 | i18n | next-intl; public/client `bg en ru de nl el he`, staff `bg en ru`; per-namespace catalogs; locale published only when its content is approved |
 | Rendering | Mutable public pages render per request from PostgreSQL (architecture §7.5); only static assets and approved media derivatives are cached |
 | Media | R2 EU jurisdiction: quarantine, private, public buckets via the S3 API; seal → scan (ClamAV) → derivatives; private downloads through the app |
-| Providers | Resend (mail), OpenAI Responses (Hermes adapter), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); local fakes until accounts exist |
+| Providers | Resend (mail), OpenRouter hosted Jev Router + typed Jev Decisions (Hermes; ADR 0003), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); synthetic checks until live qualification |
 | Tests | Vitest (unit, jsdom, integration on real PostgreSQL), Playwright (Chromium desktop/mobile + WebKit mobile) with axe and screenshot baselines in the pinned Playwright image |
 | Hosting | DigitalOcean App Platform Frankfurt: ≥2 web, 1 worker, PRE_DEPLOY migration job; HA Managed PostgreSQL 18; Cloudflare gateway Worker |
 
