@@ -90,3 +90,30 @@ Evidence: `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260929/`, especially
 `browser-qualified.log` and `grants-visual.log`. Browser run `bb89dc3b6af442ea85f238bf67b6008f`.
 Docker Desktop was unavailable, so Linux confirmation is pending the next CI run. No content
 workflow code or test timeout/retry limit was changed; its CI retry is still recorded.
+
+
+## Follow-up: Linux native select paint and focus
+
+After Docker became available, pinned Playwright Linux reproduced residual WebKit document
+width of 527px on a 390px viewport, even though every element box fit. A focused probe isolated
+native option painting: padded paint containment around the select reduces document width to
+390px while retaining native appearance, accessible names and selection. Six pixels of padding
+preserve the external three-pixel focus outline and two-pixel offset. Explicit label associations
+remain in place. The long-name fixture is retained.
+
+The first contained run passed geometry but reached WebKit's 32,767-pixel screenshot limit on
+a fixture-heavy access page. Evidence now captures bounded viewports for the team, grants and
+focused control; the full-document width assertion remains. A new locator initially used exact
+label text, which included nested option text in Playwright's label query. The final check uses
+the actual accessible combobox name. No product label, timeout, retry or geometry assertion was
+weakened. Native selection, value, keyboard focus and computed outline clearance are checked.
+
+Final pinned Linux production-build run: **16 passed, two explicit mobile virtual-passkey
+skips, no retries**. This joins six offboarding JS-on/off flows, nine content flows and the real
+desktop virtual-authenticator invitation/grant/sign-in journey. WebKit's no-JavaScript focus
+screenshot was inspected: the complete blue ring is visible, controls fit and labels wrap.
+Run `a0ea49d0e8cb4fc9bc2d4f93362e7202`; logs in the recovery evidence directory:
+`linux-browser.log`, `linux-control-probe.log`, `linux-browser-contained.log`,
+`linux-focus-identity.log` (failed locator) and `linux-focus-qualified.log` (pass).
+Existing closed-response-stream diagnostics occur during the identity cancellation journey;
+this is not a zero-console-error claim. Full current-head CI remains separately required.

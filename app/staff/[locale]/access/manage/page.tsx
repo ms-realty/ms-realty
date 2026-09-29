@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
+import type { ComponentProps } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { cases, operations, principals, staffMemberships } from "@/db/schema";
@@ -24,6 +25,16 @@ import { Notice } from "@/ui/notice";
 
 const field =
   "mt-1 block w-full min-w-0 max-w-full min-h-control rounded-control border border-border bg-surface px-3 py-2";
+// Linux WebKit includes native option paint in document overflow. The padded containment
+// keeps the native control and its outer 3px/2px focus ring without widening the page.
+function AccessSelect(props: ComponentProps<"select">) {
+  return (
+    <span className="block -m-1.5 p-1.5 [contain:paint]">
+      <select {...props} />
+    </span>
+  );
+}
+
 export default async function ManagePage({
   params,
   searchParams,
@@ -130,9 +141,10 @@ export default async function ManagePage({
           >
             {hidden("staff")}
             {person}
-            <label className="block min-w-0">
+            <label htmlFor="staff-invitation-role" className="block min-w-0">
               {c.role}
-              <select
+              <AccessSelect
+                id="staff-invitation-role"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 name="role"
                 defaultValue="assigned_broker"
@@ -142,7 +154,7 @@ export default async function ManagePage({
                     {staffRoleLabel(locale, role)}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
             <button type="submit" className={buttonClass()}>
               {c.invite}
@@ -190,9 +202,10 @@ export default async function ManagePage({
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
           >
             {hidden("recovery")}
-            <label className="block min-w-0">
+            <label htmlFor="recovery-principal" className="block min-w-0">
               {c.member}
-              <select
+              <AccessSelect
+                id="recovery-principal"
                 name="principalId"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 required
@@ -206,7 +219,7 @@ export default async function ManagePage({
                     {member.name} — {member.email}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
             <label className="block min-w-0">
               {c.evidence}
@@ -236,9 +249,10 @@ export default async function ManagePage({
           >
             {hidden("client")}
             {person}
-            <label className="block min-w-0">
+            <label htmlFor="client-invitation-principal" className="block min-w-0">
               {c.case}
-              <select
+              <AccessSelect
+                id="client-invitation-principal"
                 name="caseId"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 required
@@ -252,11 +266,12 @@ export default async function ManagePage({
                     {item.reference} — {item.title}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
-            <label className="block min-w-0">
+            <label htmlFor="client-invitation-role" className="block min-w-0">
               {c.participant}
-              <select
+              <AccessSelect
+                id="client-invitation-role"
                 name="role"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 defaultValue="collaborator"
@@ -266,7 +281,7 @@ export default async function ManagePage({
                     {roleLabel(locale, role)}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
             <button type="submit" className={buttonClass()} disabled={!availableCases.length}>
               {c.invite}
@@ -283,9 +298,10 @@ export default async function ManagePage({
           >
             {hidden("grant")}
             <input type="hidden" name="operationId" value={randomUUID()} />
-            <label className="block min-w-0">
+            <label htmlFor="capability-principal" className="block min-w-0">
               {c.member}
-              <select
+              <AccessSelect
+                id="capability-principal"
                 name="principalId"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 required
@@ -295,11 +311,12 @@ export default async function ManagePage({
                     {member.name} — {member.email}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
-            <label className="block min-w-0">
+            <label htmlFor="capability-choice" className="block min-w-0">
               {grantCopy.capability}
-              <select
+              <AccessSelect
+                id="capability-choice"
                 name="capability"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 defaultValue="document.review"
@@ -309,11 +326,12 @@ export default async function ManagePage({
                     {capability}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
-            <label className="block min-w-0">
+            <label htmlFor="capability-record-type" className="block min-w-0">
               {grantCopy.scope}
-              <select
+              <AccessSelect
+                id="capability-record-type"
                 name="recordType"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 defaultValue=""
@@ -324,15 +342,16 @@ export default async function ManagePage({
                     {grantCopy[type]}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
             <label className="block min-w-0">
               {grantCopy.recordId}
               <input name="recordId" className={field} maxLength={36} />
             </label>
-            <label className="block min-w-0">
+            <label htmlFor="capability-locale" className="block min-w-0">
               {grantCopy.locale}
-              <select
+              <AccessSelect
+                id="capability-locale"
                 name="grantLocale"
                 className={`${field} h-control overflow-hidden text-ellipsis`}
                 defaultValue=""
@@ -343,7 +362,7 @@ export default async function ManagePage({
                     {value.toUpperCase()}
                   </option>
                 ))}
-              </select>
+              </AccessSelect>
             </label>
             <label className="block min-w-0">
               {grantCopy.expires}

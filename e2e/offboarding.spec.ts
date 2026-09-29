@@ -129,11 +129,38 @@ for (const javaScriptEnabled of [true, false])
           .slice(0, 12),
       }));
       expect(geometry.width, JSON.stringify(geometry)).toBeLessThanOrEqual(geometry.viewport);
+      const nativeCapability = page.getByRole("combobox", { name: "Capability", exact: true });
+      await nativeCapability.selectOption("case.read_internal");
+      await expect(nativeCapability).toHaveValue("case.read_internal");
+      await nativeCapability.focus();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      await expect(nativeCapability).toBeFocused();
+      const focus = await nativeCapability.evaluate((element) => {
+        const style = getComputedStyle(element);
+        if (!element.parentElement) throw new Error("Select containment missing");
+        const parent = getComputedStyle(element.parentElement);
+        return {
+          style: style.outlineStyle,
+          width: Number.parseFloat(style.outlineWidth),
+          offset: Number.parseFloat(style.outlineOffset),
+          padding: Number.parseFloat(parent.paddingLeft),
+        };
+      });
+      expect(focus.style).toBe("solid");
+      expect(focus.width).toBeGreaterThanOrEqual(3);
+      expect(focus.offset).toBeGreaterThanOrEqual(2);
+      expect(focus.padding).toBeGreaterThanOrEqual(focus.width + focus.offset);
+      await page.screenshot({
+        path: testInfo.outputPath(`offboarding-select-focus-${javaScriptEnabled}.png`),
+      });
       const formerLink = page.locator(`a[href="${path}"]`);
       expect((await formerLink.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+      await page
+        .getByRole("heading", { name: "Manage access", exact: true })
+        .scrollIntoViewIfNeeded();
       await page.screenshot({
         path: testInfo.outputPath(`offboarding-team-${javaScriptEnabled}.png`),
-        fullPage: true,
       });
       await page
         .getByRole("heading", { name: "Current staff grants", exact: true })
