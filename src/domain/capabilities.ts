@@ -47,6 +47,7 @@ export const capabilities = [
   "import.run",
   "privacy.manage",
   "complaint.manage",
+  "key.manage",
   "audit.read",
   "ai.draft",
 ] as const;
@@ -148,6 +149,7 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
     "import.run",
     "privacy.manage",
     "complaint.manage",
+    "key.manage",
     "audit.read",
   ],
   external_specialist: ["portal.case.read", "portal.document.upload"],

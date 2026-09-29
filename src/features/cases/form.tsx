@@ -104,6 +104,7 @@ export function WorkflowForm({
               return (
                 // Linux WebKit lets long native option text escape a flex item even when
                 // the select's border box fits. Normal block flow preserves native UI.
+                // macOS WebKit also needs explicit height to retain the 44px control target.
                 <div key={field.name} className="group min-w-0 w-full space-y-1.5">
                   <label htmlFor={field.id} className="block font-semibold">
                     {definition.label}
@@ -114,7 +115,7 @@ export function WorkflowForm({
                     value={field.value}
                     disabled={field.readOnly}
                     onChange={(e) => form.setValue(field.name, e.target.value)}
-                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                    className={`${controlClass} h-control min-w-0 max-w-full overflow-hidden text-ellipsis`}
                     aria-invalid={Boolean(field.error) || undefined}
                     aria-describedby={describedBy}
                     required={definition.required}

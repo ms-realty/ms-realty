@@ -55,3 +55,14 @@ findings; they are not automatically frontend defects. Source and Linux browser 
 
 This bounded follow-up is not overall design sign-off. Exact evidence and limitations are in
 `reviews/2026-09-29-workflow-context.md`.
+
+The key-custody register is a new agency-operations surface using the current private Operations
+and shared form patterns. Its functional contract is `contracts/key-custody.md`; its inclusion
+here does not establish parity with an unreceived new design contract.
+
+A further coordination note reports a property → exact proposal revision → task → intended
+recipient continuity repair. Source inspection confirms the current proposal screen retains
+its source reference/revision, Case link and pinned revision identity; existing service tests
+cover stale terms, wrong party, expired revision and withdrawn source. This is source/test
+evidence only. Exact updated frame IDs and end-to-end visual mapping are still outstanding;
+no corresponding frontend defect or final design acceptance is inferred from the message.

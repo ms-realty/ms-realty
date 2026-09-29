@@ -4,6 +4,7 @@ import type { Capability } from "@/domain/capabilities";
 import { complaintCopy } from "@/features/complaints/copy";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { inboundCopy } from "@/features/inbound/copy";
+import { custodyCopy } from "@/features/key-custody/copy";
 import { isStaffLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
@@ -43,6 +44,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const c = copy[locale];
   const inbound = inboundCopy(locale);
   const destinations: { path: string; label: string; capabilities: Capability[] }[] = [
+    { path: "/operations/keys", label: custodyCopy(locale).title, capabilities: ["key.manage"] },
     {
       path: "/operations/complaints",
       label: complaintCopy(locale).title,

@@ -12,6 +12,7 @@ export * from "./geography";
 export * from "./identity";
 export * from "./inbound";
 export * from "./inventory";
+export * from "./key-custody";
 export * from "./migration";
 export * from "./parties";
 export * from "./publication";
