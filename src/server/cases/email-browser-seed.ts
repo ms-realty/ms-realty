@@ -67,12 +67,40 @@ try {
       policyVersion: consentPolicyKey(terms),
       unsubscribeTokenHash: randomUUID(),
     });
+  const addresses = [address];
+  if (process.env.E2E_CASE_MULTI_RECIPIENTS === "1") {
+    const secondAddress = `second-${randomUUID()}@example.test`;
+    const [secondContact] = await db
+      .insert(schema.contactMethods)
+      .values({
+        partyId: f.client.partyId,
+        kind: "email",
+        value: secondAddress,
+        normalizedValue: secondAddress,
+        verification: "verified",
+        verifiedAt: new Date(),
+      })
+      .returning();
+    if (!secondContact) throw new Error("No second contact");
+    await db.insert(schema.subscriptions).values({
+      partyId: f.client.partyId,
+      contactMethodId: secondContact.id,
+      purpose: "service_updates",
+      state: "active",
+      verifiedAt: new Date(),
+      timezone: "Europe/Sofia",
+      policyVersion: consentPolicyKey(terms),
+      unsubscribeTokenHash: randomUUID(),
+    });
+    addresses.push(secondAddress);
+  }
   console.log(
     JSON.stringify({
       caseId: f.record.id,
       staffToken: f.staff.token,
       clientToken: f.client.token,
       address,
+      addresses,
       contactId: contact.id,
       appointmentId,
     }),

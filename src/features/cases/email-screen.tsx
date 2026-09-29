@@ -30,6 +30,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
       {!view.enabled ? <p role="status">{c.disabled}</p> : null}
       <WorkflowSection title={c.draft}>
         <p>{c.immutable}</p>
+        <p>{c.separateDrafts}</p>
         {view.recipients.length ? (
           <BoundWorkflowForm
             {...props}
@@ -38,12 +39,12 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
             revision={view.record.version}
             path={path}
             submit={c.save}
-            values={{ subscriptionId: view.recipients[0]?.subscriptionId ?? "" }}
+            values={{ subscriptionIds: view.recipients[0]?.subscriptionId ?? "" }}
             fields={[
               {
-                name: "subscriptionId",
-                label: c.recipient,
-                type: "select",
+                name: "subscriptionIds",
+                label: c.recipients,
+                type: "checkbox-group",
                 required: true,
                 options: view.recipients.map((r) => ({
                   value: r.subscriptionId,

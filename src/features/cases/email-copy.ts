@@ -2,6 +2,9 @@ const en = {
   title: "Case email",
   draft: "New email draft",
   recipient: "Recipient",
+  recipients: "Recipients (up to 10)",
+  separateDrafts:
+    "Each selected recipient gets a separate draft to review and approve. Other recipients are not added to its address fields.",
   subject: "Subject",
   body: "Message",
   save: "Save draft for review",
@@ -44,6 +47,9 @@ const bg: typeof en = {
   title: "Имейл по случая",
   draft: "Нов имейл — чернова",
   recipient: "Получател",
+  recipients: "Получатели (до 10)",
+  separateDrafts:
+    "За всеки избран получател се създава отделна чернова за преглед и одобрение. Другите получатели не се добавят в адресните полета.",
   subject: "Тема",
   body: "Съобщение",
   save: "Запази за преглед",
@@ -84,6 +90,9 @@ const ru: typeof en = {
   title: "Письма по делу",
   draft: "Новый черновик письма",
   recipient: "Получатель",
+  recipients: "Получатели (до 10)",
+  separateDrafts:
+    "Для каждого выбранного получателя создаётся отдельный черновик для проверки и утверждения. Остальные получатели не добавляются в адресные поля.",
   subject: "Тема",
   body: "Сообщение",
   save: "Сохранить для проверки",

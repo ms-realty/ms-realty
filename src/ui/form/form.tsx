@@ -169,6 +169,15 @@ function FormSession<V extends FormValues>({
       } else if (control instanceof HTMLTextAreaElement || control instanceof HTMLSelectElement) {
         if (control instanceof HTMLSelectElement && control.multiple) continue;
         values[name as keyof V] = control.value as V[keyof V];
+      } else if (control instanceof RadioNodeList) {
+        const controls = Array.from(control);
+        if (controls.every((item) => item instanceof HTMLInputElement && item.type === "checkbox"))
+          values[name as keyof V] = controls
+            .filter(
+              (item): item is HTMLInputElement => item instanceof HTMLInputElement && item.checked,
+            )
+            .map((item) => item.value)
+            .join("\n") as V[keyof V];
       }
     }
     if (Object.keys(values).some((key) => values[key] !== state.values[key]))

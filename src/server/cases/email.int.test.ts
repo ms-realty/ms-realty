@@ -92,6 +92,110 @@ async function queued() {
   const a = await approveCaseEmail(t.db, f.staff.session, f.approve, config);
   return { ...f, actionId: a.outcome.actionId };
 }
+
+it("creates separate atomic drafts for selected recipients and approves only the reviewed one", async () => {
+  const f = await fixture();
+  const address = `second-${randomUUID()}@example.test`;
+  const [contact] = await t.db
+    .insert(contactMethods)
+    .values({
+      partyId: f.client.partyId,
+      kind: "email",
+      value: address,
+      normalizedValue: address,
+      verification: "verified",
+      verifiedAt: new Date(),
+    })
+    .returning();
+  if (!contact) throw new Error("Missing second contact");
+  const [subscription] = await t.db
+    .insert(subscriptions)
+    .values({
+      partyId: f.client.partyId,
+      contactMethodId: contact.id,
+      purpose: "service_updates",
+      state: "active",
+      verifiedAt: new Date(),
+      timezone: "Europe/Sofia",
+      policyVersion: f.subscription.policyVersion,
+      unsubscribeTokenHash: randomUUID(),
+    })
+    .returning();
+  if (!subscription) throw new Error("Missing second subscription");
+  const input = {
+    id: f.record.id,
+    operationId: randomUUID(),
+    expectedVersion: f.drafted.outcome.version,
+    subscriptionIds: [f.subscription.id, subscription.id],
+    subject: "Separate reviewed copies",
+    body: "Synthetic recipient-specific copies.",
+  };
+  const drafted = await draftCaseEmail(t.db, f.staff.session, input);
+  expect(drafted.outcome.messageIds).toHaveLength(2);
+  expect((await draftCaseEmail(t.db, f.staff.session, input)).outcome.messageIds).toEqual(
+    drafted.outcome.messageIds,
+  );
+  const view = await caseEmailWorkbench(t.db, f.staff.session, f.record.id, config);
+  const copies = view.items.filter((item) => drafted.outcome.messageIds.includes(item.message.id));
+  expect(copies).toHaveLength(2);
+  expect(
+    copies
+      .map((item) => (item.message.recipients as { address: string }[]).map((r) => r.address))
+      .sort(),
+  ).toEqual([[address], [f.contact.value]].sort());
+  const first = copies[0];
+  if (!first?.reviewHash) throw new Error("Missing review");
+  await approveCaseEmail(
+    t.db,
+    f.staff.session,
+    {
+      id: f.record.id,
+      operationId: randomUUID(),
+      expectedVersion: drafted.outcome.version,
+      messageId: first.message.id,
+      messageVersion: first.message.version,
+      reviewHash: first.reviewHash,
+      reviewed: true,
+    },
+    config,
+  );
+  expect(await state(first.message.id)).toBe("queued");
+  expect(await state(copies[1]?.message.id as string)).toBe("draft");
+});
+
+it("rejects invalid or duplicate batch recipients without leaving partial drafts", async () => {
+  const f = await fixture();
+  const input = {
+    id: f.record.id,
+    operationId: randomUUID(),
+    expectedVersion: f.drafted.outcome.version,
+    subject: "Atomic drafts",
+    body: "Synthetic batch that must not partially apply.",
+  };
+  await expect(
+    draftCaseEmail(t.db, f.staff.session, {
+      ...input,
+      subscriptionIds: [f.subscription.id, randomUUID()],
+    }),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+  await expect(
+    draftCaseEmail(t.db, f.staff.session, {
+      ...input,
+      operationId: randomUUID(),
+      subscriptionIds: [f.subscription.id, f.subscription.id],
+    }),
+  ).rejects.toMatchObject({ code: "validation_failed" });
+  await expect(
+    draftCaseEmail(t.db, f.staff.session, {
+      ...input,
+      operationId: randomUUID(),
+      subscriptionIds: [],
+    }),
+  ).rejects.toMatchObject({ code: "validation_failed" });
+  expect(await t.db.select().from(messages).where(eq(messages.caseId, f.record.id))).toHaveLength(
+    1,
+  );
+});
 const provider = () => ({
   name: "resend",
   send: vi

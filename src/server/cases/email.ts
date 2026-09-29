@@ -96,13 +96,24 @@ export async function eligibleCaseRecipient(
     policyVersion: subscription.policyVersion,
   };
 }
-const draftShape = z.object({
-  ...commandEnvelope,
-  subscriptionId: z.uuid(),
-  appointmentId: z.uuid().optional(),
-  subject: emailContent.shape.subject,
-  body: emailContent.shape.body,
-});
+const draftShape = z
+  .object({
+    ...commandEnvelope,
+    subscriptionId: z.uuid().optional(),
+    subscriptionIds: z
+      .array(z.uuid())
+      .min(1)
+      .max(10)
+      .refine((ids) => new Set(ids).size === ids.length)
+      .optional(),
+    appointmentId: z.uuid().optional(),
+    subject: emailContent.shape.subject,
+    body: emailContent.shape.body,
+  })
+  .refine((value) => Boolean(value.subscriptionId) !== Boolean(value.subscriptionIds), {
+    path: ["subscriptionIds"],
+    message: "Choose one to ten distinct recipients",
+  });
 function contentOf(row: typeof messages.$inferSelect, config: EmailConfig) {
   const recipients = z.array(emailRecipient).length(1).parse(row.recipients);
   const attached = calendarSnapshot.array().max(1).parse(row.attachments);
@@ -137,47 +148,59 @@ export async function draftCaseEmail(
     async (ctx) => {
       const { row } = await caseFor(ctx.tx, session, input.id, "message.draft", true);
       version(row, input.expectedVersion);
-      const recipient = await eligibleCaseRecipient(ctx.tx, row.id, input.subscriptionId, true);
-      if (!recipient) throw new AppError("transition_denied");
-      const calendar = input.appointmentId
-        ? await freezeCalendar(
-            ctx.tx,
-            session,
-            row.id,
-            input.appointmentId,
-            recipient.partyId,
-            organizer,
-          )
-        : null;
-      const id = randomUUID();
-      await ctx.tx.insert(messages).values({
-        id,
-        caseId: row.id,
-        kind: "case_message",
-        direction: "outbound",
-        channel: "email",
-        audience: "case_participants",
-        state: "draft",
-        authorKind: "staff",
-        authorId: live.actor.id,
-        subject: input.subject,
-        body: input.body,
-        recipients: [recipient],
-        attachments: calendar ? [calendar] : [],
-        payloadDigest: hashRequest({
+      const messageIds: string[] = [];
+      const addresses = new Set<string>();
+      for (const subscriptionId of input.subscriptionIds ?? [input.subscriptionId as string]) {
+        const recipient = await eligibleCaseRecipient(ctx.tx, row.id, subscriptionId, true);
+        if (!recipient) throw new AppError("transition_denied");
+        const address = recipient.address.toLowerCase();
+        if (addresses.has(address))
+          throw new AppError("validation_failed", {
+            fieldErrors: { subscriptionIds: ["Choose each email address once"] },
+          });
+        addresses.add(address);
+        const calendar = input.appointmentId
+          ? await freezeCalendar(
+              ctx.tx,
+              session,
+              row.id,
+              input.appointmentId,
+              recipient.partyId,
+              organizer,
+            )
+          : null;
+        const id = randomUUID();
+        await ctx.tx.insert(messages).values({
+          id,
+          caseId: row.id,
+          kind: "case_message",
+          direction: "outbound",
+          channel: "email",
+          audience: "case_participants",
+          state: "draft",
+          authorKind: "staff",
+          authorId: live.actor.id,
           subject: input.subject,
           body: input.body,
-          recipient,
-          ...(calendar ? { calendar } : {}),
-        }),
-      });
+          recipients: [recipient],
+          attachments: calendar ? [calendar] : [],
+          payloadDigest: hashRequest({
+            subject: input.subject,
+            body: input.body,
+            recipient,
+            ...(calendar ? { calendar } : {}),
+          }),
+        });
+        messageIds.push(id);
+        await caseEvent(ctx, "case", row.id, "case.email_drafted", "message.draft", {
+          messageId: id,
+        });
+      }
       await bumpCase(ctx.tx, row.id, row.version);
-      await caseEvent(ctx, "case", row.id, "case.email_drafted", "message.draft", {
-        messageId: id,
-      });
       return {
         id: row.id,
-        messageId: id,
+        messageId: messageIds[0] as string,
+        messageIds,
         reference: row.reference,
         version: row.version + 1,
         recordedAt: new Date().toISOString(),

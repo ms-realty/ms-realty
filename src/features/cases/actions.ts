@@ -58,6 +58,11 @@ export async function workflowAction(
     scope = workflowScope(command, id);
   const fields = workflowFields[command] ?? [];
   const values = readFormValues<FormValues>(data, fields);
+  if (command === "emailDraft")
+    values.subscriptionIds = data
+      .getAll("subscriptionIds")
+      .map((value) => (typeof value === "string" ? value : "invalid"))
+      .join("\n");
   const envelope = readFormEnvelope(data, scope);
   const operationId = envelope?.operationId ?? issueFormOperation(scope);
   const status = {
@@ -91,7 +96,7 @@ export async function workflowAction(
           return (
             await draftCaseEmail(db, s, {
               ...base,
-              subscriptionId: values.subscriptionId ?? "",
+              subscriptionIds: values.subscriptionIds ? values.subscriptionIds.split("\n") : [],
               appointmentId: values.appointmentId || undefined,
               subject: values.subject ?? "",
               body: values.body ?? "",
