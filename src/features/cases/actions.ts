@@ -1,5 +1,6 @@
 "use server";
 import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
 import { displayLocale, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
 import {
   arrangeAppointment,
@@ -284,6 +285,9 @@ export async function workflowAction(
     { requireSession: true },
   );
   if (result.ok) {
+    // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
+    // visible after a native POST by opening its actor-bound receipt instead.
+    if (command === "handover") redirect(status.href);
     const appointment = ["request", "arrange", "appointment"].includes(command);
     const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {

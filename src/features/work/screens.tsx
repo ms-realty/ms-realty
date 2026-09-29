@@ -740,7 +740,12 @@ export async function OperationScreen({
   );
   const copy = workCopy(locale);
   return (
-    <Page title={copy.statusTitle} locale={locale}>
+    <Page
+      title={
+        type === "accept" && receipt?.status === "succeeded" ? copy.changeSaved : copy.statusTitle
+      }
+      locale={locale}
+    >
       <p>
         {!receipt
           ? copy.statusMissing

@@ -797,7 +797,10 @@ export async function WorkflowStatusScreen(
       destination = `/${props.locale}/${["request", "arrange", "appointment"].includes(command) ? (props.session.account.kind === "staff" ? "calendar" : "appointments") : props.session.account.kind === "staff" ? "cases" : "overview"}/${outcome.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
   }
   return (
-    <WorkflowPage {...props} title={c.status}>
+    <WorkflowPage
+      {...props}
+      title={command === "handover" && receipt?.status === "succeeded" ? c.saved : c.status}
+    >
       <p>
         {!receipt
           ? c.statusAbsent

@@ -158,7 +158,7 @@ export async function CustodyDetail({
         {c.title}
       </a>
       <p>{c.lead}</p>
-      <dl className="grid gap-3 sm:grid-cols-2">
+      <dl className="grid min-w-0 gap-3 [overflow-wrap:anywhere] sm:grid-cols-2">
         {[
           [c.propertyReference, propertyReference],
           [c.quantity, row.quantity],
@@ -167,7 +167,7 @@ export async function CustodyDetail({
           [c.storageLabel, row.storageLabel ?? "—"],
           [c.holderId, name(row.holderId)],
         ].map(([label, value]) => (
-          <div key={String(label)}>
+          <div key={String(label)} className="min-w-0">
             <dt className="font-semibold">{label}</dt>
             <dd className="break-words">{value}</dd>
           </div>
@@ -235,7 +235,7 @@ export async function CustodyDetail({
           />
         </section>
       ) : null}
-      <section className="space-y-5">
+      <section className="min-w-0 space-y-5 [overflow-wrap:anywhere]">
         <h2 className="text-subheading font-semibold">{c.history}</h2>
         <ol className="divide-y divide-border">
           {events.map((event) => (

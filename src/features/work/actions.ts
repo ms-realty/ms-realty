@@ -175,7 +175,7 @@ export async function acceptAction(
   _previous: FormState<AcceptValues>,
   data: FormData,
 ) {
-  return perform<AcceptValues>(
+  const state = await perform<AcceptValues>(
     locale,
     id,
     "accept",
@@ -202,6 +202,10 @@ export async function acceptAction(
       };
     },
   );
+  // The accepted inquiry no longer offers this form on a native POST response.
+  if (state.outcome.kind === "confirmed" && state.reconciliation)
+    redirect(state.reconciliation.href);
+  return state;
 }
 
 export async function triageAction(
