@@ -51,6 +51,7 @@ try {
   console.log(
     JSON.stringify({
       staffToken: manager.token,
+      managerId: manager.id,
       brokerToken: broker.token,
       brokerId: broker.id,
       keyId: key.outcome.id,

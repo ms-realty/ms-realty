@@ -102,6 +102,7 @@ export const currentPublications = pgTable(
   },
   (t) => [
     uniqueIndex("current_publications_pointer_idx").on(t.listingId, t.locale, t.destination),
+    index("current_publications_manifest_idx").on(t.manifestId),
     check("current_publications_reason", sql`${t.state} = 'active' or ${t.reason} is not null`),
   ],
 );

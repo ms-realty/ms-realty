@@ -331,7 +331,10 @@ export const documents = pgTable(
     retentionClass: text("retention_class"),
     expiresAt: instant("expires_at"),
   },
-  (t) => [index("documents_case_idx").on(t.caseId)],
+  (t) => [
+    index("documents_case_idx").on(t.caseId),
+    index("documents_property_purpose_idx").on(t.propertyId, t.purpose),
+  ],
 );
 
 export const documentVersions = pgTable(

@@ -120,6 +120,13 @@
       "when": 1790678070090,
       "tag": "0016_recovery_quarantine",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790683066474,
+      "tag": "0017_publication_read_indexes",
+      "breakpoints": true
     }
   ]
 }

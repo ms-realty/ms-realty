@@ -49,6 +49,8 @@ export default defineConfig({
     // Health is host-neutral; every page answers only on the three configured hosts.
     url: `http://localhost:${port}/api/health`,
     reuseExistingServer: false,
+    // Let the E2E server drop its own database/files before Playwright stops the process group.
+    gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
     // Serves the design-system specimen (e2e/design-system.spec.ts); off everywhere else.
     env: {
       ENABLE_DESIGN_SPECIMEN: "1",

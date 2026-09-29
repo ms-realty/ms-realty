@@ -34,6 +34,7 @@ for (const javaScriptEnabled of [true, false])
       ),
     ) as {
       staffToken: string;
+      managerId: string;
       brokerToken: string;
       brokerId: string;
       keyId: string;
@@ -51,7 +52,38 @@ for (const javaScriptEnabled of [true, false])
       await context.addCookies([cookie(f.staffToken)]);
       const page = await context.newPage(),
         path = `/en/access/offboard/${f.brokerId}`;
+      const [target] = await db
+        .select()
+        .from(schema.principals)
+        .where(eq(schema.principals.id, f.brokerId));
+      expect(target).toBeDefined();
+      // The actor's own identity must never be presented as the other person's removal target.
+      await page.goto(hostUrl("staff", `/en/access/offboard/${f.managerId}`));
+      await expect(
+        page.getByText("Another manager must end your access", { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
+        0,
+      );
+      // An unconfirmed receipt cannot become a success banner or a fresh submit opportunity.
+      await page.goto(hostUrl("staff", `${path}?receipt=unknown-synthetic-operation`));
+      await expect(
+        page.getByText(
+          "The result is not confirmed. Keep this reference and check again before retrying.",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      await expect(page.getByText("Access removal recorded:", { exact: false })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
+        0,
+      );
       await page.goto(hostUrl("staff", path));
+      await expect(
+        page.getByText(`${target?.displayName} · ${target?.email}`, { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Another manager must end your access", { exact: true }),
+      ).toHaveCount(0);
       await expect(
         page.getByRole("heading", { name: "End staff access", exact: true }),
       ).toBeVisible();
@@ -71,6 +103,11 @@ for (const javaScriptEnabled of [true, false])
         "short",
       );
       await expect(page.getByRole("checkbox")).not.toBeChecked();
+      if (javaScriptEnabled)
+        expect(
+          (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
+            .violations,
+        ).toEqual([]);
       expect(
         (
           await db

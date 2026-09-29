@@ -35,7 +35,8 @@
     "test:visual:docker": "bash scripts/visual-docker.sh check",
     "test:visual:docker:update": "bash scripts/visual-docker.sh update",
     "prebuild": "node scripts/map-runtime.mjs",
-    "predev": "node scripts/map-runtime.mjs"
+    "predev": "node scripts/map-runtime.mjs",
+    "test:load": "playwright test --config playwright.load.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1141.0",
