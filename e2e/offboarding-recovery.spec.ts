@@ -29,8 +29,73 @@ function seed() {
         env: { ...process.env, AUTH_SECRET: authKey, DATABASE_URL: databaseUrl },
       },
     ),
-  ) as { staffToken: string; brokerId: string };
+  ) as { staffToken: string; managerId: string; brokerId: string; caseId: string };
 }
+
+test("access administration does not disclose unreadable Cases in invitation choices", async ({
+  page,
+  context,
+}) => {
+  const f = seed();
+  await db
+    .update(schema.grants)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.grants.principalId, f.managerId));
+  await db.insert(schema.grants).values({
+    principalId: f.managerId,
+    capability: "access.grant",
+    reason: "Synthetic access administration only",
+  });
+  const records = await db
+    .insert(schema.cases)
+    .values(
+      Array.from({ length: 201 }, (_, n) => ({
+        reference: `C-ACCESS-${f.managerId}-${n}`,
+        kind: "buyer" as const,
+        stage: "needs_agreed",
+        title: `Synthetic restricted Case ${n}`,
+        ownerId: f.brokerId,
+        nextAction: "Review synthetic requirements",
+      })),
+    )
+    .returning({ id: schema.cases.id });
+  const allowed = records.at(-1);
+  if (!allowed) throw new Error("Missing Case fixture");
+  await context.addCookies([
+    {
+      name: "msr_staff_session",
+      value: f.staffToken,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
+  const restricted = await page.goto(hostUrl("staff", "/en/access/manage?q=restricted&page=2"));
+  expect(await restricted?.text()).not.toContain("Synthetic restricted Case");
+  await expect(page.locator('select[name="caseId"] option:not([value=""])')).toHaveCount(0);
+  const [permission] = await db
+    .insert(schema.grants)
+    .values({
+      principalId: f.managerId,
+      capability: "case.read",
+      recordType: "case",
+      recordId: allowed.id,
+      reason: "Synthetic one-Case read scope",
+    })
+    .returning();
+  if (!permission) throw new Error("Missing permission fixture");
+  await page.reload();
+  await expect(page.locator('select[name="caseId"] option:not([value=""])')).toHaveCount(1);
+  await expect(page.locator(`select[name="caseId"] option[value="${allowed.id}"]`)).toHaveText(
+    /Synthetic restricted Case 200/,
+  );
+  await db
+    .update(schema.grants)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.grants.id, permission.id));
+  await page.reload();
+  await expect(page.locator('select[name="caseId"] option:not([value=""])')).toHaveCount(0);
+});
 
 test("offboarding keeps an unresolved operation after leaving and returning", async ({
   page,

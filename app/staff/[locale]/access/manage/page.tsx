@@ -20,6 +20,7 @@ import { staffRoles } from "@/server/auth/invitations";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { can } from "@/server/authz";
+import { caseVisibility } from "@/server/cases/shared";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
 
@@ -73,6 +74,7 @@ export default async function ManagePage({
   const availableCases = await db
     .select({ id: cases.id, reference: cases.reference, title: cases.title })
     .from(cases)
+    .where(await caseVisibility(db, session))
     .limit(200);
   const query = await searchParams;
   const receiptId = z.uuid().safeParse(query.receipt);
