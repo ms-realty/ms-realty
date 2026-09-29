@@ -6,6 +6,22 @@ import { agencyTimeZone, displayLocale } from "./config";
 
 type Instant = Date | string | number;
 
+// Catalogue cards repeatedly use the same immutable formatter configuration. Cache only
+// formatters, never values or rendered customer data; bound caller-supplied time-zone keys.
+const moneyFormats = new Map<string, Intl.NumberFormat>();
+const dateTimeFormats = new Map<string, Intl.DateTimeFormat>();
+function reuse<T>(cache: Map<string, T>, key: string, create: () => T): T {
+  const existing = cache.get(key);
+  if (existing) return existing;
+  const value = create();
+  if (cache.size >= 128) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
+  cache.set(key, value);
+  return value;
+}
+
 function toDate(value: Instant): Date {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) throw new RangeError(`Invalid instant: ${String(value)}`);
@@ -23,12 +39,17 @@ export function formatMoney(
   }
   const digits = currencyMinorDigits[currency];
   const whole = amountMinor % 10 ** digits === 0;
-  return new Intl.NumberFormat(displayLocale(locale), {
-    style: "currency",
-    currency,
-    minimumFractionDigits: whole ? 0 : digits,
-    maximumFractionDigits: digits,
-  }).format(amountMinor / 10 ** digits);
+  return reuse(
+    moneyFormats,
+    JSON.stringify([locale, currency, whole]),
+    () =>
+      new Intl.NumberFormat(displayLocale(locale), {
+        style: "currency",
+        currency,
+        minimumFractionDigits: whole ? 0 : digits,
+        maximumFractionDigits: digits,
+      }),
+  ).format(amountMinor / 10 ** digits);
 }
 
 /** The calendar year in the agency's time zone, not the server's (e.g. for the footer). */
@@ -87,13 +108,18 @@ export function formatDateTime(
   instant: Instant,
   { timeZone = agencyTimeZone }: ZonedOptions = {},
 ): string {
-  return new Intl.DateTimeFormat(displayLocale(locale), {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone,
-    timeZoneName: "short",
-  }).format(toDate(instant));
+  return reuse(
+    dateTimeFormats,
+    JSON.stringify([locale, timeZone]),
+    () =>
+      new Intl.DateTimeFormat(displayLocale(locale), {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone,
+        timeZoneName: "short",
+      }),
+  ).format(toDate(instant));
 }

@@ -64,3 +64,40 @@ rendered error panel's Axe contrast/accessibility rules. This does not approve t
 Frozen launch inventory, representative geography/content, queue non-starvation, target
 infrastructure, actual providers and field metrics remain open. R00 and launch authority are
 unchanged. This is a direct implementation review, not an independent review sign-off.
+
+## Profile-driven follow-up
+
+An instrumented repeat used the same original production build and full workload. It again
+completed without action failures and missed the budgets. During the measured phase, Node used
+0.94 CPU cores on average and event-loop utilization averaged 0.91. The database had a mean of
+7.67 active connections; all ten application connections were active in 20 of 61 samples. These
+samples do not measure exact pool queue time. CPU profiling adds overhead and is retained as a
+separate diagnostic, not substituted for the ordinary run. See `load-profile*.json`, the CPU
+profile and `../evidence/2026-09-29-load-profile.json`.
+
+The follow-up removes one full eligibility scan per search: counts are derived from the type
+facets already calculated under all the other filters. Only selected types contribute; the
+existing exact-count cap and cursor semantics are unchanged. Sixty-nine database regressions
+pass, including one/multiple/absent type counts and publication/media-consent withdrawal.
+
+The CPU profile also identifies repeated Intl construction in card formatting. Immutable money
+and date-time formatters are reused under bounded configuration keys. No record, permission,
+consent, rendered value or HTML is cached. Eight formatting tests pass, including repeated
+locale/currency/fraction/time-zone changes. Separate full-workload repeats qualify SQL alone
+and then both changes together; their outcomes must remain explicit, including any failure.
+
+All three ordinary runs used 10,000 Listings, 50 public sessions, ten staff sessions and the
+unchanged 60-second duration and budgets. SQL-only observed p95 search 1,247 ms / command 1,574 ms
+(1,902 public cycles / 190 staff commands); SQL plus formatter reuse observed 1,305 / 1,794 ms
+(1,908 / 195). Neither had operation failures; **both performance tests failed**. The shared host
+is uncontrolled, and the combined run does not prove additional end-to-end improvement from
+formatter reuse. An alternating-order isolated diagnostic of 6,000 formatting pairs measured
+297–412 ms constructing fresh objects versus 9–14 ms reusing them; that is only local formatting
+cost. See `formatter-diagnostic.json`, `load-count-report.json`, `load-optimized-report.json`,
+their build/source provenance and `../evidence/2026-09-29-load-comparison.json`.
+
+CI 36574597177 on the preceding `8bf3b049` passed every job: 1,254 tests with two explicit skips,
+the separate 11-test real-ClamAV run, 370 browser scenarios with five explicit skips, 96 visual
+checks and packaging. The SQL/formatter/profiling follow-up requires its own CI. Fresh optimized
+build, lint and TypeScript pass; the runtime tests above are the current local qualification.
+No pool limit, budget, session count or provider configuration was increased to obtain a pass.

@@ -7,6 +7,7 @@ import { cpus, platform, totalmem } from "node:os";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
 import { hostUrl, origins } from "../e2e/hosts";
+import { databaseMetrics } from "./database-metrics";
 
 const exec = promisify(execFile);
 test("AT62: catalogue reads and staff commands under 50 public and 10 staff sessions", async ({
@@ -116,6 +117,7 @@ test("AT62: catalogue reads and staff commands under 50 public and 10 staff sess
     }
   };
   const warmup: { route: string; durationMs: number }[] = [];
+  const databaseProfile = process.env.MSR_LOAD_PROFILE === "1" ? databaseMetrics() : undefined;
   const warmer = publicContexts[0];
   assert(warmer);
   await lane("warmup", async () => {
@@ -132,6 +134,7 @@ test("AT62: catalogue reads and staff commands under 50 public and 10 staff sess
       warmup.push({ route, durationMs: performance.now() - at });
     }
   });
+  const workloadStartedAt = new Date().toISOString();
   const started = performance.now(),
     end = started + seconds * 1000;
   try {
@@ -229,6 +232,7 @@ test("AT62: catalogue reads and staff commands under 50 public and 10 staff sess
       ),
     ]);
   } finally {
+    await databaseProfile?.stop();
     await Promise.all(publicContexts.map((context) => context.dispose()));
     await Promise.all(staffContexts.map(({ context }) => context.close()));
   }
@@ -265,6 +269,16 @@ test("AT62: catalogue reads and staff commands under 50 public and 10 staff sess
     scope: "local-synthetic-closed-loop",
     recordedAt: new Date().toISOString(),
     source,
+    profiling: {
+      enabled: Boolean(databaseProfile),
+      workloadStartedAt,
+      database: databaseProfile
+        ? { samples: databaseProfile.samples, errors: databaseProfile.errors }
+        : null,
+      runtime: databaseProfile
+        ? "../runtime-metrics.jsonl and CPU profile in this run directory"
+        : null,
+    },
     environment: {
       platform: platform(),
       cpus: cpus().length,

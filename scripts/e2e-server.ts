@@ -1,7 +1,7 @@
 // One freshly migrated database per browser run. Playwright owns this process and stops it
 // after the suite; the finally block drops only the generated msr_e2e_* database.
 import { type ChildProcess, spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import postgres from "postgres";
@@ -36,12 +36,27 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 
 async function next(args: string[]): Promise<number> {
   if (stopping) return 0;
+  const profile = process.env.MSR_LOAD_PROFILE === "1" && args[0] === "start";
+  const profileDirectory = join(process.cwd(), "test-results", database.slice("msr_e2e_".length));
+  if (profile) await mkdir(profileDirectory, { recursive: true });
   return new Promise((resolve, reject) => {
     // Keep localhost on IPv4 for Next's internal redirect fetch as well as its listener.
     // Linux may otherwise bind ::1 while the action redirect targets 127.0.0.1.
     child = spawn(
       process.execPath,
-      ["--dns-result-order=ipv4first", "node_modules/next/dist/bin/next", ...args],
+      [
+        "--dns-result-order=ipv4first",
+        ...(profile
+          ? [
+              "--cpu-prof",
+              `--cpu-prof-dir=${profileDirectory}`,
+              "--import",
+              "./scripts/load-runtime-metrics.mjs",
+            ]
+          : []),
+        "node_modules/next/dist/bin/next",
+        ...args,
+      ],
       {
         stdio: "inherit",
         env: { ...process.env, DATABASE_URL: databaseUrl },

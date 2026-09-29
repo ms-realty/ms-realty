@@ -460,18 +460,24 @@ export async function searchListings(
     .orderBy(base.k1, base.k2, base.listingId)
     .limit(search.pageSize + 1);
 
-  const capped = db
-    .select({ one: sql`1` })
-    .from(base)
-    .limit(exactCountLimit + 1)
-    .as("capped");
-  const [counted] = await db.select({ n: sql<number>`count(*)::int` }).from(capped);
-  const total = counted?.n ?? 0;
   const byType = matching({ withoutPropertyTypes: true });
   const facetRows = await db
     .select({ value: byType.propertyType, count: sql<number>`count(*)::int` })
     .from(byType)
     .groupBy(byType.propertyType);
+  // Facets already count the eligible set with every filter except property type. Summing
+  // only selected types gives the same total without a second full eligibility scan. Keep
+  // the capped cursor/count contract: above the limit we still expose only a lower bound.
+  const total = Math.min(
+    exactCountLimit + 1,
+    facetRows.reduce(
+      (n, facet) =>
+        !search.criteria.propertyTypes || search.criteria.propertyTypes.includes(facet.value)
+          ? n + facet.count
+          : n,
+      0,
+    ),
+  );
 
   const page = rows.slice(0, search.pageSize);
   const published = await loadPublishedListings(

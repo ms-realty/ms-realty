@@ -37,6 +37,13 @@ the minimum inventory/duration qualifications. Keep cold-start and warmed runs s
 shared developer machine, record contemporaneous host load and container limits; do not stop
 other owners' resources to manufacture a capacity pass.
 
+Set `MSR_LOAD_PROFILE=1` for a diagnostic repeat with the same dataset and session counts.
+The owned Next process writes a Node CPU profile and one-second CPU/event-loop/RSS samples into
+`test-results/<run-id>/`. The load report includes aggregate PostgreSQL connection/wait samples
+for only its own database; it does not collect query text or customer records. Profiling adds
+overhead, so preserve the ordinary run and instrumented run separately. The preload is selected
+only by the local E2E server and is never installed in production instrumentation.
+
 The report always leaves the release gate open. It does not establish ten times an approved
 frozen launch inventory, target infrastructure capacity, queue non-starvation, actual provider
 behavior, geographic/content representativeness or field LCP/INP/CLS. Those remain separate

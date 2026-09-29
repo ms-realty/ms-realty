@@ -62,4 +62,17 @@ describe("formatting (ux-spec §19.3)", () => {
     expect(agencyYear("2026-12-31T22:30:00Z")).toBe(2027);
     expect(agencyYear("2026-12-31T21:30:00Z")).toBe(2026);
   });
+
+  it("keeps repeated formatting isolated by locale, currency, fraction and time zone", () => {
+    for (let i = 0; i < 2; i++) {
+      expect(plain(formatMoney("en", 123400, "EUR"))).toBe("€1,234");
+      expect(plain(formatMoney("de", 123450, "EUR"))).toBe("1.234,50 €");
+      expect(plain(formatMoney("en", 123450, "USD"))).toBe("US$1,234.50");
+      expect(plain(formatMoney("en", 123450, "EUR"))).toBe("€1,234.50");
+      expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z"))).toBe("1 Jul 2026, 12:00 EEST");
+      expect(plain(formatDateTime("en", "2026-07-01T10:00:00Z", { timeZone: "UTC" }))).toBe(
+        "1 Jul 2026, 10:00 UTC",
+      );
+    }
+  });
 });

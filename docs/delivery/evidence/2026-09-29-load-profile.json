@@ -1,0 +1,78 @@
+{
+  "samples": 63,
+  "cpuCoreEquivalent": 0.9415362777445971,
+  "eventLoopUtilizationMean": 0.9142462698835412,
+  "dbSamples": 61,
+  "dbActiveMean": 7.672131147540983,
+  "dbActiveMax": 10,
+  "dbAll10ActiveSamples": 20,
+  "scope": "Instrumented local synthetic 10000-listing baseline; CPU profiling adds overhead",
+  "measurements": {
+    "staff-today-html": {
+      "count": 160,
+      "p50": 898.89,
+      "p95": 1340.68,
+      "p99": 1444.69,
+      "max": 1472.16,
+      "budgetMs": 500
+    },
+    "public-search-html": {
+      "count": 1458,
+      "p50": 1305.43,
+      "p95": 1905.44,
+      "p99": 2098.3,
+      "max": 2390.67,
+      "budgetMs": 500
+    },
+    "staff-task-html": {
+      "count": 160,
+      "p50": 913.05,
+      "p95": 1232.67,
+      "p99": 1491.09,
+      "max": 1611.03,
+      "budgetMs": 500
+    },
+    "public-detail-html": {
+      "count": 1458,
+      "p50": 490.06,
+      "p95": 850.86,
+      "p99": 1004.15,
+      "max": 1339.01,
+      "budgetMs": 500
+    },
+    "public-media": {
+      "count": 1458,
+      "p50": 203.42,
+      "p95": 381.87,
+      "p99": 588.38,
+      "max": 774.07,
+      "budgetMs": null
+    },
+    "staff-command-post": {
+      "count": 160,
+      "p50": 1799.38,
+      "p95": 2516.89,
+      "p99": 2600.44,
+      "max": 2600.92,
+      "budgetMs": 800
+    }
+  },
+  "qualification": {
+    "performanceBudgetsPassed": false,
+    "minimumInventory": true,
+    "minimumDuration": true,
+    "everySessionCompleted": true,
+    "frozenLaunchInventory": false,
+    "queueStarvation": false,
+    "liveInfrastructure": false,
+    "fieldWebVitals": false,
+    "releaseGatePass": false
+  },
+  "failedActions": 0,
+  "runtimeBuildId": "iKuXw7heNS2hOCL5BSaGn",
+  "limits": [
+    "Samples show busy database connections, not exact client-pool queue duration.",
+    "Event-loop utilization and CPU use are separate measurements.",
+    "No foreign process was stopped; shared-host load is not controlled."
+  ]
+}

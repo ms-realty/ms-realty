@@ -178,8 +178,15 @@ describe("AT05/AT07 eligibility, text and places", () => {
     ]);
     const typed = await inPlace("bg", { propertyTypes: ["house"] });
     expect(typed.items.map((i) => i.reference)).toEqual([ref.B]);
+    expect(typed.count).toEqual({ value: 1, type: "exact" });
     // Facet counts ignore the type filter itself, and nothing else.
     expect(typed.facets.propertyType).toEqual(bg.facets.propertyType);
+    const multipleTypes = await inPlace("bg", { propertyTypes: ["house", "apartment"] });
+    expect(multipleTypes.count).toEqual({ value: 2, type: "exact" });
+    const absentType = await inPlace("bg", { propertyTypes: ["plot"] });
+    expect(absentType.items).toEqual([]);
+    expect(absentType.count).toEqual({ value: 0, type: "exact" });
+    expect(absentType.facets.propertyType).toEqual(bg.facets.propertyType);
 
     const en = await inPlace("en");
     expect(en.items.map((i) => i.reference)).toEqual([ref.A]);
