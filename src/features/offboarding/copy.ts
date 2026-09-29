@@ -3,6 +3,19 @@ export function offboardingCopy(locale: string) {
     locale === "bg" ? bg : locale === "ru" ? ru : en;
   return {
     person: s("Служител", "Сотрудник", "Staff member"),
+    work: s("Записи за предаване", "Записи для передачи", "Records for handover"),
+    workScope: s(
+      "Показани са само записите, до които имате достъп. Прегледайте и предайте всеки поотделно; общият брой може да включва ограничени записи.",
+      "Показаны только доступные вам записи. Проверьте и передайте каждую отдельно; общий счётчик может включать закрытые записи.",
+      "Only records you can access are shown. Review and hand over each separately; totals may include restricted records.",
+    ),
+    noWork: s(
+      "Няма достъпни записи на тази страница.",
+      "На этой странице нет доступных записей.",
+      "No accessible records on this page.",
+    ),
+    next: s("Следващи записи", "Следующие записи", "Next records"),
+    previous: s("Предишни записи", "Предыдущие записи", "Previous records"),
     notApplied: s(
       "Достъпът не е променен от тази операция.",
       "Эта операция не изменила доступ.",

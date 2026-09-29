@@ -1,11 +1,13 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
 import { isStaffLocale } from "@/i18n/config";
 import { requireAuthHost } from "@/server/auth/pages";
 import { AppError } from "@/server/errors";
 import { action, type HandlerContext } from "@/server/http/next";
 import { acceptInquiry, changeTask, triageInquiry } from "@/server/work/commands";
+import { handoverTask } from "@/server/work/handover";
 import { readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
@@ -14,13 +16,13 @@ import { workCopy } from "./copy";
 export type AcceptValues = { nextAction: string; dueAt: string };
 export type TriageValues = { state: string; reason: string; duplicateOfInquiryId: string };
 export type TaskValues = { state: string; note: string; followUpAt: string };
-type Kind = "accept" | "triage" | "task";
+type Kind = "accept" | "triage" | "task" | "handover";
 const localInstant = (value: string) =>
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ? `${value}:00Z` : value;
 const inputInstant = (value: Date | null) => value?.toISOString().slice(0, 16) ?? "";
 const scopeFor = (kind: Kind, id: string) => `work.${kind}.${id}`;
 const recordPath = (locale: string, kind: Kind, id: string) =>
-  `/${locale}/${kind === "task" ? "tasks" : "inquiries"}/${id}`;
+  `/${locale}/${kind === "task" || kind === "handover" ? "tasks" : "inquiries"}/${id}`;
 
 async function perform<V extends FormValues>(
   locale: string,
@@ -49,7 +51,7 @@ async function perform<V extends FormValues>(
     operationId: key,
     expectedRevision: envelope?.expectedRevision ?? null,
     reconciliation: status,
-    values,
+    values: kind === "handover" ? { ...values, reviewed: "" } : values,
     responseId: randomUUID(),
     outcome: { kind: "idle" },
   };
@@ -280,4 +282,42 @@ export async function taskAction(
       };
     },
   );
+}
+
+export async function taskHandoverAction(
+  locale: string,
+  id: string,
+  _previous: FormState<FormValues>,
+  data: FormData,
+) {
+  const state = await perform<FormValues>(
+    locale,
+    id,
+    "handover",
+    data,
+    ["action", "receiverId", "reason", "reviewed"],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      return (
+        await handoverTask(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          action: values.action,
+          receiverId: values.receiverId,
+          reason: values.reason,
+          reviewed: values.reviewed === "true",
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const { task } = await readTask(ctx.db, ctx.session, id);
+      return { revision: task.version, values: { receiverId: task.pendingOwnerId ?? "" } };
+    },
+  );
+  // A successful request/acceptance changes which forms exist. A receipt GET remains
+  // stable for native POSTs even when the original form is no longer rendered.
+  if (state.outcome.kind === "confirmed" && state.reconciliation)
+    redirect(state.reconciliation.href);
+  return state;
 }

@@ -312,13 +312,13 @@ export async function changeTask(db: Executor, session: Session, raw: TaskInput)
 export async function readWorkOperation(
   db: Executor,
   session: Session,
-  type: "work.inquiry.accept" | "work.inquiry.triage" | "work.task.change",
+  type: "work.inquiry.accept" | "work.inquiry.triage" | "work.task.change" | "work.task.handover",
   id: string,
   key: string,
 ) {
   if (!z.uuid().safeParse(id).success || key.length > 200) throw new AppError("not_found");
   const live = await liveStaff(db, session);
-  if (type === "work.task.change") await taskFor(db, session, id);
+  if (type === "work.task.change" || type === "work.task.handover") await taskFor(db, session, id);
   else {
     const [row] = await db.select().from(inquiries).where(eq(inquiries.id, id));
     if (!row) throw new AppError("not_found");

@@ -14,6 +14,7 @@ import { offboardingCopy } from "@/features/offboarding/copy";
 import { offboardingReferenceCookie } from "@/features/offboarding/reference";
 import { isStaffLocale } from "@/i18n/config";
 import { readOffboarding } from "@/server/auth/grants";
+import { readOffboardingWork } from "@/server/auth/offboarding-work";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { can } from "@/server/authz";
@@ -25,7 +26,7 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ receipt?: string; review?: string }>;
+  searchParams: Promise<{ receipt?: string; review?: string; workPage?: string }>;
 }) {
   const { locale, id } = await params;
   if (!isStaffLocale(locale)) notFound();
@@ -40,6 +41,13 @@ export default async function Page({
     }),
     c = offboardingCopy(locale);
   const query = await searchParams;
+  const requestedPage =
+    typeof query.workPage === "string" && /^[1-9]\d{0,3}$/.test(query.workPage)
+      ? Number(query.workPage)
+      : 1;
+  const work = await readOffboardingWork(db, session, id, requestedPage);
+  const workPath = (page: number) =>
+    `${path}?workPage=${page}${query.receipt ? `&receipt=${encodeURIComponent(query.receipt)}` : ""}`;
   const referenceCookie = offboardingReferenceCookie(session.actor.id, id);
   const pendingReference = (await cookies()).get(referenceCookie)?.value;
   if (
@@ -156,6 +164,48 @@ export default async function Page({
             ]}
           />
         )}
+        <section className="space-y-4">
+          <h2 className="text-subheading font-semibold">{c.work}</h2>
+          <p>{c.workScope}</p>
+          {(["keys", "cases", "tasks", "inquiries"] as const).map((kind) =>
+            work[kind].length ? (
+              <section key={kind} className="space-y-2">
+                <h3 className="font-semibold">{c[kind]}</h3>
+                <ul className="space-y-2">
+                  {work[kind].map((row) => (
+                    <li key={row.id} className="break-words">
+                      <a
+                        className={workflowLink}
+                        href={`/${locale}/${kind === "keys" ? "operations/keys" : kind}/${row.id}`}
+                      >
+                        {"reference" in row ? row.reference : row.title}
+                        {"reference" in row && "title" in row ? ` · ${row.title}` : ""}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null,
+          )}
+          {!work.keys.length &&
+          !work.cases.length &&
+          !work.tasks.length &&
+          !work.inquiries.length ? (
+            <p>{c.noWork}</p>
+          ) : null}
+          <nav className="flex flex-wrap gap-4" aria-label={c.work}>
+            {work.page > 1 ? (
+              <a className={workflowLink} href={workPath(work.page - 1)}>
+                {c.previous}
+              </a>
+            ) : null}
+            {work.hasMore ? (
+              <a className={workflowLink} href={workPath(work.page + 1)}>
+                {c.next}
+              </a>
+            ) : null}
+          </nav>
+        </section>
         {history.length ? (
           <section className="space-y-3">
             <h2 className="text-subheading font-semibold">{c.history}</h2>

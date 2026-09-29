@@ -23,6 +23,8 @@ import { initialFormState } from "@/ui/form/server";
 import { acceptAction, taskAction, triageAction } from "./actions";
 import { workCopy } from "./copy";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
+import { taskHandoverCopy } from "./handover-copy";
+import { TaskHandoverScreen } from "./handover-screen";
 
 export function checkLocale(locale: string) {
   if (!isStaffLocale(locale)) notFound();
@@ -44,7 +46,7 @@ const link = "font-semibold text-accent underline underline-offset-4";
 function Page({ title, locale, children }: { title: string; locale: string; children: ReactNode }) {
   const copy = workCopy(locale);
   return (
-    <div className="mx-auto max-w-6xl space-y-8">
+    <div className="mx-auto min-w-0 max-w-6xl space-y-8 break-words px-4 py-6 sm:px-6">
       <header className="space-y-4">
         <h1 className="text-heading font-semibold">{title}</h1>
         <nav aria-label={copy.details} className="flex flex-wrap gap-5">
@@ -198,6 +200,13 @@ export async function TodayScreen({ locale, session }: { locale: string; session
   return (
     <Page title={copy.today} locale={locale}>
       <p className="text-text-muted">{copy.queueNote}</p>
+      <section className="space-y-4">
+        <h2 className="text-subheading font-semibold">{taskHandoverCopy(locale).inbox}</h2>
+        <TaskList rows={queues.handovers.rows} locale={locale} />
+        <a className={link} href={`/${locale}/tasks?view=handovers`}>
+          {taskHandoverCopy(locale).inbox}
+        </a>
+      </section>
       <section className="space-y-4">
         <h2 className="text-subheading font-semibold">{copy.unassigned}</h2>
         <InquiryList rows={queues.unassigned.rows} locale={locale} />
@@ -488,26 +497,32 @@ export async function TasksScreen({
   session,
   page,
   mine,
+  awaitingAcceptance = false,
 }: {
   locale: string;
   session: Session;
   page: number;
   mine: boolean;
+  awaitingAcceptance?: boolean;
 }) {
   const copy = workCopy(locale);
-  const queue = await listTasks(getDb(), session, { page, mine });
+  const queue = await listTasks(getDb(), session, { page, mine, awaitingAcceptance });
+  const href = `/${locale}/tasks${awaitingAcceptance ? "?view=handovers" : mine ? "?view=mine" : ""}`;
   return (
     <Page title={copy.tasks} locale={locale}>
-      <nav className="flex gap-5" aria-label={copy.tasks}>
+      <nav className="flex flex-wrap gap-5" aria-label={copy.tasks}>
         <a className={link} href={`/${locale}/tasks`}>
           {copy.tasks}
         </a>
         <a className={link} href={`/${locale}/tasks?view=mine`}>
           {copy.mine}
         </a>
+        <a className={link} href={`/${locale}/tasks?view=handovers`}>
+          {taskHandoverCopy(locale).inbox}
+        </a>
       </nav>
       <TaskList locale={locale} rows={queue.rows} />
-      <Pagination {...queue} href={`/${locale}/tasks${mine ? "?view=mine" : ""}`} locale={locale} />
+      <Pagination {...queue} href={href} locale={locale} />
     </Page>
   );
 }
@@ -559,6 +574,9 @@ export async function TaskScreen({
         </a>
       ) : null}
       {guarded ? <p>{copy.guardedTask}</p> : null}
+      {!["done", "cancelled"].includes(task.state) ? (
+        <TaskHandoverScreen locale={locale} session={session} id={id} />
+      ) : null}
       {targets.length ? (
         <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">
           <h2 className="text-subheading font-semibold">{copy.taskChange}</h2>
@@ -672,15 +690,17 @@ export async function OperationScreen({
 }) {
   if (
     typeof operationKey !== "string" ||
-    !(task ? type === "task" : type === "accept" || type === "triage")
+    !(task ? type === "task" || type === "handover" : type === "accept" || type === "triage")
   )
     notFound();
   const operationType =
-    type === "task"
-      ? "work.task.change"
-      : type === "accept"
-        ? "work.inquiry.accept"
-        : "work.inquiry.triage";
+    type === "handover"
+      ? "work.task.handover"
+      : type === "task"
+        ? "work.task.change"
+        : type === "accept"
+          ? "work.inquiry.accept"
+          : "work.inquiry.triage";
   const receipt = await privateRead(() =>
     readWorkOperation(getDb(), session, operationType, id, operationKey),
   );

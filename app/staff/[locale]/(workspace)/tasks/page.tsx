@@ -17,6 +17,7 @@ export default async function WorkPage({
       locale={locale}
       session={session}
       mine={query.view === "mine"}
+      awaitingAcceptance={query.view === "handovers"}
       page={queryPage(query.page)}
     />
   );

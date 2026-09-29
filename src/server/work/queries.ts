@@ -116,7 +116,13 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
 export async function listTasks(
   db: Executor,
   session: Session,
-  options: { page?: number; mine?: boolean; dueBefore?: Date; caseId?: string } = {},
+  options: {
+    page?: number;
+    mine?: boolean;
+    awaitingAcceptance?: boolean;
+    dueBefore?: Date;
+    caseId?: string;
+  } = {},
 ) {
   const live = await liveStaff(db, session);
   const grants = await resolveGrants(db, live.actor);
@@ -131,6 +137,7 @@ export async function listTasks(
         visibleWhere(grants, "task.manage", "task"),
         inArray(tasks.state, [...openTaskStates]),
         options.mine ? eq(tasks.ownerId, live.account.id) : undefined,
+        options.awaitingAcceptance ? eq(tasks.pendingOwnerId, live.account.id) : undefined,
         options.caseId ? eq(tasks.caseId, options.caseId) : undefined,
         options.dueBefore
           ? sql`${effectiveDue} <= ${options.dueBefore.toISOString()}::timestamptz`
@@ -201,10 +208,11 @@ export async function readContact(db: Executor, session: Session, id: string) {
 
 /** Bounded real queues; no synthetic metrics or inference that other modules are clear. */
 export async function readToday(db: Executor, session: Session, now = new Date()) {
-  const [unassigned, due, mine] = await Promise.all([
+  const [unassigned, due, mine, handovers] = await Promise.all([
     listInbox(db, session, "unassigned"),
     listTasks(db, session, { mine: true, dueBefore: now }),
     listInbox(db, session, "mine"),
+    listTasks(db, session, { awaitingAcceptance: true }),
   ]);
-  return { unassigned, due, mine, asOf: now };
+  return { unassigned, due, mine, handovers, asOf: now };
 }
