@@ -16,6 +16,7 @@ import type { FormReceipt } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { caseAccessCopy } from "../case-access/copy";
 import { documentRequestCopy } from "../document-requests/copy";
+import { CoverageOwner } from "../work/coverage-owner";
 import { privateRead } from "../work/screens";
 import { workflowAction } from "./actions";
 import {
@@ -175,7 +176,16 @@ export async function CaseIndexScreen(
                   <bdi>{row.reference}</bdi> · {row.title}
                 </a>
                 <p>
-                  {c.owned}: {row.ownerName ?? "—"}
+                  {c.owned}:{" "}
+                  {props.session.account.kind === "staff" ? (
+                    <CoverageOwner
+                      name={row.ownerName}
+                      needsCoverage={row.needsCoverage && row.disposition !== "closed"}
+                      locale={props.locale}
+                    />
+                  ) : (
+                    (row.ownerName ?? "—")
+                  )}
                 </p>
               </li>
             ))}
@@ -292,7 +302,18 @@ export async function CaseScreen(
           ) : null}
         </div>
         <p>
-          {c.owned}: <strong>{row.ownerName ?? "—"}</strong>
+          {c.owned}:{" "}
+          <strong>
+            {props.session.account.kind === "staff" ? (
+              <CoverageOwner
+                name={row.ownerName}
+                needsCoverage={row.needsCoverage}
+                locale={props.locale}
+              />
+            ) : (
+              (row.ownerName ?? "—")
+            )}
+          </strong>
         </p>
         <p>
           {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}

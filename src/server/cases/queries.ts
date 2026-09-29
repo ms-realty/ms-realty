@@ -16,6 +16,7 @@ import type { Session } from "../auth/sessions";
 import { can } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { ownerNeedsCoverage } from "../work/coverage-policy";
 import { caseFor, caseVisibility, liveParticipation } from "./shared";
 
 export async function listCases(db: Executor, session: Session, search = "") {
@@ -33,6 +34,7 @@ export async function listCases(db: Executor, session: Session, search = "") {
       stage: cases.stage,
       disposition: cases.disposition,
       ownerName: principals.displayName,
+      needsCoverage: ownerNeedsCoverage(cases.ownerId),
     })
     .from(cases)
     .leftJoin(principals, eq(principals.id, cases.ownerId))
@@ -54,7 +56,7 @@ export async function readCase(db: Executor, session: Session, id: string) {
   const canTransition = staff && (await can(db, live.actor, "case.transition", resource));
   const [owner] = row.ownerId
     ? await db
-        .select({ name: principals.displayName })
+        .select({ name: principals.displayName, needsCoverage: ownerNeedsCoverage(principals.id) })
         .from(principals)
         .where(eq(principals.id, row.ownerId))
     : [];
@@ -152,6 +154,7 @@ export async function readCase(db: Executor, session: Session, id: string) {
       stage: row.stage,
       disposition: row.disposition,
       ownerName: owner?.name ?? null,
+      needsCoverage: staff && row.disposition !== "closed" && (owner?.needsCoverage ?? true),
       nextAction: active ? (internal ? row.nextAction : row.clientSummary) : null,
       dueAt: active && (internal || row.clientSummary) ? row.nextActionDueAt : null,
       clientSummary: active ? row.clientSummary : null,

@@ -12,6 +12,7 @@ import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { offboardingAction } from "@/features/offboarding/action";
 import { offboardingCopy } from "@/features/offboarding/copy";
 import { offboardingReferenceCookie } from "@/features/offboarding/reference";
+import { coverageCopy } from "@/features/work/coverage-copy";
 import { isStaffLocale } from "@/i18n/config";
 import { readOffboarding } from "@/server/auth/grants";
 import { readOffboardingWork } from "@/server/auth/offboarding-work";
@@ -128,6 +129,9 @@ export default async function Page({
         <section className="space-y-3">
           <h2 className="text-subheading font-semibold">{c.retained}</h2>
           <p>{c.warning}</p>
+          <a className={workflowLink} href={`/${locale}/coverage`}>
+            {coverageCopy(locale).title}
+          </a>
           <dl>
             {(["keys", "cases", "tasks", "inquiries"] as const).map((k) => (
               <div key={k} className="flex justify-between gap-4">

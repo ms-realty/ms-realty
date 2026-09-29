@@ -22,6 +22,8 @@ import {
 import { initialFormState } from "@/ui/form/server";
 import { acceptAction, taskAction, triageAction } from "./actions";
 import { workCopy } from "./copy";
+import { coverageCopy } from "./coverage-copy";
+import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
@@ -43,7 +45,15 @@ export function queryPage(value: string | string[] | undefined) {
 }
 const link = "font-semibold text-accent underline underline-offset-4";
 
-function Page({ title, locale, children }: { title: string; locale: string; children: ReactNode }) {
+export function Page({
+  title,
+  locale,
+  children,
+}: {
+  title: string;
+  locale: string;
+  children: ReactNode;
+}) {
   const copy = workCopy(locale);
   return (
     <div className="mx-auto min-w-0 max-w-6xl space-y-8 break-words px-4 py-6 sm:px-6">
@@ -62,6 +72,9 @@ function Page({ title, locale, children }: { title: string; locale: string; chil
           <a className={link} href={`/${locale}/contacts`}>
             {copy.contacts}
           </a>
+          <a className={link} href={`/${locale}/coverage`}>
+            {coverageCopy(locale).title}
+          </a>
         </nav>
       </header>
       {children}
@@ -69,7 +82,7 @@ function Page({ title, locale, children }: { title: string; locale: string; chil
   );
 }
 
-function When({ date, locale }: { date: Date | null; locale: string }) {
+export function When({ date, locale }: { date: Date | null; locale: string }) {
   return date ? (
     <time dateTime={date.toISOString()}>
       {new Intl.DateTimeFormat(locale, {
@@ -83,7 +96,7 @@ function When({ date, locale }: { date: Date | null; locale: string }) {
     <span>{workCopy(locale).noDate}</span>
   );
 }
-function Pagination({
+export function Pagination({
   page,
   hasMore,
   href,
@@ -134,7 +147,7 @@ function InquiryList({
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ inquiry, ownerName }) => (
+          {rows.map(({ inquiry, ownerName, needsCoverage }) => (
             <tr key={inquiry.id} data-inquiry-id={inquiry.id} className="border-b border-border">
               <td className="p-3">
                 <a className={link} href={`/${locale}/inquiries/${inquiry.id}`}>
@@ -143,7 +156,7 @@ function InquiryList({
               </td>
               <td className="p-3">{copy.states[inquiry.state]}</td>
               <td className="p-3">
-                {ownerName ?? `${copy.coverage}: ${inquiry.coverageQueue ?? copy.noOwner}`}
+                <CoverageOwner name={ownerName} needsCoverage={needsCoverage} locale={locale} />
               </td>
               <td className="p-3">
                 <When locale={locale} date={inquiry.createdAt} />
@@ -169,13 +182,18 @@ function TaskList({
   const copy = workCopy(locale);
   return rows.length ? (
     <ul className="divide-y divide-border rounded-card border border-border">
-      {rows.map(({ task, ownerName }) => (
+      {rows.map(({ task, ownerName, needsCoverage }) => (
         <li key={task.id} className="space-y-2 p-4">
           <a className={link} href={`/${locale}/tasks/${task.id}`}>
             {task.title}
           </a>
           <p>
-            {copy.states[task.state]} · {copy.owner}: {ownerName ?? copy.noOwner}
+            {copy.states[task.state]} · {copy.owner}:{" "}
+            <CoverageOwner
+              name={ownerName}
+              needsCoverage={needsCoverage && !["done", "cancelled"].includes(task.state)}
+              locale={locale}
+            />
           </p>
           <p>
             {copy.followUp}:{" "}
@@ -440,7 +458,15 @@ export async function InquiryScreen({
             <div>
               <dt className="font-semibold">{copy.owner}</dt>
               <dd data-testid="inquiry-owner">
-                {ownerName ?? `${copy.coverage}: ${inquiry.coverageQueue ?? copy.noOwner}`}
+                <CoverageOwner
+                  name={ownerName}
+                  needsCoverage={
+                    detail.needsCoverage &&
+                    !inquiry.caseId &&
+                    inquiry.state !== "resolved_without_case"
+                  }
+                  locale={locale}
+                />
               </dd>
             </div>
             <div>
@@ -536,7 +562,9 @@ export async function TaskScreen({
   session: Session;
   id: string;
 }) {
-  const { task, ownerName } = await privateRead(() => readTask(getDb(), session, id));
+  const { task, ownerName, needsCoverage } = await privateRead(() =>
+    readTask(getDb(), session, id),
+  );
   const copy = workCopy(locale);
   const guarded =
     task.evidenceRequired || (highImpactTaskTypes as readonly string[]).includes(task.type);
@@ -553,7 +581,13 @@ export async function TaskScreen({
         </div>
         <div>
           <dt className="font-semibold">{copy.owner}</dt>
-          <dd>{ownerName ?? copy.noOwner}</dd>
+          <dd>
+            <CoverageOwner
+              name={ownerName}
+              needsCoverage={needsCoverage && !["done", "cancelled"].includes(task.state)}
+              locale={locale}
+            />
+          </dd>
         </div>
         <div>
           <dt className="font-semibold">{copy.followUp}</dt>

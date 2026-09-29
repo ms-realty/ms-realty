@@ -43,9 +43,9 @@ export function offboardingCopy(locale: string) {
     ),
     retained: s("Остава за предаване", "Остаётся передать", "Retained for handover"),
     warning: s(
-      "Достъпът може да бъде спрян незабавно. Тези записи остават при същия служител; не се приключват или прехвърлят автоматично.",
-      "Доступ можно отключить немедленно. Эти записи остаются за сотрудником; они не закрываются и не передаются автоматически.",
-      "Access can end immediately. These records stay assigned to this person; they are not completed or transferred automatically.",
+      "Достъпът може да бъде спрян незабавно. Отворената работа влиза в дежурната опашка. Последният потвърден отговорник и държателят на ключове се запазват до отделно потвърдено предаване.",
+      "Доступ можно отключить немедленно. Открытая работа попадает в очередь подхвата. Последний подтверждённый ответственный и держатель ключей сохраняются до отдельного подтверждения передачи.",
+      "Access can end immediately. Open work enters agency coverage. The last accepted owner and physical key holder stay recorded until an individually confirmed handover.",
     ),
     keys: s(
       "Комплекти ключове при служителя",

@@ -28,7 +28,7 @@ const en = {
   accept: "Accept case and commitments",
   cancel: "Cancel pending handover",
   boundary:
-    "The current broker remains accountable until the receiver accepts. Existing appointments retain their named host. Closeout requires every open task, appointment and proposal to be resolved individually.",
+    "The last accepted broker stays recorded until the receiver accepts. Work without an active broker enters agency coverage. Existing appointments retain their named host. Closeout requires every open task, appointment and proposal to be resolved individually.",
   completionNote:
     "Completion records an agency outcome. It requires current case review, exact-party agreement, reviewed completion evidence, the applicable listing status, handover, retention and aftercare. It does not certify legal completion.",
   history: "Recorded history",
@@ -63,6 +63,8 @@ const bg: Copy = {
   active: "Активен",
   closed: "Приключен",
   handover: "Предаване на брокер",
+  boundary:
+    "Последният потвърден брокер остава записан до приемане от получателя. Работа без активен брокер влиза в дежурната опашка. Срещите запазват посочения домакин. Приключването изисква всяка отворена задача, среща и предложение да бъдат уредени поотделно.",
   receiver: "Приемащ брокер",
   request: "Искане за предаване",
   accept: "Приемане на случая и ангажиментите",
@@ -89,6 +91,8 @@ const ru: Copy = {
   active: "Активно",
   closed: "Закрыто",
   handover: "Передача брокеру",
+  boundary:
+    "Последний подтверждённый брокер остаётся в записи до принятия дела получателем. Работа без активного брокера попадает в очередь подхвата. Встречи сохраняют указанного ведущего. Перед закрытием нужно отдельно урегулировать каждую открытую задачу, встречу и предложение.",
   receiver: "Принимающий брокер",
   request: "Запросить передачу",
   accept: "Принять дело и обязательства",

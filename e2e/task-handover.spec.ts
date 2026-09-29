@@ -28,8 +28,130 @@ function seed() {
         env: { ...process.env, AUTH_SECRET: authKey, DATABASE_URL: databaseUrl },
       },
     ),
-  ) as { staffToken: string; brokerId: string; brokerToken: string; caseId: string };
+  ) as {
+    staffToken: string;
+    managerId: string;
+    brokerId: string;
+    brokerToken: string;
+    caseId: string;
+    keyId: string;
+  };
 }
+
+for (const javaScriptEnabled of [true, false])
+  test(`revocation routes work to coverage until individually accepted, JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+  }, testInfo) => {
+    const f = seed();
+    const [task] = await db
+      .insert(schema.tasks)
+      .values({
+        ownerId: f.brokerId,
+        caseId: f.caseId,
+        title: `Synthetic coverage ${f.brokerId}`,
+        promisedToClient: true,
+        dueAt: new Date("1900-01-01T10:00:00Z"),
+      })
+      .returning();
+    if (!task) throw new Error("Missing task");
+    const context = await browser.newContext({
+      ...testInfo.project.use,
+      javaScriptEnabled,
+      viewport: { width: 320, height: 844 },
+    });
+    try {
+      await context.addCookies([
+        {
+          name: "msr_staff_session",
+          value: f.staffToken,
+          url: origins.staff,
+          httpOnly: true,
+          sameSite: "Lax",
+        },
+      ]);
+      const page = await context.newPage();
+      const findCoverageRecord = async (href: string) => {
+        await page.goto(hostUrl("staff", "/en/coverage"));
+        for (let n = 0; n < 10; n++) {
+          const record = page.locator(`a[href="${href}"]`);
+          if (await record.count()) {
+            await expect(record).toBeVisible();
+            return;
+          }
+          await page.getByRole("link", { name: "Next page", exact: true }).click();
+        }
+        throw new Error(`Coverage record not found: ${href}`);
+      };
+      await page.goto(hostUrl("staff", `/en/access/offboard/${f.brokerId}`));
+      await page
+        .getByLabel("Reason and handover plan", { exact: true })
+        .fill("Manager will review the retained work in agency coverage.");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "End staff access", exact: true }).click();
+      await expect(page.getByText("Staff membership ended", { exact: true })).toBeVisible();
+      await page.goto(hostUrl("staff", "/en/today"));
+      await page
+        .getByRole("navigation", { name: "Details", exact: true })
+        .getByRole("link", { name: "Agency coverage", exact: true })
+        .click();
+      for (const [locale, heading] of [
+        ["bg", "Дежурна опашка"],
+        ["ru", "Очередь подхвата"],
+        ["en", "Agency coverage"],
+      ]) {
+        await page.goto(hostUrl("staff", `/${locale}/coverage`));
+        await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+        await expect(page.locator(`a[href="/${locale}/tasks/${task.id}"]`)).toBeVisible();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+      }
+      await expect(
+        page.getByRole("region", { name: "Tasks needing coverage", exact: true }),
+      ).toContainText("Promised to a client");
+      await findCoverageRecord(`/en/cases/${f.caseId}`);
+      await findCoverageRecord(`/en/operations/keys/${f.keyId}`);
+      expect(
+        (await db.select().from(schema.keySets).where(eq(schema.keySets.id, f.keyId)))[0],
+      ).toMatchObject({ holderId: f.brokerId, state: "checked_out", version: 2 });
+      await page.goto(hostUrl("staff", "/en/coverage"));
+      await page.screenshot({
+        path: testInfo.outputPath(`coverage-${javaScriptEnabled}-320.png`),
+        fullPage: true,
+      });
+      await page.locator(`a[href="/en/tasks/${task.id}"]`).click();
+      const request = page
+        .locator("form")
+        .filter({ has: page.getByRole("button", { name: "Request task handover", exact: true }) });
+      await request.getByLabel("Receiving colleague", { exact: true }).selectOption(f.managerId);
+      await request
+        .getByLabel("Reason and handover notes", { exact: true })
+        .fill("Manager will take the unchanged client promise.");
+      await request.getByRole("checkbox").check();
+      await request.getByRole("button", { name: "Request task handover", exact: true }).click();
+      await expect(
+        page.getByText("This action was recorded successfully.", { exact: true }),
+      ).toBeVisible();
+      await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
+      const accept = page
+        .locator("form")
+        .filter({ has: page.getByRole("button", { name: "Accept task handover", exact: true }) });
+      await accept
+        .getByLabel("Reason and handover notes", { exact: true })
+        .fill("I accept the unchanged client promise and deadline.");
+      await accept.getByRole("checkbox").check();
+      await accept.getByRole("button", { name: "Accept task handover", exact: true }).click();
+      await expect(
+        page.getByText("This action was recorded successfully.", { exact: true }),
+      ).toBeVisible();
+      await page.goto(hostUrl("staff", "/en/coverage"));
+      await expect(page.locator(`a[href="/en/tasks/${task.id}"]`)).toHaveCount(0);
+      await findCoverageRecord(`/en/cases/${f.caseId}`);
+      await findCoverageRecord(`/en/operations/keys/${f.keyId}`);
+    } finally {
+      await context.close();
+    }
+  });
 
 for (const javaScriptEnabled of [true, false])
   test(`offboarding work leads to an individually accepted task handover, JavaScript ${javaScriptEnabled}`, async ({

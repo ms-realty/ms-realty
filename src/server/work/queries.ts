@@ -6,6 +6,7 @@ import type { Session } from "../auth/sessions";
 import { assertCanRead, can, resolveGrants } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { ownerNeedsCoverage } from "./coverage-policy";
 import {
   inquiryResource,
   liveStaff,
@@ -39,7 +40,11 @@ export async function listInbox(db: Executor, session: Session, view: InboxView 
               ])
             : undefined;
   const rows = await db
-    .select({ inquiry: inquiries, ownerName: principals.displayName })
+    .select({
+      inquiry: inquiries,
+      ownerName: principals.displayName,
+      needsCoverage: ownerNeedsCoverage(inquiries.ownerId),
+    })
     .from(inquiries)
     .leftJoin(principals, eq(principals.id, inquiries.ownerId))
     .where(
@@ -65,12 +70,16 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
   const grants = await resolveGrants(db, live.actor);
   const [owner] = row.ownerId
     ? await db
-        .select({ name: principals.displayName })
+        .select({ name: principals.displayName, needsCoverage: ownerNeedsCoverage(principals.id) })
         .from(principals)
         .where(eq(principals.id, row.ownerId))
     : [];
   const relatedTasks = await db
-    .select({ task: tasks, ownerName: principals.displayName })
+    .select({
+      task: tasks,
+      ownerName: principals.displayName,
+      needsCoverage: ownerNeedsCoverage(tasks.ownerId),
+    })
     .from(tasks)
     .leftJoin(principals, eq(principals.id, tasks.ownerId))
     .where(and(eq(tasks.inquiryId, row.id), visibleWhere(grants, "task.manage", "task")))
@@ -97,6 +106,7 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
   return {
     inquiry: row,
     ownerName: owner?.name ?? null,
+    needsCoverage: owner?.needsCoverage ?? true,
     tasks: relatedTasks,
     activity,
     canAssign: await can(db, live.actor, "inquiry.assign", resource),
@@ -129,7 +139,11 @@ export async function listTasks(
   const page = parseInput(pageSchema, options.page ?? 1);
   const effectiveDue = sql<Date>`case when ${tasks.state} = 'waiting' then ${tasks.followUpAt} else ${tasks.dueAt} end`;
   const rows = await db
-    .select({ task: tasks, ownerName: principals.displayName })
+    .select({
+      task: tasks,
+      ownerName: principals.displayName,
+      needsCoverage: ownerNeedsCoverage(tasks.ownerId),
+    })
     .from(tasks)
     .leftJoin(principals, eq(principals.id, tasks.ownerId))
     .where(
@@ -158,11 +172,11 @@ export async function readTask(db: Executor, session: Session, id: string) {
   await assertCanRead(db, live.actor, "task.manage", taskResource(row));
   const [owner] = row.ownerId
     ? await db
-        .select({ name: principals.displayName })
+        .select({ name: principals.displayName, needsCoverage: ownerNeedsCoverage(principals.id) })
         .from(principals)
         .where(eq(principals.id, row.ownerId))
     : [];
-  return { task: row, ownerName: owner?.name ?? null };
+  return { task: row, ownerName: owner?.name ?? null, needsCoverage: owner?.needsCoverage ?? true };
 }
 
 /** Contacts are reached through authorized inquiries; a known party UUID grants nothing. */

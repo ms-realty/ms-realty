@@ -20,6 +20,7 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
+import { agencyCoverageQueue } from "../work/coverage-policy";
 import { parseInput } from "../work/shared";
 import { lockOutStaff } from "./invitations";
 import { countActivePasskeys, staffPasskeyMinimum } from "./passkeys";
@@ -404,9 +405,21 @@ export async function offboardStaff(db: Executor, session: Session, raw: unknown
         recordType: "principal",
         recordId: person.id,
         operationId,
-        payload: { reason: input.reason, retained, grantsRevoked: revoked.length, ...effects },
+        payload: {
+          reason: input.reason,
+          retained,
+          coverageQueue: agencyCoverageQueue,
+          grantsRevoked: revoked.length,
+          ...effects,
+        },
       });
-      return { principalId: person.id, retained, grantsRevoked: revoked.length, ...effects };
+      return {
+        principalId: person.id,
+        retained,
+        coverageQueue: agencyCoverageQueue,
+        grantsRevoked: revoked.length,
+        ...effects,
+      };
     },
   );
 }
