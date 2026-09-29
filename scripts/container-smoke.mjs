@@ -202,6 +202,27 @@ try {
   );
   assert.equal(docker("exec", webName, "id", "-u"), "1000");
   passed.push("web runs as unprivileged uid 1000");
+  // Both owned runtimes are offline before setting this synthetic restored-state marker.
+  // Credential invalidation is exercised by the native restore/integration tests; this probe
+  // verifies that the packaged web and bundled worker actually include their startup fence.
+  docker("stop", "--time", "20", webName);
+  const [heartbeat] = await db`select completed_at from worker_progress where key='queue-worker'`;
+  await db`update recovery_control set state='quarantined', restore_id=${randomUUID()},
+    snapshot_digest=${"0".repeat(64)}, quarantined_at=now(), invalidated='{}'::jsonb
+    where key='runtime'`;
+  docker("start", webName, workerName);
+  for (const name of [webName, workerName]) {
+    await until(
+      () => docker("inspect", "--format", "{{.State.Status}}", name) === "exited",
+      "Packaged runtime did not exit for the quarantined database",
+    );
+    assert.equal(docker("inspect", "--format", "{{.State.ExitCode}}", name), "1");
+  }
+  assert.deepEqual(
+    (await db`select completed_at from worker_progress where key='queue-worker'`)[0],
+    heartbeat,
+  );
+  passed.push("packaged web and worker exit before serving or processing a quarantined database");
   console.log(
     JSON.stringify(
       {
