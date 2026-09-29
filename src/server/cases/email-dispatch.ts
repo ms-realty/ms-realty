@@ -15,6 +15,8 @@ import {
 import { canonicalJson } from "@/domain/approval";
 import type { ExternalActionState } from "@/domain/external-action";
 import { maxDeliveryAttempts, providerIdempotencyWindowMs } from "@/domain/message";
+import { senderAddress } from "../appointments/calendar-contract";
+import { currentCalendar } from "../appointments/email-calendar";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { can } from "../authz";
 import { hashRequest } from "../crypto";
@@ -79,7 +81,8 @@ async function current(db: Executor, row: Action, config: EmailConfig) {
     message.subject !== content.subject ||
     message.body !== content.body ||
     canonicalJson(message.recipients) !== canonicalJson([content.recipient]) ||
-    canonicalJson(message.attachments) !== "[]" ||
+    canonicalJson(message.attachments) !==
+      canonicalJson(content.calendar ? [content.calendar] : []) ||
     message.payloadDigest !== digest ||
     message.approvedDigest !== digest ||
     approval.subjectHash !== digest ||
@@ -154,6 +157,18 @@ async function current(db: Executor, row: Action, config: EmailConfig) {
       audience: "case_participants",
     })) ||
     (await countActivePasskeys(db, actor.id)) < staffPasskeyMinimum
+  )
+    return null;
+  if (
+    content.calendar &&
+    (content.calendar.organizer !== senderAddress(config.from) ||
+      !(await can(db, actor, "appointment.manage", {
+        type: "appointment",
+        id: content.calendar.appointmentId,
+        caseId: message.caseId,
+        audience: "case_participants",
+      })) ||
+      !(await currentCalendar(db, content.calendar, content.recipient.partyId)))
   )
     return null;
   return content;

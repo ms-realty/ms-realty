@@ -102,12 +102,13 @@ export function WorkflowForm({
             }
             if (definition.type === "select")
               return (
-                <div key={field.name} className={fieldClass}>
-                  <label htmlFor={field.id} className="font-semibold">
+                // Linux WebKit lets long native option text escape a flex item even when
+                // the select's border box fits. Normal block flow preserves native UI.
+                <div key={field.name} className="group min-w-0 w-full space-y-1.5">
+                  <label htmlFor={field.id} className="block font-semibold">
                     {definition.label}
                   </label>
                   <select
-                    style={{ width: 0, minWidth: "100%" }}
                     id={field.id}
                     name={field.name}
                     value={field.value}

@@ -1,5 +1,10 @@
 import "server-only";
 import { z } from "zod";
+import {
+  calendarEmailFile,
+  calendarSnapshot,
+  senderAddress,
+} from "../appointments/calendar-contract";
 import type { OutboundMessage } from "../jobs/provider";
 
 export const caseEmailTemplate = "case.reviewed-email.v1";
@@ -31,6 +36,7 @@ export const emailContent = z
       .max(300)
       .regex(/^[^\r\n]+$/),
     replyTo: z.email(),
+    calendar: calendarSnapshot.optional(),
   })
   .strict();
 export type EmailContent = z.infer<typeof emailContent>;
@@ -58,5 +64,27 @@ export function renderCaseEmail(message: OutboundMessage, config: EmailConfig | 
     !new RegExp(`^m-[a-f0-9]{40}@${config.replyDomain.replaceAll(".", "\\.")}$`).test(p.replyTo)
   )
     return null;
-  return { subject: p.subject, text: p.body, reply_to: p.replyTo };
+  if (
+    p.calendar &&
+    (p.calendar.caseId !== p.caseId || p.calendar.organizer !== senderAddress(p.from))
+  )
+    return null;
+  return {
+    subject: p.subject,
+    text: p.body,
+    reply_to: p.replyTo,
+    ...(p.calendar
+      ? {
+          attachments: [
+            {
+              filename: "appointment.ics",
+              content: Buffer.from(calendarEmailFile(p.calendar, p.recipient.address)).toString(
+                "base64",
+              ),
+              content_type: `text/calendar; charset=utf-8; method=${p.calendar.cancelled ? "CANCEL" : "REQUEST"}`,
+            },
+          ],
+        }
+      : {}),
+  };
 }

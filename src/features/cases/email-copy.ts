@@ -9,6 +9,14 @@ const en = {
   from: "From",
   reply: "Reply address",
   channel: "Email · no attachments",
+  calendar: "Calendar attachment (optional)",
+  noCalendar: "No calendar attachment",
+  calendarReview: "Calendar invitation or cancellation",
+  calendarBoundary:
+    "This file contains the committed time only. Sending it does not confirm attendance.",
+  calendarRaw: "Inspect exact calendar file",
+  calendarQueueReview:
+    "I checked the recipient, complete message and calendar invitation or cancellation above",
   queue: "Approve and queue email",
   reviewed: "I checked the recipient, subject and complete message above",
   disabled:
@@ -43,6 +51,12 @@ const bg: typeof en = {
   from: "От",
   reply: "Адрес за отговор",
   channel: "Имейл · без приложения",
+  calendar: "Календарен файл (незадължително)",
+  noCalendar: "Без календарен файл",
+  calendarReview: "Покана или отмяна в календара",
+  calendarBoundary: "Файлът съдържа само потвърдения час. Изпращането не потвърждава присъствие.",
+  calendarRaw: "Преглед на точния календарен файл",
+  calendarQueueReview: "Проверих получателя, цялото писмо и календарната покана или отмяна по-горе",
   queue: "Одобри и постави в опашката",
   reviewed: "Проверих получателя, темата и цялото съобщение по-горе",
   disabled:
@@ -77,6 +91,13 @@ const ru: typeof en = {
   from: "Отправитель",
   reply: "Адрес для ответа",
   channel: "Email · без вложений",
+  calendar: "Файл календаря (необязательно)",
+  noCalendar: "Без файла календаря",
+  calendarReview: "Приглашение или отмена в календаре",
+  calendarBoundary: "Файл содержит только подтверждённое время. Отправка не подтверждает участие.",
+  calendarRaw: "Проверить точный файл календаря",
+  calendarQueueReview:
+    "Я проверил получателя, всё письмо и календарное приглашение или отмену выше",
   queue: "Утвердить и поставить в очередь",
   reviewed: "Я проверил получателя, тему и полный текст выше",
   disabled:

@@ -1,5 +1,6 @@
 import "server-only";
 import { getDb } from "@/db/client";
+import { calendarEmailFile } from "@/server/appointments/calendar-contract";
 import { caseEmailWorkbench } from "@/server/cases/email";
 import { emailRecipient } from "@/server/cases/email-contract";
 import { readCaseInboundEmails } from "@/server/inbound/service";
@@ -49,6 +50,18 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                   label: r.address,
                 })),
               },
+              {
+                name: "appointmentId",
+                label: c.calendar,
+                type: "select",
+                options: [
+                  { value: "", label: c.noCalendar },
+                  ...view.calendarOptions.map((a) => ({
+                    value: a.id,
+                    label: `${a.reference} · ${a.state === "cancelled" ? "CANCEL" : "REQUEST"} · ${new Intl.DateTimeFormat(props.locale, { timeZone: "Europe/Sofia", dateStyle: "medium", timeStyle: "short" }).format(a.confirmedStartsAt ?? new Date())} Europe/Sofia`,
+                  })),
+                ],
+              },
               { name: "subject", label: c.subject, required: true },
               { name: "body", label: c.body, type: "textarea", required: true },
             ]}
@@ -68,7 +81,35 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
               <article key={message.id} className="space-y-4 border-t border-border py-5">
                 <h3 className="font-semibold">{content?.subject ?? message.subject}</h3>
                 <p>{message.state === "draft" ? c.draftState : c[message.state]}</p>
-                <p>{c.channel}</p>
+                <p>{content?.calendar ? `Email · appointment.ics` : c.channel}</p>
+                {content?.calendar ? (
+                  <section aria-label={c.calendarReview} className="space-y-3">
+                    <h4 className="font-semibold">
+                      {c.calendarReview} · {content.calendar.reference}
+                    </h4>
+                    <p>
+                      {content.calendar.cancelled ? "CANCEL" : "REQUEST"} ·{" "}
+                      {new Intl.DateTimeFormat(props.locale, {
+                        timeZone: "Europe/Sofia",
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(content.calendar.startsAt))}{" "}
+                      –{" "}
+                      {new Intl.DateTimeFormat(props.locale, {
+                        timeZone: "Europe/Sofia",
+                        timeStyle: "short",
+                      }).format(new Date(content.calendar.endsAt))}{" "}
+                      Europe/Sofia
+                    </p>
+                    <p>{c.calendarBoundary}</p>
+                    <details>
+                      <summary className="cursor-pointer underline">{c.calendarRaw}</summary>
+                      <pre className="whitespace-pre-wrap break-all text-compact">
+                        {calendarEmailFile(content.calendar, content.recipient.address)}
+                      </pre>
+                    </details>
+                  </section>
+                ) : null}
                 <dl className="space-y-2 break-words">
                   <div>
                     <dt className="font-semibold">{c.recipient}</dt>
@@ -133,7 +174,12 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                           { name: "messageId", label: "", type: "hidden" },
                           { name: "messageVersion", label: "", type: "hidden" },
                           { name: "reviewHash", label: "", type: "hidden" },
-                          { name: "reviewed", label: c.reviewed, type: "checkbox", required: true },
+                          {
+                            name: "reviewed",
+                            label: content.calendar ? c.calendarQueueReview : c.reviewed,
+                            type: "checkbox",
+                            required: true,
+                          },
                         ]}
                       />
                     </section>

@@ -92,6 +92,7 @@ export async function workflowAction(
             await draftCaseEmail(db, s, {
               ...base,
               subscriptionId: values.subscriptionId ?? "",
+              appointmentId: values.appointmentId || undefined,
               subject: values.subject ?? "",
               body: values.body ?? "",
             })

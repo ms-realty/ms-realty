@@ -4,6 +4,7 @@ import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { caseCopy } from "../cases/copy";
+import { caseEmailCopy } from "../cases/email-copy";
 import {
   AppointmentList,
   BoundWorkflowForm,
@@ -56,6 +57,11 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}
         >
           {c.cases}
+        </a>
+      ) : null}
+      {row.caseId && detail.canManage ? (
+        <a className={workflowLink} href={`/${props.locale}/cases/${row.caseId}/email`}>
+          {caseEmailCopy(props.locale).title}
         </a>
       ) : null}
       {windows.success ? (

@@ -68,6 +68,28 @@ export function calendarFile(input: {
   end: Date;
   cancelled: boolean;
   updatedAt: Date;
+  invitation?: { organizer: string; attendee: string };
 }) {
-  return `${["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//MS Realty//Agency appointments//EN", `METHOD:${input.cancelled ? "CANCEL" : "PUBLISH"}`, "BEGIN:VEVENT", `UID:${escapeText(input.uid)}`, `SEQUENCE:${input.sequence}`, `DTSTAMP:${stamp(input.updatedAt)}`, `DTSTART:${stamp(input.start)}`, `DTEND:${stamp(input.end)}`, `SUMMARY:${escapeText(`MS Realty · ${input.reference}`)}`, `STATUS:${input.cancelled ? "CANCELLED" : "CONFIRMED"}`, "END:VEVENT", "END:VCALENDAR"].map(fold).join("\r\n")}\r\n`;
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//MS Realty//Agency appointments//EN",
+    `METHOD:${input.cancelled ? "CANCEL" : input.invitation ? "REQUEST" : "PUBLISH"}`,
+    "BEGIN:VEVENT",
+    `UID:${escapeText(input.uid)}`,
+    `SEQUENCE:${input.sequence}`,
+    `DTSTAMP:${stamp(input.updatedAt)}`,
+    `DTSTART:${stamp(input.start)}`,
+    `DTEND:${stamp(input.end)}`,
+    `SUMMARY:${escapeText(`MS Realty · ${input.reference}`)}`,
+    `STATUS:${input.cancelled ? "CANCELLED" : "CONFIRMED"}`,
+  ];
+  if (input.invitation) {
+    lines.push(
+      `ORGANIZER:mailto:${escapeText(input.invitation.organizer)}`,
+      `ATTENDEE${input.cancelled ? "" : ";RSVP=TRUE;PARTSTAT=NEEDS-ACTION"}:mailto:${escapeText(input.invitation.attendee)}`,
+    );
+  }
+  lines.push("END:VEVENT", "END:VCALENDAR");
+  return `${lines.map(fold).join("\r\n")}\r\n`;
 }

@@ -13,8 +13,11 @@ import {
   subscriptions,
 } from "@/db/schema";
 import { publicLocales } from "@/domain/ids";
+import { calendarSnapshot, senderAddress } from "../appointments/calendar-contract";
+import { currentCalendar, freezeCalendar } from "../appointments/email-calendar";
+import { listAppointments } from "../appointments/service";
 import type { Session } from "../auth/sessions";
-import { can } from "../authz";
+import { assertCan, can } from "../authz";
 import { getEnv } from "../config/env";
 import { hashRequest, keyedHash } from "../crypto";
 import type { Executor } from "../db";
@@ -96,22 +99,30 @@ export async function eligibleCaseRecipient(
 const draftShape = z.object({
   ...commandEnvelope,
   subscriptionId: z.uuid(),
+  appointmentId: z.uuid().optional(),
   subject: emailContent.shape.subject,
   body: emailContent.shape.body,
 });
 function contentOf(row: typeof messages.$inferSelect, config: EmailConfig) {
   const recipients = z.array(emailRecipient).length(1).parse(row.recipients);
+  const attached = calendarSnapshot.array().max(1).parse(row.attachments);
   return emailContent.parse({
     messageId: row.id,
     caseId: row.caseId,
     subject: row.subject,
     body: row.body,
     recipient: recipients[0],
+    ...(attached[0] ? { calendar: attached[0] } : {}),
     from: config.from,
     replyTo: `m-${keyedHash(getEnv().authSecret, `case-email:${row.id}`).slice(0, 40)}@${config.replyDomain}`,
   });
 }
-export async function draftCaseEmail(db: Executor, session: Session, raw: unknown) {
+export async function draftCaseEmail(
+  db: Executor,
+  session: Session,
+  raw: unknown,
+  organizer = senderAddress(process.env.EMAIL_FROM ?? ""),
+) {
   const input = parseInput(draftShape, raw);
   if (session.account.kind !== "staff") throw new AppError("not_found");
   const { live } = await caseFor(db, session, input.id, "message.draft");
@@ -128,6 +139,16 @@ export async function draftCaseEmail(db: Executor, session: Session, raw: unknow
       version(row, input.expectedVersion);
       const recipient = await eligibleCaseRecipient(ctx.tx, row.id, input.subscriptionId, true);
       if (!recipient) throw new AppError("transition_denied");
+      const calendar = input.appointmentId
+        ? await freezeCalendar(
+            ctx.tx,
+            session,
+            row.id,
+            input.appointmentId,
+            recipient.partyId,
+            organizer,
+          )
+        : null;
       const id = randomUUID();
       await ctx.tx.insert(messages).values({
         id,
@@ -142,8 +163,13 @@ export async function draftCaseEmail(db: Executor, session: Session, raw: unknow
         subject: input.subject,
         body: input.body,
         recipients: [recipient],
-        attachments: [],
-        payloadDigest: hashRequest({ subject: input.subject, body: input.body, recipient }),
+        attachments: calendar ? [calendar] : [],
+        payloadDigest: hashRequest({
+          subject: input.subject,
+          body: input.body,
+          recipient,
+          ...(calendar ? { calendar } : {}),
+        }),
       });
       await bumpCase(ctx.tx, row.id, row.version);
       await caseEvent(ctx, "case", row.id, "case.email_drafted", "message.draft", {
@@ -236,6 +262,10 @@ export async function caseEmailWorkbench(
   }
   return {
     record: row,
+    calendarOptions: (await listAppointments(db, session, id)).filter(
+      (a) =>
+        ["confirmed", "reschedule_requested", "cancelled"].includes(a.state) && a.confirmedStartsAt,
+    ),
     recipients,
     items,
     enabled: Boolean(config),
@@ -296,6 +326,19 @@ export async function approveCaseEmail(
       );
       if (!current || hashRequest(current) !== hashRequest(content.recipient))
         throw new AppError("version_conflict");
+      if (content.calendar) {
+        await assertCan(ctx.tx, live.actor, "appointment.manage", {
+          type: "appointment",
+          id: content.calendar.appointmentId,
+          caseId: row.id,
+          audience: "case_participants",
+        });
+        if (
+          content.calendar.organizer !== senderAddress(config.from) ||
+          !(await currentCalendar(ctx.tx, content.calendar, current.partyId))
+        )
+          throw new AppError("version_conflict");
+      }
       const [approval] = await ctx.tx
         .insert(approvals)
         .values({

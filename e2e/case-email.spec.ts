@@ -221,3 +221,90 @@ test("native client service-email choice enables only reviewed case mail and can
     await context.close();
   }
 });
+
+test("native calendar email previews exact ICS and queues only that reviewed snapshot", async ({
+  browser,
+}, testInfo) => {
+  const f = JSON.parse(
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "src/server/cases/email-browser-seed.ts"],
+      {
+        env: {
+          ...process.env,
+          E2E_CASE_CALENDAR: "1",
+          AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+          DATABASE_URL: url,
+        },
+        encoding: "utf8",
+      },
+    ),
+  ) as { caseId: string; staffToken: string; address: string; appointmentId: string };
+  const context = await browser.newContext({ ...testInfo.project.use, javaScriptEnabled: false });
+  try {
+    await context.addCookies([
+      {
+        name: "msr_staff_session",
+        value: f.staffToken,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    const page = await context.newPage();
+    await page.goto(hostUrl("staff", `/en/cases/${f.caseId}/email`));
+    await page
+      .getByLabel("Calendar attachment (optional)", { exact: true })
+      .selectOption(f.appointmentId);
+    await page.getByLabel("Subject", { exact: true }).fill("Confirmed viewing time");
+    await page
+      .getByLabel("Message", { exact: true })
+      .fill("Please review the attached calendar invitation.");
+    await page.getByRole("button", { name: "Save draft for review", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Open current record", exact: true }).click();
+    const preview = page.getByRole("region", {
+      name: "Calendar invitation or cancellation",
+      exact: true,
+    });
+    await preview.locator("summary").click();
+    const ics = await preview.locator("pre").textContent();
+    expect(ics).toContain("METHOD:REQUEST");
+    expect(ics).toContain("DTSTART:20270115T080000Z");
+    expect(ics?.replace(/\r?\n /g, "")).toContain(
+      `ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION:mailto:${f.address}`,
+    );
+    expect(ics).not.toContain("Private keys");
+    expect(ics).not.toContain("PARTSTAT=ACCEPTED");
+    await page
+      .getByLabel(
+        "I checked the recipient, complete message and calendar invitation or cancellation above",
+        { exact: true },
+      )
+      .check();
+    await page.getByRole("button", { name: "Approve and queue email", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Open current record", exact: true }).click();
+    await expect(
+      page
+        .getByRole("region", { name: "Review exact email", exact: true })
+        .getByText("Queued — not sent yet", { exact: true }),
+    ).toBeVisible();
+    const [message] = await db
+      .select()
+      .from(schema.messages)
+      .where(eq(schema.messages.caseId, f.caseId));
+    expect(message?.attachments).toMatchObject([{ appointmentId: f.appointmentId, sequence: 1 }]);
+    const [action] = await db
+      .select()
+      .from(schema.externalActions)
+      .where(eq(schema.externalActions.subjectId, message?.id ?? ""));
+    expect(action).toMatchObject({ state: "queued", attempts: 0 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: testInfo.outputPath("calendar-email.png"), fullPage: true });
+  } finally {
+    await context.close();
+  }
+});

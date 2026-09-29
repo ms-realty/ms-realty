@@ -28,6 +28,34 @@ try {
     })
     .returning();
   if (!contact) throw new Error("No contact");
+  let appointmentId: string | undefined;
+  if (process.env.E2E_CASE_CALENDAR === "1") {
+    const [appointment] = await db
+      .insert(schema.appointments)
+      .values({
+        reference: `AP-${randomUUID()}`,
+        state: "confirmed",
+        format: "in_person",
+        caseId: f.record.id,
+        hostId: f.staff.id,
+        timezone: "Europe/Sofia",
+        propertyAccess: "confirmed",
+        externalBusyCheckedAt: new Date(),
+        confirmedStartsAt: new Date("2027-01-15T08:00:00Z"),
+        confirmedEndsAt: new Date("2027-01-15T09:00:00Z"),
+        icsUid: `${randomUUID()}@appointments.example.test`,
+        icsSequence: 1,
+        accessNotes: "Private keys and private address",
+      })
+      .returning();
+    if (!appointment) throw new Error("No appointment");
+    appointmentId = appointment.id;
+    await db.insert(schema.appointmentParticipants).values({
+      appointmentId,
+      partyId: f.client.partyId,
+      role: "buyer",
+    });
+  }
   if (process.env.E2E_CASE_EMAIL_OPT_IN !== "1")
     await db.insert(schema.subscriptions).values({
       partyId: f.client.partyId,
@@ -46,6 +74,7 @@ try {
       clientToken: f.client.token,
       address,
       contactId: contact.id,
+      appointmentId,
     }),
   );
 } finally {

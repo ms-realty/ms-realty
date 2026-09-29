@@ -83,7 +83,9 @@ it("renders only the reviewed Case sender, recipient and opaque reply address", 
   try {
     const fetcher = vi
       .fn<typeof fetch>()
-      .mockResolvedValue(new Response(JSON.stringify({ id: randomUUID() }), { status: 200 }));
+      .mockImplementation(
+        async () => new Response(JSON.stringify({ id: randomUUID() }), { status: 200 }),
+      );
     const input: OutboundMessage = {
       outboxId: randomUUID(),
       idempotencyKey: randomUUID(),
@@ -134,9 +136,37 @@ it("renders only the reviewed Case sender, recipient and opaque reply address", 
       text: input.params.body,
       reply_to: input.params.replyTo,
     });
+    const calendar = {
+      kind: "appointment_calendar",
+      appointmentId: randomUUID(),
+      appointmentVersion: 1,
+      caseId: input.params.caseId,
+      reference: "AP-test",
+      uid: "stable@appointments.example.test",
+      sequence: 1,
+      startsAt: "2027-01-15T08:00:00.000Z",
+      endsAt: "2027-01-15T09:00:00.000Z",
+      updatedAt: "2026-09-29T00:00:00.000Z",
+      cancelled: false,
+      organizer: "access@example.test",
+    };
+    expect((await provider.send({ ...input, params: { ...input.params, calendar } })).status).toBe(
+      "accepted",
+    );
+    const payload = JSON.parse(String(fetcher.mock.calls[1]?.[1]?.body));
+    expect(payload.attachments).toHaveLength(1);
+    expect(payload.attachments[0]).toMatchObject({
+      filename: "appointment.ics",
+      content_type: "text/calendar; charset=utf-8; method=REQUEST",
+    });
+    expect(payload.attachments[0].path).toBeUndefined();
+    expect(Buffer.from(payload.attachments[0].content, "base64").toString()).toContain(
+      "UID:stable@appointments.example.test\r\n",
+    );
+    expect(fetcher.mock.calls[1]?.[0]).toBe("https://api.resend.com/emails");
     vi.stubEnv("CASE_EMAIL_ENABLED", "");
     expect((await provider.send(input)).status).toBe("rejected");
-    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher).toHaveBeenCalledTimes(2);
   } finally {
     vi.unstubAllEnvs();
   }

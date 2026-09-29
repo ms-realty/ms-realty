@@ -443,3 +443,176 @@ it("an exact approved reply token suggests a Case but never assigns an incoming 
     messageId: null,
   });
 });
+async function calendarFixture() {
+  const { appointments, appointmentParticipants } = await import("@/db/schema");
+  const f = await fixture();
+  const [appointment] = await t.db
+    .insert(appointments)
+    .values({
+      reference: `AP-${randomUUID()}`,
+      state: "confirmed",
+      format: "in_person",
+      caseId: f.record.id,
+      hostId: f.staff.id,
+      timezone: "Europe/Sofia",
+      propertyAccess: "confirmed",
+      externalBusyCheckedAt: new Date(),
+      confirmedStartsAt: new Date("2027-01-15T08:00:00Z"),
+      confirmedEndsAt: new Date("2027-01-15T09:00:00Z"),
+      icsUid: `${randomUUID()}@appointments.example.test`,
+      icsSequence: 1,
+      accessNotes: "Private keys and private address",
+    })
+    .returning();
+  if (!appointment) throw new Error("No appointment");
+  await t.db
+    .insert(appointmentParticipants)
+    .values({ appointmentId: appointment.id, partyId: f.client.partyId, role: "buyer" });
+  return { ...f, appointment };
+}
+async function calendarQueued(
+  f: Awaited<ReturnType<typeof calendarFixture>>,
+  beforeApproval?: () => Promise<unknown>,
+) {
+  const { cases } = await import("@/db/schema");
+  const [record] = await t.db.select().from(cases).where(eq(cases.id, f.record.id));
+  const drafted = await draftCaseEmail(
+    t.db,
+    f.staff.session,
+    {
+      ...f.input,
+      operationId: randomUUID(),
+      expectedVersion: record?.version,
+      appointmentId: f.appointment.id,
+    },
+    "service@example.test",
+  );
+  const view = await caseEmailWorkbench(t.db, f.staff.session, f.record.id, config),
+    item = view.items.find((item) => item.message.id === drafted.outcome.messageId);
+  if (!item?.reviewHash || !item.content?.calendar) throw new Error("No calendar review");
+  await beforeApproval?.();
+  const approved = await approveCaseEmail(
+    t.db,
+    f.staff.session,
+    {
+      operationId: randomUUID(),
+      id: f.record.id,
+      expectedVersion: drafted.outcome.version,
+      messageId: item.message.id,
+      messageVersion: item.message.version,
+      reviewHash: item.reviewHash,
+      reviewed: true,
+    },
+    config,
+  );
+  return { item, approved };
+}
+it("reviews and sends only the committed calendar snapshot for an appointment participant", async () => {
+  const { renderCaseEmail } = await import("./email-contract");
+  const f = await calendarFixture(),
+    { item, approved } = await calendarQueued(f),
+    p = provider();
+  expect(await dispatchCaseEmail(t.db, p, approved.outcome.actionId, { config })).toBe(
+    "acknowledged",
+  );
+  const sent = p.send.mock.calls[0]?.[0];
+  if (!sent) throw new Error("Missing provider call");
+  const rendered = renderCaseEmail(sent, config),
+    attachment = rendered?.attachments?.[0];
+  expect(attachment?.content_type).toBe("text/calendar; charset=utf-8; method=REQUEST");
+  const decoded = Buffer.from(attachment?.content ?? "", "base64").toString("utf8");
+  expect(decoded).toContain(`UID:${f.appointment.icsUid}`);
+  expect(decoded).toContain("SEQUENCE:1");
+  expect(decoded).toContain("DTSTART:20270115T080000Z");
+  expect(decoded).not.toContain("Private keys");
+  expect(item.content?.calendar?.appointmentVersion).toBe(f.appointment.version);
+});
+it.each(["version", "participant"])(
+  "cancels queued calendar mail after %s changes",
+  async (kind) => {
+    const { appointments, appointmentParticipants } = await import("@/db/schema");
+    const f = await calendarFixture(),
+      { approved } = await calendarQueued(f),
+      p = provider();
+    if (kind === "version")
+      await t.db
+        .update(appointments)
+        .set({ version: f.appointment.version + 1 })
+        .where(eq(appointments.id, f.appointment.id));
+    else
+      await t.db
+        .delete(appointmentParticipants)
+        .where(eq(appointmentParticipants.appointmentId, f.appointment.id));
+    expect(await dispatchCaseEmail(t.db, p, approved.outcome.actionId, { config })).toBe(
+      "cancelled",
+    );
+    expect(p.send).not.toHaveBeenCalled();
+  },
+);
+it("cancellation creates a newly reviewed CANCEL with stable UID and next sequence", async () => {
+  const { respondToAppointment } = await import("../appointments/service");
+  const f = await calendarFixture(),
+    first = await calendarQueued(f);
+  await respondToAppointment(t.db, f.staff.session, {
+    id: f.appointment.id,
+    operationId: randomUUID(),
+    expectedVersion: f.appointment.version,
+    state: "cancelled",
+    reason: "Synthetic cancellation reviewed by the broker",
+  });
+  const cancellation = await calendarQueued(f),
+    p = provider();
+  expect(cancellation.item.content?.calendar).toMatchObject({
+    uid: first.item.content?.calendar?.uid,
+    cancelled: true,
+    sequence: 2,
+  });
+  expect(await dispatchCaseEmail(t.db, p, first.approved.outcome.actionId, { config })).toBe(
+    "cancelled",
+  );
+  expect(p.send).not.toHaveBeenCalled();
+  expect(await dispatchCaseEmail(t.db, p, cancellation.approved.outcome.actionId, { config })).toBe(
+    "acknowledged",
+  );
+});
+it("cannot silently change an established calendar organizer or address a non-participant", async () => {
+  const { cases, appointmentParticipants } = await import("@/db/schema");
+  const f = await calendarFixture();
+  await calendarQueued(f);
+  const [record] = await t.db.select().from(cases).where(eq(cases.id, f.record.id));
+  const input = {
+    ...f.input,
+    operationId: randomUUID(),
+    expectedVersion: record?.version,
+    appointmentId: f.appointment.id,
+  };
+  await expect(
+    draftCaseEmail(t.db, f.staff.session, input, "changed@example.test"),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+  await t.db
+    .delete(appointmentParticipants)
+    .where(eq(appointmentParticipants.appointmentId, f.appointment.id));
+  await expect(
+    draftCaseEmail(
+      t.db,
+      f.staff.session,
+      { ...input, operationId: randomUUID() },
+      "service@example.test",
+    ),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+});
+
+it("refuses approval after the calendar preview becomes stale", async () => {
+  const { appointments } = await import("@/db/schema");
+  const f = await calendarFixture();
+  await expect(
+    calendarQueued(f, async () =>
+      t.db
+        .update(appointments)
+        .set({ version: f.appointment.version + 1 })
+        .where(eq(appointments.id, f.appointment.id)),
+    ),
+  ).rejects.toMatchObject({ code: "version_conflict" });
+  const drafts = await t.db.select().from(messages).where(eq(messages.caseId, f.record.id));
+  expect(drafts.every((m) => m.state === "draft" && m.approvalId === null)).toBe(true);
+});

@@ -23,3 +23,23 @@ virtual-authenticator exclusions. Includes Case mail, native service preferences
 inbound triage and identity across desktop/mobile Chromium and mobile WebKit.
 Server/component subset: 60 passed. This is macOS evidence, not Linux WebKit CI proof;
 the next pushed revision must complete CI before this regression is closed remotely.
+
+
+## 2026-09-29 Linux reproduction and correction
+
+Run 36491387582 on 9cf10d6e still failed the two Case-email overflow assertions (331 passed,
+2 failed, 1 flaky, 5 skipped). The lifecycle repair passed. The earlier select width change
+was insufficient and is superseded below; it must not be treated as CI closure.
+
+Using the pinned Playwright 1.63.0 Noble image, the complete mail flow reproduced the
+390-to-514/524 px overflow. Computed select border width was 316 px; native option painting
+escaped its flex container. Controlled CSS probes showed changing the select's width alone
+failed, while ordinary block flow for the field wrapper restored 390 px. The select field
+now uses block layout and vertical spacing; the temporary zero-width inline style is removed.
+Native appearance, focus outline and no-JavaScript form behavior remain intact.
+
+Fresh Linux build/run f5eadae8d3a94cd0821bad6aaf77022c passed all 12 mail scenarios on
+Chromium desktop/mobile and WebKit mobile. Includes both formerly failing tests, service
+preference withdrawal and exact calendar review/queueing. WebKit mobile screenshot was
+visually inspected. Logs are in the calendar-email evidence directory. Remote CI on the
+new pushed revision is still required for full CI closure.
