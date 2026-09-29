@@ -23,7 +23,10 @@ Evidence in `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260929/`:
   failed on an invalid synthetic stage and was not a reproduction; the fixture was corrected.
 - `access-case-visibility-green.log`: fresh Linux production build and all three browser profiles
   passed the deny/scoped-grant/revoke path. Later raw-response/query coverage is recorded in the
-  joined acceptance log. `access-case-lint.log` passed.
+  joined `coverage-access-linux-final.log`: all three Case-picker checks passed, including raw
+  response/query assertions. That joined run had six separate container DNS failures;
+  `offboarding-linux-dns.log` passed those six with the explicit hosts mapping and unchanged
+  production build. `access-case-lint.log` passed.
 
 ## Deployment boundary
 
