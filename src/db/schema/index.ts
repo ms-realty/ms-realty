@@ -3,6 +3,7 @@
 export * from "./approvals";
 export * from "./assistance";
 export * from "./collaboration";
+export * from "./complaints";
 export * from "./compliance";
 export * from "./coordination";
 export * from "./enums";

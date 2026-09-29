@@ -68,6 +68,7 @@ export const referencePrefixes = {
   document: "DC",
   seller_instruction: "SI",
   privacy_request: "PQ",
+  complaint: "CM",
   import_batch: "IM",
 } as const;
 export type ReferenceKind = keyof typeof referencePrefixes;

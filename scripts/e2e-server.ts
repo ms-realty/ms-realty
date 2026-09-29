@@ -37,10 +37,16 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 async function next(args: string[]): Promise<number> {
   if (stopping) return 0;
   return new Promise((resolve, reject) => {
-    child = spawn(process.execPath, ["node_modules/next/dist/bin/next", ...args], {
-      stdio: "inherit",
-      env: { ...process.env, DATABASE_URL: databaseUrl },
-    });
+    // Keep localhost on IPv4 for Next's internal redirect fetch as well as its listener.
+    // Linux may otherwise bind ::1 while the action redirect targets 127.0.0.1.
+    child = spawn(
+      process.execPath,
+      ["--dns-result-order=ipv4first", "node_modules/next/dist/bin/next", ...args],
+      {
+        stdio: "inherit",
+        env: { ...process.env, DATABASE_URL: databaseUrl },
+      },
+    );
     child.once("error", reject);
     child.once("exit", (code) => resolve(code ?? (stopping ? 0 : 1)));
   });

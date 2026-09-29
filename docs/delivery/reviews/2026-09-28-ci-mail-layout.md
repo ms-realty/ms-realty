@@ -43,3 +43,8 @@ Chromium desktop/mobile and WebKit mobile. Includes both formerly failing tests,
 preference withdrawal and exact calendar review/queueing. WebKit mobile screenshot was
 visually inspected. Logs are in the calendar-email evidence directory. Remote CI on the
 new pushed revision is still required for full CI closure.
+
+
+Remote closure: all jobs in GitHub Actions run 36501444665 passed for commit
+912729f8e394aefafcea38fc789fd03dafb6452c. This closes the observed CI regression;
+it does not qualify unrelated later changes or production release gates.
