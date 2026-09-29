@@ -63,11 +63,26 @@ for (const javaScriptEnabled of [true, false]) {
           await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
         ).toBe(true);
       }
-      const panel = page
-        .locator("section")
-        .filter({
-          has: page.getByRole("heading", { name: "Automated draft assessment", exact: true }),
-        });
+      const panel = page.locator("section").filter({
+        has: page.getByRole("heading", { name: "Automated draft assessment", exact: true }),
+      });
+      const brand = page.locator('header img[src="/brand/logo-ms-realty.png"]:visible');
+      await expect(brand).toHaveCount(1);
+      expect(
+        await brand.evaluate((element) => {
+          const image = element as HTMLImageElement;
+          const rect = image.getBoundingClientRect();
+          return (
+            image.complete &&
+            image.naturalWidth === 172 &&
+            image.naturalHeight === 88 &&
+            Math.abs(rect.width / rect.height - 172 / 88) < 0.01
+          );
+        }),
+      ).toBe(true);
+      await page
+        .locator("header:visible")
+        .screenshot({ path: testInfo.outputPath("authentic-workspace-header-320.png") });
       await expect(panel).toContainText("Insufficient evidence");
       await panel.getByText("Assessment details", { exact: true }).click();
       await expect(panel).toContainText("typesafe/jev-1.13-20260917");

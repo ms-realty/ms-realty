@@ -157,8 +157,14 @@ export async function WorkspaceShell({
         {/* Phones and tablets: brand bar, Today/Inquiries/Calendar tabs, the rest under More. */}
         <header className="border-b border-divider bg-surface lg:hidden">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2">
-            <p className="me-auto">
-              <span className="font-semibold">{common("brand")}</span>{" "}
+            <p className="me-auto flex items-center gap-2">
+              <Image
+                src="/brand/logo-ms-realty.png"
+                alt={common("brand")}
+                width={86}
+                height={44}
+                className="h-auto shrink-0 object-contain"
+              />
               <span className="text-caption text-text-muted">{t("label")}</span>
             </p>
             {mobileMore.length > 0 || account ? (

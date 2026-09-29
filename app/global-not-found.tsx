@@ -40,7 +40,7 @@ async function notFoundSurface(): Promise<{ context: HostContext; locale: Public
 export async function generateMetadata(): Promise<Metadata> {
   const { locale } = await notFoundSurface();
   const t = await getTranslations({ locale, namespace: "errors.notFound" });
-  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/favicon.svg" } };
+  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/logo-ms-realty.png" } };
 }
 
 export default async function GlobalNotFound() {

@@ -1,11 +1,36 @@
 // Locale routing and the three surface shells (ux-spec §03, §06; F01, AT03, AT61). The
 // chromium-mobile and chromium-desktop projects run every test. Host routing and cross-host
 // isolation are in hosts.spec.ts.
+
+import { createHash } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { hostUrl } from "./hosts";
 
 const wcag22aa = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+test("authentic favicon loads on public, client, staff and not-found surfaces", async ({
+  page,
+}) => {
+  for (const address of [
+    "/bg",
+    hostUrl("client", "/en/access"),
+    hostUrl("staff", "/en/access"),
+    "/en/no-such-page",
+  ]) {
+    await page.goto(address);
+    const href = await page.locator('link[rel="icon"]').first().getAttribute("href");
+    expect(href).toBe("/brand/logo-ms-realty.png");
+    const response = await page.request.get(new URL(href ?? "", page.url()).href);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("image/png");
+    expect(
+      createHash("sha256")
+        .update(await response.body())
+        .digest("hex"),
+    ).toBe("a066e47e0258bbdf20eb0f7c84dbd1d947f526c71c7dbb9b75e562dae660fd3b");
+  }
+});
 
 const publicLocales = [
   { locale: "bg", dir: "ltr", skip: "Към основното съдържание" },

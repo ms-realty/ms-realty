@@ -13,7 +13,7 @@ import { LocaleProvider } from "@/ui/locale-provider";
 
 export const metadata: Metadata = {
   title: { template: "%s · MS Realty", default: "MS Realty" },
-  icons: { icon: "/brand/favicon.svg" },
+  icons: { icon: "/brand/logo-ms-realty.png" },
   // Safe default. A page opts into indexing through localizedMetadata (spec §20.4).
   robots: { index: false, follow: false },
 };

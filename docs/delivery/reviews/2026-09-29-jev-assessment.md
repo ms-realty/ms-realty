@@ -22,7 +22,10 @@ Validation:
 - 208 AI unit/integration checks passed before adding the final explicit excessive-assessment
   billing and between-call authority regression. All 13 final focused assistance tests passed,
   covering these additions; exact results are retained in `jev-assistance-final.log`.
-- TypeScript, repository lint and the `.next-jev` production build passed.
+- TypeScript and the `.next-jev` production build passed. Repository lint found one formatter
+  difference in the added browser test after the first formatting pass; it was corrected in
+  the subsequent branding increment. Final lint is `jev-brand-lint.log` (pass), while
+  `jev-lint.log` retains the original failure.
 - 15 browser scenarios passed across Chromium desktop/mobile and WebKit mobile. Six added
   journeys exercise 320px, BG/RU/EN, details disclosure and explicit human acceptance, with
   JavaScript on/off. The stored run stays a draft until the human review.
