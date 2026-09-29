@@ -18,6 +18,7 @@ describe("AT51–AT54 bounded assistance", () => {
   it("requires both operator activation and processing approval with an explicit model/rate card", () => {
     expect(assistanceConfig({}).enabled).toBe(false);
     const env = {
+      HERMES_PROVIDER: "openai",
       HERMES_ENABLED: "1",
       OPENAI_API_KEY: "test-only",
       HERMES_MODEL: "operator-test-model",

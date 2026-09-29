@@ -1,6 +1,9 @@
 import "server-only";
+import { type RoutingPolicy, readRoutingPolicy } from "./routing";
 
 export interface AssistanceConfig {
+  readonly provider?: "openai" | "openrouter";
+  readonly routing?: RoutingPolicy;
   readonly enabled: boolean;
   readonly model: string | null;
   readonly apiKey: string | null;
@@ -20,23 +23,33 @@ const positive = (raw: string | undefined, maximum: number) => {
 export function assistanceConfig(
   env: Record<string, string | undefined> = process.env,
 ): AssistanceConfig {
-  const model = env.HERMES_MODEL?.trim() || null;
+  const provider = env.HERMES_PROVIDER ?? "openrouter";
+  const routing = readRoutingPolicy(env);
+  const model =
+    provider === "openrouter" ? (routing?.router ?? null) : env.HERMES_MODEL?.trim() || null;
   const apiKey = env.OPENAI_API_KEY?.trim() || null;
   const inputCostMicros = positive(env.HERMES_INPUT_USD_MICROS_PER_TOKEN, 100_000);
   const outputCostMicros = positive(env.HERMES_OUTPUT_USD_MICROS_PER_TOKEN, 100_000);
   const dailyLimitMicros = Math.floor(positive(env.HERMES_DAILY_LIMIT_USD_MICROS, 1_000_000_000));
+  const credential = provider === "openrouter" ? env.OPENROUTER_API_KEY?.trim() : apiKey;
+  const transportReady =
+    provider === "openai" ||
+    (provider === "openrouter" && routing && env.HERMES_ROUTING_QUALIFIED === "1");
   return {
+    provider: provider === "openai" ? "openai" : "openrouter",
+    routing: provider === "openrouter" ? (routing ?? undefined) : undefined,
     enabled: Boolean(
       env.HERMES_ENABLED === "1" &&
         env.HERMES_PROCESSING_APPROVED === "1" &&
         model &&
-        apiKey &&
+        credential &&
+        transportReady &&
         inputCostMicros &&
         outputCostMicros &&
         dailyLimitMicros,
     ),
     model,
-    apiKey,
+    apiKey: credential || null,
     inputCostMicros,
     outputCostMicros,
     dailyLimitMicros,

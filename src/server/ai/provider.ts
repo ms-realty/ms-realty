@@ -9,11 +9,27 @@ import {
 } from "./draft";
 import { type IntakeSource, intakeDraftInstructions, intakeDraftJsonSchema } from "./intake-draft";
 import { type LocaleSource, localeDraftInstructions, localeDraftJsonSchema } from "./locale-draft";
+import { routedGeneration } from "./openrouter";
+import { providerJson } from "./response";
 
 export interface Generation {
   readonly output: unknown;
   readonly inputTokens: number;
   readonly outputTokens: number;
+  readonly actualCostMicros?: number;
+  readonly routing?: {
+    requested: string;
+    model: string;
+    provider: string | null;
+    generationId: string;
+    policyDigest: string | null;
+    metadata: {
+      requested: string;
+      strategy: string;
+      attempt: number;
+      attempts?: { provider: string; model: string; status: number }[];
+    } | null;
+  };
 }
 export type DraftGenerator = (
   task: AssistanceTask,
@@ -33,7 +49,7 @@ const usageSchema = z.object({
   input_tokens: z.number().int().nonnegative().max(1_000_000),
   output_tokens: z.number().int().nonnegative().max(1_000_000),
 });
-/** Responses API, no tools/retries/storage; operator activation is independently enforced. */
+/** Qualified transport, no tools/retries/storage; activation is independently enforced. */
 export const generateDraft: DraftGenerator = async (task, source, config) => {
   return requestGeneration(
     config,
@@ -69,6 +85,8 @@ async function requestGeneration(
   name: string,
 ): Promise<Generation> {
   if (!config.enabled || !config.model || !config.apiKey) throw new Error("provider_disabled");
+  if (config.provider === "openrouter")
+    return routedGeneration(config, instructions, input, schema, name);
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" },
@@ -91,26 +109,7 @@ async function requestGeneration(
     redirect: "error",
     cache: "no-store",
   });
-  if (!response.ok) throw new Error(`provider_http_${response.status}`);
-  // Bound response size even when the provider returns malformed output.
-  const reader = response.body?.getReader();
-  if (!reader) throw new Error("provider_empty");
-  let body = "";
-  const decoder = new TextDecoder();
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      body += decoder.decode(value, { stream: true });
-      if (body.length > 64_000) {
-        await reader.cancel();
-        throw new Error("provider_oversize");
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  const result = JSON.parse(body) as {
+  const result = (await providerJson(response)) as {
     status?: string;
     model?: string;
     usage?: unknown;

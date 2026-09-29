@@ -14,6 +14,7 @@ import {
 } from "./assistance";
 import type { AssistanceConfig } from "./config";
 import type { DraftGenerator } from "./provider";
+import { type RoutingPolicy, routingDigest } from "./routing";
 
 let t: TestDatabase;
 let queue: JobQueue;
@@ -82,6 +83,83 @@ const generate: DraftGenerator = async () => ({
 });
 
 describe("source-bound Hermes drafts on PostgreSQL", () => {
+  const routing: RoutingPolicy = {
+    router: "typesafe/jev-router",
+    models: ["test/fast", "test/deep"],
+    providers: ["test"],
+    guardrailRevision: "synthetic",
+    sort: "price",
+  };
+  const routed: AssistanceConfig = {
+    ...config,
+    provider: "openrouter",
+    routing,
+    model: routing.router,
+  };
+  it("pins routing policy before queueing and invalidates changed provider constraints without inference", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: routed });
+    const spy = vi.fn(generate);
+    await expect(
+      processAssistanceRun(t.db, result.outcome.id, {
+        config: { ...routed, routing: { ...routing, providers: ["different"] } },
+        generate: spy,
+      }),
+    ).rejects.toThrow("configuration_changed");
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({
+      state: "failed",
+      errorCode: "configuration_changed",
+      actualCostMicros: 0,
+    });
+    expect(spy).not.toHaveBeenCalled();
+  });
+  it("accounts actual routed cost and selected model independently of the reservation rate card", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: routed });
+    await processAssistanceRun(t.db, result.outcome.id, {
+      config: routed,
+      generate: async (...args) => ({
+        ...(await generate(...args)),
+        actualCostMicros: 7,
+        routing: {
+          requested: routing.router,
+          model: "test/deep",
+          provider: "Test",
+          generationId: "gen-synthetic",
+          policyDigest: routingDigest(routing),
+          metadata: null,
+        },
+      }),
+    });
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({
+      state: "draft",
+      actualCostMicros: 7,
+      model: routing.router,
+      validation: { factualApproval: "human_required", routing: { model: "test/deep" } },
+    });
+  });
+  it("keeps unknown routed cost reserved and fails closed when billed cost exceeds the reservation", async () => {
+    for (const cost of [undefined, 1000000]) {
+      const f = await fixture();
+      const result = await requestAssistance(t.db, f.session, f.input, { queue, config: routed });
+      await expect(
+        processAssistanceRun(t.db, result.outcome.id, {
+          config: routed,
+          generate: async (...args) => ({ ...(await generate(...args)), actualCostMicros: cost }),
+        }),
+      ).rejects.toThrow(cost === undefined ? "provider_cost_unknown" : "cost_limit_exceeded");
+      const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+      expect(run).toMatchObject({
+        state: "failed",
+        actualCostMicros: cost ?? null,
+        errorCode: cost === undefined ? "provider_cost_unknown" : "cost_limit_exceeded",
+      });
+      expect(run.reservedCostMicros).toBeGreaterThan(0);
+      expect(run.output).toBeNull();
+    }
+  });
   it("atomically queues once, records a minimized draft, and human acceptance has no message/task effect", async () => {
     const f = await fixture();
     const result = await requestAssistance(t.db, f.session, f.input, { queue, config });

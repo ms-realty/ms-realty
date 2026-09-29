@@ -55,6 +55,7 @@ import {
   type IntakeDraftGenerator,
   type LocaleDraftGenerator,
 } from "./provider";
+import { routingDigest } from "./routing";
 
 const requestSchema = z.discriminatedUnion("task", [
   z.object({
@@ -407,6 +408,8 @@ export async function requestAssistance(
             inputCostMicros: config.inputCostMicros,
             outputCostMicros: config.outputCostMicros,
             maxOutputTokens: config.maxOutputTokens,
+            provider: config.provider ?? "openai",
+            routingDigest: routingDigest(config.routing),
           },
         })
         .returning();
@@ -480,11 +483,15 @@ export async function processAssistanceRun(
       inputCostMicros: number;
       outputCostMicros: number;
       maxOutputTokens: number;
+      provider?: string;
+      routingDigest?: string | null;
     };
     if (
       pinned.inputCostMicros !== config.inputCostMicros ||
       pinned.outputCostMicros !== config.outputCostMicros ||
-      pinned.maxOutputTokens !== config.maxOutputTokens
+      pinned.maxOutputTokens !== config.maxOutputTokens ||
+      (pinned.provider ?? "openai") !== (config.provider ?? "openai") ||
+      (pinned.routingDigest ?? null) !== routingDigest(config.routing)
     )
       throw new Error("configuration_changed");
     const current = await sourceForRun(db, actor, run);
@@ -508,10 +515,14 @@ export async function processAssistanceRun(
             );
     inputTokens = generated.inputTokens;
     outputTokens = generated.outputTokens;
-    const cost = Math.ceil(
-      inputTokens * config.inputCostMicros + outputTokens * config.outputCostMicros,
-    );
-    if (Number.isSafeInteger(cost) && cost >= 0 && cost <= 2_000_000_000) actualCostMicros = cost;
+    const cost =
+      config.provider === "openrouter"
+        ? generated.actualCostMicros
+        : Math.ceil(inputTokens * config.inputCostMicros + outputTokens * config.outputCostMicros);
+    if (typeof cost !== "number" || !Number.isSafeInteger(cost) || cost < 0 || cost > 2_000_000_000)
+      throw new Error("provider_cost_unknown");
+    actualCostMicros = cost;
+    if (cost > run.reservedCostMicros) throw new Error("cost_limit_exceeded");
     if (
       !Number.isSafeInteger(inputTokens) ||
       inputTokens < 0 ||
@@ -549,6 +560,7 @@ export async function processAssistanceRun(
             sourcePointers: "checked",
             protectedNumbers: "checked",
             factualApproval: "human_required",
+            routing: generated.routing ?? null,
           },
         })
         .where(and(eq(assistanceRuns.id, run.id), eq(assistanceRuns.state, "running")));
