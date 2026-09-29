@@ -33,6 +33,7 @@ function seed() {
     ),
   ) as {
     staffToken: string;
+    managerId: string;
     brokerId: string;
     caseId: string;
     keyId: string;
@@ -40,6 +41,128 @@ function seed() {
 }
 const reviewAt = () => new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 16);
 const plan = "Review retained commitments and arrange agency coverage.";
+
+for (const javaScriptEnabled of [true, false])
+  test(`UX18 upcoming appointments keep their arrangements during planned absence, JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+  }, testInfo) => {
+    const f = seed();
+    await db
+      .update(schema.cases)
+      .set({ ownerId: f.managerId })
+      .where(eq(schema.cases.id, f.caseId));
+    await db.insert(schema.grants).values({
+      principalId: f.managerId,
+      capability: "appointment.manage",
+      recordType: "case",
+      recordId: f.caseId,
+      reason: "Synthetic calendar coverage authority",
+    });
+    const startsAt = new Date(Date.now() + 86400000),
+      endsAt = new Date(startsAt.getTime() + 3600000);
+    const [appointment] = await db
+      .insert(schema.appointments)
+      .values({
+        caseId: f.caseId,
+        hostId: f.brokerId,
+        reference: `AP-COVER-${f.brokerId}`,
+        icsUid: f.brokerId,
+        state: "confirmed",
+        format: "in_person",
+        timezone: "Europe/Sofia",
+        confirmedStartsAt: startsAt,
+        confirmedEndsAt: endsAt,
+        propertyAccess: "confirmed",
+        externalBusyCheckedAt: new Date(),
+        icsSequence: 2,
+      })
+      .returning();
+    if (!appointment) throw new Error("Missing appointment");
+    const [reservation] = await db
+      .insert(schema.appointmentResources)
+      .values({
+        appointmentId: appointment.id,
+        kind: "broker",
+        resourceId: f.brokerId,
+        during: `[${startsAt.toISOString()},${new Date(endsAt.getTime() + 1800000).toISOString()})`,
+      })
+      .returning();
+    const context = await browser.newContext({
+      ...testInfo.project.use,
+      javaScriptEnabled,
+      viewport: { width: 320, height: 844 },
+    });
+    try {
+      await context.addCookies([
+        {
+          name: "msr_staff_session",
+          value: f.staffToken,
+          url: origins.staff,
+          httpOnly: true,
+          sameSite: "Lax",
+        },
+      ]);
+      const page = await context.newPage(),
+        path = `/en/access/absence/${f.brokerId}`;
+      await page.goto(hostUrl("staff", path));
+      await page.getByRole("link", { name: appointment.reference, exact: true }).click();
+      await expect(page.getByTestId("appointment-state")).toHaveText("Confirmed");
+      await page.goto(hostUrl("staff", path));
+      await page
+        .getByLabel("Starts at (UTC)", { exact: true })
+        .fill(new Date(endsAt.getTime() + 900000).toISOString().slice(0, 16));
+      await page.getByLabel("Coverage review due (UTC)", { exact: true }).fill(reviewAt());
+      await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Record absence", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Absence scheduled", exact: true }),
+      ).toBeVisible();
+      await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
+      await page.getByRole("link", { name: appointment.reference, exact: true }).click();
+      await expect(
+        page.getByRole("link", { name: "Appointments needing coverage", exact: true }),
+      ).toBeVisible();
+      for (const locale of ["bg", "ru", "en"]) {
+        await page.goto(hostUrl("staff", `/${locale}/calendar/${appointment.id}`));
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+          320,
+        );
+      }
+      await expect(page.getByTestId("appointment-state")).toHaveText("Confirmed");
+      await page.screenshot({
+        path: testInfo.outputPath(`appointment-coverage-${javaScriptEnabled}-320.png`),
+        fullPage: true,
+      });
+      expect(
+        await db
+          .select()
+          .from(schema.appointments)
+          .where(eq(schema.appointments.id, appointment.id)),
+      ).toEqual([appointment]);
+      expect(
+        await db
+          .select()
+          .from(schema.appointmentResources)
+          .where(eq(schema.appointmentResources.appointmentId, appointment.id)),
+      ).toEqual([reservation]);
+      await page.goto(hostUrl("staff", path));
+      await page
+        .getByLabel("Coverage or return plan", { exact: true })
+        .fill("The absence is cancelled; retain the original appointment.");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Cancel scheduled absence", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Available for work", exact: true }),
+      ).toBeVisible();
+      await page.goto(hostUrl("staff", `/en/calendar/${appointment.id}`));
+      await expect(
+        page.getByRole("link", { name: "Appointments needing coverage", exact: true }),
+      ).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
+  });
 
 for (const javaScriptEnabled of [true, false])
   test(`O23 absence and explicit return preserve commitments and custody, JavaScript ${javaScriptEnabled}`, async ({

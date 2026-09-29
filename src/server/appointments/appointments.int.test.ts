@@ -90,7 +90,7 @@ function confirmation(id: string, expectedVersion = 1) {
 }
 
 describe("appointment requests and exclusive commitments", () => {
-  it("refuses a confirmation whose host has a planned absence during the proposed slot", async () => {
+  it("refuses a confirmation whose host has a planned absence during its travel buffer", async () => {
     const f = await fixture(),
       manager = await custodyFixture(t.db);
     await changeStaffAbsence(t.db, manager.session, {
@@ -98,7 +98,7 @@ describe("appointment requests and exclusive commitments", () => {
       principalId: f.staff.id,
       expectedRevision: 1,
       action: "schedule",
-      startsAt: new Date(new Date(start).getTime() + 1800000).toISOString(),
+      startsAt: new Date(new Date(end).getTime() + 900000).toISOString(),
       reviewAt: new Date(new Date(end).getTime() + 86400000).toISOString(),
       reason: "Cover appointments during the planned absence.",
       reviewed: true,

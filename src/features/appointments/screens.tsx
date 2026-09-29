@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
+import { Notice } from "@/ui/notice";
 import { caseCopy } from "../cases/copy";
 import { caseEmailCopy } from "../cases/email-copy";
 import {
@@ -14,6 +15,7 @@ import {
   WorkflowTime,
   workflowLink,
 } from "../cases/screens";
+import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
 export async function CalendarScreen(props: ScreenProps) {
   const c = caseCopy(props.locale);
@@ -47,24 +49,37 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       <p data-testid="appointment-state" className="font-semibold">
         {c[row.state]}
       </p>
+      {staff && detail.needsCoverage ? (
+        <Notice tone="warning">
+          <a href={`/${props.locale}/coverage`} className={workflowLink}>
+            {coverageCopy(props.locale).appointments}
+          </a>
+          <p>{coverageCopy(props.locale).appointmentNote}</p>
+        </Notice>
+      ) : null}
       <p>
         {c.owned}: {row.hostName ?? "—"}
       </p>
       <p>Europe/Sofia</p>
       {row.caseId ? (
-        <a
-          className={workflowLink}
-          href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}
-        >
-          {c.cases}
-        </a>
+        <nav className="flex flex-wrap gap-4" aria-label={c.cases}>
+          <a
+            className={`${workflowLink} inline-flex min-h-control items-center`}
+            href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}
+          >
+            {c.cases}
+          </a>
+          {detail.canManage ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/cases/${row.caseId}/email`}
+            >
+              {caseEmailCopy(props.locale).title}
+            </a>
+          ) : null}
+        </nav>
       ) : null}
-      {row.caseId && detail.canManage ? (
-        <a className={workflowLink} href={`/${props.locale}/cases/${row.caseId}/email`}>
-          {caseEmailCopy(props.locale).title}
-        </a>
-      ) : null}
-      {windows.success ? (
+      {windows.success && windows.data.length ? (
         <WorkflowSection title={c.preferredWindow}>
           <ul>
             {windows.data.map((window) => (

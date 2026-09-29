@@ -1,13 +1,21 @@
 import "server-only";
 import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { cases, inquiries, keySets, principals, tasks } from "@/db/schema";
+import { appointments, cases, inquiries, keySets, principals, tasks } from "@/db/schema";
+import { staffAppointmentVisibility } from "../appointments/visibility";
 import type { Session } from "../auth/sessions";
 import { can, resolveGrants } from "../authz";
 import { caseVisibility } from "../cases/shared";
 import type { Executor } from "../db";
-import { ownerNeedsCoverage } from "./coverage-policy";
-import { liveStaff, openInquiryStates, openTaskStates, parseInput, visibleWhere } from "./shared";
+import { appointmentCoverageAt, ownerNeedsCoverage } from "./coverage-policy";
+import {
+  liveStaff,
+  openAppointmentStates,
+  openInquiryStates,
+  openTaskStates,
+  parseInput,
+  visibleWhere,
+} from "./shared";
 
 export const coveragePageSize = 25;
 
@@ -18,7 +26,7 @@ export async function readCoverage(db: Executor, session: Session, page = 1) {
   page = parseInput(z.number().int().min(1).max(10000), page);
   const offset = (page - 1) * coveragePageSize;
   const due = sql<Date | null>`case when ${tasks.state} = 'waiting' then ${tasks.followUpAt} else ${tasks.dueAt} end`;
-  const [caseRows, taskRows, inquiryRows, keyRows] = await Promise.all([
+  const [caseRows, taskRows, inquiryRows, keyRows, appointmentRows] = await Promise.all([
     db
       .select({
         id: cases.id,
@@ -95,13 +103,40 @@ export async function readCoverage(db: Executor, session: Session, page = 1) {
           .limit(coveragePageSize + 1)
           .offset(offset)
       : [],
+    db
+      .select({
+        id: appointments.id,
+        reference: appointments.reference,
+        ownerName: principals.displayName,
+        dueAt:
+          sql<Date | null>`coalesce(${appointments.confirmedStartsAt}, ${appointments.proposedStartsAt})`.mapWith(
+            appointments.confirmedStartsAt,
+          ),
+        state: appointments.state,
+      })
+      .from(appointments)
+      .leftJoin(principals, eq(principals.id, appointments.hostId))
+      .where(
+        and(
+          inArray(appointments.state, [...openAppointmentStates]),
+          ownerNeedsCoverage(appointments.hostId, appointmentCoverageAt),
+          await staffAppointmentVisibility(db, live),
+        ),
+      )
+      .orderBy(
+        asc(sql`coalesce(${appointments.confirmedStartsAt}, ${appointments.proposedStartsAt})`),
+        asc(appointments.id),
+      )
+      .limit(coveragePageSize + 1)
+      .offset(offset),
   ]);
   return {
     cases: caseRows.slice(0, coveragePageSize),
     tasks: taskRows.slice(0, coveragePageSize),
     inquiries: inquiryRows.slice(0, coveragePageSize),
     keys: keyRows.slice(0, coveragePageSize),
-    hasMore: [caseRows, taskRows, inquiryRows, keyRows].some(
+    appointments: appointmentRows.slice(0, coveragePageSize),
+    hasMore: [caseRows, taskRows, inquiryRows, keyRows, appointmentRows].some(
       (rows) => rows.length > coveragePageSize,
     ),
     page,

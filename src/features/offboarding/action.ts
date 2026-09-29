@@ -93,7 +93,7 @@ export async function offboardingAction(
             values: {},
             details: [
               { label: labels.person, value: `${person.name} · ${person.email}` },
-              ...(["keys", "cases", "tasks", "inquiries"] as const).map((key) => ({
+              ...(["keys", "cases", "tasks", "inquiries", "appointments"] as const).map((key) => ({
                 label: labels[key],
                 value: String(retained[key]),
               })),

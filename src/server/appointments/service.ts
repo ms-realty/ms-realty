@@ -33,7 +33,8 @@ import { AppError } from "../errors";
 import { runOperation } from "../operations";
 import { loadPublishedListings } from "../publication/presentation";
 import { nextReference } from "../references";
-import { allow, commandEnvelope, parseInput, version } from "../work/shared";
+import { appointmentCoverageAt, ownerNeedsCoverage } from "../work/coverage-policy";
+import { allow, commandEnvelope, openAppointmentStates, parseInput, version } from "../work/shared";
 import { appointmentTimezone, calendarFile, inServiceHours, sofiaInstant } from "./time";
 
 const requestSchema = z.object({
@@ -286,7 +287,12 @@ export async function arrangeAppointment(
       if (input.action === "confirm") {
         if (!row.listingId || !row.propertyId || !row.hostId)
           throw new AppError("transition_denied");
-        await requireAvailableStaff(ctx.tx, row.hostId, true, new Date(end.getTime() - 1));
+        await requireAvailableStaff(
+          ctx.tx,
+          row.hostId,
+          true,
+          new Date(end.getTime() + input.bufferMinutes * 60000 - 1),
+        );
         const [listing] = await ctx.tx
           .select()
           .from(listings)
@@ -542,6 +548,13 @@ export async function respondToAppointment(
 
 export async function readAppointment(db: Executor, session: Session, id: string) {
   const { row, live, resource } = await appointmentFor(db, session, id);
+  const [coverage] =
+    live.actor.kind === "staff" && (openAppointmentStates as readonly string[]).includes(row.state)
+      ? await db
+          .select({ needed: ownerNeedsCoverage(appointments.hostId, appointmentCoverageAt) })
+          .from(appointments)
+          .where(eq(appointments.id, id))
+      : [];
   const windows = z.array(z.object({ text: z.string() })).safeParse(row.requestedWindows);
   const [host] = row.hostId
     ? await db
@@ -579,6 +592,7 @@ export async function readAppointment(db: Executor, session: Session, id: string
       icsSequence: row.icsSequence,
     },
     canManage: live.account.kind === "staff",
+    needsCoverage: Boolean(coverage?.needed),
     canRespond: await can(
       db,
       live.actor,

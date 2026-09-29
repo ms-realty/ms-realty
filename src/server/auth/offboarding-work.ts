@@ -1,11 +1,12 @@
 import "server-only";
-import { and, asc, eq, ne, notInArray } from "drizzle-orm";
+import { and, asc, eq, inArray, ne, notInArray } from "drizzle-orm";
 import { z } from "zod";
-import { cases, inquiries, keySets, tasks } from "@/db/schema";
+import { appointments, cases, inquiries, keySets, tasks } from "@/db/schema";
+import { staffAppointmentVisibility } from "../appointments/visibility";
 import { can, resolveGrants } from "../authz";
 import { caseVisibility } from "../cases/shared";
 import type { Executor } from "../db";
-import { parseInput, visibleWhere } from "../work/shared";
+import { openAppointmentStates, parseInput, visibleWhere } from "../work/shared";
 import { offboardingOperator } from "./grants";
 import type { Session } from "./sessions";
 
@@ -21,7 +22,7 @@ export async function readOffboardingWork(
   page = parseInput(z.number().int().min(1).max(10000), page);
   const grants = await resolveGrants(db, live.actor);
   const offset = (page - 1) * 25;
-  const [ownedCases, ownedTasks, ownedInquiries, heldKeys] = await Promise.all([
+  const [ownedCases, ownedTasks, ownedInquiries, heldKeys, hostedAppointments] = await Promise.all([
     db
       .select({ id: cases.id, reference: cases.reference, title: cases.title })
       .from(cases)
@@ -66,13 +67,29 @@ export async function readOffboardingWork(
           .limit(26)
           .offset(offset)
       : [],
+    db
+      .select({ id: appointments.id, reference: appointments.reference })
+      .from(appointments)
+      .where(
+        and(
+          eq(appointments.hostId, id),
+          inArray(appointments.state, [...openAppointmentStates]),
+          await staffAppointmentVisibility(db, live),
+        ),
+      )
+      .orderBy(asc(appointments.confirmedStartsAt), asc(appointments.id))
+      .limit(26)
+      .offset(offset),
   ]);
   return {
     cases: ownedCases.slice(0, 25),
     tasks: ownedTasks.slice(0, 25),
     inquiries: ownedInquiries.slice(0, 25),
     keys: heldKeys.slice(0, 25),
+    appointments: hostedAppointments.slice(0, 25),
     page,
-    hasMore: [ownedCases, ownedTasks, ownedInquiries, heldKeys].some((rows) => rows.length > 25),
+    hasMore: [ownedCases, ownedTasks, ownedInquiries, heldKeys, hostedAppointments].some(
+      (rows) => rows.length > 25,
+    ),
   };
 }

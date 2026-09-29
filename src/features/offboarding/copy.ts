@@ -58,6 +58,7 @@ export function offboardingCopy(locale: string) {
       "Active and paused Cases",
     ),
     tasks: s("Неприключени задачи", "Незавершённые задачи", "Unfinished tasks"),
+    appointments: s("Неприключени срещи", "Незавершённые встречи", "Open appointments"),
     inquiries: s("Неприключени запитвания", "Незавершённые заявки", "Unresolved inquiries"),
     reason: s(
       "Основание и план за предаване",

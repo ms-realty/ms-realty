@@ -160,7 +160,7 @@ export default async function Page({
           <h2 className="text-subheading font-semibold">{c.retained}</h2>
           <p>{a.manager}</p>
           <dl>
-            {(["keys", "cases", "tasks", "inquiries"] as const).map((k) => (
+            {(["keys", "cases", "tasks", "inquiries", "appointments"] as const).map((k) => (
               <div key={k} className="flex justify-between gap-4">
                 <dt>{c[k]}</dt>
                 <dd>{retained[k]}</dd>
@@ -176,7 +176,7 @@ export default async function Page({
         <section className="space-y-4">
           <h2 className="text-subheading font-semibold">{c.work}</h2>
           <p>{c.workScope}</p>
-          {(["keys", "cases", "tasks", "inquiries"] as const).map((kind) =>
+          {(["keys", "cases", "tasks", "inquiries", "appointments"] as const).map((kind) =>
             work[kind].length ? (
               <section key={kind} className="space-y-2">
                 <h3 className="font-semibold">{c[kind]}</h3>
@@ -185,7 +185,7 @@ export default async function Page({
                     <li key={row.id} className="break-words">
                       <a
                         className={workflowLink}
-                        href={`/${locale}/${kind === "keys" ? "operations/keys" : kind}/${row.id}`}
+                        href={`/${locale}/${kind === "keys" ? "operations/keys" : kind === "appointments" ? "calendar" : kind}/${row.id}`}
                       >
                         {"reference" in row ? row.reference : row.title}
                         {"reference" in row && "title" in row ? ` · ${row.title}` : ""}
@@ -199,7 +199,8 @@ export default async function Page({
           {!work.keys.length &&
           !work.cases.length &&
           !work.tasks.length &&
-          !work.inquiries.length ? (
+          !work.inquiries.length &&
+          !work.appointments.length ? (
             <p>{c.noWork}</p>
           ) : null}
           <nav className="flex flex-wrap gap-4" aria-label={c.work}>

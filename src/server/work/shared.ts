@@ -1,7 +1,7 @@
 import "server-only";
 import { and, eq, inArray, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
-import { inquiries, tasks } from "@/db/schema";
+import { appointments, inquiries, tasks } from "@/db/schema";
 import type { Capability, CapabilityGrant } from "@/domain/capabilities";
 import type { Decision } from "@/domain/state-machine";
 import { recordActivity } from "../activity";
@@ -20,6 +20,12 @@ export const commandEnvelope = {
   expectedVersion: z.number().int().positive().safe(),
 };
 export const openTaskStates = ["open", "in_progress", "waiting"] as const;
+export const openAppointmentStates = [
+  "requested",
+  "proposed",
+  "confirmed",
+  "reschedule_requested",
+] as const;
 export const openInquiryStates = [
   "received",
   "assigned",
@@ -76,9 +82,9 @@ export function taskResource(row: Task): Resource {
 export function visibleWhere(
   grants: readonly CapabilityGrant[],
   capability: Capability,
-  type: "inquiry" | "task",
+  type: "inquiry" | "task" | "appointment",
 ): SQL {
-  const table = type === "inquiry" ? inquiries : tasks;
+  const table = type === "inquiry" ? inquiries : type === "appointment" ? appointments : tasks;
   const branches = grants
     .filter((g) => g.capability === capability)
     .flatMap(({ scope }) => {

@@ -1,8 +1,9 @@
 // O23: explicit grants are human, capability-scoped, step-up protected and receipt-backed.
 import "server-only";
-import { and, count, eq, gt, isNull, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, count, eq, gt, inArray, isNull, ne, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
+  appointments,
   cases,
   grants,
   inquiries,
@@ -21,7 +22,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
 import { agencyCoverageQueue } from "../work/coverage-policy";
-import { parseInput } from "../work/shared";
+import { openAppointmentStates, parseInput } from "../work/shared";
 import { lockOutStaff } from "./invitations";
 import { countActivePasskeys, staffPasskeyMinimum } from "./passkeys";
 import { requireFreshAuth, requireLiveSession, revokeAllSessions, type Session } from "./sessions";
@@ -282,34 +283,45 @@ export async function offboardingOperator(db: Executor, session: Session) {
   return live;
 }
 export async function retainedWork(db: Executor, principalId: string) {
-  const [[keys], [ownedCases], [ownedTasks], [ownedInquiries]] = await Promise.all([
-    db
-      .select({ count: count() })
-      .from(keySets)
-      .where(and(eq(keySets.holderId, principalId), eq(keySets.state, "checked_out"))),
-    db
-      .select({ count: count() })
-      .from(cases)
-      .where(and(eq(cases.ownerId, principalId), ne(cases.disposition, "closed"))),
-    db
-      .select({ count: count() })
-      .from(tasks)
-      .where(and(eq(tasks.ownerId, principalId), notInArray(tasks.state, ["done", "cancelled"]))),
-    db
-      .select({ count: count() })
-      .from(inquiries)
-      .where(
-        and(
-          eq(inquiries.ownerId, principalId),
-          notInArray(inquiries.state, ["linked_to_case", "resolved_without_case"]),
+  const [[keys], [ownedCases], [ownedTasks], [ownedInquiries], [hostedAppointments]] =
+    await Promise.all([
+      db
+        .select({ count: count() })
+        .from(keySets)
+        .where(and(eq(keySets.holderId, principalId), eq(keySets.state, "checked_out"))),
+      db
+        .select({ count: count() })
+        .from(cases)
+        .where(and(eq(cases.ownerId, principalId), ne(cases.disposition, "closed"))),
+      db
+        .select({ count: count() })
+        .from(tasks)
+        .where(and(eq(tasks.ownerId, principalId), notInArray(tasks.state, ["done", "cancelled"]))),
+      db
+        .select({ count: count() })
+        .from(inquiries)
+        .where(
+          and(
+            eq(inquiries.ownerId, principalId),
+            notInArray(inquiries.state, ["linked_to_case", "resolved_without_case"]),
+          ),
         ),
-      ),
-  ]);
+      db
+        .select({ count: count() })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.hostId, principalId),
+            inArray(appointments.state, [...openAppointmentStates]),
+          ),
+        ),
+    ]);
   return {
     keys: keys?.count ?? 0,
     cases: ownedCases?.count ?? 0,
     tasks: ownedTasks?.count ?? 0,
     inquiries: ownedInquiries?.count ?? 0,
+    appointments: hostedAppointments?.count ?? 0,
   };
 }
 export async function readOffboarding(db: Executor, session: Session, principalId: string) {
