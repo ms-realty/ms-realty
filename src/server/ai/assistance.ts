@@ -14,6 +14,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import type { JobQueue } from "../jobs/queue";
 import { findOperation, runOperation } from "../operations";
+import { assertRecoveryOpen } from "../recovery/quarantine";
 import { commandEnvelope, inquiryResource, liveStaff, parseInput, version } from "../work/shared";
 import { type AssistanceConfig, assistanceConfig } from "./config";
 import {
@@ -447,6 +448,7 @@ export async function processAssistanceRun(
     generateIntake?: IntakeDraftGenerator;
   } = {},
 ): Promise<void> {
+  await assertRecoveryOpen(db);
   const [run] = await db
     .update(assistanceRuns)
     .set({ state: "running", updatedAt: new Date(), version: sql`${assistanceRuns.version} + 1` })

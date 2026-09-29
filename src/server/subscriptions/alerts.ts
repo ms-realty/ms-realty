@@ -7,6 +7,7 @@ import { hashRequest } from "../crypto";
 import type { Database, Executor } from "../db";
 import { AppError } from "../errors";
 import type { MessageProvider, ProviderResult } from "../jobs/provider";
+import { assertRecoveryOpen } from "../recovery/quarantine";
 import { approvedAlertRule } from "./approval";
 import { type AlertRule, configuredAlertRule, validateAlertRule } from "./rule";
 import { alertPeriod } from "./schedule";
@@ -266,6 +267,7 @@ export async function dispatchSearchAlert(
   actionId: string,
   options: AlertOptions = {},
 ): Promise<ExternalActionState> {
+  await assertRecoveryOpen(db);
   const rule = resolveRule(options);
   const now = options.now ?? new Date();
   const claimed = await db.transaction(async (tx) => {

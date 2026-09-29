@@ -8,6 +8,7 @@ import type { PublicLocale } from "@/domain/ids";
 import { issueEmailLink } from "../auth/email-link";
 import type { Database, Executor } from "../db";
 import { pruneRateLimits } from "../rate-limit";
+import { assertRecoveryOpen } from "../recovery/quarantine";
 import { dispatchMessage, dispatchQueued } from "./outbox";
 import type { MessageProvider } from "./provider";
 import type { ReceivingProvider } from "./resend-receiving";
@@ -115,6 +116,7 @@ export interface WorkerDependencies {
 
 /** Wires every job name to its handler; the job worker process calls this once. */
 export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies): Promise<void> {
+  await assertRecoveryOpen(deps.db);
   await queue.work("auth.email_link", async (job) => {
     await issueEmailLink(deps.db, job, { queue });
   });

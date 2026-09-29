@@ -18,6 +18,7 @@ import {
 import { caseEmailConfig, caseEmailTemplate } from "../cases/email-contract";
 import { type Database, type Executor, inTransaction } from "../db";
 import { AppError } from "../errors";
+import { assertRecoveryOpen } from "../recovery/quarantine";
 import { alertSubjectType, alertTemplate } from "../subscriptions/template";
 import type { MessageProvider } from "./provider";
 import type { JobQueue } from "./queue";
@@ -142,6 +143,7 @@ export async function dispatchMessage(
   outboxId: string,
   now: Date = new Date(),
 ): Promise<OutboxState> {
+  await assertRecoveryOpen(db);
   // Consequential dispatch uses a pool: the attempting state must commit before I/O.
   // Optional digests have stricter current-consent/publication gates than access emails.
   const [subject] = await db

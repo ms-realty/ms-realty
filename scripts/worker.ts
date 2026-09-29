@@ -9,6 +9,7 @@ import { JobQueue, registerWorkers } from "../src/server/jobs/queue";
 import { ResendMessageProvider } from "../src/server/jobs/resend";
 
 import { ResendReceivingProvider } from "../src/server/jobs/resend-receiving";
+import { assertRecoveryOpen } from "../src/server/recovery/quarantine";
 
 const env = getEnv();
 if (!env.databaseUrl) throw new Error("DATABASE_URL is required");
@@ -71,6 +72,7 @@ for (const signal of ["SIGTERM", "SIGINT"] as const)
     });
   });
 try {
+  await assertRecoveryOpen(db);
   await queue.start();
   await registerWorkers(queue, { db, provider, receiving });
   await queue.scheduleRecurring();

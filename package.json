@@ -29,6 +29,7 @@
     "openapi:generate": "tsx --conditions=react-server scripts/openapi.mjs",
     "release:schemas": "tsx scripts/release-schemas.mjs",
     "release:evaluate": "tsx scripts/release-evaluate.mjs",
+    "recovery:rehearse": "tsx --conditions=react-server scripts/recovery-rehearsal.ts",
     "auth:bootstrap": "tsx --conditions=react-server scripts/bootstrap-staff.ts",
     "tokens:check": "node scripts/tokens-build.mjs --check",
     "test:visual:docker": "bash scripts/visual-docker.sh check",

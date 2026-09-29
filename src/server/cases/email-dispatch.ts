@@ -23,6 +23,7 @@ import { hashRequest } from "../crypto";
 import type { Database, Executor } from "../db";
 import { AppError } from "../errors";
 import type { MessageProvider, ProviderResult } from "../jobs/provider";
+import { assertRecoveryOpen } from "../recovery/quarantine";
 import { eligibleCaseRecipient } from "./email";
 import {
   caseEmailConfig,
@@ -210,6 +211,7 @@ export async function dispatchCaseEmail(
   id: string,
   options: { config?: EmailConfig | null; now?: Date } = {},
 ) {
+  await assertRecoveryOpen(db);
   const config = options.config === undefined ? caseEmailConfig() : options.config,
     now = options.now ?? new Date();
   if (!config) return (await load(db, id)).state;
