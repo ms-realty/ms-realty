@@ -3,8 +3,10 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { appointmentResources, caseParticipants, listings, servicePolicies } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import { changeStaffAbsence } from "../auth/absence";
 import { addInterest, respondToInterest } from "../cases/commands";
 import { caseFixture, staffFixture } from "../cases/testing";
+import { custodyFixture } from "../key-custody/testing";
 import { createListingFixture, publishForTest } from "../publication/testing";
 import {
   arrangeAppointment,
@@ -88,6 +90,32 @@ function confirmation(id: string, expectedVersion = 1) {
 }
 
 describe("appointment requests and exclusive commitments", () => {
+  it("refuses a confirmation whose host has a planned absence during the proposed slot", async () => {
+    const f = await fixture(),
+      manager = await custodyFixture(t.db);
+    await changeStaffAbsence(t.db, manager.session, {
+      operationId: randomUUID(),
+      principalId: f.staff.id,
+      expectedRevision: 1,
+      action: "schedule",
+      startsAt: new Date(new Date(start).getTime() + 1800000).toISOString(),
+      reviewAt: new Date(new Date(end).getTime() + 86400000).toISOString(),
+      reason: "Cover appointments during the planned absence.",
+      reviewed: true,
+    });
+    await expect(
+      arrangeAppointment(t.db, f.staff.session, confirmation(f.request.id)),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    expect((await readAppointment(t.db, f.staff.session, f.request.id)).appointment.state).toBe(
+      "requested",
+    );
+    expect(
+      await t.db
+        .select()
+        .from(appointmentResources)
+        .where(eq(appointmentResources.appointmentId, f.request.id)),
+    ).toHaveLength(0);
+  });
   it("keeps requests tentative; requires service policy, current availability and manual checks before confirmation", async () => {
     const f = await fixture();
     expect((await readAppointment(t.db, f.client.session, f.request.id)).appointment.state).toBe(

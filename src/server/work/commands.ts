@@ -4,6 +4,7 @@ import { z } from "zod";
 import { inquiries, tasks } from "@/db/schema";
 import { guardInquiryTransition, inquiryMachine, inquiryTransitions } from "@/domain/inquiry";
 import { guardTaskTransition, highImpactTaskTypes, taskMachine } from "@/domain/task";
+import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
 import { hashRequest } from "../crypto";
@@ -70,7 +71,8 @@ export async function acceptInquiry(db: Executor, session: Session, raw: AcceptI
   const input = parseInput(acceptSchema, raw);
   const { live } = await inquiryFor(db, session, input.id, "inquiry.assign");
   // Reauthorize before operation replay as well as inside the business transaction.
-  const authorizeOwner = async (tx: Executor, row: typeof inquiries.$inferSelect) => {
+  const authorizeOwner = async (tx: Executor, row: typeof inquiries.$inferSelect, lock = false) => {
+    await requireAvailableStaff(tx, live.actor.id, lock);
     await assertCan(tx, live.actor, "inquiry.respond", inquiryResource(row));
     await assertCan(tx, live.actor, "task.manage", {
       type: "task",
@@ -91,7 +93,7 @@ export async function acceptInquiry(db: Executor, session: Session, raw: AcceptI
     },
     async (ctx) => {
       const { row } = await inquiryFor(ctx.tx, session, input.id, "inquiry.assign", true);
-      await authorizeOwner(ctx.tx, row);
+      await authorizeOwner(ctx.tx, row, true);
       version(row, input.expectedVersion);
       // Taking over assigned work requires an explicit acceptance; existing promises stay intact.
       if (row.state !== "assigned" || row.ownerId === live.account.id)

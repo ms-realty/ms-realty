@@ -53,17 +53,29 @@ export const principals = pgTable(
 );
 
 /** Active staff role for a staff principal; its absence closes the staff interface. */
-export const staffMemberships = pgTable("staff_memberships", {
-  ...mutable(),
-  principalId: uuid("principal_id")
-    .notNull()
-    .unique()
-    .references(() => principals.id),
-  state: staffMembershipStateEnum("state").notNull().default("active"),
-  staffLocale: staffLocaleEnum("staff_locale").notNull().default("bg"),
-  startedAt: instant("started_at").notNull().defaultNow(),
-  endedAt: instant("ended_at"),
-});
+export const staffMemberships = pgTable(
+  "staff_memberships",
+  {
+    ...mutable(),
+    principalId: uuid("principal_id")
+      .notNull()
+      .unique()
+      .references(() => principals.id),
+    state: staffMembershipStateEnum("state").notNull().default("active"),
+    staffLocale: staffLocaleEnum("staff_locale").notNull().default("bg"),
+    startedAt: instant("started_at").notNull().defaultNow(),
+    endedAt: instant("ended_at"),
+    /** Planned unavailability does not revoke sign-in. Coverage ends only on explicit return. */
+    absenceFrom: instant("absence_from"),
+    absenceReviewAt: instant("absence_review_at"),
+  },
+  (t) => [
+    check(
+      "staff_absence_review",
+      sql`(${t.absenceFrom} is null and ${t.absenceReviewAt} is null) or (${t.absenceFrom} is not null and ${t.absenceReviewAt} is not null and ${t.absenceReviewAt} > ${t.absenceFrom})`,
+    ),
+  ],
+);
 
 /**
  * Role presets and record-scoped capability grants. A grant names exactly one grantee and

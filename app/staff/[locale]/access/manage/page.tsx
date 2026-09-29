@@ -8,6 +8,8 @@ import { cases, operations, principals, staffMemberships } from "@/db/schema";
 import { capabilities } from "@/domain/capabilities";
 import { publicLocales } from "@/domain/ids";
 import { participantRoles } from "@/domain/parties";
+import { absenceCopy } from "@/features/absence/copy";
+import { WorkflowTime } from "@/features/cases/screens";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
 import { accessErrorMessage, identityCopy, roleLabel } from "@/features/identity/copy";
 import { grantManagementCopy } from "@/features/identity/grant-copy";
@@ -50,7 +52,13 @@ export default async function ManagePage({
   if (!isFresh(session))
     redirect(`/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/access/manage`)}`);
   const allMembers = await db
-    .select({ id: principals.id, name: principals.displayName, email: principals.email })
+    .select({
+      id: principals.id,
+      name: principals.displayName,
+      email: principals.email,
+      absenceFrom: staffMemberships.absenceFrom,
+      reviewAt: staffMemberships.absenceReviewAt,
+    })
     .from(principals)
     .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
     .where(
@@ -134,6 +142,37 @@ export default async function ManagePage({
           </Notice>
         ) : null}
         {error ? <Notice tone="error">{error}</Notice> : null}
+        <section className="min-w-0 space-y-4">
+          <h2 className="text-section font-semibold">{absenceCopy(locale).title}</h2>
+          <ul className="space-y-4">
+            {allMembers.map((member) => (
+              <li key={member.id} className="min-w-0 break-words">
+                <a
+                  className="block min-h-control underline"
+                  href={`/${locale}/access/absence/${member.id}`}
+                >
+                  {member.name} · {member.email}
+                </a>
+                <p>
+                  {member.absenceFrom
+                    ? member.absenceFrom > new Date()
+                      ? absenceCopy(locale).planned
+                      : absenceCopy(locale).absent
+                    : absenceCopy(locale).available}
+                </p>
+                {member.reviewAt ? (
+                  <p>
+                    {absenceCopy(locale).reviewRecorded}:{" "}
+                    <WorkflowTime value={member.reviewAt} locale={locale} />
+                  </p>
+                ) : null}
+                {member.reviewAt && member.reviewAt < new Date() ? (
+                  <p className="font-semibold text-warning">{absenceCopy(locale).overdue}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.staffTitle}</h2>
           <form

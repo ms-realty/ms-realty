@@ -29,6 +29,7 @@ import {
   dispositionTransitions,
   type StageEvidence,
 } from "@/domain/case";
+import { availableStaff, requireAvailableStaff } from "../auth/availability";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCan, can } from "../authz";
 import { assertCaseAgreementReady, reviewedEvidence } from "../compliance/agreement-gate";
@@ -373,11 +374,13 @@ export async function handoverCase(
       await receiverAccess(ctx.tx, live.actor, row.id, snapshot);
       if (input.action === "request") {
         if (input.receiverId === row.ownerId) throw new AppError("validation_failed");
+        await requireAvailableStaff(ctx.tx, input.receiverId, true);
         await receiverAccess(ctx.tx, { kind: "staff", id: input.receiverId }, row.id, snapshot);
         await bumpCase(ctx.tx, row.id, row.version, { pendingOwnerId: input.receiverId });
       } else if (input.action === "accept") {
         if (row.pendingOwnerId !== live.account.id || input.receiverId !== live.account.id)
           throw new AppError("forbidden");
+        await requireAvailableStaff(ctx.tx, live.account.id, true);
         await receiverAccess(ctx.tx, live.actor, row.id, snapshot);
         for (const task of snapshot.commitments.filter((t) => t.ownerId === row.ownerId)) {
           await ctx.tx
@@ -843,6 +846,7 @@ export async function lifecycleView(db: Executor, session: Session, id: string) 
         eq(principals.kind, "staff"),
         eq(principals.status, "active"),
         eq(staffMemberships.state, "active"),
+        availableStaff(),
       ),
     )
     .orderBy(asc(principals.displayName))

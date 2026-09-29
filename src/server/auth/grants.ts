@@ -97,7 +97,7 @@ async function activeStaff(db: Executor, id: string) {
     );
   if (!person) throw new AppError("not_found");
 }
-async function lockStaff(db: Executor) {
+export async function lockStaff(db: Executor) {
   await db.execute(
     sql`select pg_advisory_xact_lock(hashtextextended('staff-capability-management', 0))`,
   );
@@ -110,7 +110,7 @@ async function lockStaff(db: Executor) {
     .orderBy(principals.id)
     .for("update");
 }
-async function ensureUsableManager(db: Executor) {
+export async function ensureUsableManager(db: Executor) {
   const staff = await db
     .select({ id: principals.id })
     .from(principals)
@@ -120,6 +120,8 @@ async function ensureUsableManager(db: Executor) {
         eq(principals.kind, "staff"),
         eq(principals.status, "active"),
         eq(staffMemberships.state, "active"),
+        // No automatic return: keep one usable manager beyond every scheduled absence.
+        isNull(staffMemberships.absenceFrom),
       ),
     );
   for (const person of staff)
@@ -279,7 +281,7 @@ export async function offboardingOperator(db: Executor, session: Session) {
   if (!(await can(db, live.actor, "access.grant"))) throw new AppError("not_found");
   return live;
 }
-async function retainedWork(db: Executor, principalId: string) {
+export async function retainedWork(db: Executor, principalId: string) {
   const [[keys], [ownedCases], [ownedTasks], [ownedInquiries]] = await Promise.all([
     db
       .select({ count: count() })

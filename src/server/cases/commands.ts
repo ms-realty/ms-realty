@@ -18,6 +18,7 @@ import {
 import { initialStage } from "@/domain/case";
 import { guardInquiryTransition, inquiryMachine } from "@/domain/inquiry";
 import { guardInterestTransition, interestMachine } from "@/domain/interest";
+import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
 import { hashRequest } from "../crypto";
@@ -90,6 +91,7 @@ export async function createCaseFromInquiry(db: Executor, session: Session, raw:
   const live = await liveStaff(db, session);
   const authorize = async (tx: Executor, lock: boolean) => {
     await liveStaff(tx, session);
+    await requireAvailableStaff(tx, live.actor.id, lock);
     const query = tx.select().from(inquiries).where(eq(inquiries.id, input.id));
     const [row] = await (lock ? query.for("update") : query);
     if (!row) throw new AppError("not_found");

@@ -127,6 +127,13 @@
       "when": 1790683066474,
       "tag": "0017_publication_read_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790708392020,
+      "tag": "0018_staff_absence",
+      "breakpoints": true
     }
   ]
 }

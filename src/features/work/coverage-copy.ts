@@ -5,9 +5,9 @@ export function coverageCopy(locale: string) {
   return {
     title: s("Дежурна опашка", "Очередь подхвата", "Agency coverage"),
     lead: s(
-      "Отворена работа без активен отговорник. Ръководителят организира поемането ѝ; показани са само записите, до които имате достъп. Предаването на всеки запис се потвърждава отделно.",
-      "Открытая работа без активного ответственного. Руководитель организует её подхват; показаны только доступные вам записи. Передача каждой записи подтверждается отдельно.",
-      "Open work without an active owner. Management coordinates coverage; only records you can access are shown. Each record needs its own confirmed handover.",
+      "Отворена работа без наличен отговорник, включително при отсъствие. Ръководителят организира поемането ѝ; показани са само записите, до които имате достъп. Предаването на всеки запис се потвърждава отделно.",
+      "Открытая работа без доступного ответственного, в том числе при отсутствии. Руководитель организует её подхват; показаны только доступные вам записи. Передача каждой записи подтверждается отдельно.",
+      "Open work without an available owner, including during absence. Management coordinates coverage; only records you can access are shown. Each record needs its own confirmed handover.",
     ),
     owner: s(
       "Последен потвърден отговорник",

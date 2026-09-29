@@ -46,7 +46,7 @@ export async function custodyOperator(db: Executor, session: Session) {
 }
 async function eligibleHolder(db: Executor, id: string) {
   const [row] = await db
-    .select({ id: principals.id })
+    .select({ id: principals.id, absenceFrom: staffMemberships.absenceFrom })
     .from(principals)
     .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
     .where(
@@ -58,7 +58,11 @@ async function eligibleHolder(db: Executor, id: string) {
       ),
     )
     .for("share");
-  return Boolean(row && (await countActivePasskeys(db, id)) >= 2);
+  return Boolean(
+    row &&
+      (!row.absenceFrom || row.absenceFrom.getTime() > Date.now()) &&
+      (await countActivePasskeys(db, id)) >= 2,
+  );
 }
 export async function custodyHolders(db: Executor, session: Session) {
   await custodyOperator(db, session);

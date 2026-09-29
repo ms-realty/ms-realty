@@ -2,6 +2,7 @@ import "server-only";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { principals, staffMemberships, tasks } from "@/db/schema";
+import { availableStaff } from "../auth/availability";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCanRead, can } from "../authz";
@@ -23,7 +24,7 @@ import {
 
 async function receiverEligible(db: Executor, id: string, task: Task, lock = false) {
   const query = db
-    .select({ id: principals.id })
+    .select({ id: principals.id, absenceFrom: staffMemberships.absenceFrom })
     .from(principals)
     .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
     .where(
@@ -37,6 +38,7 @@ async function receiverEligible(db: Executor, id: string, task: Task, lock = fal
   const [row] = await (lock ? query.for("share") : query);
   return Boolean(
     row &&
+      (!row.absenceFrom || row.absenceFrom.getTime() > Date.now()) &&
       (await countActivePasskeys(db, id)) >= staffPasskeyMinimum &&
       (await can(db, { kind: "staff", id }, "task.manage", taskResource(task))),
   );
@@ -53,6 +55,7 @@ export async function readTaskHandover(db: Executor, session: Session, id: strin
         eq(principals.kind, "staff"),
         eq(principals.status, "active"),
         eq(staffMemberships.state, "active"),
+        availableStaff(),
       ),
     )
     .orderBy(asc(principals.displayName), asc(principals.id));

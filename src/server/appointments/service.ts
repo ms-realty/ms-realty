@@ -16,6 +16,7 @@ import {
   servicePolicies,
 } from "@/db/schema";
 import { appointmentMachine, guardAppointmentTransition } from "@/domain/appointment";
+import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, can, resolveGrants } from "../authz";
 import {
@@ -285,6 +286,7 @@ export async function arrangeAppointment(
       if (input.action === "confirm") {
         if (!row.listingId || !row.propertyId || !row.hostId)
           throw new AppError("transition_denied");
+        await requireAvailableStaff(ctx.tx, row.hostId, true, new Date(end.getTime() - 1));
         const [listing] = await ctx.tx
           .select()
           .from(listings)

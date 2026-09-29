@@ -20,5 +20,7 @@ export function ownerNeedsCoverage(owner: AnyPgColumn) {
     where coverage_owner.id = ${outerOwner}
       and coverage_owner.kind = 'staff' and coverage_owner.status = 'active'
       and coverage_membership.state = 'active'
+      and (coverage_membership.absence_from is null
+        or coverage_membership.absence_from > clock_timestamp())
   )`;
 }
