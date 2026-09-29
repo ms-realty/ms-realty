@@ -1,7 +1,14 @@
 import "server-only";
-import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, gt, inArray, lt } from "drizzle-orm";
 import { z } from "zod";
-import { keyCustodyEvents, keySets, principals, properties, staffMemberships } from "@/db/schema";
+import {
+  keyCustodyEvents,
+  keySets,
+  operations,
+  principals,
+  properties,
+  staffMemberships,
+} from "@/db/schema";
 import { recordAudit } from "../audit";
 import { countActivePasskeys } from "../auth/passkeys";
 import type { Session } from "../auth/sessions";
@@ -76,6 +83,7 @@ async function recordCustody(
   row: typeof keySets.$inferSelect,
   operationId: string,
   note: string,
+  action = "key.custody_recorded",
 ) {
   await db.insert(keyCustodyEvents).values({
     keySetId: row.id,
@@ -90,7 +98,7 @@ async function recordCustody(
   });
   await recordAudit(db, {
     actor: session.actor,
-    action: "key.custody_recorded",
+    action,
     capability: "key.manage",
     recordType: "key_set",
     recordId: row.id,
@@ -228,6 +236,67 @@ export async function moveKeys(db: Executor, session: Session, raw: unknown) {
     },
   );
 }
+export async function amendKeyDeadline(db: Executor, session: Session, raw: unknown) {
+  const input = parseInput(
+    z.object({
+      ...common,
+      id: z.uuid(),
+      expectedVersion: z.int().positive(),
+      dueAt: z.iso.datetime(),
+    }),
+    raw,
+  );
+  const live = await custodyOperator(db, session);
+  return runOperation(
+    db,
+    {
+      actor: live.actor,
+      type: "key.amend_deadline",
+      idempotencyKey: input.operationId,
+      requestHash: hashRequest(input),
+      expectedVersion: input.expectedVersion,
+    },
+    async (ctx) => {
+      const [row] = await ctx.tx
+        .select()
+        .from(keySets)
+        .where(eq(keySets.id, input.id))
+        .for("update");
+      await custodyOperator(ctx.tx, session);
+      if (!row) throw new AppError("not_found");
+      version(row, input.expectedVersion);
+      if (
+        row.state !== "checked_out" ||
+        !row.holderId ||
+        !(await eligibleHolder(ctx.tx, row.holderId))
+      )
+        throw new AppError("transition_denied");
+      const dueAt = new Date(input.dueAt);
+      if (dueAt.getTime() <= Date.now() || dueAt.getTime() === row.dueAt?.getTime())
+        throw new AppError("validation_failed", {
+          fieldErrors: { dueAt: ["Choose a different future due-back time"] },
+        });
+      const [changed] = await ctx.tx
+        .update(keySets)
+        .set({
+          dueAt,
+          version: row.version + 1,
+          updatedAt: new Date(),
+        })
+        .where(eq(keySets.id, row.id))
+        .returning();
+      if (!changed) throw new Error("No custody revision");
+      return recordCustody(
+        ctx.tx,
+        live,
+        changed,
+        ctx.operationId,
+        input.note,
+        "key.deadline_amended",
+      );
+    },
+  );
+}
 export async function listKeys(db: Executor, session: Session, state?: string, after?: string) {
   await custodyOperator(db, session);
   const filter = z.enum(custodyStates).safeParse(state),
@@ -269,8 +338,9 @@ export async function readKeys(db: Executor, session: Session, id: string, befor
       ? Number(before)
       : undefined;
   const events = await db
-    .select()
+    .select({ ...getTableColumns(keyCustodyEvents), operationType: operations.operationType })
     .from(keyCustodyEvents)
+    .innerJoin(operations, eq(operations.id, keyCustodyEvents.operationId))
     .where(
       and(
         eq(keyCustodyEvents.keySetId, id),

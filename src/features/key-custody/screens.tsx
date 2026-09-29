@@ -50,7 +50,7 @@ function CustodyForm({
       initialState={initial}
       fields={fields}
       action={custodyAction.bind(null, locale, command, id)}
-      path={`/${locale}/operations/keys${command === "move" ? `/${id}` : ""}`}
+      path={`/${locale}/operations/keys${command === "receive" ? "" : `/${id}`}`}
       status={{
         href: `/${locale}/operations/keys/receipt?key=${encodeURIComponent(initial.operationId)}`,
         label: caseCopy(locale).status,
@@ -216,11 +216,33 @@ export async function CustodyDetail({
       ) : (
         <p>{c.terminal}</p>
       )}
+      {row.state === "checked_out" && holders.some((h) => h.id === row.holderId) ? (
+        <section className="space-y-4" aria-labelledby="key-deadline-heading">
+          <h2 id="key-deadline-heading" className="text-subheading font-semibold">
+            {c.amend_deadline}
+          </h2>
+          <p>{c.deadlineHelp}</p>
+          <CustodyForm
+            locale={locale}
+            command="amend_deadline"
+            id={id}
+            revision={row.version}
+            fields={[
+              { name: "dueAt", label: c.dueAt, type: "datetime-local", required: true },
+              { name: "note", label: c.deadlineNote, type: "textarea", required: true },
+              { name: "reviewed", label: c.deadlineReviewed, type: "checkbox", required: true },
+            ]}
+          />
+        </section>
+      ) : null}
       <section className="space-y-5">
         <h2 className="text-subheading font-semibold">{c.history}</h2>
         <ol className="divide-y divide-border">
           {events.map((event) => (
             <li key={event.id} className="space-y-2 py-4">
+              {event.operationType === "key.amend_deadline" ? (
+                <p className="font-semibold">{c.deadlineChanged}</p>
+              ) : null}
               <p>
                 <strong>{c[event.state as CustodyState]}</strong> ·{" "}
                 <WorkflowTime value={event.createdAt} locale={locale} />
@@ -271,7 +293,7 @@ export async function CustodyReceipt({
         eq(operations.actorKind, "staff"),
         eq(operations.actorId, session.actor.id),
         eq(operations.idempotencyKey, operationKey),
-        inArray(operations.operationType, ["key.receive", "key.move"]),
+        inArray(operations.operationType, ["key.receive", "key.move", "key.amend_deadline"]),
       ),
     );
   if (!row) notFound();

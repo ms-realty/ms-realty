@@ -6,7 +6,7 @@ import { requireAuthHost } from "@/server/auth/pages";
 import { processLocalInstant } from "@/server/compliance/local-time";
 import { AppError } from "@/server/errors";
 import { action } from "@/server/http/next";
-import { moveKeys, receiveKeys } from "@/server/key-custody/service";
+import { amendKeyDeadline, moveKeys, receiveKeys } from "@/server/key-custody/service";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
@@ -26,7 +26,7 @@ export async function custodyAction(
   const values = readFormValues<FormValues>(form, fields),
     envelope = readFormEnvelope(form, scope);
   const operationId = envelope?.operationId ?? issueFormOperation(scope),
-    path = `/${locale}/operations/keys${command === "move" ? `/${id}` : ""}`;
+    path = `/${locale}/operations/keys${command === "receive" ? "" : `/${id}`}`;
   const status = {
     href: `/${locale}/operations/keys/receipt?key=${encodeURIComponent(operationId)}`,
     label: c.status,
@@ -57,6 +57,13 @@ export async function custodyAction(
           quantity: Number(values.quantity),
           sourceReference: values.sourceReference,
           storageLabel: values.storageLabel,
+        });
+      if (command === "amend_deadline")
+        return amendKeyDeadline(ctx.db, ctx.session, {
+          ...common,
+          id,
+          expectedVersion: envelope.expectedRevision,
+          dueAt: processLocalInstant(values.dueAt ?? ""),
         });
       return moveKeys(ctx.db, ctx.session, {
         ...common,

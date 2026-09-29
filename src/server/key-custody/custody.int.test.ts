@@ -13,7 +13,7 @@ import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "../auth/sessions";
 import { staffFixture } from "../cases/testing";
 import { createClient, createProperty } from "../testing";
-import { listKeys, moveKeys, readKeys, receiveKeys } from "./service";
+import { amendKeyDeadline, listKeys, moveKeys, readKeys, receiveKeys } from "./service";
 import { custodyFixture } from "./testing";
 
 let t: TestDatabase;
@@ -211,4 +211,114 @@ it("denies brokers, clients, record-scoped grants and revoked manager assurance"
     .set({ revokedAt: new Date() })
     .where(eq(passkeys.principalId, f.manager.id));
   await expect(moveKeys(t.db, f.manager.session, f.move)).rejects.toThrow();
+});
+
+it("amends a deadline with immutable prior custody, one receipt and fresh review", async () => {
+  const f = await fixture();
+  await moveKeys(t.db, f.manager.session, f.move);
+  const input = {
+    operationId: randomUUID(),
+    id: f.result.outcome.id,
+    expectedVersion: 2,
+    dueAt: new Date(Date.now() + 7200000).toISOString(),
+    note: "Holder confirmed the revised due-back time under synthetic agreement K4.",
+    reviewed: true,
+  };
+  for (const patch of [
+    { reviewed: false },
+    { note: "" },
+    { dueAt: f.move.dueAt },
+    { dueAt: new Date(0).toISOString() },
+  ])
+    await expect(
+      amendKeyDeadline(t.db, f.manager.session, { ...input, ...patch, operationId: randomUUID() }),
+    ).rejects.toMatchObject({ code: "validation_failed" });
+  const result = await amendKeyDeadline(t.db, f.manager.session, input);
+  expect(await amendKeyDeadline(t.db, f.manager.session, input)).toMatchObject({
+    replayed: true,
+    outcome: result.outcome,
+  });
+  await expect(
+    amendKeyDeadline(t.db, f.manager.session, { ...input, note: "Changed reviewed reason" }),
+  ).rejects.toMatchObject({ code: "idempotency_key_reused" });
+  const view = await readKeys(t.db, f.manager.session, input.id);
+  expect(view.row).toMatchObject({
+    version: 3,
+    state: "checked_out",
+    holderId: f.holder.id,
+    quantity: 2,
+    storageLabel: null,
+    dueAt: new Date(input.dueAt),
+  });
+  expect(view.events).toHaveLength(3);
+  expect(view.events[0]).toMatchObject({
+    operationType: "key.amend_deadline",
+    dueAt: new Date(input.dueAt),
+    note: input.note,
+  });
+  expect(view.events[1]).toMatchObject({
+    operationType: "key.move",
+    dueAt: new Date(f.move.dueAt),
+    holderId: f.holder.id,
+  });
+});
+it("does not extend custody for stored keys, offboarded holders or unauthorized operators", async () => {
+  const f = await fixture();
+  const input = {
+    operationId: randomUUID(),
+    id: f.result.outcome.id,
+    expectedVersion: 1,
+    dueAt: new Date(Date.now() + 7200000).toISOString(),
+    note: "Synthetic agreement to change only the deadline.",
+    reviewed: true,
+  };
+  await expect(amendKeyDeadline(t.db, f.manager.session, input)).rejects.toMatchObject({
+    code: "transition_denied",
+  });
+  await moveKeys(t.db, f.manager.session, f.move);
+  const next = { ...input, operationId: randomUUID(), expectedVersion: 2 };
+  await expect(amendKeyDeadline(t.db, f.holder.session, next)).rejects.toMatchObject({
+    code: "not_found",
+  });
+  await t.db
+    .update(staffMemberships)
+    .set({ state: "ended" })
+    .where(eq(staffMemberships.principalId, f.holder.id));
+  await expect(amendKeyDeadline(t.db, f.manager.session, next)).rejects.toMatchObject({
+    code: "transition_denied",
+  });
+  expect((await readKeys(t.db, f.manager.session, input.id)).events).toHaveLength(2);
+});
+it("serializes a deadline amendment against physical return without overwriting either history", async () => {
+  const f = await fixture();
+  await moveKeys(t.db, f.manager.session, f.move);
+  const input = {
+    ...f.move,
+    operationId: randomUUID(),
+    expectedVersion: 2,
+    dueAt: new Date(Date.now() + 7200000).toISOString(),
+  };
+  const results = await Promise.allSettled([
+    amendKeyDeadline(t.db, f.manager.session, input),
+    moveKeys(t.db, f.manager.session, {
+      ...input,
+      operationId: randomUUID(),
+      state: "stored",
+      storageLabel: "Synthetic cabinet C",
+    }),
+  ]);
+  expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+  expect(results.find((r) => r.status === "rejected")).toMatchObject({
+    reason: { code: "version_conflict" },
+  });
+  const view = await readKeys(t.db, f.manager.session, input.id);
+  expect(view.events).toHaveLength(3);
+  expect(view.row.version).toBe(3);
+  if (results[0]?.status === "fulfilled")
+    expect(view.row).toMatchObject({
+      state: "checked_out",
+      holderId: f.holder.id,
+      dueAt: new Date(input.dueAt),
+    });
+  else expect(view.row).toMatchObject({ state: "stored", holderId: null, dueAt: null });
 });

@@ -10,6 +10,31 @@ export function custodyCopy(locale: string) {
     ),
     receive: s("Запис на получени ключове", "Записать приём ключей", "Record keys received"),
     move: s("Запис на предаване", "Записать передачу", "Record custody change"),
+    amend_deadline: s(
+      "Промяна на срока за връщане",
+      "Изменить срок возврата",
+      "Change due-back time",
+    ),
+    deadlineChanged: s(
+      "Срокът за връщане е променен",
+      "Срок возврата изменён",
+      "Due-back time changed",
+    ),
+    deadlineHelp: s(
+      "Ключовете остават при същия служител. Запишете причината и потвърждението за новия срок; предишният срок остава в историята.",
+      "Ключи остаются у того же сотрудника. Укажите причину и подтверждение нового срока; прежний срок сохранится в истории.",
+      "Keys remain with the same staff holder. Record the reason and agreement for the new deadline; the previous deadline stays in history.",
+    ),
+    deadlineNote: s(
+      "Причина и потвърждение на срока",
+      "Причина и подтверждение срока",
+      "Deadline reason and agreement",
+    ),
+    deadlineReviewed: s(
+      "Проверих притежателя на ключовете и потвърждението за новия срок",
+      "Я проверил держателя ключей и подтверждение нового срока",
+      "I checked the current holder and agreement for the new deadline",
+    ),
     propertyReference: s("Номер на имота", "Номер объекта", "Property reference"),
     keyTag: s("Етикет на комплекта", "Бирка комплекта", "Key set tag"),
     quantity: s("Брой ключове", "Количество ключей", "Number of keys"),

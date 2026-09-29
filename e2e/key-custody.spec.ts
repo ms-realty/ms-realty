@@ -15,7 +15,7 @@ const connection = postgres(url, { max: 2 }),
   db = drizzle(connection, { schema });
 test.afterAll(async () => connection.end());
 for (const javaScriptEnabled of [true, false])
-  test(`key custody: receive, issue and return with JavaScript ${javaScriptEnabled}`, async ({
+  test(`key custody: receive, issue, amend deadline and return with JavaScript ${javaScriptEnabled}`, async ({
     browser,
   }, testInfo) => {
     const f = JSON.parse(
@@ -58,7 +58,12 @@ for (const javaScriptEnabled of [true, false])
       await page
         .getByLabel("Handover evidence and reason", { exact: true })
         .fill("Received two synthetic keys from owner under receipt K1.");
-      await page.getByRole("checkbox").check();
+      await page
+        .getByRole("checkbox", {
+          name: "I checked physical custody, the recipient and handover evidence",
+          exact: true,
+        })
+        .check();
       await page.getByRole("button", { name: "Record keys received", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),
@@ -73,7 +78,12 @@ for (const javaScriptEnabled of [true, false])
       await page
         .getByLabel("Handover evidence and reason", { exact: true })
         .fill("Handed two synthetic keys to the selected broker, receipt K2.");
-      await page.getByRole("checkbox").check();
+      await page
+        .getByRole("checkbox", {
+          name: "I checked physical custody, the recipient and handover evidence",
+          exact: true,
+        })
+        .check();
       await page.getByRole("button", { name: "Record custody change", exact: true }).click();
       await expect(
         page.getByRole("region", { name: "There is a problem", exact: true }),
@@ -81,14 +91,24 @@ for (const javaScriptEnabled of [true, false])
       await expect(page.getByLabel("Handover evidence and reason", { exact: true })).toHaveValue(
         "Handed two synthetic keys to the selected broker, receipt K2.",
       );
-      await expect(page.getByRole("checkbox")).not.toBeChecked();
+      await expect(
+        page.getByRole("checkbox", {
+          name: "I checked physical custody, the recipient and handover evidence",
+          exact: true,
+        }),
+      ).not.toBeChecked();
       await expect(page.getByLabel("Due back · Europe/Sofia", { exact: true })).toHaveAttribute(
         "aria-invalid",
         "true",
       );
       const year = new Date().getUTCFullYear() + 1;
       await page.getByLabel("Due back · Europe/Sofia", { exact: true }).fill(`${year}-01-15T12:00`);
-      await page.getByRole("checkbox").check();
+      await page
+        .getByRole("checkbox", {
+          name: "I checked physical custody, the recipient and handover evidence",
+          exact: true,
+        })
+        .check();
       await page.getByRole("button", { name: "Record custody change", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),
@@ -110,12 +130,70 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`key-custody-${javaScriptEnabled}.png`),
         fullPage: true,
       });
+      const amendment = page.getByRole("region", { name: "Change due-back time", exact: true });
+      await amendment
+        .getByLabel("Due back · Europe/Sofia", { exact: true })
+        .fill(`${year}-01-15T12:00`);
+      await amendment
+        .getByLabel("Deadline reason and agreement", { exact: true })
+        .fill("Broker confirmed revised return time under synthetic agreement K4.");
+      await amendment.getByRole("checkbox").check();
+      await amendment.getByRole("button", { name: "Change due-back time", exact: true }).click();
+      await expect(
+        amendment.getByRole("region", { name: "There is a problem", exact: true }),
+      ).toBeVisible();
+      await expect(
+        amendment.getByLabel("Deadline reason and agreement", { exact: true }),
+      ).toHaveValue("Broker confirmed revised return time under synthetic agreement K4.");
+      await expect(amendment.getByRole("checkbox")).not.toBeChecked();
+      await expect(
+        amendment.getByLabel("Due back · Europe/Sofia", { exact: true }),
+      ).toHaveAttribute("aria-invalid", "true");
+      expect(
+        (await db.select().from(schema.keySets).where(eq(schema.keySets.id, key.id)))[0]?.version,
+      ).toBe(2);
+      await amendment
+        .getByLabel("Due back · Europe/Sofia", { exact: true })
+        .fill(`${year}-01-16T14:30`);
+      await amendment.getByRole("checkbox").check();
+      await amendment.getByRole("button", { name: "Change due-back time", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Change recorded", exact: true }),
+      ).toBeVisible();
+      await page.getByRole("link", { name: "Open current record", exact: true }).click();
+      await expect(page.getByText("Due-back time changed", { exact: true })).toBeVisible();
+      const amended = (
+        await db.select().from(schema.keySets).where(eq(schema.keySets.id, key.id))
+      )[0];
+      expect(amended).toMatchObject({
+        version: 3,
+        state: "checked_out",
+        holderId: f.brokerId,
+        storageLabel: null,
+      });
+      expect(amended?.dueAt?.toISOString()).toBe(`${year}-01-16T12:30:00.000Z`);
+      const history = await db
+        .select()
+        .from(schema.keyCustodyEvents)
+        .where(eq(schema.keyCustodyEvents.keySetId, key.id));
+      expect(history.find((event) => event.version === 2)?.dueAt?.toISOString()).toBe(
+        `${year}-01-15T10:00:00.000Z`,
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`key-deadline-${javaScriptEnabled}.png`),
+        fullPage: true,
+      });
       await page.getByLabel("State", { exact: true }).selectOption("stored");
       await page.getByLabel("Storage label", { exact: true }).fill("Synthetic cabinet B");
       await page
         .getByLabel("Handover evidence and reason", { exact: true })
         .fill("Both synthetic keys counted and physically returned under receipt K3.");
-      await page.getByRole("checkbox").check();
+      await page
+        .getByRole("checkbox", {
+          name: "I checked physical custody, the recipient and handover evidence",
+          exact: true,
+        })
+        .check();
       await page.getByRole("button", { name: "Record custody change", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),
@@ -128,14 +206,14 @@ for (const javaScriptEnabled of [true, false])
         holderId: null,
         dueAt: null,
         storageLabel: "Synthetic cabinet B",
-        version: 3,
+        version: 4,
       });
       expect(
         await db
           .select()
           .from(schema.keyCustodyEvents)
           .where(eq(schema.keyCustodyEvents.keySetId, key.id)),
-      ).toHaveLength(3);
+      ).toHaveLength(4);
       await context.clearCookies();
       await context.addCookies([
         {

@@ -39,5 +39,14 @@ state and the current clock; deadline expiry never returns keys automatically. H
 staff names remain available after offboarding for authorized custody operators. Forms retain
 failed input, clear physical confirmation, bind signed operation envelopes and expose durable
 actor-bound receipts. No email, background reminder, entry permission, customer disclosure or
-provider action is produced. Automated reminders, partial set splits, deadline amendment and
-full staff offboarding orchestration remain separate work.
+provider action is produced. Automated reminders, partial set splits and full staff offboarding orchestration remain
+separate work.
+
+A separate reviewed deadline amendment is allowed only while checked out to a currently
+eligible holder. It requires a different future deadline, reason/agreement note and fresh
+confirmation. It changes neither holder nor custody state. A distinct operation and audit
+action identify the amendment; history labels it separately and retains the previous deadline.
+Shortening or extending a deadline uses the same guarded operation. No amendment is allowed
+for an offboarded holder; actual return remains available. An amendment and a concurrent
+return share the same row lock/version, so only one can commit from a given version.
+The review records an operator declaration, not independent proof of the holder’s agreement.
