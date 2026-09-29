@@ -37,6 +37,8 @@ import {
   validateIntakeDraft,
 } from "./intake-draft";
 import { intakeSourceFor } from "./intake-source";
+import { assessDraft, type DraftAssessor, jevDigest, prepareJevState } from "./jev";
+import { type JevAssessment, jevAssessmentSchema } from "./jev-contract";
 import {
   type LocaleSource,
   localeDraftInstructions,
@@ -319,7 +321,9 @@ function reservation(
       "utf8",
     ) + 1024;
   const cost = Math.ceil(
-    inputTokens * config.inputCostMicros + config.maxOutputTokens * config.outputCostMicros,
+    inputTokens * config.inputCostMicros +
+      config.maxOutputTokens * config.outputCostMicros +
+      (config.jev?.maxCostMicros ?? 0),
   );
   if (!Number.isSafeInteger(cost) || cost > 2_000_000_000) throw new AppError("unavailable");
   return { inputTokens, cost };
@@ -410,6 +414,8 @@ export async function requestAssistance(
             maxOutputTokens: config.maxOutputTokens,
             provider: config.provider ?? "openai",
             routingDigest: routingDigest(config.routing),
+            jevDigest: jevDigest(config.jev),
+            jevReservedCostMicros: config.jev?.maxCostMicros ?? 0,
           },
         })
         .returning();
@@ -449,6 +455,7 @@ export async function processAssistanceRun(
     generate?: DraftGenerator;
     generateLocale?: LocaleDraftGenerator;
     generateIntake?: IntakeDraftGenerator;
+    assess?: DraftAssessor;
   } = {},
 ): Promise<void> {
   await assertRecoveryOpen(db);
@@ -464,6 +471,8 @@ export async function processAssistanceRun(
   const actor: Actor = { kind: "staff", id: run.requestedById };
   let started = false;
   let actualCostMicros: number | null = null;
+  let generationCostMicros: number | null = null;
+  let assessment: JevAssessment | null = null;
   let inputTokens = 0;
   let outputTokens = 0;
   let state = "failed";
@@ -485,13 +494,15 @@ export async function processAssistanceRun(
       maxOutputTokens: number;
       provider?: string;
       routingDigest?: string | null;
+      jevDigest?: string | null;
     };
     if (
       pinned.inputCostMicros !== config.inputCostMicros ||
       pinned.outputCostMicros !== config.outputCostMicros ||
       pinned.maxOutputTokens !== config.maxOutputTokens ||
       (pinned.provider ?? "openai") !== (config.provider ?? "openai") ||
-      (pinned.routingDigest ?? null) !== routingDigest(config.routing)
+      (pinned.routingDigest ?? null) !== routingDigest(config.routing) ||
+      (pinned.jevDigest ?? null) !== jevDigest(config.jev)
     )
       throw new Error("configuration_changed");
     const current = await sourceForRun(db, actor, run);
@@ -522,7 +533,9 @@ export async function processAssistanceRun(
     if (typeof cost !== "number" || !Number.isSafeInteger(cost) || cost < 0 || cost > 2_000_000_000)
       throw new Error("provider_cost_unknown");
     actualCostMicros = cost;
-    if (cost > run.reservedCostMicros) throw new Error("cost_limit_exceeded");
+    generationCostMicros = cost;
+    if (cost > run.reservedCostMicros - (config.jev?.maxCostMicros ?? 0))
+      throw new Error("cost_limit_exceeded");
     if (
       !Number.isSafeInteger(inputTokens) ||
       inputTokens < 0 ||
@@ -538,6 +551,35 @@ export async function processAssistanceRun(
         : run.task === "locale.draft"
           ? validateLocaleDraft(generated.output, current.source as LocaleSource)
           : validateDraft(generated.output, current.source as AssistanceSource);
+    if (config.jev) {
+      const latest = await sourceForRun(db, actor, run);
+      if (latest.digest !== run.sourceDigest || latest.source.version !== run.sourceVersion) {
+        state = "stale";
+        throw new Error("source_changed");
+      }
+      const assessmentInput = prepareJevState({
+        task: run.task,
+        source: latest.source,
+        draft: output,
+      });
+      // A second call with unknown outcome must not release its reserved cost merely because
+      // the first call returned a known bill. No automatic retry of either provider call.
+      actualCostMicros = null;
+      assessment = jevAssessmentSchema.parse(
+        await (deps.assess ?? assessDraft)(assessmentInput, config),
+      );
+      actualCostMicros = cost + assessment.costMicros;
+      if (actualCostMicros > 2_000_000_000) {
+        actualCostMicros = null;
+        throw new Error("provider_cost_unknown");
+      }
+      if (
+        assessment.policyDigest !== jevDigest(config.jev) ||
+        !config.jev.snapshots.includes(assessment.model)
+      )
+        throw new Error("configuration_changed");
+      if (assessment.costMicros > config.jev.maxCostMicros) throw new Error("cost_limit_exceeded");
+    }
     await db.transaction(async (tx) => {
       const latest = await sourceForRun(tx, actor, run, true);
       if (latest.digest !== run.sourceDigest || latest.source.version !== run.sourceVersion) {
@@ -561,6 +603,8 @@ export async function processAssistanceRun(
             protectedNumbers: "checked",
             factualApproval: "human_required",
             routing: generated.routing ?? null,
+            assessment,
+            generationCostMicros,
           },
         })
         .where(and(eq(assistanceRuns.id, run.id), eq(assistanceRuns.state, "running")));
@@ -578,6 +622,11 @@ export async function processAssistanceRun(
         state,
         errorCode: code,
         actualCostMicros: started ? actualCostMicros : 0,
+        validation: {
+          ...(run.validation as Record<string, unknown>),
+          assessment,
+          generationCostMicros,
+        },
         inputTokens:
           Number.isSafeInteger(inputTokens) && inputTokens >= 0 && inputTokens <= 1_000_000
             ? inputTokens

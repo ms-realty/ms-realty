@@ -23,6 +23,7 @@ import { aiCopy } from "./copy";
 import { AssistanceForm } from "./forms";
 import { intakeAiCopy } from "./intake-copy";
 import { IntakeDraftPanel, IntakeSourcePanel } from "./intake-screen";
+import { JevReview } from "./jev-review";
 import { localeAiCopy } from "./locale-copy";
 import { LocaleSourcePanel } from "./locale-screen";
 
@@ -277,6 +278,12 @@ export async function AssistanceRunScreen({
           title={run.state === "failed" ? copy.failed : copy.noOutput}
         />
       )}
+      {output.success ? (
+        <JevReview
+          locale={locale}
+          value={(run.validation as Record<string, unknown> | null)?.assessment}
+        />
+      ) : null}
       {run.state === "draft" && sourceCurrent && output.success ? (
         <AssistanceForm
           locale={locale}

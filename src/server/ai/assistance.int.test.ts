@@ -13,6 +13,7 @@ import {
   reviewAssistance,
 } from "./assistance";
 import type { AssistanceConfig } from "./config";
+import { syntheticAssessment, syntheticJevPolicy } from "./jev-testing";
 import type { DraftGenerator } from "./provider";
 import { type RoutingPolicy, routingDigest } from "./routing";
 
@@ -83,6 +84,105 @@ const generate: DraftGenerator = async () => ({
 });
 
 describe("source-bound Hermes drafts on PostgreSQL", () => {
+  const judged = { ...config, jev: syntheticJevPolicy };
+  it("reserves both calls, retains uncertain judgments for human review and charges both actual costs", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+    const assess = vi.fn(async () => syntheticAssessment());
+    await processAssistanceRun(t.db, result.outcome.id, { config: judged, generate, assess });
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({
+      state: "draft",
+      actualCostMicros: 260,
+      validation: {
+        jevReservedCostMicros: 5000,
+        generationCostMicros: 220,
+        factualApproval: "human_required",
+        assessment: { answers: { grounding: { choice: "uncertain" } } },
+      },
+    });
+    expect(assess).toHaveBeenCalledOnce();
+    expect(JSON.stringify(assess.mock.calls)).not.toContain("private@example.test");
+    expect(run.reviewedAt).toBeNull();
+  });
+  it("does not release either reservation after an unknown second call and never retries it", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+    const assess = vi.fn(async () => {
+      throw new Error("provider_http_503");
+    });
+    await expect(
+      processAssistanceRun(t.db, result.outcome.id, { config: judged, generate, assess }),
+    ).rejects.toThrow("provider_http_503");
+    await processAssistanceRun(t.db, result.outcome.id, { config: judged, generate, assess });
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({
+      state: "failed",
+      actualCostMicros: null,
+      output: null,
+      validation: { generationCostMicros: 220 },
+    });
+    expect(run.reservedCostMicros).toBeGreaterThan(5000);
+    expect(assess).toHaveBeenCalledOnce();
+  });
+  it("invalidates changed Jev qualification before either call", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+    const spy = vi.fn(generate),
+      assess = vi.fn(async () => syntheticAssessment());
+    await expect(
+      processAssistanceRun(t.db, result.outcome.id, {
+        config: { ...judged, jev: { ...syntheticJevPolicy, guardrailRevision: "changed" } },
+        generate: spy,
+        assess,
+      }),
+    ).rejects.toThrow("configuration_changed");
+    expect(spy).not.toHaveBeenCalled();
+    expect(assess).not.toHaveBeenCalled();
+  });
+  it("records a known excessive second-call charge without releasing it or exposing a draft", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+    await expect(
+      processAssistanceRun(t.db, result.outcome.id, {
+        config: judged,
+        generate,
+        assess: async () => ({ ...syntheticAssessment(), costMicros: 6000 }),
+      }),
+    ).rejects.toThrow("cost_limit_exceeded");
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({ state: "failed", actualCostMicros: 6220, output: null });
+  });
+  it("rejects unsupported numeric facts before assessment and rechecks source freshness between calls", async () => {
+    for (const change of ["invalid", "source", "authority"]) {
+      const f = await fixture();
+      const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+      const assess = vi.fn(async () => syntheticAssessment());
+      await expect(
+        processAssistanceRun(t.db, result.outcome.id, {
+          config: judged,
+          assess,
+          generate: async (...args) => {
+            const result = await generate(...args);
+            if (change === "source")
+              await t.db.update(inquiries).set({ version: 2 }).where(eq(inquiries.id, f.source.id));
+            if (change === "authority")
+              await t.db
+                .update(grants)
+                .set({ revokedAt: new Date() })
+                .where(eq(grants.principalId, f.person.id));
+            return change === "invalid"
+              ? {
+                  ...result,
+                  output: { body: "The price is 900000.", citations: [], warnings: [] },
+                }
+              : result;
+          },
+        }),
+      ).rejects.toThrow();
+      expect(assess).not.toHaveBeenCalled();
+    }
+  });
   const routing: RoutingPolicy = {
     router: "typesafe/jev-router",
     models: ["test/fast", "test/deep"],

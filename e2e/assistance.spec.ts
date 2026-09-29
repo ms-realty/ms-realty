@@ -14,17 +14,81 @@ if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
 const connection = postgres(url, { max: 2 });
 const db = drizzle(connection, { schema });
 test.afterAll(async () => connection.end());
-function fixture() {
+function fixture(assessment = false) {
   return JSON.parse(
     execFileSync(
       process.execPath,
-      ["--conditions=react-server", "--import", "tsx", "src/features/ai/testing/seed.ts"],
+      [
+        "--conditions=react-server",
+        "--import",
+        "tsx",
+        "src/features/ai/testing/seed.ts",
+        ...(assessment ? ["jev"] : []),
+      ],
       {
         encoding: "utf8",
         env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
       },
     ).trim(),
   ) as { id: string; sourceId: string; actorId: string; token: string };
+}
+
+for (const javaScriptEnabled of [true, false]) {
+  test.describe(`typed assessment with JavaScript ${javaScriptEnabled}`, () => {
+    test.use({ javaScriptEnabled });
+    test("O32: Jev uncertainty remains visible and human review retains authority at 320px", async ({
+      context,
+      page,
+    }, testInfo) => {
+      const data = fixture(true);
+      await context.addCookies([
+        {
+          name: "msr_staff_session",
+          value: data.token,
+          url: origins.staff,
+          httpOnly: true,
+          secure: false,
+          sameSite: "Lax",
+        },
+      ]);
+      await page.setViewportSize({ width: 320, height: 800 });
+      for (const [locale, heading] of [
+        ["bg", "Автоматична оценка на черновата"],
+        ["ru", "Автоматическая оценка черновика"],
+        ["en", "Automated draft assessment"],
+      ]) {
+        await page.goto(hostUrl("staff", `/${locale}/operations/assistance/${data.id}`));
+        await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        ).toBe(true);
+      }
+      const panel = page
+        .locator("section")
+        .filter({
+          has: page.getByRole("heading", { name: "Automated draft assessment", exact: true }),
+        });
+      await expect(panel).toContainText("Insufficient evidence");
+      await panel.getByText("Assessment details", { exact: true }).click();
+      await expect(panel).toContainText("typesafe/jev-1.13-20260917");
+      await expect(panel).toContainText("10%");
+      await expect(panel).toContainText("1.50");
+      await panel.screenshot({ path: testInfo.outputPath("jev-assessment-320.png") });
+      const read = async () =>
+        (
+          await db.select().from(schema.assistanceRuns).where(eq(schema.assistanceRuns.id, data.id))
+        )[0];
+      expect(await read()).toMatchObject({
+        state: "draft",
+        reviewedAt: null,
+        actualCostMicros: 170,
+      });
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Record review", exact: true }).click();
+      await expect.poll(async () => (await read())?.state).toBe("accepted");
+      expect((await read())?.reviewedById).toBe(data.actorId);
+    });
+  });
 }
 
 test("O32: human review stays source-bound; disabled provider and real queue status preserve manual work", async ({

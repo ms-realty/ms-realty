@@ -79,7 +79,10 @@ TypeSafe's [use-case map](https://docs.typesafe.ai/concepts/use-case-map),
 | Inquiry/task triage | Choice from bounded purposes or queues; Score urgency | No autonomous assignment, promise, sending or permission change |
 | Translation review | Separate rubric questions for meaning, terminology and unsupported claims | BG source authority and human indexing approval unchanged |
 
-These domain applications are **planned, not implemented by the routing slice**. Give each a
+Follow-up implementation adds source-grounding, untrusted-instruction following and usefulness
+assessments to the existing inquiry/translation/note-extraction draft pipeline. Choice, Noul
+and Score are batched; the human sees the estimate and retains the decision. Search ranking,
+duplicate matching and candidate-value selection remain **planned**. Give each a
 separate schema, prompt/model version, input boundary and labeled BG/RU/EN/other-locale evaluation.
 Probabilities are not ground truth and Noul is not generic confidence. Do not invent a universal
 acceptance threshold. Evaluate abstention, multilingual performance, prompt injection, noisy
@@ -98,7 +101,8 @@ successful model judgment must not publish, send, grant access or approve a lega
 2. Negative live checks for disallowed models/providers and empty eligible pool, including
    fallback behavior and ZDR policy. No customer data during qualification.
 3. Labeled task/locale evaluations and documented acceptance thresholds before activation.
-4. Typed Jev contracts and their own failure/cost/quality tests before claiming domain integration.
+4. Live quality qualification of typed Jev contracts; local failure/cost tests and review UI
+   exercise do not establish model accuracy on MS Realty sources.
 
 Local transport/queue tests can establish the application's contract, not any of these live facts.
 R00 and the existing launch authorities remain unchanged.

@@ -1,9 +1,12 @@
 import "server-only";
+import { readJevPolicy } from "./jev";
+import type { JevPolicy } from "./jev-contract";
 import { type RoutingPolicy, readRoutingPolicy } from "./routing";
 
 export interface AssistanceConfig {
   readonly provider?: "openai" | "openrouter";
   readonly routing?: RoutingPolicy;
+  readonly jev?: JevPolicy;
   readonly enabled: boolean;
   readonly model: string | null;
   readonly apiKey: string | null;
@@ -25,6 +28,10 @@ export function assistanceConfig(
 ): AssistanceConfig {
   const provider = env.HERMES_PROVIDER ?? "openrouter";
   const routing = readRoutingPolicy(env);
+  const jev = readJevPolicy(env);
+  const jevReady =
+    env.HERMES_JEV_ENABLED !== "1" ||
+    (provider === "openrouter" && jev && env.HERMES_JEV_QUALIFIED === "1");
   const model =
     provider === "openrouter" ? (routing?.router ?? null) : env.HERMES_MODEL?.trim() || null;
   const apiKey = env.OPENAI_API_KEY?.trim() || null;
@@ -38,12 +45,14 @@ export function assistanceConfig(
   return {
     provider: provider === "openai" ? "openai" : "openrouter",
     routing: provider === "openrouter" ? (routing ?? undefined) : undefined,
+    jev,
     enabled: Boolean(
       env.HERMES_ENABLED === "1" &&
         env.HERMES_PROCESSING_APPROVED === "1" &&
         model &&
         credential &&
         transportReady &&
+        jevReady &&
         inputCostMicros &&
         outputCostMicros &&
         dailyLimitMicros,

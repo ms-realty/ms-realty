@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
 import { processAssistanceRun, requestAssistance } from "@/server/ai/assistance";
+import { syntheticAssessment, syntheticJevPolicy } from "@/server/ai/jev-testing";
 import { createSession } from "@/server/auth/sessions";
 import { JobQueue } from "@/server/jobs/queue";
 import { createStaff } from "@/server/testing";
@@ -46,6 +47,7 @@ try {
     .returning();
   if (!source) throw new Error("No synthetic source");
   const config = {
+    jev: process.argv[2] === "jev" ? syntheticJevPolicy : undefined,
     enabled: true,
     model: "synthetic-fixture-model",
     apiKey: "not-used",
@@ -70,6 +72,7 @@ try {
     );
     await processAssistanceRun(tx, requested.outcome.id, {
       config,
+      assess: async () => syntheticAssessment(),
       generate: async () => ({
         output: {
           body: "Synthetic draft: you asked about 2 bedrooms.",

@@ -1,6 +1,7 @@
 # Hermes bounded assistance
 
-The durable `ai.draft` job uses one bounded generation request, no provider tools, no
+The durable `ai.draft` job uses one bounded generation request and, when qualified, one typed
+assessment request. Neither receives provider tools. There are no
 application retries and `store: false`. Operator configuration keeps generation disabled by
 default. The requested router/model, routing policy, prompt/schema versions, source digest, token ceiling and rates
 are pinned to each request; a changed source, authority, configuration or UTC budget period
@@ -77,5 +78,50 @@ contract/authority/recovery behavior, not live model quality, cost qualification
 approval or release readiness. A real model/prompt/locale change requires its separate live
 evaluation and release evidence.
 
-See [OpenRouter/Jev research](../../../docs/research/openrouter-jev.md) for the separate typed
-decision API, verified capabilities and remaining qualification work.
+## Typed Jev assessment
+
+`HERMES_JEV_ENABLED=1` requests semantic assessment after deterministic draft validation,
+for inquiry, translation and broker-note extraction proposals. It additionally requires
+`HERMES_JEV_QUALIFIED=1` and valid `HERMES_JEV_POLICY` JSON. Requested but unqualified
+assessment disables generation as well; it is never silently omitted.
+
+```json
+{
+  "model": "typesafe/jev-1.13",
+  "snapshots": ["typesafe/jev-1.13-20260917"],
+  "guardrailRevision": "replace-with-live-decision-qualification-reference",
+  "inputCostMicros": 0.05,
+  "outputCostMicros": 0,
+  "maxCostMicros": 5000
+}
+```
+
+This illustrates the contract, not an approved rate card or authorization to activate it.
+The same restricted OpenRouter key must allow the qualified Jev snapshot and TypeSafe provider
+in addition to the generative pool. Verify Decisions API privacy and provider constraints
+separately. The decision request allows only TypeSafe, denies collection, requires ZDR and
+has no provider fallback. It sends no trace, user identifier, tools or generative messages.
+
+One batch asks independent Choice (source support), Noul (following untrusted instructions)
+and Score (task usefulness) questions over minimized source plus the validated proposal.
+Question text and policy are pinned by digest. State and questions together are capped at
+24k UTF-8 bytes. The reservation allows three 32k input contexts and three 1024-token output
+bounds at the approved rates; the configured `maxCostMicros` must cover them. Actual returned
+billing, not a token estimate, determines the successful second-call charge.
+
+The worker reserves both calls before queueing, rechecks source authority/freshness before
+the second call and again before saving. An uncertain assessment remains a draft requiring
+human review. It never sends, publishes, approves claims or changes a record. Source support
+and assessment details appear before the review form in BG/RU/EN, including native JS-off pages.
+Probabilities and score/confidence are model estimates, not calibrated correctness or access
+rights; no arbitrary threshold grants approval.
+
+If the second call's outcome is unknown, `actualCostMicros` remains null and the whole joint
+reservation remains charged to the application budget. The known generation cost remains
+in private validation evidence. A complete two-call result sums both actual costs. Malformed
+answers, an unqualified snapshot, changed policy or excess cost fail the draft without retry.
+Generation token columns describe the generation call; assessment token usage is separate in
+its validation record. No live performance or accuracy is implied by synthetic fixtures.
+
+See [OpenRouter/Jev research](../../../docs/research/openrouter-jev.md) for other applications
+and remaining live qualification work.
