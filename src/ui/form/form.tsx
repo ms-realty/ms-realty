@@ -8,6 +8,7 @@ import {
   useActionState,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -145,6 +146,31 @@ function FormSession<V extends FormValues>({
   const [state, formAction, pending] = useActionState(action, initialState, formPermalink);
   const [draft, setDraft] = useState({ responseId: state.responseId, values: state.values });
   const inFlight = useRef(false);
+  const nativeForm = useRef<HTMLFormElement>(null);
+  const adopted = useRef(false);
+  useLayoutEffect(() => {
+    if (adopted.current || !nativeForm.current) return;
+    adopted.current = true;
+    // Server-rendered controls are usable before JavaScript. Hydration preserves their DOM
+    // values, but React's initial draft does not know about those edits. Adopt only the safe
+    // declared fields before a later controlled render can replace the visitor's input.
+    const values = { ...state.values };
+    for (const name of Object.keys(values)) {
+      const control = nativeForm.current.elements.namedItem(name);
+      if (control instanceof HTMLInputElement) {
+        if (["hidden", "password", "file", "submit", "button"].includes(control.type)) continue;
+        if (control.type === "radio") continue;
+        values[name as keyof V] = (
+          control.type === "checkbox" ? (control.checked ? control.value : "") : control.value
+        ) as V[keyof V];
+      } else if (control instanceof HTMLTextAreaElement || control instanceof HTMLSelectElement) {
+        if (control instanceof HTMLSelectElement && control.multiple) continue;
+        values[name as keyof V] = control.value as V[keyof V];
+      }
+    }
+    if (Object.keys(values).some((key) => values[key] !== state.values[key]))
+      setDraft({ responseId: state.responseId, values });
+  }, [state.responseId, state.values]);
   useEffect(() => {
     if (!pending) inFlight.current = false;
   }, [pending]);
@@ -193,6 +219,7 @@ function FormSession<V extends FormValues>({
 
   return (
     <form
+      ref={nativeForm}
       action={formAction}
       noValidate
       aria-busy={pending}

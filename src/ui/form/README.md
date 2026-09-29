@@ -36,3 +36,11 @@ It writes no agency data. Its host-only HttpOnly cookie stores one signed practi
 (operation identity, text digest, time, revision, reference) for one hour. It neither stores
 the entered text nor substitutes for the database operation ledger. Storybook states are
 synthetic; `e2e/forms.spec.ts` covers the real enhanced and JavaScript-disabled path.
+
+On the first client commit, the form adopts pre-hydration edits from its declared safe native
+text/textarea, single-select and checkbox controls. This prevents a subsequent controlled edit
+from restoring the server's initial draft over text entered on a slow connection. Operation
+identity, revisions, hidden fields, passwords and file controls are excluded. It runs once per
+form instance; later rejected/conflict states remain governed by the server response. The
+server still validates every submitted field and explicit confirmation. The delayed-script
+journeys in `e2e/form-hydration.spec.ts` cover early typing, selection and review confirmation.
