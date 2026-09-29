@@ -52,6 +52,26 @@ test("O32: human review stays source-bound; disabled provider and real queue sta
     page.getByText("Synthetic draft: you asked about 2 bedrooms.", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("withheld@example.test", { exact: false })).toHaveCount(0);
+  const source = page.locator("section").filter({
+    has: page.getByRole("heading", { name: "Included source", exact: true }),
+  });
+  await expect(source).toContainText("Synthetic visitor asks about 2 bedrooms.");
+  const draft = page.getByRole("heading", { name: "Proposed text", exact: true });
+  const sourceBox = await source.boundingBox();
+  const draftBox = await draft.boundingBox();
+  if (!sourceBox || !draftBox) throw new Error("Source or draft not rendered");
+  expect(sourceBox.y).toBeLessThan(draftBox.y);
+  await page.screenshot({
+    path: testInfo.outputPath("assistance-source-review.png"),
+    fullPage: true,
+  });
+  await expect(page.getByText("synthetic-fixture-model", { exact: true })).toBeHidden();
+  await page.getByText("Generation details", { exact: true }).click();
+  await expect(page.getByText("synthetic-fixture-model", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Open the inquiry", exact: true }).click();
+  await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${data.sourceId}`));
+  await page.goto(hostUrl("staff", `/en/operations/assistance/${data.id}`));
+
   const stale = await context.newPage();
   await stale.goto(hostUrl("staff", `/en/operations/assistance/${data.id}`));
   await stale.getByRole("checkbox").check();

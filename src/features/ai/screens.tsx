@@ -209,21 +209,16 @@ export async function AssistanceRunScreen({
           }
         />
       ) : null}
-      <dl className="grid gap-3 sm:grid-cols-2">
-        {[
-          [copy.status, run.state],
-          [copy.model, run.model],
-          [copy.revision, run.sourceVersion],
-          [copy.digest, run.sourceDigest],
-          [copy.generated, run.generatedAt?.toISOString() ?? "—"],
-          [copy.costs, run.actualCostMicros ?? copy.unknown],
-        ].map(([label, value]) => (
-          <div key={String(label)}>
-            <dt className="text-caption text-text-muted">{label}</dt>
-            <dd className="break-all">{value}</dd>
-          </div>
-        ))}
-      </dl>
+      <p>
+        {copy.status}: <strong>{run.state}</strong>
+      </p>
+      {extractedSource ? (
+        <IntakeSourcePanel source={extractedSource} locale={locale} />
+      ) : translatedSource ? (
+        <LocaleSourcePanel source={translatedSource} locale={locale} />
+      ) : (
+        sourcePanel(source, locale)
+      )}
       {output.success ? (
         <section className="space-y-4">
           <h2 className="text-subheading font-semibold">{copy.draft}</h2>
@@ -282,13 +277,6 @@ export async function AssistanceRunScreen({
           title={run.state === "failed" ? copy.failed : copy.noOutput}
         />
       )}
-      {extractedSource ? (
-        <IntakeSourcePanel source={extractedSource} locale={locale} />
-      ) : translatedSource ? (
-        <LocaleSourcePanel source={translatedSource} locale={locale} />
-      ) : (
-        sourcePanel(source, locale)
-      )}
       {run.state === "draft" && sourceCurrent && output.success ? (
         <AssistanceForm
           locale={locale}
@@ -298,6 +286,25 @@ export async function AssistanceRunScreen({
           action={assistanceAction.bind(null, locale, id, "review")}
         />
       ) : null}
+      <details className="space-y-4">
+        <summary className="min-h-11 cursor-pointer py-2 font-semibold underline underline-offset-4">
+          {copy.evidence}
+        </summary>
+        <dl className="grid gap-3 sm:grid-cols-2">
+          {[
+            [copy.model, run.model],
+            [copy.revision, run.sourceVersion],
+            [copy.digest, run.sourceDigest],
+            [copy.generated, run.generatedAt?.toISOString() ?? "—"],
+            [copy.costs, run.actualCostMicros ?? copy.unknown],
+          ].map(([label, value]) => (
+            <div key={String(label)}>
+              <dt className="text-caption text-text-muted">{label}</dt>
+              <dd className="break-all">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
     </DiscoveryPage>
   );
 }

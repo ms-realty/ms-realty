@@ -84,10 +84,23 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     .select()
     .from(schema.tasks)
     .where(eq(schema.tasks.inquiryId, f.inquiryId));
+  if (!task) throw new Error("No linked intake follow-up task");
   expect(task).toMatchObject({ caseId, ownerId: f.staffId, state: "open" });
   await expect(
     page.getByRole("link", { name: "Existing intake follow-up", exact: true }),
   ).toBeVisible();
+  // Open commitments must be reachable before the long editable requirements form.
+  const followUp = page.getByRole("link", { name: "Existing intake follow-up", exact: true });
+  const requirements = page.getByRole("heading", { name: "Requirements", exact: true });
+  const followUpBox = await followUp.boundingBox();
+  const requirementsBox = await requirements.boundingBox();
+  if (!followUpBox || !requirementsBox) throw new Error("Case task or requirements not rendered");
+  expect(followUpBox.y).toBeLessThan(requirementsBox.y);
+  await followUp.click();
+  await expect(page).toHaveURL(hostUrl("staff", `/en/tasks/${task.id}`));
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Existing intake follow-up");
+  await page.goto(hostUrl("staff", `/en/cases/${caseId}`));
+  await page.screenshot({ path: testInfo.outputPath("case-current-work.png"), fullPage: true });
   await expect(
     page.getByText("Broker interpretation · client agreement has not been recorded", {
       exact: true,

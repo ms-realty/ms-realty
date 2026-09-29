@@ -38,3 +38,20 @@ no newer changed screen contract was present in the referenced final-state/revie
 Keep the proven bounded repairs, await exact new evidence and do not infer a full design sign-off
 or redesign working screens from the coordination message alone. Overall runtime/design parity
 was already open here and remains open. No message was sent to another chat by this delivery task.
+
+## 29 September targeted flow follow-up
+
+The subsequent design message identified seller Back, broker current work, inquiry context in
+AI review, mobile comparison and client message-review layouts. These are reported Figma
+findings; they are not automatically frontend defects. Source and Linux browser verification:
+
+| Flow | Current implementation and evidence | Still open |
+|---|---|---|
+| Seller preview Back | Already links to the same client Case on `my.`. Native-browser checks now click Back and reopen the same preview in all three profiles. | New exact design composition/contract |
+| Broker current work | Case tasks were after editable requirements. Open commitments now precede that form; the internal next action is explicitly labelled. Browser checks open the actual task and preserve client exclusion of internal text. | Overall Case composition and approved visual parity |
+| AI inquiry review | The frozen, minimized source and original inquiry link already existed. Source now precedes proposed text; generation metadata is an accessible native disclosure after review. Browser checks retain source/return navigation, metadata access, stale-source rejection and revoked-access denial. | Full O32 design and human language acceptance |
+| Mobile comparison | Current public comparison uses up to three freshly read published listings. The prior browser contract covers withdrawal recheck. | New reported layout contract and fuller visual acceptance |
+| Client message review | Existing Case/mail review flows retain human confirmation and durable receipts. | Precise changed client-screen contract; do not equate staff-email checks with client design acceptance |
+
+This bounded follow-up is not overall design sign-off. Exact evidence and limitations are in
+`reviews/2026-09-29-workflow-context.md`.

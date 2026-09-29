@@ -2,6 +2,7 @@
 const en = {
   title: "Hermes draft assistance",
   source: "Included source",
+  evidence: "Generation details",
   excluded:
     "Names, contact details, URLs, documents and other records are excluded. Check the minimized text before requesting a draft.",
   boundary:
@@ -64,6 +65,7 @@ const en = {
 const bg: Record<keyof typeof en, string> = {
   title: "Чернови с Hermes",
   source: "Включен източник",
+  evidence: "Данни за генерирането",
   excluded:
     "Имена, контакти, URL адреси, документи и други записи са изключени. Проверете ограничените данни преди заявка.",
   boundary:
@@ -126,6 +128,7 @@ const bg: Record<keyof typeof en, string> = {
 const ru: Record<keyof typeof en, string> = {
   title: "Черновики Hermes",
   source: "Включённый источник",
+  evidence: "Сведения о генерации",
   excluded:
     "Имена, контакты, URL, документы и другие записи исключены. Проверьте ограниченные данные перед запросом.",
   boundary:

@@ -311,7 +311,10 @@ export async function CaseScreen(
         ) : null}
         {row.disposition === "active" ? (
           <>
-            <p>{row.nextAction ?? c.noAction}</p>
+            <p>
+              {staff ? <strong>{c.next}: </strong> : null}
+              {row.nextAction ?? c.noAction}
+            </p>
             <WorkflowTime value={row.dueAt} locale={props.locale} />
           </>
         ) : (
@@ -350,6 +353,35 @@ export async function CaseScreen(
           {ownerPreviewCopy(props.locale).ownerLink} · {reference}
         </a>
       ))}
+      {commitments ? (
+        <WorkflowSection title={c.tasks}>
+          {commitments.rows.length ? (
+            <ul className="space-y-4">
+              {commitments.rows.map(({ task, ownerName }) => (
+                <li key={task.id} className="space-y-1">
+                  <a className={workflowLink} href={`/${props.locale}/tasks/${task.id}`}>
+                    {task.title}
+                  </a>
+                  <p>
+                    {c.owned}: {ownerName ?? "—"}
+                  </p>
+                  <WorkflowTime
+                    value={task.state === "waiting" ? task.followUpAt : task.dueAt}
+                    locale={props.locale}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>{c.noTasks}</p>
+          )}
+          {commitments.hasMore ? (
+            <a className={workflowLink} href={`/${props.locale}/tasks`}>
+              {c.moreTasks}
+            </a>
+          ) : null}
+        </WorkflowSection>
+      ) : null}
       {showOverview ? (
         <>
           <WorkflowSection title={c.brief}>
@@ -433,35 +465,6 @@ export async function CaseScreen(
             </WorkflowSection>
           ) : null}
         </>
-      ) : null}
-      {commitments ? (
-        <WorkflowSection title={c.tasks}>
-          {commitments.rows.length ? (
-            <ul className="space-y-4">
-              {commitments.rows.map(({ task, ownerName }) => (
-                <li key={task.id} className="space-y-1">
-                  <a className={workflowLink} href={`/${props.locale}/tasks/${task.id}`}>
-                    {task.title}
-                  </a>
-                  <p>
-                    {c.owned}: {ownerName ?? "—"}
-                  </p>
-                  <WorkflowTime
-                    value={task.state === "waiting" ? task.followUpAt : task.dueAt}
-                    locale={props.locale}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>{c.noTasks}</p>
-          )}
-          {commitments.hasMore ? (
-            <a className={workflowLink} href={`/${props.locale}/tasks`}>
-              {c.moreTasks}
-            </a>
-          ) : null}
-        </WorkflowSection>
       ) : null}
       {showProperties ? (
         <WorkflowSection title={c.interests}>

@@ -99,6 +99,11 @@ test("C12 / AT18 exact owner preview, private reviewed images and current consen
     await expect(
       owner.getByRole("heading", { name: "Current approved Bulgarian source", exact: true }),
     ).toBeVisible();
+    // Returning from a seller preview keeps the current client Case and host.
+    await owner.getByRole("link", { name: "Open case", exact: true }).click();
+    await expect(owner).toHaveURL(hostUrl("client", `/en/overview/${f.caseId}`));
+    await owner.getByRole("link", { name: /Review owner listing preview/ }).click();
+    await expect(owner).toHaveURL(preview);
     const image = owner.locator(`main img[src*="${f.assetId}"]`);
     await expect(image).toBeVisible();
     await expect
