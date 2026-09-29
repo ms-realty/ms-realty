@@ -11,6 +11,8 @@ export interface OutboundMessage {
   readonly recipient: string;
   readonly template: string;
   readonly params: Record<string, unknown>;
+  /** Verified private bytes, materialized only for the provider call; never persisted in payloads. */
+  readonly files?: readonly { versionId: string; bytes: Uint8Array }[];
   readonly secretParams: Record<string, unknown> | null;
 }
 

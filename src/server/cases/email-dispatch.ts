@@ -22,6 +22,8 @@ import { can } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Database, Executor } from "../db";
 import { AppError } from "../errors";
+import { fileServices } from "../files/config";
+import type { FileStorage } from "../files/storage";
 import type { MessageProvider, ProviderResult } from "../jobs/provider";
 import { assertRecoveryOpen } from "../recovery/quarantine";
 import { eligibleCaseRecipient } from "./email";
@@ -30,8 +32,9 @@ import {
   caseEmailTemplate,
   type EmailConfig,
   emailContent,
-  renderCaseEmail,
+  validateCaseEmail,
 } from "./email-contract";
+import { currentEmailFiles, loadEmailFiles } from "./email-files";
 
 type Action = typeof externalActions.$inferSelect;
 async function current(db: Executor, row: Action, config: EmailConfig) {
@@ -83,7 +86,10 @@ async function current(db: Executor, row: Action, config: EmailConfig) {
     message.body !== content.body ||
     canonicalJson(message.recipients) !== canonicalJson([content.recipient]) ||
     canonicalJson(message.attachments) !==
-      canonicalJson(content.calendar ? [content.calendar] : []) ||
+      canonicalJson([
+        ...(content.calendar ? [content.calendar] : []),
+        ...(content.documents ?? []),
+      ]) ||
     message.payloadDigest !== digest ||
     message.approvedDigest !== digest ||
     approval.subjectHash !== digest ||
@@ -102,7 +108,7 @@ async function current(db: Executor, row: Action, config: EmailConfig) {
   )
     return null;
   if (
-    !renderCaseEmail(
+    !validateCaseEmail(
       {
         outboxId: row.id,
         idempotencyKey: row.effectKey,
@@ -172,6 +178,16 @@ async function current(db: Executor, row: Action, config: EmailConfig) {
       !(await currentCalendar(db, content.calendar, content.recipient.partyId)))
   )
     return null;
+  if (
+    !(await currentEmailFiles(
+      db,
+      actor,
+      message.caseId,
+      recipient.partyId,
+      content.documents ?? [],
+    ))
+  )
+    return null;
   return content;
 }
 async function cancel(db: Executor, row: Action, code: string) {
@@ -209,7 +225,7 @@ export async function dispatchCaseEmail(
   db: Database,
   provider: MessageProvider,
   id: string,
-  options: { config?: EmailConfig | null; now?: Date } = {},
+  options: { config?: EmailConfig | null; now?: Date; storage?: FileStorage } = {},
 ) {
   await assertRecoveryOpen(db);
   const config = options.config === undefined ? caseEmailConfig() : options.config,
@@ -286,6 +302,30 @@ export async function dispatchCaseEmail(
     if (!row) throw new AppError("not_found");
     if (row.state !== "attempting" || row.version !== claimed.row.version) return row.state;
     if (!content) return cancel(tx, row, "case_email_eligibility_changed");
+    let files: { versionId: string; bytes: Buffer }[] = [];
+    if (content.documents?.length) {
+      const [approval] = await tx
+        .select({ decidedById: approvals.decidedById })
+        .from(messages)
+        .innerJoin(approvals, eq(approvals.id, messages.approvalId))
+        .where(eq(messages.id, content.messageId));
+      if (!approval?.decidedById) return cancel(tx, row, "case_email_eligibility_changed");
+      try {
+        files = await loadEmailFiles(
+          tx,
+          options.storage ?? fileServices().storage,
+          { kind: "staff", id: approval.decidedById },
+          content.caseId,
+          content.recipient.partyId,
+          content.documents,
+        );
+      } catch {
+        // No provider call has occurred. A missing/changed file is not an unknown send.
+        return cancel(tx, row, "case_email_attachment_unavailable");
+      }
+      if (!(await current(tx, row, config)))
+        return cancel(tx, row, "case_email_eligibility_changed");
+    }
     let result: ProviderResult | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
@@ -297,6 +337,7 @@ export async function dispatchCaseEmail(
           recipient: content.recipient.address,
           template: caseEmailTemplate,
           params: content,
+          files,
           secretParams: null,
         }),
         new Promise<never>((_, reject) => {

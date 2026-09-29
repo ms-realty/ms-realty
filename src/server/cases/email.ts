@@ -33,6 +33,8 @@ import {
   emailContent,
   emailRecipient,
 } from "./email-contract";
+import { currentEmailFiles, freezeEmailFiles, listEmailFiles } from "./email-files";
+import { emailFile } from "./email-files-contract";
 import { bumpCase, caseEvent, caseFor, liveParticipation } from "./shared";
 
 export async function eligibleCaseRecipient(
@@ -107,6 +109,11 @@ const draftShape = z
       .refine((ids) => new Set(ids).size === ids.length)
       .optional(),
     appointmentId: z.uuid().optional(),
+    documentVersionIds: z
+      .array(z.uuid())
+      .max(5)
+      .refine((ids) => new Set(ids).size === ids.length)
+      .default([]),
     subject: emailContent.shape.subject,
     body: emailContent.shape.body,
   })
@@ -116,14 +123,20 @@ const draftShape = z
   });
 function contentOf(row: typeof messages.$inferSelect, config: EmailConfig) {
   const recipients = z.array(emailRecipient).length(1).parse(row.recipients);
-  const attached = calendarSnapshot.array().max(1).parse(row.attachments);
+  const attached = z.array(z.union([calendarSnapshot, emailFile])).parse(row.attachments);
+  const calendars = attached.filter((item) => !("kind" in item && item.kind === "document"));
+  if (calendars.length > 1) throw new AppError("validation_failed");
+  const documents = attached.filter(
+    (item): item is z.infer<typeof emailFile> => "kind" in item && item.kind === "document",
+  );
   return emailContent.parse({
     messageId: row.id,
     caseId: row.caseId,
     subject: row.subject,
     body: row.body,
     recipient: recipients[0],
-    ...(attached[0] ? { calendar: attached[0] } : {}),
+    ...(calendars[0] ? { calendar: calendars[0] } : {}),
+    ...(documents.length ? { documents } : {}),
     from: config.from,
     replyTo: `m-${keyedHash(getEnv().authSecret, `case-email:${row.id}`).slice(0, 40)}@${config.replyDomain}`,
   });
@@ -169,6 +182,13 @@ export async function draftCaseEmail(
               organizer,
             )
           : null;
+        const documents = await freezeEmailFiles(
+          ctx.tx,
+          live.actor,
+          row.id,
+          recipient.partyId,
+          input.documentVersionIds,
+        );
         const id = randomUUID();
         await ctx.tx.insert(messages).values({
           id,
@@ -183,12 +203,13 @@ export async function draftCaseEmail(
           subject: input.subject,
           body: input.body,
           recipients: [recipient],
-          attachments: calendar ? [calendar] : [],
+          attachments: [...(calendar ? [calendar] : []), ...documents],
           payloadDigest: hashRequest({
             subject: input.subject,
             body: input.body,
             recipient,
             ...(calendar ? { calendar } : {}),
+            ...(documents.length ? { documents } : {}),
           }),
         });
         messageIds.push(id);
@@ -290,6 +311,12 @@ export async function caseEmailWorkbench(
         ["confirmed", "reschedule_requested", "cancelled"].includes(a.state) && a.confirmedStartsAt,
     ),
     recipients,
+    documentOptions: await listEmailFiles(
+      db,
+      live.actor,
+      id,
+      recipients.map((r) => r.partyId),
+    ),
     items,
     enabled: Boolean(config),
     canSend: await can(db, live.actor, "message.send_external", resource),
@@ -348,6 +375,16 @@ export async function approveCaseEmail(
         true,
       );
       if (!current || hashRequest(current) !== hashRequest(content.recipient))
+        throw new AppError("version_conflict");
+      if (
+        !(await currentEmailFiles(
+          ctx.tx,
+          live.actor,
+          row.id,
+          current.partyId,
+          content.documents ?? [],
+        ))
+      )
         throw new AppError("version_conflict");
       if (content.calendar) {
         await assertCan(ctx.tx, live.actor, "appointment.manage", {

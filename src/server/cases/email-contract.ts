@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import {
   calendarEmailFile,
@@ -6,6 +7,7 @@ import {
   senderAddress,
 } from "../appointments/calendar-contract";
 import type { OutboundMessage } from "../jobs/provider";
+import { emailFiles } from "./email-files-contract";
 
 export const caseEmailTemplate = "case.reviewed-email.v1";
 export const emailRecipient = z
@@ -37,6 +39,7 @@ export const emailContent = z
       .regex(/^[^\r\n]+$/),
     replyTo: z.email(),
     calendar: calendarSnapshot.optional(),
+    documents: emailFiles.optional(),
   })
   .strict();
 export type EmailContent = z.infer<typeof emailContent>;
@@ -53,7 +56,7 @@ export function caseEmailConfig(): EmailConfig | null {
     return null;
   return { from, replyDomain };
 }
-export function renderCaseEmail(message: OutboundMessage, config: EmailConfig | null) {
+export function validateCaseEmail(message: OutboundMessage, config: EmailConfig | null) {
   if (!config || message.channel !== "email" || message.template !== caseEmailTemplate) return null;
   const parsed = emailContent.safeParse(message.params);
   if (!parsed.success) return null;
@@ -69,22 +72,39 @@ export function renderCaseEmail(message: OutboundMessage, config: EmailConfig | 
     (p.calendar.caseId !== p.caseId || p.calendar.organizer !== senderAddress(p.from))
   )
     return null;
+  return p;
+}
+export function renderCaseEmail(message: OutboundMessage, config: EmailConfig | null) {
+  const p = validateCaseEmail(message, config);
+  if (!p) return null;
+  const files = p.documents ?? [];
+  if (files.length !== (message.files?.length ?? 0)) return null;
+  const attachments = [];
+  for (const [index, file] of files.entries()) {
+    const materialized = message.files?.[index];
+    if (
+      !materialized ||
+      materialized.versionId !== file.versionId ||
+      materialized.bytes.length !== file.byteSize ||
+      createHash("sha256").update(materialized.bytes).digest("hex") !== file.sha256
+    )
+      return null;
+    attachments.push({
+      filename: file.fileName,
+      content: Buffer.from(materialized.bytes).toString("base64"),
+      content_type: file.contentType,
+    });
+  }
+  if (p.calendar)
+    attachments.push({
+      filename: "appointment.ics",
+      content: Buffer.from(calendarEmailFile(p.calendar, p.recipient.address)).toString("base64"),
+      content_type: `text/calendar; charset=utf-8; method=${p.calendar.cancelled ? "CANCEL" : "REQUEST"}`,
+    });
   return {
     subject: p.subject,
     text: p.body,
     reply_to: p.replyTo,
-    ...(p.calendar
-      ? {
-          attachments: [
-            {
-              filename: "appointment.ics",
-              content: Buffer.from(calendarEmailFile(p.calendar, p.recipient.address)).toString(
-                "base64",
-              ),
-              content_type: `text/calendar; charset=utf-8; method=${p.calendar.cancelled ? "CANCEL" : "REQUEST"}`,
-            },
-          ],
-        }
-      : {}),
+    ...(attachments.length ? { attachments } : {}),
   };
 }

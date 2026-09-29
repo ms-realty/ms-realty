@@ -58,11 +58,13 @@ export async function workflowAction(
     scope = workflowScope(command, id);
   const fields = workflowFields[command] ?? [];
   const values = readFormValues<FormValues>(data, fields);
-  if (command === "emailDraft")
-    values.subscriptionIds = data
-      .getAll("subscriptionIds")
-      .map((value) => (typeof value === "string" ? value : "invalid"))
-      .join("\n");
+  if (command === "emailDraft") {
+    for (const name of ["subscriptionIds", "documentVersionIds"] as const)
+      values[name] = data
+        .getAll(name)
+        .map((value) => (typeof value === "string" ? value : "invalid"))
+        .join("\n");
+  }
   const envelope = readFormEnvelope(data, scope);
   const operationId = envelope?.operationId ?? issueFormOperation(scope);
   const status = {
@@ -98,6 +100,9 @@ export async function workflowAction(
               ...base,
               subscriptionIds: values.subscriptionIds ? values.subscriptionIds.split("\n") : [],
               appointmentId: values.appointmentId || undefined,
+              documentVersionIds: values.documentVersionIds
+                ? values.documentVersionIds.split("\n")
+                : [],
               subject: values.subject ?? "",
               body: values.body ?? "",
             })

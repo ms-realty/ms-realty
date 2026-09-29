@@ -1,4 +1,10 @@
 const en = {
+  files: "Reviewed documents (up to 5, total 10 MiB)",
+  fileBoundary:
+    "Files must already be available to every selected recipient through their current document request. Email copies cannot be recalled when portal access is revoked.",
+  fileReview: "Exact document attachments",
+  fileApproval: "I reviewed the recipient, complete email and every attached file shown above",
+
   title: "Case email",
   draft: "New email draft",
   recipient: "Recipient",
@@ -44,6 +50,12 @@ const en = {
   limited: "Showing the latest 50 email records.",
 };
 const bg: typeof en = {
+  files: "Прегледани документи (до 5, общо 10 MiB)",
+  fileBoundary:
+    "Всеки избран получател трябва вече да има достъп до файловете чрез текущото си искане за документи. Изпратените копия не могат да бъдат оттеглени при отнемане на достъпа до портала.",
+  fileReview: "Точни приложения към писмото",
+  fileApproval: "Проверих получателя, цялото писмо и всеки приложен файл по-горе",
+
   title: "Имейл по случая",
   draft: "Нов имейл — чернова",
   recipient: "Получател",
@@ -87,6 +99,12 @@ const bg: typeof en = {
   limited: "Показани са последните 50 имейла.",
 };
 const ru: typeof en = {
+  files: "Проверенные документы (до 5, всего 10 MiB)",
+  fileBoundary:
+    "Все выбранные получатели уже должны иметь доступ к файлам через действующий запрос документов. Отзыв доступа к кабинету не удаляет отправленные по почте копии.",
+  fileReview: "Точные вложения письма",
+  fileApproval: "Я проверил получателя, всё письмо и каждый приложенный файл выше",
+
   title: "Письма по делу",
   draft: "Новый черновик письма",
   recipient: "Получатель",

@@ -31,6 +31,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
       <WorkflowSection title={c.draft}>
         <p>{c.immutable}</p>
         <p>{c.separateDrafts}</p>
+        {view.documentOptions.length ? <p>{c.fileBoundary}</p> : null}
         {view.recipients.length ? (
           <BoundWorkflowForm
             {...props}
@@ -63,6 +64,22 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                   })),
                 ],
               },
+              ...(view.documentOptions.length
+                ? [
+                    {
+                      name: "documentVersionIds",
+                      label: c.files,
+                      type: "checkbox-group" as const,
+                      options: view.documentOptions.map((file) => ({
+                        value: file.versionId,
+                        label: `${file.fileName} · v${file.versionNumber} · ${file.byteSize} B · ${view.recipients
+                          .filter((r) => r.partyId === file.partyId)
+                          .map((r) => r.address)
+                          .join(", ")}`,
+                      })),
+                    },
+                  ]
+                : []),
               { name: "subject", label: c.subject, required: true },
               { name: "body", label: c.body, type: "textarea", required: true },
             ]}
@@ -82,7 +99,35 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
               <article key={message.id} className="space-y-4 border-t border-border py-5">
                 <h3 className="font-semibold">{content?.subject ?? message.subject}</h3>
                 <p>{message.state === "draft" ? c.draftState : c[message.state]}</p>
-                <p>{content?.calendar ? `Email · appointment.ics` : c.channel}</p>
+                <p>
+                  {content?.documents?.length
+                    ? c.fileReview
+                    : content?.calendar
+                      ? `Email · appointment.ics`
+                      : c.channel}
+                </p>
+                {content?.documents?.length ? (
+                  <section aria-label={c.fileReview} className="space-y-3">
+                    <h4 className="font-semibold">{c.fileReview}</h4>
+                    <p>{c.fileBoundary}</p>
+                    <ul className="space-y-3">
+                      {content.documents.map((file) => (
+                        <li key={file.versionId}>
+                          <a
+                            className={workflowLink}
+                            href={`/api/files/private/document/${file.versionId}`}
+                          >
+                            {file.fileName}
+                          </a>
+                          <p>
+                            v{file.versionNumber} · {file.byteSize} B · {file.contentType}
+                          </p>
+                          <p className="break-all text-compact">SHA-256: {file.sha256}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
                 {content?.calendar ? (
                   <section aria-label={c.calendarReview} className="space-y-3">
                     <h4 className="font-semibold">
@@ -177,7 +222,11 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                           { name: "reviewHash", label: "", type: "hidden" },
                           {
                             name: "reviewed",
-                            label: content.calendar ? c.calendarQueueReview : c.reviewed,
+                            label: content.documents?.length
+                              ? c.fileApproval
+                              : content.calendar
+                                ? c.calendarQueueReview
+                                : c.reviewed,
                             type: "checkbox",
                             required: true,
                           },

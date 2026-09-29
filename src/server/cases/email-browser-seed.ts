@@ -3,8 +3,10 @@ import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
+import { LocalFileStorage } from "../files/storage";
 import { consentPolicyKey } from "../privacy/preferences";
 import { syntheticServiceEmailTerms } from "../privacy/testing";
+import { emailFileFixture } from "./email-file-testing";
 import { caseFixture } from "./testing";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -14,7 +16,11 @@ const connection = postgres(url, { max: 1, onnotice: () => {} }),
   db = drizzle(connection, { schema });
 try {
   const terms = await syntheticServiceEmailTerms(db);
-  const f = await caseFixture(db),
+  const withFile =
+    process.env.E2E_CASE_EMAIL_FILES === "1"
+      ? await emailFileFixture(db, new LocalFileStorage(process.env.E2E_FILE_STORAGE_ROOT ?? ""))
+      : null;
+  const f = withFile ?? (await caseFixture(db)),
     address = `email-${randomUUID()}@example.test`;
   const [contact] = await db
     .insert(schema.contactMethods)
@@ -103,6 +109,9 @@ try {
       addresses,
       contactId: contact.id,
       appointmentId,
+      fileId: withFile?.file.id,
+      fileName: withFile?.file.fileName,
+      fileHash: withFile?.file.sha256,
     }),
   );
 } finally {
