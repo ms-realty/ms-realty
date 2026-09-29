@@ -162,6 +162,19 @@ export async function sendInquiry(
       };
     if (isAppError(error) && error.code === "operation_pending")
       return { ...state, outcome: { kind: "accepted", message: copy.notConfirmed, status } };
+    if (isAppError(error) && error.code === "rate_limited")
+      return {
+        ...state,
+        outcome: {
+          kind: "rejected",
+          code: error.code,
+          message: copy.rateLimited.replace(
+            "{seconds}",
+            String(Math.max(1, Math.ceil(error.retryAfterSeconds ?? 120))),
+          ),
+          retryable: true,
+        },
+      };
     if (isAppError(error) && error.outcome === "not_applied")
       return {
         ...state,

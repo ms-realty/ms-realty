@@ -136,8 +136,12 @@ async function uploadDocument(
       `Synthetic ${purpose}: reviewed exact uploaded bytes for this test only, no legal conclusion.`,
     );
   await review.getByRole("checkbox").check();
+  const uploadReceipt = new URL(page.url()).searchParams.get("saved");
   await review.getByRole("button", { name: "Record review", exact: true }).click();
-  await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("saved")));
+  // Upload already left a saved receipt in this URL. Wait for the review's new receipt.
+  await expect(page).toHaveURL((url) =>
+    Boolean(url.searchParams.get("saved") && url.searchParams.get("saved") !== uploadReceipt),
+  );
   const [reviewed] =
     await connection`select state, review_type, professional_validation from document_versions where id = ${versionId}`;
   expect(reviewed).toMatchObject({
@@ -272,7 +276,11 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     )
     .check();
   await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
+  const mediaUploadReceipt = new URL(page.url()).searchParams.get("saved");
   await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await expect(page).toHaveURL((url) =>
+    Boolean(url.searchParams.get("saved") && url.searchParams.get("saved") !== mediaUploadReceipt),
+  );
   await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
 

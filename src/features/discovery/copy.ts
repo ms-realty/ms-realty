@@ -365,6 +365,15 @@ const rows = {
     "Αυτό το ακίνητο δεν είναι διαθέσιμο εδώ.",
     "הנכס הזה אינו זמין כאן.",
   ],
+  rateLimited: [
+    "Изчакайте {seconds} секунди, преди да опитате отново. Запитването не е изпратено и въведените данни са запазени.",
+    "Wait {seconds} seconds before trying again. Your inquiry was not submitted and your entries are retained.",
+    "Подождите {seconds} секунд перед повторной попыткой. Заявка не отправлена, введённые данные сохранены.",
+    "Warten Sie {seconds} Sekunden, bevor Sie es erneut versuchen. Ihre Anfrage wurde nicht gesendet. Ihre Eingaben bleiben erhalten.",
+    "Wacht {seconds} seconden voordat u het opnieuw probeert. Uw aanvraag is niet verzonden en uw invoer blijft bewaard.",
+    "Περιμένετε {seconds} δευτερόλεπτα πριν δοκιμάσετε ξανά. Το αίτημά σας δεν υποβλήθηκε και τα στοιχεία σας διατηρούνται.",
+    "המתינו {seconds} שניות לפני ניסיון נוסף. הפנייה לא נשלחה והפרטים שהזנתם נשמרו.",
+  ],
   failed: [
     "Не успяхме да заредим информацията. Опитайте отново.",
     "We could not load the information. Please try again.",

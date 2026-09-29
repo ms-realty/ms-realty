@@ -1,7 +1,7 @@
 // Real public intake → authorized staff queue → accountable follow-up and conflict recovery.
 // Identity ceremonies have their own suite; these fixtures seed valid sessions only in this
 // run's disposable database. They never stand in for live acceptance or launch evidence.
-import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
 import { type BrowserContext, expect, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -79,6 +79,10 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   context,
 }) => {
   test.setTimeout(90000);
+  // Each isolated journey represents a different visitor behind the trusted edge.
+  // Keep the production limiter; do not make all three browser profiles share its bucket.
+  const visitorIp = `2001:db8:${randomBytes(12).toString("hex").match(/.{4}/g)?.join(":")}`;
+  await context.setExtraHTTPHeaders({ "cf-connecting-ip": visitorIp });
   const marker = `Browser inquiry ${randomUUID()}`;
   const email = `${randomUUID()}@example.test`;
   await page.goto(hostUrl("public", "/en/inquire"));
@@ -188,3 +192,55 @@ test("each work route requires staff access, including detail and reconciliation
     await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
   }
 });
+
+for (const javaScriptEnabled of [true, false]) {
+  test(`public inquiry rate-limit recovery with JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+  }, testInfo) => {
+    const visitorIp = `2001:db8:${randomBytes(12).toString("hex").match(/.{4}/g)?.join(":")}`;
+    const secret = process.env.E2E_AUTH_SECRET;
+    if (!secret) throw new Error("No isolated rate-limit secret");
+    const bucketKey = `inquiry.ip:${createHmac("sha256", secret).update(visitorIp).digest("hex")}`;
+    // Seed only this synthetic visitor's exhausted bucket, then simulate elapsed refill time.
+    await db.insert(schema.rateLimitBuckets).values({
+      key: bucketKey,
+      tokens: 0,
+      refilledAt: new Date(),
+      expiresAt: new Date(Date.now() + 600000),
+    });
+    const isolated = await browser.newContext({
+      ...testInfo.project.use,
+      javaScriptEnabled,
+      extraHTTPHeaders: { "cf-connecting-ip": visitorIp },
+    });
+    try {
+      const page = await isolated.newPage(),
+        marker = `Limited visitor ${randomUUID()}`;
+      await page.goto(hostUrl("public", "/en/inquire"));
+      const operationId = await page.locator('[name="_operationId"]').inputValue();
+      await page.getByLabel("Your inquiry", { exact: true }).fill(marker);
+      await page.getByLabel("Email", { exact: true }).fill(`${randomUUID()}@example.test`);
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+      await expect(page.getByText(/Your inquiry was not submitted/)).toBeVisible();
+      await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(marker);
+      await expect(page.locator('[name="_operationId"]')).toHaveValue(operationId);
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.message, marker)),
+      ).toHaveLength(0);
+      await db
+        .update(schema.rateLimitBuckets)
+        .set({ refilledAt: new Date(Date.now() - 121000) })
+        .where(eq(schema.rateLimitBuckets.key, bucketKey));
+      await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Inquiry received", exact: true }),
+      ).toBeVisible();
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.message, marker)),
+      ).toHaveLength(1);
+    } finally {
+      await isolated.close();
+    }
+  });
+}
