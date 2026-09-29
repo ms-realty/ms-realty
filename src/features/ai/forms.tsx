@@ -40,14 +40,14 @@ export function AssistanceForm({
       {(form) => (
         <>
           {mode === "request" ? (
-            <label className="grid gap-2">
-              <span>{copy.task}</span>
+            <label className="block min-w-0">
+              <span className="mb-2 block">{copy.task}</span>
               <select
                 name="task"
                 value={form.values.task}
                 onChange={(e) => form.setValue("task", e.target.value)}
                 disabled={form.pending}
-                className={controlClass}
+                className={`${controlClass} min-w-0 max-w-full`}
               >
                 {(["inquiry_summary", "reply_draft", "task_draft"] as const).map((task) => (
                   <option key={task} value={task}>
@@ -57,14 +57,14 @@ export function AssistanceForm({
               </select>
             </label>
           ) : (
-            <label className="grid gap-2">
-              <span>{copy.decision}</span>
+            <label className="block min-w-0">
+              <span className="mb-2 block">{copy.decision}</span>
               <select
                 name="decision"
                 value={form.values.decision}
                 onChange={(e) => form.setValue("decision", e.target.value)}
                 disabled={form.pending}
-                className={controlClass}
+                className={`${controlClass} min-w-0 max-w-full`}
               >
                 <option value="accepted">{copy.accepted}</option>
                 <option value="rejected">{copy.rejected}</option>

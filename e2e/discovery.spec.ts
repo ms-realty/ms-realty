@@ -96,6 +96,7 @@ test("F02/F29: native reviewed intent commits only chosen rules to editable sear
   await page.getByRole("checkbox", { name: /^Bedrooms/ }).check();
   await page.getByRole("checkbox", { name: /^Price/ }).check();
   await page.getByRole("button", { name: "Search with selected filters" }).click();
+  await expect(page).toHaveURL(/\/en\/properties\?/);
   const query = new URL(page.url()).searchParams;
   expect(query.get("purpose")).toBe("sale");
   expect(query.get("type")).toBe("apartment");

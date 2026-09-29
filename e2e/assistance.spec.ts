@@ -59,9 +59,38 @@ for (const javaScriptEnabled of [true, false]) {
       ]) {
         await page.goto(hostUrl("staff", `/${locale}/operations/assistance/${data.id}`));
         await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
-        expect(
-          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-        ).toBe(true);
+        const layout = await page.evaluate(() => ({
+          width: innerWidth,
+          scroll: document.documentElement.scrollWidth,
+          textOverflow: [...document.querySelectorAll<HTMLElement>("body *")]
+            .filter(
+              (el) =>
+                el.getClientRects().length &&
+                getComputedStyle(el).overflowX === "visible" &&
+                el.scrollWidth > el.clientWidth + 1,
+            )
+            .slice(-12)
+            .map((el) => ({
+              tag: el.tagName,
+              class: el.className,
+              width: el.clientWidth,
+              scroll: el.scrollWidth,
+              text: el.textContent?.slice(0, 100),
+            })),
+          overflow: [...document.querySelectorAll<HTMLElement>("body *")]
+            .filter(
+              (el) =>
+                el.getClientRects().length && el.getBoundingClientRect().right > innerWidth + 1,
+            )
+            .slice(0, 12)
+            .map((el) => ({
+              tag: el.tagName,
+              class: el.className,
+              right: el.getBoundingClientRect().right,
+              text: el.textContent?.slice(0, 80),
+            })),
+        }));
+        expect(layout.scroll <= layout.width, `${locale}: ${JSON.stringify(layout)}`).toBe(true);
       }
       const panel = page.locator("section").filter({
         has: page.getByRole("heading", { name: "Automated draft assessment", exact: true }),
