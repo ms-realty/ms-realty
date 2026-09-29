@@ -27,3 +27,14 @@ Keep Bulgarian as source and human approval before public translations are index
 Design repair does not override launch-readiness files, R00, live provider/DNS approval,
 manual completion without Hermes, or exact property facts. Full source/runtime parity is
 still open. No current design count is used as a release-gate pass.
+
+
+## 29 September coordination update
+
+A design coordination message reports that Ivan's renewed quality review has reopened overall
+visual/UX acceptance and that concrete contract/screen changes will follow. Readback of the
+local source package still returns the 28 September `SCOPED_DESIGN_REPAIR_COMPLETE` snapshot;
+no newer changed screen contract was present in the referenced final-state/review/handoff.
+Keep the proven bounded repairs, await exact new evidence and do not infer a full design sign-off
+or redesign working screens from the coordination message alone. Overall runtime/design parity
+was already open here and remains open. No message was sent to another chat by this delivery task.

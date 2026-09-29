@@ -130,7 +130,10 @@ test.describe("lang and dir follow the URL locale on every host (§03.1)", () =>
 
   test("staff routes do not exist in public-only locales", async ({ page }) => {
     for (const locale of ["de", "nl", "el", "he"]) {
-      const response = await page.goto(hostUrl("staff", `/${locale}/today`));
+      // This routing contract needs the new HTML document, not completion of its assets.
+      const response = await page.goto(hostUrl("staff", `/${locale}/today`), {
+        waitUntil: "domcontentloaded",
+      });
       expect(response?.status(), locale).toBe(404);
       await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
     }
