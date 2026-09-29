@@ -116,14 +116,30 @@ for (const javaScriptEnabled of [true, false])
         fullPage: true,
       });
       await page.getByRole("link", { name: "Team and access", exact: true }).click();
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
-      );
+      const geometry = await page.evaluate(() => ({
+        viewport: innerWidth,
+        width: document.documentElement.scrollWidth,
+        overflow: [...document.querySelectorAll("main *")]
+          .flatMap((element) => {
+            const box = element.getBoundingClientRect();
+            return box.right > innerWidth
+              ? [{ tag: element.tagName, class: element.className, right: box.right }]
+              : [];
+          })
+          .slice(0, 12),
+      }));
+      expect(geometry.width, JSON.stringify(geometry)).toBeLessThanOrEqual(geometry.viewport);
       const formerLink = page.locator(`a[href="${path}"]`);
       expect((await formerLink.boundingBox())?.height).toBeGreaterThanOrEqual(44);
       await page.screenshot({
         path: testInfo.outputPath(`offboarding-team-${javaScriptEnabled}.png`),
         fullPage: true,
+      });
+      await page
+        .getByRole("heading", { name: "Current staff grants", exact: true })
+        .scrollIntoViewIfNeeded();
+      await page.screenshot({
+        path: testInfo.outputPath(`offboarding-grants-${javaScriptEnabled}.png`),
       });
 
       await page.locator(`a[href="${path}"]`).click();

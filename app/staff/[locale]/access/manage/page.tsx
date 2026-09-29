@@ -121,12 +121,12 @@ export default async function ManagePage({
           </Notice>
         ) : null}
         {error ? <Notice tone="error">{error}</Notice> : null}
-        <section className="grid min-w-0 gap-4">
+        <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.staffTitle}</h2>
           <form
             method="post"
             action={`/${locale}/access/manage/submit`}
-            className="grid min-w-0 gap-4"
+            className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
           >
             {hidden("staff")}
             {person}
@@ -149,7 +149,7 @@ export default async function ManagePage({
             </button>
           </form>
         </section>
-        <section className="grid min-w-0 gap-4">
+        <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{offboardingCopy(locale).title}</h2>
           <ul className="space-y-3">
             {members.map((member) => (
@@ -164,7 +164,7 @@ export default async function ManagePage({
             ))}
           </ul>
         </section>
-        <section className="grid min-w-0 gap-4">
+        <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           {formerMembers.length ? (
             <>
               <h2 className="text-section font-semibold">{offboardingCopy(locale).former}</h2>
@@ -187,7 +187,7 @@ export default async function ManagePage({
           <form
             method="post"
             action={`/${locale}/access/manage/submit`}
-            className="grid min-w-0 gap-4"
+            className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
           >
             {hidden("recovery")}
             <label className="block min-w-0">
@@ -227,12 +227,12 @@ export default async function ManagePage({
             </button>
           </form>
         </section>
-        <section className="grid min-w-0 gap-4">
+        <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.clientTitle}</h2>
           <form
             method="post"
             action={`/${locale}/access/manage/submit`}
-            className="grid min-w-0 gap-4"
+            className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
           >
             {hidden("client")}
             {person}
@@ -273,13 +273,13 @@ export default async function ManagePage({
             </button>
           </form>
         </section>
-        <section className="grid min-w-0 gap-4">
+        <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{grantCopy.title}</h2>
           <p>{grantCopy.lead}</p>
           <form
             method="post"
             action={`/${locale}/access/manage/submit`}
-            className="grid min-w-0 gap-4"
+            className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
           >
             {hidden("grant")}
             <input type="hidden" name="operationId" value={randomUUID()} />
@@ -367,7 +367,7 @@ export default async function ManagePage({
               key={grant.id}
               method="post"
               action={`/${locale}/access/manage/submit`}
-              className="grid gap-3 rounded-panel border border-divider p-4"
+              className="grid min-w-0 grid-cols-1 gap-3 rounded-panel border border-divider p-4"
             >
               {hidden("revoke-grant")}
               <input type="hidden" name="operationId" value={randomUUID()} />

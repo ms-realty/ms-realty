@@ -67,3 +67,26 @@ C-locale test cluster is stopped. The owned UTF-8 test cluster is on loopback 55
 No production mutation or existing Docker-service recreation occurred. Launch authority hashes
 remain unchanged; R00 and live acceptance are open. Prior commit `7a95a8e0` passed all CI jobs
 in run 36551918070; offboarding requires its own current-head CI.
+
+
+## Follow-up: full-suite mobile containment
+
+CI run 36555638793 on 19613f14 failed both Linux WebKit offboarding profiles at the
+Manage access width assertion. It recorded 358 browser passes, five explicit skips and one
+content-publication retry; the result is not green. Local short-identity checks had missed
+a second overflow source: intrinsic grid sizing in existing grant forms. A maximum-length
+unbroken staff name reproduces it on native WebKit too: 1379px document width on a 390px screen.
+
+Sections and grant forms now have explicit zero-minimum single-column tracks, and long values
+wrap inside the grid. Native controls, full identity labels, authorization and grant semantics
+remain intact. The browser fixture always includes the long name and the assertion reports
+actual viewport/document/element geometry. Twelve production-build journeys passed without
+retries across desktop Chromium, mobile Chromium and mobile WebKit: six offboarding JS-on/off
+and six existing content publication/native-draft checks. A further WebKit no-JS run captured
+a readable viewport of the previously overflowing grants. The full-page capture is also retained.
+
+Evidence: `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260929/`, especially
+`previous-ci-failure.log`, `long-name-baseline.log`, `long-name-dimensions.log`,
+`browser-qualified.log` and `grants-visual.log`. Browser run `bb89dc3b6af442ea85f238bf67b6008f`.
+Docker Desktop was unavailable, so Linux confirmation is pending the next CI run. No content
+workflow code or test timeout/retry limit was changed; its CI retry is still recorded.

@@ -17,6 +17,12 @@ try {
   const manager = await custodyFixture(db),
     broker = await staffFixture(db),
     propertyId = await createProperty(db);
+  // The full suite includes longer identities than the small isolated fixture. Exercise
+  // maximum-length unbroken names too; their native select/list rendering must fit a phone.
+  await db
+    .update(schema.principals)
+    .set({ displayName: "A".repeat(120) })
+    .where(eq(schema.principals.id, manager.id));
   const [property] = await db
     .select()
     .from(schema.properties)
