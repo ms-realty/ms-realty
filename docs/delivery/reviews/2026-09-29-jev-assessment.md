@@ -46,3 +46,9 @@ and multilingual calibration still require real evidence before activation.
 
 Other Jev uses (search relevance, duplicate matching, bounded candidate extraction) remain
 planned. This slice is draft assessment, not completion of all AI or product capabilities.
+
+Final author review found and repaired the UTC boundary between calls: if generation returns
+on a new day, the worker records its known charge and refuses to start Jev against the old
+reservation. Qualification accepts only dated Jev snapshots. All 23 focused decision/assistance
+checks passed after this repair, along with TypeScript and lint (`jev-midnight.log`,
+`jev-final-types.log`, `jev-final-lint.log`). No confidence threshold or new AI authority was added.

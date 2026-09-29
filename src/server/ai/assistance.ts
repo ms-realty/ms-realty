@@ -552,6 +552,8 @@ export async function processAssistanceRun(
           ? validateLocaleDraft(generated.output, current.source as LocaleSource)
           : validateDraft(generated.output, current.source as AssistanceSource);
     if (config.jev) {
+      if (run.createdAt.toISOString().slice(0, 10) !== new Date().toISOString().slice(0, 10))
+        throw new Error("budget_period_changed");
       const latest = await sourceForRun(db, actor, run);
       if (latest.digest !== run.sourceDigest || latest.source.version !== run.sourceVersion) {
         state = "stale";

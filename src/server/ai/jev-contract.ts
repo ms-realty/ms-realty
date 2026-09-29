@@ -7,7 +7,7 @@ export const jevPolicySchema = z
   .object({
     model: z.literal("typesafe/jev-1.13"),
     snapshots: z
-      .array(z.string().regex(/^typesafe\/jev-1\.13(?:-\d{8})?$/))
+      .array(z.string().regex(/^typesafe\/jev-1\.13-\d{8}$/))
       .min(1)
       .max(8),
     guardrailRevision: z.string().min(1).max(160),

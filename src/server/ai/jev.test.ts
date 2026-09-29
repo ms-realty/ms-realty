@@ -82,6 +82,15 @@ describe("typed Jev assessment over OpenRouter", () => {
       HERMES_JEV_POLICY: JSON.stringify(syntheticJevPolicy),
     };
     expect(assistanceConfig(env).enabled).toBe(false);
+    expect(
+      readJevPolicy({
+        ...env,
+        HERMES_JEV_POLICY: JSON.stringify({
+          ...syntheticJevPolicy,
+          snapshots: ["typesafe/jev-1.13"],
+        }),
+      }),
+    ).toBeUndefined();
     expect(assistanceConfig({ ...env, HERMES_JEV_QUALIFIED: "1" }).enabled).toBe(true);
     expect(
       readJevPolicy({

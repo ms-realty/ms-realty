@@ -153,6 +153,32 @@ describe("source-bound Hermes drafts on PostgreSQL", () => {
     const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
     expect(run).toMatchObject({ state: "failed", actualCostMicros: 6220, output: null });
   });
+  it("does not start the second call against yesterday's budget reservation", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+    const assess = vi.fn(async () => syntheticAssessment());
+    try {
+      await expect(
+        processAssistanceRun(t.db, result.outcome.id, {
+          config: judged,
+          assess,
+          generate: async (...args) => {
+            const generated = await generate(...args);
+            const nextDay = new Date();
+            nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+            vi.useFakeTimers({ toFake: ["Date"] });
+            vi.setSystemTime(nextDay);
+            return generated;
+          },
+        }),
+      ).rejects.toThrow("budget_period_changed");
+    } finally {
+      vi.useRealTimers();
+    }
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({ state: "failed", actualCostMicros: 220, output: null });
+    expect(assess).not.toHaveBeenCalled();
+  });
   it("rejects unsupported numeric facts before assessment and rechecks source freshness between calls", async () => {
     for (const change of ["invalid", "source", "authority"]) {
       const f = await fixture();
