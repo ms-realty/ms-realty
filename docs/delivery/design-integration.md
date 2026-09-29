@@ -66,3 +66,9 @@ its source reference/revision, Case link and pinned revision identity; existing 
 cover stale terms, wrong party, expired revision and withdrawn source. This is source/test
 evidence only. Exact updated frame IDs and end-to-end visual mapping are still outstanding;
 no corresponding frontend defect or final design acceptance is inferred from the message.
+
+The O23 staff access-removal page uses the existing standalone access frame and shared form,
+with separate retained-work counts and a durable receipt. Native-browser verification found
+and repaired Manage access mobile overflow and overlapping former-staff links. The new
+functional contract is `contracts/staff-offboarding.md`; this does not close broader Figma
+parity, seven-locale acceptance or the full agency handover workflow.

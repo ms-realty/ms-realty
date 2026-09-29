@@ -316,7 +316,7 @@ export async function issueStaffInvitation(
 }
 
 /** Ends every way the principal could still get in: sessions, passkeys, pending invitations. */
-async function lockOut(tx: Transaction, principalId: string, now: Date) {
+export async function lockOutStaff(tx: Transaction, principalId: string, now: Date) {
   const sessionsRevoked = await revokeAllSessions(tx, { kind: "staff", id: principalId }, { now });
   const revokedPasskeys = await tx
     .update(passkeys)
@@ -369,7 +369,7 @@ export async function issueStaffRecovery(
       .for("update");
     if (target?.kind !== "staff" || target.status !== "active") throw new AppError("not_found");
     if (target.membership !== "active") throw new AppError("transition_denied");
-    const effects = await lockOut(tx, target.id, now);
+    const effects = await lockOutStaff(tx, target.id, now);
     const issued = await insertStaffInvitation(
       tx,
       {
@@ -466,7 +466,7 @@ export async function bootstrapManager(
       .where(eq(staffMemberships.principalId, principal.id));
     const kind: StaffInvitationKind =
       membership?.state === "active" ? "staff_recovery" : "staff_enrolment";
-    const effects = await lockOut(tx, principal.id, now);
+    const effects = await lockOutStaff(tx, principal.id, now);
     const issued = await insertStaffInvitation(tx, {
       kind,
       principalId: principal.id,

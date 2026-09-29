@@ -56,7 +56,8 @@ async function eligibleHolder(db: Executor, id: string) {
         eq(principals.status, "active"),
         eq(staffMemberships.state, "active"),
       ),
-    );
+    )
+    .for("share");
   return Boolean(row && (await countActivePasskeys(db, id)) >= 2);
 }
 export async function custodyHolders(db: Executor, session: Session) {

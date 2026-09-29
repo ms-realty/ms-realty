@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/db/client";
@@ -12,6 +12,7 @@ import { accessErrorMessage, identityCopy, roleLabel } from "@/features/identity
 import { grantManagementCopy } from "@/features/identity/grant-copy";
 import { managementCopy, staffRoleLabel } from "@/features/identity/management-copy";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
+import { offboardingCopy } from "@/features/offboarding/copy";
 import { isStaffLocale } from "@/i18n/config";
 import { listStaffGrants } from "@/server/auth/grants";
 import { staffRoles } from "@/server/auth/invitations";
@@ -21,7 +22,8 @@ import { can } from "@/server/authz";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
 
-const field = "min-h-control rounded-control border border-border bg-surface px-3 py-2";
+const field =
+  "mt-1 block w-full min-w-0 max-w-full min-h-control rounded-control border border-border bg-surface px-3 py-2";
 export default async function ManagePage({
   params,
   searchParams,
@@ -47,6 +49,14 @@ export default async function ManagePage({
       ),
     );
   const members = allMembers.filter((member) => member.id !== session.account.id);
+  const formerMembers = await db
+    .select({ id: principals.id, name: principals.displayName, email: principals.email })
+    .from(principals)
+    .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+    .where(and(eq(principals.kind, "staff"), eq(staffMemberships.state, "ended")))
+    .orderBy(desc(staffMemberships.endedAt))
+    .limit(50);
+
   const currentGrants = await listStaffGrants(db, session);
   const grantCopy = grantManagementCopy(locale);
   const availableCases = await db
@@ -83,11 +93,11 @@ export default async function ManagePage({
   );
   const person = (
     <>
-      <label className="grid gap-1">
+      <label className="block min-w-0">
         {c.name}
         <input name="displayName" className={field} maxLength={120} required autoComplete="name" />
       </label>
-      <label className="grid gap-1">
+      <label className="block min-w-0">
         {c.email}
         <input
           name="email"
@@ -111,14 +121,22 @@ export default async function ManagePage({
           </Notice>
         ) : null}
         {error ? <Notice tone="error">{error}</Notice> : null}
-        <section className="grid gap-4">
+        <section className="grid min-w-0 gap-4">
           <h2 className="text-section font-semibold">{c.staffTitle}</h2>
-          <form method="post" action={`/${locale}/access/manage/submit`} className="grid gap-4">
+          <form
+            method="post"
+            action={`/${locale}/access/manage/submit`}
+            className="grid min-w-0 gap-4"
+          >
             {hidden("staff")}
             {person}
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {c.role}
-              <select className={field} name="role" defaultValue="assigned_broker">
+              <select
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                name="role"
+                defaultValue="assigned_broker"
+              >
                 {staffRoles.map((role) => (
                   <option key={role} value={role}>
                     {staffRoleLabel(locale, role)}
@@ -131,14 +149,55 @@ export default async function ManagePage({
             </button>
           </form>
         </section>
-        <section className="grid gap-4">
+        <section className="grid min-w-0 gap-4">
+          <h2 className="text-section font-semibold">{offboardingCopy(locale).title}</h2>
+          <ul className="space-y-3">
+            {members.map((member) => (
+              <li key={member.id}>
+                <a
+                  className="block min-h-control break-words underline"
+                  href={`/${locale}/access/offboard/${member.id}`}
+                >
+                  {member.name} · {member.email}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="grid min-w-0 gap-4">
+          {formerMembers.length ? (
+            <>
+              <h2 className="text-section font-semibold">{offboardingCopy(locale).former}</h2>
+              <ul className="space-y-3">
+                {formerMembers.map((member) => (
+                  <li key={member.id}>
+                    <a
+                      className="block min-h-control break-words underline"
+                      href={`/${locale}/access/offboard/${member.id}`}
+                    >
+                      {member.name} · {member.email}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
           <h2 className="text-section font-semibold">{c.recoveryTitle}</h2>
           <p>{c.recoveryNote}</p>
-          <form method="post" action={`/${locale}/access/manage/submit`} className="grid gap-4">
+          <form
+            method="post"
+            action={`/${locale}/access/manage/submit`}
+            className="grid min-w-0 gap-4"
+          >
             {hidden("recovery")}
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {c.member}
-              <select name="principalId" className={field} required defaultValue="">
+              <select
+                name="principalId"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                required
+                defaultValue=""
+              >
                 <option value="" disabled>
                   {c.choose}
                 </option>
@@ -149,7 +208,7 @@ export default async function ManagePage({
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {c.evidence}
               <textarea
                 className={field}
@@ -168,14 +227,23 @@ export default async function ManagePage({
             </button>
           </form>
         </section>
-        <section className="grid gap-4">
+        <section className="grid min-w-0 gap-4">
           <h2 className="text-section font-semibold">{c.clientTitle}</h2>
-          <form method="post" action={`/${locale}/access/manage/submit`} className="grid gap-4">
+          <form
+            method="post"
+            action={`/${locale}/access/manage/submit`}
+            className="grid min-w-0 gap-4"
+          >
             {hidden("client")}
             {person}
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {c.case}
-              <select name="caseId" className={field} required defaultValue="">
+              <select
+                name="caseId"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                required
+                defaultValue=""
+              >
                 <option value="" disabled>
                   {c.choose}
                 </option>
@@ -186,9 +254,13 @@ export default async function ManagePage({
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {c.participant}
-              <select name="role" className={field} defaultValue="collaborator">
+              <select
+                name="role"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                defaultValue="collaborator"
+              >
                 {participantRoles.map((role) => (
                   <option value={role} key={role}>
                     {roleLabel(locale, role)}
@@ -201,15 +273,23 @@ export default async function ManagePage({
             </button>
           </form>
         </section>
-        <section className="grid gap-4">
+        <section className="grid min-w-0 gap-4">
           <h2 className="text-section font-semibold">{grantCopy.title}</h2>
           <p>{grantCopy.lead}</p>
-          <form method="post" action={`/${locale}/access/manage/submit`} className="grid gap-4">
+          <form
+            method="post"
+            action={`/${locale}/access/manage/submit`}
+            className="grid min-w-0 gap-4"
+          >
             {hidden("grant")}
             <input type="hidden" name="operationId" value={randomUUID()} />
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {c.member}
-              <select name="principalId" className={field} required>
+              <select
+                name="principalId"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                required
+              >
                 {allMembers.map((member) => (
                   <option key={member.id} value={member.id}>
                     {member.name} — {member.email}
@@ -217,9 +297,13 @@ export default async function ManagePage({
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {grantCopy.capability}
-              <select name="capability" className={field} defaultValue="document.review">
+              <select
+                name="capability"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                defaultValue="document.review"
+              >
                 {capabilities.map((capability) => (
                   <option key={capability} value={capability}>
                     {capability}
@@ -227,9 +311,13 @@ export default async function ManagePage({
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {grantCopy.scope}
-              <select name="recordType" className={field} defaultValue="">
+              <select
+                name="recordType"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                defaultValue=""
+              >
                 <option value="">{grantCopy.global}</option>
                 {(["document", "listing", "property", "case"] as const).map((type) => (
                   <option key={type} value={type}>
@@ -238,13 +326,17 @@ export default async function ManagePage({
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {grantCopy.recordId}
               <input name="recordId" className={field} maxLength={36} />
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {grantCopy.locale}
-              <select name="grantLocale" className={field} defaultValue="">
+              <select
+                name="grantLocale"
+                className={`${field} h-control overflow-hidden text-ellipsis`}
+                defaultValue=""
+              >
                 <option value="">{grantCopy.allLocales}</option>
                 {publicLocales.map((value) => (
                   <option key={value} value={value}>
@@ -253,11 +345,11 @@ export default async function ManagePage({
                 ))}
               </select>
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {grantCopy.expires}
               <input name="expiresAt" type="date" className={field} />
             </label>
-            <label className="grid gap-1">
+            <label className="block min-w-0">
               {grantCopy.reason}
               <textarea name="reason" className={field} minLength={10} maxLength={1000} required />
             </label>
@@ -292,7 +384,7 @@ export default async function ManagePage({
                 {grant.locales?.length ? ` · ${grant.locales.join(", ")}` : ""}
               </p>
               <p>{grant.reason}</p>
-              <label className="grid gap-1">
+              <label className="block min-w-0">
                 {grantCopy.reason}
                 <textarea
                   name="reason"

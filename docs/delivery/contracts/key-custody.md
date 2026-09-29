@@ -50,3 +50,8 @@ Shortening or extending a deadline uses the same guarded operation. No amendment
 for an offboarded holder; actual return remains available. An amendment and a concurrent
 return share the same row lock/version, so only one can commit from a given version.
 The review records an operator declaration, not independent proof of the holder’s agreement.
+
+
+Application-level staff access removal and retained custody are now implemented in
+[O23 offboarding](staff-offboarding.md). Physical return remains a separate reviewed command;
+record counts and manager navigation keep unreturned sets visible after access ends.

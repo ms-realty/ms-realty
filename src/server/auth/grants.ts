@@ -1,8 +1,17 @@
 // O23: explicit grants are human, capability-scoped, step-up protected and receipt-backed.
 import "server-only";
-import { and, eq, gt, isNull, or, sql } from "drizzle-orm";
+import { and, count, eq, gt, isNull, ne, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { grants, principals, staffMemberships } from "@/db/schema";
+import {
+  cases,
+  grants,
+  inquiries,
+  keySets,
+  operations,
+  principals,
+  staffMemberships,
+  tasks,
+} from "@/db/schema";
 import { type Capability, capabilities, hasCapability, rolePresets } from "@/domain/capabilities";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { recordAudit } from "../audit";
@@ -11,6 +20,8 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
+import { parseInput } from "../work/shared";
+import { lockOutStaff } from "./invitations";
 import { countActivePasskeys, staffPasskeyMinimum } from "./passkeys";
 import { requireFreshAuth, requireLiveSession, revokeAllSessions, type Session } from "./sessions";
 
@@ -260,4 +271,142 @@ export async function listStaffGrants(db: Executor, session: Session) {
       ),
     )
     .orderBy(principals.displayName);
+}
+
+export async function offboardingOperator(db: Executor, session: Session) {
+  const live = await liveManager(db, session);
+  if (!(await can(db, live.actor, "access.grant"))) throw new AppError("not_found");
+  return live;
+}
+async function retainedWork(db: Executor, principalId: string) {
+  const [[keys], [ownedCases], [ownedTasks], [ownedInquiries]] = await Promise.all([
+    db
+      .select({ count: count() })
+      .from(keySets)
+      .where(and(eq(keySets.holderId, principalId), eq(keySets.state, "checked_out"))),
+    db
+      .select({ count: count() })
+      .from(cases)
+      .where(and(eq(cases.ownerId, principalId), ne(cases.disposition, "closed"))),
+    db
+      .select({ count: count() })
+      .from(tasks)
+      .where(and(eq(tasks.ownerId, principalId), notInArray(tasks.state, ["done", "cancelled"]))),
+    db
+      .select({ count: count() })
+      .from(inquiries)
+      .where(
+        and(
+          eq(inquiries.ownerId, principalId),
+          notInArray(inquiries.state, ["linked_to_case", "resolved_without_case"]),
+        ),
+      ),
+  ]);
+  return {
+    keys: keys?.count ?? 0,
+    cases: ownedCases?.count ?? 0,
+    tasks: ownedTasks?.count ?? 0,
+    inquiries: ownedInquiries?.count ?? 0,
+  };
+}
+export async function readOffboarding(db: Executor, session: Session, principalId: string) {
+  await offboardingOperator(db, session);
+  if (!z.uuid().safeParse(principalId).success) throw new AppError("not_found");
+  const [person] = await db
+    .select({
+      id: principals.id,
+      name: principals.displayName,
+      email: principals.email,
+      version: principals.version,
+      state: staffMemberships.state,
+    })
+    .from(principals)
+    .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+    .where(and(eq(principals.id, principalId), eq(principals.kind, "staff")));
+  if (!person) throw new AppError("not_found");
+  const history = await db
+    .select({ id: operations.id, at: operations.completedAt })
+    .from(operations)
+    .where(
+      and(
+        eq(operations.operationType, "access.staff.offboard"),
+        eq(operations.status, "succeeded"),
+        sql`${operations.outcome}->>'principalId' = ${principalId}`,
+      ),
+    )
+    .orderBy(sql`${operations.completedAt} desc`)
+    .limit(10);
+  return { person, retained: await retainedWork(db, principalId), history };
+}
+export async function offboardStaff(db: Executor, session: Session, raw: unknown) {
+  const input = parseInput(
+    z.object({
+      operationId: z.string().min(16).max(200),
+      principalId: z.uuid(),
+      expectedRevision: z.int().positive(),
+      reason: z.string().trim().min(10).max(1000),
+      reviewed: z.literal(true),
+    }),
+    raw,
+  );
+  const live = await offboardingOperator(db, session);
+  if (input.principalId === live.actor.id) throw new AppError("forbidden");
+  return runOperation(
+    db,
+    {
+      actor: live.actor,
+      type: "access.staff.offboard",
+      idempotencyKey: input.operationId,
+      requestHash: hashRequest(input),
+      expectedVersion: input.expectedRevision,
+    },
+    async ({ tx, operationId }) => {
+      await lockStaff(tx);
+      await offboardingOperator(tx, session);
+      const [person] = await tx
+        .select()
+        .from(principals)
+        .where(eq(principals.id, input.principalId));
+      if (person?.kind !== "staff") throw new AppError("not_found");
+      if (person.version !== input.expectedRevision) throw new AppError("version_conflict");
+      const [membership] = await tx
+        .select()
+        .from(staffMemberships)
+        .where(eq(staffMemberships.principalId, person.id))
+        .for("update");
+      if (membership?.state !== "active") throw new AppError("transition_denied");
+      const now = new Date();
+      await tx
+        .update(staffMemberships)
+        .set({ state: "ended", endedAt: now, updatedAt: now, version: membership.version + 1 })
+        .where(eq(staffMemberships.id, membership.id));
+      await tx
+        .update(principals)
+        .set({ version: person.version + 1, updatedAt: now })
+        .where(eq(principals.id, person.id));
+      const revoked = await tx
+        .update(grants)
+        .set({
+          revokedAt: now,
+          revokedById: live.actor.id,
+          updatedAt: now,
+          version: sql`${grants.version} + 1`,
+        })
+        .where(and(eq(grants.principalId, person.id), isNull(grants.revokedAt)))
+        .returning({ id: grants.id });
+      const effects = await lockOutStaff(tx, person.id, now);
+      await ensureUsableManager(tx);
+      const retained = await retainedWork(tx, person.id);
+      await recordAudit(tx, {
+        actor: live.actor,
+        capability: "access.grant",
+        action: "access.staff.offboarded",
+        recordType: "principal",
+        recordId: person.id,
+        operationId,
+        payload: { reason: input.reason, retained, grantsRevoked: revoked.length, ...effects },
+      });
+      return { principalId: person.id, retained, grantsRevoked: revoked.length, ...effects };
+    },
+  );
 }
