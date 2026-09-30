@@ -82,13 +82,13 @@ for (const javaScriptEnabled of [true, false]) {
           path: testInfo.outputPath(`workspace-nav-${width}-${javaScriptEnabled}.png`),
           fullPage: true,
         });
-        const tasks = page.locator('header:visible a[href="/en/tasks"]');
+        const tasks = page.getByRole("banner").locator('a[href="/en/tasks"]');
         await expect(tasks).toBeVisible();
         const taskBox = await tasks.boundingBox();
         expect(taskBox?.height).toBeGreaterThanOrEqual(44);
         await tasks.click();
         await expect(page).toHaveURL(hostUrl("staff", "/en/tasks"));
-        await expect(page.locator('header:visible a[href="/en/tasks"]')).toHaveAttribute(
+        await expect(page.getByRole("banner").locator('a[href="/en/tasks"]')).toHaveAttribute(
           "aria-current",
           "page",
         );
@@ -97,18 +97,17 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByRole("button", { name: /Interface language/ }).click();
       await page.getByRole("link", { name: "Русский", exact: true }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/ru/tasks?view=mine"));
-      await expect(page.locator('header:visible a[href="/ru/tasks"]')).toHaveAttribute(
+      await expect(page.getByRole("banner").locator('a[href="/ru/tasks"]')).toHaveAttribute(
         "aria-current",
         "page",
       );
-      const hermes = page.locator('header:visible a[href="/ru/operations/assistance"]');
+      const hermes = page.getByRole("banner").locator('a[href="/ru/operations/assistance"]');
       await hermes.click();
       await expect(page.getByRole("main")).toBeVisible();
       await expect(hermes).toHaveAttribute("aria-current", "page");
-      await expect(page.locator('header:visible a[href="/ru/operations"]')).not.toHaveAttribute(
-        "aria-current",
-        "page",
-      );
+      await expect(
+        page.getByRole("banner").locator('a[href="/ru/operations"]'),
+      ).not.toHaveAttribute("aria-current", "page");
       await page.goBack();
       await expect(page).toHaveURL(hostUrl("staff", "/ru/tasks?view=mine"));
       await page.goto(hostUrl("staff", "/en/today"));
