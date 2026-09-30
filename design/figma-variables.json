@@ -59,7 +59,7 @@
       "name": "color/canvas",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Page background (§11.3).",
+      "description": "Light Figma semantic canvas; compatibility role canvas.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-canvas)"
@@ -71,7 +71,7 @@
       "name": "color/surface",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Cards, panels, header and controls (§11.3).",
+      "description": "Light Figma semantic raised; compatibility role surface.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-surface)"
@@ -83,7 +83,7 @@
       "name": "color/subtle",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Quiet fills: hover, placeholders, staff navigation rail.",
+      "description": "Light Figma semantic subtle; compatibility role subtle.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-subtle)"
@@ -95,7 +95,7 @@
       "name": "color/ink",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Inverse band for tooltips only. Focusable content on it uses focus-inverse.",
+      "description": "Compatibility inverse band uses primary-action ink; focusable content uses focus-inverse.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-ink)"
@@ -107,7 +107,7 @@
       "name": "color/text",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Primary text: essential facts (§11.3).",
+      "description": "Light Figma semantic text; compatibility role text.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text)"
@@ -119,7 +119,7 @@
       "name": "color/text-muted",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Secondary text: supporting context, never required data (§11.3).",
+      "description": "Light Figma semantic muted; compatibility role text-muted.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text-muted)"
@@ -131,7 +131,7 @@
       "name": "color/text-inverse",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Text on the primary action and on ink (§11.3).",
+      "description": "Light Figma semantic on-action; compatibility role text-inverse.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text-inverse)"
@@ -143,7 +143,7 @@
       "name": "color/text-on-ink-muted",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Secondary text on ink.",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text-on-ink-muted)"
@@ -155,7 +155,7 @@
       "name": "color/divider",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Subtle border: separates content only, never the sole control or focus boundary (§11.3).",
+      "description": "Light Figma semantic line; compatibility role divider.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-divider)"
@@ -167,7 +167,7 @@
       "name": "color/border",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Interactive outline: bounds inputs and controls at 3:1 or better (ux-spec §06.1).",
+      "description": "Light Figma semantic control; compatibility role border. Control boundary: 3.2154:1 on fog and 3.5141:1 on white.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-border)"
@@ -179,7 +179,7 @@
       "name": "color/focus",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Focus indicator, independent of the palette (§11.3, ux-spec §06.1).",
+      "description": "Light Figma semantic focus; compatibility role focus.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-focus)"
@@ -203,7 +203,7 @@
       "name": "color/action",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Primary action and deliberate selection, not every badge (§11.3).",
+      "description": "Light Figma semantic action; compatibility role action.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-action)"
@@ -215,6 +215,7 @@
       "name": "color/action-hover",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Light Figma semantic action-hover; compatibility role action-hover.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-action-hover)"
@@ -226,6 +227,7 @@
       "name": "color/action-pressed",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Light Figma semantic action-pressed; compatibility role action-pressed.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-action-pressed)"
@@ -237,7 +239,7 @@
       "name": "color/link",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Links are underlined; colour is not their only cue.",
+      "description": "Compatibility link uses agency brand, with underlining as the non-color cue.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-link)"
@@ -249,6 +251,7 @@
       "name": "color/link-visited",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-link-visited)"
@@ -260,7 +263,7 @@
       "name": "color/selected",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Background of a selected or current item; paired with a text or shape change.",
+      "description": "Compatibility selected surface maps to Figma brand-tint; selection still requires a text or shape cue.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-selected)"
@@ -272,7 +275,7 @@
       "name": "color/disabled",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Disabled fill. Disabled is a colour pair with a stated reason, never opacity alone.",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-disabled)"
@@ -284,6 +287,7 @@
       "name": "color/disabled-text",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-disabled-text)"
@@ -295,7 +299,7 @@
       "name": "color/success",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Success text and icons; always with words (ux-spec §06.1).",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-success)"
@@ -307,6 +311,7 @@
       "name": "color/success-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-success-soft)"
@@ -318,7 +323,7 @@
       "name": "color/warning",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Warning text and icons; always with words (ux-spec §06.1).",
+      "description": "Light Figma semantic warning; compatibility role warning.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-warning)"
@@ -330,6 +335,7 @@
       "name": "color/warning-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Light Figma semantic warning-tint; compatibility role warning-soft.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-warning-soft)"
@@ -341,7 +347,7 @@
       "name": "color/error",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Error and destructive only; always with words (ux-spec §06.1).",
+      "description": "Light Figma semantic danger; compatibility role error.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error)"
@@ -353,6 +359,7 @@
       "name": "color/error-hover",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error-hover)"
@@ -364,6 +371,7 @@
       "name": "color/error-pressed",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error-pressed)"
@@ -375,6 +383,7 @@
       "name": "color/error-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Light Figma semantic danger-tint; compatibility role error-soft.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error-soft)"
@@ -386,7 +395,7 @@
       "name": "color/info",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Neutral information and pending states; always with words.",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-info)"
@@ -398,6 +407,7 @@
       "name": "color/info-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Compatibility extension retained from the previous operational system; not a new Figma semantic. Contrast is checked on its actual supported surfaces.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-info-soft)"
@@ -409,7 +419,7 @@
       "name": "color/assist",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Interpreted criteria and AI drafts a person still has to review (F01, F29). Never an action colour.",
+      "description": "Light Figma semantic ai; compatibility role assist.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-assist)"
@@ -421,6 +431,7 @@
       "name": "color/assist-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Light Figma semantic ai-tint; compatibility role assist-soft.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-assist-soft)"
@@ -432,6 +443,7 @@
       "name": "color/assist-line",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
+      "description": "Extension: assistance boundary uses the reviewed blue text role, with non-text contrast on assist-soft.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-assist-line)"
@@ -443,10 +455,34 @@
       "name": "color/overlay",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "description": "Scrim behind modal sheets and dialogs.",
+      "description": "Extension: existing 50% scrim uses current primary text; not a separate Figma semantic.",
       "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-overlay)"
+      }
+    },
+    {
+      "action": "CREATE",
+      "id": "color/brand",
+      "name": "color/brand",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Light Figma semantic brand; agency identity, distinct from primary-action ink.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-brand)"
+      }
+    },
+    {
+      "action": "CREATE",
+      "id": "color/brand-tint",
+      "name": "color/brand-tint",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Light Figma semantic brand-tint; supporting selection surface.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-brand-tint)"
       }
     },
     {
@@ -456,6 +492,15 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "STRING",
       "description": "Self-hosted Noto Sans (latin, latin-ext, cyrillic, greek) with Noto Sans Hebrew (§11.3). Hebrew pages put Noto Sans Hebrew first (src/ui/base.css).",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
+      "id": "font/family/display",
+      "name": "font/family/display",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "description": "Self-hosted licensed Manrope variable face for display/title roles; Noto script fallbacks remain available. Hebrew gives Noto Sans Hebrew priority.",
       "scopes": ["FONT_FAMILY"]
     },
     {
@@ -492,11 +537,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/title/family",
+      "name": "typography/title/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/title/size",
       "name": "typography/title/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Public primary heading, 32/40.",
+      "description": "Figma Title/32: Manrope SemiBold 32/42, -2% tracking.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -517,11 +570,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/page/family",
+      "name": "typography/page/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/page/size",
       "name": "typography/page/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Client and staff page heading, 28/36.",
+      "description": "Figma Title/32: Manrope SemiBold 32/42, -2% tracking.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -542,11 +603,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/heading/family",
+      "name": "typography/heading/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/heading/size",
       "name": "typography/heading/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Section heading, 22/30.",
+      "description": "Figma Heading/20: Noto Sans SemiBold 20/30.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -567,11 +636,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/subheading/family",
+      "name": "typography/subheading/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/subheading/size",
       "name": "typography/subheading/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Group heading, 18/26.",
+      "description": "Compatibility typography role retained for existing component anatomy; Noto Sans, not a new Figma text style.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -592,11 +669,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/price/family",
+      "name": "typography/price/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/price/size",
       "name": "typography/price/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Amount on a property card; always tabular figures.",
+      "description": "Compatibility typography role retained for existing component anatomy; Noto Sans, not a new Figma text style.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -614,6 +699,14 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/body/family",
+      "name": "typography/body/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -642,11 +735,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/compact/family",
+      "name": "typography/compact/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/compact/size",
       "name": "typography/compact/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Labels, controls and navigation, 16/24.",
+      "description": "Compatibility typography role retained for existing component anatomy; Noto Sans, not a new Figma text style.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -667,11 +768,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/operational/family",
+      "name": "typography/operational/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/operational/size",
       "name": "typography/operational/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Staff rows and navigation: denser, still readable at zoom, 15/22.",
+      "description": "Figma UI/14: Noto Sans 14/22; supporting data, not essential public body copy.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -692,11 +801,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/dense/family",
+      "name": "typography/dense/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/dense/size",
       "name": "typography/dense/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Staff secondary data only, 14/20.",
+      "description": "Figma UI/14: Noto Sans 14/22; supporting data, not essential public body copy.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -717,11 +834,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/caption/family",
+      "name": "typography/caption/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/caption/size",
       "name": "typography/caption/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Hints, metadata and references, 14/20.",
+      "description": "Figma UI/14: Noto Sans 14/22; supporting data, not essential public body copy.",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -955,9 +1080,9 @@
       "variableId": "color/canvas",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.9725,
-        "g": 0.9686,
-        "b": 0.9529,
+        "r": 1,
+        "g": 1,
+        "b": 1,
         "a": 1
       }
     },
@@ -975,9 +1100,9 @@
       "variableId": "color/subtle",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.9333,
-        "g": 0.9451,
-        "b": 0.9255,
+        "r": 0.9529,
+        "g": 0.9608,
+        "b": 0.9686,
         "a": 1
       }
     },
@@ -986,16 +1111,16 @@
       "modeId": "mode:color:light",
       "value": {
         "type": "VARIABLE_ALIAS",
-        "id": "color/text"
+        "id": "color/action"
       }
     },
     {
       "variableId": "color/text",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.098,
-        "g": 0.1804,
-        "b": 0.1529,
+        "r": 0.1176,
+        "g": 0.1569,
+        "b": 0.1961,
         "a": 1
       }
     },
@@ -1003,9 +1128,9 @@
       "variableId": "color/text-muted",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.3216,
-        "g": 0.3843,
-        "b": 0.3529,
+        "r": 0.3373,
+        "g": 0.3922,
+        "b": 0.451,
         "a": 1
       }
     },
@@ -1033,9 +1158,9 @@
       "variableId": "color/divider",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.851,
-        "g": 0.8745,
-        "b": 0.8471,
+        "r": 0.8824,
+        "g": 0.898,
+        "b": 0.9137,
         "a": 1
       }
     },
@@ -1043,9 +1168,9 @@
       "variableId": "color/border",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.4078,
-        "g": 0.4784,
-        "b": 0.4353,
+        "r": 0.4941,
+        "g": 0.5412,
+        "b": 0.5961,
         "a": 1
       }
     },
@@ -1053,8 +1178,8 @@
       "variableId": "color/focus",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.0902,
-        "g": 0.3059,
+        "r": 0.1922,
+        "g": 0.3569,
         "b": 0.651,
         "a": 1
       }
@@ -1071,9 +1196,9 @@
       "variableId": "color/action",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.1294,
-        "g": 0.3098,
-        "b": 0.2353,
+        "r": 0.0902,
+        "g": 0.1255,
+        "b": 0.1608,
         "a": 1
       }
     },
@@ -1081,9 +1206,9 @@
       "variableId": "color/action-hover",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.102,
-        "g": 0.2471,
-        "b": 0.1882,
+        "r": 0.1882,
+        "g": 0.2392,
+        "b": 0.2863,
         "a": 1
       }
     },
@@ -1091,9 +1216,9 @@
       "variableId": "color/action-pressed",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.0745,
-        "g": 0.1882,
-        "b": 0.1412,
+        "r": 0.0471,
+        "g": 0.0784,
+        "b": 0.1059,
         "a": 1
       }
     },
@@ -1102,7 +1227,7 @@
       "modeId": "mode:color:light",
       "value": {
         "type": "VARIABLE_ALIAS",
-        "id": "color/action"
+        "id": "color/brand"
       }
     },
     {
@@ -1119,10 +1244,8 @@
       "variableId": "color/selected",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.8941,
-        "g": 0.9333,
-        "b": 0.9059,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "color/brand-tint"
       }
     },
     {
@@ -1169,9 +1292,9 @@
       "variableId": "color/warning",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.4667,
-        "g": 0.3137,
-        "b": 0,
+        "r": 0.5373,
+        "g": 0.3529,
+        "b": 0.0745,
         "a": 1
       }
     },
@@ -1179,9 +1302,9 @@
       "variableId": "color/warning-soft",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.9843,
-        "g": 0.9412,
-        "b": 0.851,
+        "r": 1,
+        "g": 0.9608,
+        "b": 0.8941,
         "a": 1
       }
     },
@@ -1189,9 +1312,9 @@
       "variableId": "color/error",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.6314,
-        "g": 0.1647,
-        "b": 0.1451,
+        "r": 0.6863,
+        "g": 0.1882,
+        "b": 0.2078,
         "a": 1
       }
     },
@@ -1219,9 +1342,9 @@
       "variableId": "color/error-soft",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.9843,
-        "g": 0.9176,
-        "b": 0.9098,
+        "r": 1,
+        "g": 0.9412,
+        "b": 0.9373,
         "a": 1
       }
     },
@@ -1249,9 +1372,9 @@
       "variableId": "color/assist",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.3569,
-        "g": 0.2706,
-        "b": 0.6275,
+        "r": 0.1922,
+        "g": 0.3569,
+        "b": 0.651,
         "a": 1
       }
     },
@@ -1259,9 +1382,9 @@
       "variableId": "color/assist-soft",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.9451,
-        "g": 0.9294,
-        "b": 0.9765,
+        "r": 0.9294,
+        "g": 0.949,
+        "b": 0.9882,
         "a": 1
       }
     },
@@ -1269,26 +1392,49 @@
       "variableId": "color/assist-line",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.6549,
-        "g": 0.5882,
-        "b": 0.8392,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "color/assist"
       }
     },
     {
       "variableId": "color/overlay",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.098,
-        "g": 0.1804,
-        "b": 0.1529,
+        "r": 0.1176,
+        "g": 0.1569,
+        "b": 0.1961,
         "a": 0.5
+      }
+    },
+    {
+      "variableId": "color/brand",
+      "modeId": "mode:color:light",
+      "value": {
+        "r": 0.1412,
+        "g": 0.3569,
+        "b": 0.2824,
+        "a": 1
+      }
+    },
+    {
+      "variableId": "color/brand-tint",
+      "modeId": "mode:color:light",
+      "value": {
+        "r": 0.9294,
+        "g": 0.9569,
+        "b": 0.9412,
+        "a": 1
       }
     },
     {
       "variableId": "font/family/sans",
       "modeId": "mode:type:light",
       "value": "Noto Sans"
+    },
+    {
+      "variableId": "font/family/display",
+      "modeId": "mode:type:light",
+      "value": "Manrope"
     },
     {
       "variableId": "font/weight/regular",
@@ -1311,6 +1457,11 @@
       "value": 700
     },
     {
+      "variableId": "typography/title/family",
+      "modeId": "mode:type:light",
+      "value": "Manrope"
+    },
+    {
       "variableId": "typography/title/size",
       "modeId": "mode:type:light",
       "value": 32
@@ -1318,7 +1469,7 @@
     {
       "variableId": "typography/title/line-height",
       "modeId": "mode:type:light",
-      "value": 40
+      "value": 42
     },
     {
       "variableId": "typography/title/weight",
@@ -1326,14 +1477,19 @@
       "value": 600
     },
     {
+      "variableId": "typography/page/family",
+      "modeId": "mode:type:light",
+      "value": "Manrope"
+    },
+    {
       "variableId": "typography/page/size",
       "modeId": "mode:type:light",
-      "value": 28
+      "value": 32
     },
     {
       "variableId": "typography/page/line-height",
       "modeId": "mode:type:light",
-      "value": 36
+      "value": 42
     },
     {
       "variableId": "typography/page/weight",
@@ -1341,9 +1497,14 @@
       "value": 600
     },
     {
+      "variableId": "typography/heading/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/heading/size",
       "modeId": "mode:type:light",
-      "value": 22
+      "value": 20
     },
     {
       "variableId": "typography/heading/line-height",
@@ -1354,6 +1515,11 @@
       "variableId": "typography/heading/weight",
       "modeId": "mode:type:light",
       "value": 600
+    },
+    {
+      "variableId": "typography/subheading/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/subheading/size",
@@ -1371,6 +1537,11 @@
       "value": 600
     },
     {
+      "variableId": "typography/price/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/price/size",
       "modeId": "mode:type:light",
       "value": 22
@@ -1384,6 +1555,11 @@
       "variableId": "typography/price/weight",
       "modeId": "mode:type:light",
       "value": 700
+    },
+    {
+      "variableId": "typography/body/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/body/size",
@@ -1401,6 +1577,11 @@
       "value": 400
     },
     {
+      "variableId": "typography/compact/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/compact/size",
       "modeId": "mode:type:light",
       "value": 16
@@ -1416,9 +1597,14 @@
       "value": 400
     },
     {
+      "variableId": "typography/operational/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/operational/size",
       "modeId": "mode:type:light",
-      "value": 15
+      "value": 14
     },
     {
       "variableId": "typography/operational/line-height",
@@ -1431,6 +1617,11 @@
       "value": 400
     },
     {
+      "variableId": "typography/dense/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/dense/size",
       "modeId": "mode:type:light",
       "value": 14
@@ -1438,12 +1629,17 @@
     {
       "variableId": "typography/dense/line-height",
       "modeId": "mode:type:light",
-      "value": 20
+      "value": 22
     },
     {
       "variableId": "typography/dense/weight",
       "modeId": "mode:type:light",
       "value": 400
+    },
+    {
+      "variableId": "typography/caption/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/caption/size",
@@ -1453,7 +1649,7 @@
     {
       "variableId": "typography/caption/line-height",
       "modeId": "mode:type:light",
-      "value": 20
+      "value": 22
     },
     {
       "variableId": "typography/caption/weight",
@@ -1528,12 +1724,12 @@
     {
       "variableId": "radius/control",
       "modeId": "mode:size:light",
-      "value": 6
+      "value": 8
     },
     {
       "variableId": "radius/panel",
       "modeId": "mode:size:light",
-      "value": 8
+      "value": 12
     },
     {
       "variableId": "focus/width",

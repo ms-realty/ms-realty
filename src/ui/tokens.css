@@ -8,43 +8,47 @@
   --breakpoint-xl: 90rem;
 
   --color-*: initial;
-  --color-canvas: #f8f7f3;
+  --color-canvas: #ffffff;
   --color-surface: #ffffff;
-  --color-subtle: #eef1ec;
-  --color-ink: #192e27;
-  --color-text: #192e27;
-  --color-text-muted: #52625a;
+  --color-subtle: #f3f5f7;
+  --color-ink: #172029;
+  --color-text: #1e2832;
+  --color-text-muted: #566473;
   --color-text-inverse: #ffffff;
   --color-text-on-ink-muted: #b8c5bd;
-  --color-divider: #d9dfd8;
-  --color-border: #687a6f;
-  --color-focus: #174ea6;
+  --color-divider: #e1e5e9;
+  --color-border: #7e8a98;
+  --color-focus: #315ba6;
   --color-focus-inverse: #ffffff;
-  --color-action: #214f3c;
-  --color-action-hover: #1a3f30;
-  --color-action-pressed: #133024;
-  --color-link: #214f3c;
+  --color-action: #172029;
+  --color-action-hover: #303d49;
+  --color-action-pressed: #0c141b;
+  --color-link: #245b48;
   --color-link-visited: #4e3f73;
-  --color-selected: #e4eee7;
+  --color-selected: #edf4f0;
   --color-disabled: #eceeea;
   --color-disabled-text: #5c6962;
   --color-success: #21603c;
   --color-success-soft: #e5f0e8;
-  --color-warning: #775000;
-  --color-warning-soft: #fbf0d9;
-  --color-error: #a12a25;
+  --color-warning: #895a13;
+  --color-warning-soft: #fff5e4;
+  --color-error: #af3035;
   --color-error-hover: #86221e;
   --color-error-pressed: #6b1b18;
-  --color-error-soft: #fbeae8;
+  --color-error-soft: #fff0ef;
   --color-info: #245a86;
   --color-info-soft: #e6eef6;
-  --color-assist: #5b45a0;
-  --color-assist-soft: #f1edf9;
-  --color-assist-line: #a796d6;
-  --color-overlay: rgb(25 46 39 / 0.5);
+  --color-assist: #315ba6;
+  --color-assist-soft: #edf2fc;
+  --color-assist-line: #315ba6;
+  --color-overlay: rgb(30 40 50 / 0.5);
+  --color-brand: #245b48;
+  --color-brand-tint: #edf4f0;
 
   --font-*: initial;
   --font-sans: "Noto Sans", "Noto Sans Hebrew", "Noto Sans Fallback", system-ui, sans-serif;
+  --font-display:
+    "Manrope", "Noto Sans", "Noto Sans Hebrew", "Noto Sans Fallback", system-ui, sans-serif;
   --font-weight-*: initial;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -53,10 +57,12 @@
 
   --text-*: initial;
   --text-title: 2rem;
-  --text-title--line-height: 2.5rem;
-  --text-page: 1.75rem;
-  --text-page--line-height: 2.25rem;
-  --text-heading: 1.375rem;
+  --text-title--line-height: 2.625rem;
+  --text-title--letter-spacing: -0.64px;
+  --text-page: 2rem;
+  --text-page--line-height: 2.625rem;
+  --text-page--letter-spacing: -0.64px;
+  --text-heading: 1.25rem;
   --text-heading--line-height: 1.875rem;
   --text-subheading: 1.125rem;
   --text-subheading--line-height: 1.625rem;
@@ -66,12 +72,12 @@
   --text-body--line-height: 1.625rem;
   --text-compact: 1rem;
   --text-compact--line-height: 1.5rem;
-  --text-operational: 0.9375rem;
+  --text-operational: 0.875rem;
   --text-operational--line-height: 1.375rem;
   --text-dense: 0.875rem;
-  --text-dense--line-height: 1.25rem;
+  --text-dense--line-height: 1.375rem;
   --text-caption: 0.875rem;
-  --text-caption--line-height: 1.25rem;
+  --text-caption--line-height: 1.375rem;
 
   --spacing: 0.25rem;
   --spacing-control: 2.75rem;
@@ -86,8 +92,8 @@
   --container-inspector: 21rem;
 
   --radius-*: initial;
-  --radius-control: 0.375rem;
-  --radius-panel: 0.5rem;
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
 
   --shadow-*: initial;
   --shadow-raised: 0px 1px 2px 0px rgb(25 46 39 / 0.08);
@@ -95,6 +101,38 @@
 
   --ease-*: initial;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Text roles keep their source family, including responsive text-* variants. */
+@utility text-title {
+  font-family: var(--font-display);
+}
+@utility text-page {
+  font-family: var(--font-display);
+}
+@utility text-heading {
+  font-family: var(--font-sans);
+}
+@utility text-subheading {
+  font-family: var(--font-sans);
+}
+@utility text-price {
+  font-family: var(--font-sans);
+}
+@utility text-body {
+  font-family: var(--font-sans);
+}
+@utility text-compact {
+  font-family: var(--font-sans);
+}
+@utility text-operational {
+  font-family: var(--font-sans);
+}
+@utility text-dense {
+  font-family: var(--font-sans);
+}
+@utility text-caption {
+  font-family: var(--font-sans);
 }
 
 /* Not Tailwind theme namespaces: use as duration-(--duration-fast), z-(--z-header). */
