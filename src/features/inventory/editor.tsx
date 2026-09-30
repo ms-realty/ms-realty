@@ -53,7 +53,7 @@ export function InventoryEditor({
       submitLabel={reference ? copy.save : copy.create}
     >
       {(form) => (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {fields
             .filter((name) => !reference || !identity.includes(name))
             .map((name) => {
@@ -92,7 +92,7 @@ export function InventoryEditor({
                   key={name}
                   className={
                     name === "description" || name === "sourceReference" || name === "brokerNote"
-                      ? "md:col-span-2"
+                      ? "sm:col-span-2"
                       : undefined
                   }
                 >

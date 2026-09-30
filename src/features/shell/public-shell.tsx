@@ -85,11 +85,11 @@ export async function PublicShell({
               <li>
                 <a
                   href={`tel:${brandPhone.e164}`}
-                  className={buttonClass("secondary", "px-3 md:px-4")}
+                  className={buttonClass("secondary", "px-3 sm:px-4")}
                 >
                   <icons.PhoneIcon className="size-[1.125rem]" />
                   <span className="sr-only">{footer("callLabel")}</span>
-                  <span className="max-md:sr-only">
+                  <span className="max-sm:sr-only">
                     <Ltr>{brandPhone.display}</Ltr>
                   </span>
                 </a>
