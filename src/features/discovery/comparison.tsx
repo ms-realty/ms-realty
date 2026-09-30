@@ -116,8 +116,10 @@ export function Comparison({
             <>
               <bdi>
                 {formatNumber(locale, listing.area.value.value, { maximumFractionDigits: 20 })}
-                {"\u00a0"}m²
-              </bdi>
+              </bdi>{" "}
+              <span className="inline-block whitespace-nowrap" data-unit="area">
+                m²
+              </span>
               <span className="block font-normal text-text-muted">
                 {copy[listing.area.value.basis]}
               </span>
@@ -254,9 +256,10 @@ export function Comparison({
             item.result.listing.availability.primaryAction !== "view_similar" ? (
               <a
                 className={buttonClass("secondary", "w-full wrap-anywhere")}
+                aria-label={`${copy.ask} · ${item.reference}`}
                 href={`/${locale}/inquire?${new URLSearchParams({ purpose: "question", reference: item.reference, manifest: item.result.listing.manifestId, comparisonReferences: items.map((other) => other.reference).join(",") })}`}
               >
-                {copy.ask} · <bdi>{item.reference}</bdi>
+                {copy.ask}
               </a>
             ) : null}
             <RemoveComparison

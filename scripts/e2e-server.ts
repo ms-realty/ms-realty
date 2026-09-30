@@ -1,6 +1,6 @@
 // One freshly migrated database per browser run. Playwright owns this process and stops it
 // after the suite; the finally block drops only the generated msr_e2e_* database.
-import { type ChildProcess, spawn } from "node:child_process";
+import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -83,6 +83,11 @@ try {
     await writeMapFixture();
     process.env.MAP_RELEASE_ID = mapFixtureRelease;
   }
+  // This harness invokes Next directly, so npm's prebuild hook does not run. Prepare the
+  // pinned same-origin worker for fresh and previously compiled candidates alike.
+  const mapRuntime = spawnSync(process.execPath, ["scripts/map-runtime.mjs"], { stdio: "inherit" });
+  if (mapRuntime.error) throw mapRuntime.error;
+  if (mapRuntime.status !== 0) throw new Error("Map runtime preparation failed");
   const built = process.env.CI || process.env.E2E_SKIP_BUILD === "1" ? 0 : await next(["build"]);
   process.exitCode =
     built ||

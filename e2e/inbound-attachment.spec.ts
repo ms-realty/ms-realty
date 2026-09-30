@@ -79,7 +79,7 @@ for (const locale of ["bg", "ru", "en"])
           .set({ version: sql`${schema.cases.version}+1` })
           .where(eq(schema.cases.id, f.caseId));
         await form.getByRole("button", { name: c.submit, exact: true }).click();
-        await expect(page.getByRole("alert")).toBeVisible();
+        await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
         await expect(form.getByLabel(c.fileName, { exact: true })).toHaveValue(
           "selected-case-check.pdf",
         );

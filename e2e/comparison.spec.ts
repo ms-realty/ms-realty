@@ -194,6 +194,13 @@ for (const width of [320, 390, 1440]) {
     await expect(table.locator('td[headers^="compare-price"]').nth(1)).toContainText("Negotiable");
     await expect(table.locator('td[headers^="compare-area"]').nth(0)).toContainText("72.123456789");
     await expect(table.locator('td[headers^="compare-area"]').nth(1)).toContainText("65.987654321");
+    for (const unit of await table.locator('[data-unit="area"]').all()) {
+      const height = await unit.evaluate((element) => ({
+        rendered: element.getBoundingClientRect().height,
+        line: Number.parseFloat(getComputedStyle(element).lineHeight),
+      }));
+      expect(height.rendered).toBeLessThanOrEqual(height.line * 1.1);
+    }
     await expect(table.locator('td[headers^="compare-lift"]')).toContainText([
       "Unknown",
       "Unknown",
@@ -216,6 +223,12 @@ for (const width of [320, 390, 1440]) {
           )
         ).height,
       ).toBeGreaterThanOrEqual(44);
+      const individual = page.getByRole("link", {
+        name: `Send an inquiry · ${item.reference}`,
+        exact: true,
+      });
+      await expect(individual).toHaveText("Send an inquiry");
+      expect((await bounds(individual)).height).toBeLessThanOrEqual(60);
     }
     expect((await bounds(table.locator("thead"))).height).toBeLessThan(width >= 1024 ? 460 : 220);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
