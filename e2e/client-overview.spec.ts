@@ -138,6 +138,7 @@ for (const javaScriptEnabled of [true, false]) {
     test("one authorized Case opens its recorded next step; native navigation, chooser and isolation survive all widths", async ({
       context,
       page,
+      browserName,
     }, info) => {
       // This one journey covers three widths, RTL, all five native destinations and Back.
       test.slow();
@@ -215,7 +216,9 @@ for (const javaScriptEnabled of [true, false]) {
 
         await page.setViewportSize({ width: 320, height: 900 });
         await page.goto(overview);
-        await page.keyboard.press("Tab");
+        await page.keyboard.press(
+          browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab",
+        );
         await expect(
           page.getByRole("link", { name: "Skip to main content", exact: true }),
         ).toBeFocused();

@@ -61,6 +61,7 @@ for (const javaScriptEnabled of [true, false]) {
     test("Tasks, Hermes and tools retain identity, locale and native navigation at every range", async ({
       context,
       page,
+      browserName,
     }, testInfo) => {
       const name = await operator(context);
       for (const width of [320, 390, 768, 1440]) {
@@ -111,7 +112,9 @@ for (const javaScriptEnabled of [true, false]) {
       await page.goBack();
       await expect(page).toHaveURL(hostUrl("staff", "/ru/tasks?view=mine"));
       await page.goto(hostUrl("staff", "/en/today"));
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(
+        browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab",
+      );
       await expect(
         page.getByRole("link", { name: "Skip to main content", exact: true }),
       ).toBeFocused();
