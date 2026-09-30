@@ -868,3 +868,41 @@ describe("mergeAssistProposals", () => {
     expect(mergeAssistProposals(text, r, [], known)).toBe(r);
   });
 });
+
+it("F02/F29 retain locale, ambiguity and evidence behavior with a large alias registry", () => {
+  const large: InterpretPlace[] = [
+    {
+      id: "00000000-0000-4000-8000-00000000fffe",
+      level: "settlement",
+      parentId: null,
+      countryCode: "BG",
+      names: Array.from({ length: 2048 }, (_, i) => `Synthetic alias ${i}`),
+    },
+    ...places,
+  ];
+  for (const [locale, examples] of Object.entries(cases)) {
+    for (const [text] of examples) {
+      expect(interpretIntent(text, { locale: locale as PublicLocale, places: large })).toEqual(
+        interpretIntent(text, { locale: locale as PublicLocale, places }),
+      );
+    }
+  }
+});
+
+it("prefers the original longest alias across batches and resumes at its exact end", () => {
+  const multi: InterpretPlace[] = [
+    {
+      id: "00000000-0000-4000-8000-00000000fffd",
+      level: "settlement",
+      parentId: null,
+      countryCode: "BG",
+      names: ["North Melnik", ...Array.from({ length: 128 }, (_, i) => `Unused ${i}`)],
+    },
+    ...places,
+  ];
+  const text = "buy in North Melnik and Sandanski";
+  expect(interpretIntent(text, { locale: "en", places: multi }).places).toMatchObject([
+    { placeId: multi[0]?.id, evidence: "North Melnik", span: { start: 7, end: 19 } },
+    { placeId: ids.sandanski, evidence: "Sandanski", span: { start: 24, end: 33 } },
+  ]);
+});

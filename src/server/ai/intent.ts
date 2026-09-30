@@ -995,7 +995,7 @@ function trimSpan(text: string, span: Span): Span {
 }
 
 interface PlaceMatcher {
-  readonly re: RegExp | null;
+  readonly patterns: readonly RegExp[];
   readonly byKey: ReadonlyMap<string, readonly string[]>;
   readonly byId: ReadonlyMap<string, InterpretPlace>;
 }
@@ -1041,10 +1041,16 @@ function placeMatcher(places: readonly InterpretPlace[]): PlaceMatcher {
       return vowel ? `${src.slice(0, -1)}(?:${vowel}|${caseEndings})` : `${src}(?:${caseEndings})?`;
     });
   const matcher: PlaceMatcher = {
-    re:
-      alternatives.length === 0
-        ? null
-        : new RegExp(`${B}${hebrewPrefix}(${alternatives.join("|")})${E}`, "gu"),
+    // Keep compilation bounded when the complete registry has many aliases. Pattern
+    // order retains the original longest-name preference across the whole registry.
+    patterns: Array.from(
+      { length: Math.ceil(alternatives.length / 128) },
+      (_, i) =>
+        new RegExp(
+          `${B}${hebrewPrefix}(${alternatives.slice(i * 128, (i + 1) * 128).join("|")})${E}`,
+          "gu",
+        ),
+    ),
     byKey,
     byId: new Map(places.map((p) => [p.id, p])),
   };
@@ -1071,10 +1077,10 @@ const levelRank = (matcher: PlaceMatcher, id: string) =>
 
 function scanPlaces(scan: Scan, draft: Draft, places: readonly InterpretPlace[]): void {
   const matcher = placeMatcher(places);
-  if (!matcher.re) return;
+  if (!matcher.patterns.length) return;
   const view = placeView(scan.view);
   let ambiguous = 0;
-  for (const [m, span] of scan.matches(matcher.re, view)) {
+  for (const [m, span] of placeMatches(scan, matcher, view)) {
     const ids = resolvePlaceKey(matcher, (m[1] ?? "").replace(/[\s-]+/g, " "));
     if (ids.length === 0) continue;
     const nearAt = scan.before(span.start, nearBefore);
@@ -1108,6 +1114,28 @@ function scanPlaces(scan: Scan, draft: Draft, places: readonly InterpretPlace[])
       });
       ambiguous += 1;
     }
+  }
+}
+
+/** Equivalent to one ordered global alternation, without compiling one huge pattern. */
+function* placeMatches(
+  scan: Scan,
+  matcher: PlaceMatcher,
+  view: View,
+): Generator<[RegExpExecArray, Span]> {
+  let cursor = 0;
+  while (cursor < view.text.length) {
+    let first: RegExpExecArray | null = null;
+    for (const pattern of matcher.patterns) {
+      pattern.lastIndex = cursor;
+      const match = pattern.exec(view.text);
+      // A tie keeps the earlier batch and therefore the original alternative priority.
+      if (match && (!first || match.index < first.index)) first = match;
+    }
+    if (!first) return;
+    cursor = first.index + Math.max(1, first[0].length);
+    const span = scan.toOriginal(view, first.index, cursor);
+    if (scan.isFree(span)) yield [first, span];
   }
 }
 
