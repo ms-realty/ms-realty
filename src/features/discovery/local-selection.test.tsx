@@ -25,7 +25,7 @@ it("lets the URL selection populate empty storage without showing an empty or co
   expect(JSON.parse(localStorage.getItem(key) ?? "null")).toEqual(refs);
   expect(screen.queryByText(copy.emptySaved)).not.toBeInTheDocument();
   expect(screen.queryByRole("list")).not.toBeInTheDocument();
-  expect(screen.getByText(copy.localOnly)).toBeVisible();
+  expect(screen.queryByText(copy.localOnly)).not.toBeInTheDocument();
   rerender(
     <>
       <LocalSelection kind="compare" locale="en" copy={copy} canonicalReferences={refs} />

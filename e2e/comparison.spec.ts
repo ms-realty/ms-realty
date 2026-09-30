@@ -209,7 +209,7 @@ for (const width of [320, 390, 1440]) {
       expect(
         (
           await bounds(
-            column(page, item.reference).getByRole("link", {
+            page.getByRole("link", {
               name: `Remove ${item.reference}`,
               exact: true,
             }),
@@ -217,6 +217,7 @@ for (const width of [320, 390, 1440]) {
         ).height,
       ).toBeGreaterThanOrEqual(44);
     }
+    expect((await bounds(table.locator("thead"))).height).toBeLessThan(width >= 1024 ? 460 : 220);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );

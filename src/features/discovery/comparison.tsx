@@ -151,7 +151,10 @@ export function Comparison({
       {
         key: "availability",
         label: labels.availability,
-        value: (listing) => <Availability listing={listing} locale={locale} copy={copy} />,
+        value: (listing) => {
+          const state = listing.availability.presented;
+          return state === "let" ? copy.letStatus : copy[state];
+        },
       },
     ];
   return (
@@ -190,14 +193,6 @@ export function Comparison({
                   ) : (
                     <p>{unavailable(item)}</p>
                   )}
-                  <RemoveComparison
-                    reference={item.reference}
-                    remaining={items
-                      .filter((other) => other.reference !== item.reference)
-                      .map((other) => other.reference)}
-                    locale={locale}
-                    copy={copy}
-                  />
                 </th>
               );
             })}
@@ -235,29 +230,45 @@ export function Comparison({
         </tbody>
       </table>
       <div className="grid gap-5 lg:grid-cols-3">
-        {items.map((item) =>
-          item.result?.status === "listing" ? (
-            <section
-              key={item.reference}
-              className="min-w-0 space-y-3 wrap-anywhere"
-              aria-label={item.reference}
-            >
-              <h2 className="font-semibold lg:hidden">
-                <a className="underline" href={listingHref(item.result.listing, locale)}>
-                  {item.result.listing.title || item.reference}
-                </a>
+        {items.map((item) => (
+          <section
+            key={item.reference}
+            className="min-w-0 space-y-3 wrap-anywhere"
+            aria-label={item.reference}
+          >
+            {item.result?.status === "listing" ? (
+              <>
+                <h2 className="font-semibold lg:hidden">
+                  <a className="underline" href={listingHref(item.result.listing, locale)}>
+                    {item.result.listing.title || item.reference}
+                  </a>
+                </h2>
+                <Availability listing={item.result.listing} locale={locale} copy={copy} />
+              </>
+            ) : (
+              <h2 className="font-semibold">
+                <bdi>{item.reference}</bdi>
               </h2>
-              {item.result.listing.availability.primaryAction !== "view_similar" ? (
-                <a
-                  className={buttonClass("secondary", "w-full wrap-anywhere")}
-                  href={`/${locale}/inquire?${new URLSearchParams({ purpose: "question", reference: item.reference, manifest: item.result.listing.manifestId, comparisonReferences: items.map((other) => other.reference).join(",") })}`}
-                >
-                  {copy.ask} · <bdi>{item.reference}</bdi>
-                </a>
-              ) : null}
-            </section>
-          ) : null,
-        )}
+            )}
+            {item.result?.status === "listing" &&
+            item.result.listing.availability.primaryAction !== "view_similar" ? (
+              <a
+                className={buttonClass("secondary", "w-full wrap-anywhere")}
+                href={`/${locale}/inquire?${new URLSearchParams({ purpose: "question", reference: item.reference, manifest: item.result.listing.manifestId, comparisonReferences: items.map((other) => other.reference).join(",") })}`}
+              >
+                {copy.ask} · <bdi>{item.reference}</bdi>
+              </a>
+            ) : null}
+            <RemoveComparison
+              reference={item.reference}
+              remaining={items
+                .filter((other) => other.reference !== item.reference)
+                .map((other) => other.reference)}
+              locale={locale}
+              copy={copy}
+            />
+          </section>
+        ))}
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         {available ? (

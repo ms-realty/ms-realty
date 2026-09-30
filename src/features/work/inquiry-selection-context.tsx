@@ -1,7 +1,10 @@
 import { z } from "zod";
-import { isPublicLocale } from "@/domain/ids";
+import { areaBases, priceBases, pricePeriods } from "@/domain/facts";
+import { currencyCodes, isPublicLocale, type PublicLocale } from "@/domain/ids";
+import { compareCopy } from "@/features/discovery/compare-copy";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { optionLabel } from "@/features/inventory/copy";
+import { formatMoney, formatNumber } from "@/i18n/format";
 import { workCopy } from "./copy";
 
 const fact = z.object({ state: z.string(), value: z.unknown().optional() });
@@ -61,11 +64,43 @@ function valueText(value: unknown, locale: string): string {
   return "—";
 }
 
+const moneyValue = z.object({
+  amountMinor: z.number().int().safe(),
+  currency: z.enum(currencyCodes),
+  period: z.enum(pricePeriods),
+  basis: z.enum(priceBases),
+});
+const areaValue = z.object({ value: z.number(), unit: z.literal("m2"), basis: z.enum(areaBases) });
+
+function summaryValue(
+  kind: "price" | "area" | "bedrooms",
+  source: z.infer<typeof fact>,
+  locale: PublicLocale,
+): string {
+  if (source.state !== "known") return optionLabel(source.state, locale);
+  const copy = discoveryCopy(locale);
+  if (kind === "price") {
+    const parsed = moneyValue.safeParse(source.value);
+    if (!parsed.success) return copy.unknown;
+    const value = parsed.data;
+    return `${formatMoney(locale, value.amountMinor, value.currency)}${value.period === "month" ? ` ${copy.perMonth}` : ` · ${compareCopy(locale).total}`} · ${copy[value.basis]}`;
+  }
+  if (kind === "area") {
+    const parsed = areaValue.safeParse(source.value);
+    if (!parsed.success) return copy.unknown;
+    return `${formatNumber(locale, parsed.data.value, { maximumFractionDigits: 20 })}\u00a0m² · ${optionLabel(parsed.data.basis, locale)}`;
+  }
+  return typeof source.value === "number"
+    ? formatNumber(locale, source.value, { maximumFractionDigits: 20 })
+    : copy.unknown;
+}
+
 /** Original public snapshots, not a fresh query which could replace what the visitor saw. */
 export function InquirySelectionContext({ context, locale }: { context: unknown; locale: string }) {
   const parsed = snapshotSchema.safeParse(context);
   if (!parsed.success || !parsed.data.selection.length) return null;
-  const copy = discoveryCopy(isPublicLocale(locale) ? locale : "bg");
+  const publicLocale = isPublicLocale(locale) ? locale : "bg";
+  const copy = discoveryCopy(publicLocale);
   const label =
     locale === "bg"
       ? "Избрани имоти при изпращането"
@@ -91,22 +126,18 @@ export function InquirySelectionContext({ context, locale }: { context: unknown;
               {optionLabel(item.availability.freshness, locale)}
             </p>
             <dl className="space-y-2">
-              {[
-                [locale === "bg" ? "Цена" : locale === "ru" ? "Цена" : "Price", item.price],
-                [copy.area, item.area],
-                [copy.bedrooms, item.bedrooms],
-              ].map(([name, raw]) => {
-                const value = raw as z.infer<typeof fact>;
-                return (
-                  <div key={String(name)}>
-                    <dt className="font-semibold">{String(name)}</dt>
-                    <dd>
-                      {optionLabel(value.state, locale)}
-                      {value.state === "known" ? ` · ${valueText(value.value, locale)}` : ""}
-                    </dd>
-                  </div>
-                );
-              })}
+              {(
+                [
+                  ["price", compareCopy(publicLocale).price, item.price],
+                  ["area", copy.area, item.area],
+                  ["bedrooms", copy.bedrooms, item.bedrooms],
+                ] as const
+              ).map(([kind, name, value]) => (
+                <div key={kind}>
+                  <dt className="font-semibold">{name}</dt>
+                  <dd>{summaryValue(kind, value, publicLocale)}</dd>
+                </div>
+              ))}
             </dl>
             <details>
               <summary className="cursor-pointer font-semibold">{workCopy(locale).details}</summary>

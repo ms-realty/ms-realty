@@ -142,6 +142,12 @@ export function LocalSelection({
     window.addEventListener("pageshow", synchronize);
     return () => window.removeEventListener("pageshow", synchronize);
   }, [canonical, copy.storageFailed, kind]);
+  if (canonical !== undefined)
+    return (
+      <p role="status" className={notice ? "text-caption text-text-muted" : "sr-only"}>
+        {notice}
+      </p>
+    );
   return (
     <div className="space-y-5">
       <p>{copy.localOnly}</p>
