@@ -77,8 +77,8 @@ export default async function PropertyPage({
       <a className="self-start underline" href={`/${locale}/properties?purpose=${listing.purpose}`}>
         {copy.back}
       </a>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-        <div className="space-y-6">
+      <div className="grid gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+        <div className="min-w-0 space-y-6">
           <header className="space-y-3">
             <p className="text-compact text-text-muted">
               <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}
@@ -94,6 +94,30 @@ export default async function PropertyPage({
           </header>
           <ApprovedGallery media={listing.media} unavailable={copy.noPhoto} />
           <ListingFacts listing={listing} locale={locale} copy={copy} />
+        </div>
+        <aside className="flex min-w-0 flex-col gap-5 self-start rounded-panel border border-border bg-surface p-5 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <p className="font-semibold">{listing.responsibleTeam.label}</p>
+          {listing.availability.primaryAction === "request_viewing" ? (
+            <a className={buttonClass("primary")} href={inquiry("viewing_request")}>
+              {copy.viewing}
+            </a>
+          ) : null}
+          {listing.availability.primaryAction !== "view_similar" ? (
+            <a className={buttonClass("secondary")} href={inquiry("question")}>
+              {copy.ask}
+            </a>
+          ) : (
+            <a
+              href={`/${locale}/properties?purpose=${listing.purpose}`}
+              className={buttonClass("primary")}
+            >
+              {copy.back}
+            </a>
+          )}
+          <LocalActions reference={listing.reference} copy={copy} />
+          <p className="text-caption text-text-muted">{copy.localOnly}</p>
+        </aside>
+        <div className="min-w-0 space-y-6 lg:col-start-1">
           {listing.description ? (
             <p className="max-w-reading whitespace-pre-wrap break-words text-body">
               {listing.description}
@@ -118,28 +142,6 @@ export default async function PropertyPage({
             }
           />
         </div>
-        <aside className="flex flex-col gap-5 self-start rounded-panel border border-border bg-surface p-5">
-          <p className="font-semibold">{listing.responsibleTeam.label}</p>
-          {listing.availability.primaryAction === "request_viewing" ? (
-            <a className={buttonClass("primary")} href={inquiry("viewing_request")}>
-              {copy.viewing}
-            </a>
-          ) : null}
-          {listing.availability.primaryAction !== "view_similar" ? (
-            <a className={buttonClass("secondary")} href={inquiry("question")}>
-              {copy.ask}
-            </a>
-          ) : (
-            <a
-              href={`/${locale}/properties?purpose=${listing.purpose}`}
-              className={buttonClass("primary")}
-            >
-              {copy.back}
-            </a>
-          )}
-          <LocalActions reference={listing.reference} copy={copy} />
-          <p className="text-caption text-text-muted">{copy.localOnly}</p>
-        </aside>
       </div>
       {result.alternatives.length ? (
         <ListingGrid items={result.alternatives} locale={locale} copy={copy} />
