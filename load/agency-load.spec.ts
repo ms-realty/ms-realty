@@ -285,6 +285,7 @@ test("AT62: catalogue reads and staff commands under 50 public and 10 staff sess
       memoryBytes: totalmem(),
       node: process.version,
       nextDist: process.env.NEXT_DIST_DIR ?? ".next",
+      webReplicas: Number(process.env.LOAD_REPLICAS ?? 1),
     },
     dataset: {
       listings: fixture.listings,

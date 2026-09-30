@@ -215,3 +215,24 @@ not evidence for the final correction.
 load, source benchmark and failed CI artifacts. The deployment template specifies two web
 instances; the measurement above used one. A separately labelled local two-process experiment
 can assess that topology without relaxing budgets or claiming live high availability.
+
+
+## Explicit local replica harness
+
+`LOAD_REPLICAS=2 npm run test:load` starts two local Next processes from one build behind a
+streaming round-robin transport. Default remains one. Both processes share the generated
+browser database, test file directory and synthetic auth configuration. The wrapper accepts
+replica mode only for an explicitly local disposable workload, waits for both health routes,
+and stops the whole cohort if either process exits. Cleanup still removes only that run's
+own database and files. Reports record the replica count. This is a local topology experiment,
+not live balancing, HA, rolling deployment or target-size acceptance.
+
+Transport checks verify unchanged host/origin/body and separate cookies, first-byte streaming,
+caller cancellation, and no retry of a failed POST against the other backend. Four tests pass;
+TypeScript and the 895-file lint check pass. The initial custom-Host check failed because native
+fetch replaced that header; the final check uses a native HTTP request and verifies the received
+backend headers. Both logs are retained. Budgets and workload concurrency are unchanged.
+
+The automatic Jev rule check was unavailable due to its daily budget, not passed. Native review
+of the configured applicable no-secrets rule found only environment references and synthetic
+loopback test data. The other configured rules apply to Mindburn paths, outside this repository.

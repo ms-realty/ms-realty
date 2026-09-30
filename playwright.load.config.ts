@@ -9,6 +9,8 @@ assert(
   ),
   "Load runs require a local disposable PostgreSQL server",
 );
+// The server wrapper admits replica mode only for this explicitly local, disposable workload.
+process.env.MSR_LOAD_SCOPE = "local-synthetic";
 
 export default defineConfig({
   ...base,
