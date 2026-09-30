@@ -8,6 +8,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { attachmentCopy } from "../src/features/inbound/attachment-copy";
+import { inboundCopy } from "../src/features/inbound/copy";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -79,7 +80,9 @@ for (const locale of ["bg", "ru", "en"])
           .set({ version: sql`${schema.cases.version}+1` })
           .where(eq(schema.cases.id, f.caseId));
         await form.getByRole("button", { name: c.submit, exact: true }).click();
-        await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
+        await expect(
+          page.getByRole("main").getByRole("alert").filter({ hasText: c.error }),
+        ).toBeVisible();
         await expect(form.getByLabel(c.fileName, { exact: true })).toHaveValue(
           "selected-case-check.pdf",
         );

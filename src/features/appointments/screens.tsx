@@ -64,7 +64,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       </p>
       <p>Europe/Sofia</p>
       {row.caseId ? (
-        <nav className="flex flex-wrap gap-4" aria-label={c.cases}>
+        <nav className="flex flex-wrap gap-4" aria-label={hostCopy.links}>
           <a
             className={`${workflowLink} inline-flex min-h-control items-center`}
             href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}
@@ -113,9 +113,75 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           <WorkflowTime value={row.proposedEndsAt} locale={props.locale} />
         </WorkflowSection>
       ) : null}
+      {staff && detail.hostOffer ? (
+        <WorkflowSection title={hostCopy.pending}>
+          <p>{detail.hostOffer.name}</p>
+          <p className="whitespace-pre-wrap">{detail.hostOffer.note}</p>
+          {!detail.hostOffer.current ? <Notice tone="warning">{hostCopy.stale}</Notice> : null}
+          {detail.canWithdrawHost ? (
+            <BoundWorkflowForm
+              {...props}
+              command="appointmentHostHandover"
+              id={row.id}
+              revision={row.version}
+              path={path}
+              values={{ action: "cancel" }}
+              fields={[
+                { name: "action", label: "", type: "hidden" },
+                { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
+                {
+                  name: "reviewed",
+                  label: hostCopy.withdrawReviewed,
+                  type: "checkbox",
+                  required: true,
+                },
+              ]}
+              submit={hostCopy.withdraw}
+            />
+          ) : null}
+        </WorkflowSection>
+      ) : null}
+      {staff && detail.canOfferHost ? (
+        <WorkflowSection title={hostCopy.offerTitle}>
+          <p>{hostCopy.offerLead}</p>
+          {detail.hostReceivers.length ? (
+            <BoundWorkflowForm
+              {...props}
+              command="appointmentHostHandover"
+              id={row.id}
+              revision={row.version}
+              path={path}
+              values={{ action: "request" }}
+              fields={[
+                { name: "action", label: "", type: "hidden" },
+                {
+                  name: "receiverId",
+                  label: hostCopy.receiver,
+                  type: "select",
+                  required: true,
+                  options: detail.hostReceivers.map((person) => ({
+                    value: person.id,
+                    label: person.name,
+                  })),
+                },
+                { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
+                {
+                  name: "reviewed",
+                  label: hostCopy.offerReviewed,
+                  type: "checkbox",
+                  required: true,
+                },
+              ]}
+              submit={hostCopy.offerSubmit}
+            />
+          ) : (
+            <Notice tone="info">{hostCopy.none}</Notice>
+          )}
+        </WorkflowSection>
+      ) : null}
       {staff && detail.canAcceptHost ? (
         <WorkflowSection title={hostCopy.title}>
-          <p>{hostCopy.lead}</p>
+          <p>{detail.needsCoverage ? hostCopy.lead : hostCopy.plannedLead}</p>
           {detail.reservedInterval ? (
             <p>
               {hostCopy.reserved}:{" "}

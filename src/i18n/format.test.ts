@@ -5,6 +5,7 @@ import {
   formatArea,
   formatDate,
   formatDateTime,
+  formatExactArea,
   formatMoney,
   formatNumber,
   formatTime,
@@ -35,6 +36,41 @@ describe("formatting (ux-spec §19.3)", () => {
     expect(formatDate("en", instant, { dateStyle: "long", timeZone: "UTC" })).toBe(
       "31 December 2026",
     );
+  });
+
+  it("keeps number and area rounding separate across every locale and later values", () => {
+    for (const locale of publicLocales) {
+      for (const value of [85.256, -1200.78, 0, 99.99]) {
+        expect(formatNumber(locale, value)).toBe(
+          new Intl.NumberFormat(displayLocale(locale)).format(value),
+        );
+        expect(formatArea(locale, value)).toBe(
+          `${new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 1 }).format(value)}\u00a0m²`,
+        );
+      }
+    }
+  });
+
+  it("preserves caller options, inherited values, changed options and invalid-option errors", () => {
+    const options = { maximumFractionDigits: 1 };
+    expect(formatNumber("en", 85.256, options)).toBe("85.3");
+    options.maximumFractionDigits = 2;
+    expect(formatNumber("en", 85.256, options)).toBe("85.26");
+    expect(formatNumber("en", 85.256, Object.create({ maximumFractionDigits: 0 }))).toBe("85");
+    expect(() => formatNumber("en", 1, { maximumFractionDigits: Infinity })).toThrow(RangeError);
+    expect(formatNumber("en", 85.256)).toBe("85.256");
+  });
+
+  it("preserves source area precision independently of rounded area and subsequent facts", () => {
+    for (const locale of publicLocales)
+      for (const value of [
+        85.25678901234566, 0.00001234567890123456, 1_200_000.789123, -85.25, 0,
+      ]) {
+        const expected = `${new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 20 }).format(value)}\u00a0m²`;
+        expect(formatExactArea(locale, value)).toBe(expected);
+        formatArea(locale, value);
+        expect(formatExactArea(locale, value)).toBe(expected);
+      }
   });
 
   it("names the zone when showing a date and time people act on", () => {

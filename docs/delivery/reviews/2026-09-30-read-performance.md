@@ -168,3 +168,117 @@ typing error was also repaired and the final type check passed.
 `publication-join-*.log` under the artifact root above preserve the scope and failures.
 These single service observations justify a full workload rerun, not R08 acceptance. The new
 source still needs its own CI and fresh-build HTTP/concurrency qualification.
+
+
+## Fresh load profile and formatter repair
+
+A fresh Linux build of `ebebf03156e9f816dc2e70e2585a07584033e9ac` (build ID
+`DihC8w9abYJpa0TBl95L_`) ran the unchanged 10k/50-public/10-staff workload.
+The bare eligibility plan executed in 192.30 ms. There were zero operation failures,
+2,059 public cycles and 180 staff cycles. Every budgeted lane still failed:
+
+| Lane | p95 ms | Unchanged budget ms |
+|---|---:|---:|
+| Search HTML | 1086.01 | 500 |
+| Detail HTML | 629.96 | 500 |
+| Today HTML | 775.38 | 500 |
+| Task HTML | 1285.84 | 500 |
+| Command POST, actual network timing | 1920.34 | 800 |
+
+Media p95 was 312.20 ms with no assigned latency budget. The closed-loop request mix and
+shared host vary between runs; the improvements do not prove isolated throughput causality.
+The runner cannot read the managed worktree's external Git metadata, so the retained host
+provenance explicitly binds source, build, run ID and failure exit code.
+
+The runtime was near full event-loop utilization (average 0.959 during load). Database
+connection observations included many client-read waits, not only running SQL. The CPU profile
+showed repeated number and calendar-year formatter construction among application frames.
+Default number formatting, the fixed square-metre configuration and the agency-year formatter
+now reuse formatter objects. Values are always formatted anew; explicit caller options still
+use native Intl construction and validation, including inherited and mutable options. No
+rendered content, permission or session state is cached.
+
+An alternating benchmark of the actual before/after source formatted 12,000 numbers/areas
+across all seven locales and 500 Sofia calendar years per wave. After excluding two warmup
+waves, median duration was 164.61 versus 5.39 ms, with identical output SHA-256 across every
+wave. This is a source microbenchmark, not HTTP capacity acceptance. Ten locale-formatting
+tests, TypeScript and changed-file lint passed.
+
+CI [36747742134](https://github.com/ms-realty/ms-realty/actions/runs/36747742134) failed on
+this load source because two hydrated WebKit attachment cases matched both the application
+alert and Next's empty route announcer. The test now requires the application's localized
+error text. Both affected BG/RU scenarios pass in the pinned Linux browser; the whole new
+source still needs its own CI. The earlier isolated unscoped diagnostic is preserved and is
+not evidence for the final correction.
+
+[Portable profile observations](../evidence/2026-09-30-render-profile.json) link the retained
+load, source benchmark and failed CI artifacts. The deployment template specifies two web
+instances; the measurement above used one. A separately labelled local two-process experiment
+can assess that topology without relaxing budgets or claiming live high availability.
+
+
+## Explicit local replica harness
+
+`LOAD_REPLICAS=2 npm run test:load` starts two local Next processes from one build behind a
+streaming round-robin transport. Default remains one. Both processes share the generated
+browser database, test file directory and synthetic auth configuration. The wrapper accepts
+replica mode only for an explicitly local disposable workload, waits for both health routes,
+and stops the whole cohort if either process exits. Cleanup still removes only that run's
+own database and files. Reports record the replica count. This is a local topology experiment,
+not live balancing, HA, rolling deployment or target-size acceptance.
+
+Transport checks verify unchanged host/origin/body and separate cookies, first-byte streaming,
+caller cancellation, and no retry of a failed POST against the other backend. Four tests pass;
+TypeScript and the 895-file lint check pass. The initial custom-Host check failed because native
+fetch replaced that header; the final check uses a native HTTP request and verifies the received
+backend headers. Both logs are retained. Budgets and workload concurrency are unchanged.
+
+The automatic Jev rule check was unavailable due to its daily budget, not passed. Native review
+of the configured applicable no-secrets rule found only environment references and synthetic
+loopback test data. The other configured rules apply to Mindburn paths, outside this repository.
+
+The first replica workload stopped before seeding: Playwright also discovered the adjacent
+Vitest transport tests. The load config now explicitly selects `agency-load.spec.ts`; the
+failed discovery log is retained separately, and is not load evidence.
+
+
+The corrected two-process workload completed 2,253 public and 226 staff cycles with no
+operation failures. Every budget still failed: p95 search 1109.59, detail 689.63, Today 805.80,
+task 1101.43 and command POST 2018.10 ms. Media p95 was 301.62 ms. Source/build binding and
+unmodified runtime source are retained; only discovery/docs changed since the fresh build.
+Both generated database and private file directory were confirmed absent after shutdown.
+[Portable observations](../evidence/2026-09-30-two-web-load.json) retain the failed result.
+
+During the measured tail, both Node processes used about one CPU core and averaged 0.89
+event-loop utilization. The existing CPU profiles map a remaining application hot frame to
+`formatNumber`: Listing cards explicitly request 20 fraction digits for source-fact precision,
+so that path still constructs a formatter per area. `replica-cpu-summary.json` retains both
+profiles' source-mapped self-time breakdown, with approximate last-65-second alignment.
+The previous default-number/rounded-area microbenchmark does not qualify this exact-area
+path. No further identical full-load repeat is justified before a measured source repair.
+
+
+## Exact-area rendering repair
+
+Listing facts now use `formatExactArea`, a separate fixed configuration retaining the previous
+20-fraction-digit behavior. The rounded area formatter remains distinct. Caller-controlled
+Intl options still use native construction/validation. No fact, HTML, permission or session
+value is cached. All seven locales preserve high-precision values and later-value changes.
+
+The actual before/after ListingFacts source was compiled with the same automatic JSX setting
+and rendered through production React's static-markup API. Eight alternating waves of 12,000
+high-precision area/bedroom sets excluded two warmups. HTML hashes matched for every wave;
+median duration was 219.73 before and 44.68 ms after. Eleven formatting tests and TypeScript
+pass. [Portable observations](../evidence/2026-09-30-exact-area-render.json) retain source hashes
+and scope. Initial standalone JSX-loader attempts failed before measurement; explicit matched
+compilation repaired the benchmark setup and failed logs remain in the artifact directory.
+
+This supports the identified component CPU repair. It does not qualify Next RSC serialization,
+network latency, the full concurrent workload, target infrastructure or R08. The previous
+failed two-process load remains the current full-workload evidence.
+
+The fresh Linux build passed all 12 public discovery browser scenarios across desktop/mobile
+Chromium and mobile WebKit, including save/compare, reviewed native intent, no-JavaScript
+inquiry receipts and publication withdrawal. `exact-area-browser.log`, the final 11-test
+formatting log, TypeScript log and 900-file lint log are retained. A precision-loss warning
+in one test literal was repaired to its actual representable value; the failed lint log remains.

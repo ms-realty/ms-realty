@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { displayLocale, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
 import { acceptAppointmentHost } from "@/server/appointments/host-handover";
+import { offerAppointmentHost } from "@/server/appointments/host-offer";
 import {
   arrangeAppointment,
   requestAppointment,
@@ -100,6 +101,16 @@ export async function workflowAction(
       const s = ctx.session,
         db = ctx.db;
       switch (command) {
+        case "appointmentHostHandover":
+          return (
+            await offerAppointmentHost(db, s, {
+              ...base,
+              action: values.action,
+              receiverId: values.receiverId || undefined,
+              reason: values.reason,
+              reviewed: values.reviewed === "true",
+            })
+          ).outcome;
         case "appointmentHost":
           return (
             await acceptAppointmentHost(db, s, {
@@ -302,7 +313,8 @@ export async function workflowAction(
   if (result.ok) {
     // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
     // visible after a native POST by opening its actor-bound receipt instead.
-    if (command === "handover" || command === "appointmentHost") redirect(status.href);
+    if (["handover", "appointmentHost", "appointmentHostHandover"].includes(command))
+      redirect(status.href);
     const appointment = ["request", "arrange", "appointment"].includes(command);
     const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {
@@ -332,7 +344,7 @@ export async function workflowAction(
         message: "Confirm your identity again. Your draft is retained.",
         retryable: false,
         recovery: {
-          href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/${command === "appointmentHost" ? "calendar" : context === "staff" ? "cases" : "overview"}/${id}`)}`,
+          href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/${["appointmentHost", "appointmentHostHandover"].includes(command) ? "calendar" : context === "staff" ? "cases" : "overview"}/${id}`)}`,
           label: "Confirm your identity",
         },
       },

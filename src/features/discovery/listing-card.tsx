@@ -1,5 +1,5 @@
 import type { PublicLocale } from "@/i18n/config";
-import { formatDateTime, formatNumber } from "@/i18n/format";
+import { formatDateTime, formatExactArea } from "@/i18n/format";
 import type { ListingCard as Listing } from "@/server/listings/view-models";
 import { StatusBadge } from "@/ui/status-badge";
 import { ApprovedMedia } from "./approved-media";
@@ -28,9 +28,7 @@ export function ListingFacts({
           {area.state === "known" ? copy[area.value.basis] : copy.area}
         </dt>
         <dd>
-          {area.state === "known"
-            ? `${formatNumber(locale, area.value.value, { maximumFractionDigits: 20 })}\u00a0m²`
-            : copy[area.state]}
+          {area.state === "known" ? formatExactArea(locale, area.value.value) : copy[area.state]}
         </dd>
       </div>
     </dl>

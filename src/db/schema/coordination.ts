@@ -54,6 +54,11 @@ export const appointments = pgTable(
     listingId: uuid("listing_id").references(() => listings.id),
     propertyId: uuid("property_id").references(() => properties.id),
     hostId: uuid("host_id").references(() => principals.id),
+    /** The old host and booking remain in force until this named receiver personally accepts. */
+    pendingHostId: uuid("pending_host_id").references(() => principals.id),
+    pendingHostVersion: integer("pending_host_version"),
+    pendingHostNote: text("pending_host_note"),
+    pendingHostOfferedAt: instant("pending_host_offered_at"),
     /** IANA timezone controlling the local time; instants are stored in UTC. */
     timezone: text("timezone").notNull(),
     /** Preferred windows the requester gave; a request is never a booking. */
@@ -80,6 +85,10 @@ export const appointments = pgTable(
     cancelReason: text("cancel_reason"),
   },
   (t) => [
+    check(
+      "appointments_host_offer_complete",
+      sql`num_nonnulls(${t.pendingHostId}, ${t.pendingHostVersion}, ${t.pendingHostNote}, ${t.pendingHostOfferedAt}) in (0, 4) and (${t.pendingHostId} is null or (${t.hostId} is not null and ${t.pendingHostId} <> ${t.hostId} and ${t.pendingHostVersion} > 0 and ${t.pendingHostVersion} <= ${t.version} and char_length(${t.pendingHostNote}) between 10 and 2000))`,
+    ),
     check(
       "appointments_confirmed_slot",
       sql`${t.state} not in ('confirmed', 'reschedule_requested', 'completed', 'no_show') or (${t.confirmedStartsAt} is not null and ${t.confirmedEndsAt} is not null and ${t.confirmedEndsAt} > ${t.confirmedStartsAt})`,
