@@ -573,13 +573,15 @@ test("P07: Hebrew comparison keeps the ordered selection and aligned facts at na
     const boxes = await Promise.all(
       references().map((reference) => bounds(column(page, reference))),
     );
+    const [firstBox, secondBox, thirdBox] = boxes;
+    if (!firstBox || !secondBox || !thirdBox) throw new Error("Expected all three RTL columns");
     for (const box of boxes) {
       expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
-      expect(Math.abs(box.y - boxes[0].y)).toBeLessThan(1);
+      expect(Math.abs(box.y - firstBox.y)).toBeLessThan(1);
     }
-    expect(boxes[0].x).toBeGreaterThan(boxes[1].x);
-    expect(boxes[1].x).toBeGreaterThan(boxes[2].x);
+    expect(firstBox.x).toBeGreaterThan(secondBox.x);
+    expect(secondBox.x).toBeGreaterThan(thirdBox.x);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );
