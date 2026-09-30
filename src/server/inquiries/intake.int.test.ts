@@ -1,17 +1,20 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { externalActions, inquiries, outboxEvents } from "@/db/schema";
+import { contactMethods, externalActions, inquiries, outboxEvents, parties } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { GET as readReceiptRoute } from "../../../app/api/inquiries/[submission]/route";
 import { GET as issueRoute, POST } from "../../../app/api/inquiries/route";
 import { getEnv } from "../config/env";
 import { AppError } from "../errors";
+import { getPublicListing } from "../listings/detail";
+import { withdrawPublication } from "../publication/commands";
 import { loadPublishedListings } from "../publication/presentation";
 import {
   createListingFixture,
   createPlaces,
   type ListingFixture,
+  newOperationId,
   publishForTest,
 } from "../publication/testing";
 import { createStaff } from "../testing";
@@ -28,13 +31,25 @@ import {
 let t: TestDatabase;
 let live: ListingFixture;
 let unpublished: ListingFixture;
+let publisher: Awaited<ReturnType<typeof createStaff>>;
+const collective: ListingFixture[] = [];
 beforeAll(async () => {
   t = await createTestDatabase();
   const staff = await createStaff(t.db, { roles: ["content_editor", "publishing_approver"] });
+  publisher = staff;
   const places = await createPlaces(t.db);
   live = await createListingFixture(t.db, { reviewerId: staff.id, placeId: places.settlementId });
   await publishForTest(t.db, staff.actor, live);
   unpublished = await createListingFixture(t.db, { reviewerId: staff.id });
+  for (let index = 0; index < 3; index++) {
+    const fixture = await createListingFixture(t.db, {
+      reviewerId: staff.id,
+      placeId: places.settlementId,
+      title: `Collective fixture ${index + 1}`,
+    });
+    await publishForTest(t.db, staff.actor, fixture);
+    collective.push(fixture);
+  }
 });
 afterAll(async () => {
   // The route handlers opened the app pool on this test database; dropping it ends those
@@ -358,8 +373,313 @@ describe("/api/inquiries", () => {
     expect(Object.fromEntries(location.searchParams)).toEqual({
       submission: submissionKey,
       error: "VALIDATION_FAILED",
+      purpose: "question",
     });
     expect(location.toString()).not.toContain("private");
     expect(await inquiriesFor(submissionKey)).toEqual([]);
+  });
+});
+
+function requiredFixture(fixtures: ListingFixture[], index: number) {
+  const fixture = fixtures[index];
+  if (!fixture) throw new Error(`Missing test fixture ${index}`);
+  return fixture;
+}
+async function selectedContext(fixtures: ListingFixture[] = collective) {
+  const order = [2, 0, 1].map((index) => requiredFixture(fixtures, index));
+  const details = await Promise.all(
+    order.map(async (fixture) => {
+      const result = await getPublicListing(t.db, { reference: fixture.reference, locale: "bg" });
+      if (result.status !== "listing") throw new Error("Missing published test fixture");
+      return result.listing;
+    }),
+  );
+  return {
+    details,
+    selectedListings: details.map((listing) => ({
+      reference: listing.reference,
+      observedManifestId: listing.manifestId,
+    })),
+  };
+}
+async function intakeCounts() {
+  const counts = await Promise.all(
+    [parties, contactMethods, inquiries, outboxEvents].map((table) =>
+      t.db.select({ value: count() }).from(table),
+    ),
+  );
+  return counts.map((rows) => rows[0]?.value);
+}
+
+describe("P07 collective inquiry", () => {
+  it("commits all three full public snapshots in visitor order with no chosen singular listing", async () => {
+    const { selectedListings, details } = await selectedContext();
+    const input = question({ listingReference: undefined, selectedListings });
+    const session = newReceiptSession();
+    const accepted = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    const [row] = await inquiriesFor(input.submissionKey);
+    expect(row).toMatchObject({
+      listingId: null,
+      listingRevisionId: null,
+      coverageQueue: "intake",
+      ownerId: null,
+    });
+    expect(row?.context).toEqual({
+      listing: null,
+      criteria: null,
+      selection: details.map((listing) => ({
+        ...listing,
+        sourceUrl: `${getEnv().canonicalOrigin}/bg/properties/${listing.reference}/${listing.slug}`,
+      })),
+    });
+    expect(accepted.receipt.selectedListingReferences).toEqual(
+      selectedListings.map((item) => item.reference),
+    );
+    expect(accepted.receipt.listingReference).toBeNull();
+    expect(
+      await readInquiryReceipt(t.db, {
+        submissionKey: input.submissionKey,
+        receiptSession: session,
+      }),
+    ).toEqual(accepted.receipt);
+    const again = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    expect(again.receipt).toEqual(accepted.receipt);
+    expect(again.replayed).toBe(true);
+    expect(await inquiriesFor(input.submissionKey)).toHaveLength(1);
+    expect(JSON.stringify(accepted.receipt)).not.toMatch(
+      /example.test|Test Visitor|lift|description|sourceUrl/,
+    );
+    expect(await t.db.select().from(externalActions)).toEqual([]);
+    const reordered = await rejection(
+      submitInquiry(
+        t.db,
+        { ...input, selectedListings: [...selectedListings].reverse() },
+        { ip: ip(), receiptSession: session },
+      ),
+    );
+    expect(reordered.code).toBe("idempotency_key_reused");
+  });
+
+  it("rejects one stale manifest atomically before creating any party, contact, inquiry or event", async () => {
+    const { selectedListings } = await selectedContext();
+    const stale = selectedListings[1];
+    if (!stale) throw new Error("Missing selected listing fixture");
+    stale.observedManifestId = randomUUID();
+    const input = question({ listingReference: undefined, selectedListings });
+    const before = await intakeCounts();
+    expect(
+      await rejection(
+        submitInquiry(t.db, input, { ip: ip(), receiptSession: newReceiptSession() }),
+      ),
+    ).toMatchObject({ code: "version_conflict", current: { reason: "selection_changed" } });
+    expect(await inquiriesFor(input.submissionKey)).toEqual([]);
+    expect(await intakeCounts()).toEqual(before);
+  });
+
+  it("rejects an approved but sold selection, without silently submitting the remaining listings", async () => {
+    const sold = await createListingFixture(t.db, {
+      reviewerId: publisher.id,
+      commercialState: "sold",
+    });
+    await publishForTest(t.db, publisher.actor, sold);
+    const { selectedListings } = await selectedContext([
+      requiredFixture(collective, 0),
+      sold,
+      requiredFixture(collective, 2),
+    ]);
+    const input = question({ listingReference: undefined, selectedListings });
+    const before = await intakeCounts();
+    expect(
+      (
+        await rejection(
+          submitInquiry(t.db, input, { ip: ip(), receiptSession: newReceiptSession() }),
+        )
+      ).code,
+    ).toBe("version_conflict");
+    expect(await intakeCounts()).toEqual(before);
+  });
+
+  it("keeps a successful same-session receipt after withdrawal while denying another session and new intent", async () => {
+    const withdrawn = await createListingFixture(t.db, { reviewerId: publisher.id });
+    await publishForTest(t.db, publisher.actor, withdrawn);
+    const { selectedListings } = await selectedContext([
+      requiredFixture(collective, 0),
+      withdrawn,
+      requiredFixture(collective, 2),
+    ]);
+    const input = question({ listingReference: undefined, selectedListings });
+    const session = newReceiptSession();
+    const original = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    await withdrawPublication(t.db, {
+      actor: publisher.actor,
+      operationId: newOperationId(),
+      expectedRevision: 0,
+      reference: withdrawn.reference,
+      reason: "Fixture publication withdrawn",
+    });
+    expect(
+      (await submitInquiry(t.db, input, { ip: ip(), receiptSession: session })).receipt,
+    ).toEqual(original.receipt);
+    const stranger = newReceiptSession();
+    expect(
+      (await rejection(submitInquiry(t.db, input, { ip: ip(), receiptSession: stranger }))).code,
+    ).toBe("not_found");
+    expect(
+      (
+        await rejection(
+          readInquiryReceipt(t.db, {
+            submissionKey: input.submissionKey,
+            receiptSession: stranger,
+          }),
+        )
+      ).code,
+    ).toBe("not_found");
+    const fresh = { ...input, submissionKey: issueSubmissionKey() };
+    const before = await intakeCounts();
+    expect(
+      (await rejection(submitInquiry(t.db, fresh, { ip: ip(), receiptSession: session }))).code,
+    ).toBe("version_conflict");
+    expect(await intakeCounts()).toEqual(before);
+  });
+
+  it("refuses ambiguous JSON API context before committing intake records", async () => {
+    process.env.DATABASE_URL = t.url;
+    const { selectedListings } = await selectedContext();
+    const first = selectedListings[0];
+    if (!first) throw new Error("Missing selection fixture");
+    for (const ambiguous of [
+      question({ selectedListings }),
+      question({ listingReference: undefined, selectedListings: [first, first] }),
+      question({ listingReference: undefined, selectedListings, purpose: "viewing_request" }),
+    ]) {
+      const before = await intakeCounts();
+      const response = await POST(
+        new Request("http://localhost:3000/api/inquiries", {
+          method: "POST",
+          headers: {
+            origin: "http://localhost:3000",
+            "content-type": "application/json",
+            "cf-connecting-ip": ip(),
+          },
+          body: JSON.stringify(ambiguous),
+        }),
+      );
+      expect(response.status).toBe(422);
+      expect(await response.json()).toMatchObject({
+        error: { code: "VALIDATION_FAILED", outcome: "not_applied" },
+      });
+      expect(await intakeCounts()).toEqual(before);
+    }
+  });
+
+  it("accepts the native JSON selection field and preserves only public context on a rejected form redirect", async () => {
+    process.env.DATABASE_URL = t.url;
+    const { selectedListings } = await selectedContext();
+    const post = (fields: Record<string, string>) =>
+      POST(
+        new Request("http://localhost:3000/api/inquiries", {
+          method: "POST",
+          headers: {
+            origin: "http://localhost:3000",
+            "content-type": "application/x-www-form-urlencoded",
+            "cf-connecting-ip": ip(),
+          },
+          body: new URLSearchParams(fields),
+        }),
+      );
+    const fields = {
+      submissionKey: issueSubmissionKey(),
+      purpose: "question",
+      locale: "bg",
+      selectedListings: JSON.stringify(selectedListings),
+      contactKind: "email",
+      contactValue: "collective-private@example.test",
+      message: "Private test question",
+      privacyNotice: "on",
+    };
+    const success = await post(fields);
+    expect(success.status).toBe(303);
+    expect(success.headers.get("location")).toBe(
+      `http://localhost:3000/bg/requests/${fields.submissionKey}`,
+    );
+    const [row] = await inquiriesFor(fields.submissionKey);
+    expect(row?.context).toMatchObject({
+      selection: selectedListings.map((item) => ({
+        reference: item.reference,
+        manifestId: item.observedManifestId,
+      })),
+    });
+    const invalid = await post({
+      ...fields,
+      submissionKey: issueSubmissionKey(),
+      privacyNotice: "",
+    });
+    const recovery = new URL(invalid.headers.get("location") ?? "");
+    expect(recovery.searchParams.get("selection")).toBe(JSON.stringify(selectedListings));
+    expect(recovery.href).not.toMatch(/collective-private|Private.test.question/);
+  });
+});
+
+describe("P07 individual inquiry with comparison return", () => {
+  it("stores one subject and a separate ordered navigation set through receipt and replay", async () => {
+    const { selectedListings } = await selectedContext();
+    const subject = selectedListings[1];
+    if (!subject) throw new Error("Missing individual subject fixture");
+    const comparisonReferences = selectedListings.map((item) => item.reference);
+    const input = question({
+      listingReference: subject.reference,
+      observedManifestId: subject.observedManifestId,
+      comparisonReferences,
+    });
+    const session = newReceiptSession();
+    const accepted = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    const [row] = await inquiriesFor(input.submissionKey);
+    expect(row?.listingId).toBe(requiredFixture(collective, 0).listingId);
+    expect(row?.context).toMatchObject({
+      listing: { reference: subject.reference, manifestId: subject.observedManifestId },
+      comparisonReferences,
+    });
+    expect(row?.context).not.toHaveProperty("selection");
+    expect(accepted.receipt).toMatchObject({
+      listingReference: subject.reference,
+      selectedListingReferences: [],
+      comparisonReferences,
+    });
+    expect(
+      await readInquiryReceipt(t.db, {
+        submissionKey: input.submissionKey,
+        receiptSession: session,
+      }),
+    ).toEqual(accepted.receipt);
+    expect(
+      (await submitInquiry(t.db, input, { ip: ip(), receiptSession: session })).receipt,
+    ).toEqual(accepted.receipt);
+  });
+  it("rejects a comparison-origin single listing that is sold despite the same approved manifest", async () => {
+    const sold = await createListingFixture(t.db, {
+      reviewerId: publisher.id,
+      commercialState: "sold",
+    });
+    await publishForTest(t.db, publisher.actor, sold);
+    const [published] = await loadPublishedListings(t.db, { references: [sold.reference] }, "bg");
+    if (!published) throw new Error("Missing sold published fixture");
+    const input = question({
+      listingReference: sold.reference,
+      observedManifestId: published.manifestId,
+      comparisonReferences: [
+        requiredFixture(collective, 0).reference,
+        sold.reference,
+        requiredFixture(collective, 2).reference,
+      ],
+    });
+    const before = await intakeCounts();
+    expect(
+      (
+        await rejection(
+          submitInquiry(t.db, input, { ip: ip(), receiptSession: newReceiptSession() }),
+        )
+      ).code,
+    ).toBe("version_conflict");
+    expect(await intakeCounts()).toEqual(before);
   });
 });

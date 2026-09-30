@@ -177,6 +177,8 @@ export const inquiryReceiptSchema = z.object({
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),
   listingReference: z.string().nullable(),
+  selectedListingReferences: z.array(z.string()),
+  comparisonReferences: z.array(z.string()),
 });
 
 export const inquiryAcceptedSchema = z.object({
@@ -194,6 +196,21 @@ const inquiryFormSchema = z.object({
   contactValue: z.string(),
   message: z.string().optional(),
   listingReference: z.string().optional(),
+  observedManifestId: z.uuid().optional(),
+  comparisonReferences: z
+    .string()
+    .max(62)
+    .optional()
+    .describe(
+      "Navigation only: 1–3 comma-separated canonical unique ordered listing references, including the individual inquiry subject",
+    ),
+  selectedListings: z
+    .string()
+    .max(1000)
+    .optional()
+    .describe(
+      "JSON array of 1–3 ordered unique reference/observedManifestId pairs; mutually exclusive with listingReference",
+    ),
   callbackWindow: z.string().optional(),
   privacyNotice: z.literal("on"),
   marketingOptIn: z.literal("on").optional(),
@@ -208,6 +225,8 @@ const receiptExample = {
   purpose: "question",
   locale: "bg",
   listingReference: null,
+  selectedListingReferences: [],
+  comparisonReferences: [],
 } as const;
 
 export const endpoints = [

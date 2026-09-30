@@ -1,5 +1,10 @@
 "use client";
 import { useRef } from "react";
+import {
+  comparisonReturnHref,
+  parseComparisonReferences,
+  parseSelectedListingsJson,
+} from "@/domain/inquiry-selection";
 import type { PublicLocale } from "@/i18n/config";
 import { controlClass, fieldClass } from "@/ui/field-class";
 import type { FormAction } from "@/ui/form/contract";
@@ -30,7 +35,7 @@ export function InquiryForm({
     <ActionForm
       action={action}
       initialState={initialState}
-      permalink={inquiryPermalink(locale, initialState.operationId)}
+      permalink={inquiryPermalink(locale, initialState.operationId, initialState.values)}
       reconciliation={{
         href: inquiryStatus(locale, initialState.operationId),
         label: copy.checkOperation,
@@ -46,6 +51,8 @@ export function InquiryForm({
         privacyNotice: copy.privacy,
         listingReference: copy.reference,
         observedManifestId: copy.reference,
+        selectedListings: copy.compare,
+        comparisonReferences: copy.compare,
       }}
       submitLabel={copy.ask}
     >
@@ -58,15 +65,89 @@ export function InquiryForm({
         const purpose = form.field("purpose"),
           contact = form.field("contactKind"),
           privacy = form.field("privacyNotice");
-        const choices = {
-          question: copy.ask,
-          callback: copy.callback,
-          seller_consultation: copy.sell,
-          landlord_consultation: copy.let,
-          ...(form.values.listingReference ? { viewing_request: copy.viewing } : {}),
-        };
+        const selected = parseSelectedListingsJson(form.values.selectedListings);
+        const selection = form.field("selectedListings");
+        const navigation = form.field("comparisonReferences");
+        const returnReferences = parseComparisonReferences(form.values.comparisonReferences);
+        const choices = form.values.selectedListings
+          ? { question: copy.ask }
+          : {
+              question: copy.ask,
+              callback: copy.callback,
+              seller_consultation: copy.sell,
+              landlord_consultation: copy.let,
+              ...(form.values.listingReference ? { viewing_request: copy.viewing } : {}),
+            };
         return (
           <>
+            {form.values.selectedListings || selection.error ? (
+              <section
+                id={selection.id}
+                tabIndex={-1}
+                aria-label={copy.compare}
+                aria-describedby={selection.error ? `${selection.id}-error` : undefined}
+                className="min-w-0 space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
+              >
+                <h2 className="font-semibold">{copy.compare}</h2>
+                <ol className="list-decimal space-y-2 ps-5">
+                  {selected?.map((item) => (
+                    <li key={item.reference}>
+                      <a
+                        className="underline"
+                        href={`/${locale}/properties/${item.reference}/${item.reference.toLowerCase()}`}
+                      >
+                        <bdi>{item.reference}</bdi>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+                {selected ? (
+                  <a
+                    className="underline"
+                    href={comparisonReturnHref(
+                      locale,
+                      selected.map((item) => item.reference),
+                    )}
+                  >
+                    {copy.compare}
+                  </a>
+                ) : (
+                  <p>{copy.invalid}</p>
+                )}
+                {selection.error ? (
+                  <p id={`${selection.id}-error`} className="text-error">
+                    {selection.error}
+                  </p>
+                ) : null}
+              </section>
+            ) : null}
+            <input type="hidden" name="selectedListings" value={form.values.selectedListings} />
+            <input
+              type="hidden"
+              name="comparisonReferences"
+              value={form.values.comparisonReferences}
+            />
+            {form.values.comparisonReferences || navigation.error ? (
+              <div
+                id={navigation.id}
+                tabIndex={-1}
+                className="min-w-0 space-y-2"
+                aria-describedby={navigation.error ? `${navigation.id}-error` : undefined}
+              >
+                {returnReferences ? (
+                  <a className="underline" href={comparisonReturnHref(locale, returnReferences)}>
+                    {copy.compare}
+                  </a>
+                ) : (
+                  <p>{copy.invalid}</p>
+                )}
+                {navigation.error ? (
+                  <p id={`${navigation.id}-error`} className="text-error">
+                    {navigation.error}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
             {form.values.listingReference ? (
               <p>
                 {copy.reference}:{" "}

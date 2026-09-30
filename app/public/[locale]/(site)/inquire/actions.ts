@@ -2,17 +2,23 @@
 import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { getDb } from "@/db/client";
+import {
+  comparisonReturnHref,
+  parseComparisonReferences,
+  parseSelectedListingsJson,
+} from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import {
   emptyInquiry,
   type InquiryState,
   type InquiryValues,
+  inquiryPermalink,
   inquiryReceiptView,
   inquiryStatus,
 } from "@/features/discovery/inquiry-state";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
-import { isAppError } from "@/server/errors";
+import { AppError, isAppError } from "@/server/errors";
 import { assertSameOrigin, clientIpFrom, correlationIdFrom } from "@/server/http/request";
 import {
   isIssuedSubmissionKey,
@@ -75,8 +81,9 @@ export async function sendInquiry(
         message: copy.notConfirmed,
         retryable: false,
         recovery: {
-          href: `/${locale}/inquire/start?submission=${encodeURIComponent(key)}`,
-          label: copy.checkOperation,
+          href: inquiryPermalink(locale, key, values).replace("/inquire?", "/inquire/start?"),
+          label:
+            values.selectedListings || values.comparisonReferences ? copy.ask : copy.checkOperation,
         },
       },
     };
@@ -91,6 +98,18 @@ export async function sendInquiry(
       },
     };
   try {
+    const selectedListings = values.selectedListings
+      ? parseSelectedListingsJson(values.selectedListings)
+      : undefined;
+    if (selectedListings === null)
+      throw new AppError("validation_failed", { fieldErrors: { selectedListings: ["invalid"] } });
+    const comparisonReferences = values.comparisonReferences
+      ? parseComparisonReferences(values.comparisonReferences)
+      : undefined;
+    if (comparisonReferences === null)
+      throw new AppError("validation_failed", {
+        fieldErrors: { comparisonReferences: ["invalid"] },
+      });
     const result = await submitInquiry(
       getDb(),
       {
@@ -104,6 +123,8 @@ export async function sendInquiry(
         privacyNotice: values.privacyNotice === "true",
         listingReference: values.listingReference,
         observedManifestId: values.observedManifestId,
+        selectedListings,
+        comparisonReferences,
       },
       {
         ip: clientIpFrom(requestHeaders),
@@ -124,7 +145,11 @@ export async function sendInquiry(
             ? "contactKind"
             : name === "contact.value"
               ? "contactValue"
-              : (name as keyof InquiryValues);
+              : name.startsWith("selectedListings")
+                ? "selectedListings"
+                : name.startsWith("comparisonReferences")
+                  ? "comparisonReferences"
+                  : (name as keyof InquiryValues);
         if (field in emptyInquiry) fields[field] = [copy.invalid];
       }
       return {
@@ -145,8 +170,21 @@ export async function sendInquiry(
           code: "REVISION_CONFLICT",
           message: copy.changed,
           recovery: {
-            href: `/${locale}/properties/${encodeURIComponent(values.listingReference)}/${encodeURIComponent(values.listingReference.toLowerCase())}`,
-            label: copy.back,
+            href: values.selectedListings
+              ? comparisonReturnHref(
+                  locale,
+                  parseSelectedListingsJson(values.selectedListings)?.map(
+                    (item) => item.reference,
+                  ) ?? [],
+                )
+              : values.comparisonReferences
+                ? comparisonReturnHref(
+                    locale,
+                    parseComparisonReferences(values.comparisonReferences) ?? [],
+                  )
+                : `/${locale}/properties/${encodeURIComponent(values.listingReference)}/${encodeURIComponent(values.listingReference.toLowerCase())}`,
+            label:
+              values.selectedListings || values.comparisonReferences ? copy.compare : copy.back,
           },
         },
       };

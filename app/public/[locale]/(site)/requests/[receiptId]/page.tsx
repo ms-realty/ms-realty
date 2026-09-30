@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
+import { comparisonReturnHref } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { inquiryReceiptView, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
@@ -47,6 +48,9 @@ export default async function ReceiptPage({
     );
   }
   const view = inquiryReceiptView(receipt, locale, copy);
+  const returnReferences = receipt.selectedListingReferences.length
+    ? receipt.selectedListingReferences
+    : receipt.comparisonReferences;
   return (
     <DiscoveryPage>
       <div className="max-w-reading">
@@ -59,6 +63,15 @@ export default async function ReceiptPage({
           recordedAtLabel={copy.received}
         >
           <p>{copy.next}</p>
+          {receipt.selectedListingReferences.length ? (
+            <ol aria-label={copy.compare} className="list-decimal space-y-2 ps-5">
+              {receipt.selectedListingReferences.map((reference) => (
+                <li key={reference}>
+                  <bdi>{reference}</bdi>
+                </li>
+              ))}
+            </ol>
+          ) : null}
           {receipt.listingReference ? (
             <p>
               {copy.reference}: <bdi>{receipt.listingReference}</bdi>
@@ -66,8 +79,15 @@ export default async function ReceiptPage({
           ) : null}
         </Receipt>
       </div>
-      <a className="self-start underline" href={`/${locale}/properties`}>
-        {copy.back}
+      <a
+        className="self-start underline"
+        href={
+          returnReferences.length
+            ? comparisonReturnHref(locale, returnReferences)
+            : `/${locale}/properties`
+        }
+      >
+        {returnReferences.length ? copy.compare : copy.back}
       </a>
     </DiscoveryPage>
   );

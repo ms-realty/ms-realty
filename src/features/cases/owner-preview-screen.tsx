@@ -95,7 +95,7 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
         </p>
       </WorkflowSection>
       <WorkflowSection title={c.media}>
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {view.media.map((image) => (
             <figure key={image.id}>
               {/* biome-ignore lint/performance/noImgElement: Private derivatives require the client session. */}

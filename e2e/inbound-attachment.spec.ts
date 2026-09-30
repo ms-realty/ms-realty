@@ -81,7 +81,10 @@ for (const locale of ["bg", "ru", "en"])
           .where(eq(schema.cases.id, f.caseId));
         await form.getByRole("button", { name: c.submit, exact: true }).click();
         await expect(
-          page.getByRole("alert").filter({ hasText: inboundCopy(locale).error }),
+          page
+            .getByRole("main")
+            .getByRole("alert")
+            .filter({ hasText: inboundCopy(locale).error }),
         ).toBeVisible();
         await expect(form.getByLabel(c.fileName, { exact: true })).toHaveValue(
           "selected-case-check.pdf",

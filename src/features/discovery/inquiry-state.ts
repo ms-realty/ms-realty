@@ -1,3 +1,6 @@
+import { isUuid, parseReference } from "@/domain/ids";
+import { inquiryPurposes } from "@/domain/inquiry";
+import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import type { PublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { InquiryReceipt } from "@/server/inquiries/intake";
@@ -13,6 +16,8 @@ export type InquiryValues = {
   privacyNotice: string;
   listingReference: string;
   observedManifestId: string;
+  selectedListings: string;
+  comparisonReferences: string;
 };
 export const emptyInquiry: InquiryValues = {
   purpose: "question",
@@ -24,12 +29,40 @@ export const emptyInquiry: InquiryValues = {
   privacyNotice: "",
   listingReference: "",
   observedManifestId: "",
+  selectedListings: "",
+  comparisonReferences: "",
 };
 export type InquiryState = FormState<InquiryValues>;
 export const inquiryStatus = (locale: PublicLocale, key: string) =>
   `/${locale}/requests/${encodeURIComponent(key)}`;
-export const inquiryPermalink = (locale: PublicLocale, key: string) =>
-  `/${locale}/inquire?submission=${encodeURIComponent(key)}`;
+export function inquiryPermalink(locale: PublicLocale, key: string, values?: InquiryValues) {
+  const query = new URLSearchParams({ submission: key });
+  if (values) {
+    query.set(
+      "purpose",
+      inquiryPurposes.some((purpose) => purpose === values.purpose) ? values.purpose : "invalid",
+    );
+    if (values.selectedListings) {
+      const selection = parseSelectedListingsJson(values.selectedListings);
+      // Keep invalid context visibly invalid without copying arbitrary hidden-field text into URLs.
+      query.set("selection", selection ? JSON.stringify(selection) : "invalid");
+    }
+    if (values.comparisonReferences) {
+      const references = parseComparisonReferences(values.comparisonReferences);
+      query.set("comparisonReferences", references ? references.join(",") : "invalid");
+    }
+    if (values.listingReference) {
+      const reference = parseReference(values.listingReference);
+      query.set("reference", reference?.kind === "listing" ? reference.reference : "invalid");
+    }
+    if (values.observedManifestId)
+      query.set(
+        "manifest",
+        isUuid(values.observedManifestId) ? values.observedManifestId : "invalid",
+      );
+  }
+  return `/${locale}/inquire?${query}`;
+}
 export function inquiryFormCopy(copy: DiscoveryCopy): FormCopy {
   return {
     errorSummary: copy.check,
@@ -53,7 +86,11 @@ export function inquiryReceiptView(
     title: copy.received,
     reference: receipt.reference,
     recordedAt: { dateTime: receipt.acceptedAt, label: formatDateTime(locale, receipt.acceptedAt) },
-    nextStep: copy.next,
+    nextStep: receipt.selectedListingReferences?.length
+      ? `${copy.reference}: ${receipt.selectedListingReferences.join(", ")}. ${copy.next}`
+      : receipt.listingReference
+        ? `${copy.reference}: ${receipt.listingReference}. ${copy.next}`
+        : copy.next,
     destination: { href: inquiryStatus(locale, receipt.receiptId), label: copy.receipt },
   };
 }

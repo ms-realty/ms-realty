@@ -1,5 +1,6 @@
 // P11: establish the anonymous receipt capability before the HTML form is submitted.
 import { type NextRequest, NextResponse } from "next/server";
+import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
 import {
@@ -18,7 +19,33 @@ export async function GET(
   if (!isRoutableLocale(locale)) return new Response(null, { status: 404 });
   const env = getEnv(),
     target = new URL(`/${locale}/inquire`, env.hosts.public);
-  for (const name of ["purpose", "reference", "manifest"]) {
+  const query = request.nextUrl.searchParams;
+  if (
+    ["purpose", "reference", "manifest", "selection", "submission", "comparisonReferences"].some(
+      (name) => query.getAll(name).length > 1,
+    )
+  )
+    return new Response(null, { status: 400 });
+  if (query.has("context")) return new Response(null, { status: 400 });
+  const rawComparison = query.get("comparisonReferences");
+  if (rawComparison !== null) {
+    const comparison = parseComparisonReferences(rawComparison);
+    if (!comparison?.includes(query.get("reference") ?? "") || query.has("selection"))
+      return new Response(null, { status: 400 });
+    target.searchParams.set("comparisonReferences", comparison.join(","));
+  }
+  const selection = query.get("selection");
+  if (selection !== null) {
+    if (
+      !parseSelectedListingsJson(selection) ||
+      query.has("reference") ||
+      query.has("manifest") ||
+      (query.has("purpose") && query.get("purpose") !== "question")
+    )
+      return new Response(null, { status: 400 });
+    target.searchParams.set("selection", selection);
+  }
+  for (const name of ["purpose", "reference", "manifest", "error"]) {
     const value = request.nextUrl.searchParams.get(name);
     if (value && value.length <= 100) target.searchParams.set(name, value);
   }

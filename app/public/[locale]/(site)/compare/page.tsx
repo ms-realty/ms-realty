@@ -1,8 +1,13 @@
 // P07: current approved data on read, never stale local property facts.
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
+import { compareCopy } from "@/features/discovery/compare-copy";
+import {
+  Comparison,
+  ComparisonCorrection,
+  comparisonSelection,
+} from "@/features/discovery/comparison";
 import { discoveryCopy } from "@/features/discovery/copy";
-import { ListingCard } from "@/features/discovery/listing-card";
 import { LocalSelection } from "@/features/discovery/local-selection";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
 import type { QueryParams } from "@/features/discovery/query";
@@ -20,10 +25,8 @@ export default async function ComparePage({
   if (!isRoutableLocale(locale)) notFound();
   const copy = discoveryCopy(locale),
     query = await searchParams;
-  const refs =
-    typeof query.references === "string"
-      ? [...new Set(query.references.split(","))].filter((r) => /^MS-\d{5,}$/.test(r)).slice(0, 3)
-      : [];
+  const selection = comparisonSelection(query.references);
+  const refs = selection.references;
   const results = await Promise.all(
     refs.map(async (reference) => {
       try {
@@ -35,24 +38,20 @@ export default async function ComparePage({
   );
   return (
     <DiscoveryPage>
-      <h1 className="text-title font-semibold">{copy.compare}</h1>
-      <LocalSelection kind="compare" locale={locale} copy={copy} />
-      {results.length ? (
-        <div className="grid gap-5 md:grid-cols-3">
-          {results.map(({ reference, result }) =>
-            result?.status === "listing" ? (
-              <ListingCard key={reference} listing={result.listing} locale={locale} copy={copy} />
-            ) : (
-              <div key={reference} className="space-y-3 rounded-control border border-border p-5">
-                <h2>
-                  <bdi>{reference}</bdi>
-                </h2>
-                <p>{result ? copy.unavailable : copy.failed}</p>
-              </div>
-            ),
-          )}
-        </div>
-      ) : null}
+      <h1 className="text-title font-semibold">{compareCopy(locale).title}</h1>
+      {selection.correction === null ? (
+        <>
+          <LocalSelection
+            kind="compare"
+            locale={locale}
+            copy={copy}
+            canonicalReferences={typeof query.references === "string" ? refs : undefined}
+          />
+          <Comparison items={results} locale={locale} copy={copy} />
+        </>
+      ) : (
+        <ComparisonCorrection entries={selection.correction} locale={locale} copy={copy} />
+      )}
       <a className="underline" href={`/${locale}/properties`}>
         {copy.back}
       </a>

@@ -1,9 +1,11 @@
 import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { findCoverageRecord, findPaginatedRecord, moveQueuePage } from "./coverage-helpers";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -54,6 +56,30 @@ for (const javaScriptEnabled of [true, false])
       })
       .returning();
     if (!task) throw new Error("Missing task");
+    // Coverage pages contain 25 records per category, not 25 records across all categories.
+    // Earlier tasks force this task beyond page one; a later retained task must remain there
+    // after acceptance. Other suites' records cannot move our target back onto page one.
+    const retained = await db
+      .insert(schema.tasks)
+      .values([
+        ...Array.from({ length: 26 }, (_, index) => ({
+          ownerId: f.brokerId,
+          caseId: f.caseId,
+          title: `Earlier retained coverage ${f.brokerId} ${index}`,
+          promisedToClient: true,
+          dueAt: new Date("1899-01-01T10:00:00Z"),
+        })),
+        {
+          ownerId: f.brokerId,
+          caseId: f.caseId,
+          title: `Later retained coverage ${f.brokerId}`,
+          promisedToClient: true,
+          dueAt: new Date("1901-01-01T10:00:00Z"),
+        },
+      ])
+      .returning();
+    const later = retained.at(-1);
+    if (!later) throw new Error("Missing retained coverage fixture");
     const context = await browser.newContext({
       ...testInfo.project.use,
       javaScriptEnabled,
@@ -70,18 +96,6 @@ for (const javaScriptEnabled of [true, false])
         },
       ]);
       const page = await context.newPage();
-      const findCoverageRecord = async (href: string) => {
-        await page.goto(hostUrl("staff", "/en/coverage"));
-        for (let n = 0; n < 10; n++) {
-          const record = page.locator(`a[href="${href}"]`);
-          if (await record.count()) {
-            await expect(record).toBeVisible();
-            return;
-          }
-          await page.getByRole("link", { name: "Next page", exact: true }).click();
-        }
-        throw new Error(`Coverage record not found: ${href}`);
-      };
       await page.goto(hostUrl("staff", `/en/access/offboard/${f.brokerId}`));
       await page
         .getByLabel("Reason and handover plan", { exact: true })
@@ -101,20 +115,29 @@ for (const javaScriptEnabled of [true, false])
       ]) {
         await page.goto(hostUrl("staff", `/${locale}/coverage`));
         await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
-        await expect(page.locator(`a[href="/${locale}/tasks/${task.id}"]`)).toBeVisible();
-        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-          true,
-        );
+        const href = `/${locale}/tasks/${task.id}`;
+        // Deliberately absent here but present later: page-one absence must not pass as gone.
+        await expect(page.locator(`a[href="${href}"]`)).toHaveCount(0);
+        expect(await findPaginatedRecord(page, href, { locale, viewportWidth: 320 })).toBe(true);
+        const targetPage = Number(new URL(page.url()).searchParams.get("page"));
+        expect(targetPage).toBeGreaterThan(1);
+        expect(await moveQueuePage(page, "previous", { locale, viewportWidth: 320 })).toBe(true);
+        await expect(page.locator(`a[href="${href}"]`)).toHaveCount(0);
+        expect(await moveQueuePage(page, "next", { locale, viewportWidth: 320 })).toBe(true);
+        await expect(page.locator(`a[href="${href}"]`)).toBeVisible();
       }
       await expect(
         page.getByRole("region", { name: "Tasks needing coverage", exact: true }),
       ).toContainText("Promised to a client");
-      await findCoverageRecord(`/en/cases/${f.caseId}`);
-      await findCoverageRecord(`/en/operations/keys/${f.keyId}`);
+      expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
+      expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, f.keyId)))[0],
       ).toMatchObject({ holderId: f.brokerId, state: "checked_out", version: 2 });
-      await page.goto(hostUrl("staff", "/en/coverage"));
+      expect(await findCoverageRecord(page, `/en/tasks/${task.id}`)).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        320,
+      );
       await page.screenshot({
         path: testInfo.outputPath(`coverage-${javaScriptEnabled}-320.png`),
         fullPage: false,
@@ -144,12 +167,41 @@ for (const javaScriptEnabled of [true, false])
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();
-      await page.goto(hostUrl("staff", "/en/coverage"));
-      await expect(page.locator(`a[href="/en/tasks/${task.id}"]`)).toHaveCount(0);
-      await findCoverageRecord(`/en/cases/${f.caseId}`);
-      await findCoverageRecord(`/en/operations/keys/${f.keyId}`);
+      expect(
+        (await db.select().from(schema.tasks).where(eq(schema.tasks.id, task.id)))[0],
+      ).toMatchObject({
+        ownerId: f.managerId,
+        pendingOwnerId: null,
+        dueAt: task.dueAt,
+        promisedToClient: true,
+        state: "open",
+      });
+      expect(await findCoverageRecord(page, `/en/tasks/${task.id}`)).toBe(false);
+      expect(await findCoverageRecord(page, `/en/tasks/${later.id}`)).toBe(true);
+      expect(Number(new URL(page.url()).searchParams.get("page"))).toBeGreaterThan(1);
+      expect(
+        await db
+          .select()
+          .from(schema.tasks)
+          .where(
+            inArray(
+              schema.tasks.id,
+              retained.map((row) => row.id),
+            ),
+          ),
+      ).toEqual(expect.arrayContaining(retained));
+      expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
+      expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);
     } finally {
       await context.close();
+      // These unmodified padding records belong only to this test; the runner owns the rest
+      // of the synthetic database. Do not accumulate extra pages for unrelated scenarios.
+      await db.delete(schema.tasks).where(
+        inArray(
+          schema.tasks.id,
+          retained.map((row) => row.id),
+        ),
+      );
     }
   });
 
@@ -163,6 +215,7 @@ for (const javaScriptEnabled of [true, false])
     const [task] = await db
       .insert(schema.tasks)
       .values({
+        id: `ffffffff-${randomUUID().slice(9)}`,
         ownerId: f.brokerId,
         caseId: f.caseId,
         title: "Synthetic handover promise",
@@ -171,6 +224,22 @@ for (const javaScriptEnabled of [true, false])
       })
       .returning();
     if (!task) throw new Error("Missing synthetic task");
+    // Offboarding sorts UUIDs with 25 per category; acceptance sorts due dates with 30/page.
+    // Force this same task beyond both first pages without depending on shared fixture order.
+    const pending = await db
+      .insert(schema.tasks)
+      .values(
+        Array.from({ length: 31 }, (_, index) => ({
+          id: `00000000-${randomUUID().slice(9)}`,
+          ownerId: f.brokerId,
+          pendingOwnerId: receiver.brokerId,
+          caseId: f.caseId,
+          title: `Earlier pending promise ${f.brokerId} ${index}`,
+          promisedToClient: true,
+          dueAt: new Date("1900-01-01T10:00:00Z"),
+        })),
+      )
+      .returning();
     const context = await browser.newContext({
       ...testInfo.project.use,
       javaScriptEnabled,
@@ -187,7 +256,16 @@ for (const javaScriptEnabled of [true, false])
       await context.addCookies([cookie(f.staffToken)]);
       const page = await context.newPage();
       await page.goto(hostUrl("staff", `/en/access/offboard/${f.brokerId}`));
-      await page.getByRole("link", { name: "Synthetic handover promise", exact: true }).click();
+      const taskHref = `/en/tasks/${task.id}`;
+      await expect(page.locator(`a[href="${taskHref}"]`)).toHaveCount(0);
+      expect(
+        await findPaginatedRecord(page, taskHref, {
+          pageParameter: "workPage",
+          viewportWidth: 320,
+        }),
+      ).toBe(true);
+      expect(Number(new URL(page.url()).searchParams.get("workPage"))).toBeGreaterThan(1);
+      await page.locator(`a[href="${taskHref}"]`).click();
       const request = page
         .locator("form")
         .filter({ has: page.getByRole("button", { name: "Request task handover", exact: true }) });
@@ -209,7 +287,14 @@ for (const javaScriptEnabled of [true, false])
       await context.addCookies([cookie(receiver.brokerToken)]);
       await page.goto(hostUrl("staff", "/en/today"));
       await page.getByRole("link", { name: "Awaiting my acceptance", exact: true }).click();
-      await page.getByRole("link", { name: "Synthetic handover promise", exact: true }).click();
+      await expect(page.locator(`a[href="${taskHref}"]`)).toHaveCount(0);
+      expect(await findPaginatedRecord(page, taskHref, { viewportWidth: 320 })).toBe(true);
+      expect(Number(new URL(page.url()).searchParams.get("page"))).toBeGreaterThan(1);
+      expect(new URL(page.url()).searchParams.get("view")).toBe("handovers");
+      expect(await moveQueuePage(page, "previous", { viewportWidth: 320 })).toBe(true);
+      expect(new URL(page.url()).searchParams.get("view")).toBe("handovers");
+      expect(await moveQueuePage(page, "next", { viewportWidth: 320 })).toBe(true);
+      await page.locator(`a[href="${taskHref}"]`).click();
       const accept = page
         .locator("form")
         .filter({ has: page.getByRole("button", { name: "Accept task handover", exact: true }) });
@@ -217,8 +302,8 @@ for (const javaScriptEnabled of [true, false])
         .getByLabel("Reason and handover notes", { exact: true })
         .fill("I reviewed the promise and accept the unchanged due date.");
       await accept.getByRole("checkbox").check();
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        320,
       );
       await page.screenshot({
         path: testInfo.outputPath(`task-handover-${javaScriptEnabled}.png`),
@@ -237,6 +322,14 @@ for (const javaScriptEnabled of [true, false])
         promisedToClient: true,
         state: "open",
       });
+      await page.goto(hostUrl("staff", "/en/tasks?view=handovers"));
+      expect(await findPaginatedRecord(page, taskHref, { viewportWidth: 320 })).toBe(false);
+      const lastPending = pending.reduce((last, row) => (row.id > last.id ? row : last));
+      if (!lastPending) throw new Error("Missing pending handover fixture");
+      expect(
+        await findPaginatedRecord(page, `/en/tasks/${lastPending.id}`, { viewportWidth: 320 }),
+      ).toBe(true);
+      expect(Number(new URL(page.url()).searchParams.get("page"))).toBeGreaterThan(1);
       await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
       const secondRequest = page
         .locator("form")
@@ -279,7 +372,24 @@ for (const javaScriptEnabled of [true, false])
       expect(
         (await db.select().from(schema.tasks).where(eq(schema.tasks.id, task.id)))[0],
       ).toMatchObject({ ownerId: receiver.brokerId, pendingOwnerId: null, dueAt, version: 5 });
+      expect(
+        await db
+          .select()
+          .from(schema.tasks)
+          .where(
+            inArray(
+              schema.tasks.id,
+              pending.map((row) => row.id),
+            ),
+          ),
+      ).toEqual(expect.arrayContaining(pending));
     } finally {
       await context.close();
+      await db.delete(schema.tasks).where(
+        inArray(
+          schema.tasks.id,
+          pending.map((row) => row.id),
+        ),
+      );
     }
   });

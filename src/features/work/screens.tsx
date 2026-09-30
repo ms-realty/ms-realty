@@ -28,6 +28,7 @@ import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
+import { InquirySelectionContext } from "./inquiry-selection-context";
 
 export function checkLocale(locale: string) {
   if (!isStaffLocale(locale)) notFound();
@@ -432,6 +433,7 @@ export async function InquiryScreen({
                 ) : null}
               </div>
             ) : null}
+            <InquirySelectionContext context={inquiry.context} locale={locale} />
             <dl className="space-y-2">
               <div>
                 <dt className="font-semibold">{copy.purpose}</dt>

@@ -118,7 +118,7 @@ export function ListingGrid({
   copy: DiscoveryCopy;
 }) {
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((listing) => (
         <ListingCard key={listing.reference} listing={listing} locale={locale} copy={copy} />
       ))}

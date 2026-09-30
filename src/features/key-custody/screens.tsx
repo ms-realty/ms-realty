@@ -83,9 +83,9 @@ export async function CustodyList({
         ))}
       </nav>
       {page.rows.length ? (
-        <ul className="divide-y divide-border">
+        <ul className="min-w-0 divide-y divide-border [overflow-wrap:anywhere]">
           {page.rows.map(({ key, propertyReference, holderName }) => (
-            <li key={key.id} className="space-y-2 py-5">
+            <li key={key.id} className="min-w-0 space-y-2 py-5 [overflow-wrap:anywhere]">
               <a className={workflowLink} href={`${path}/${key.id}`}>
                 <bdi>{key.reference}</bdi> · {key.keyTag}
               </a>

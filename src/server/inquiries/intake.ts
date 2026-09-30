@@ -12,12 +12,13 @@
 // contact details or message.
 import "server-only";
 import { timingSafeEqual } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { contactMethods, inquiries, listings, parties } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { type PublicLocale, parseReference, publicLocales } from "@/domain/ids";
 import { type InquiryPurpose, inquiryPurposes } from "@/domain/inquiry";
+import { comparisonReferencesSchema, selectedListingsSchema } from "@/domain/inquiry-selection";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
 import { type CookieOptions, serializeCookie } from "../auth/cookies";
@@ -26,8 +27,10 @@ import { hashRequest, keyedHash, randomToken } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { recordOutboxEvent } from "../jobs/outbox";
+import { getPublicListing } from "../listings/detail";
+import type { PublicListingDetail } from "../listings/view-models";
 import { findOperation, runOperation } from "../operations";
-import { listingSlug, loadPublishedListings } from "../publication/presentation";
+import { listingSlug, loadPublishedListings, presentationOf } from "../publication/presentation";
 import { enforceRateLimit } from "../rate-limit";
 import { nextReference } from "../references";
 import { normalizeSearch } from "../search/search";
@@ -127,6 +130,9 @@ export const inquirySchema = z
     ),
     message: text(4000),
     listingReference: text(20),
+    selectedListings: selectedListingsSchema.optional(),
+    /** A bounded return destination, never additional inquiry subjects. */
+    comparisonReferences: comparisonReferencesSchema.optional(),
     /** The approved page the visitor actually reviewed. Optional for older/general clients. */
     observedManifestId: z.preprocess(blankAsUnset, z.uuid().optional()),
     /** The search the visitor asked from, as its public filters (never a private brief). */
@@ -158,6 +164,22 @@ export const inquirySchema = z
     }
     if (input.listingReference && parseReference(input.listingReference)?.kind !== "listing") {
       issue(["listingReference"], "invalid_reference");
+    }
+    if (input.selectedListings) {
+      if (input.listingReference || input.observedManifestId) {
+        issue(["selectedListings"], "ambiguous_listing_context");
+      }
+      if (input.purpose !== "question") issue(["purpose"], "selection_requires_question");
+    }
+    if (
+      input.comparisonReferences &&
+      (input.selectedListings ||
+        !input.listingReference ||
+        !input.comparisonReferences.includes(
+          parseReference(input.listingReference)?.reference ?? "",
+        ))
+    ) {
+      issue(["comparisonReferences"], "invalid_comparison_context");
     }
     if (input.observedManifestId && !input.listingReference) {
       issue(["listingReference"], "required");
@@ -200,6 +222,9 @@ export interface InquiryReceipt {
   readonly locale: PublicLocale;
   /** The public listing the request is about, if any. */
   readonly listingReference: string | null;
+  readonly selectedListingReferences: string[];
+  /** Navigation only; does not broaden the subject represented by listingReference. */
+  readonly comparisonReferences: string[];
 }
 
 export interface SubmittedInquiry {
@@ -211,7 +236,12 @@ export interface SubmittedInquiry {
 }
 
 function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
-  const listing = (row.context as { listing?: { reference?: unknown } } | null)?.listing;
+  const context = row.context as {
+    listing?: { reference?: unknown };
+    selection?: { reference: string }[];
+    comparisonReferences?: string[];
+  } | null;
+  const listing = context?.listing;
   return {
     receiptId: row.submissionKey,
     status: "accepted",
@@ -220,6 +250,8 @@ function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
     purpose: row.purpose,
     locale: row.preferredLocale ?? "bg",
     listingReference: typeof listing?.reference === "string" ? listing.reference : null,
+    selectedListingReferences: context?.selection?.map((item) => item.reference) ?? [],
+    comparisonReferences: context?.comparisonReferences ?? [],
   };
 }
 
@@ -278,6 +310,40 @@ export async function submitInquiry(
     db,
     { actor, type: operationType, idempotencyKey: submissionKey, requestHash },
     async ({ tx, operationId }) => {
+      const now = context.now ?? new Date();
+      const selection: (PublicListingDetail & { sourceUrl: string })[] = [];
+      if (input.selectedListings) {
+        // Lock in canonical order to avoid deadlocks; snapshots and intent retain visitor order.
+        await tx
+          .select({ id: listings.id })
+          .from(listings)
+          .where(
+            inArray(
+              listings.reference,
+              input.selectedListings.map((item) => item.reference),
+            ),
+          )
+          .orderBy(asc(listings.reference))
+          .for("share");
+        for (const selected of input.selectedListings) {
+          const resolved = await getPublicListing(tx, {
+            reference: selected.reference,
+            locale: input.locale,
+            now,
+          });
+          if (
+            resolved.status !== "listing" ||
+            resolved.listing.manifestId !== selected.observedManifestId ||
+            resolved.listing.availability.primaryAction === "view_similar"
+          ) {
+            throw new AppError("version_conflict", { current: { reason: "selection_changed" } });
+          }
+          selection.push({
+            ...resolved.listing,
+            sourceUrl: `${getEnv().canonicalOrigin}/${input.locale}/properties/${resolved.listing.reference}/${resolved.listing.slug}`,
+          });
+        }
+      }
       let listing: Awaited<ReturnType<typeof resolveListing>> | null = null;
       if (input.listingReference) {
         // Publication commands take this row's update lock. Hold a share lock through the
@@ -298,11 +364,14 @@ export async function submitInquiry(
             throw error;
           throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
         }
-        if (input.observedManifestId && listing.manifestId !== input.observedManifestId) {
+        if (
+          (input.observedManifestId && listing.manifestId !== input.observedManifestId) ||
+          (input.comparisonReferences &&
+            presentationOf(listing, now).primaryAction === "view_similar")
+        ) {
           throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
         }
       }
-      const now = context.now ?? new Date();
       const kind = input.contact.kind;
       const normalized =
         kind === "phone"
@@ -360,6 +429,10 @@ export async function submitInquiry(
                   sourceUrl: `${getEnv().canonicalOrigin}/${listing.locale}/properties/${listing.reference}/${listingSlug(listing.reference)}`,
                 }
               : null,
+            ...(selection.length ? { selection } : {}),
+            ...(input.comparisonReferences
+              ? { comparisonReferences: input.comparisonReferences }
+              : {}),
             criteria,
           },
           preferredName: input.name ?? null,
@@ -385,13 +458,21 @@ export async function submitInquiry(
         payload: { reference, purpose: input.purpose, coverageQueue: inquiryCoverageQueue },
         operationId,
       });
-      const about = listing ? ` about ${listing.reference}` : "";
+      const about = selection.length
+        ? ` about ${selection.map((item) => item.reference).join(", ")}`
+        : listing
+          ? ` about ${listing.reference}`
+          : "";
       await recordActivity(tx, {
         recordType: "inquiry",
         recordId: row.id,
         reference,
         messageKey: "activity.inquiry.received",
-        params: { purpose: input.purpose, listingReference: listing?.reference ?? null },
+        params: {
+          purpose: input.purpose,
+          listingReference: listing?.reference ?? null,
+          selectedListingReferences: selection.map((item) => item.reference),
+        },
         summary: `Inquiry ${reference} received from the website (${input.purpose}${about}).`,
         actor,
         operationId,
@@ -416,7 +497,13 @@ export async function submitInquiry(
       return toReceipt(row);
     },
   );
-  return { receipt: result.outcome, replayed: result.replayed, operationId: result.operationId };
+  // Operation identity alone is not the receipt capability. This also fences a concurrent
+  // replay from a different browser, and normalizes receipts created before selection support.
+  const receipt = await readInquiryReceipt(db, {
+    submissionKey,
+    receiptSession: context.receiptSession,
+  });
+  return { receipt, replayed: result.replayed, operationId: result.operationId };
 }
 
 /**

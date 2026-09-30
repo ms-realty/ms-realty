@@ -104,6 +104,7 @@ test("F02/F29: native reviewed intent commits only chosen rules to editable sear
   expect(query.get("maxPrice")).toBe("150000");
   expect(query.get("currency")).toBe("EUR");
   expect(query.has("q")).toBe(false);
+  await page.getByRole("button", { name: /^Filters/ }).click();
   await expect(page.getByRole("checkbox", { name: "Apartment", exact: true })).toBeChecked();
   await expect(page.getByLabel("Minimum bedrooms", { exact: true })).toHaveValue("2");
   await page.goto("/en/properties/intent?text=holiday+rental+for+60+euro+per+night");

@@ -49,13 +49,23 @@ export default async function PropertiesPage({
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.search}</h1>
-      <SearchForm locale={locale} copy={copy} values={values} />
       {result ? (
-        <>
+        <div className="space-y-2">
           <h2 id="results-heading" tabIndex={-1} className="text-heading font-semibold">
             {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
             {formatNumber(locale, result.count.value)}
           </h2>
+          {!result.items.length ? <p>{copy.none}</p> : null}
+          {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
+        </div>
+      ) : (
+        <Notice tone="warning" title={invalid ? copy.check : copy.failed}>
+          <p>{invalid ? copy.invalid : copy.retained}</p>
+        </Notice>
+      )}
+      <SearchForm locale={locale} copy={copy} values={values} filtersOpen={!result} />
+      {result ? (
+        <>
           <SearchMap
             locale={locale}
             release={publicMapRelease()}
@@ -73,14 +83,12 @@ export default async function PropertiesPage({
                 : [],
             )}
           />
-          {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
           {result.items.length ? (
             <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
               <ListingGrid items={result.items} locale={locale} copy={copy} />
             </section>
           ) : (
             <div className="space-y-4">
-              <p>{copy.none}</p>
               <a className="underline" href={`/${locale}/inquire`}>
                 {copy.ask}
               </a>
@@ -102,11 +110,7 @@ export default async function PropertiesPage({
             </a>
           ) : null}
         </>
-      ) : (
-        <Notice tone="warning" title={invalid ? copy.check : copy.failed}>
-          <p>{invalid ? copy.invalid : copy.retained}</p>
-        </Notice>
-      )}
+      ) : null}
     </DiscoveryPage>
   );
 }

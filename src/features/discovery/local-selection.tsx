@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type { PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
 import type { DiscoveryCopy } from "./copy";
@@ -117,18 +117,42 @@ export function LocalSelection({
   kind,
   locale,
   copy,
+  canonicalReferences,
 }: {
   kind: Kind;
   locale: PublicLocale;
   copy: DiscoveryCopy;
+  /** On a comparison result, its URL owns the displayed selection, including explicit empty. */
+  canonicalReferences?: readonly string[];
 }) {
   const { refs, hydrated } = useSelection(kind);
   const [notice, setNotice] = useState("");
+  const canonical =
+    canonicalReferences === undefined
+      ? undefined
+      : JSON.stringify(selectedReferences(JSON.stringify(canonicalReferences), kind));
+  useEffect(() => {
+    if (canonical === undefined) return;
+    const synchronize = () => {
+      if (JSON.stringify(selectedReferences(read(kind), kind)) !== canonical)
+        setNotice(write(kind, JSON.parse(canonical)) ? "" : copy.storageFailed);
+    };
+    synchronize();
+    // Native Back may restore a cached document without remounting React.
+    window.addEventListener("pageshow", synchronize);
+    return () => window.removeEventListener("pageshow", synchronize);
+  }, [canonical, copy.storageFailed, kind]);
+  if (canonical !== undefined)
+    return (
+      <p role="status" className={notice ? "text-caption text-text-muted" : "sr-only"}>
+        {notice}
+      </p>
+    );
   return (
     <div className="space-y-5">
       <p>{copy.localOnly}</p>
       {kind === "compare" ? <p>{copy.compareLimit}</p> : null}
-      {hydrated ? (
+      {canonical === undefined && hydrated ? (
         refs.length ? (
           <>
             <ul className="space-y-3">
@@ -173,9 +197,40 @@ export function LocalSelection({
         )
       ) : null}
       <p role="status">{notice}</p>
-      <noscript>
-        <p>{copy.noJsSaved}</p>
-      </noscript>
+      {canonical === undefined ? (
+        <noscript>
+          <p>{copy.noJsSaved}</p>
+        </noscript>
+      ) : null}
+    </div>
+  );
+}
+
+/** A real GET link removes the rendered column without depending on client JavaScript. */
+export function RemoveComparison({
+  reference,
+  remaining,
+  locale,
+  copy,
+}: {
+  reference: string;
+  remaining: readonly string[];
+  locale: PublicLocale;
+  copy: DiscoveryCopy;
+}) {
+  const [notice, setNotice] = useState("");
+  return (
+    <div className="min-w-0">
+      <a
+        className={buttonClass("tertiary", "max-w-full px-1 text-caption wrap-anywhere")}
+        href={`/${locale}/compare?references=${remaining.join(",")}`}
+        onClick={() => setNotice(write("compare", [...remaining]) ? "" : copy.storageFailed)}
+      >
+        {copy.remove} <bdi>{reference}</bdi>
+      </a>
+      <p role="status" className="text-caption text-text-muted">
+        {notice}
+      </p>
     </div>
   );
 }

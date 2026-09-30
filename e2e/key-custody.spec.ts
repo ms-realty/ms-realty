@@ -24,7 +24,12 @@ for (const javaScriptEnabled of [true, false])
         ["--conditions=react-server", "--import", "tsx", "src/server/key-custody/browser-seed.ts"],
         {
           encoding: "utf8",
-          env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
+          env: {
+            ...process.env,
+            AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+            DATABASE_URL: url,
+            E2E_KEY_RETURN: "1",
+          },
         },
       ),
     ) as {
@@ -34,6 +39,11 @@ for (const javaScriptEnabled of [true, false])
       brokerToken: string;
       propertyReference: string;
     };
+    const holderName = `Z${"R".repeat(110)}${randomUUID().replaceAll("-", "").slice(0, 9)}`;
+    await db
+      .update(schema.principals)
+      .set({ displayName: holderName })
+      .where(eq(schema.principals.id, f.brokerId));
     const context = await browser.newContext({ ...testInfo.project.use, javaScriptEnabled });
     try {
       await context.addCookies([
@@ -46,7 +56,23 @@ for (const javaScriptEnabled of [true, false])
         },
       ]);
       const page = await context.newPage();
+      const viewportWidth = page.viewportSize()?.width;
+      if (!viewportWidth) throw new Error("Configured viewport required");
       await page.goto(hostUrl("staff", "/en/operations/keys"));
+      const holder = page.getByText(`Staff holder: ${holderName}`, { exact: true });
+      // The fixture's existing checked-out set must exercise long names on the list itself.
+      // Follow real pagination: other suites may have already populated earlier pages.
+      for (;;) {
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+          viewportWidth,
+        );
+        if (await holder.count()) break;
+        const next = page.getByRole("link", { name: "Next records", exact: true });
+        await expect(next).toBeVisible();
+        await next.click();
+      }
+      await expect(holder).toBeVisible();
+      await expect(holder).toHaveText(`Staff holder: ${holderName}`);
       const tag = `SYN-${randomUUID().slice(0, 8)}`.toUpperCase();
       await page.getByLabel("Property reference", { exact: true }).fill(f.propertyReference);
       await page.getByLabel("Key set tag", { exact: true }).fill(tag);
@@ -120,8 +146,8 @@ for (const javaScriptEnabled of [true, false])
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, key.id)))[0],
       ).toMatchObject({ state: "checked_out", holderId: f.brokerId, storageLabel: null });
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        viewportWidth,
       );
       const holderControl = await page.getByLabel("Staff holder", { exact: true }).boundingBox();
       expect(holderControl?.height).toBeGreaterThanOrEqual(44);
