@@ -13,6 +13,7 @@ const en = {
   mineInquiries: "My open inquiries",
   queueNote:
     "These queues show the inquiries, follow-up tasks and key returns you can access. Other work is shown in its own workspace.",
+  shown: "Shown in this queue",
   empty: "No matching items in this queue.",
   noContacts: "No contacts linked to inquiries you can access.",
   previous: "Previous page",
@@ -138,6 +139,7 @@ const bg: Copy = {
   mineInquiries: "Моите отворени запитвания",
   queueNote:
     "Тук са запитванията, задачите и връщането на ключове, до които имате достъп. Останалата работа е в съответните раздели.",
+  shown: "Показани в тази опашка",
   empty: "Няма съответстващи записи.",
   noContacts: "Няма контакти към достъпни за вас запитвания.",
   previous: "Предишна страница",
@@ -258,6 +260,7 @@ const ru: Copy = {
   mineInquiries: "Мои открытые обращения",
   queueNote:
     "Здесь показаны доступные вам обращения, задачи и возвраты ключей. Остальная работа находится в соответствующих разделах.",
+  shown: "Показано в этой очереди",
   empty: "Нет подходящих записей.",
   noContacts: "Нет контактов по доступным вам обращениям.",
   previous: "Предыдущая страница",

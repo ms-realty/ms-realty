@@ -1,5 +1,6 @@
 // P11: establish the anonymous receipt capability before the HTML form is submitted.
 import { type NextRequest, NextResponse } from "next/server";
+import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
@@ -21,12 +22,24 @@ export async function GET(
     target = new URL(`/${locale}/inquire`, env.hosts.public);
   const query = request.nextUrl.searchParams;
   if (
-    ["purpose", "reference", "manifest", "selection", "submission", "comparisonReferences"].some(
-      (name) => query.getAll(name).length > 1,
-    )
+    [
+      "purpose",
+      "reference",
+      "manifest",
+      "selection",
+      "submission",
+      "comparisonReferences",
+      "contentReference",
+    ].some((name) => query.getAll(name).length > 1)
   )
     return new Response(null, { status: 400 });
   if (query.has("context")) return new Response(null, { status: 400 });
+  const rawContent = query.get("contentReference");
+  if (rawContent !== null) {
+    const content = parseContentReference(rawContent);
+    if (!content) return new Response(null, { status: 400 });
+    target.searchParams.set("contentReference", JSON.stringify(content));
+  }
   const rawComparison = query.get("comparisonReferences");
   if (rawComparison !== null) {
     const comparison = parseComparisonReferences(rawComparison);

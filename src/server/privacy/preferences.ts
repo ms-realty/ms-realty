@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { consentEvents, contactMethods, parties, subscriptions } from "@/db/schema";
+import { listingPurposes } from "@/domain/facts";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { alertFrequencies, checkSendEligibility, subscriptionMachine } from "@/domain/subscription";
 import { recordAudit } from "../audit";
@@ -363,7 +364,7 @@ export async function editSearchSubscription(db: Executor, session: Session, inp
       timezone,
       frequency: z.enum(alertFrequencies),
       q: z.string().trim().max(100),
-      purpose: z.enum(["sale", "rent"]),
+      purpose: z.enum(listingPurposes),
       maxPrice: z.int().nonnegative().max(1_000_000_000_000).nullable(),
     }),
     input,
@@ -411,6 +412,7 @@ export async function editSearchSubscription(db: Executor, session: Session, inp
       const search = normalizeSearch({
         ...criteria,
         locale: value.locale,
+        sort: current.sort,
         purpose: value.purpose,
         q: value.q,
         includeUnconfirmed: includeNeedsConfirmation,

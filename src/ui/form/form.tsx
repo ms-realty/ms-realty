@@ -59,7 +59,7 @@ export type ActionFormProps<V extends FormValues> = {
   pendingReferenceCookie?: string;
   copy: FormCopy;
   labels: Record<keyof V, string>;
-  submitLabel: string;
+  submitLabel: string | ((state: FormState<V>) => string);
   children: (form: FormController<V>) => ReactNode;
 };
 
@@ -396,7 +396,11 @@ function FormSession<V extends FormValues>({
               className={cx("col-start-1 row-start-1", pending && "invisible")}
               aria-hidden={pending || undefined}
             >
-              {conflict?.reapply ? copy.reapply : submitLabel}
+              {conflict?.reapply
+                ? copy.reapply
+                : typeof submitLabel === "function"
+                  ? submitLabel(state)
+                  : submitLabel}
             </span>
             <span
               className={cx("col-start-1 row-start-1", !pending && "invisible")}

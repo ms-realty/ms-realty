@@ -13,6 +13,8 @@ import {
   readFilters,
   searchInput,
 } from "@/features/discovery/query";
+import { searchAlertCopy, searchAlertCopyLocale } from "@/features/discovery/search-alert-copy";
+import { alertSearch } from "@/features/discovery/search-alert-state";
 import { SearchForm } from "@/features/discovery/search-form";
 import { SearchMap } from "@/features/discovery/search-map";
 import { isRoutableLocale } from "@/i18n/config";
@@ -64,6 +66,16 @@ export default async function PropertiesPage({
         </Notice>
       )}
       <SearchForm locale={locale} copy={copy} values={values} filtersOpen={!result} />
+      {result ? (
+        <a
+          className={buttonClass("secondary", "self-start")}
+          href={alertSearch(locale, values).publicHref}
+          lang={searchAlertCopyLocale(locale)}
+          dir="ltr"
+        >
+          {searchAlertCopy(locale).entry}
+        </a>
+      ) : null}
       {result ? (
         <>
           <SearchMap

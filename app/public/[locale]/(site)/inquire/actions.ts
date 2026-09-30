@@ -2,12 +2,8 @@
 import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { getDb } from "@/db/client";
-import {
-  comparisonReturnHref,
-  parseComparisonReferences,
-  parseSelectedListingsJson,
-} from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
+import { inquiryReviewCopy } from "@/features/discovery/inquiry-review-copy";
 import {
   emptyInquiry,
   type InquiryState,
@@ -18,14 +14,22 @@ import {
 } from "@/features/discovery/inquiry-state";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
-import { AppError, isAppError } from "@/server/errors";
+import { isAppError } from "@/server/errors";
 import { assertSameOrigin, clientIpFrom, correlationIdFrom } from "@/server/http/request";
+import { readInquiryContent } from "@/server/inquiries/content-context";
 import {
   isIssuedSubmissionKey,
   receiptCookieName,
   submitInquiry,
   validReceiptSession,
 } from "@/server/inquiries/intake";
+import {
+  inquiryPayload,
+  issueInquiryReview,
+  refreshInquirySources,
+  reviewInquirySources,
+  validInquiryReview,
+} from "@/server/inquiries/review";
 import { formFields } from "@/ui/form/contract";
 
 export async function sendInquiry(
@@ -59,6 +63,9 @@ export async function sendInquiry(
     typeof key !== "string" ||
     !isIssuedSubmissionKey(key) ||
     data.getAll(formFields.operationId).length !== 1 ||
+    ["inquiryStage", "reviewToken", "editInquiry", "refreshSources"].some(
+      (name) => data.getAll(name).length > 1,
+    ) ||
     Object.keys(emptyInquiry).some((name) => data.getAll(name).length > 1)
   )
     return {
@@ -87,6 +94,7 @@ export async function sendInquiry(
         },
       },
     };
+  if (data.get("editInquiry") === "1") return state;
   if (values.message.length > 2000)
     return {
       ...state,
@@ -97,41 +105,48 @@ export async function sendInquiry(
         fieldErrors: { message: [copy.messageHint] },
       },
     };
+  let submissionStarted = false;
   try {
-    const selectedListings = values.selectedListings
-      ? parseSelectedListingsJson(values.selectedListings)
-      : undefined;
-    if (selectedListings === null)
-      throw new AppError("validation_failed", { fieldErrors: { selectedListings: ["invalid"] } });
-    const comparisonReferences = values.comparisonReferences
-      ? parseComparisonReferences(values.comparisonReferences)
-      : undefined;
-    if (comparisonReferences === null)
-      throw new AppError("validation_failed", {
-        fieldErrors: { comparisonReferences: ["invalid"] },
-      });
-    const result = await submitInquiry(
-      getDb(),
-      {
-        submissionKey: key,
-        purpose: values.purpose,
-        locale,
-        name: values.name,
-        contact: { kind: values.contactKind, value: values.contactValue },
-        message: values.message,
-        callbackWindow: values.callbackWindow,
-        privacyNotice: values.privacyNotice === "true",
-        listingReference: values.listingReference,
-        observedManifestId: values.observedManifestId,
-        selectedListings,
-        comparisonReferences,
-      },
-      {
-        ip: clientIpFrom(requestHeaders),
-        receiptSession,
-        correlationId: correlationIdFrom(requestHeaders),
-      },
-    );
+    if (data.get("refreshSources") === "1") {
+      const refreshed = await refreshInquirySources(getDb(), values, key, locale);
+      Object.assign(values, refreshed);
+    }
+    const payload = inquiryPayload(values, key, locale);
+    if (data.get("inquiryStage") !== "confirm" || data.get("refreshSources") === "1") {
+      const listings = await reviewInquirySources(getDb(), payload);
+      const content = payload.contentReference
+        ? await readInquiryContent(getDb(), payload.contentReference, locale)
+        : undefined;
+      // Older single-property entries may not carry a manifest. Pin the approved source
+      // displayed in this review so confirmation cannot silently accept a newer revision.
+      if (values.listingReference && !values.observedManifestId && listings[0])
+        values.observedManifestId = listings[0].manifestId;
+      return {
+        ...state,
+        review: {
+          token: issueInquiryReview(key, locale, receiptSession, values),
+          listings,
+          ownerInput: payload.ownerInput,
+          content,
+        },
+      };
+    }
+    if (!validInquiryReview(data.get("reviewToken"), key, locale, receiptSession, values))
+      return {
+        ...state,
+        outcome: {
+          kind: "validation",
+          code: "VALIDATION_FAILED",
+          message: copy.check,
+          fieldErrors: { message: [inquiryReviewCopy(locale).reviewNeeded] },
+        },
+      };
+    submissionStarted = true;
+    const result = await submitInquiry(getDb(), payload, {
+      ip: clientIpFrom(requestHeaders),
+      receiptSession,
+      correlationId: correlationIdFrom(requestHeaders),
+    });
     return {
       ...state,
       outcome: { kind: "confirmed", receipt: inquiryReceiptView(result.receipt, locale, copy) },
@@ -145,11 +160,25 @@ export async function sendInquiry(
             ? "contactKind"
             : name === "contact.value"
               ? "contactValue"
-              : name.startsWith("selectedListings")
-                ? "selectedListings"
-                : name.startsWith("comparisonReferences")
-                  ? "comparisonReferences"
-                  : (name as keyof InquiryValues);
+              : name.startsWith("ownerInput.")
+                ? (
+                    {
+                      "ownerInput.locality": "ownerLocality",
+                      "ownerInput.propertyType": "ownerPropertyType",
+                      "ownerInput.transaction": "ownerTransaction",
+                      "ownerInput.documentArea": "ownerDocumentArea",
+                      "ownerInput.relationship": "ownerRelationship",
+                      "ownerInput.propertyStatus": "ownerPropertyStatus",
+                      "ownerInput.documentSource": "ownerDocumentSource",
+                    } as const
+                  )[name as "ownerInput.locality"]
+                : name === "ownerInput"
+                  ? "purpose"
+                  : name.startsWith("selectedListings")
+                    ? "selectedListings"
+                    : name.startsWith("comparisonReferences")
+                      ? "comparisonReferences"
+                      : (name as keyof InquiryValues);
         if (field in emptyInquiry) fields[field] = [copy.invalid];
       }
       return {
@@ -165,27 +194,22 @@ export async function sendInquiry(
     if (isAppError(error) && error.code === "version_conflict")
       return {
         ...state,
+        sourcesChanged: true,
         outcome: {
-          kind: "conflict",
-          code: "REVISION_CONFLICT",
+          kind: "validation",
+          code: "VALIDATION_FAILED",
           message: copy.changed,
-          recovery: {
-            href: values.selectedListings
-              ? comparisonReturnHref(
-                  locale,
-                  parseSelectedListingsJson(values.selectedListings)?.map(
-                    (item) => item.reference,
-                  ) ?? [],
-                )
-              : values.comparisonReferences
-                ? comparisonReturnHref(
-                    locale,
-                    parseComparisonReferences(values.comparisonReferences) ?? [],
-                  )
-                : `/${locale}/properties/${encodeURIComponent(values.listingReference)}/${encodeURIComponent(values.listingReference.toLowerCase())}`,
-            label:
-              values.selectedListings || values.comparisonReferences ? copy.compare : copy.back,
-          },
+          fieldErrors: { contentReference: [inquiryReviewCopy(locale).sourcesChanged] },
+        },
+      };
+    if (!submissionStarted)
+      return {
+        ...state,
+        outcome: {
+          kind: "rejected",
+          code: "REVIEW_UNAVAILABLE",
+          message: copy.failed,
+          retryable: true,
         },
       };
     if (isAppError(error) && error.code === "idempotency_key_reused")

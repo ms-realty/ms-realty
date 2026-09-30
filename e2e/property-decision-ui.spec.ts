@@ -200,7 +200,8 @@ test("P05/F06/AT27: phone contact works without JavaScript and records the exact
     await page
       .getByLabel("I understand MS Realty will use these details to respond to this inquiry.")
       .check();
-    await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+    await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+    await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Inquiry received", exact: true }),
     ).toBeVisible();
