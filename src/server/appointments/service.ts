@@ -35,6 +35,7 @@ import { loadPublishedListings } from "../publication/presentation";
 import { nextReference } from "../references";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "../work/coverage-policy";
 import { allow, commandEnvelope, openAppointmentStates, parseInput, version } from "../work/shared";
+import { readHostReceivers } from "./host-receivers";
 import { appointmentTimezone, calendarFile, inServiceHours, sofiaInstant } from "./time";
 
 const requestSchema = z.object({
@@ -122,6 +123,10 @@ export async function recordAppointmentVersion(
       confirmedEndsAt: row.confirmedEndsAt?.toISOString(),
       icsSequence: row.icsSequence,
       hostId: row.hostId,
+      pendingHostId: row.pendingHostId,
+      pendingHostVersion: row.pendingHostVersion,
+      pendingHostNote: row.pendingHostNote,
+      pendingHostOfferedAt: row.pendingHostOfferedAt?.toISOString(),
     },
     actorKind: session.actor.kind,
     actorId: session.actor.id,
@@ -592,6 +597,26 @@ export async function readAppointment(db: Executor, session: Session, id: string
         Date.now() >= row.confirmedStartsAt.getTime() - 7 * 86400000 &&
         Date.now() <= row.confirmedEndsAt.getTime() + 86400000,
     );
+  const future =
+    (!row.confirmedStartsAt || row.confirmedStartsAt.getTime() > Date.now()) &&
+    (!row.proposedStartsAt || row.confirmedStartsAt || row.proposedStartsAt.getTime() > Date.now());
+  const open = (openAppointmentStates as readonly string[]).includes(row.state);
+  const ownHost = live.account.kind === "staff" && row.hostId === live.account.id;
+  const [pending] =
+    live.account.kind === "staff" && row.pendingHostId
+      ? await db
+          .select({ name: principals.displayName })
+          .from(principals)
+          .where(eq(principals.id, row.pendingHostId))
+      : [];
+  const canOfferHost = Boolean(ownHost && open && future && !row.pendingHostId);
+  const hostReceivers = canOfferHost
+    ? await readHostReceivers(
+        db,
+        row,
+        reservation ? new Date(reservation.endsAt) : (row.proposedEndsAt ?? undefined),
+      )
+    : [];
   return {
     appointment: {
       id: row.id,
@@ -614,13 +639,24 @@ export async function readAppointment(db: Executor, session: Session, id: string
     },
     canManage: live.account.kind === "staff",
     needsCoverage: Boolean(coverage?.needed),
+    canOfferHost,
+    canWithdrawHost: Boolean(ownHost && row.pendingHostId),
+    hostReceivers,
+    hostOffer:
+      live.account.kind === "staff" && row.pendingHostId
+        ? {
+            name: pending?.name ?? "—",
+            note: row.pendingHostNote,
+            current: row.pendingHostVersion === row.version,
+          }
+        : null,
     canAcceptHost: Boolean(
-      coverage?.needed &&
+      live.account.kind === "staff" &&
+        open &&
+        (coverage?.needed ||
+          (row.pendingHostId === live.account.id && row.pendingHostVersion === row.version)) &&
         row.hostId !== live.account.id &&
-        (!row.confirmedStartsAt || row.confirmedStartsAt.getTime() > Date.now()) &&
-        (!row.proposedStartsAt ||
-          row.confirmedStartsAt ||
-          row.proposedStartsAt.getTime() > Date.now()),
+        future,
     ),
     reservedInterval: reservation
       ? { startsAt: new Date(reservation.startsAt), endsAt: new Date(reservation.endsAt) }

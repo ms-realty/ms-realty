@@ -50,7 +50,11 @@ export async function acceptAppointmentHost(db: Executor, session: Session, raw:
         .select({ needed: ownerNeedsCoverage(appointments.hostId, appointmentCoverageAt) })
         .from(appointments)
         .where(eq(appointments.id, row.id));
-      if (!coverage?.needed) throw new AppError("transition_denied");
+      if (
+        !coverage?.needed &&
+        (row.pendingHostId !== receiver.account.id || row.pendingHostVersion !== row.version)
+      )
+        throw new AppError("transition_denied");
       const start = row.confirmedStartsAt ?? row.proposedStartsAt;
       if (start && start.getTime() <= Date.now()) throw new AppError("transition_denied");
       const resources = await ctx.tx
@@ -132,6 +136,10 @@ export async function acceptAppointmentHost(db: Executor, session: Session, raw:
         .update(appointments)
         .set({
           hostId: receiver.account.id,
+          pendingHostId: null,
+          pendingHostVersion: null,
+          pendingHostNote: null,
+          pendingHostOfferedAt: null,
           externalBusyCheckedAt: new Date(),
           externalBusyCheckedById: receiver.account.id,
           icsSequence: row.icsSequence + 1,
@@ -150,6 +158,8 @@ export async function acceptAppointmentHost(db: Executor, session: Session, raw:
         "appointment.manage",
         {
           previousHostId: row.hostId,
+          offeredByHost:
+            row.pendingHostId === receiver.account.id && row.pendingHostVersion === row.version,
           receiverId: receiver.account.id,
           reason: input.reason,
           externalBusyChecked: true,

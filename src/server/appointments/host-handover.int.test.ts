@@ -6,6 +6,7 @@ import {
   appointments,
   appointmentVersions,
   grants,
+  passkeys,
   sessions,
   staffMemberships,
   tasks,
@@ -15,6 +16,8 @@ import { staffFixture } from "../cases/testing";
 import { createCase, createProperty } from "../testing";
 import { readCoverage } from "../work/coverage";
 import { acceptAppointmentHost } from "./host-handover";
+import { offerAppointmentHost } from "./host-offer";
+import { readAppointment, respondToAppointment } from "./service";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -85,6 +88,187 @@ const resources = (id: string) =>
   t.db.select().from(appointmentResources).where(eq(appointmentResources.appointmentId, id));
 const current = async (id: string) =>
   (await t.db.select().from(appointments).where(eq(appointments.id, id)))[0];
+
+async function plannedFixture() {
+  const f = await fixture();
+  await t.db
+    .update(staffMemberships)
+    .set({ absenceFrom: null, absenceReviewAt: null })
+    .where(eq(staffMemberships.principalId, f.old.id));
+  return f;
+}
+function offerInput(f: Awaited<ReturnType<typeof fixture>>) {
+  return { ...input(f.row.id), action: "request", receiverId: f.target.id };
+}
+
+it("a current host offers the unchanged booking; only the named receiver can personally accept, with idempotent receipts", async () => {
+  const f = await plannedFixture(),
+    command = offerInput(f),
+    held = await resources(f.row.id);
+  const offered = await offerAppointmentHost(t.db, f.old.session, command);
+  expect(await current(f.row.id)).toMatchObject({
+    hostId: f.old.id,
+    pendingHostId: f.target.id,
+    pendingHostVersion: 2,
+    version: 2,
+    icsSequence: f.row.icsSequence,
+    confirmedStartsAt: f.start,
+    confirmedEndsAt: f.end,
+  });
+  expect(await resources(f.row.id)).toEqual(held);
+  expect((await readAppointment(t.db, f.target.session, f.row.id)).canAcceptHost).toBe(true);
+  expect((await readAppointment(t.db, f.old.session, f.row.id)).canAcceptHost).toBe(false);
+  const other = await staffFixture(t.db);
+  expect((await readAppointment(t.db, other.session, f.row.id)).canAcceptHost).toBe(false);
+  await expect(
+    acceptAppointmentHost(t.db, other.session, { ...input(f.row.id), expectedVersion: 2 }),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+  const accept = { ...input(f.row.id), expectedVersion: 2 };
+  const accepted = await acceptAppointmentHost(t.db, f.target.session, accept);
+  expect(await current(f.row.id)).toMatchObject({
+    hostId: f.target.id,
+    pendingHostId: null,
+    pendingHostVersion: null,
+    pendingHostNote: null,
+    pendingHostOfferedAt: null,
+    version: 3,
+    icsSequence: f.row.icsSequence + 1,
+    confirmedStartsAt: f.start,
+    confirmedEndsAt: f.end,
+    icsUid: f.row.icsUid,
+  });
+  expect((await resources(f.row.id)).find((r) => r.kind === "property_access")).toEqual(
+    held.find((r) => r.kind === "property_access"),
+  );
+  expect((await offerAppointmentHost(t.db, f.old.session, command)).outcome).toEqual(
+    offered.outcome,
+  );
+  expect((await acceptAppointmentHost(t.db, f.target.session, accept)).outcome).toEqual(
+    accepted.outcome,
+  );
+  expect(
+    await t.db
+      .select()
+      .from(appointmentVersions)
+      .where(eq(appointmentVersions.appointmentId, f.row.id)),
+  ).toHaveLength(2);
+});
+
+it("withdrawal retains the original host/resources and makes the old offer unusable", async () => {
+  const f = await plannedFixture(),
+    held = await resources(f.row.id);
+  await offerAppointmentHost(t.db, f.old.session, offerInput(f));
+  await expect(
+    offerAppointmentHost(t.db, f.target.session, {
+      ...input(f.row.id),
+      expectedVersion: 2,
+      action: "cancel",
+    }),
+  ).rejects.toMatchObject({ code: "forbidden" });
+  await offerAppointmentHost(t.db, f.old.session, {
+    ...input(f.row.id),
+    expectedVersion: 2,
+    action: "cancel",
+  });
+  expect(await current(f.row.id)).toMatchObject({
+    hostId: f.old.id,
+    pendingHostId: null,
+    version: 3,
+  });
+  expect(await resources(f.row.id)).toEqual(held);
+  await expect(
+    acceptAppointmentHost(t.db, f.target.session, { ...input(f.row.id), expectedVersion: 3 }),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+});
+
+it("a real arrangement change invalidates the offer even when the receiver submits the new row version", async () => {
+  const f = await plannedFixture(),
+    held = await resources(f.row.id);
+  await offerAppointmentHost(t.db, f.old.session, offerInput(f));
+  await respondToAppointment(t.db, f.old.session, {
+    id: f.row.id,
+    operationId: randomUUID(),
+    expectedVersion: 2,
+    state: "reschedule_requested",
+    reason: "Review a proposed replacement before changing this booking",
+  });
+  const changed = await current(f.row.id);
+  expect(changed).toMatchObject({ version: 3, pendingHostVersion: 2 });
+  expect((await readAppointment(t.db, f.target.session, f.row.id)).canAcceptHost).toBe(false);
+  await expect(
+    acceptAppointmentHost(t.db, f.target.session, { ...input(f.row.id), expectedVersion: 3 }),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+  expect(await resources(f.row.id)).toEqual(held);
+  expect(await current(f.row.id)).toEqual(changed);
+});
+
+it("only the current host can offer; an absent or undercredentialed recipient is not eligible", async () => {
+  const f = await plannedFixture();
+  await expect(offerAppointmentHost(t.db, f.target.session, offerInput(f))).rejects.toMatchObject({
+    code: "forbidden",
+  });
+  await t.db
+    .update(staffMemberships)
+    .set({
+      absenceFrom: new Date(f.end.getTime() + 60_000),
+      absenceReviewAt: new Date(f.end.getTime() + 3_600_000),
+    })
+    .where(eq(staffMemberships.principalId, f.target.id));
+  expect(
+    (await readAppointment(t.db, f.old.session, f.row.id)).hostReceivers.map((r) => r.id),
+  ).not.toContain(f.target.id);
+  await expect(offerAppointmentHost(t.db, f.old.session, offerInput(f))).rejects.toMatchObject({
+    code: "transition_denied",
+  });
+  await t.db
+    .update(staffMemberships)
+    .set({ absenceFrom: null, absenceReviewAt: null })
+    .where(eq(staffMemberships.principalId, f.target.id));
+  await t.db
+    .update(passkeys)
+    .set({ revokedAt: new Date() })
+    .where(eq(passkeys.principalId, f.target.id));
+  expect(
+    (await readAppointment(t.db, f.old.session, f.row.id)).hostReceivers.map((r) => r.id),
+  ).not.toContain(f.target.id);
+  await expect(offerAppointmentHost(t.db, f.old.session, offerInput(f))).rejects.toMatchObject({
+    code: "forbidden",
+  });
+  expect(await current(f.row.id)).toEqual(f.row);
+});
+
+it("loss of recipient access after an offer cannot transfer the booking", async () => {
+  const f = await plannedFixture(),
+    held = await resources(f.row.id);
+  await offerAppointmentHost(t.db, f.old.session, offerInput(f));
+  await t.db
+    .update(grants)
+    .set({ revokedAt: new Date() })
+    .where(eq(grants.principalId, f.target.id));
+  await expect(
+    acceptAppointmentHost(t.db, f.target.session, { ...input(f.row.id), expectedVersion: 2 }),
+  ).rejects.toBeDefined();
+  expect(await current(f.row.id)).toMatchObject({
+    hostId: f.old.id,
+    pendingHostId: f.target.id,
+    version: 2,
+  });
+  expect(await resources(f.row.id)).toEqual(held);
+});
+
+it("competing offers select one pending receiver and never move the active resources", async () => {
+  const f = await plannedFixture(),
+    second = await staffFixture(t.db),
+    held = await resources(f.row.id);
+  const results = await Promise.allSettled([
+    offerAppointmentHost(t.db, f.old.session, offerInput(f)),
+    offerAppointmentHost(t.db, f.old.session, { ...offerInput(f), receiverId: second.id }),
+  ]);
+  expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+  expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
+  expect(await current(f.row.id)).toMatchObject({ hostId: f.old.id, version: 2 });
+  expect(await resources(f.row.id)).toEqual(held);
+});
 
 it("receiver acceptance changes only hosting, preserving the booked slot, property resource, promises and calendar UID; replay is idempotent", async () => {
   const f = await fixture(),

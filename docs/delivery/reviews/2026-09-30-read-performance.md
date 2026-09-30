@@ -240,3 +240,19 @@ loopback test data. The other configured rules apply to Mindburn paths, outside 
 The first replica workload stopped before seeding: Playwright also discovered the adjacent
 Vitest transport tests. The load config now explicitly selects `agency-load.spec.ts`; the
 failed discovery log is retained separately, and is not load evidence.
+
+
+The corrected two-process workload completed 2,253 public and 226 staff cycles with no
+operation failures. Every budget still failed: p95 search 1109.59, detail 689.63, Today 805.80,
+task 1101.43 and command POST 2018.10 ms. Media p95 was 301.62 ms. Source/build binding and
+unmodified runtime source are retained; only discovery/docs changed since the fresh build.
+Both generated database and private file directory were confirmed absent after shutdown.
+[Portable observations](../evidence/2026-09-30-two-web-load.json) retain the failed result.
+
+During the measured tail, both Node processes used about one CPU core and averaged 0.89
+event-loop utilization. The existing CPU profiles map a remaining application hot frame to
+`formatNumber`: Listing cards explicitly request 20 fraction digits for source-fact precision,
+so that path still constructs a formatter per area. `replica-cpu-summary.json` retains both
+profiles' source-mapped self-time breakdown, with approximate last-65-second alignment.
+The previous default-number/rounded-area microbenchmark does not qualify this exact-area
+path. No further identical full-load repeat is justified before a measured source repair.

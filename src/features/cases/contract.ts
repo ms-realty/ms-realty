@@ -19,6 +19,7 @@ export const workflowTypes = {
   arrange: "appointment.arrange",
   appointment: "appointment.respond",
   appointmentHost: "appointment.host.accept",
+  appointmentHostHandover: "appointment.host.handover",
 } as const;
 export type WorkflowCommand = keyof typeof workflowTypes;
 export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
@@ -68,6 +69,7 @@ export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
   ],
   appointment: ["state", "reason"],
   appointmentHost: ["reason", "reviewed", "externalBusyChecked", "propertyAccessConfirmed"],
+  appointmentHostHandover: ["action", "receiverId", "reason", "reviewed"],
 };
 export const workflowScope = (command: WorkflowCommand, id: string) => `workflow.${command}.${id}`;
 export const workflowStatus = (

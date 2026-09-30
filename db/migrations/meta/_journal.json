@@ -141,6 +141,13 @@
       "when": 1790782395457,
       "tag": "0019_inbound_attachment_imports",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790793649048,
+      "tag": "0020_appointment_host_offer",
+      "breakpoints": true
     }
   ]
 }

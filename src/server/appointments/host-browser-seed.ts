@@ -44,16 +44,18 @@ try {
     { appointmentId: appointment.id, kind: "broker", resourceId: owner.id, during },
     { appointmentId: appointment.id, kind: "property_access", resourceId: propertyId, during },
   ]);
-  await db
-    .update(schema.staffMemberships)
-    .set({
-      absenceFrom: new Date(Date.now() - 1000),
-      absenceReviewAt: new Date(Date.now() + 3600000),
-    })
-    .where(eq(schema.staffMemberships.principalId, owner.id));
+  if (process.env.MSR_HOST_SEED_PLANNED !== "1")
+    await db
+      .update(schema.staffMemberships)
+      .set({
+        absenceFrom: new Date(Date.now() - 1000),
+        absenceReviewAt: new Date(Date.now() + 3600000),
+      })
+      .where(eq(schema.staffMemberships.principalId, owner.id));
   console.log(
     JSON.stringify({
       token: receiver.token,
+      ownerToken: owner.token,
       receiverId: receiver.id,
       ownerId: owner.id,
       id: appointment.id,
