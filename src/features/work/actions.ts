@@ -302,7 +302,7 @@ export async function contactAction(
           nextAction: values.nextAction,
           dueAt: localInstant(values.dueAt),
           promisedToClient: values.promisedToClient === "yes",
-          reviewed: (values.reviewed === "yes") as true,
+          reviewed: values.reviewed === "yes",
         })
       ).outcome;
     },

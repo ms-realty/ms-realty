@@ -51,7 +51,7 @@ async function Result({
   );
 }
 
-function SearchEditor({
+export function SearchEditor({
   locale,
   subscription,
   termsVersionId,
@@ -76,7 +76,7 @@ function SearchEditor({
             defaultValue={current?.criteria?.purpose ?? "sale"}
           >
             <option value="sale">{c.sale}</option>
-            <option value="rent">{c.rent}</option>
+            <option value="long_term_rent">{c.rent}</option>
           </select>
         </label>
         <TextField name="q" label={c.query} value={current?.q ?? ""} />
@@ -84,6 +84,7 @@ function SearchEditor({
           name="maxPrice"
           label={c.maxPrice}
           type="number"
+          step="0.01"
           value={
             current?.criteria?.price?.max === undefined
               ? ""
@@ -310,11 +311,11 @@ export async function PreferencesScreen({
                         className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
                       >
                         <option value="sale">{c.sale}</option>
-                        <option value="rent">{c.rent}</option>
+                        <option value="long_term_rent">{c.rent}</option>
                       </select>
                     </label>
                     <TextField name="q" label={c.query} />
-                    <TextField name="maxPrice" label={c.maxPrice} type="number" />
+                    <TextField name="maxPrice" label={c.maxPrice} type="number" step="0.01" />
                     <label className="grid gap-1">
                       {c.frequency}
                       <select

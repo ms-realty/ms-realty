@@ -395,7 +395,25 @@ test("P07: native three-property inquiry carries every ordered identity through 
       name: "I understand MS Realty will use these details to respond to this inquiry.",
     })
     .check();
-  await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+  await expect(page.locator("[data-review-listing]")).toHaveCount(expected.length);
+  expect(
+    await page
+      .locator("[data-review-listing]")
+      .evaluateAll((items) => items.map((item) => item.getAttribute("data-review-listing"))),
+  ).toEqual(references());
+  await page.getByRole("button", { name: "Edit inquiry", exact: true }).click();
+  await expect(page.locator('[name="selectedListings"]')).toHaveValue(JSON.stringify(expected));
+  await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(marker);
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
+    "synthetic-comparison@example.test",
+  );
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+  await page.screenshot({
+    path: testInfo.outputPath("comparison-native-review-390.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inquiry received" })).toBeVisible();
   await page.getByRole("link", { name: "Open receipt", exact: true }).click();
   const selection = page.getByRole("list", { name: "Compare", exact: true });
@@ -540,7 +558,8 @@ test("P07: native individual inquiry preserves its subject and returns to the or
         name: "I understand MS Realty will use these details to respond to this inquiry.",
       })
       .check();
-    await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+    await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+    await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Inquiry received" })).toBeVisible();
     await page.getByRole("link", { name: "Open receipt", exact: true }).click();
     await expect(page.getByRole("list", { name: "Compare", exact: true })).toHaveCount(0);
@@ -599,7 +618,7 @@ test("P07: malformed or duplicated native selection preserves the command and bl
       expect(recovery.searchParams.get("submission")).toBe(submissionKey);
       expect(recovery.searchParams.get("context")).toBe("invalid");
       await page.goto(location);
-      await expect(page.getByRole("button", { name: "Send an inquiry", exact: true })).toHaveCount(
+      await expect(page.getByRole("button", { name: "Review inquiry", exact: true })).toHaveCount(
         0,
       );
       await expect(page.locator('[name="submissionKey"]')).toHaveCount(0);

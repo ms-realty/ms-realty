@@ -117,7 +117,13 @@ afterAll(async () => {
   await t?.drop();
 });
 async function fixture(
-  overrides: { title?: string; publish?: boolean; weekly?: boolean; empty?: boolean } = {},
+  overrides: {
+    title?: string;
+    publish?: boolean;
+    weekly?: boolean;
+    empty?: boolean;
+    search?: Record<string, unknown>;
+  } = {},
 ) {
   const listing = await createListingFixture(t.db, {
     reviewerId: staff.id,
@@ -149,7 +155,10 @@ async function fixture(
     confirmed: true,
     timezone: "Europe/Sofia",
     ...(overrides.weekly ? { frequency: "weekly" } : {}),
-    search: { purpose: "sale", q: overrides.empty ? "NO-SYNTHETIC-MATCH" : listing.reference },
+    search: overrides.search ?? {
+      purpose: "sale",
+      q: overrides.empty ? "NO-SYNTHETIC-MATCH" : listing.reference,
+    },
   });
   return { ...listing, client, contact, session, id: choice.outcome.id, terms };
 }
@@ -272,6 +281,67 @@ describe("AT44 saved-search alert delivery", () => {
     expect(await dispatchSearchAlert(t.db, provider, id, options)).toBe("cancelled");
     expect(await planSearchAlerts(t.db, f.id, options)).toMatchObject({ state: "no_matches" });
     expect(provider.sent).toEqual([]);
+  });
+  it("edits a stored long-term rental search in the same stream without losing exact criteria", async () => {
+    const f = await fixture({
+      search: {
+        purpose: "long_term_rent",
+        q: "Original search",
+        sort: "price_asc",
+        propertyTypes: ["apartment", "house"],
+        placeIds: [randomUUID()],
+        price: { currency: "EUR", min: 95003, max: 150007 },
+        bedrooms: { min: 2, max: 3 },
+        rooms: { min: 3, max: 5 },
+        area: { basis: "built", min: 74.51, max: 90.07 },
+        mustHave: ["lift", "parking"],
+        includeUnconfirmed: true,
+      },
+    });
+    const [before] = await t.db.select().from(subscriptions).where(eq(subscriptions.id, f.id));
+    if (!before) throw new Error("Missing original rental subscription");
+    await changeSubscription(t.db, f.session, {
+      operationId: randomUUID(),
+      id: f.id,
+      expectedVersion: 1,
+      state: "paused",
+    });
+    const input = {
+      operationId: randomUUID(),
+      id: f.id,
+      expectedVersion: 2,
+      locale: "bg",
+      termsVersionId: f.terms.version.id,
+      confirmed: true,
+      timezone: "Europe/Sofia",
+      frequency: "weekly",
+      purpose: "long_term_rent",
+      q: "Updated search",
+      maxPrice: 160009,
+    };
+    const result = await editSearchSubscription(t.db, f.session, input);
+    expect(await editSearchSubscription(t.db, f.session, input)).toEqual(result);
+    const rows = await t.db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.partyId, f.client.partyId));
+    expect(rows).toHaveLength(1);
+    const prior = before.criteria as { criteria: Record<string, unknown> };
+    expect(rows[0]).toMatchObject({
+      id: f.id,
+      contactMethodId: f.contact.id,
+      state: "paused",
+      version: 3,
+      frequency: "weekly",
+      criteria: {
+        ...prior,
+        q: "Updated search",
+        criteria: { ...prior.criteria, price: { currency: "EUR", min: 95003, max: 160009 } },
+      },
+    });
+    expect(
+      await t.db.select().from(externalActions).where(eq(externalActions.subjectId, f.id)),
+    ).toEqual([]);
   });
   it.each(["unverified", "different_recipient", "marketing"] as const)(
     "rechecks %s eligibility immediately at dispatch",

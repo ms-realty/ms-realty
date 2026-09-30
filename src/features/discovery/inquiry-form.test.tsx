@@ -55,7 +55,7 @@ describe("P11 inquiry draft", () => {
     );
     const consent = screen.getByRole("checkbox");
     await user.click(consent);
-    await user.click(screen.getByRole("button", { name: "Send an inquiry" }));
+    await user.click(screen.getByRole("button", { name: "Review inquiry" }));
     await screen.findByRole("link", { name: "Your inquiry: Add a question" });
     expect(screen.getByLabelText("Preferred contact method")).toHaveValue("phone");
     expect(screen.getByLabelText("Phone with country code", { exact: true })).toHaveValue(
@@ -107,7 +107,7 @@ describe("P07 collective inquiry retention", () => {
       "MS-00202",
     ]);
     expect(screen.queryByRole("option", { name: "Request a viewing" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Send an inquiry" }));
+    await user.click(screen.getByRole("button", { name: "Review inquiry" }));
     const errorLink = await screen.findByRole("link", {
       name: "Compare: Review all selected properties",
     });

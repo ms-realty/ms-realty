@@ -131,9 +131,7 @@ export function SavedProperties({
   return (
     <section className="min-w-0 space-y-6" aria-label={copy.saved}>
       <p className="max-w-prose text-compact text-text-muted">{copy.localOnly}</p>
-      <noscript>
-        <p>{copy.noJsSaved}</p>
-      </noscript>
+      {!saved.hydrated ? <p>{copy.noJsSaved}</p> : null}
       {saved.hydrated ? (
         <>
           <p

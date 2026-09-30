@@ -339,7 +339,10 @@ export function ClientCaseOverview({
             className="min-w-0 space-y-5 rounded-[1rem] bg-brand-tint p-6"
             aria-label={c.clientSummary}
           >
-            <h2 className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]">
+            <h2
+              dir="auto"
+              className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]"
+            >
               {active
                 ? (row.nextAction ?? c.noAction)
                 : row.disposition === "closed"
@@ -422,6 +425,7 @@ export async function CaseScreen(
     // Its links need no conversation history or signed manual-action forms.
     const agenda = await listAppointments(getDb(), props.session, row.id);
     const appointment = agenda.length === 1 ? agenda[0] : undefined;
+    const copyLocale = props.locale === "bg" || props.locale === "ru" ? props.locale : "en";
     const links = [
       {
         label: c.appointments,
@@ -440,13 +444,20 @@ export async function CaseScreen(
             ) : null}
           </>
         ) : agenda.length === 0 ? (
-          c.noAppointments
+          <span lang={copyLocale} dir="ltr">
+            {c.noAppointments}
+          </span>
         ) : null,
       },
       {
         label: c.interests,
         href: `/${props.locale}/properties/${row.id}`,
-        detail: view.interests.length === 0 ? c.noInterests : null,
+        detail:
+          view.interests.length === 0 ? (
+            <span lang={copyLocale} dir="ltr">
+              {c.noInterests}
+            </span>
+          ) : null,
       },
       { label: c.documents, href: `/${props.locale}/documents`, detail: null },
     ];

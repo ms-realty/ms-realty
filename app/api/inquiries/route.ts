@@ -8,7 +8,9 @@
 
 import { getDb } from "@/db/client";
 import { isPublicLocale, isUuid, parseReference, sourceLocale } from "@/domain/ids";
+import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
+import { ownerInquirySchema } from "@/domain/owner-inquiry";
 import { readCookie } from "@/server/auth/cookies";
 import { getEnv } from "@/server/config/env";
 import { AppError, isAppError, wireCode } from "@/server/errors";
@@ -60,6 +62,20 @@ function formInput(form: URLSearchParams): Record<string, unknown> {
       throw new AppError("validation_failed", { fieldErrors: { [name]: ["ambiguous"] } });
   }
   const field = (name: string) => form.get(name) ?? undefined;
+  const rawContent = field("contentReference");
+  const contentReference = rawContent ? parseContentReference(rawContent) : undefined;
+  if (contentReference === null)
+    throw new AppError("validation_failed", { fieldErrors: { contentReference: ["invalid"] } });
+  let ownerInput: unknown;
+  const rawOwner = field("ownerInput");
+  if (rawOwner) {
+    try {
+      if (rawOwner.length > 2048) throw new Error("too_large");
+      ownerInput = ownerInquirySchema.parse(JSON.parse(rawOwner));
+    } catch {
+      throw new AppError("validation_failed", { fieldErrors: { ownerInput: ["invalid"] } });
+    }
+  }
   const rawSelection = field("selectedListings");
   const selectedListings = rawSelection ? parseSelectedListingsJson(rawSelection) : undefined;
   if (selectedListings === null)
@@ -79,6 +95,8 @@ function formInput(form: URLSearchParams): Record<string, unknown> {
     listingReference: field("listingReference"),
     observedManifestId: field("observedManifestId"),
     selectedListings,
+    contentReference,
+    ownerInput,
     comparisonReferences,
     callbackWindow: field("callbackWindow"),
     privacyNotice: checked("privacyNotice"),
@@ -154,6 +172,9 @@ export async function POST(request: Request): Promise<Response> {
     }
     const query = new URLSearchParams({ submission: key, error: wireCode(error.code) });
     const rawSelection = single("selectedListings");
+    const rawContent = single("contentReference");
+    const content = rawContent ? parseContentReference(rawContent) : null;
+    if (content) query.set("contentReference", JSON.stringify(content));
     const selected = rawSelection ? parseSelectedListingsJson(rawSelection) : null;
     const rawComparison = single("comparisonReferences");
     const comparison = rawComparison ? parseComparisonReferences(rawComparison) : null;
@@ -162,6 +183,8 @@ export async function POST(request: Request): Promise<Response> {
     const manifest = single("observedManifestId");
     const purpose = single("purpose");
     const contextFields = [
+      "contentReference",
+      "ownerInput",
       "selectedListings",
       "comparisonReferences",
       "listingReference",
@@ -169,6 +192,7 @@ export async function POST(request: Request): Promise<Response> {
       "purpose",
     ];
     const invalidContext =
+      Boolean(rawContent && !content) ||
       contextFields.some((name) => (nativeFields?.getAll(name).length ?? 0) > 1) ||
       Boolean(rawSelection && !selected) ||
       Boolean(rawComparison && !comparison) ||

@@ -18,14 +18,17 @@ import { contactMethods, inquiries, listings, parties } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { type PublicLocale, parseReference, publicLocales } from "@/domain/ids";
 import { type InquiryPurpose, inquiryPurposes } from "@/domain/inquiry";
+import { contentReferenceSchema } from "@/domain/inquiry-content";
+import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
 import { comparisonReferencesSchema, selectedListingsSchema } from "@/domain/inquiry-selection";
+import { ownerInquiryReceipt, ownerInquirySchema } from "@/domain/owner-inquiry";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
 import { type CookieOptions, serializeCookie } from "../auth/cookies";
 import { getEnv, type ServerEnv } from "../config/env";
 import { hashRequest, keyedHash, randomToken } from "../crypto";
 import type { Executor } from "../db";
-import { AppError } from "../errors";
+import { AppError, isAppError } from "../errors";
 import { recordOutboxEvent } from "../jobs/outbox";
 import { getPublicListing } from "../listings/detail";
 import type { PublicListingDetail } from "../listings/view-models";
@@ -34,6 +37,7 @@ import { listingSlug, loadPublishedListings, presentationOf } from "../publicati
 import { enforceRateLimit } from "../rate-limit";
 import { nextReference } from "../references";
 import { normalizeSearch } from "../search/search";
+import { readInquiryContent } from "./content-context";
 
 /**
  * The coverage queue that owns new website inquiries until a named broker accepts one. A
@@ -133,6 +137,8 @@ export const inquirySchema = z
     selectedListings: selectedListingsSchema.optional(),
     /** A bounded return destination, never additional inquiry subjects. */
     comparisonReferences: comparisonReferencesSchema.optional(),
+    ownerInput: ownerInquirySchema.optional(),
+    contentReference: contentReferenceSchema.optional(),
     /** The approved page the visitor actually reviewed. Optional for older/general clients. */
     observedManifestId: z.preprocess(blankAsUnset, z.uuid().optional()),
     /** The search the visitor asked from, as its public filters (never a private brief). */
@@ -184,6 +190,21 @@ export const inquirySchema = z
     if (input.observedManifestId && !input.listingReference) {
       issue(["listingReference"], "required");
     }
+    if (input.ownerInput) {
+      if (!["seller_consultation", "landlord_consultation"].includes(input.purpose))
+        issue(["ownerInput"], "owner_purpose_required");
+      if (input.listingReference || input.selectedListings)
+        issue(["ownerInput"], "ambiguous_listing_context");
+      const transaction = input.ownerInput.transaction;
+      if (
+        transaction &&
+        transaction !== "unknown" &&
+        transaction !== (input.purpose === "seller_consultation" ? "sale" : "long_term_rent")
+      )
+        issue(["ownerInput", "transaction"], "purpose_mismatch");
+    }
+    if (input.purpose === "service_consultation" && input.contentReference?.kind !== "service")
+      issue(["contentReference"], "approved_service_context_required");
   });
 
 export type InquiryInput = z.input<typeof inquirySchema>;
@@ -211,6 +232,8 @@ export function parseInquiry(input: unknown): ParsedInquiry {
 
 /** Acceptance state only: never the contact details, message or any other personal data. */
 export interface InquiryReceipt {
+  readonly content?: z.infer<typeof inquiryContentSnapshotSchema>;
+  readonly ownerInput?: ReturnType<typeof ownerInquiryReceipt>;
   /** The logical submission identity (the submission key). */
   readonly receiptId: string;
   readonly status: "accepted";
@@ -238,12 +261,19 @@ export interface SubmittedInquiry {
 function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
   const context = row.context as {
     listing?: { reference?: unknown };
+    ownerInput?: unknown;
+    content?: unknown;
     selection?: { reference: string }[];
     comparisonReferences?: string[];
   } | null;
   const listing = context?.listing;
+  const content = inquiryContentSnapshotSchema.safeParse(context?.content);
   return {
+    ...(content.success ? { content: content.data } : {}),
     receiptId: row.submissionKey,
+    ...(ownerInquiryReceipt(context?.ownerInput)
+      ? { ownerInput: ownerInquiryReceipt(context?.ownerInput) }
+      : {}),
     status: "accepted",
     reference: row.reference,
     acceptedAt: row.createdAt.toISOString(),
@@ -306,197 +336,221 @@ export async function submitInquiry(
     }
   }
 
-  const result = await runOperation(
-    db,
-    { actor, type: operationType, idempotencyKey: submissionKey, requestHash },
-    async ({ tx, operationId }) => {
-      const now = context.now ?? new Date();
-      const selection: (PublicListingDetail & { sourceUrl: string })[] = [];
-      if (input.selectedListings) {
-        // Lock in canonical order to avoid deadlocks; snapshots and intent retain visitor order.
-        await tx
-          .select({ id: listings.id })
-          .from(listings)
-          .where(
-            inArray(
-              listings.reference,
-              input.selectedListings.map((item) => item.reference),
-            ),
-          )
-          .orderBy(asc(listings.reference))
-          .for("share");
-        for (const selected of input.selectedListings) {
-          const resolved = await getPublicListing(tx, {
-            reference: selected.reference,
-            locale: input.locale,
-            now,
-          });
-          if (
-            resolved.status !== "listing" ||
-            resolved.listing.manifestId !== selected.observedManifestId ||
-            resolved.listing.availability.primaryAction === "view_similar"
-          ) {
-            throw new AppError("version_conflict", { current: { reason: "selection_changed" } });
+  // Source conflicts are correctable before acceptance. Roll back their attempted operation
+  // too, so an explicit refreshed review can use this same key. All other settled outcomes
+  // retain the shared operation contract, including failed, pending and unknown results.
+  const settled = await db.transaction(async (outer) => {
+    try {
+      const result = await runOperation(
+        outer,
+        { actor, type: operationType, idempotencyKey: submissionKey, requestHash },
+        async ({ tx, operationId }) => {
+          const now = context.now ?? new Date();
+          const content = input.contentReference
+            ? await readInquiryContent(tx, input.contentReference, input.locale)
+            : null;
+          const selection: (PublicListingDetail & { sourceUrl: string })[] = [];
+          if (input.selectedListings) {
+            // Lock in canonical order to avoid deadlocks; snapshots and intent retain visitor order.
+            await tx
+              .select({ id: listings.id })
+              .from(listings)
+              .where(
+                inArray(
+                  listings.reference,
+                  input.selectedListings.map((item) => item.reference),
+                ),
+              )
+              .orderBy(asc(listings.reference))
+              .for("share");
+            for (const selected of input.selectedListings) {
+              const resolved = await getPublicListing(tx, {
+                reference: selected.reference,
+                locale: input.locale,
+                now,
+              });
+              if (
+                resolved.status !== "listing" ||
+                resolved.listing.manifestId !== selected.observedManifestId ||
+                resolved.listing.availability.primaryAction === "view_similar"
+              ) {
+                throw new AppError("version_conflict", {
+                  current: { reason: "selection_changed" },
+                });
+              }
+              selection.push({
+                ...resolved.listing,
+                sourceUrl: `${getEnv().canonicalOrigin}/${input.locale}/properties/${resolved.listing.reference}/${resolved.listing.slug}`,
+              });
+            }
           }
-          selection.push({
-            ...resolved.listing,
-            sourceUrl: `${getEnv().canonicalOrigin}/${input.locale}/properties/${resolved.listing.reference}/${resolved.listing.slug}`,
+          let listing: Awaited<ReturnType<typeof resolveListing>> | null = null;
+          if (input.listingReference) {
+            // Publication commands take this row's update lock. Hold a share lock through the
+            // inquiry commit, so approval/current-manifest changes cannot race the snapshot.
+            await tx
+              .select({ id: listings.id })
+              .from(listings)
+              .where(
+                eq(listings.reference, parseReference(input.listingReference)?.reference ?? ""),
+              )
+              .for("share");
+            try {
+              listing = await resolveListing(tx, input.listingReference, input.locale);
+            } catch (error) {
+              if (
+                !input.observedManifestId ||
+                !(error instanceof AppError) ||
+                error.code !== "validation_failed"
+              )
+                throw error;
+              throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
+            }
+            if (
+              (input.observedManifestId && listing.manifestId !== input.observedManifestId) ||
+              ((input.observedManifestId ||
+                input.comparisonReferences ||
+                input.purpose === "viewing_request") &&
+                presentationOf(listing, now).primaryAction === "view_similar")
+            ) {
+              throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
+            }
+          }
+          const kind = input.contact.kind;
+          const normalized =
+            kind === "phone"
+              ? (normalizePhone(input.contact.value) ?? "")
+              : input.contact.value.toLowerCase();
+          // Every request gets its own party: matching it to an existing one is a human triage
+          // decision, never an automatic merge on a typed address.
+          const [party] = await tx
+            .insert(parties)
+            .values({
+              kind: "person",
+              displayName: input.name ?? "Website visitor",
+              preferredLocale: input.locale,
+              contactPreferences: {
+                channel: kind,
+                ...(input.callbackWindow ? { callbackWindow: input.callbackWindow } : {}),
+              },
+            })
+            .returning({ id: parties.id });
+          if (!party) throw new Error("Party insert returned no row.");
+          const [method] = await tx
+            .insert(contactMethods)
+            .values({
+              partyId: party.id,
+              kind,
+              value: kind === "phone" ? normalized : input.contact.value,
+              normalizedValue: normalized,
+            })
+            .returning({ id: contactMethods.id });
+          if (!method) throw new Error("Contact method insert returned no row.");
+
+          // A filled honeypot is held for human review, not silently dropped; the sender sees the
+          // same receipt as anyone else.
+          const automated = Boolean(website?.trim());
+          const reference = await nextReference(tx, "inquiry", now);
+          const [row] = await tx
+            .insert(inquiries)
+            .values({
+              reference,
+              state: automated ? "suspected_spam" : "received",
+              purpose: input.purpose,
+              source: "website",
+              submissionKey,
+              payloadDigest: requestHash,
+              receiptSessionHash: receiptSessionHash(context.receiptSession),
+              listingId: listing?.listingId ?? null,
+              listingRevisionId: listing?.listingRevisionId ?? null,
+              context: {
+                listing: listing
+                  ? {
+                      reference: listing.reference,
+                      manifestId: listing.manifestId,
+                      title: listing.title,
+                      locale: listing.locale,
+                      sourceUrl: `${getEnv().canonicalOrigin}/${listing.locale}/properties/${listing.reference}/${listingSlug(listing.reference)}`,
+                    }
+                  : null,
+                ...(selection.length ? { selection } : {}),
+                ...(input.comparisonReferences
+                  ? { comparisonReferences: input.comparisonReferences }
+                  : {}),
+                criteria,
+                ...(content ? { content } : {}),
+                ...(input.ownerInput ? { ownerInput: input.ownerInput } : {}),
+              },
+              preferredName: input.name ?? null,
+              contactMethodId: method.id,
+              partyId: party.id,
+              preferredLocale: input.locale,
+              preferredChannel: kind,
+              callbackWindow: input.callbackWindow ?? null,
+              message: input.message ?? null,
+              marketingOptIn: input.marketingOptIn,
+              coverageQueue: inquiryCoverageQueue,
+              dispositionReason: automated ? "automated_submission_signal" : null,
+              createdAt: now,
+            })
+            .returning();
+          if (!row) throw new Error("Inquiry insert returned no row.");
+
+          // Identifiers only: staff open the inquiry in triage, so no personal data travels.
+          await recordOutboxEvent(tx, {
+            eventType: "inquiry.received",
+            subjectType: "inquiry",
+            subjectId: row.id,
+            payload: { reference, purpose: input.purpose, coverageQueue: inquiryCoverageQueue },
+            operationId,
           });
-        }
-      }
-      let listing: Awaited<ReturnType<typeof resolveListing>> | null = null;
-      if (input.listingReference) {
-        // Publication commands take this row's update lock. Hold a share lock through the
-        // inquiry commit, so approval/current-manifest changes cannot race the snapshot.
-        await tx
-          .select({ id: listings.id })
-          .from(listings)
-          .where(eq(listings.reference, parseReference(input.listingReference)?.reference ?? ""))
-          .for("share");
-        try {
-          listing = await resolveListing(tx, input.listingReference, input.locale);
-        } catch (error) {
-          if (
-            !input.observedManifestId ||
-            !(error instanceof AppError) ||
-            error.code !== "validation_failed"
-          )
-            throw error;
-          throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
-        }
-        if (
-          (input.observedManifestId && listing.manifestId !== input.observedManifestId) ||
-          (input.comparisonReferences &&
-            presentationOf(listing, now).primaryAction === "view_similar")
-        ) {
-          throw new AppError("version_conflict", { current: { reason: "listing_changed" } });
-        }
-      }
-      const kind = input.contact.kind;
-      const normalized =
-        kind === "phone"
-          ? (normalizePhone(input.contact.value) ?? "")
-          : input.contact.value.toLowerCase();
-      // Every request gets its own party: matching it to an existing one is a human triage
-      // decision, never an automatic merge on a typed address.
-      const [party] = await tx
-        .insert(parties)
-        .values({
-          kind: "person",
-          displayName: input.name ?? "Website visitor",
-          preferredLocale: input.locale,
-          contactPreferences: {
-            channel: kind,
-            ...(input.callbackWindow ? { callbackWindow: input.callbackWindow } : {}),
-          },
-        })
-        .returning({ id: parties.id });
-      if (!party) throw new Error("Party insert returned no row.");
-      const [method] = await tx
-        .insert(contactMethods)
-        .values({
-          partyId: party.id,
-          kind,
-          value: kind === "phone" ? normalized : input.contact.value,
-          normalizedValue: normalized,
-        })
-        .returning({ id: contactMethods.id });
-      if (!method) throw new Error("Contact method insert returned no row.");
-
-      // A filled honeypot is held for human review, not silently dropped; the sender sees the
-      // same receipt as anyone else.
-      const automated = Boolean(website?.trim());
-      const reference = await nextReference(tx, "inquiry", now);
-      const [row] = await tx
-        .insert(inquiries)
-        .values({
-          reference,
-          state: automated ? "suspected_spam" : "received",
-          purpose: input.purpose,
-          source: "website",
-          submissionKey,
-          payloadDigest: requestHash,
-          receiptSessionHash: receiptSessionHash(context.receiptSession),
-          listingId: listing?.listingId ?? null,
-          listingRevisionId: listing?.listingRevisionId ?? null,
-          context: {
-            listing: listing
-              ? {
-                  reference: listing.reference,
-                  manifestId: listing.manifestId,
-                  title: listing.title,
-                  locale: listing.locale,
-                  sourceUrl: `${getEnv().canonicalOrigin}/${listing.locale}/properties/${listing.reference}/${listingSlug(listing.reference)}`,
-                }
-              : null,
-            ...(selection.length ? { selection } : {}),
-            ...(input.comparisonReferences
-              ? { comparisonReferences: input.comparisonReferences }
-              : {}),
-            criteria,
-          },
-          preferredName: input.name ?? null,
-          contactMethodId: method.id,
-          partyId: party.id,
-          preferredLocale: input.locale,
-          preferredChannel: kind,
-          callbackWindow: input.callbackWindow ?? null,
-          message: input.message ?? null,
-          marketingOptIn: input.marketingOptIn,
-          coverageQueue: inquiryCoverageQueue,
-          dispositionReason: automated ? "automated_submission_signal" : null,
-          createdAt: now,
-        })
-        .returning();
-      if (!row) throw new Error("Inquiry insert returned no row.");
-
-      // Identifiers only: staff open the inquiry in triage, so no personal data travels.
-      await recordOutboxEvent(tx, {
-        eventType: "inquiry.received",
-        subjectType: "inquiry",
-        subjectId: row.id,
-        payload: { reference, purpose: input.purpose, coverageQueue: inquiryCoverageQueue },
-        operationId,
-      });
-      const about = selection.length
-        ? ` about ${selection.map((item) => item.reference).join(", ")}`
-        : listing
-          ? ` about ${listing.reference}`
-          : "";
-      await recordActivity(tx, {
-        recordType: "inquiry",
-        recordId: row.id,
-        reference,
-        messageKey: "activity.inquiry.received",
-        params: {
-          purpose: input.purpose,
-          listingReference: listing?.reference ?? null,
-          selectedListingReferences: selection.map((item) => item.reference),
+          const about = selection.length
+            ? ` about ${selection.map((item) => item.reference).join(", ")}`
+            : listing
+              ? ` about ${listing.reference}`
+              : "";
+          await recordActivity(tx, {
+            recordType: "inquiry",
+            recordId: row.id,
+            reference,
+            messageKey: "activity.inquiry.received",
+            params: {
+              purpose: input.purpose,
+              listingReference: listing?.reference ?? null,
+              selectedListingReferences: selection.map((item) => item.reference),
+            },
+            summary: `Inquiry ${reference} received from the website (${input.purpose}${about}).`,
+            actor,
+            operationId,
+            at: now,
+          });
+          await recordAudit(tx, {
+            action: operationType,
+            actor,
+            capability: "inquiry.submit",
+            recordType: "inquiry",
+            recordId: row.id,
+            operationId,
+            ...(context.correlationId ? { correlationId: context.correlationId } : {}),
+            payload: {
+              purpose: input.purpose,
+              contactKind: kind,
+              listingId: listing?.listingId ?? null,
+              state: row.state,
+            },
+            at: now,
+          });
+          return toReceipt(row);
         },
-        summary: `Inquiry ${reference} received from the website (${input.purpose}${about}).`,
-        actor,
-        operationId,
-        at: now,
-      });
-      await recordAudit(tx, {
-        action: operationType,
-        actor,
-        capability: "inquiry.submit",
-        recordType: "inquiry",
-        recordId: row.id,
-        operationId,
-        ...(context.correlationId ? { correlationId: context.correlationId } : {}),
-        payload: {
-          purpose: input.purpose,
-          contactKind: kind,
-          listingId: listing?.listingId ?? null,
-          state: row.state,
-        },
-        at: now,
-      });
-      return toReceipt(row);
-    },
-  );
+      );
+      return { kind: "success" as const, result };
+    } catch (error) {
+      if (isAppError(error) && error.code === "version_conflict") throw error;
+      return { kind: "error" as const, error };
+    }
+  });
+  if (settled.kind === "error") throw settled.error;
+  const result = settled.result;
   // Operation identity alone is not the receipt capability. This also fences a concurrent
   // replay from a different browser, and normalizes receipts created before selection support.
   const receipt = await readInquiryReceipt(db, {

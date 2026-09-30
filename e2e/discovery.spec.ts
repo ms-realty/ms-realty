@@ -13,6 +13,94 @@ if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
 const sql = postgres(url, { max: 1 });
 const db = drizzle(sql, { schema });
 test.afterAll(async () => sql.end());
+
+for (const javaScriptEnabled of [true, false]) {
+  test(`P18 owner intake review/edit/confirm preserves self-declaration with JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+    baseURL,
+  }, info) => {
+    const context = await browser.newContext({
+      baseURL,
+      javaScriptEnabled,
+      viewport: { width: 390, height: 844 },
+      extraHTTPHeaders: {
+        "cf-connecting-ip": `2001:db8:${randomUUID().replaceAll("-", "").slice(0, 24).match(/.{4}/g)?.join(":")}`,
+      },
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto("/en/inquire?purpose=seller_consultation");
+      const key = await page.locator('[name="_operationId"]').inputValue();
+      await expect(page.getByLabel(/^Town or area/)).toHaveValue("");
+      await expect(page.getByLabel("Property type", { exact: true })).toHaveValue("");
+      await expect(page.getByLabel("Sale or long-term letting", { exact: true })).toHaveValue("");
+      await page.getByLabel(/^Town or area/).fill("Synthetic broad locality");
+      await page.getByLabel("Property type", { exact: true }).selectOption("house");
+      await page.getByLabel("Sale or long-term letting", { exact: true }).selectOption("sale");
+      await page.getByLabel(/^Document area/).fill("78.50");
+      await page
+        .getByLabel("Your relationship to the property", { exact: true })
+        .selectOption("representative");
+      await page.getByLabel(/^Area source/).fill("Synthetic private source note");
+      await page.getByLabel(/^Current use or condition/).fill("Not known first-hand");
+      await page.getByLabel("Email", { exact: true }).fill("synthetic-owner@example.test");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      const review = page.getByRole("region", { name: "Review your inquiry", exact: true });
+      await expect(review).toContainText("Synthetic broad locality");
+      await expect(review).toContainText("78.50 m²");
+      await expect(review).toContainText("Representative");
+      await expect(review).toContainText("do not verify ownership");
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+      ).toHaveLength(0);
+      expect(
+        await db.select().from(schema.operations).where(eq(schema.operations.idempotencyKey, key)),
+      ).toHaveLength(0);
+      expect(page.url()).not.toMatch(/Synthetic|private|owner@example/);
+      await page.getByRole("button", { name: "Edit inquiry", exact: true }).click();
+      await expect(page.getByLabel(/^Town or area/)).toHaveValue("Synthetic broad locality");
+      await expect(page.getByLabel(/^Area source/)).toHaveValue("Synthetic private source note");
+      await expect(page.getByRole("checkbox")).toBeChecked();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      await page.screenshot({
+        path: info.outputPath(`owner-review-390-${javaScriptEnabled}.png`),
+        fullPage: true,
+      });
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Inquiry received", exact: true }),
+      ).toBeVisible();
+      const records = await db
+        .select()
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.submissionKey, key));
+      expect(records).toHaveLength(1);
+      expect(records[0]?.context).toMatchObject({
+        ownerInput: {
+          version: 1,
+          provenance: "self_declared",
+          locality: "Synthetic broad locality",
+          propertyType: "house",
+          transaction: "sale",
+          documentArea: "78.50",
+          relationship: "representative",
+          propertyStatus: "Not known first-hand",
+          documentSource: "Synthetic private source note",
+        },
+      });
+      await page.getByRole("link", { name: "Open receipt", exact: true }).click();
+      await expect(page.getByRole("main")).toContainText("78.50 m²");
+      await expect(page.getByRole("main")).toContainText("Representative");
+      await expect(page.getByRole("main")).not.toContainText("Synthetic private source note");
+      await expect(page.getByRole("main")).not.toContainText("synthetic-owner@example.test");
+      await page.reload();
+      await expect(page.getByRole("main")).toContainText("78.50 m²");
+    } finally {
+      await context.close();
+    }
+  });
+}
 function fixture(command = "create", reference?: string) {
   return JSON.parse(
     execFileSync(
@@ -139,12 +227,35 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   await page
     .getByLabel("I understand MS Realty will use these details to respond to this inquiry.")
     .check();
-  await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
   await expect(page.getByRole("region", { name: "Check your answers" })).toBeVisible();
   await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(message);
   await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
   await page.getByLabel("Email", { exact: true }).fill("synthetic-visitor@example.test");
-  await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Review your inquiry", exact: true }),
+  ).toBeVisible();
+  expect(
+    await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+  ).toHaveLength(0);
+  expect(
+    await db.select().from(schema.operations).where(eq(schema.operations.idempotencyKey, key)),
+  ).toHaveLength(0);
+  await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+  await expect(page).not.toHaveURL(/synthetic-visitor|Synthetic%20inquiry/);
+  await page.getByRole("button", { name: "Edit inquiry", exact: true }).click();
+  await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(message);
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
+    "synthetic-visitor@example.test",
+  );
+  await expect(page.getByRole("checkbox")).toBeChecked();
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+  await page.screenshot({
+    path: testInfo.outputPath("inquiry-native-review-390.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inquiry received" })).toBeVisible();
   const reference = (await page.locator("bdi").filter({ hasText: /^RQ-/ }).innerText()).trim();
   await page.getByRole("link", { name: "Open receipt" }).click();
@@ -184,6 +295,86 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   await context.close();
 });
 
+for (const javaScriptEnabled of [true, false]) {
+  test(`P11 changed after review requires explicit source refresh with JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+    baseURL,
+  }, info) => {
+    const data = fixture();
+    const context = await browser.newContext({
+      baseURL,
+      javaScriptEnabled,
+      viewport: { width: 390, height: 844 },
+      extraHTTPHeaders: {
+        "cf-connecting-ip": `2001:db8:${randomUUID().replaceAll("-", "").slice(0, 24).match(/.{4}/g)?.join(":")}`,
+      },
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(
+        `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,
+      );
+      await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
+      const key = await page.locator('[name="_operationId"]').inputValue();
+      const previousManifest = await page.locator('[name="observedManifestId"]').inputValue();
+      await page
+        .getByLabel(/^Your inquiry/)
+        .fill("Synthetic retained preference after publication change");
+      await page.getByLabel("Email", { exact: true }).fill("synthetic-revision@example.test");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      await expect(page.getByRole("region", { name: "Review your inquiry" })).toContainText(
+        data.published.title,
+      );
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+      ).toHaveLength(0);
+      fixture("republish", data.published.reference);
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
+      await expect(
+        page.getByRole("button", { name: "Review current sources", exact: true }),
+      ).toBeVisible();
+      await expect(page.getByLabel(/^Your inquiry/)).toHaveValue(
+        "Synthetic retained preference after publication change",
+      );
+      await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
+        "synthetic-revision@example.test",
+      );
+      await expect(page.getByRole("checkbox")).toBeChecked();
+      await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+      await expect(page.locator('[name="observedManifestId"]')).toHaveValue(previousManifest);
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+      ).toHaveLength(0);
+      await page.getByRole("button", { name: "Review current sources", exact: true }).click();
+      await expect(page.getByRole("region", { name: "Review your inquiry" })).toContainText(
+        "Synthetic retained preference after publication change",
+      );
+      const currentManifest = await page.locator('[name="observedManifestId"]').inputValue();
+      expect(currentManifest).not.toBe(previousManifest);
+      await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+      await page.screenshot({
+        path: info.outputPath(`inquiry-explicit-current-review-${javaScriptEnabled}.png`),
+        fullPage: true,
+      });
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Inquiry received", exact: true }),
+      ).toBeVisible();
+      const records = await db
+        .select()
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.submissionKey, key));
+      expect(records).toHaveLength(1);
+      expect(records[0]?.context).toMatchObject({
+        listing: { reference: data.published.reference, manifestId: currentManifest },
+      });
+    } finally {
+      await context.close();
+    }
+  });
+}
+
 test("AT27: listing withdrawal between reading and submitting keeps the draft without accepting stale intent", async ({
   page,
 }, testInfo) => {
@@ -200,7 +391,7 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   await page.getByLabel("Email", { exact: true }).fill("synthetic-observer@example.test");
   await page.getByRole("checkbox").check();
   fixture("withdraw", data.published.reference);
-  await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
   await expect(
     page.getByText("The listing changed. Review the current version before continuing."),
   ).toBeVisible();
@@ -214,4 +405,12 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   expect(
     await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
   ).toHaveLength(0);
+  await page.getByRole("button", { name: "Review current sources", exact: true }).click();
+  await expect(page.getByLabel(/^Your inquiry/)).toHaveValue(
+    "Synthetic viewing preference to retain",
+  );
+  await expect(
+    page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator('[name="listingReference"]')).toHaveValue(data.published.reference);
 });

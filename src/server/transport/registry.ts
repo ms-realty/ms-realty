@@ -8,6 +8,8 @@ import { z } from "zod";
 import type { Capability } from "@/domain/capabilities";
 import { publicLocales } from "@/domain/ids";
 import { inquiryPurposes } from "@/domain/inquiry";
+import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
+import { ownerInquiryReceiptSchema } from "@/domain/owner-inquiry";
 import { gateIds, gateStatuses, readinessReportSchema } from "@/release/schemas";
 import type { HostContext } from "../config/hosts";
 import type { ErrorCode } from "../errors";
@@ -170,6 +172,8 @@ const submissionKeyExample = `${"A".repeat(43)}.${"0".repeat(32)}`;
 export const submissionKeyResponseSchema = z.object({ submissionKey: z.string() });
 
 export const inquiryReceiptSchema = z.object({
+  content: inquiryContentSnapshotSchema.optional(),
+  ownerInput: ownerInquiryReceiptSchema.optional(),
   receiptId: z.string().describe("The logical submission key"),
   status: z.literal("accepted"),
   reference: z.string().describe("Human reference, e.g. RQ-2026-000042"),
@@ -188,6 +192,8 @@ export const inquiryAcceptedSchema = z.object({
 
 /** The no-JavaScript form post: the same command with flat fields. */
 const inquiryFormSchema = z.object({
+  contentReference: z.string().max(512).optional(),
+  ownerInput: z.string().max(2048).optional(),
   submissionKey: z.string(),
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),

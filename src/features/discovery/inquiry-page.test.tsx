@@ -21,6 +21,7 @@ vi.mock("@/server/listings/detail", () => ({ getPublicListing: mocked.listing })
 
 import { issueSubmissionKey } from "@/server/inquiries/intake";
 import InquiryPage from "../../../app/public/[locale]/(site)/inquire/page";
+import { inquiryReviewCopy } from "./inquiry-review-copy";
 
 afterEach(cleanup);
 beforeEach(() => {
@@ -60,7 +61,7 @@ describe("native inquiry correction loader", () => {
       ).rejects.toThrow(`REDIRECT:/en/requests/${submission}`);
     },
   );
-  it("blocks a comparison-origin single subject which is no longer offered while retaining its navigation", async () => {
+  it("retains an unoffered comparison subject and editable draft behind fresh source review", async () => {
     const reference = "MS-00101";
     mocked.listing.mockResolvedValue({
       status: "listing",
@@ -81,7 +82,11 @@ describe("native inquiry correction loader", () => {
     });
     const view = render(result);
     expect(screen.queryByRole("button", { name: "Send an inquiry" })).not.toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Purpose" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Purpose" })).toBeEnabled();
+    expect(view.container.querySelector('input[name="inquiryStage"]')).toHaveValue("review");
+    expect(
+      screen.getByRole("button", { name: inquiryReviewCopy("en").refreshSources }),
+    ).toBeInTheDocument();
     expect(view.container.querySelector('input[name="listingReference"]')).toHaveValue(reference);
     expect(view.container.querySelector('input[name="selectedListings"]')).toHaveValue("");
     expect(view.container.querySelector('input[name="comparisonReferences"]')).toHaveValue(

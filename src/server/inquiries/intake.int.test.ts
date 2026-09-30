@@ -1,7 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { count, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { contactMethods, externalActions, inquiries, outboxEvents, parties } from "@/db/schema";
+import {
+  contactMethods,
+  externalActions,
+  inquiries,
+  operations,
+  outboxEvents,
+  parties,
+} from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { GET as readReceiptRoute } from "../../../app/api/inquiries/[submission]/route";
 import { GET as issueRoute, POST } from "../../../app/api/inquiries/route";
@@ -86,19 +93,26 @@ const inquiriesFor = (key: string) =>
   t.db.select().from(inquiries).where(eq(inquiries.submissionKey, key));
 
 describe("submitInquiry", () => {
-  it("AT27: rejects an outdated observed manifest without accepting intent and records the canonical source on a fresh request", async () => {
+  it("AT27: rolls back a stale source attempt and accepts explicit current review with the same operation and session", async () => {
+    const session = newReceiptSession();
     const stale = question({ observedManifestId: randomUUID() });
     const error = await rejection(
-      submitInquiry(t.db, stale, { ip: ip(), receiptSession: newReceiptSession() }),
+      submitInquiry(t.db, stale, { ip: ip(), receiptSession: session }),
     );
     expect(error).toMatchObject({
       code: "version_conflict",
       current: { reason: "listing_changed" },
     });
     expect(await inquiriesFor(stale.submissionKey)).toEqual([]);
+    expect(
+      await t.db
+        .select()
+        .from(operations)
+        .where(eq(operations.idempotencyKey, stale.submissionKey)),
+    ).toEqual([]);
     const [published] = await loadPublishedListings(t.db, { references: [live.reference] }, "bg");
-    const reviewed = question({ observedManifestId: published?.manifestId });
-    await submitInquiry(t.db, reviewed, { ip: ip(), receiptSession: newReceiptSession() });
+    const reviewed = { ...stale, observedManifestId: published?.manifestId };
+    await submitInquiry(t.db, reviewed, { ip: ip(), receiptSession: session });
     const [row] = await inquiriesFor(reviewed.submissionKey);
     expect(row?.context).toMatchObject({
       listing: {
@@ -106,6 +120,44 @@ describe("submitInquiry", () => {
         sourceUrl: `${getEnv().canonicalOrigin}/bg/properties/${live.reference}/${live.reference.toLowerCase()}`,
       },
     });
+  });
+
+  it("retains structured self-declaration privately and exposes only safe owner receipt fields", async () => {
+    const ownerInput = {
+      version: 1 as const,
+      provenance: "self_declared" as const,
+      locality: "Synthetic broad locality",
+      propertyType: "house" as const,
+      transaction: "sale" as const,
+      documentArea: "78,50",
+      relationship: "representative" as const,
+      propertyStatus: "Synthetic private condition note",
+      documentSource: "Synthetic private document description",
+    };
+    const input = question({
+      listingReference: undefined,
+      purpose: "seller_consultation",
+      ownerInput,
+    });
+    const session = newReceiptSession();
+    const accepted = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    const [row] = await inquiriesFor(input.submissionKey);
+    expect(row?.context).toMatchObject({ ownerInput });
+    expect(row?.listingId).toBeNull();
+    expect(accepted.receipt.ownerInput).toEqual({
+      version: 1,
+      provenance: "self_declared",
+      propertyType: "house",
+      transaction: "sale",
+      documentArea: "78,50",
+      relationship: "representative",
+    });
+    const reopened = await readInquiryReceipt(t.db, {
+      submissionKey: input.submissionKey,
+      receiptSession: session,
+    });
+    expect(reopened).toEqual(accepted.receipt);
+    expect(JSON.stringify(reopened)).not.toMatch(/Synthetic|example.test/);
   });
 
   it("AT10: a retried or double-tapped submission yields one Inquiry and one receipt", async () => {

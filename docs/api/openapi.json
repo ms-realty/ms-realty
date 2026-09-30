@@ -1069,6 +1069,78 @@
                       "maxLength": 20
                     }
                   },
+                  "ownerInput": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "number",
+                        "const": 1
+                      },
+                      "provenance": {
+                        "type": "string",
+                        "const": "self_declared"
+                      },
+                      "locality": {
+                        "type": "string",
+                        "maxLength": 160
+                      },
+                      "propertyType": {
+                        "type": "string",
+                        "enum": [
+                          "apartment",
+                          "house",
+                          "plot",
+                          "commercial",
+                          "hotel",
+                          "development",
+                          "other",
+                          "unknown"
+                        ]
+                      },
+                      "transaction": {
+                        "type": "string",
+                        "enum": ["sale", "long_term_rent", "unknown"]
+                      },
+                      "documentArea": {
+                        "type": "string",
+                        "maxLength": 32
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                      },
+                      "propertyStatus": {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "documentSource": {
+                        "type": "string",
+                        "maxLength": 200
+                      }
+                    },
+                    "required": ["version", "provenance"],
+                    "additionalProperties": false
+                  },
+                  "contentReference": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": ["area", "service", "help"]
+                      },
+                      "slug": {
+                        "type": "string",
+                        "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                      },
+                      "versionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      }
+                    },
+                    "required": ["kind", "slug", "versionId"],
+                    "additionalProperties": false
+                  },
                   "observedManifestId": {
                     "type": "string",
                     "format": "uuid",
@@ -1116,6 +1188,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "contentReference": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "ownerInput": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
                   "submissionKey": {
                     "type": "string"
                   },
@@ -1204,6 +1284,78 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["area", "service", "help"]
+                            },
+                            "slug": {
+                              "type": "string",
+                              "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                            },
+                            "versionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "title": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "locale": {
+                              "type": "string",
+                              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": ["kind", "slug", "versionId", "title", "locale", "sourceUrl"],
+                          "additionalProperties": false
+                        },
+                        "ownerInput": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number",
+                              "const": 1
+                            },
+                            "provenance": {
+                              "type": "string",
+                              "const": "self_declared"
+                            },
+                            "propertyType": {
+                              "type": "string",
+                              "enum": [
+                                "apartment",
+                                "house",
+                                "plot",
+                                "commercial",
+                                "hotel",
+                                "development",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            "transaction": {
+                              "type": "string",
+                              "enum": ["sale", "long_term_rent", "unknown"]
+                            },
+                            "documentArea": {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                            }
+                          },
+                          "required": ["version", "provenance"],
+                          "additionalProperties": false
+                        },
                         "receiptId": {
                           "type": "string",
                           "description": "The logical submission key"
@@ -1285,6 +1437,78 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["area", "service", "help"]
+                            },
+                            "slug": {
+                              "type": "string",
+                              "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                            },
+                            "versionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "title": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "locale": {
+                              "type": "string",
+                              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": ["kind", "slug", "versionId", "title", "locale", "sourceUrl"],
+                          "additionalProperties": false
+                        },
+                        "ownerInput": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number",
+                              "const": 1
+                            },
+                            "provenance": {
+                              "type": "string",
+                              "const": "self_declared"
+                            },
+                            "propertyType": {
+                              "type": "string",
+                              "enum": [
+                                "apartment",
+                                "house",
+                                "plot",
+                                "commercial",
+                                "hotel",
+                                "development",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            "transaction": {
+                              "type": "string",
+                              "enum": ["sale", "long_term_rent", "unknown"]
+                            },
+                            "documentArea": {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                            }
+                          },
+                          "required": ["version", "provenance"],
+                          "additionalProperties": false
+                        },
                         "receiptId": {
                           "type": "string",
                           "description": "The logical submission key"
@@ -1573,6 +1797,78 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["area", "service", "help"]
+                            },
+                            "slug": {
+                              "type": "string",
+                              "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                            },
+                            "versionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "title": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "locale": {
+                              "type": "string",
+                              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": ["kind", "slug", "versionId", "title", "locale", "sourceUrl"],
+                          "additionalProperties": false
+                        },
+                        "ownerInput": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number",
+                              "const": 1
+                            },
+                            "provenance": {
+                              "type": "string",
+                              "const": "self_declared"
+                            },
+                            "propertyType": {
+                              "type": "string",
+                              "enum": [
+                                "apartment",
+                                "house",
+                                "plot",
+                                "commercial",
+                                "hotel",
+                                "development",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            "transaction": {
+                              "type": "string",
+                              "enum": ["sale", "long_term_rent", "unknown"]
+                            },
+                            "documentArea": {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                            }
+                          },
+                          "required": ["version", "provenance"],
+                          "additionalProperties": false
+                        },
                         "receiptId": {
                           "type": "string",
                           "description": "The logical submission key"

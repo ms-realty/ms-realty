@@ -23,6 +23,12 @@ export function InventoryDecisionForm({
   const copy = inventoryCopy(context.locale),
     decision = inventoryDecisionCopy(context.locale);
   const href = `/${context.locale}/inventory/${context.reference}`;
+  // Freeze creates the first revision; availability also targets the listing itself.
+  // Their native response identity must survive a change in the latest revision.
+  const nativeTarget =
+    context.intent === "freeze" || context.intent === "availability"
+      ? "listing"
+      : (context.manifestId ?? context.revisionId);
   return (
     <div
       className="space-y-3 rounded-panel border border-divider bg-surface p-5"
@@ -33,7 +39,7 @@ export function InventoryDecisionForm({
         action={action}
         initialState={initialState}
         permalink={href}
-        nativeIdentity={`inventory-decision:${context.intent}:${context.reference}:${context.manifestId ?? context.revisionId}`}
+        nativeIdentity={`inventory-decision:${context.intent}:${context.reference}:${nativeTarget}`}
         reconciliation={{
           href: `/${context.locale}/inventory/operations/${initialState.operationId}?reference=${encodeURIComponent(context.reference)}`,
           label: copy.operation,

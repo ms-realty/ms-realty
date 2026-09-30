@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/db/client";
+import { isUuid, parseReference } from "@/domain/ids";
+import { parseContentReference } from "@/domain/inquiry-content";
 import {
   comparisonReturnHref,
   parseComparisonReferences,
@@ -10,6 +12,7 @@ import {
 } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryForm } from "@/features/discovery/inquiry-form";
+import { inquiryReviewCopy } from "@/features/discovery/inquiry-review-copy";
 import { emptyInquiry, type InquiryState, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
 import type { QueryParams } from "@/features/discovery/query";
@@ -52,11 +55,28 @@ export default async function InquiryPage({
       : null;
   const selected =
     typeof query.selection === "string" ? parseSelectedListingsJson(query.selection) : null;
+  const content =
+    typeof query.contentReference === "string"
+      ? parseContentReference(query.contentReference)
+      : null;
   const invalidContext =
     query.context !== undefined ||
-    ["purpose", "reference", "manifest", "submission", "selection", "comparisonReferences"].some(
-      (name) => Array.isArray(query[name]),
-    ) ||
+    (query.reference !== undefined &&
+      (typeof query.reference !== "string" ||
+        parseReference(query.reference)?.kind !== "listing")) ||
+    (query.manifest !== undefined &&
+      (typeof query.manifest !== "string" || !isUuid(query.manifest) || !query.reference)) ||
+    (query.contentReference !== undefined && !content) ||
+    (query.purpose === "service_consultation" && content?.kind !== "service") ||
+    [
+      "purpose",
+      "reference",
+      "manifest",
+      "submission",
+      "selection",
+      "comparisonReferences",
+      "contentReference",
+    ].some((name) => Array.isArray(query[name])) ||
     (query.selection !== undefined &&
       (!selected ||
         query.reference !== undefined ||
@@ -89,6 +109,7 @@ export default async function InquiryPage({
       "submission",
       "selection",
       "comparisonReferences",
+      "contentReference",
       "error",
     ]) {
       if (typeof query[name] === "string") next.set(name, query[name]);
@@ -102,7 +123,11 @@ export default async function InquiryPage({
         <Notice tone="warning" title={copy.notConfirmed} />
       </DiscoveryPage>
     );
-  const values = { ...emptyInquiry, comparisonReferences: comparison?.join(",") ?? "" };
+  const values = {
+    ...emptyInquiry,
+    comparisonReferences: comparison?.join(",") ?? "",
+    contentReference: content ? JSON.stringify(content) : "",
+  };
   let selectionChanged = false;
   if (
     typeof query.purpose === "string" &&
@@ -112,6 +137,7 @@ export default async function InquiryPage({
       "seller_consultation",
       "landlord_consultation",
       "viewing_request",
+      "service_consultation",
     ].includes(query.purpose)
   )
     values.purpose = query.purpose;
@@ -134,18 +160,8 @@ export default async function InquiryPage({
     const result = await getPublicListing(getDb(), { reference: query.reference, locale }).catch(
       () => null,
     );
-    if (result?.status !== "listing" && !comparison)
-      return (
-        <DiscoveryPage>
-          <Notice tone="warning" title={result ? copy.unavailable : copy.failed} />
-          <a
-            className="underline"
-            href={comparison ? comparisonReturnHref(locale, comparison) : `/${locale}/properties`}
-          >
-            {comparison ? copy.compare : copy.back}
-          </a>
-        </DiscoveryPage>
-      );
+    // The native POST must render the same ActionForm even if a source was withdrawn.
+    // Its returned draft and operation cannot be replaced by a new navigation-only page.
     values.listingReference =
       result?.status === "listing" ? result.listing.reference : query.reference;
     values.observedManifestId =
@@ -155,35 +171,26 @@ export default async function InquiryPage({
           ? result.listing.manifestId
           : "";
     if (
-      comparison &&
-      (result?.status !== "listing" || result.listing.availability.primaryAction === "view_similar")
+      result?.status !== "listing" ||
+      result.listing.availability.primaryAction === "view_similar" ||
+      (typeof query.manifest === "string" && result.listing.manifestId !== query.manifest)
     )
       selectionChanged = true;
   }
   const state: InquiryState = {
+    sourcesChanged: selectionChanged || query.error === "REVISION_CONFLICT",
     operationId: key,
     expectedRevision: null,
     responseId: randomUUID(),
     reconciliation: { href: inquiryStatus(locale, key), label: copy.checkOperation },
     values,
     outcome:
-      (selectionChanged || query.error === "REVISION_CONFLICT") &&
-      (selected || typeof query.reference === "string")
+      selectionChanged || query.error === "REVISION_CONFLICT"
         ? {
-            kind: "conflict",
-            code: "REVISION_CONFLICT",
+            kind: "validation",
+            code: "VALIDATION_FAILED",
             message: copy.changed,
-            recovery: {
-              href: selected
-                ? comparisonReturnHref(
-                    locale,
-                    selected.map((item) => item.reference),
-                  )
-                : comparison
-                  ? comparisonReturnHref(locale, comparison)
-                  : `/${locale}/properties/${values.listingReference}/${values.listingReference.toLowerCase()}`,
-              label: selected || comparison ? copy.compare : copy.back,
-            },
+            fieldErrors: { contentReference: [inquiryReviewCopy(locale).sourcesChanged] },
           }
         : typeof query.error === "string"
           ? {

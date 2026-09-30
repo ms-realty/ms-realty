@@ -116,6 +116,7 @@ test("P08: save four, choose second and fourth, compare exactly those and recove
   );
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => window.scrollTo(0, 0));
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );
@@ -185,6 +186,7 @@ test("P08: an unavailable selected property stays visible and needs explicit cor
     `/en/compare?references=${refs[0]},${refs[1]}`,
   );
   await page.setViewportSize({ width: 320, height: 844 });
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath("saved-unavailable-320.png"), fullPage: true });
   await page.goto("/he/saved");
   await expect(

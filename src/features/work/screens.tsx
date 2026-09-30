@@ -30,6 +30,7 @@ import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
+import { InquiryOwnerContext } from "./inquiry-owner-context";
 import { InquirySelectionContext } from "./inquiry-selection-context";
 
 export function checkLocale(locale: string) {
@@ -47,39 +48,43 @@ export function queryPage(value: string | string[] | undefined) {
   const page = typeof value === "string" ? Number(value) : 1;
   return Number.isSafeInteger(page) && page > 0 && page <= 10000 ? page : 1;
 }
-const link = "font-semibold text-accent underline underline-offset-4";
+const link = "font-semibold text-link underline underline-offset-4";
 
 export function Page({
   title,
   locale,
   children,
+  navigation = true,
 }: {
   title: string;
   locale: string;
   children: ReactNode;
+  navigation?: boolean;
 }) {
   const copy = workCopy(locale);
   return (
     <div className="mx-auto min-w-0 max-w-page space-y-8 break-words px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <header className="space-y-4">
         <h1 className="text-title font-semibold">{title}</h1>
-        <nav aria-label={copy.details} className="flex flex-wrap gap-5">
-          <a className={link} href={`/${locale}/today`}>
-            {copy.today}
-          </a>
-          <a className={link} href={`/${locale}/inquiries`}>
-            {copy.inbox}
-          </a>
-          <a className={link} href={`/${locale}/tasks`}>
-            {copy.tasks}
-          </a>
-          <a className={link} href={`/${locale}/contacts`}>
-            {copy.contacts}
-          </a>
-          <a className={link} href={`/${locale}/coverage`}>
-            {coverageCopy(locale).title}
-          </a>
-        </nav>
+        {navigation ? (
+          <nav aria-label={copy.details} className="flex flex-wrap gap-5">
+            <a className={link} href={`/${locale}/today`}>
+              {copy.today}
+            </a>
+            <a className={link} href={`/${locale}/inquiries`}>
+              {copy.inbox}
+            </a>
+            <a className={link} href={`/${locale}/tasks`}>
+              {copy.tasks}
+            </a>
+            <a className={link} href={`/${locale}/contacts`}>
+              {copy.contacts}
+            </a>
+            <a className={link} href={`/${locale}/coverage`}>
+              {coverageCopy(locale).title}
+            </a>
+          </nav>
+        ) : null}
       </header>
       {children}
     </div>
@@ -139,13 +144,50 @@ export function Pagination({
 function InquiryList({
   rows,
   locale,
+  cards = false,
 }: {
   rows: Awaited<ReturnType<typeof listInbox>>["rows"];
   locale: string;
+  cards?: boolean;
 }) {
   const copy = workCopy(locale);
   if (!rows.length)
     return <p className="rounded-card border border-border p-5 text-text-muted">{copy.empty}</p>;
+  if (cards)
+    return (
+      <ul className="divide-y divide-border rounded-card border border-border bg-surface">
+        {rows.map(({ inquiry, ownerName, needsCoverage }) => (
+          <li key={inquiry.id} data-inquiry-id={inquiry.id} className="min-w-0 space-y-3 p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+              <a className={link} href={`/${locale}/inquiries/${inquiry.id}`}>
+                <bdi>{inquiry.reference}</bdi>
+              </a>
+              <span className="text-compact text-text-muted">{copy.states[inquiry.state]}</span>
+            </div>
+            <dl className="grid min-w-0 gap-3 text-compact sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <dt className="text-text-muted">{copy.owner}</dt>
+                <dd>
+                  <CoverageOwner name={ownerName} needsCoverage={needsCoverage} locale={locale} />
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-muted">{copy.received}</dt>
+                <dd>
+                  <When locale={locale} date={inquiry.createdAt} />
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-muted">{copy.followUp}</dt>
+                <dd>
+                  <When locale={locale} date={inquiry.followUpAt} />
+                </dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ul>
+    );
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-start text-compact">
@@ -228,82 +270,116 @@ export async function TodayScreen({ locale, session }: { locale: string; session
   const copy = workCopy(locale);
   const queues = await readToday(getDb(), session);
   const custody = custodyCopy(locale);
+  const summaries = [
+    { label: copy.due, queue: queues.due, href: `/${locale}/tasks?view=mine` },
+    {
+      label: copy.unassigned,
+      queue: queues.unassigned,
+      href: `/${locale}/inquiries?view=unassigned`,
+    },
+    {
+      label: taskHandoverCopy(locale).inbox,
+      queue: queues.handovers,
+      href: `/${locale}/tasks?view=handovers`,
+    },
+  ];
   return (
-    <Page title={copy.today} locale={locale}>
-      <p className="text-text-muted">{copy.queueNote}</p>
-      {queues.keyReturns ? (
-        <section
-          className="space-y-4"
-          aria-labelledby="key-return-reminders"
-          data-key-return-reminders
-        >
-          <h2 id="key-return-reminders" className="text-subheading font-semibold">
-            {custody.returnReminders}
-          </h2>
-          <p>{custody.reminderHint}</p>
-          {queues.keyReturns.rows.length ? (
-            <ul className="divide-y divide-border rounded-card border border-border">
-              {queues.keyReturns.rows.map((row) => (
-                <li
-                  key={row.id}
-                  className="min-w-0 space-y-2 break-words p-4"
-                  data-key-return={row.id}
-                >
-                  <a className={link} href={`/${locale}/operations/keys/${row.id}`}>
-                    <bdi>{row.reference}</bdi>
-                  </a>
-                  <p>
-                    {custody.propertyReference}: <bdi>{row.propertyReference}</bdi>
-                  </p>
-                  <p>
-                    {custody.holderId}:{" "}
-                    <CoverageOwner
-                      name={row.holderName}
-                      needsCoverage={row.needsCoverage}
-                      locale={locale}
-                    />
-                  </p>
-                  <p>
-                    {custody.returnDue}:{" "}
-                    <When date={row.dueAt} locale={locale} zone="Europe/Sofia" />
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="rounded-card border border-border p-5 text-text-muted">{copy.empty}</p>
-          )}
-          {queues.keyReturns.hasMore ? <p>{custody.moreReminders}</p> : null}
-          <a className={link} href={`/${locale}/operations/keys?state=overdue`}>
-            {custody.openOverdue}
+    <Page title={copy.today} locale={locale} navigation={false}>
+      <p className="max-w-prose text-text-muted">{copy.queueNote}</p>
+      <nav aria-label={copy.today} className="grid gap-3 sm:grid-cols-3" data-today-summary>
+        {summaries.map(({ label, queue, href }) => (
+          <a
+            key={href}
+            href={href}
+            className="flex min-w-0 items-center justify-between gap-4 rounded-panel border border-border bg-surface p-5 text-text hover:bg-subtle"
+          >
+            <span className="text-compact font-semibold">{label}</span>
+            <span className="shrink-0 text-heading font-semibold tabular-nums">
+              <span className="sr-only">{copy.shown}: </span>
+              {queue.rows.length}
+              {queue.hasMore ? "+" : ""}
+            </span>
+          </a>
+        ))}
+      </nav>
+      <div className="grid min-w-0 items-start gap-x-8 gap-y-8 xl:grid-cols-2">
+        {queues.keyReturns ? (
+          <section
+            className="min-w-0 space-y-4 rounded-panel border border-border bg-subtle p-4 sm:p-5 xl:col-span-2"
+            aria-labelledby="key-return-reminders"
+            data-key-return-reminders
+          >
+            <h2 id="key-return-reminders" className="text-subheading font-semibold">
+              {custody.returnReminders}
+            </h2>
+            <p>{custody.reminderHint}</p>
+            {queues.keyReturns.rows.length ? (
+              <ul className="divide-y divide-border rounded-card border border-border">
+                {queues.keyReturns.rows.map((row) => (
+                  <li
+                    key={row.id}
+                    className="min-w-0 space-y-2 break-words p-4"
+                    data-key-return={row.id}
+                  >
+                    <a className={link} href={`/${locale}/operations/keys/${row.id}`}>
+                      <bdi>{row.reference}</bdi>
+                    </a>
+                    <p>
+                      {custody.propertyReference}: <bdi>{row.propertyReference}</bdi>
+                    </p>
+                    <p>
+                      {custody.holderId}:{" "}
+                      <CoverageOwner
+                        name={row.holderName}
+                        needsCoverage={row.needsCoverage}
+                        locale={locale}
+                      />
+                    </p>
+                    <p>
+                      {custody.returnDue}:{" "}
+                      <When date={row.dueAt} locale={locale} zone="Europe/Sofia" />
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="rounded-card border border-border p-5 text-text-muted">{copy.empty}</p>
+            )}
+            {queues.keyReturns.hasMore ? <p>{custody.moreReminders}</p> : null}
+            <a className={link} href={`/${locale}/operations/keys?state=overdue`}>
+              {custody.openOverdue}
+            </a>
+          </section>
+        ) : null}
+        <section className="min-w-0 space-y-4">
+          <h2 className="text-subheading font-semibold">{taskHandoverCopy(locale).inbox}</h2>
+          <TaskList rows={queues.handovers.rows} locale={locale} />
+          <a className={link} href={`/${locale}/tasks?view=handovers`}>
+            {taskHandoverCopy(locale).inbox}
           </a>
         </section>
-      ) : null}
-      <section className="space-y-4">
-        <h2 className="text-subheading font-semibold">{taskHandoverCopy(locale).inbox}</h2>
-        <TaskList rows={queues.handovers.rows} locale={locale} />
-        <a className={link} href={`/${locale}/tasks?view=handovers`}>
-          {taskHandoverCopy(locale).inbox}
-        </a>
-      </section>
-      <section className="space-y-4">
-        <h2 className="text-subheading font-semibold">{copy.unassigned}</h2>
-        <InquiryList rows={queues.unassigned.rows} locale={locale} />
-        <a className={link} href={`/${locale}/inquiries?view=unassigned`}>
-          {copy.inbox}
-        </a>
-      </section>
-      <section className="space-y-4">
-        <h2 className="text-subheading font-semibold">{copy.due}</h2>
-        <TaskList rows={queues.due.rows} locale={locale} />
-        <a className={link} href={`/${locale}/tasks?view=mine`}>
-          {copy.tasks}
-        </a>
-      </section>
-      <section className="space-y-4">
-        <h2 className="text-subheading font-semibold">{copy.mineInquiries}</h2>
-        <InquiryList rows={queues.mine.rows} locale={locale} />
-      </section>
+        <section className="min-w-0 space-y-4">
+          <h2 className="text-subheading font-semibold">{copy.unassigned}</h2>
+          <InquiryList rows={queues.unassigned.rows} locale={locale} cards />
+          <a className={link} href={`/${locale}/inquiries?view=unassigned`}>
+            {copy.inbox}
+          </a>
+        </section>
+        <section className="min-w-0 space-y-4">
+          <h2 className="text-subheading font-semibold">{copy.due}</h2>
+          <TaskList rows={queues.due.rows} locale={locale} />
+          <a className={link} href={`/${locale}/tasks?view=mine`}>
+            {copy.tasks}
+          </a>
+        </section>
+        <section className="min-w-0 space-y-4">
+          <h2 className="text-subheading font-semibold">{copy.mineInquiries}</h2>
+          <InquiryList rows={queues.mine.rows} locale={locale} cards />
+          <a className={link} href={`/${locale}/inquiries?view=mine`}>
+            {copy.inbox}
+          </a>
+        </section>
+      </div>
     </Page>
   );
 }
@@ -437,6 +513,7 @@ export async function InquiryScreen({
               </div>
             ) : null}
             <InquirySelectionContext context={inquiry.context} locale={locale} />
+            <InquiryOwnerContext context={inquiry.context} locale={locale} />
             <dl className="space-y-2">
               <div>
                 <dt className="font-semibold">{copy.purpose}</dt>

@@ -6,7 +6,12 @@ import postgres from "postgres";
 import * as schema from "@/db/schema";
 import { publicLocales } from "@/domain/ids";
 import { restrictPublication, withdrawPublication } from "@/server/publication/commands";
-import { createListingFixture, insertPlace, publishForTest } from "@/server/publication/testing";
+import {
+  createListingFixture,
+  insertPlace,
+  publishForTest,
+  publishLocales,
+} from "@/server/publication/testing";
 import { createStaff } from "@/server/testing";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -22,7 +27,19 @@ try {
   const command = process.argv[2];
   const isMap = command === "map" || command === "map-gr";
   const country = command === "map-gr" ? "GR" : "BG";
-  if (command === "withdraw") {
+  if (command === "republish") {
+    const reference = process.argv[3] ?? "";
+    const [listing] = await db
+      .select()
+      .from(schema.listings)
+      .where(eq(schema.listings.reference, reference));
+    if (!listing) throw new Error("No fixture listing");
+    const manifests = await publishLocales(db, staff.actor, { reference, listingId: listing.id }, [
+      "bg",
+      "en",
+    ]);
+    console.log(JSON.stringify({ reference, manifests }));
+  } else if (command === "withdraw") {
     const reference = process.argv[3] ?? "";
     const [listing] = await db
       .select()

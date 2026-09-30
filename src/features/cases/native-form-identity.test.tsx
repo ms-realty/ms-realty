@@ -165,6 +165,42 @@ it("gives ordinary bound commands a stable record identity independent of issued
   expect(native.calls[0]?.initial.operationId).not.toBe(before?.initial.operationId);
 });
 
+it.each(["freeze", "availability"] as const)(
+  "restores the listing's %s receipt when the native response introduces its first frozen revision",
+  (intent) => {
+    const action: FormAction<InventoryDecisionValues> = async (state) => state;
+    const form = (revisionId: string, version: number) => (
+      <InventoryDecisionForm
+        context={{ locale: "en", reference: "MS-ONE", intent, revisionId }}
+        title="Record listing decision"
+        action={action}
+        initialState={{
+          operationId: `operation-${++native.sequence}`,
+          responseId: `render-${native.sequence}`,
+          expectedRevision: version,
+          values: { scope: "Recorded evidence", confirmed: "yes", publicationLocale: "bg" },
+          outcome: { kind: "idle" },
+        }}
+      />
+    );
+    render(form("", 1));
+    const submitted = native.calls[0];
+    if (!submitted?.permalink) throw new Error("Missing listing decision permalink");
+    native.restored.set(submitted.permalink, restoredReceipt(submitted.initial, "MS-ONE"));
+    cleanup();
+    native.calls.length = 0;
+    render(form("new-immutable-revision", 2));
+    expect(native.calls[0]?.permalink).toBe(submitted.permalink);
+    expect(native.calls[0]?.initial.operationId).not.toBe(submitted.initial.operationId);
+    expect(native.calls[0]?.initial.expectedRevision).toBe(2);
+    expect(screen.getByRole("heading", { name: "Recorded for this source" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Open recorded source" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Record listing decision" }),
+    ).not.toBeInTheDocument();
+  },
+);
+
 it("keeps a manifest activation receipt with its exact manifest when sibling forms move", () => {
   const action: FormAction<InventoryDecisionValues> = async (state) => state;
   const forms = (ids: string[], revision: number) => (

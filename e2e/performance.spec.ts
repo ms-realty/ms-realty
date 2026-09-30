@@ -26,22 +26,46 @@ test("S1b public initial JavaScript stays below 250 KiB gzip", async ({ page, re
 });
 
 test("S1b self-hosted fonts resolve and preload only the page's scripts", async ({ page }) => {
-  for (const [locale, script] of [
-    ["bg", "cyrillic"],
-    ["he", "hebrew"],
+  for (const [locale, expectedFiles] of [
+    [
+      "bg",
+      [
+        "/fonts/noto-sans-latin.woff2",
+        "/fonts/manrope-latin.woff2",
+        "/fonts/noto-sans-cyrillic.woff2",
+        "/fonts/manrope-cyrillic.woff2",
+      ],
+    ],
+    [
+      "he",
+      [
+        "/fonts/noto-sans-latin.woff2",
+        "/fonts/manrope-latin.woff2",
+        "/fonts/noto-sans-hebrew.woff2",
+      ],
+    ],
   ] as const) {
     await page.goto(`/${locale}`);
     await page.evaluate(() => document.fonts.ready);
     const preloads = await page
       .locator('link[rel="preload"][as="font"]')
       .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
-    expect(preloads).toHaveLength(2);
-    expect(preloads.some((url) => url.endsWith(`/noto-sans-${script}.woff2`))).toBe(true);
-    expect(preloads.some((url) => url.endsWith("/noto-sans-latin.woff2"))).toBe(true);
+    expect(preloads.map((url) => new URL(url).pathname).sort()).toEqual([...expectedFiles].sort());
+    const files: { path: string; bodyBytes: number }[] = [];
     for (const url of preloads) {
+      expect(new URL(url).origin).toBe(new URL(page.url()).origin);
       const response = await page.request.get(url);
       expect(response.status()).toBe(200);
       expect(response.headers()["content-type"]).toMatch(/font|woff/);
+      files.push({ path: new URL(url).pathname, bodyBytes: (await response.body()).byteLength });
     }
+    await test.info().attach(`preloaded-fonts-${locale}.json`, {
+      body: JSON.stringify({
+        route: `/${locale}`,
+        files,
+        totalBodyBytes: files.reduce((total, file) => total + file.bodyBytes, 0),
+      }),
+      contentType: "application/json",
+    });
   }
 });

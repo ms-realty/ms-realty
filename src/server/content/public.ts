@@ -116,5 +116,6 @@ export async function readApprovedContent(
       ),
     );
   const decisions = await (options.lock ? decisionQuery.for("share") : decisionQuery);
-  return approvedContent(row.version, decisions, locale);
+  const content = approvedContent(row.version, decisions, locale);
+  return content ? { ...content, placeId: row.page.placeId } : null;
 }

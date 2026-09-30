@@ -1,9 +1,12 @@
 import { isUuid, parseReference } from "@/domain/ids";
 import { inquiryPurposes } from "@/domain/inquiry";
+import { type ContentReference, parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
+import type { OwnerInquiry } from "@/domain/owner-inquiry";
 import type { PublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { InquiryReceipt } from "@/server/inquiries/intake";
+import type { ListingCard } from "@/server/listings/view-models";
 import type { FormCopy, FormReceipt, FormState } from "@/ui/form/contract";
 import type { DiscoveryCopy } from "./copy";
 export type InquiryValues = {
@@ -18,6 +21,14 @@ export type InquiryValues = {
   observedManifestId: string;
   selectedListings: string;
   comparisonReferences: string;
+  contentReference: string;
+  ownerLocality: string;
+  ownerPropertyType: string;
+  ownerTransaction: string;
+  ownerDocumentArea: string;
+  ownerRelationship: string;
+  ownerPropertyStatus: string;
+  ownerDocumentSource: string;
 };
 export const emptyInquiry: InquiryValues = {
   purpose: "question",
@@ -31,13 +42,33 @@ export const emptyInquiry: InquiryValues = {
   observedManifestId: "",
   selectedListings: "",
   comparisonReferences: "",
+  contentReference: "",
+  ownerLocality: "",
+  ownerPropertyType: "",
+  ownerTransaction: "",
+  ownerDocumentArea: "",
+  ownerRelationship: "",
+  ownerPropertyStatus: "",
+  ownerDocumentSource: "",
 };
-export type InquiryState = FormState<InquiryValues>;
+export type InquiryState = FormState<InquiryValues> & {
+  sourcesChanged?: boolean;
+  review?: {
+    token: string;
+    listings: readonly ListingCard[];
+    ownerInput?: OwnerInquiry;
+    content?: ContentReference & { title: string; locale: PublicLocale; sourceUrl: string };
+  };
+};
 export const inquiryStatus = (locale: PublicLocale, key: string) =>
   `/${locale}/requests/${encodeURIComponent(key)}`;
 export function inquiryPermalink(locale: PublicLocale, key: string, values?: InquiryValues) {
   const query = new URLSearchParams({ submission: key });
   if (values) {
+    if (values.contentReference) {
+      const content = parseContentReference(values.contentReference);
+      query.set("contentReference", content ? JSON.stringify(content) : "invalid");
+    }
     query.set(
       "purpose",
       inquiryPurposes.some((purpose) => purpose === values.purpose) ? values.purpose : "invalid",
