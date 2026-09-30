@@ -61,6 +61,21 @@ export const publicDestination = "website";
  * on listing id (and manifest id, for projections) wherever public inventory is read.
  */
 export function eligiblePublications(db: Executor, locale: PublicLocale) {
+  // Keep consent evaluation bound to this manifest and listing. Flattening its evidence
+  // joins into the whole catalogue caused severe cardinality underestimation and repeated
+  // full-table joins. LIMIT keeps the lateral boundary; the unique instruction ID already
+  // means at most one match, so it does not choose between or truncate permissions.
+  const consent = db
+    .select({ id: sellerInstructions.id })
+    .from(sellerInstructions)
+    .where(
+      and(
+        sql`${sellerInstructions.id}::text = ${publicationManifests.decisions}->>'sellerInstruction'`,
+        currentSellerEvidence(undefined, listings.id),
+      ),
+    )
+    .limit(1)
+    .as("public_consent");
   return db
     .select({
       listingId: currentPublications.listingId,
@@ -76,10 +91,7 @@ export function eligiblePublications(db: Executor, locale: PublicLocale) {
       ),
     )
     .innerJoin(publicationManifests, eq(publicationManifests.id, currentPublications.manifestId))
-    .innerJoin(
-      sellerInstructions,
-      sql`${sellerInstructions.id}::text = ${publicationManifests.decisions}->>'sellerInstruction'`,
-    )
+    .innerJoinLateral(consent, sql`true`)
     .leftJoin(
       localizedRevisions,
       eq(localizedRevisions.id, publicationManifests.localizedRevisionId),
@@ -89,7 +101,6 @@ export function eligiblePublications(db: Executor, locale: PublicLocale) {
         eq(currentPublications.locale, locale),
         eq(currentPublications.destination, publicDestination),
         eq(currentPublications.state, "active"),
-        currentSellerEvidence(undefined, listings.id),
         or(
           isNull(publicationManifests.localizedRevisionId),
           eq(localizedRevisions.state, "approved_for_source"),

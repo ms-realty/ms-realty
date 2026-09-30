@@ -1,6 +1,6 @@
 import { unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   approvals,
@@ -22,6 +22,7 @@ import {
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Actor } from "@/domain/capabilities";
 import { AppError } from "../errors";
+import { searchListings } from "../search/search";
 import { createStaff, grantService } from "../testing";
 import {
   activateManifest as activate,
@@ -219,6 +220,60 @@ describe("publication commands (§7.2–§7.3)", () => {
       expect(await rejection(prepare(f.reference, f.listingId))).toMatchObject({
         code: "publication_ineligible",
       });
+    }
+  });
+
+  it("isolates malformed or foreign seller evidence without hiding unrelated catalogue rows", async () => {
+    const damaged = await fixture();
+    const intact = await fixture();
+    await publishForTest(t.db, publisher.actor, damaged, ["bg"]);
+    await publishForTest(t.db, publisher.actor, intact, ["bg"]);
+    const authority = async (listingId: string) => {
+      const [instruction] = await t.db
+        .select()
+        .from(sellerInstructions)
+        .where(eq(sellerInstructions.listingId, listingId));
+      const terms = instruction?.commercialTerms as { authorityRelationshipId: string };
+      const [row] = await t.db
+        .select()
+        .from(propertyRelationships)
+        .where(eq(propertyRelationships.id, terms.authorityRelationshipId));
+      if (!row) throw new Error("Missing seller authority fixture");
+      return row;
+    };
+    const damagedAuthority = await authority(damaged.listingId);
+    const intactAuthority = await authority(intact.listingId);
+    const damagedScope = damagedAuthority.scope as Record<string, unknown>;
+    for (const scope of [
+      { ...damagedScope, documentVersionId: "malformed-import-id" },
+      { ...damagedScope, documentVersionId: { unexpected: true } },
+      intactAuthority.scope,
+    ]) {
+      await t.db
+        .update(propertyRelationships)
+        .set({ scope })
+        .where(eq(propertyRelationships.id, damagedAuthority.id));
+      const eligible = eligiblePublications(t.db, "bg");
+      expect(
+        await t.db
+          .select({ id: eligible.listingId })
+          .from(eligible)
+          .where(inArray(eligible.listingId, [damaged.listingId, intact.listingId])),
+      ).toEqual([{ id: intact.listingId }]);
+      expect(
+        (
+          await loadPublishedListings(t.db, { ids: [damaged.listingId, intact.listingId] }, "bg")
+        ).map((row) => row.reference),
+      ).toEqual([intact.reference]);
+      expect(
+        (await searchListings(t.db, { locale: "bg", purpose: "sale", q: damaged.reference })).count
+          .value,
+      ).toBe(0);
+      expect(
+        (
+          await searchListings(t.db, { locale: "bg", purpose: "sale", q: intact.reference })
+        ).items.map((row) => row.reference),
+      ).toEqual([intact.reference]);
     }
   });
 

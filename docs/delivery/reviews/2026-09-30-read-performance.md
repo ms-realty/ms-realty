@@ -128,3 +128,43 @@ Artifacts under `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260930/`:
 `publication-index-probe.json` (full plans). R08 remains failed. The next useful diagnostic is
 the existing full catalogue's join shape and per-request connection/query timing; repeating the
 same full HTTP load without a measured repair would not establish a cause.
+
+## Manifest-bound consent repair
+
+The representative saved 10,000-Listing plans underestimated 10,000 eligible rows as one.
+That plan repeatedly scanned the full manifest, pointer, Listing and localization tables,
+discarding tens of millions of join combinations. This establishes a SQL bottleneck; it does
+not by itself explain every HTTP latency measurement.
+
+A fresh 3,500-Listing fixture with Bulgarian plus rotating approved translations compared
+the original join, a boundary inside the authority subquery, and a manifest-bound LATERAL
+consent read. All four stages, including a repeated baseline, returned identical eligible IDs:
+
+| Variant | Eligible-ID read ms | EXPLAIN execution ms |
+|---|---:|---:|
+| Original | 4925.37 | 6188.01 |
+| Boundary inside authority subquery | 4997.57 | 5872.53 |
+| Manifest-bound current consent | 44.43 | 46.36 |
+| Original repeated | 4770.48 | 5911.99 |
+
+`eligiblePublications` now evaluates the unchanged current-consent predicate inside an
+`INNER JOIN LATERAL` bound to the manifest's instruction ID and Listing. `LIMIT 1` retains
+that boundary. Instruction IDs are unique, so it cannot choose an older agreement or truncate
+multiple permissions. Text comparisons still fail closed on malformed imported identifiers.
+Permission expiry/revocation, current file versions, scan/digest/review, superseding agreements,
+publication generation and human-approved localization remain current reads. No cache or
+schema migration was introduced. [PostgreSQL's LATERAL semantics](https://www.postgresql.org/docs/18/queries-table-expressions.html#QUERIES-LATERAL)
+describe the row binding; the performance result above comes from the retained local plans.
+
+82 publication/search/detail/consent checks and 19 public-media/inquiry checks passed. A new
+regression corrupts one authority's document identifier or gives it another property's evidence:
+that Listing is omitted from detail, eligibility and search while an unrelated Listing remains
+available. Types and the 891-file lint check passed. Source SQL was compiled and compared with
+the measured candidate. The initial prototype failed because Drizzle omitted numeric OFFSET 0;
+its log is retained, and the successful candidate uses LIMIT 1 instead. A test-only JSON spread
+typing error was also repaired and the final type check passed.
+
+[Portable observations](../evidence/2026-09-30-publication-join.json) and
+`publication-join-*.log` under the artifact root above preserve the scope and failures.
+These single service observations justify a full workload rerun, not R08 acceptance. The new
+source still needs its own CI and fresh-build HTTP/concurrency qualification.
