@@ -12,7 +12,7 @@ const en = {
   noText:
     "No plain-text content. Assignment is unavailable; review through your approved mail process.",
   omitted: "HTML was omitted. Remote images and links were not fetched.",
-  attachments: "Attachments — metadata only; unavailable until separate scanning and review",
+  attachments: "Attachments from the message — unverified metadata",
   auth: "Provider authentication hints — not proof of the person's identity",
   select: "Choose a Case to review",
   choose: "Open Case context",
@@ -49,7 +49,7 @@ const bg: typeof en = {
   noText:
     "Няма обикновен текст. Свързването е недостъпно; проверете писмото чрез одобрения процес за поща.",
   omitted: "HTML е пропуснат. Външни изображения и връзки не са изтегляни.",
-  attachments: "Прикачени файлове — само метаданни; недостъпни до отделно сканиране и преглед",
+  attachments: "Прикачени файлове от писмото — непроверени метаданни",
   auth: "Данни за удостоверяване от доставчика — не доказват самоличност",
   select: "Изберете дело за преглед",
   choose: "Отворете контекста на делото",
@@ -85,7 +85,7 @@ const ru: typeof en = {
   noText:
     "Обычного текста нет. Привязка недоступна; проверьте письмо через утверждённый почтовый процесс.",
   omitted: "HTML пропущен. Внешние изображения и ссылки не загружались.",
-  attachments: "Вложения — только метаданные; недоступны до отдельной проверки",
+  attachments: "Вложения из письма — непроверенные метаданные",
   auth: "Данные проверки провайдера — не подтверждение личности",
   select: "Выберите дело для проверки",
   choose: "Открыть контекст дела",

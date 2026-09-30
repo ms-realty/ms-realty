@@ -8,7 +8,13 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ q?: string; case?: string; receipt?: string; error?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    case?: string;
+    receipt?: string;
+    importReceipt?: string;
+    error?: string;
+  }>;
 }) {
   const { locale, id } = await params;
   if (!isStaffLocale(locale)) notFound();

@@ -10,8 +10,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { instant, mutable } from "./columns";
-import { messages } from "./coordination";
+import { createdAt, id, instant, mutable } from "./columns";
+import { documentVersions, messages } from "./coordination";
 import { principals } from "./identity";
 import { parties } from "./parties";
 import { inboxEvents } from "./records";
@@ -57,6 +57,42 @@ export const inboundEmails = pgTable(
     check(
       "inbound_email_assigned",
       sql`${t.state} <> 'assigned' or (${t.caseId} is not null and ${t.senderPartyId} is not null and ${t.messageId} is not null)`,
+    ),
+  ],
+);
+
+/** Append-only provenance for a human-selected import; scanning and acceptance remain separate. */
+export const inboundAttachmentImports = pgTable(
+  "inbound_attachment_imports",
+  {
+    id: id(),
+    createdAt: createdAt(),
+    inboundEmailId: uuid("inbound_email_id")
+      .notNull()
+      .references(() => inboundEmails.id),
+    attachmentId: uuid("attachment_id").notNull(),
+    sourceDigest: text("source_digest").notNull(),
+    caseId: uuid("case_id")
+      .notNull()
+      .references(() => cases.id),
+    senderPartyId: uuid("sender_party_id")
+      .notNull()
+      .references(() => parties.id),
+    documentVersionId: uuid("document_version_id")
+      .notNull()
+      .references(() => documentVersions.id),
+    sha256: text("sha256").notNull(),
+    importedById: uuid("imported_by_id")
+      .notNull()
+      .references(() => principals.id),
+    reason: text("reason").notNull(),
+  },
+  (t) => [
+    uniqueIndex("inbound_attachment_source_idx").on(t.inboundEmailId, t.attachmentId),
+    uniqueIndex("inbound_attachment_version_idx").on(t.documentVersionId),
+    check(
+      "inbound_attachment_digest",
+      sql`${t.sha256} ~ '^[a-f0-9]{64}$' and ${t.sourceDigest} ~ '^[a-f0-9]{64}$'`,
     ),
   ],
 );

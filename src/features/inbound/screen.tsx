@@ -8,6 +8,7 @@ import { buttonClass } from "@/ui/button-class";
 import { controlClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
+import { InboundAttachments } from "./attachments";
 import { inboundCopy } from "./copy";
 import { inboundDraft, inboundReceipt, inboundScope } from "./native";
 
@@ -81,7 +82,7 @@ export async function InboundDetail({
   locale: string;
   session: Session;
   id: string;
-  query: { q?: string; case?: string; receipt?: string; error?: string };
+  query: { q?: string; case?: string; receipt?: string; importReceipt?: string; error?: string };
 }) {
   const db = getDb(),
     c = inboundCopy(locale),
@@ -146,6 +147,15 @@ export async function InboundDetail({
         <a className="underline" href={`/${locale}/cases/${row.caseId}`}>
           {c.caseLink}
         </a>
+      ) : null}
+      {row.state === "assigned" && row.caseId && attachments.length ? (
+        <InboundAttachments
+          session={session}
+          locale={locale}
+          id={id}
+          caseId={row.caseId}
+          receipt={query.importReceipt}
+        />
       ) : null}
       {row.state === "triage" ? (
         <>
