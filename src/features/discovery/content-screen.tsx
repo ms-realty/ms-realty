@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
+import type { ContentReference } from "@/domain/inquiry-content";
 import { isRoutableLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { Notice } from "@/ui/notice";
@@ -100,6 +101,14 @@ export async function ContentScreen({
         : route === "/contact"
           ? label.contact
           : label[kind]);
+  const inquiryQuery = new URLSearchParams();
+  if (intent) inquiryQuery.set("purpose", intent);
+  else if (kind === "service" && content) inquiryQuery.set("purpose", "service_consultation");
+  if (content)
+    inquiryQuery.set(
+      "contentReference",
+      JSON.stringify({ kind, slug, versionId: content.version.id } satisfies ContentReference),
+    );
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{title}</h1>
@@ -139,9 +148,17 @@ export async function ContentScreen({
           {copy.source}
         </a>
       ) : null}
+      {kind === "area" && content?.placeId ? (
+        <a
+          className="self-start underline"
+          href={`/${locale}/properties?${new URLSearchParams({ places: content.placeId })}`}
+        >
+          {copy.search}
+        </a>
+      ) : null}
       <a
         className="self-start underline"
-        href={`/${locale}/inquire${intent ? `?purpose=${intent}` : ""}`}
+        href={`/${locale}/inquire${inquiryQuery.size ? `?${inquiryQuery}` : ""}`}
       >
         {copy.ask}
       </a>

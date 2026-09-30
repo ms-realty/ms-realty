@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { approvals, contentPages, contentPageVersions, grants, passkeys } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "../auth/sessions";
+import { readInquiryContent } from "../inquiries/content-context";
 import { createStaff } from "../testing";
 import {
   createContent,
@@ -133,6 +134,21 @@ describe("O21 editorial content authority", () => {
     const published = await readApprovedContent(t.db, "help", input.slug, "bg");
     expect(published?.title).toBe(input.title);
     expect(published?.version.id).toBeTruthy();
+    if (!published) throw new Error("Expected an approved test content version");
+    const reference = { kind: "help" as const, slug: input.slug, versionId: published.version.id };
+    expect(await t.db.transaction((tx) => readInquiryContent(tx, reference, "bg"))).toMatchObject({
+      ...reference,
+      title: input.title,
+      locale: "bg",
+    });
+    await expect(
+      t.db.transaction((tx) =>
+        readInquiryContent(tx, { ...reference, versionId: randomUUID() }, "bg"),
+      ),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    await expect(
+      t.db.transaction((tx) => readInquiryContent(tx, reference, "en")),
+    ).rejects.toMatchObject({ code: "version_conflict" });
     expect(await readApprovedContent(t.db, "help", input.slug, "en")).toBeNull();
     const { page } = await readContentWorkbench(t.db, actor.session, created.outcome.id);
     await saveContent(t.db, actor.session, {
@@ -169,6 +185,9 @@ describe("O21 editorial content authority", () => {
       reviewed: true,
     });
     expect(await readApprovedContent(t.db, "help", input.slug, "bg")).toBeNull();
+    await expect(
+      t.db.transaction((tx) => readInquiryContent(tx, reference, "bg")),
+    ).rejects.toMatchObject({ code: "version_conflict" });
   });
   it("editor-only authority cannot approve claims or publish; stale edits preserve existing text", async () => {
     const actor = await staff(false),
