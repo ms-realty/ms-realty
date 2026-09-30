@@ -236,3 +236,7 @@ backend headers. Both logs are retained. Budgets and workload concurrency are un
 The automatic Jev rule check was unavailable due to its daily budget, not passed. Native review
 of the configured applicable no-secrets rule found only environment references and synthetic
 loopback test data. The other configured rules apply to Mindburn paths, outside this repository.
+
+The first replica workload stopped before seeding: Playwright also discovered the adjacent
+Vitest transport tests. The load config now explicitly selects `agency-load.spec.ts`; the
+failed discovery log is retained separately, and is not load evidence.

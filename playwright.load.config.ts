@@ -15,6 +15,7 @@ process.env.MSR_LOAD_SCOPE = "local-synthetic";
 export default defineConfig({
   ...base,
   testDir: "load",
+  testMatch: "**/agency-load.spec.ts",
   workers: 1,
   retries: 0,
   timeout: 1_800_000,
