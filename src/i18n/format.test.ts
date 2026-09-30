@@ -37,6 +37,29 @@ describe("formatting (ux-spec §19.3)", () => {
     );
   });
 
+  it("keeps number and area rounding separate across every locale and later values", () => {
+    for (const locale of publicLocales) {
+      for (const value of [85.256, -1200.78, 0, 99.99]) {
+        expect(formatNumber(locale, value)).toBe(
+          new Intl.NumberFormat(displayLocale(locale)).format(value),
+        );
+        expect(formatArea(locale, value)).toBe(
+          `${new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 1 }).format(value)}\u00a0m²`,
+        );
+      }
+    }
+  });
+
+  it("preserves caller options, inherited values, changed options and invalid-option errors", () => {
+    const options = { maximumFractionDigits: 1 };
+    expect(formatNumber("en", 85.256, options)).toBe("85.3");
+    options.maximumFractionDigits = 2;
+    expect(formatNumber("en", 85.256, options)).toBe("85.26");
+    expect(formatNumber("en", 85.256, Object.create({ maximumFractionDigits: 0 }))).toBe("85");
+    expect(() => formatNumber("en", 1, { maximumFractionDigits: Infinity })).toThrow(RangeError);
+    expect(formatNumber("en", 85.256)).toBe("85.256");
+  });
+
   it("names the zone when showing a date and time people act on", () => {
     expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z"))).toBe("1 Jul 2026, 12:00 EEST");
     expect(formatDateTime("en", "2026-07-01T09:00:00Z", { timeZone: "Asia/Jerusalem" })).toMatch(

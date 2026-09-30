@@ -9,7 +9,9 @@ type Instant = Date | string | number;
 // Catalogue cards repeatedly use the same immutable formatter configuration. Cache only
 // formatters, never values or rendered customer data; bound caller-supplied time-zone keys.
 const moneyFormats = new Map<string, Intl.NumberFormat>();
+const numberFormats = new Map<string, Intl.NumberFormat>();
 const dateTimeFormats = new Map<string, Intl.DateTimeFormat>();
+const yearFormat = new Intl.DateTimeFormat("en", { year: "numeric", timeZone: agencyTimeZone });
 function reuse<T>(cache: Map<string, T>, key: string, create: () => T): T {
   const existing = cache.get(key);
   if (existing) return existing;
@@ -54,9 +56,7 @@ export function formatMoney(
 
 /** The calendar year in the agency's time zone, not the server's (e.g. for the footer). */
 export function agencyYear(at: Instant = new Date()): number {
-  return Number(
-    new Intl.DateTimeFormat("en", { year: "numeric", timeZone: agencyTimeZone }).format(toDate(at)),
-  );
+  return Number(yearFormat.format(toDate(at)));
 }
 
 export function formatNumber(
@@ -64,12 +64,25 @@ export function formatNumber(
   value: number,
   options?: Intl.NumberFormatOptions,
 ): string {
-  return new Intl.NumberFormat(displayLocale(locale), options).format(value);
+  // Explicit caller options retain Intl's complete behavior, including inherited/getter
+  // values and validation. Only the fixed application-owned configurations are reused.
+  if (options !== undefined)
+    return new Intl.NumberFormat(displayLocale(locale), options).format(value);
+  return reuse(
+    numberFormats,
+    JSON.stringify([locale, "number"]),
+    () => new Intl.NumberFormat(displayLocale(locale)),
+  ).format(value);
 }
 
 /** Square metres; the unit symbol is the same in every supported locale. */
 export function formatArea(locale: PublicLocale, squareMetres: number): string {
-  return `${formatNumber(locale, squareMetres, { maximumFractionDigits: 1 })}\u00a0m²`;
+  const formatted = reuse(
+    numberFormats,
+    JSON.stringify([locale, "area"]),
+    () => new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 1 }),
+  ).format(squareMetres);
+  return `${formatted}\u00a0m²`;
 }
 
 export interface ZonedOptions {

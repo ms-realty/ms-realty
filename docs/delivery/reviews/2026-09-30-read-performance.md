@@ -168,3 +168,50 @@ typing error was also repaired and the final type check passed.
 `publication-join-*.log` under the artifact root above preserve the scope and failures.
 These single service observations justify a full workload rerun, not R08 acceptance. The new
 source still needs its own CI and fresh-build HTTP/concurrency qualification.
+
+
+## Fresh load profile and formatter repair
+
+A fresh Linux build of `ebebf03156e9f816dc2e70e2585a07584033e9ac` (build ID
+`DihC8w9abYJpa0TBl95L_`) ran the unchanged 10k/50-public/10-staff workload.
+The bare eligibility plan executed in 192.30 ms. There were zero operation failures,
+2,059 public cycles and 180 staff cycles. Every budgeted lane still failed:
+
+| Lane | p95 ms | Unchanged budget ms |
+|---|---:|---:|
+| Search HTML | 1086.01 | 500 |
+| Detail HTML | 629.96 | 500 |
+| Today HTML | 775.38 | 500 |
+| Task HTML | 1285.84 | 500 |
+| Command POST, actual network timing | 1920.34 | 800 |
+
+Media p95 was 312.20 ms with no assigned latency budget. The closed-loop request mix and
+shared host vary between runs; the improvements do not prove isolated throughput causality.
+The runner cannot read the managed worktree's external Git metadata, so the retained host
+provenance explicitly binds source, build, run ID and failure exit code.
+
+The runtime was near full event-loop utilization (average 0.959 during load). Database
+connection observations included many client-read waits, not only running SQL. The CPU profile
+showed repeated number and calendar-year formatter construction among application frames.
+Default number formatting, the fixed square-metre configuration and the agency-year formatter
+now reuse formatter objects. Values are always formatted anew; explicit caller options still
+use native Intl construction and validation, including inherited and mutable options. No
+rendered content, permission or session state is cached.
+
+An alternating benchmark of the actual before/after source formatted 12,000 numbers/areas
+across all seven locales and 500 Sofia calendar years per wave. After excluding two warmup
+waves, median duration was 164.61 versus 5.39 ms, with identical output SHA-256 across every
+wave. This is a source microbenchmark, not HTTP capacity acceptance. Ten locale-formatting
+tests, TypeScript and changed-file lint passed.
+
+CI [36747742134](https://github.com/ms-realty/ms-realty/actions/runs/36747742134) failed on
+this load source because two hydrated WebKit attachment cases matched both the application
+alert and Next's empty route announcer. The test now requires the application's localized
+error text. Both affected BG/RU scenarios pass in the pinned Linux browser; the whole new
+source still needs its own CI. The earlier isolated unscoped diagnostic is preserved and is
+not evidence for the final correction.
+
+[Portable profile observations](../evidence/2026-09-30-render-profile.json) link the retained
+load, source benchmark and failed CI artifacts. The deployment template specifies two web
+instances; the measurement above used one. A separately labelled local two-process experiment
+can assess that topology without relaxing budgets or claiming live high availability.
