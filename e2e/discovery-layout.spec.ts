@@ -59,7 +59,7 @@ for (const javaScriptEnabled of [true, false]) {
         }
       }
       await page.goto(
-        `/en/properties?q=${data.published.reference}&type=apartment,house&minBeds=2&maxPrice=150000&currency=EUR&areaBasis=gross_floor&minArea=55&sort=price_asc`,
+        `/en/properties?q=${data.published.reference}&type=apartment,house&minBeds=2&maxPrice=150000&currency=EUR&areaBasis=built&minArea=55&sort=price_asc`,
       );
       const form = page.locator('form[action="/en/properties"]');
       const details = form.locator("details");
@@ -84,7 +84,7 @@ for (const javaScriptEnabled of [true, false]) {
       expect(query.get("minBeds")).toBe("3");
       expect(query.get("maxPrice")).toBe("150000");
       expect(query.get("currency")).toBe("EUR");
-      expect(query.get("areaBasis")).toBe("gross_floor");
+      expect(query.get("areaBasis")).toBe("built");
       expect(query.get("minArea")).toBe("55");
       expect(query.get("sort")).toBe("price_asc");
       await page.getByRole("link", { name: "Clear filters", exact: true }).click();

@@ -1,9 +1,10 @@
 import { getDb } from "@/db/client";
-import { areaBases, propertyTypes } from "@/domain/facts";
+import { propertyTypes } from "@/domain/facts";
 import { currencyCodes } from "@/domain/ids";
 import type { PublicLocale } from "@/i18n/config";
 import { interpretedFeatureKeys } from "@/server/ai/intent";
 import { intentPlaces } from "@/server/ai/intent-source";
+import { searchableAreaBases } from "@/server/search/search";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass } from "@/ui/field-class";
 import { ChevronDownIcon, FiltersIcon } from "@/ui/icons";
@@ -290,10 +291,11 @@ export async function SearchForm({
                 defaultValue={values.areaBasis || "living"}
                 className={controlClass}
               >
-                {values.areaBasis && !areaBases.some((value) => value === values.areaBasis) ? (
+                {values.areaBasis &&
+                !searchableAreaBases.some((value) => value === values.areaBasis) ? (
                   <option value={values.areaBasis}>{label(values.areaBasis)}</option>
                 ) : null}
-                {areaBases.map((value) => (
+                {searchableAreaBases.map((value) => (
                   <option key={value} value={value}>
                     {copy[value]}
                   </option>

@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { normalizeSearch } from "@/server/search/search";
 import { discoveryCopy } from "./copy";
 import { readFilters, searchInput } from "./query";
 import { SearchForm } from "./search-form";
@@ -30,6 +31,53 @@ function submittedFilters(form: HTMLFormElement) {
 }
 
 describe("P02 native advanced filters", () => {
+  it("offers only area bases carried by the search projection", async () => {
+    render(
+      await SearchForm({
+        locale: "en",
+        copy: discoveryCopy("en"),
+        values: readFilters({}),
+        filtersOpen: true,
+      }),
+    );
+    const basis = screen.getByLabelText<HTMLSelectElement>("Area basis");
+    expect([...basis.options].map((option) => option.value)).toEqual([
+      "living",
+      "built",
+      "total",
+      "land",
+    ]);
+    for (const option of basis.options) {
+      expect(() =>
+        normalizeSearch(searchInput("en", readFilters({ areaBasis: option.value, minArea: "55" }))),
+      ).not.toThrow();
+    }
+  });
+
+  it.each(["usable", "gross_floor"])(
+    "retains unsupported selected basis %s until the visitor corrects it",
+    async (areaBasis) => {
+      const user = userEvent.setup();
+      const values = readFilters({ areaBasis, minArea: "55" });
+      const { container } = render(
+        await SearchForm({ locale: "en", copy: discoveryCopy("en"), values, filtersOpen: true }),
+      );
+      const basis = screen.getByLabelText<HTMLSelectElement>("Area basis");
+      const form = container.querySelector("form");
+      if (!form) throw new Error("Search form missing");
+      expect(basis).toBeVisible();
+      expect(basis).toHaveValue(areaBasis);
+      expect([...basis.selectedOptions].map((option) => option.textContent)).toEqual([
+        discoveryCopy("en")[areaBasis as "usable" | "gross_floor"],
+      ]);
+      expect(submittedFilters(form)).toMatchObject({ areaBasis, minArea: "55" });
+      expect(() => normalizeSearch(searchInput("en", submittedFilters(form)))).toThrow();
+      await user.selectOptions(basis, "built");
+      expect(submittedFilters(form)).toMatchObject({ areaBasis: "built", minArea: "55" });
+      expect(() => normalizeSearch(searchInput("en", submittedFilters(form)))).not.toThrow();
+    },
+  );
+
   it("starts compact and exposes editable controls through the native disclosure", async () => {
     const user = userEvent.setup();
     const { container } = render(
@@ -67,7 +115,7 @@ describe("P02 native advanced filters", () => {
       maxRooms: "5",
       places: ["place-a", "place-b", "unavailable-place"],
       features: ["parking", "source-feature"],
-      areaBasis: "gross_floor",
+      areaBasis: "built",
       minArea: "42.75",
       maxArea: "100",
       sort: "price_desc",
@@ -82,7 +130,7 @@ describe("P02 native advanced filters", () => {
     expect(form).toHaveAttribute("action", "/en/properties");
     expect(container.querySelector("details")).not.toHaveAttribute("open");
     expect(submittedFilters(form)).toEqual(values);
-    expect(screen.getByLabelText("Active filters")).toHaveTextContent("Gross floor area");
+    expect(screen.getByLabelText("Active filters")).toHaveTextContent("Built area");
     expect(screen.getByLabelText("Active filters")).toHaveTextContent("Sandanski");
   });
 
