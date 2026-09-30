@@ -1,6 +1,5 @@
-// Agency workspace shell on the staff host (architecture §11.1, L07). Primary: Today ·
-// Inquiries · Cases · Calendar · Inventory · Reviews · Content · Operations; secondary:
-// Settings. On phones Today, Inquiries and Calendar stay on screen and the rest sits under More.
+// Agency shell follows the saved O01 composition. Native navigation remains complete on
+// phones: Today, Inquiries and Calendar stay visible; the other destinations live in More.
 
 import { randomUUID } from "node:crypto";
 import Image from "next/image";
@@ -9,7 +8,6 @@ import type { ReactNode } from "react";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
-import * as icons from "@/ui/icons";
 import { SkipLink } from "@/ui/skip-link";
 import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
@@ -20,25 +18,26 @@ import {
   workspacePrimaryNav,
   workspaceSecondaryNav,
 } from "./navigation";
+import { WorkspaceContext } from "./workspace-context";
 
 export const workspaceMainId = "main";
 
 const sideLinkClass = cx(
-  "flex min-h-10 items-center gap-2.5 rounded-lg border border-transparent px-2.5 text-operational font-medium text-text no-underline",
+  "flex min-h-control min-w-0 items-center gap-3 rounded-control px-3 py-2 text-dense text-text-muted no-underline wrap-anywhere",
   "transition-colors duration-(--duration-fast) hover:bg-divider",
-  "aria-[current=page]:border-divider aria-[current=page]:bg-surface aria-[current=page]:shadow-raised",
+  "aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-text",
 );
 
-const navIcons: Partial<Record<WorkspaceNavLabel, typeof icons.HomeIcon>> = {
-  today: icons.HomeIcon,
-  inquiries: icons.InboxIcon,
-  cases: icons.CaseIcon,
-  calendar: icons.CalendarIcon,
-  inventory: icons.BuildingIcon,
-  reviews: icons.StampIcon,
-  content: icons.FolderIcon,
-  operations: icons.HistoryIcon,
-  settings: icons.FiltersIcon,
+// Original 20px static assets from get_design_context O01, retained locally without redrawing.
+const navIcons: Partial<Record<WorkspaceNavLabel, string>> = {
+  today: "/brand/workspace/today.svg",
+  inquiries: "/brand/workspace/inquiries.svg",
+  cases: "/brand/workspace/cases.svg",
+  calendar: "/brand/workspace/calendar.svg",
+  inventory: "/brand/workspace/inventory.svg",
+  tasks: "/brand/workspace/tasks.svg",
+  hermes: "/brand/workspace/hermes.svg",
+  moreTools: "/brand/workspace/more-tools.svg",
 };
 const tabLinkClass =
   "inline-flex min-h-control items-center border-b-2 border-transparent px-3 text-operational font-medium text-text no-underline aria-[current=page]:border-action aria-[current=page]:font-semibold aria-[current=page]:text-action";
@@ -83,6 +82,22 @@ export async function WorkspaceShell({
     </div>
   );
   const mobileMore = [...primary.filter((item) => !item.mobilePrimary), ...secondary];
+  const accountIdentity = account ? (
+    <p className="flex min-w-0 items-start gap-2.5 px-2" data-workspace-account>
+      <span
+        aria-hidden="true"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-selected text-dense font-semibold text-brand"
+      >
+        {initials(account.name)}
+      </span>
+      <span className="flex min-w-0 flex-col wrap-anywhere">
+        <span className="text-operational font-medium text-text">{account.name}</span>
+        {account.detail ? (
+          <span className="text-caption text-text-muted">{account.detail}</span>
+        ) : null}
+      </span>
+    </p>
+  ) : null;
 
   // A preference, not a destination. Staff URLs carry the locale (§03.1), so choosing a
   // language opens the same address in it.
@@ -93,15 +108,28 @@ export async function WorkspaceShell({
   const list = (items: typeof primary, className: string, withIcons = false) => (
     <ul className="flex flex-col gap-0.5">
       {items.map((item) => {
-        const Icon = withIcons ? navIcons[item.label] : null;
+        const icon = withIcons ? navIcons[item.label] : null;
         const count = counts?.[item.label];
         return (
           <li key={item.label}>
-            <NavLink href={item.href} className={className}>
-              {Icon ? (
-                <Icon className="size-[1.125rem] text-text-muted group-data-current:text-action" />
+            <NavLink
+              href={item.href}
+              className={className}
+              {...(item.label === "moreTools"
+                ? { excludePaths: [`/${locale}/operations/assistance`] }
+                : {})}
+            >
+              {icon ? (
+                <Image
+                  src={icon}
+                  alt=""
+                  aria-hidden="true"
+                  width={20}
+                  height={20}
+                  className="shrink-0"
+                />
               ) : null}
-              <span className="flex-1">{t(item.label)}</span>
+              <span className="min-w-0 flex-1">{t(item.label)}</span>
               {count ? (
                 <span className="min-w-6 rounded-full bg-subtle px-1.5 text-center text-caption font-semibold text-text-muted tabular-nums group-data-current:bg-action group-data-current:text-text-inverse">
                   {count}
@@ -116,40 +144,29 @@ export async function WorkspaceShell({
 
   return (
     <PrivatePageGuard locale={locale} verification={randomUUID()}>
-      <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
+      <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
         <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
 
         {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
-        <header className="hidden border-e border-divider bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto lg:px-3 lg:py-4">
-          <p className="flex items-center gap-2.5 px-2">
-            <Image src="/brand/logo-ms-realty.png" alt={common("brand")} width={56} height={29} />
-            <span className="text-dense font-medium text-text-muted">{t("label")}</span>
+        <header className="hidden bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:min-w-0 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:p-5">
+          <p className="flex items-center">
+            <Image
+              src="/brand/logo-ms-realty.png"
+              alt={common("brand")}
+              width={86}
+              height={44}
+              className="h-auto shrink-0 object-contain"
+            />
           </p>
           {search ? <search aria-label={t("search")}>{search}</search> : null}
           <nav aria-label={t("label")}>{list(primary, sideLinkClass, true)}</nav>
           {secondary.length > 0 ? (
-            <nav aria-label={t("secondaryLabel")} className="border-t border-divider pt-4">
+            <nav aria-label={t("secondaryLabel")} className="mt-auto border-t border-divider pt-4">
               {list(secondary, sideLinkClass, true)}
             </nav>
           ) : null}
-          <div className="mt-auto flex flex-col gap-3 border-t border-divider pt-4">
-            {account ? (
-              <p className="flex items-center gap-2.5 px-2">
-                <span
-                  aria-hidden="true"
-                  className="inline-flex size-8 items-center justify-center rounded-full bg-selected text-dense font-semibold text-action"
-                >
-                  {initials(account.name)}
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-operational font-medium text-text">{account.name}</span>
-                  {account.detail ? (
-                    <span className="text-caption text-text-muted">{account.detail}</span>
-                  ) : null}
-                </span>
-              </p>
-            ) : null}
-            {languageSwitcher}
+          <div className="flex min-w-0 flex-col gap-3 border-t border-divider pt-4">
+            {accountIdentity}
             {accountActions}
           </div>
         </header>
@@ -168,8 +185,12 @@ export async function WorkspaceShell({
               <span className="text-caption text-text-muted">{t("label")}</span>
             </p>
             {mobileMore.length > 0 || account ? (
-              <MenuDisclosure label={t("more")} panelClassName="flex flex-col gap-4 pb-3">
+              <MenuDisclosure
+                label={t("more")}
+                panelClassName="flex max-h-[calc(100dvh-6rem)] flex-col gap-4 overflow-y-auto pb-3"
+              >
                 <nav aria-label={t("secondaryLabel")}>{list(mobileMore, tabLinkClass)}</nav>
+                {accountIdentity}
                 {accountActions}
               </MenuDisclosure>
             ) : null}
@@ -195,9 +216,21 @@ export async function WorkspaceShell({
           </nav>
         </header>
 
-        <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
-          {children}
-        </main>
+        <div className="min-w-0">
+          <div className="hidden min-h-[4.5rem] items-center justify-between gap-4 border-b border-divider px-8 py-3 lg:flex">
+            <WorkspaceContext
+              label={t("label")}
+              items={[...primary, ...secondary].map((item) => ({
+                href: item.href,
+                label: t(item.label),
+              }))}
+            />
+            {languageSwitcher}
+          </div>
+          <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
+            {children}
+          </main>
+        </div>
       </div>
     </PrivatePageGuard>
   );

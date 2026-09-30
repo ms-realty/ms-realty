@@ -5,9 +5,9 @@ import type { PublicLocale } from "@/i18n/config";
 // (brand, digits, references), so Latin is always preloaded; a locale adds only its own script.
 // Latin Extended and the other scripts still load on demand through unicode-range.
 const scriptFiles = {
-  cyrillic: "/fonts/noto-sans-cyrillic.woff2",
-  greek: "/fonts/noto-sans-greek.woff2",
-  hebrew: "/fonts/noto-sans-hebrew.woff2",
+  cyrillic: ["/fonts/noto-sans-cyrillic.woff2", "/fonts/manrope-cyrillic.woff2"],
+  greek: ["/fonts/noto-sans-greek.woff2", "/fonts/manrope-greek.woff2"],
+  hebrew: ["/fonts/noto-sans-hebrew.woff2"],
 } as const;
 
 const localeScripts: Record<PublicLocale, readonly (keyof typeof scriptFiles)[]> = {
@@ -21,7 +21,11 @@ const localeScripts: Record<PublicLocale, readonly (keyof typeof scriptFiles)[]>
 };
 
 export function fontFilesFor(locale: PublicLocale): string[] {
-  return ["/fonts/noto-sans-latin.woff2", ...localeScripts[locale].map((s) => scriptFiles[s])];
+  return [
+    "/fonts/noto-sans-latin.woff2",
+    "/fonts/manrope-latin.woff2",
+    ...localeScripts[locale].flatMap((s) => scriptFiles[s]),
+  ];
 }
 
 /** Call from a root layout: emits `<link rel="preload">` for the locale's font files. */

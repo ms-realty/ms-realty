@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { FormAction, FormState } from "./contract";
-import { ActionForm } from "./form";
+import { ActionForm, nativeFormPermalink } from "./form";
 import { formSpecimenCopy } from "./specimen-copy";
 import { SpecimenForm, type SpecimenValues } from "./specimen-form";
 
@@ -31,6 +31,39 @@ function mount(action: FormAction<SpecimenValues>, state = initialState) {
 }
 
 describe("UI07 / S11–S17 progressive form", () => {
+  it("keeps a supplied business identity stable across server tree positions and distinct from a sibling", () => {
+    const firstPosition = nativeFormPermalink(
+      "/en/cases/example/email",
+      "_R_first_",
+      "email-approve:message A",
+    );
+    const reorderedPosition = nativeFormPermalink(
+      "/en/cases/example/email",
+      "_R_second_",
+      "email-approve:message A",
+    );
+    expect(firstPosition).toBe("/en/cases/example/email#form-email-approve%3Amessage%20A");
+    expect(reorderedPosition).toBe(firstPosition);
+    expect(
+      nativeFormPermalink("/en/cases/example/email", "_R_first_", "email-approve:message B"),
+    ).not.toBe(firstPosition);
+    expect(
+      nativeFormPermalink(
+        "/en/cases/example/email#history",
+        "_R_second_",
+        "email-approve:message A",
+      ),
+    ).toBe("/en/cases/example/email#history-email-approve%3Amessage%20A");
+  });
+
+  it("retains the existing positional permalink when no business identity is supplied", () => {
+    expect(nativeFormPermalink("/practice", "_R_first_")).toBe("/practice#form-_R_first_");
+    expect(nativeFormPermalink("/practice", "_R_second_")).toBe("/practice#form-_R_second_");
+    expect(nativeFormPermalink("/practice#details", "_R_first_")).toBe(
+      "/practice#details-_R_first_",
+    );
+  });
+
   it("retains native select changes and batches related field updates without losing either value", async () => {
     const action = vi.fn<FormAction<SpecimenValues>>(async (state, data) => ({
       ...state,

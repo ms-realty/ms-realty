@@ -53,6 +53,7 @@ function RequestForm({
       fields={fields}
       action={documentRequestAction.bind(null, locale, binding)}
       path={path}
+      nativeIdentity={requestScope(binding)}
       submit={submit}
       status={{
         href: `${path}?command=${binding.command}&key=${encodeURIComponent(initial.operationId)}`,

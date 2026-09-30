@@ -225,6 +225,7 @@ function ProcessForm({
       fields={fields}
       action={processAction.bind(null, locale, binding)}
       path={path}
+      nativeIdentity={processScope(binding)}
       status={{
         href: `${basePath}/operations?key=${encodeURIComponent(initial.operationId)}`,
         label: c.status,

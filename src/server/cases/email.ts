@@ -264,7 +264,8 @@ export async function caseEmailWorkbench(
         eq(messages.direction, "outbound"),
       ),
     )
-    .orderBy(desc(messages.createdAt))
+    // Multi-recipient drafts share one transaction timestamp; keep their order stable.
+    .orderBy(desc(messages.createdAt), desc(messages.id))
     .limit(50);
   const items = [];
   for (const message of drafts) {

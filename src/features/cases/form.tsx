@@ -26,6 +26,7 @@ export function WorkflowForm({
   fields,
   action,
   path,
+  nativeIdentity,
   status,
   submit,
   pendingReferenceCookie,
@@ -35,6 +36,7 @@ export function WorkflowForm({
   fields: WorkflowField[];
   action: FormAction<FormValues>;
   path: string;
+  nativeIdentity?: string;
   status: { href: string; label: string };
   submit: string;
   pendingReferenceCookie?: string;
@@ -44,6 +46,7 @@ export function WorkflowForm({
       action={action}
       initialState={initialState}
       permalink={path}
+      nativeIdentity={nativeIdentity}
       reconciliation={status}
       pendingReferenceCookie={pendingReferenceCookie}
       copy={workCopy(locale).form}

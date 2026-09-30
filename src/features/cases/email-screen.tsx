@@ -96,7 +96,11 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
           view.items.map(({ message, content, reviewHash, approvedAt }) => {
             const recipient = emailRecipient.array().safeParse(message.recipients);
             return (
-              <article key={message.id} className="space-y-4 border-t border-border py-5">
+              <article
+                key={message.id}
+                data-message-id={message.id}
+                className="space-y-4 border-t border-border py-5"
+              >
                 <h3 className="font-semibold">{content?.subject ?? message.subject}</h3>
                 <p>{message.state === "draft" ? c.draftState : c[message.state]}</p>
                 <p>
@@ -192,6 +196,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                       <BoundWorkflowForm
                         {...props}
                         command="emailApprove"
+                        nativeIdentity={`email-approve:${message.id}`}
                         id={props.id}
                         revision={view.record.version}
                         path={path}

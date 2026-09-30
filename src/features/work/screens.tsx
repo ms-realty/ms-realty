@@ -58,9 +58,9 @@ export function Page({
 }) {
   const copy = workCopy(locale);
   return (
-    <div className="mx-auto min-w-0 max-w-6xl space-y-8 break-words px-4 py-6 sm:px-6">
+    <div className="mx-auto min-w-0 max-w-page space-y-8 break-words px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <header className="space-y-4">
-        <h1 className="text-heading font-semibold">{title}</h1>
+        <h1 className="text-title font-semibold">{title}</h1>
         <nav aria-label={copy.details} className="flex flex-wrap gap-5">
           <a className={link} href={`/${locale}/today`}>
             {copy.today}

@@ -109,6 +109,7 @@ export function ContentReviewForm({
       initialState={initialState}
       action={action}
       permalink={`/${locale}/content/${id}`}
+      nativeIdentity={`content.decide.${id}.${decision}`}
       reconciliation={{
         href: `/${locale}/content/operations?${new URLSearchParams({ kind: "decide", id, key: initialState.operationId })}`,
         label: copy.check,

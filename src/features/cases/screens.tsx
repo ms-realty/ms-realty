@@ -39,51 +39,76 @@ export function WorkflowPage({
   session,
   title,
   children,
-}: ScreenProps & { title: string; children: ReactNode }) {
+  clientOverview = false,
+}: ScreenProps & { title: string; children: ReactNode; clientOverview?: boolean }) {
   const c = caseCopy(locale),
     staff = session.account.kind === "staff";
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-gutter py-6 lg:px-gutter-wide">
+    <div
+      className={
+        clientOverview
+          ? "mx-auto min-w-0 max-w-page space-y-8 p-5 [overflow-wrap:anywhere] lg:p-8"
+          : "mx-auto max-w-6xl space-y-8 px-gutter py-6 lg:px-gutter-wide"
+      }
+    >
       <header className="space-y-4">
-        <h1 className="text-heading font-semibold">{title}</h1>
-        <nav className="flex flex-wrap gap-5" aria-label={c.cases}>
-          <a className={workflowLink} href={`/${locale}/${staff ? "cases" : "overview"}`}>
-            {staff ? c.cases : c.overview}
-          </a>
-          <a className={workflowLink} href={`/${locale}/${staff ? "calendar" : "appointments"}`}>
-            {c.appointments}
-          </a>
-          <a className={workflowLink} href={`/${locale}/proposals`}>
-            {c.proposals}
-          </a>
-          {!staff ? (
-            <a className={workflowLink} href={`/${locale}/documents`}>
-              {c.documents}
+        <h1
+          className={
+            clientOverview
+              ? "font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em] lg:text-title"
+              : "text-heading font-semibold"
+          }
+        >
+          {title}
+        </h1>
+        {!clientOverview ? (
+          <nav className="flex flex-wrap gap-5" aria-label={c.cases}>
+            <a className={workflowLink} href={`/${locale}/${staff ? "cases" : "overview"}`}>
+              {staff ? c.cases : c.overview}
             </a>
-          ) : null}
-          {staff ? (
-            <a className={workflowLink} href={`/${locale}/inquiries`}>
-              Inbox
+            <a className={workflowLink} href={`/${locale}/${staff ? "calendar" : "appointments"}`}>
+              {c.appointments}
             </a>
-          ) : (
-            <>
-              <a className={workflowLink} href={`/${locale}/properties`}>
-                {c.interests}
+            <a className={workflowLink} href={`/${locale}/proposals`}>
+              {c.proposals}
+            </a>
+            {!staff ? (
+              <a className={workflowLink} href={`/${locale}/documents`}>
+                {c.documents}
               </a>
-              <a className={workflowLink} href={`/${locale}/messages`}>
-                {c.messages}
+            ) : null}
+            {staff ? (
+              <a className={workflowLink} href={`/${locale}/inquiries`}>
+                Inbox
               </a>
-            </>
-          )}
-        </nav>
+            ) : (
+              <>
+                <a className={workflowLink} href={`/${locale}/properties`}>
+                  {c.interests}
+                </a>
+                <a className={workflowLink} href={`/${locale}/messages`}>
+                  {c.messages}
+                </a>
+              </>
+            )}
+          </nav>
+        ) : null}
       </header>
       {children}
     </div>
   );
 }
-export function WorkflowSection({ title, children }: { title: string; children: ReactNode }) {
+export function WorkflowSection({
+  title,
+  children,
+  id,
+}: {
+  title: string;
+  children: ReactNode;
+  id?: string;
+}) {
   return (
-    <section className="space-y-4 rounded-card border border-border bg-surface p-5">
+    <section id={id} className="space-y-4 rounded-card border border-border bg-surface p-5">
       <h2 className="text-subheading font-semibold">{title}</h2>
       {children}
     </section>
@@ -122,6 +147,7 @@ export function BoundWorkflowForm({
   path,
   submit,
   receipt,
+  nativeIdentity,
 }: ScreenProps & {
   command: WorkflowCommand;
   id: string;
@@ -131,6 +157,7 @@ export function BoundWorkflowForm({
   path: string;
   submit: string;
   receipt?: FormReceipt;
+  nativeIdentity?: string;
 }) {
   const initial = initialFormState(
     workflowScope(command, id),
@@ -145,6 +172,7 @@ export function BoundWorkflowForm({
       initialState={initial}
       fields={fields}
       path={path}
+      nativeIdentity={nativeIdentity ?? workflowScope(command, id)}
       status={{
         href: workflowStatus(session.account.kind, locale, command, id, initial.operationId),
         label: caseCopy(locale).status,
@@ -155,23 +183,46 @@ export function BoundWorkflowForm({
 }
 
 export async function CaseIndexScreen(
-  props: ScreenProps & { destination?: "overview" | "properties" | "messages" },
+  props: ScreenProps & {
+    destination?: "overview" | "properties" | "messages";
+    openSingleCase?: boolean;
+  },
 ) {
   const c = caseCopy(props.locale);
   const rows = await listCases(getDb(), props.session);
   const root = props.session.account.kind === "staff" ? "cases" : (props.destination ?? "overview");
+  // listCases applies authorization in SQL before its unfiltered limit of 50. One returned
+  // row therefore means one accessible Case, not one item on an arbitrary cursor page.
+  // CaseScreen still reauthorizes the selected record before rendering any private facts.
+  const onlyCase = rows.length === 1 ? rows[0] : undefined;
+  if (props.openSingleCase && root === "overview" && onlyCase)
+    return (
+      <CaseScreen
+        locale={props.locale}
+        session={props.session}
+        id={onlyCase.id}
+        pane="overview"
+        compactClientOverview
+      />
+    );
   return (
     <WorkflowPage
       {...props}
+      clientOverview={props.session.account.kind !== "staff" && root === "overview"}
       title={root === "properties" ? c.interests : root === "messages" ? c.messages : c.cases}
     >
       <p>{c.scope}</p>
+      {props.session.account.kind !== "staff" && root === "overview" ? (
+        <a className={workflowLink} href={`/${props.locale}/proposals`}>
+          {c.proposals}
+        </a>
+      ) : null}
       {rows.length ? (
         <>
           <p className="text-text-muted">{c.bounded}</p>
-          <ul className="divide-y divide-border">
+          <ul className="min-w-0 divide-y divide-divider [overflow-wrap:anywhere]">
             {rows.map((row) => (
-              <li key={row.id} className="space-y-2 py-4">
+              <li key={row.id} className="min-w-0 space-y-2 py-5">
                 <a className={workflowLink} href={`/${props.locale}/${root}/${row.id}`}>
                   <bdi>{row.reference}</bdi> · {row.title}
                 </a>
@@ -186,6 +237,13 @@ export async function CaseIndexScreen(
                   ) : (
                     (row.ownerName ?? "—")
                   )}
+                </p>
+                <p className="text-text-muted">
+                  {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+                  {row.stage.replaceAll("_", " ")} ·{" "}
+                  {row.disposition === "paused"
+                    ? lifecycleCopy(props.locale).pause
+                    : lifecycleCopy(props.locale)[row.disposition]}
                 </p>
               </li>
             ))}
@@ -242,14 +300,191 @@ export async function NewCaseScreen(props: ScreenProps & { inquiryId: string }) 
   );
 }
 
+export function ClientCaseOverview({
+  locale,
+  view,
+  targetBasePath = "",
+  nextSteps,
+}: {
+  locale: string;
+  targetBasePath?: string;
+  nextSteps?: ReactNode;
+  view: Pick<
+    Awaited<ReturnType<typeof readCase>>,
+    "record" | "brief" | "canAcknowledge" | "canPost"
+  >;
+}) {
+  const c = caseCopy(locale),
+    row = view.record,
+    brief = view.brief[0];
+  const active = row.disposition === "active";
+  const reviewBrief = active && view.canAcknowledge && brief && !brief.clientAcknowledgedAt;
+  const primaryHref = `${targetBasePath}${reviewBrief || !view.canPost ? "#case-brief" : "#case-conversation"}`;
+  const primaryLabel = reviewBrief ? c.requirements : view.canPost ? c.messages : c.brief;
+  return (
+    <div className="min-w-0 space-y-6 [overflow-wrap:anywhere]">
+      <p className="text-body text-text-muted">
+        {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+        {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
+          ? c.needsReview
+          : row.stage.replaceAll("_", " ")}{" "}
+        ·{" "}
+        {row.disposition === "paused"
+          ? lifecycleCopy(locale).pause
+          : lifecycleCopy(locale)[row.disposition]}
+      </p>
+      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-8">
+        <div className="min-w-0 space-y-6">
+          <section
+            className="min-w-0 space-y-5 rounded-[1rem] bg-brand-tint p-6"
+            aria-label={c.clientSummary}
+          >
+            <h2 className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]">
+              {active
+                ? (row.nextAction ?? c.noAction)
+                : row.disposition === "closed"
+                  ? c.closedSummary
+                  : c.pausedSummary}
+            </h2>
+            {!active &&
+            (row.dispositionReason || row.closureOutcome || row.waitingOn || row.reviewAt) ? (
+              <div className="space-y-3">
+                {row.dispositionReason ? (
+                  <p>
+                    <strong>{c.dispositionReason}:</strong> {row.dispositionReason}
+                  </p>
+                ) : null}
+                {row.closureOutcome ? (
+                  <p>
+                    <strong>{c.closureOutcome}:</strong> {row.closureOutcome}
+                  </p>
+                ) : null}
+                {row.waitingOn ? (
+                  <p>
+                    <strong>{c.waitingOn}:</strong> {row.waitingOn}
+                  </p>
+                ) : null}
+                {row.reviewAt ? (
+                  <p>
+                    <strong>{c.reviewAt}:</strong>{" "}
+                    <WorkflowTime value={row.reviewAt} locale={locale} />
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            {active && row.dueAt ? (
+              <p>
+                <WorkflowTime value={row.dueAt} locale={locale} />
+              </p>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-4">
+              <a
+                href={primaryHref}
+                className="inline-flex min-h-control items-center justify-center rounded-control bg-action px-4 py-3 text-dense font-semibold text-text-inverse hover:bg-action-hover active:bg-action-pressed"
+              >
+                {primaryLabel}
+              </a>
+            </div>
+          </section>
+          {nextSteps}
+        </div>
+        <aside className="min-w-0 space-y-5 rounded-[1rem] bg-subtle p-6" aria-label={c.owned}>
+          <p className="text-dense text-text-muted">{c.owned}</p>
+          <h2 className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]">
+            {row.ownerName ?? "—"}
+          </h2>
+          <a
+            href={`/${locale}/messages/${row.id}`}
+            className="inline-flex min-h-control w-full items-center justify-center rounded-control bg-action px-4 py-3 text-dense font-semibold text-text-inverse hover:bg-action-hover active:bg-action-pressed"
+          >
+            {c.messages}
+          </a>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
 export async function CaseScreen(
-  props: ScreenProps & { id: string; pane?: "overview" | "properties" | "messages" },
+  props: ScreenProps & {
+    id: string;
+    pane?: "overview" | "properties" | "messages";
+    compactClientOverview?: boolean;
+  },
 ) {
   const view = await privateRead(() => readCase(getDb(), props.session, props.id));
   const c = caseCopy(props.locale);
   const staff = props.session.account.kind === "staff";
   const row = view.record;
   const path = `/${props.locale}/${staff ? "cases" : (props.pane ?? "overview")}/${row.id}`;
+  if (!staff && props.compactClientOverview && props.pane === "overview") {
+    // The compact entry still uses readCase's current authorization and client projection.
+    // Its links need no conversation history or signed manual-action forms.
+    const agenda = await listAppointments(getDb(), props.session, row.id);
+    const appointment = agenda.length === 1 ? agenda[0] : undefined;
+    const links = [
+      {
+        label: c.appointments,
+        href: `/${props.locale}/appointments${appointment ? `/${appointment.id}` : ""}`,
+        detail: appointment ? (
+          <>
+            {appointment.reference} · {c[appointment.state]}
+            {appointment.confirmedStartsAt || appointment.proposedStartsAt ? (
+              <>
+                {" · "}
+                <WorkflowTime
+                  value={appointment.confirmedStartsAt ?? appointment.proposedStartsAt}
+                  locale={props.locale}
+                />
+              </>
+            ) : null}
+          </>
+        ) : agenda.length === 0 ? (
+          c.noAppointments
+        ) : null,
+      },
+      {
+        label: c.interests,
+        href: `/${props.locale}/properties/${row.id}`,
+        detail: view.interests.length === 0 ? c.noInterests : null,
+      },
+      { label: c.documents, href: `/${props.locale}/documents`, detail: null },
+    ];
+    return (
+      <WorkflowPage {...props} title={`${row.reference} · ${row.title}`} clientOverview>
+        <ClientCaseOverview
+          locale={props.locale}
+          view={view}
+          targetBasePath={path}
+          nextSteps={
+            <section className="min-w-0 space-y-3" aria-label={c.nextSteps}>
+              <h2 className="font-display text-heading font-semibold">{c.nextSteps}</h2>
+              <ul className="divide-y divide-divider">
+                {links.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      className="flex min-h-control items-center justify-between gap-4 rounded-control px-4 py-5 hover:bg-subtle"
+                      href={link.href}
+                    >
+                      <span className="min-w-0 space-y-1">
+                        <span className="block font-semibold">{link.label}</span>
+                        {link.detail ? (
+                          <span className="block text-dense text-text-muted">{link.detail}</span>
+                        ) : null}
+                      </span>
+                      <span aria-hidden="true" className="shrink-0 rtl:rotate-180">
+                        →
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          }
+        />
+      </WorkflowPage>
+    );
+  }
   const brief = view.brief[0];
   const parsedItems = z
     .array(z.object({ kind: z.string(), text: z.string(), origin: z.string() }))
@@ -262,7 +497,12 @@ export async function CaseScreen(
   const showProperties = staff || props.pane === "properties" || showOverview;
   const showMessages = staff || props.pane === "messages" || showOverview;
   return (
-    <WorkflowPage {...props} title={`${row.reference} · ${row.title}`}>
+    <WorkflowPage
+      {...props}
+      title={`${row.reference} · ${row.title}`}
+      clientOverview={!staff && showOverview}
+    >
+      {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
       <div className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
         <div className="flex flex-wrap gap-5">
           <a className={workflowLink} href={`/${props.locale}/proposals?case=${row.id}`}>
@@ -301,69 +541,75 @@ export async function CaseScreen(
             </a>
           ) : null}
         </div>
-        <p>
-          {c.owned}:{" "}
-          <strong>
-            {props.session.account.kind === "staff" ? (
-              <CoverageOwner
-                name={row.ownerName}
-                needsCoverage={row.needsCoverage}
-                locale={props.locale}
-              />
-            ) : (
-              (row.ownerName ?? "—")
-            )}
-          </strong>
-        </p>
-        <p>
-          {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
-          {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
-            ? c.needsReview
-            : row.stage.replaceAll("_", " ")}{" "}
-          ·{" "}
-          {row.disposition === "paused"
-            ? lifecycleCopy(props.locale).pause
-            : lifecycleCopy(props.locale)[row.disposition]}
-        </p>
-        {view.canManageContinuity ? (
-          <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/continuity`}>
-            {row.disposition === "active" ? lifecycleCopy(props.locale).title : c.reviewReopening}
-          </a>
-        ) : null}
-        {row.disposition === "active" ? (
+        {staff || !showOverview ? (
           <>
             <p>
-              {staff ? <strong>{c.next}: </strong> : null}
-              {row.nextAction ?? c.noAction}
+              {c.owned}:{" "}
+              <strong>
+                {props.session.account.kind === "staff" ? (
+                  <CoverageOwner
+                    name={row.ownerName}
+                    needsCoverage={row.needsCoverage}
+                    locale={props.locale}
+                  />
+                ) : (
+                  (row.ownerName ?? "—")
+                )}
+              </strong>
             </p>
-            <WorkflowTime value={row.dueAt} locale={props.locale} />
+            <p>
+              {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+              {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
+                ? c.needsReview
+                : row.stage.replaceAll("_", " ")}{" "}
+              ·{" "}
+              {row.disposition === "paused"
+                ? lifecycleCopy(props.locale).pause
+                : lifecycleCopy(props.locale)[row.disposition]}
+            </p>
+            {view.canManageContinuity ? (
+              <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/continuity`}>
+                {row.disposition === "active"
+                  ? lifecycleCopy(props.locale).title
+                  : c.reviewReopening}
+              </a>
+            ) : null}
+            {row.disposition === "active" ? (
+              <>
+                <p>
+                  {staff ? <strong>{c.next}: </strong> : null}
+                  {row.nextAction ?? c.noAction}
+                </p>
+                <WorkflowTime value={row.dueAt} locale={props.locale} />
+              </>
+            ) : (
+              <div className="space-y-3 rounded-control border border-border p-4">
+                <p>{row.disposition === "closed" ? c.closedSummary : c.pausedSummary}</p>
+                {row.dispositionReason ? (
+                  <p>
+                    <strong>{c.dispositionReason}:</strong> {row.dispositionReason}
+                  </p>
+                ) : null}
+                {row.closureOutcome ? (
+                  <p>
+                    <strong>{c.closureOutcome}:</strong> {row.closureOutcome}
+                  </p>
+                ) : null}
+                {row.waitingOn ? (
+                  <p>
+                    <strong>{c.waitingOn}:</strong> {row.waitingOn}
+                  </p>
+                ) : null}
+                {row.reviewAt ? (
+                  <p>
+                    <strong>{c.reviewAt}:</strong>{" "}
+                    <WorkflowTime value={row.reviewAt} locale={props.locale} />
+                  </p>
+                ) : null}
+              </div>
+            )}
           </>
-        ) : (
-          <div className="space-y-3 rounded-control border border-border p-4">
-            <p>{row.disposition === "closed" ? c.closedSummary : c.pausedSummary}</p>
-            {row.dispositionReason ? (
-              <p>
-                <strong>{c.dispositionReason}:</strong> {row.dispositionReason}
-              </p>
-            ) : null}
-            {row.closureOutcome ? (
-              <p>
-                <strong>{c.closureOutcome}:</strong> {row.closureOutcome}
-              </p>
-            ) : null}
-            {row.waitingOn ? (
-              <p>
-                <strong>{c.waitingOn}:</strong> {row.waitingOn}
-              </p>
-            ) : null}
-            {row.reviewAt ? (
-              <p>
-                <strong>{c.reviewAt}:</strong>{" "}
-                <WorkflowTime value={row.reviewAt} locale={props.locale} />
-              </p>
-            ) : null}
-          </div>
-        )}
+        ) : null}
       </div>
       {view.ownerPreviews.map((reference) => (
         <a
@@ -405,7 +651,7 @@ export async function CaseScreen(
       ) : null}
       {showOverview ? (
         <>
-          <WorkflowSection title={c.brief}>
+          <WorkflowSection title={c.brief} id="case-brief">
             <p>{brief?.clientAcknowledgedAt ? c.agreedBrief : c.draftBrief}</p>
             <p>Revision {brief?.revision ?? "—"}</p>
             <ul className="space-y-3">
@@ -507,6 +753,7 @@ export async function CaseScreen(
                       {...props}
                       command="proposalRequest"
                       id={row.id}
+                      nativeIdentity={`${workflowScope("proposalRequest", row.id)}:${interest.id}`}
                       revision={row.version}
                       path={path}
                       fields={[
@@ -656,7 +903,7 @@ export async function CaseScreen(
         ) : null}
       </WorkflowSection>
       {showMessages ? (
-        <WorkflowSection title={c.messages}>
+        <WorkflowSection title={c.messages} id="case-conversation">
           <p>{c.messageNote}</p>
           {thread.length ? (
             <ol className="space-y-5">

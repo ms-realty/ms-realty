@@ -14,7 +14,10 @@
   /* Hebrew text reaches Noto Sans Hebrew first: the metric fallback (local Arial) has Hebrew
      glyphs and would otherwise be used for Hebrew while Noto Sans, which has none, loads. */
   :lang(he) {
-    font-family: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    --font-sans: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    --font-display:
+      "Noto Sans Hebrew", "Manrope", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    font-family: var(--font-sans);
   }
 
   /* Aligned amounts, times and counts use tabular figures (§11.3). */

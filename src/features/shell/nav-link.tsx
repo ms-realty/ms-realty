@@ -11,6 +11,7 @@ export function NavLink({
   children,
   className,
   exact = false,
+  excludePaths = [],
 }: {
   /** Must come from the navigation registry, which checks that the route exists. */
   href: string;
@@ -18,9 +19,14 @@ export function NavLink({
   className?: string;
   /** Match only this path, not its descendants (for section roots). */
   exact?: boolean;
+  /** A separately navigable child section owns its own active item. */
+  excludePaths?: readonly string[];
 }) {
   const pathname = usePathname();
-  const current = pathname === href || (!exact && pathname.startsWith(`${href}/`));
+  const excluded = excludePaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+  const current = !excluded && (pathname === href || (!exact && pathname.startsWith(`${href}/`)));
   return (
     <Link
       href={href}

@@ -104,6 +104,9 @@ for (const javaScriptEnabled of [true, false])
         .from(schema.messages)
         .where(eq(schema.messages.caseId, f.caseId));
       expect(messages).toHaveLength(2);
+      // Both recipient drafts were inserted in one transaction. Their timestamp tie
+      // must not make native approval recovery depend on whichever row appears first.
+      expect(new Set(messages.map((message) => message.createdAt.toISOString())).size).toBe(1);
       expect(
         messages.every(
           (message) => (message.attachments as { versionId: string }[])[0]?.versionId === f.fileId,
@@ -138,6 +141,19 @@ for (const javaScriptEnabled of [true, false])
         fullPage: true,
       });
       const first = page.getByRole("article").first();
+      const approvedMessageId = await first.locator('input[name="messageId"]').inputValue();
+      const sibling = messages.find((message) => message.id !== approvedMessageId);
+      if (!sibling) throw new Error("The two-recipient fixture needs an untouched sibling draft");
+      if (!javaScriptEnabled) {
+        // Force history order to change between GET and native POST. Only fixture
+        // ordering changes; recipient, files, version and reviewed content stay exact.
+        await db
+          .update(schema.messages)
+          .set({
+            createdAt: new Date(sibling.createdAt.getTime() + 1_000),
+          })
+          .where(eq(schema.messages.id, sibling.id));
+      }
       await first
         .getByLabel(
           "I reviewed the recipient, complete email and every attached file shown above",
@@ -145,15 +161,36 @@ for (const javaScriptEnabled of [true, false])
         )
         .check();
       await first.getByRole("button", { name: "Approve and queue email", exact: true }).click();
+      await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toHaveCount(
+        1,
+      );
       await expect(
-        page.getByRole("heading", { name: "Change recorded", exact: true }),
+        page
+          .locator(`article[data-message-id="${approvedMessageId}"]`)
+          .getByRole("heading", { name: "Change recorded", exact: true }),
       ).toBeVisible();
+      const untouched = page.locator(`article[data-message-id="${sibling.id}"]`);
+      await expect(
+        untouched.getByRole("heading", { name: "Change recorded", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        untouched.getByRole("checkbox", {
+          name: "I reviewed the recipient, complete email and every attached file shown above",
+          exact: true,
+        }),
+      ).not.toBeChecked();
+      await expect(
+        untouched.getByRole("button", { name: "Approve and queue email", exact: true }),
+      ).toBeVisible();
+      await expect(untouched.locator('input[name="messageId"]')).toHaveValue(sibling.id);
       const queued = await db
         .select()
         .from(schema.messages)
         .where(eq(schema.messages.caseId, f.caseId));
       expect(queued.filter((message) => message.state === "queued")).toHaveLength(1);
       expect(queued.filter((message) => message.state === "draft")).toHaveLength(1);
+      expect(queued.find((message) => message.id === approvedMessageId)?.state).toBe("queued");
+      expect(queued.find((message) => message.id === sibling.id)?.state).toBe("draft");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );

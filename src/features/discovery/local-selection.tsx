@@ -40,7 +40,7 @@ export function selectedReferences(raw: string, kind: Kind): string[] {
     return [];
   }
 }
-function write(kind: Kind, refs: string[]) {
+export function writeSelection(kind: Kind, refs: string[]) {
   let durable = true;
   try {
     localStorage.setItem(storageKey(kind), JSON.stringify(refs));
@@ -52,7 +52,7 @@ function write(kind: Kind, refs: string[]) {
   window.dispatchEvent(new Event(changed));
   return durable;
 }
-function useSelection(kind: Kind) {
+export function useSelection(kind: Kind) {
   const raw = useSyncExternalStore(
     subscribe,
     () => read(kind),
@@ -63,7 +63,15 @@ function useSelection(kind: Kind) {
     () => true,
     () => false,
   );
-  return { refs: selectedReferences(raw, kind), hydrated };
+  let temporaryOnly = temporary[kind] !== undefined;
+  if (hydrated) {
+    try {
+      localStorage.getItem(storageKey(kind));
+    } catch {
+      temporaryOnly = true;
+    }
+  }
+  return { refs: selectedReferences(raw, kind), hydrated, temporaryOnly };
 }
 export function LocalActions({ reference, copy }: { reference: string; copy: DiscoveryCopy }) {
   const saved = useSelection("saved");
@@ -77,7 +85,7 @@ export function LocalActions({ reference, copy }: { reference: string; copy: Dis
       return;
     }
     setNotice(
-      write(kind, exists ? refs.filter((r) => r !== reference) : [...refs, reference])
+      writeSelection(kind, exists ? refs.filter((r) => r !== reference) : [...refs, reference])
         ? ""
         : copy.storageFailed,
     );
@@ -119,7 +127,7 @@ export function LocalSelection({
   copy,
   canonicalReferences,
 }: {
-  kind: Kind;
+  kind: "compare";
   locale: PublicLocale;
   copy: DiscoveryCopy;
   /** On a comparison result, its URL owns the displayed selection, including explicit empty. */
@@ -135,7 +143,7 @@ export function LocalSelection({
     if (canonical === undefined) return;
     const synchronize = () => {
       if (JSON.stringify(selectedReferences(read(kind), kind)) !== canonical)
-        setNotice(write(kind, JSON.parse(canonical)) ? "" : copy.storageFailed);
+        setNotice(writeSelection(kind, JSON.parse(canonical)) ? "" : copy.storageFailed);
     };
     synchronize();
     // Native Back may restore a cached document without remounting React.
@@ -172,7 +180,7 @@ export function LocalSelection({
                     type="button"
                     onClick={() => {
                       if (
-                        !write(
+                        !writeSelection(
                           kind,
                           refs.filter((r) => r !== reference),
                         )
@@ -187,7 +195,7 @@ export function LocalSelection({
             </ul>
             <a
               className={buttonClass("primary")}
-              href={`/${locale}/compare?references=${refs.slice(0, 3).join(",")}`}
+              href={`/${locale}/compare?references=${refs.join(",")}`}
             >
               {copy.compare}
             </a>
@@ -224,7 +232,9 @@ export function RemoveComparison({
       <a
         className={buttonClass("tertiary", "max-w-full px-1 text-caption wrap-anywhere")}
         href={`/${locale}/compare?references=${remaining.join(",")}`}
-        onClick={() => setNotice(write("compare", [...remaining]) ? "" : copy.storageFailed)}
+        onClick={() =>
+          setNotice(writeSelection("compare", [...remaining]) ? "" : copy.storageFailed)
+        }
       >
         {copy.remove} <bdi>{reference}</bdi>
       </a>

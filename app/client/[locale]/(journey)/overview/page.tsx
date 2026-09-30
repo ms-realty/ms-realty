@@ -4,5 +4,5 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const { locale } = await params;
   const session = await requireClientPage(locale);
 
-  return <CaseIndexScreen locale={locale} session={session} />;
+  return <CaseIndexScreen locale={locale} session={session} openSingleCase />;
 }

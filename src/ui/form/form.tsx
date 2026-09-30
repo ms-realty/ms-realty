@@ -51,6 +51,8 @@ export type ActionFormProps<V extends FormValues> = {
   initialState: FormState<V>;
   /** Same canonical page and Server Action before/after an HTML POST (React permalink). */
   permalink: string;
+  /** Stable, page-unique business identity for a form in a list that can reorder. */
+  nativeIdentity?: string;
   /** A server-authorized status URL for this logical operation; safe on lost acknowledgment. */
   reconciliation: RecoveryLink;
   /** Preserve a signed operation reference before the request can lose its acknowledgment. */
@@ -62,6 +64,14 @@ export type ActionFormProps<V extends FormValues> = {
 };
 
 type Snapshot = { operationId: string; values: FormValues; reconciliation: RecoveryLink };
+
+export function nativeFormPermalink(
+  permalink: string,
+  positionalId: string,
+  nativeIdentity?: string,
+) {
+  return `${permalink}${permalink.includes("#") ? "-" : "#form-"}${encodeURIComponent(nativeIdentity ?? positionalId)}`;
+}
 
 function FocusResult({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -131,6 +141,7 @@ function FormSession<V extends FormValues>({
   action,
   initialState,
   permalink,
+  nativeIdentity,
   reconciliation,
   pendingReferenceCookie,
   copy,
@@ -143,9 +154,10 @@ function FormSession<V extends FormValues>({
   // native progressive enhancement, including the no-JavaScript validation response.
   const prefix = useId();
   // React keys native POST state by permalink, not by the Server Action's bound values.
-  // A stable fragment keeps sibling forms on this page from restoring one another's
-  // drafts/errors; fragments never change the route or reach the server as query data.
-  const formPermalink = `${permalink}${permalink.includes("#") ? "-" : "#form-"}${encodeURIComponent(prefix)}`;
+  // Reorderable lists supply a business identity: useId follows server tree position.
+  // Fragments never change the route or reach the server as query data. This is only
+  // native UI recovery identity; signed operation scope/version checks remain separate.
+  const formPermalink = nativeFormPermalink(permalink, prefix, nativeIdentity);
   const [state, formAction, pending] = useActionState(action, initialState, formPermalink);
   const [draft, setDraft] = useState({ responseId: state.responseId, values: state.values });
   const inFlight = useRef(false);

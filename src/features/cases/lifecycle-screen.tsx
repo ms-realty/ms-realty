@@ -4,6 +4,7 @@ import { type CaseStage, caseStageTransitions, stagesByKind } from "@/domain/cas
 import { lifecycleView } from "@/server/cases/lifecycle";
 import { sellerBindingOptions } from "@/server/cases/owner-preview";
 import { privateRead } from "../work/screens";
+import { workflowScope } from "./contract";
 import type { WorkflowField } from "./form";
 import { lifecycleCopy } from "./lifecycle-copy";
 import { ownerPreviewCopy } from "./owner-preview-copy";
@@ -93,6 +94,7 @@ export async function LifecycleScreen(props: ScreenProps & { id: string }) {
             <BoundWorkflowForm
               {...common}
               command="handover"
+              nativeIdentity={`${workflowScope("handover", row.id)}:accept`}
               fields={[
                 hidden("action"),
                 hidden("receiverId"),
@@ -112,6 +114,7 @@ export async function LifecycleScreen(props: ScreenProps & { id: string }) {
             <BoundWorkflowForm
               {...common}
               command="handover"
+              nativeIdentity={`${workflowScope("handover", row.id)}:request`}
               fields={[
                 hidden("action"),
                 hidden("snapshotHash"),
@@ -138,6 +141,7 @@ export async function LifecycleScreen(props: ScreenProps & { id: string }) {
             <BoundWorkflowForm
               {...common}
               command="handover"
+              nativeIdentity={`${workflowScope("handover", row.id)}:cancel`}
               fields={[
                 hidden("action"),
                 hidden("receiverId"),

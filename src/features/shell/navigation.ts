@@ -63,21 +63,20 @@ export const journeyHelpNav: NavItem<JourneyNavLabel> = {
   path: null,
 };
 
-/** Staff navigation (§11.1): Today, Inquiries, Cases, Calendar, Inventory, Reviews, Content,
- * Operations; settings stays secondary. */
+/** Saved Figma O01 rail: everyday work stays primary; Hermes and tools stay secondary.
+ * The route registry preserves working native destinations and leaves unbuilt pages out. */
 export const workspacePrimaryNav: readonly WorkspaceNavItem[] = [
   { label: "today", screen: "O01", path: "/today", mobilePrimary: true },
   { label: "inquiries", screen: "O02", path: "/inquiries", mobilePrimary: true },
   { label: "cases", screen: "O04", path: "/cases" },
-  { label: "calendar", screen: "O08", path: "/calendar", mobilePrimary: true },
   { label: "inventory", screen: "O10", path: "/inventory" },
-  { label: "reviews", screen: "O15", path: null },
-  { label: "content", screen: "O21", path: "/content" },
-  { label: "operations", screen: "O22", path: "/operations" },
+  { label: "calendar", screen: "O08", path: "/calendar", mobilePrimary: true },
+  { label: "tasks", screen: "O18", path: "/tasks" },
 ];
 
 export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [
-  { label: "settings", screen: "O24", path: null },
+  { label: "hermes", screen: "XHERMES", path: "/operations/assistance" },
+  { label: "moreTools", screen: "X02", path: "/operations" },
 ];
 
 /** Items whose route exists, with locale-prefixed hrefs. */

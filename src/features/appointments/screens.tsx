@@ -4,6 +4,7 @@ import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { Notice } from "@/ui/notice";
+import { workflowScope } from "../cases/contract";
 import { caseCopy } from "../cases/copy";
 import { caseEmailCopy } from "../cases/email-copy";
 import {
@@ -122,6 +123,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             <BoundWorkflowForm
               {...props}
               command="appointmentHostHandover"
+              nativeIdentity={`${workflowScope("appointmentHostHandover", row.id)}:cancel`}
               id={row.id}
               revision={row.version}
               path={path}
@@ -148,6 +150,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             <BoundWorkflowForm
               {...props}
               command="appointmentHostHandover"
+              nativeIdentity={`${workflowScope("appointmentHostHandover", row.id)}:request`}
               id={row.id}
               revision={row.version}
               path={path}

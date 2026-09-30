@@ -16,6 +16,7 @@ const copy = {
     privacy: "Искания за лични данни",
     subscriptions: "Правило за известия за имоти",
     access: "Екип и достъп",
+    content: "Съдържание",
     empty: "Няма разрешени операции за този профил.",
   },
   en: {
@@ -24,6 +25,7 @@ const copy = {
     privacy: "Privacy requests",
     subscriptions: "Property alert rule",
     access: "Team and access",
+    content: "Content",
     empty: "No operations are available for this account.",
   },
   ru: {
@@ -32,6 +34,7 @@ const copy = {
     privacy: "Запросы о персональных данных",
     subscriptions: "Правило уведомлений об объектах",
     access: "Команда и доступ",
+    content: "Контент",
     empty: "Для этой учётной записи нет доступных операций.",
   },
 } as const;
@@ -44,6 +47,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const c = copy[locale];
   const inbound = inboundCopy(locale);
   const destinations: { path: string; label: string; capabilities: Capability[] }[] = [
+    { path: "/content", label: c.content, capabilities: ["content.edit"] },
     { path: "/operations/keys", label: custodyCopy(locale).title, capabilities: ["key.manage"] },
     {
       path: "/operations/complaints",

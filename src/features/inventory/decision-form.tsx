@@ -33,6 +33,7 @@ export function InventoryDecisionForm({
         action={action}
         initialState={initialState}
         permalink={href}
+        nativeIdentity={`inventory-decision:${context.intent}:${context.reference}:${context.manifestId ?? context.revisionId}`}
         reconciliation={{
           href: `/${context.locale}/inventory/operations/${initialState.operationId}?reference=${encodeURIComponent(context.reference)}`,
           label: copy.operation,

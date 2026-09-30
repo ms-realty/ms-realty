@@ -77,19 +77,6 @@ it("removes via an actual URL and synchronizes browser storage during the click"
   expect(JSON.parse(localStorage.getItem(key) ?? "null")).toEqual(["MS-00001", "MS-00003"]);
 });
 
-it("keeps the saved page as an explicit browser-local list", () => {
-  localStorage.setItem("ms-realty.saved.v1", JSON.stringify(["MS-00002", "MS-00001"]));
-  render(<LocalSelection kind="saved" locale="en" copy={copy} />);
-  expect(screen.getByRole("list")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: copy.compare })).toHaveAttribute(
-    "href",
-    "/en/compare?references=MS-00002,MS-00001",
-  );
-  fireEvent.click(screen.getByRole("button", { name: `${copy.remove} MS-00002` }));
-  expect(screen.queryByRole("link", { name: "MS-00002" })).not.toBeInTheDocument();
-  expect(JSON.parse(localStorage.getItem("ms-realty.saved.v1") ?? "null")).toEqual(["MS-00001"]);
-});
-
 it("bounds corrupt browser-local data without affecting strict URL validation", () => {
   expect(
     selectedReferences(
