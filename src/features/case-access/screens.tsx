@@ -52,6 +52,7 @@ function AccessForm({
       fields={fields}
       action={caseAccessAction.bind(null, locale, binding)}
       path={path}
+      nativeIdentity={accessScope(binding)}
       submit={submit}
       status={{
         href: `${path}?command=${binding.command}&key=${encodeURIComponent(initial.operationId)}`,

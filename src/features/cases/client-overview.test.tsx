@@ -61,7 +61,7 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-it("opens the sole authorized Case through its existing detail authorization and preserves its manual workflow routes", async () => {
+it("opens a compact authorized Case summary and links into its full manual workflow without reading messages", async () => {
   const entry = await CaseIndexScreen({ locale: "en", session, openSingleCase: true });
   expect(entry.type).toBe(CaseScreen);
   render(await CaseScreen(entry.props));
@@ -71,7 +71,10 @@ it("opens the sole authorized Case through its existing detail authorization and
     "CA-ONE · Recorded home search",
   );
   expect(screen.getByRole("heading", { name: baseView.record.nextAction })).toBeVisible();
-  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute("href", "#case-brief");
+  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute(
+    "href",
+    "/en/overview/case-one#case-brief",
+  );
   expect(screen.getByRole("link", { name: "Conversation" })).toHaveAttribute(
     "href",
     "/en/messages/case-one",
@@ -80,6 +83,52 @@ it("opens the sole authorized Case through its existing detail authorization and
   expect(screen.getByRole("complementary", { name: "Accountable broker" })).toHaveTextContent(
     row.ownerName,
   );
+  expect(reads.messages).not.toHaveBeenCalled();
+  expect(reads.appointments).toHaveBeenCalledWith("test-db", session, "case-one");
+  expect(document.querySelector("form")).toBeNull();
+  expect(document.querySelector("#case-brief")).toBeNull();
+  const nextSteps = within(screen.getByRole("region", { name: "Next steps" }));
+  expect(nextSteps.getByRole("link", { name: /Appointments/ })).toHaveAttribute(
+    "href",
+    "/en/appointments",
+  );
+  expect(nextSteps.getByRole("link", { name: /Properties/ })).toHaveAttribute(
+    "href",
+    "/en/properties/case-one",
+  );
+  expect(nextSteps.getByRole("link", { name: "Documents" })).toHaveAttribute(
+    "href",
+    "/en/documents",
+  );
+});
+
+it("uses only the supplied authorized appointment and sends the hero conversation action to full detail", async () => {
+  reads.detail.mockResolvedValue({ ...baseView, canPost: true });
+  const startsAt = new Date("2026-10-05T10:00:00Z");
+  reads.appointments.mockResolvedValue([
+    {
+      id: "appointment-one",
+      reference: "AP-ONE",
+      state: "proposed",
+      proposedStartsAt: startsAt,
+      confirmedStartsAt: null,
+    },
+  ]);
+  const entry = await CaseIndexScreen({ locale: "bg", session, openSingleCase: true });
+  render(await CaseScreen(entry.props));
+  const hero = within(screen.getByRole("region", { name: "Следващо действие, видимо за клиента" }));
+  expect(hero.getByRole("link")).toHaveAttribute("href", "/bg/overview/case-one#case-conversation");
+  const appointment = screen.getByRole("link", { name: /AP-ONE/ });
+  expect(appointment).toHaveAttribute("href", "/bg/appointments/appointment-one");
+  expect(appointment.querySelector("time")).toHaveAttribute("datetime", startsAt.toISOString());
+  expect(reads.messages).not.toHaveBeenCalled();
+});
+
+it("keeps the full Case route and its requirements section outside the compact entry", async () => {
+  render(await CaseScreen({ locale: "en", session, id: row.id, pane: "overview" }));
+  expect(reads.messages).toHaveBeenCalledWith("test-db", session, row.id);
+  expect(document.querySelector("#case-brief")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute("href", "#case-brief");
 });
 
 it("does not fall back to cached Case content when detail authorization changes after listing", async () => {

@@ -171,7 +171,23 @@ for (const javaScriptEnabled of [true, false]) {
               .getByRole("link", { name: caseCopy("en").messages, exact: true }),
           ).toHaveAttribute("href", `/en/messages/${data.first.id}`);
           const review = page.getByRole("link", { name: caseCopy("en").requirements, exact: true });
-          await expect(review).toHaveAttribute("href", "#case-brief");
+          await expect(review).toHaveAttribute("href", `/en/overview/${data.first.id}#case-brief`);
+          await expect(page.getByRole("main").locator("form")).toHaveCount(0);
+          await expect(page.locator("#case-brief")).toHaveCount(0);
+          const nextSteps = page.getByRole("region", { name: "Next steps", exact: true });
+          await expect(nextSteps.getByRole("link", { name: /Properties/ })).toHaveAttribute(
+            "href",
+            `/en/properties/${data.first.id}`,
+          );
+          await fitsViewport(page, width);
+          await page.screenshot({
+            path: info.outputPath(`client-overview-${width}-${javaScriptEnabled}.png`),
+            fullPage: true,
+          });
+          await review.click();
+          await expect(page).toHaveURL(
+            hostUrl("client", `/en/overview/${data.first.id}#case-brief`),
+          );
           const brief = page.locator("#case-brief");
           await expect(brief).toContainText(data.requirement);
           await expect(brief.locator('input[name="briefId"]')).toHaveValue(data.briefId);
@@ -186,9 +202,15 @@ for (const javaScriptEnabled of [true, false]) {
           ).toHaveCount(0);
           await fitsViewport(page, width);
           await page.screenshot({
-            path: info.outputPath(`client-overview-${width}-${javaScriptEnabled}.png`),
+            path: info.outputPath(`client-case-requirements-${width}-${javaScriptEnabled}.png`),
             fullPage: true,
           });
+          await page.goBack();
+          await expect(page).toHaveURL(overview);
+          await expect(
+            page.getByRole("heading", { name: data.summary, exact: true }),
+          ).toBeVisible();
+          await expect(page.getByRole("main").locator("form")).toHaveCount(0);
         }
 
         await page.setViewportSize({ width: 320, height: 900 });
