@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { discoveryCopy } from "./copy";
 import { InquiryForm } from "./inquiry-form";
-import { emptyInquiry, type InquiryState } from "./inquiry-state";
+import {
+  emptyInquiry,
+  type InquiryState,
+  inquiryPermalink,
+  inquiryReceiptView,
+} from "./inquiry-state";
 
 afterEach(cleanup);
 describe("P11 inquiry draft", () => {
@@ -58,4 +63,99 @@ describe("P11 inquiry draft", () => {
     );
     expect(consent).toBeChecked();
   });
+});
+
+describe("P07 collective inquiry retention", () => {
+  const selectedListings = JSON.stringify(
+    ["MS-00303", "MS-00101", "MS-00202"].map((reference, index) => ({
+      reference,
+      observedManifestId: `12345678-1234-4123-8123-12345678900${index}`,
+    })),
+  );
+  const state: InquiryState = {
+    operationId: "server-key",
+    expectedRevision: null,
+    responseId: "initial",
+    values: { ...emptyInquiry, selectedListings },
+    outcome: { kind: "idle" },
+  };
+  it("carries one ordered JSON field through server validation and exposes a focusable error target", async () => {
+    const user = userEvent.setup();
+    const rendered = render(
+      <InquiryForm
+        locale="en"
+        copy={discoveryCopy("en")}
+        initialState={state}
+        action={async (previous, data) => {
+          expect(data.getAll("selectedListings")).toEqual([selectedListings]);
+          return {
+            ...previous,
+            responseId: "invalid-selection",
+            outcome: {
+              kind: "validation",
+              code: "VALIDATION_FAILED",
+              message: "Check",
+              fieldErrors: { selectedListings: ["Review all selected properties"] },
+            },
+          };
+        }}
+      />,
+    );
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "MS-00303",
+      "MS-00101",
+      "MS-00202",
+    ]);
+    expect(screen.queryByRole("option", { name: "Request a viewing" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Send an inquiry" }));
+    const errorLink = await screen.findByRole("link", {
+      name: "Compare: Review all selected properties",
+    });
+    await user.click(errorLink);
+    expect(screen.getByRole("region", { name: "Compare" })).toHaveFocus();
+    expect(rendered.container.querySelector('input[name="selectedListings"]')).toHaveValue(
+      selectedListings,
+    );
+  });
+  it("retains selection in native permalink and immediate receipt without contact data", () => {
+    const url = new URL(inquiryPermalink("en", "key", state.values), "https://example.test");
+    expect(url.searchParams.get("selection")).toBe(selectedListings);
+    const receipt = inquiryReceiptView(
+      {
+        receiptId: "key",
+        reference: "RQ-2026-000001",
+        status: "accepted",
+        acceptedAt: "2026-09-30T12:00:00Z",
+        purpose: "question",
+        locale: "en",
+        listingReference: null,
+        selectedListingReferences: ["MS-00303", "MS-00101", "MS-00202"],
+        comparisonReferences: [],
+      },
+      "en",
+      discoveryCopy("en"),
+    );
+    expect(receipt.nextStep).toContain("MS-00303, MS-00101, MS-00202");
+    expect(receipt.destination.href).toBe("/en/requests/key");
+  });
+});
+
+it("identifies only the individual inquiry subject on immediate confirmation, not its comparison return set", () => {
+  const receipt = inquiryReceiptView(
+    {
+      receiptId: "key",
+      reference: "RQ-2026-000001",
+      status: "accepted",
+      acceptedAt: "2026-09-30T12:00:00Z",
+      purpose: "question",
+      locale: "en",
+      listingReference: "MS-00101",
+      selectedListingReferences: [],
+      comparisonReferences: ["MS-00303", "MS-00101", "MS-00202"],
+    },
+    "en",
+    discoveryCopy("en"),
+  );
+  expect(receipt.nextStep).toContain("MS-00101");
+  expect(receipt.nextStep).not.toMatch(/MS-00303|MS-00202/);
 });

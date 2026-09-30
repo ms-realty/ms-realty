@@ -30,7 +30,7 @@ test("public listing results adapt to the specified compact, medium and wide ran
     [768, 2],
     [1024, 2],
     [1440, 3],
-  ]) {
+  ] as const) {
     await page.setViewportSize({ width, height: 900 });
     const actualColumns = await results.evaluate(
       (element) => getComputedStyle(element).gridTemplateColumns.split(" ").length,
