@@ -98,3 +98,33 @@ Additional evidence:
 [Portable measurements and provenance](../evidence/2026-09-30-read-performance.json) preserve
 all runs and the paired samples. Full CI for this commit is pending; eb538812's green CI applies
 only to that preceding source. The review here is the implementation author's source review.
+
+## Expression-index diagnostic on ac92db7e
+
+A fresh PostgreSQL 18 database with 2,000 BG-only synthetic eligible Listings tested whether
+expression indexes on `property_relationships(id::text)` and `document_versions(id::text)`
+would improve the publication eligibility join. The database was analyzed before measurement.
+The indexes existed only in that disposable database and were dropped before the final baseline;
+the database and its private fixture files were removed when the probe completed successfully.
+
+| Stage | Eligible-ID read ms | EXPLAIN count execution ms |
+|---|---:|---:|
+| Baseline | 337.43 | 455.31 |
+| Authority expression index | 343.19 | 451.69 |
+| Document-version expression index | 404.97 | 487.31 |
+| Both expression indexes | 350.37 | 464.72 |
+| Baseline after removing indexes | 344.31 | 463.20 |
+
+Every stage returned the same 2,000 eligible IDs (SHA-256
+`c91fdbed9afb34c7d5429619caf5bd974b6331dd36f8258a684845031a541544`). Empty-query and
+text search also retained a count of 2,000. Plans show that PostgreSQL used the diagnostic
+indexes, but this experiment provides no evidence of a useful improvement. No migration was
+added. These are single observations on a smaller, BG-only service fixture, not repeated load
+samples or proof about the 10,000-Listing multilingual workload. The raw report's `seedMs`
+includes measurement time and must not be reported as seeding-only duration.
+
+Artifacts under `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260930/`:
+`publication-index-probe.mts`, `publication-index-probe.log`, and
+`publication-index-probe.json` (full plans). R08 remains failed. The next useful diagnostic is
+the existing full catalogue's join shape and per-request connection/query timing; repeating the
+same full HTTP load without a measured repair would not establish a cause.

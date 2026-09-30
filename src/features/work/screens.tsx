@@ -261,7 +261,8 @@ export async function TodayScreen({ locale, session }: { locale: string; session
                     />
                   </p>
                   <p>
-                    {custody.returnDue}: <When date={row.dueAt} locale={locale} zone="Europe/Sofia" />
+                    {custody.returnDue}:{" "}
+                    <When date={row.dueAt} locale={locale} zone="Europe/Sofia" />
                   </p>
                 </li>
               ))}
