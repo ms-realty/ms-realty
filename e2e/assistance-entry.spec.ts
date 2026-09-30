@@ -33,7 +33,7 @@ function fixture(role?: "content_editor"): Fixture {
     import { eq } from 'drizzle-orm';
     import { drizzle } from 'drizzle-orm/postgres-js';
     import postgres from 'postgres';
-    import * as schema from './src/db/schema.ts';
+    import * as schema from './src/db/schema/index.ts';
     import { createStaff } from './src/server/testing.ts';
     import { createSession } from './src/server/auth/sessions.ts';
     const url = process.env.E2E_DATABASE_URL;
