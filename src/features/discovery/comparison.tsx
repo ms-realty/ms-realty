@@ -79,7 +79,7 @@ export function Comparison({
       : items.length === 2
         ? "grid-cols-2 lg:grid-cols-[11rem_repeat(2,minmax(0,1fr))]"
         : "grid-cols-3 lg:grid-cols-[11rem_repeat(3,minmax(0,1fr))]";
-  const rowClass = `grid ${columns} gap-x-3 lg:gap-x-4`;
+  const rowClass = `grid ${columns} gap-x-1 sm:gap-x-3 lg:gap-x-4`;
   const available =
     items.every(
       ({ reference, result }) =>

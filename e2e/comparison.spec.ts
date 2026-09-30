@@ -194,6 +194,23 @@ for (const width of [320, 390, 1440]) {
     await expect(table.locator('td[headers^="compare-price"]').nth(1)).toContainText("Negotiable");
     await expect(table.locator('td[headers^="compare-area"]').nth(0)).toContainText("72.123456789");
     await expect(table.locator('td[headers^="compare-area"]').nth(1)).toContainText("65.987654321");
+    for (const number of await table.locator('td[headers^="compare-area"] bdi').all()) {
+      const lines = await number.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const rects = [...range.getClientRects()].filter((rect) => rect.width > 0);
+        const cell = element.closest("td")?.getBoundingClientRect();
+        return {
+          rows: new Set(rects.map((rect) => Math.round(rect.top))).size,
+          inside: Boolean(
+            cell &&
+              rects.every((rect) => rect.left >= cell.left - 1 && rect.right <= cell.right + 1),
+          ),
+        };
+      });
+      expect(lines.rows).toBe(1);
+      expect(lines.inside).toBe(true);
+    }
     for (const unit of await table.locator('[data-unit="area"]').all()) {
       const height = await unit.evaluate((element) => ({
         rendered: element.getBoundingClientRect().height,
