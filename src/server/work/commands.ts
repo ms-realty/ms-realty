@@ -314,7 +314,12 @@ export async function changeTask(db: Executor, session: Session, raw: TaskInput)
 export async function readWorkOperation(
   db: Executor,
   session: Session,
-  type: "work.inquiry.accept" | "work.inquiry.triage" | "work.task.change" | "work.task.handover",
+  type:
+    | "work.inquiry.accept"
+    | "work.inquiry.triage"
+    | "work.inquiry.contact"
+    | "work.task.change"
+    | "work.task.handover",
   id: string,
   key: string,
 ) {
@@ -327,6 +332,12 @@ export async function readWorkOperation(
     await assertCanRead(db, live.actor, "inquiry.read", inquiryResource(row));
   }
   const operation = await findOperation(db, live.actor, type, key);
+  if (
+    operation &&
+    type === "work.inquiry.contact" &&
+    (operation.resultType !== "inquiry" || operation.resultId !== id)
+  )
+    throw new AppError("not_found");
   // A key from a different record must not disclose that record's receipt.
   if (operation?.status === "succeeded" && (operation.outcome as { id?: string })?.id !== id)
     throw new AppError("not_found");

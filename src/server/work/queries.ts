@@ -12,6 +12,7 @@ import {
   tasks,
 } from "@/db/schema";
 import { hasCapability } from "@/domain/capabilities";
+import { readInquiryContact } from "@/domain/inquiry-contact";
 import type { Session } from "../auth/sessions";
 import { assertCanRead, can, resolveGrants } from "../authz";
 import type { Executor } from "../db";
@@ -115,6 +116,7 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
       messageKey: activityEvents.messageKey,
       at: activityEvents.occurredAt,
       actorName: principals.displayName,
+      params: activityEvents.params,
     })
     .from(activityEvents)
     .leftJoin(
@@ -124,15 +126,42 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
         eq(activityEvents.actorKind, "staff"),
       ),
     )
-    .where(and(eq(activityEvents.recordType, "inquiry"), eq(activityEvents.recordId, row.id)))
+    .where(
+      and(
+        eq(activityEvents.recordType, "inquiry"),
+        eq(activityEvents.recordId, row.id),
+        eq(activityEvents.audience, "internal"),
+      ),
+    )
     .orderBy(desc(activityEvents.occurredAt))
     .limit(30);
+  const [contactMethod] =
+    row.partyId && row.contactMethodId
+      ? await db
+          .select({
+            id: contactMethods.id,
+            version: contactMethods.version,
+            kind: contactMethods.kind,
+            value: contactMethods.value,
+          })
+          .from(contactMethods)
+          .where(
+            and(
+              eq(contactMethods.id, row.contactMethodId),
+              eq(contactMethods.partyId, row.partyId),
+            ),
+          )
+      : [];
   return {
     inquiry: row,
     ownerName: owner?.name ?? null,
     needsCoverage: owner?.needsCoverage ?? true,
     tasks: relatedTasks,
-    activity,
+    contactMethod: contactMethod ?? null,
+    activity: activity.map(({ params, ...entry }) => ({
+      ...entry,
+      contact: readInquiryContact(entry.messageKey, params),
+    })),
     canAssign: await can(db, live.actor, "inquiry.assign", resource),
     canRespond: await can(db, live.actor, "inquiry.respond", resource),
     canAssist: await can(db, live.actor, "ai.draft", resource),

@@ -20,6 +20,8 @@ export interface OperationInput {
   /** `hashRequest(body)` of the command as submitted; it must include `expectedVersion`. */
   readonly requestHash: string;
   readonly expectedVersion?: number;
+  /** Server-selected record binding, retained even when a known failure has no result body. */
+  readonly subject?: { readonly type: string; readonly id: string };
 }
 
 export interface OperationContext {
@@ -124,6 +126,8 @@ export async function runOperation<T>(
         idempotencyKey,
         requestHash,
         expectedRevision: input.expectedVersion ?? null,
+        resultType: input.subject?.type ?? null,
+        resultId: input.subject?.id ?? null,
         status: "in_progress",
       })
       .returning({ id: operations.id });
@@ -180,6 +184,8 @@ export interface OperationView {
   readonly operationId: string;
   readonly status: OperationStatus;
   readonly outcome: unknown;
+  readonly resultType: string | null;
+  readonly resultId: string | null;
 }
 
 /** Looks up a command by its key, for "did my timed-out submission go through?" (AT10). */
@@ -194,6 +200,8 @@ export async function findOperation(
       operationId: operations.id,
       status: operations.status,
       outcome: operations.outcome,
+      resultType: operations.resultType,
+      resultId: operations.resultId,
     })
     .from(operations)
     .where(

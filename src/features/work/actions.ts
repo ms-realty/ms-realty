@@ -7,6 +7,7 @@ import { requireAuthHost } from "@/server/auth/pages";
 import { AppError } from "@/server/errors";
 import { action, type HandlerContext } from "@/server/http/next";
 import { acceptInquiry, changeTask, triageInquiry } from "@/server/work/commands";
+import { recordInquiryContact } from "@/server/work/contact";
 import { handoverTask } from "@/server/work/handover";
 import { readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
@@ -16,9 +17,21 @@ import { workCopy } from "./copy";
 export type AcceptValues = { nextAction: string; dueAt: string };
 export type TriageValues = { state: string; reason: string; duplicateOfInquiryId: string };
 export type TaskValues = { state: string; note: string; followUpAt: string };
-type Kind = "accept" | "triage" | "task" | "handover";
+export type ContactValues = {
+  contactChoice: string;
+  result: string;
+  contactedAt: string;
+  note: string;
+  nextAction: string;
+  dueAt: string;
+  promisedToClient: string;
+  reviewed: string;
+};
+type Kind = "accept" | "triage" | "contact" | "task" | "handover";
 const localInstant = (value: string) =>
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ? `${value}:00Z` : value;
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?$/.test(value)
+    ? `${value}${value.length === 16 ? ":00" : ""}Z`
+    : value;
 const inputInstant = (value: Date | null) => value?.toISOString().slice(0, 16) ?? "";
 const scopeFor = (kind: Kind, id: string) => `work.${kind}.${id}`;
 const recordPath = (locale: string, kind: Kind, id: string) =>
@@ -51,7 +64,7 @@ async function perform<V extends FormValues>(
     operationId: key,
     expectedRevision: envelope?.expectedRevision ?? null,
     reconciliation: status,
-    values: kind === "handover" ? { ...values, reviewed: "" } : values,
+    values: kind === "handover" || kind === "contact" ? { ...values, reviewed: "" } : values,
     responseId: randomUUID(),
     outcome: { kind: "idle" },
   };
@@ -247,6 +260,76 @@ export async function triageAction(
       };
     },
   );
+}
+
+export async function contactAction(
+  locale: string,
+  id: string,
+  _previous: FormState<ContactValues>,
+  data: FormData,
+) {
+  const state = await perform<ContactValues>(
+    locale,
+    id,
+    "contact",
+    data,
+    [
+      "contactChoice",
+      "result",
+      "contactedAt",
+      "note",
+      "nextAction",
+      "dueAt",
+      "promisedToClient",
+      "reviewed",
+    ],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const [contactMethodId, revision] = values.contactChoice.split(":");
+      if (!contactMethodId || !revision || values.contactChoice.split(":").length !== 2)
+        throw new AppError("validation_failed", {
+          fieldErrors: { contactChoice: ["Review the current contact."] },
+        });
+      return (
+        await recordInquiryContact(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          contactMethodId,
+          expectedContactVersion: Number(revision),
+          result: values.result as "unanswered" | "useful_response",
+          contactedAt: localInstant(values.contactedAt),
+          note: values.note,
+          nextAction: values.nextAction,
+          dueAt: localInstant(values.dueAt),
+          promisedToClient: values.promisedToClient === "yes",
+          reviewed: (values.reviewed === "yes") as true,
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const current = await readInquiry(ctx.db, ctx.session, id);
+      const latest = current.activity.find((entry) => entry.contact)?.contact;
+      return {
+        revision: current.inquiry.version,
+        values: {
+          contactChoice: current.contactMethod
+            ? `${current.contactMethod.kind} · ${current.contactMethod.value}`
+            : "—",
+          result: latest?.result ?? "unanswered",
+          contactedAt: latest?.contactedAt ?? "",
+          note: latest?.note ?? "",
+          nextAction: latest?.nextAction ?? "",
+          dueAt: latest?.dueAt ?? "",
+          promisedToClient: latest?.promisedToClient ? "yes" : "",
+          reviewed: "",
+        },
+      };
+    },
+  );
+  if (state.outcome.kind === "confirmed" && state.reconciliation)
+    redirect(state.reconciliation.href);
+  return state;
 }
 
 export async function taskAction(

@@ -21,7 +21,9 @@ import {
   readToday,
 } from "@/server/work/queries";
 import { initialFormState } from "@/ui/form/server";
-import { acceptAction, taskAction, triageAction } from "./actions";
+import { acceptAction, contactAction, taskAction, triageAction } from "./actions";
+import { contactCopy } from "./contact-copy";
+import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
 import { coverageCopy } from "./coverage-copy";
 import { CoverageOwner } from "./coverage-owner";
@@ -355,6 +357,7 @@ export async function InquiryScreen({
   const detail = await privateRead(() => readInquiry(getDb(), session, id));
   const { inquiry, ownerName } = detail;
   const copy = workCopy(locale);
+  const contact = contactCopy(locale);
   const targets = (
     [
       "suspected_spam",
@@ -483,6 +486,40 @@ export async function InquiryScreen({
               />
             </section>
           ) : null}
+          {detail.canRespond &&
+          detail.canCreateTask &&
+          !detail.needsCoverage &&
+          inquiry.ownerId === session.account.id &&
+          detail.contactMethod &&
+          (inquiry.state === "assigned" || inquiry.state === "awaiting_client") ? (
+            <section
+              className="space-y-4 rounded-card border border-border p-5"
+              data-inquiry-contact
+            >
+              <h2 className="text-subheading font-semibold">{contact.title}</h2>
+              <p>{contact.lead}</p>
+              <ContactForm
+                locale={locale}
+                id={id}
+                contact={detail.contactMethod}
+                action={contactAction.bind(null, locale, id)}
+                initialState={initialFormState(
+                  `work.contact.${id}`,
+                  {
+                    contactChoice: `${detail.contactMethod.id}:${detail.contactMethod.version}`,
+                    result: "unanswered",
+                    contactedAt: "",
+                    note: "",
+                    nextAction: "",
+                    dueAt: "",
+                    promisedToClient: "",
+                    reviewed: "",
+                  },
+                  inquiry.version,
+                )}
+              />
+            </section>
+          ) : null}
           {targets.length ? (
             <section className="space-y-4 rounded-card border border-border p-5">
               <h2 className="text-subheading font-semibold">{copy.disposition}</h2>
@@ -511,6 +548,22 @@ export async function InquiryScreen({
         </div>
         <aside className="space-y-6">
           <dl className="space-y-4 rounded-card border border-border p-5">
+            <div>
+              <dt className="font-semibold">{contact.acknowledgment}</dt>
+              <dd>
+                <When date={inquiry.acknowledgedAt} locale={locale} />
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold">{contact.firstResponse}</dt>
+              <dd data-testid="inquiry-first-response">
+                {inquiry.firstResponseAt ? (
+                  <When date={inquiry.firstResponseAt} locale={locale} />
+                ) : (
+                  contact.noResponse
+                )}
+              </dd>
+            </div>
             <div>
               <dt className="font-semibold">{copy.state}</dt>
               <dd data-testid="inquiry-state">{copy.states[inquiry.state]}</dd>
@@ -558,8 +611,43 @@ export async function InquiryScreen({
               {detail.activity.map((entry) => (
                 <li key={entry.id}>
                   <p>
-                    {copy.events[entry.messageKey as keyof typeof copy.events] ?? copy.changeSaved}
+                    {entry.contact
+                      ? contact[entry.contact.result]
+                      : (copy.events[entry.messageKey as keyof typeof copy.events] ??
+                        copy.changeSaved)}
                   </p>
+                  {entry.contact ? (
+                    <dl className="space-y-2 break-words text-caption">
+                      <div>
+                        <dt className="font-semibold">{contact.observed}</dt>
+                        <dd>
+                          <When date={new Date(entry.contact.contactedAt)} locale={locale} />
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold">{contact.contact}</dt>
+                        <dd>
+                          <bdi>{entry.contact.contact.value}</bdi>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold">{contact.note}</dt>
+                        <dd className="whitespace-pre-wrap">{entry.contact.note}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-semibold">{contact.followUp}</dt>
+                        <dd>
+                          <a href={`/${locale}/tasks/${entry.contact.taskId}`} className={link}>
+                            {entry.contact.nextAction}
+                          </a>{" "}
+                          · <When date={new Date(entry.contact.dueAt)} locale={locale} /> ·{" "}
+                          {entry.contact.promisedToClient
+                            ? contact.clientPromise
+                            : contact.internal}
+                        </dd>
+                      </div>
+                    </dl>
+                  ) : null}
                   <p className="text-caption text-text-muted">
                     <When date={entry.at} locale={locale} />
                   </p>
@@ -783,7 +871,9 @@ export async function OperationScreen({
 }) {
   if (
     typeof operationKey !== "string" ||
-    !(task ? type === "task" || type === "handover" : type === "accept" || type === "triage")
+    !(task
+      ? type === "task" || type === "handover"
+      : type === "accept" || type === "triage" || type === "contact")
   )
     notFound();
   const operationType =
@@ -793,7 +883,9 @@ export async function OperationScreen({
         ? "work.task.change"
         : type === "accept"
           ? "work.inquiry.accept"
-          : "work.inquiry.triage";
+          : type === "contact"
+            ? "work.inquiry.contact"
+            : "work.inquiry.triage";
   const receipt = await privateRead(() =>
     readWorkOperation(getDb(), session, operationType, id, operationKey),
   );
@@ -801,7 +893,9 @@ export async function OperationScreen({
   return (
     <Page
       title={
-        type === "accept" && receipt?.status === "succeeded" ? copy.changeSaved : copy.statusTitle
+        (type === "accept" || type === "contact") && receipt?.status === "succeeded"
+          ? copy.changeSaved
+          : copy.statusTitle
       }
       locale={locale}
     >
