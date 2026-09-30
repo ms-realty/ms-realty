@@ -124,6 +124,40 @@ it("uses only the supplied authorized appointment and sends the hero conversatio
   expect(reads.messages).not.toHaveBeenCalled();
 });
 
+it("isolates a recorded English action and English empty-state copy inside the Hebrew overview", async () => {
+  const nextAction = "Review the recorded step-free requirement with your broker.";
+  reads.detail.mockResolvedValue({
+    ...baseView,
+    record: { ...baseView.record, nextAction },
+  });
+  render(
+    <div dir="rtl" lang="he">
+      {
+        await CaseScreen({
+          locale: "he",
+          session,
+          id: row.id,
+          pane: "overview",
+          compactClientOverview: true,
+        })
+      }
+    </div>,
+  );
+  expect(screen.getByRole("heading", { name: nextAction })).toHaveAttribute("dir", "auto");
+  for (const text of [
+    "No appointments are available in this scope.",
+    "No properties have been suggested yet.",
+  ]) {
+    const fallback = screen.getByText(text);
+    expect(fallback).toHaveAttribute("lang", "en");
+    expect(fallback).toHaveAttribute("dir", "ltr");
+  }
+  expect(screen.getByRole("link", { name: /Appointments/ })).toHaveAttribute(
+    "href",
+    "/he/appointments",
+  );
+});
+
 it("keeps the full Case route and its requirements section outside the compact entry", async () => {
   render(await CaseScreen({ locale: "en", session, id: row.id, pane: "overview" }));
   expect(reads.messages).toHaveBeenCalledWith("test-db", session, row.id);
