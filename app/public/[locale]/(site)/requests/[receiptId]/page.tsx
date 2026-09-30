@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { comparisonReturnHref } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
+import { InquiryContent } from "@/features/discovery/inquiry-content";
+import { OwnerInquirySummary } from "@/features/discovery/inquiry-owner";
 import { inquiryReceiptView, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
 import { isRoutableLocale } from "@/i18n/config";
@@ -79,6 +81,14 @@ export default async function ReceiptPage({
           ) : null}
         </Receipt>
       </div>
+      <InquiryContent content={receipt.content} locale={locale} />
+      {receipt.ownerInput ? (
+        <OwnerInquirySummary
+          input={receipt.ownerInput}
+          locale={locale}
+          includePrivateDetails={false}
+        />
+      ) : null}
       <a
         className="self-start underline"
         href={

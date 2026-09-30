@@ -31,6 +31,32 @@ function mount(action: FormAction<SpecimenValues>, state = initialState) {
 }
 
 describe("UI07 / S11–S17 progressive form", () => {
+  it("resolves the submit label from the returned review state while preserving the operation", async () => {
+    const user = userEvent.setup();
+    render(
+      <ActionForm
+        action={async (state) => ({
+          ...state,
+          responseId: "reviewed",
+          values: { ...state.values, note: "reviewed" },
+        })}
+        initialState={initialState}
+        permalink="/en/design/forms"
+        nativeIdentity="inquiry"
+        reconciliation={{ href: "/operation/server-issued-key", label: "Check operation" }}
+        copy={copy.form}
+        labels={{ subject: "Subject", note: "Note" }}
+        submitLabel={(state) =>
+          state.values.note === "reviewed" ? "Confirm exact inquiry" : "Review inquiry"
+        }
+      >
+        {() => <p>Entered values</p>}
+      </ActionForm>,
+    );
+    await user.click(screen.getByRole("button", { name: "Review inquiry" }));
+    expect(await screen.findByRole("button", { name: "Confirm exact inquiry" })).toBeEnabled();
+    expect(document.querySelector('input[name="_operationId"]')).toHaveValue("server-issued-key");
+  });
   it("keeps a supplied business identity stable across server tree positions and distinct from a sibling", () => {
     const firstPosition = nativeFormPermalink(
       "/en/cases/example/email",

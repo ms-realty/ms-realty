@@ -1,16 +1,21 @@
 "use client";
 import { useRef } from "react";
+import { contentRoute, parseContentReference } from "@/domain/inquiry-content";
 import {
   comparisonReturnHref,
   parseComparisonReferences,
   parseSelectedListingsJson,
 } from "@/domain/inquiry-selection";
 import type { PublicLocale } from "@/i18n/config";
+import { buttonClass } from "@/ui/button-class";
 import { controlClass, fieldClass } from "@/ui/field-class";
 import type { FormAction } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { DiscoveryCopy } from "./copy";
+import { OwnerInquiryFields } from "./inquiry-owner";
+import { InquiryReview } from "./inquiry-review";
+import { inquiryReviewCopy } from "./inquiry-review-copy";
 import {
   type InquiryState,
   type InquiryValues,
@@ -31,6 +36,7 @@ export function InquiryForm({
   copy: DiscoveryCopy;
 }) {
   const contacts = useRef<Record<string, string>>({});
+  const reviewCopy = inquiryReviewCopy(locale);
   return (
     <ActionForm
       action={action}
@@ -53,10 +59,31 @@ export function InquiryForm({
         observedManifestId: copy.reference,
         selectedListings: copy.compare,
         comparisonReferences: copy.compare,
+        contentReference: copy.source,
+        ownerLocality: reviewCopy.locality,
+        ownerPropertyType: reviewCopy.propertyType,
+        ownerTransaction: reviewCopy.transaction,
+        ownerDocumentArea: reviewCopy.documentArea,
+        ownerRelationship: reviewCopy.relationship,
+        ownerPropertyStatus: reviewCopy.propertyStatus,
+        ownerDocumentSource: reviewCopy.documentSource,
       }}
-      submitLabel={copy.ask}
+      submitLabel={(state) =>
+        (state as InquiryState).review ? reviewCopy.confirmAction : reviewCopy.reviewAction
+      }
     >
       {(form) => {
+        const review = (form.state as InquiryState).review;
+        if (review)
+          return (
+            <InquiryReview
+              review={review}
+              values={form.values}
+              locale={locale}
+              copy={copy}
+              pending={form.pending}
+            />
+          );
         const setContact = (kind: string) => {
           contacts.current[form.values.contactKind] = form.values.contactValue;
           form.setValue("contactKind", kind);
@@ -69,6 +96,8 @@ export function InquiryForm({
         const selection = form.field("selectedListings");
         const navigation = form.field("comparisonReferences");
         const returnReferences = parseComparisonReferences(form.values.comparisonReferences);
+        const contentReference = parseContentReference(form.values.contentReference);
+        const content = form.field("contentReference");
         const choices = form.values.selectedListings
           ? { question: copy.ask }
           : {
@@ -77,9 +106,45 @@ export function InquiryForm({
               seller_consultation: copy.sell,
               landlord_consultation: copy.let,
               ...(form.values.listingReference ? { viewing_request: copy.viewing } : {}),
+              ...(contentReference?.kind === "service"
+                ? { service_consultation: reviewCopy.service }
+                : {}),
             };
         return (
           <>
+            <input type="hidden" name="inquiryStage" value="review" />
+            <input type="hidden" name="contentReference" value={form.values.contentReference} />
+            {content.error || contentReference ? (
+              <section
+                id={content.id}
+                tabIndex={-1}
+                aria-label={copy.source}
+                className="space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
+                aria-describedby={content.error ? `${content.id}-error` : undefined}
+              >
+                {content.error ? (
+                  <p id={`${content.id}-error`} className="text-error">
+                    {content.error}
+                  </p>
+                ) : null}
+                {contentReference ? (
+                  <a className="underline" href={`/${locale}${contentRoute(contentReference)}`}>
+                    {copy.source}
+                  </a>
+                ) : null}
+                {(form.state as InquiryState).sourcesChanged ? (
+                  <button
+                    type="submit"
+                    name="refreshSources"
+                    value="1"
+                    className={buttonClass("secondary")}
+                    disabled={form.pending}
+                  >
+                    {reviewCopy.refreshSources}
+                  </button>
+                ) : null}
+              </section>
+            ) : null}
             {form.values.selectedListings || selection.error ? (
               <section
                 id={selection.id}
@@ -190,6 +255,15 @@ export function InquiryForm({
                 </p>
               ) : null}
             </div>
+            {["seller_consultation", "landlord_consultation"].includes(form.values.purpose) ? (
+              <OwnerInquiryFields form={form} locale={locale} />
+            ) : (
+              Object.entries(form.values)
+                .filter(([name]) => name.startsWith("owner"))
+                .map(([name, value]) => (
+                  <input type="hidden" key={name} name={name} value={value} />
+                ))
+            )}
             <FormField
               {...form.field("message")}
               label={copy.message}

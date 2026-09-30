@@ -8,6 +8,7 @@ import { emptyInquiry, type InquiryState } from "./inquiry-state";
 const mocked = vi.hoisted(() => ({
   session: "a".repeat(43) as string | undefined,
   submit: vi.fn(),
+  source: vi.fn(),
 }));
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({ origin: "http://localhost:3000" }),
@@ -18,6 +19,8 @@ vi.mock("@/server/inquiries/intake", async (original) => ({
   ...(await original<typeof import("@/server/inquiries/intake")>()),
   submitInquiry: mocked.submit,
 }));
+
+vi.mock("@/server/listings/detail", () => ({ getPublicListing: mocked.source }));
 
 import { issueSubmissionKey, parseInquiry } from "@/server/inquiries/intake";
 import { POST as submitNativeInquiry } from "../../../app/api/inquiries/route";
@@ -53,6 +56,14 @@ function submission() {
 beforeEach(() => {
   mocked.session = "a".repeat(43);
   mocked.submit.mockReset();
+  mocked.source.mockImplementation(async (_db, query) => ({
+    status: "listing",
+    listing: {
+      reference: query.reference,
+      manifestId: selection.find((item) => item.reference === query.reference)?.observedManifestId,
+      availability: { primaryAction: "ask" },
+    },
+  }));
 });
 
 describe("collective server action recovery", () => {
@@ -63,7 +74,10 @@ describe("collective server action recovery", () => {
         fieldErrors: { "selectedListings.1.observedManifestId": ["invalid"] },
       }),
     );
-    const result = await sendInquiry("en", state, data);
+    const review = await sendInquiry("en", state, data);
+    data.set("inquiryStage", "confirm");
+    data.set("reviewToken", review.review?.token ?? "");
+    const result = await sendInquiry("en", review, data);
     expect(mocked.submit.mock.calls[0]?.[1]).toMatchObject({ selectedListings: selection });
     expect(result.values).toEqual(state.values);
     expect(result.outcome).toMatchObject({
@@ -98,19 +112,19 @@ describe("collective server action recovery", () => {
       "Private text inserted into an invalid hidden field",
     );
   });
-  it("returns a fixed comparison path after a stale selection without dropping refs or drafts", async () => {
+  it("keeps source conflicts editable on the same operation without dropping refs or drafts", async () => {
     const { state, data } = submission();
     mocked.submit.mockRejectedValue(
       new AppError("version_conflict", { current: { reason: "selection_changed" } }),
     );
-    const result = await sendInquiry("he", state, data);
+    const review = await sendInquiry("he", state, data);
+    data.set("inquiryStage", "confirm");
+    data.set("reviewToken", review.review?.token ?? "");
+    const result = await sendInquiry("he", review, data);
     expect(result.values).toEqual(state.values);
     expect(result.outcome).toMatchObject({
-      kind: "conflict",
-      recovery: {
-        href: "/he/compare?references=MS-00303%2CMS-00101%2CMS-00202",
-        label: discoveryCopy("he").compare,
-      },
+      kind: "validation",
+      fieldErrors: { contentReference: [expect.any(String)] },
     });
   });
   it("rejects malformed and repeated hidden fields before intake", async () => {
@@ -228,7 +242,10 @@ describe("individual inquiry comparison return context", () => {
     mocked.submit.mockRejectedValue(
       new AppError("validation_failed", { fieldErrors: { message: ["required"] } }),
     );
-    const validation = await sendInquiry("en", state, data);
+    const review = await sendInquiry("en", state, data);
+    data.set("inquiryStage", "confirm");
+    data.set("reviewToken", review.review?.token ?? "");
+    const validation = await sendInquiry("en", review, data);
     expect(mocked.submit.mock.calls[0]?.[1]).toMatchObject({
       listingReference: "MS-00101",
       selectedListings: undefined,
@@ -238,9 +255,11 @@ describe("individual inquiry comparison return context", () => {
     mocked.submit.mockRejectedValue(new AppError("version_conflict"));
     const conflict = await sendInquiry("en", state, data);
     expect(conflict.outcome).toMatchObject({
-      kind: "conflict",
-      recovery: { href: "/en/compare?references=MS-00303%2CMS-00101%2CMS-00202", label: "Compare" },
+      kind: "validation",
+      fieldErrors: { contentReference: [expect.any(String)] },
     });
+    expect(conflict.sourcesChanged).toBe(true);
+    expect(conflict.values.comparisonReferences).toBe(comparisonReferences);
   });
   it("carries navigation and singular snapshot identity through native session bootstrap", async () => {
     const { state, data, key } = individual();

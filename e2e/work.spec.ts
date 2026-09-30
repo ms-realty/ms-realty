@@ -90,7 +90,8 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await page.getByLabel("Name", { exact: false }).fill("Synthetic visitor");
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+  await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+  await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inquiry received", exact: true })).toBeVisible();
   const rows = await db.select().from(schema.inquiries).where(eq(schema.inquiries.message, marker));
   expect(rows).toHaveLength(1);
@@ -221,7 +222,8 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel("Your inquiry", { exact: true }).fill(marker);
       await page.getByLabel("Email", { exact: true }).fill(`${randomUUID()}@example.test`);
       await page.getByRole("checkbox").check();
-      await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
       await expect(page.getByText(/Your inquiry was not submitted/)).toBeVisible();
       await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(marker);
       await expect(page.locator('[name="_operationId"]')).toHaveValue(operationId);
@@ -232,7 +234,8 @@ for (const javaScriptEnabled of [true, false]) {
         .update(schema.rateLimitBuckets)
         .set({ refilledAt: new Date(Date.now() - 121000) })
         .where(eq(schema.rateLimitBuckets.key, bucketKey));
-      await page.getByRole("button", { name: "Send an inquiry", exact: true }).click();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "Inquiry received", exact: true }),
       ).toBeVisible();
