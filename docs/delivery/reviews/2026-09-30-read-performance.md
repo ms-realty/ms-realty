@@ -256,3 +256,29 @@ so that path still constructs a formatter per area. `replica-cpu-summary.json` r
 profiles' source-mapped self-time breakdown, with approximate last-65-second alignment.
 The previous default-number/rounded-area microbenchmark does not qualify this exact-area
 path. No further identical full-load repeat is justified before a measured source repair.
+
+
+## Exact-area rendering repair
+
+Listing facts now use `formatExactArea`, a separate fixed configuration retaining the previous
+20-fraction-digit behavior. The rounded area formatter remains distinct. Caller-controlled
+Intl options still use native construction/validation. No fact, HTML, permission or session
+value is cached. All seven locales preserve high-precision values and later-value changes.
+
+The actual before/after ListingFacts source was compiled with the same automatic JSX setting
+and rendered through production React's static-markup API. Eight alternating waves of 12,000
+high-precision area/bedroom sets excluded two warmups. HTML hashes matched for every wave;
+median duration was 219.73 before and 44.68 ms after. Eleven formatting tests and TypeScript
+pass. [Portable observations](../evidence/2026-09-30-exact-area-render.json) retain source hashes
+and scope. Initial standalone JSX-loader attempts failed before measurement; explicit matched
+compilation repaired the benchmark setup and failed logs remain in the artifact directory.
+
+This supports the identified component CPU repair. It does not qualify Next RSC serialization,
+network latency, the full concurrent workload, target infrastructure or R08. The previous
+failed two-process load remains the current full-workload evidence.
+
+The fresh Linux build passed all 12 public discovery browser scenarios across desktop/mobile
+Chromium and mobile WebKit, including save/compare, reviewed native intent, no-JavaScript
+inquiry receipts and publication withdrawal. `exact-area-browser.log`, the final 11-test
+formatting log, TypeScript log and 900-file lint log are retained. A precision-loss warning
+in one test literal was repaired to its actual representable value; the failed lint log remains.

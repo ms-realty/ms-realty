@@ -85,6 +85,16 @@ export function formatArea(locale: PublicLocale, squareMetres: number): string {
   return `${formatted}\u00a0m²`;
 }
 
+/** Public source facts retain the existing 20-digit configuration, separate from rounded area. */
+export function formatExactArea(locale: PublicLocale, squareMetres: number): string {
+  const formatted = reuse(
+    numberFormats,
+    JSON.stringify([locale, "exact-area"]),
+    () => new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 20 }),
+  ).format(squareMetres);
+  return `${formatted}\u00a0m²`;
+}
+
 export interface ZonedOptions {
   /** IANA zone; defaults to the agency's. Always explicit, never the server's zone. */
   readonly timeZone?: string;
