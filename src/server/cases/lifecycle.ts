@@ -849,24 +849,24 @@ export async function lifecycleView(db: Executor, session: Session, id: string) 
         availableStaff(),
       ),
     )
-    .orderBy(asc(principals.displayName))
-    .limit(50);
+    .orderBy(asc(principals.displayName), asc(principals.id));
   const receivers = [];
-  for (const member of members)
-    if (
-      member.id !== row.ownerId &&
-      (await can(db, { kind: "staff", id: member.id }, "case.transition", {
-        type: "case",
-        id,
-        audience: "internal",
-      })) &&
-      (await can(db, { kind: "staff", id: member.id }, "case.read_internal", {
-        type: "case",
-        id,
-        audience: "internal",
-      }))
-    )
-      receivers.push(member);
+  // Ineligible people must not hide a valid receiver after an arbitrary first page.
+  // Bound concurrent database work while retaining all eligible options.
+  for (let offset = 0; offset < members.length; offset += 4) {
+    const eligible = await Promise.all(
+      members.slice(offset, offset + 4).map(async (member) => {
+        if (member.id === row.ownerId) return null;
+        const actor = { kind: "staff" as const, id: member.id };
+        const resource = { type: "case", id, audience: "internal" as const };
+        return (await can(db, actor, "case.transition", resource)) &&
+          (await can(db, actor, "case.read_internal", resource))
+          ? member
+          : null;
+      }),
+    );
+    for (const member of eligible) if (member) receivers.push(member);
+  }
   const historyRows = await db
     .select({
       id: caseStageHistory.id,

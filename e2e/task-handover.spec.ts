@@ -117,7 +117,7 @@ for (const javaScriptEnabled of [true, false])
       await page.goto(hostUrl("staff", "/en/coverage"));
       await page.screenshot({
         path: testInfo.outputPath(`coverage-${javaScriptEnabled}-320.png`),
-        fullPage: true,
+        fullPage: false,
       });
       await page.locator(`a[href="/en/tasks/${task.id}"]`).click();
       const request = page

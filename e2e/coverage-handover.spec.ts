@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { findCoverageRecord } from "./coverage-helpers";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -100,7 +101,6 @@ for (const javaScriptEnabled of [true, false])
     try {
       await context.addCookies([cookie(f.staffToken)]);
       const page = await context.newPage();
-      const queue = async () => page.goto(hostUrl("staff", "/en/coverage"));
       await page.goto(hostUrl("staff", `/en/access/offboard/${f.brokerId}`));
       await page
         .getByLabel("Reason and handover plan", { exact: true })
@@ -108,7 +108,7 @@ for (const javaScriptEnabled of [true, false])
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "End staff access", exact: true }).click();
       await expect(page.getByText("Staff membership ended", { exact: true })).toBeVisible();
-      await queue();
+      expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
       await page.locator(`a[href="/en/cases/${f.caseId}"]`).click();
       await page.locator(`a[href="/en/cases/${f.caseId}/continuity"]`).click();
       const request = page
@@ -126,8 +126,7 @@ for (const javaScriptEnabled of [true, false])
       expect(
         (await db.select().from(schema.cases).where(eq(schema.cases.id, f.caseId)))[0],
       ).toMatchObject({ ownerId: f.brokerId, pendingOwnerId: receiver.brokerId });
-      await queue();
-      await expect(page.locator(`a[href="/en/cases/${f.caseId}"]`)).toBeVisible();
+      expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
       await context.clearCookies();
       await context.addCookies([cookie(receiver.brokerToken)]);
       await page.goto(hostUrl("staff", `/en/cases/${f.caseId}/continuity`));
@@ -164,8 +163,8 @@ for (const javaScriptEnabled of [true, false])
         (await db.select().from(schema.inquiries).where(eq(schema.inquiries.id, inquiry.id)))[0]
           ?.ownerId,
       ).toBe(f.brokerId);
-      await queue();
-      await expect(page.locator(`a[href="/en/cases/${f.caseId}"]`)).toHaveCount(0);
+      expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(false);
+      expect(await findCoverageRecord(page, `/en/inquiries/${inquiry.id}`)).toBe(true);
       await page.locator(`a[href="/en/inquiries/${inquiry.id}"]`).click();
       await page
         .getByLabel("Next action", { exact: true })
@@ -186,8 +185,8 @@ for (const javaScriptEnabled of [true, false])
       ).toMatchObject({ promisedToClient: true, dueAt });
       await context.clearCookies();
       await context.addCookies([cookie(f.staffToken)]);
-      await queue();
-      await expect(page.locator(`a[href="/en/inquiries/${inquiry.id}"]`)).toHaveCount(0);
+      expect(await findCoverageRecord(page, `/en/inquiries/${inquiry.id}`)).toBe(false);
+      expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);
       await page.locator(`a[href="/en/operations/keys/${f.keyId}"]`).click();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         320,
@@ -216,14 +215,13 @@ for (const javaScriptEnabled of [true, false])
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, f.keyId)))[0],
       ).toMatchObject({ state: "stored", holderId: null });
-      await queue();
       for (const href of [
         `/en/cases/${f.caseId}`,
         `/en/tasks/${task.id}`,
         `/en/inquiries/${inquiry.id}`,
         `/en/operations/keys/${f.keyId}`,
       ])
-        await expect(page.locator(`a[href="${href}"]`)).toHaveCount(0);
+        expect(await findCoverageRecord(page, href)).toBe(false);
     } finally {
       await context.close();
     }
