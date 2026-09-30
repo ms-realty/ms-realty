@@ -263,7 +263,7 @@ export async function CaseScreen(
   const showMessages = staff || props.pane === "messages" || showOverview;
   return (
     <WorkflowPage {...props} title={`${row.reference} · ${row.title}`}>
-      <div className="space-y-3">
+      <div className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
         <div className="flex flex-wrap gap-5">
           <a className={workflowLink} href={`/${props.locale}/proposals?case=${row.id}`}>
             {c.proposals}
@@ -379,7 +379,7 @@ export async function CaseScreen(
           {commitments.rows.length ? (
             <ul className="space-y-4">
               {commitments.rows.map(({ task, ownerName }) => (
-                <li key={task.id} className="space-y-1">
+                <li key={task.id} className="min-w-0 space-y-1 [overflow-wrap:anywhere]">
                   <a className={workflowLink} href={`/${props.locale}/tasks/${task.id}`}>
                     {task.title}
                   </a>

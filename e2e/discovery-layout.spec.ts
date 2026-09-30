@@ -3,10 +3,18 @@ import { expect, test } from "@playwright/test";
 
 function fixture() {
   return JSON.parse(
-    execFileSync(process.execPath, ["--import", "tsx", "src/features/discovery/testing/seed.ts"], {
-      encoding: "utf8",
-      env: { ...process.env, DATABASE_URL: process.env.E2E_DATABASE_URL },
-    }),
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "src/features/discovery/testing/seed.ts"],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+          DATABASE_URL: process.env.E2E_DATABASE_URL,
+        },
+      },
+    ),
   ) as { published: { reference: string; title: string } };
 }
 

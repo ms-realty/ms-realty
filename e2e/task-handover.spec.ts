@@ -324,11 +324,12 @@ for (const javaScriptEnabled of [true, false])
       });
       await page.goto(hostUrl("staff", "/en/tasks?view=handovers"));
       expect(await findPaginatedRecord(page, taskHref, { viewportWidth: 320 })).toBe(false);
-      const lastPending = pending.at(-1);
+      const lastPending = pending.reduce((last, row) => (row.id > last.id ? row : last));
       if (!lastPending) throw new Error("Missing pending handover fixture");
       expect(
         await findPaginatedRecord(page, `/en/tasks/${lastPending.id}`, { viewportWidth: 320 }),
       ).toBe(true);
+      expect(Number(new URL(page.url()).searchParams.get("page"))).toBeGreaterThan(1);
       await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
       const secondRequest = page
         .locator("form")
