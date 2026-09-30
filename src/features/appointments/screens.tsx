@@ -17,6 +17,7 @@ import {
 } from "../cases/screens";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
+import { hostHandoverCopy } from "./host-copy";
 export async function CalendarScreen(props: ScreenProps) {
   const c = caseCopy(props.locale);
   const rows = await listAppointments(getDb(), props.session);
@@ -33,6 +34,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
   const { appointment: row } = detail;
   const c = caseCopy(props.locale);
   const staff = props.session.account.kind === "staff";
+  const hostCopy = hostHandoverCopy(props.locale);
   const path = `/${props.locale}/${staff ? "calendar" : "appointments"}/${row.id}`;
   const windows = z.array(z.object({ text: z.string() })).safeParse(row.requestedWindows);
   const canArrange =
@@ -109,6 +111,42 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
         <WorkflowSection title={c.proposedTime}>
           <WorkflowTime value={row.proposedStartsAt} locale={props.locale} /> —{" "}
           <WorkflowTime value={row.proposedEndsAt} locale={props.locale} />
+        </WorkflowSection>
+      ) : null}
+      {staff && detail.canAcceptHost ? (
+        <WorkflowSection title={hostCopy.title}>
+          <p>{hostCopy.lead}</p>
+          {detail.reservedInterval ? (
+            <p>
+              {hostCopy.reserved}:{" "}
+              <WorkflowTime value={detail.reservedInterval.startsAt} locale={props.locale} /> —{" "}
+              <WorkflowTime value={detail.reservedInterval.endsAt} locale={props.locale} />
+            </p>
+          ) : null}
+          <BoundWorkflowForm
+            {...props}
+            command="appointmentHost"
+            id={row.id}
+            revision={row.version}
+            path={path}
+            fields={[
+              { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
+              {
+                name: "propertyAccessConfirmed",
+                label: c.access,
+                type: "checkbox",
+                required: true,
+              },
+              {
+                name: "externalBusyChecked",
+                label: hostCopy.external,
+                type: "checkbox",
+                required: true,
+              },
+              { name: "reviewed", label: hostCopy.reviewed, type: "checkbox", required: true },
+            ]}
+            submit={hostCopy.submit}
+          />
         </WorkflowSection>
       ) : null}
       {canArrange ? (

@@ -106,7 +106,11 @@ export async function appointmentFor(
   return { row, live, resource };
 }
 
-async function snapshot(db: Executor, row: typeof appointments.$inferSelect, session: Session) {
+export async function recordAppointmentVersion(
+  db: Executor,
+  row: typeof appointments.$inferSelect,
+  session: Session,
+) {
   await db.insert(appointmentVersions).values({
     appointmentId: row.id,
     versionNumber: row.version,
@@ -220,7 +224,7 @@ export async function requestAppointment(
       await ctx.tx
         .insert(appointmentParticipants)
         .values({ appointmentId: row.id, partyId, role: "client" });
-      await snapshot(ctx.tx, row, live);
+      await recordAppointmentVersion(ctx.tx, row, live);
       await bumpCase(ctx.tx, caseRow.id, caseRow.version);
       await caseEvent(ctx, "appointment", row.id, "appointment.requested", capability, {
         caseId: caseRow.id,
@@ -440,7 +444,7 @@ export async function arrangeAppointment(
         .where(eq(appointments.id, row.id))
         .returning();
       if (!changed) throw new Error("Appointment update failed");
-      await snapshot(ctx.tx, changed, live);
+      await recordAppointmentVersion(ctx.tx, changed, live);
       await caseEvent(
         ctx,
         "appointment",
@@ -534,7 +538,7 @@ export async function respondToAppointment(
         .where(eq(appointments.id, row.id))
         .returning();
       if (!changed) throw new Error("Appointment response failed");
-      await snapshot(ctx.tx, changed, live);
+      await recordAppointmentVersion(ctx.tx, changed, live);
       await caseEvent(ctx, "appointment", row.id, `appointment.${input.state}`, capability);
       return {
         id: row.id,
@@ -548,6 +552,23 @@ export async function respondToAppointment(
 
 export async function readAppointment(db: Executor, session: Session, id: string) {
   const { row, live, resource } = await appointmentFor(db, session, id);
+  const [reservation] =
+    live.actor.kind === "staff"
+      ? await db
+          .select({
+            startsAt: sql<string>`lower(${appointmentResources.during})::text`,
+            endsAt: sql<string>`upper(${appointmentResources.during})::text`,
+          })
+          .from(appointmentResources)
+          .where(
+            and(
+              eq(appointmentResources.appointmentId, row.id),
+              eq(appointmentResources.kind, "broker"),
+              eq(appointmentResources.active, true),
+            ),
+          )
+          .limit(1)
+      : [];
   const [coverage] =
     live.actor.kind === "staff" && (openAppointmentStates as readonly string[]).includes(row.state)
       ? await db
@@ -593,6 +614,17 @@ export async function readAppointment(db: Executor, session: Session, id: string
     },
     canManage: live.account.kind === "staff",
     needsCoverage: Boolean(coverage?.needed),
+    canAcceptHost: Boolean(
+      coverage?.needed &&
+        row.hostId !== live.account.id &&
+        (!row.confirmedStartsAt || row.confirmedStartsAt.getTime() > Date.now()) &&
+        (!row.proposedStartsAt ||
+          row.confirmedStartsAt ||
+          row.proposedStartsAt.getTime() > Date.now()),
+    ),
+    reservedInterval: reservation
+      ? { startsAt: new Date(reservation.startsAt), endsAt: new Date(reservation.endsAt) }
+      : null,
     canRespond: await can(
       db,
       live.actor,

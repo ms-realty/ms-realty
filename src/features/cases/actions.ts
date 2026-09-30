@@ -2,6 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { displayLocale, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import { acceptAppointmentHost } from "@/server/appointments/host-handover";
 import {
   arrangeAppointment,
   requestAppointment,
@@ -29,6 +30,7 @@ import { AppError } from "@/server/errors";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { hostHandoverCopy } from "../appointments/host-copy";
 import {
   type WorkflowCommand,
   workflowFields,
@@ -75,7 +77,10 @@ export async function workflowAction(
   const state: FormState<FormValues> = {
     operationId,
     expectedRevision: envelope?.expectedRevision ?? null,
-    values,
+    values:
+      command === "appointmentHost"
+        ? { ...values, reviewed: "", externalBusyChecked: "", propertyAccessConfirmed: "" }
+        : values,
     responseId: randomUUID(),
     reconciliation: status,
     outcome: { kind: "idle" },
@@ -95,6 +100,16 @@ export async function workflowAction(
       const s = ctx.session,
         db = ctx.db;
       switch (command) {
+        case "appointmentHost":
+          return (
+            await acceptAppointmentHost(db, s, {
+              ...base,
+              reason: values.reason,
+              reviewed: values.reviewed === "true",
+              externalBusyChecked: values.externalBusyChecked === "true",
+              propertyAccessConfirmed: values.propertyAccessConfirmed === "true",
+            })
+          ).outcome;
         case "emailDraft":
           return (
             await draftCaseEmail(db, s, {
@@ -287,7 +302,7 @@ export async function workflowAction(
   if (result.ok) {
     // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
     // visible after a native POST by opening its actor-bound receipt instead.
-    if (command === "handover") redirect(status.href);
+    if (command === "handover" || command === "appointmentHost") redirect(status.href);
     const appointment = ["request", "arrange", "appointment"].includes(command);
     const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {
@@ -317,7 +332,7 @@ export async function workflowAction(
         message: "Confirm your identity again. Your draft is retained.",
         retryable: false,
         recovery: {
-          href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/${context === "staff" ? "cases" : "overview"}/${id}`)}`,
+          href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/${command === "appointmentHost" ? "calendar" : context === "staff" ? "cases" : "overview"}/${id}`)}`,
           label: "Confirm your identity",
         },
       },
@@ -353,17 +368,21 @@ export async function workflowAction(
       },
     };
   const explanation = error.fieldErrors?.form?.includes("appointment_conflict")
-    ? copy.calendarConflict
+    ? command === "appointmentHost"
+      ? hostHandoverCopy(locale).busy
+      : copy.calendarConflict
     : ["NOT_FOUND", "NOT_AUTHORIZED", "UNAUTHENTICATED"].includes(error.code)
       ? copy.denied
       : copy.transition;
   return {
-    ...state,
+    ...(command === "appointmentHost" ? fresh : state),
     outcome: {
       kind: "rejected",
       code: error.code,
       message: explanation,
-      retryable: false,
+      retryable:
+        command === "appointmentHost" &&
+        Boolean(error.fieldErrors?.form?.includes("appointment_conflict")),
       recovery: status,
     },
   };
