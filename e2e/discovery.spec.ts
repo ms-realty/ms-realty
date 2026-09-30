@@ -62,7 +62,12 @@ test("AT01/AT05/AT27: published search, local save/compare and withdrawal rechec
   await expect(
     page.getByRole("link", { name: data.published.reference, exact: true }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Compare", exact: true }).last().click();
+  // P08 deliberately requires two choices; the single-property P07 URL remains supported.
+  await expect(
+    page.getByRole("checkbox", { name: `Select for comparison ${data.published.reference}` }),
+  ).toBeChecked();
+  await expect(page.getByRole("button", { name: "Compare selected properties" })).toBeDisabled();
+  await page.goto(`/en/compare?references=${data.published.reference}`);
   await expect(page.getByRole("link", { name: data.published.title, exact: true })).toBeVisible();
   fixture("withdraw", data.published.reference);
   await page.reload();
