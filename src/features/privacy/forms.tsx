@@ -27,12 +27,14 @@ export function TextField({
   label,
   value,
   type = "text",
+  step,
   required = false,
 }: {
   name: string;
   label: string;
   value?: string;
   type?: string;
+  step?: string;
   required?: boolean;
 }) {
   return (
@@ -43,6 +45,7 @@ export function TextField({
         name={name}
         defaultValue={value}
         type={type}
+        step={step}
         required={required}
         maxLength={500}
       />
