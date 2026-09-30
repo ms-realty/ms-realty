@@ -1,11 +1,11 @@
 import "server-only";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { principals, staffMemberships, tasks } from "@/db/schema";
+import { passkeys, principals, staffMemberships, tasks } from "@/db/schema";
 import { availableStaff } from "../auth/availability";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, type Session } from "../auth/sessions";
-import { assertCanRead, can } from "../authz";
+import { assertCanRead, can, staffWhoCan } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
@@ -46,6 +46,8 @@ async function receiverEligible(db: Executor, id: string, task: Task, lock = fal
 
 export async function readTaskHandover(db: Executor, session: Session, id: string) {
   const view = await readTask(db, session, id);
+  if (!(openTaskStates as readonly string[]).includes(view.task.state))
+    return { ...view, receivers: [], pendingName: null };
   const people = await db
     .select({ id: principals.id, name: principals.displayName })
     .from(principals)
@@ -56,13 +58,20 @@ export async function readTaskHandover(db: Executor, session: Session, id: strin
         eq(principals.status, "active"),
         eq(staffMemberships.state, "active"),
         availableStaff(),
+        sql`(select count(*) from ${passkeys}
+          where ${passkeys.principalId} = ${principals.id}
+            and ${passkeys.revokedAt} is null) >= ${staffPasskeyMinimum}`,
       ),
     )
     .orderBy(asc(principals.displayName), asc(principals.id));
-  const receivers = [];
-  for (const person of people)
-    if (person.id !== view.task.ownerId && (await receiverEligible(db, person.id, view.task)))
-      receivers.push(person);
+  const candidates = people.filter((person) => person.id !== view.task.ownerId);
+  const eligible = await staffWhoCan(
+    db,
+    candidates.map((person) => person.id),
+    ["task.manage"],
+    taskResource(view.task),
+  );
+  const receivers = candidates.filter((person) => eligible.has(person.id));
   const [pending] = view.task.pendingOwnerId
     ? await db
         .select({ name: principals.displayName })

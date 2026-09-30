@@ -1,22 +1,23 @@
-import { getDb } from "@/db/client";
 import { type WorkflowField, WorkflowForm } from "@/features/cases/form";
 import type { Session } from "@/server/auth/sessions";
-import { readTaskHandover } from "@/server/work/handover";
+import type { readTaskHandover } from "@/server/work/handover";
 import { initialFormState } from "@/ui/form/server";
 import { taskHandoverAction } from "./actions";
 import { workCopy } from "./copy";
 import { taskHandoverCopy } from "./handover-copy";
 
-export async function TaskHandoverScreen({
+export function TaskHandoverScreen({
   locale,
   session,
   id,
+  view,
 }: {
   locale: string;
   session: Session;
   id: string;
+  view: Awaited<ReturnType<typeof readTaskHandover>>;
 }) {
-  const { task, receivers, pendingName } = await readTaskHandover(getDb(), session, id);
+  const { task, receivers, pendingName } = view;
   const c = taskHandoverCopy(locale),
     path = `/${locale}/tasks/${id}`;
   function form(intent: "request" | "accept" | "cancel", label: string) {

@@ -1,0 +1,532 @@
+{
+  "schema": 1,
+  "scope": "local-synthetic-shared-development-host",
+  "releaseVerdict": "R08 remains failed; no production capacity claim",
+  "budgetChanged": false,
+  "runs": [
+    {
+      "name": "load-baseline-eb538812",
+      "provenance": {
+        "revision": "eb5388126d933ed4c8af1f0cb8899e9f1601559e",
+        "dirty": false,
+        "buildId": "gmUUsOwEBiIH_5jVllSLZ",
+        "containerId": "7cd00167482b80ad9c34b800bc6cd95d4fb28f8186536b419c57f41dad62cd65",
+        "image": "mcr.microsoft.com/playwright:v1.63.0-noble",
+        "resources": {
+          "NanoCpus": 0,
+          "Memory": 0,
+          "MemorySwap": 0,
+          "CpuQuota": 0,
+          "CpuPeriod": 0
+        },
+        "exitCode": 1,
+        "report": "test-results/a5bba12d81554909b06f383dfbfb70b0/agency-load-AT62-catalogue-ad422-ublic-and-10-staff-sessions-synthetic-load/load-report.json",
+        "boundary": "Local Linux container calling native macOS PG18 through host.docker.internal. Shared workstation; not target infrastructure."
+      },
+      "recordedAt": "2026-09-30T14:42:53.775Z",
+      "dataset": {
+        "listings": 10000,
+        "projections": 18571,
+        "largeMediaBytes": 747308,
+        "largeMediaSamples": 100,
+        "scanEvidence": "synthetic fixture, not real ClamAV"
+      },
+      "workload": {
+        "publicSessions": 50,
+        "staffSessions": 10,
+        "intendedSeconds": 60,
+        "elapsedMs": 61368.26465299999,
+        "peakMeasuredRequests": 60,
+        "completedCycles": {
+          "public": [
+            36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36,
+            36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 35, 35, 36, 36,
+            36, 36, 36, 36, 35, 35
+          ],
+          "staff": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+        }
+      },
+      "measurements": {
+        "staff-today-html": {
+          "count": 60,
+          "p50": 768.03,
+          "p95": 1291.23,
+          "p99": 1330.9,
+          "max": 1330.9,
+          "budgetMs": 500
+        },
+        "public-search-html": {
+          "count": 1796,
+          "p50": 947.02,
+          "p95": 1410.24,
+          "p99": 1886.77,
+          "max": 2086.35,
+          "budgetMs": 500
+        },
+        "public-detail-html": {
+          "count": 1796,
+          "p50": 467.87,
+          "p95": 727.52,
+          "p99": 831.36,
+          "max": 1048.43,
+          "budgetMs": 500
+        },
+        "public-media": {
+          "count": 1796,
+          "p50": 188.83,
+          "p95": 332.1,
+          "p99": 434.41,
+          "max": 543.94,
+          "budgetMs": null
+        },
+        "staff-task-html": {
+          "count": 60,
+          "p50": 4133.95,
+          "p95": 5432.09,
+          "p99": 5584.48,
+          "max": 5584.48,
+          "budgetMs": 500
+        },
+        "staff-command-post": {
+          "count": 60,
+          "p50": 4912.86,
+          "p95": 5381.48,
+          "p99": 5469.61,
+          "max": 5469.61,
+          "budgetMs": 800
+        }
+      },
+      "failures": [],
+      "verdict": "failed-performance-budgets"
+    },
+    {
+      "name": "load-search-cte",
+      "provenance": {
+        "revision": "eb5388126d933ed4c8af1f0cb8899e9f1601559e",
+        "dirty": true,
+        "buildId": "vxmJJojIGTDX3cEQTaNN1",
+        "patchSha256": "e5e06a88961668c44d46148dd080d5e16bf22e6e95f196b8287eb83abcb49af1",
+        "patch": "load-search-cte.patch",
+        "exitCode": 1,
+        "report": "test-results/dca6231b47484b8c842c48c18ba3fa17/agency-load-AT62-catalogue-ad422-ublic-and-10-staff-sessions-synthetic-load/load-report.json",
+        "boundary": "Same owned Linux container and native macOS PG18 as baseline; shared development host."
+      },
+      "recordedAt": "2026-09-30T14:54:13.285Z",
+      "dataset": {
+        "listings": 10000,
+        "projections": 18571,
+        "largeMediaBytes": 747604,
+        "largeMediaSamples": 100,
+        "scanEvidence": "synthetic fixture, not real ClamAV"
+      },
+      "workload": {
+        "publicSessions": 50,
+        "staffSessions": 10,
+        "intendedSeconds": 60,
+        "elapsedMs": 60848.65911099996,
+        "peakMeasuredRequests": 60,
+        "completedCycles": {
+          "public": [
+            43, 43, 43, 43, 42, 43, 43, 43, 43, 43, 43, 43, 43, 42, 42, 43, 43, 43, 43, 42, 43, 43,
+            43, 43, 42, 43, 43, 43, 43, 43, 43, 43, 43, 42, 42, 42, 43, 43, 43, 42, 43, 43, 42, 42,
+            42, 42, 42, 42, 42, 43
+          ],
+          "staff": [7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+        }
+      },
+      "measurements": {
+        "staff-today-html": {
+          "count": 70,
+          "p50": 742.03,
+          "p95": 983.24,
+          "p99": 989.41,
+          "max": 989.41,
+          "budgetMs": 500
+        },
+        "public-search-html": {
+          "count": 2134,
+          "p50": 777.92,
+          "p95": 1049.07,
+          "p99": 1283.61,
+          "max": 1493.75,
+          "budgetMs": 500
+        },
+        "public-detail-html": {
+          "count": 2134,
+          "p50": 413.93,
+          "p95": 608.21,
+          "p99": 700.04,
+          "max": 1016.05,
+          "budgetMs": 500
+        },
+        "public-media": {
+          "count": 2134,
+          "p50": 192.11,
+          "p95": 305.25,
+          "p99": 378.16,
+          "max": 651.07,
+          "budgetMs": null
+        },
+        "staff-task-html": {
+          "count": 70,
+          "p50": 3748.29,
+          "p95": 4740.87,
+          "p99": 4791.77,
+          "max": 4791.77,
+          "budgetMs": 500
+        },
+        "staff-command-post": {
+          "count": 70,
+          "p50": 4317.11,
+          "p95": 4933.64,
+          "p99": 4968.34,
+          "max": 4968.34,
+          "budgetMs": 800
+        }
+      },
+      "failures": [],
+      "verdict": "failed-performance-budgets"
+    },
+    {
+      "name": "load-recipient-batch",
+      "provenance": {
+        "revision": "eb5388126d933ed4c8af1f0cb8899e9f1601559e",
+        "dirty": true,
+        "buildId": "sIVbzKpjHCKjZuJhK0jHO",
+        "patchSha256": "8144054f7c248437e2779508b5f91386c0c5378ece6aa07f93bed3dfbd66d7c2",
+        "patch": "load-recipient-batch.patch",
+        "exitCode": 1,
+        "report": "test-results/9afb4963fdf449b39694ea6940c1ac7d/agency-load-AT62-catalogue-ad422-ublic-and-10-staff-sessions-synthetic-load/load-report.json",
+        "boundary": "Same owned Linux container and native macOS PG18 as baseline; shared development host."
+      },
+      "recordedAt": "2026-09-30T15:08:28.026Z",
+      "dataset": {
+        "listings": 10000,
+        "projections": 18571,
+        "largeMediaBytes": 747388,
+        "largeMediaSamples": 100,
+        "scanEvidence": "synthetic fixture, not real ClamAV"
+      },
+      "workload": {
+        "publicSessions": 50,
+        "staffSessions": 10,
+        "intendedSeconds": 60,
+        "elapsedMs": 61211.57469400001,
+        "peakMeasuredRequests": 60,
+        "completedCycles": {
+          "public": [
+            35, 35, 35, 35, 35, 34, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35,
+            35, 35, 35, 34, 35, 35, 35, 35, 35, 34, 34, 34, 35, 35, 35, 35, 35, 34, 34, 35, 35, 35,
+            34, 35, 35, 35, 34, 35
+          ],
+          "staff": [16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
+        }
+      },
+      "measurements": {
+        "staff-today-html": {
+          "count": 160,
+          "p50": 847.05,
+          "p95": 1293.72,
+          "p99": 1473.73,
+          "max": 1515.47,
+          "budgetMs": 500
+        },
+        "public-search-html": {
+          "count": 1741,
+          "p50": 932.74,
+          "p95": 1499.7,
+          "p99": 1866.52,
+          "max": 2122.08,
+          "budgetMs": 500
+        },
+        "public-detail-html": {
+          "count": 1741,
+          "p50": 486.59,
+          "p95": 744.98,
+          "p99": 884.9,
+          "max": 1183.42,
+          "budgetMs": 500
+        },
+        "public-media": {
+          "count": 1741,
+          "p50": 236.63,
+          "p95": 420.9,
+          "p99": 602.39,
+          "max": 802.44,
+          "budgetMs": null
+        },
+        "staff-task-html": {
+          "count": 160,
+          "p50": 1015.92,
+          "p95": 1471.95,
+          "p99": 1566.58,
+          "max": 1585.16,
+          "budgetMs": 500
+        },
+        "staff-command-post": {
+          "count": 160,
+          "p50": 1631.62,
+          "p95": 3056.76,
+          "p99": 3257.54,
+          "max": 3339.69,
+          "budgetMs": 800
+        }
+      },
+      "failures": [],
+      "verdict": "failed-performance-budgets"
+    },
+    {
+      "name": "load-today-context",
+      "provenance": {
+        "revision": "eb5388126d933ed4c8af1f0cb8899e9f1601559e",
+        "dirty": true,
+        "buildId": "6EIaI5FJKRYahb_aO3rmR",
+        "patchSha256": "6a96b47d5bc2e45fde836be397c53e2c02c2f1fd678ac02ad8cd791165834807",
+        "patch": "load-today-context.patch",
+        "exitCode": 1,
+        "report": "test-results/f0cd5982f53448afab44e71e31816cb9/agency-load-AT62-catalogue-ad422-ublic-and-10-staff-sessions-synthetic-load/load-report.json",
+        "boundary": "Same owned Linux container and native macOS PG18 as baseline; shared development host."
+      },
+      "recordedAt": "2026-09-30T15:21:29.359Z",
+      "dataset": {
+        "listings": 10000,
+        "projections": 18571,
+        "largeMediaBytes": 747418,
+        "largeMediaSamples": 100,
+        "scanEvidence": "synthetic fixture, not real ClamAV"
+      },
+      "workload": {
+        "publicSessions": 50,
+        "staffSessions": 10,
+        "intendedSeconds": 60,
+        "elapsedMs": 61325.23123699997,
+        "peakMeasuredRequests": 60,
+        "completedCycles": {
+          "public": [
+            23, 23, 23, 24, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
+            23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
+            23, 23, 23, 23, 23, 23
+          ],
+          "staff": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+        }
+      },
+      "measurements": {
+        "staff-today-html": {
+          "count": 100,
+          "p50": 1095.21,
+          "p95": 1847.38,
+          "p99": 1962.58,
+          "max": 2209.19,
+          "budgetMs": 500
+        },
+        "public-search-html": {
+          "count": 1151,
+          "p50": 1422.98,
+          "p95": 2071.32,
+          "p99": 2896.31,
+          "max": 3245.34,
+          "budgetMs": 500
+        },
+        "public-detail-html": {
+          "count": 1151,
+          "p50": 849,
+          "p95": 1518.91,
+          "p99": 1787.17,
+          "max": 2102.92,
+          "budgetMs": 500
+        },
+        "public-media": {
+          "count": 1151,
+          "p50": 325.24,
+          "p95": 609.65,
+          "p99": 721.64,
+          "max": 857.54,
+          "budgetMs": null
+        },
+        "staff-task-html": {
+          "count": 100,
+          "p50": 1531.38,
+          "p95": 2234.16,
+          "p99": 2368.35,
+          "max": 2376.11,
+          "budgetMs": 500
+        },
+        "staff-command-post": {
+          "count": 100,
+          "p50": 2726.57,
+          "p95": 4894.52,
+          "p99": 5044.15,
+          "max": 5068.31,
+          "budgetMs": 800
+        }
+      },
+      "failures": [],
+      "verdict": "failed-performance-budgets"
+    }
+  ],
+  "todayPairedDiagnostic": {
+    "kind": "paired-service-diagnostic",
+    "boundary": "Native macOS PG18, one fresh synthetic database, 10 staff, fixed now, alternating order, max 4 database connections; not HTTP/load/release evidence.",
+    "sameResults": true,
+    "summary": {
+      "legacy": {
+        "waves": 12,
+        "requestsPerWave": 10,
+        "p50WaveMs": 23.949125000000095,
+        "p95WaveMs": 29.582292000000052
+      },
+      "shared": {
+        "waves": 12,
+        "requestsPerWave": 10,
+        "p50WaveMs": 12.954208000000108,
+        "p95WaveMs": 16.488665999999967
+      }
+    },
+    "samples": [
+      {
+        "pair": 0,
+        "name": "legacy",
+        "waveMs": 27.9904590000001,
+        "completed": 10
+      },
+      {
+        "pair": 0,
+        "name": "shared",
+        "waveMs": 12.954208000000108,
+        "completed": 10
+      },
+      {
+        "pair": 1,
+        "name": "shared",
+        "waveMs": 12.277291999999989,
+        "completed": 10
+      },
+      {
+        "pair": 1,
+        "name": "legacy",
+        "waveMs": 23.977084000000104,
+        "completed": 10
+      },
+      {
+        "pair": 2,
+        "name": "legacy",
+        "waveMs": 22.77624999999989,
+        "completed": 10
+      },
+      {
+        "pair": 2,
+        "name": "shared",
+        "waveMs": 12.070042000000058,
+        "completed": 10
+      },
+      {
+        "pair": 3,
+        "name": "shared",
+        "waveMs": 12.096542,
+        "completed": 10
+      },
+      {
+        "pair": 3,
+        "name": "legacy",
+        "waveMs": 23.33699999999999,
+        "completed": 10
+      },
+      {
+        "pair": 4,
+        "name": "legacy",
+        "waveMs": 29.582292000000052,
+        "completed": 10
+      },
+      {
+        "pair": 4,
+        "name": "shared",
+        "waveMs": 16.488665999999967,
+        "completed": 10
+      },
+      {
+        "pair": 5,
+        "name": "shared",
+        "waveMs": 15.79704199999992,
+        "completed": 10
+      },
+      {
+        "pair": 5,
+        "name": "legacy",
+        "waveMs": 25.879083000000037,
+        "completed": 10
+      },
+      {
+        "pair": 6,
+        "name": "legacy",
+        "waveMs": 23.659332999999833,
+        "completed": 10
+      },
+      {
+        "pair": 6,
+        "name": "shared",
+        "waveMs": 12.368582999999944,
+        "completed": 10
+      },
+      {
+        "pair": 7,
+        "name": "shared",
+        "waveMs": 14.220624999999927,
+        "completed": 10
+      },
+      {
+        "pair": 7,
+        "name": "legacy",
+        "waveMs": 23.443416999999954,
+        "completed": 10
+      },
+      {
+        "pair": 8,
+        "name": "legacy",
+        "waveMs": 23.949125000000095,
+        "completed": 10
+      },
+      {
+        "pair": 8,
+        "name": "shared",
+        "waveMs": 13.136332999999922,
+        "completed": 10
+      },
+      {
+        "pair": 9,
+        "name": "shared",
+        "waveMs": 13.18770799999993,
+        "completed": 10
+      },
+      {
+        "pair": 9,
+        "name": "legacy",
+        "waveMs": 24.195874999999887,
+        "completed": 10
+      },
+      {
+        "pair": 10,
+        "name": "legacy",
+        "waveMs": 22.838000000000193,
+        "completed": 10
+      },
+      {
+        "pair": 10,
+        "name": "shared",
+        "waveMs": 11.527624999999944,
+        "completed": 10
+      },
+      {
+        "pair": 11,
+        "name": "shared",
+        "waveMs": 11.577457999999979,
+        "completed": 10
+      },
+      {
+        "pair": 11,
+        "name": "legacy",
+        "waveMs": 23.65912500000013,
+        "completed": 10
+      }
+    ]
+  }
+}

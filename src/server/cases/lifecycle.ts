@@ -31,7 +31,7 @@ import {
 } from "@/domain/case";
 import { availableStaff, requireAvailableStaff } from "../auth/availability";
 import { requireFreshAuth, type Session } from "../auth/sessions";
-import { assertCan, can } from "../authz";
+import { assertCan, staffWhoCan } from "../authz";
 import { assertCaseAgreementReady, reviewedEvidence } from "../compliance/agreement-gate";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
@@ -850,23 +850,15 @@ export async function lifecycleView(db: Executor, session: Session, id: string) 
       ),
     )
     .orderBy(asc(principals.displayName), asc(principals.id));
-  const receivers = [];
-  // Ineligible people must not hide a valid receiver after an arbitrary first page.
-  // Bound concurrent database work while retaining all eligible options.
-  for (let offset = 0; offset < members.length; offset += 4) {
-    const eligible = await Promise.all(
-      members.slice(offset, offset + 4).map(async (member) => {
-        if (member.id === row.ownerId) return null;
-        const actor = { kind: "staff" as const, id: member.id };
-        const resource = { type: "case", id, audience: "internal" as const };
-        return (await can(db, actor, "case.transition", resource)) &&
-          (await can(db, actor, "case.read_internal", resource))
-          ? member
-          : null;
-      }),
-    );
-    for (const member of eligible) if (member) receivers.push(member);
-  }
+  // Do not truncate the directory before checking record-scoped eligibility.
+  const candidates = members.filter((member) => member.id !== row.ownerId);
+  const eligible = await staffWhoCan(
+    db,
+    candidates.map((member) => member.id),
+    ["case.transition", "case.read_internal"],
+    { type: "case", id, audience: "internal" },
+  );
+  const receivers = candidates.filter((member) => eligible.has(member.id));
   const historyRows = await db
     .select({
       id: caseStageHistory.id,

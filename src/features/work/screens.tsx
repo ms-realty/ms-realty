@@ -9,6 +9,7 @@ import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
+import { readTaskHandover } from "@/server/work/handover";
 import {
   type InboxView,
   listContacts,
@@ -16,7 +17,6 @@ import {
   listTasks,
   readContact,
   readInquiry,
-  readTask,
   readToday,
 } from "@/server/work/queries";
 import { initialFormState } from "@/ui/form/server";
@@ -562,9 +562,8 @@ export async function TaskScreen({
   session: Session;
   id: string;
 }) {
-  const { task, ownerName, needsCoverage } = await privateRead(() =>
-    readTask(getDb(), session, id),
-  );
+  const view = await privateRead(() => readTaskHandover(getDb(), session, id));
+  const { task, ownerName, needsCoverage } = view;
   const copy = workCopy(locale);
   const guarded =
     task.evidenceRequired || (highImpactTaskTypes as readonly string[]).includes(task.type);
@@ -609,7 +608,7 @@ export async function TaskScreen({
       ) : null}
       {guarded ? <p>{copy.guardedTask}</p> : null}
       {!["done", "cancelled"].includes(task.state) ? (
-        <TaskHandoverScreen locale={locale} session={session} id={id} />
+        <TaskHandoverScreen locale={locale} session={session} id={id} view={view} />
       ) : null}
       {targets.length ? (
         <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">

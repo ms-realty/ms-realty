@@ -3,7 +3,7 @@
 // participation and property relationships, which give clients access to exactly the cases and
 // properties they are part of. The AI service is draft-only whatever it is granted (AT52).
 import "server-only";
-import { and, eq, gt, isNull, lte, or } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lte, or } from "drizzle-orm";
 import {
   caseParticipants,
   grants as grantRows,
@@ -267,6 +267,48 @@ export async function can(
   now: Date = new Date(),
 ): Promise<boolean> {
   return allows(actor, await resolveGrants(db, actor, now), capability, resource, now);
+}
+
+/**
+ * A current directory projection for several staff members, using the same grant expansion
+ * and record/locale rules as can(). No grants survive this call; commands recheck under lock.
+ */
+export async function staffWhoCan(
+  db: Executor,
+  ids: readonly string[],
+  required: readonly [Capability, ...Capability[]],
+  resource?: Resource,
+  now: Date = new Date(),
+): Promise<Set<string>> {
+  if (!ids.length) return new Set();
+  const rows = await db
+    .select({ id: principals.id, grant: grantRows })
+    .from(principals)
+    .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+    .innerJoin(grantRows, and(eq(grantRows.principalId, principals.id), liveGrant(now)))
+    .where(
+      and(
+        inArray(principals.id, [...ids]),
+        eq(principals.kind, "staff"),
+        eq(principals.status, "active"),
+        eq(staffMemberships.state, "active"),
+      ),
+    );
+  const grantsById = new Map<string, CapabilityGrant[]>();
+  for (const row of rows) {
+    const grants = grantsById.get(row.id) ?? [];
+    grants.push(...expandGrant(row.grant));
+    grantsById.set(row.id, grants);
+  }
+  return new Set(
+    [...grantsById].flatMap(([id, grants]) =>
+      required.every((capability) =>
+        allows({ kind: "staff", id }, grants, capability, resource, now),
+      )
+        ? [id]
+        : [],
+    ),
+  );
 }
 
 /**

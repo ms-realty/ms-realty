@@ -420,8 +420,10 @@ export async function searchListings(
   const eligible = eligiblePublications(db, search.locale);
   const { where, rank, unconfirmed } = plan(search, now);
   const [k1, k2] = sortKeys(search, rank, sql`${eligible.activatedAt}`);
-  // Every read below goes through this one filtered, eligible set.
-  const matching = (options?: { withoutPropertyTypes?: boolean }) =>
+  // Share this statement's eligible, filtered projection across page, facets and freshness.
+  // Keep all selective criteria inside the CTE except property type, which facets ignore.
+  // This is not a publication cache: hydration below rechecks current publication and consent.
+  const base = db.$with("matching").as(
     db
       .select({
         listingId: doc.listingId,
@@ -438,11 +440,12 @@ export async function searchListings(
         and(eq(eligible.listingId, doc.listingId), eq(eligible.manifestId, doc.manifestId)),
       )
       .innerJoin(listings, eq(listings.id, doc.listingId))
-      .where(where(options))
-      .as("matching");
-
-  const base = matching();
-  const rows = await db
+      .where(where({ withoutPropertyTypes: true })),
+  );
+  const selectedTypes = search.criteria.propertyTypes
+    ? inArray(base.propertyType, [...search.criteria.propertyTypes])
+    : undefined;
+  const pageQuery = db
     .select({
       listingId: base.listingId,
       k1: base.k1,
@@ -452,19 +455,51 @@ export async function searchListings(
     })
     .from(base)
     .where(
-      cursor
-        ? sql`(${base.k1}, ${base.k2}, ${base.listingId}) >
-            (${cursor.key[0]}::numeric, ${cursor.key[1]}::numeric, ${cursor.key[2]}::uuid)`
-        : undefined,
+      and(
+        selectedTypes,
+        cursor
+          ? sql`(${base.k1}, ${base.k2}, ${base.listingId}) >
+              (${cursor.key[0]}::numeric, ${cursor.key[1]}::numeric, ${cursor.key[2]}::uuid)`
+          : undefined,
+      ),
     )
     .orderBy(base.k1, base.k2, base.listingId)
-    .limit(search.pageSize + 1);
-
-  const byType = matching({ withoutPropertyTypes: true });
-  const facetRows = await db
-    .select({ value: byType.propertyType, count: sql<number>`count(*)::int` })
-    .from(byType)
-    .groupBy(byType.propertyType);
+    .limit(search.pageSize + 1)
+    .as("search_page");
+  const facetQuery = db
+    .select({ value: base.propertyType, count: sql<number>`count(*)::int`.as("count") })
+    .from(base)
+    .groupBy(base.propertyType)
+    .as("search_facets");
+  type MatchRow = {
+    listingId: string;
+    k1: string;
+    k2: string;
+    rank: number;
+    unconfirmed: string[];
+  };
+  type FacetRow = { value: (typeof propertyTypes)[number]; count: number };
+  const [projection] = await db
+    .with(base)
+    .select({
+      // Preserve numeric cursor keys as text; JSON numbers would round precise sort keys.
+      rows: sql<MatchRow[]>`coalesce((select json_agg(json_build_object(
+      'listingId', ${pageQuery.listingId}, 'k1', ${pageQuery.k1}::text,
+      'k2', ${pageQuery.k2}::text, 'rank', ${pageQuery.rank},
+      'unconfirmed', ${pageQuery.unconfirmed}
+    ) order by ${pageQuery.k1}, ${pageQuery.k2}, ${pageQuery.listingId})
+      from ${pageQuery}), '[]'::json)`,
+      facets: sql<FacetRow[]>`coalesce((select json_agg(json_build_object(
+      'value', ${facetQuery.value}, 'count', ${facetQuery.count}
+    )) from ${facetQuery}), '[]'::json)`,
+      latestAt: cursor
+        ? sql<string | null>`(select max(${base.activatedAt})::text from ${base}
+          where ${selectedTypes ?? sql`true`})`
+        : sql<null>`null`,
+    })
+    .from(sql`(select 1) as search_response`);
+  if (!projection) throw new Error("Search projection returned no row");
+  const { rows, facets: facetRows } = projection;
   // Facets already count the eligible set with every filter except property type. Summing
   // only selected types gives the same total without a second full eligibility scan. Keep
   // the capped cursor/count contract: above the limit we still expose only a lower bound.
@@ -501,10 +536,7 @@ export async function searchListings(
 
   let stale = items.length !== page.length;
   if (cursor) {
-    const [latest] = await db
-      .select({ at: sql<string | null>`max(${base.activatedAt})` })
-      .from(base);
-    const latestAt = latest?.at ? new Date(latest.at) : new Date(0);
+    const latestAt = projection.latestAt ? new Date(projection.latestAt) : new Date(0);
     stale ||= total !== cursor.total || latestAt > new Date(cursor.asOf);
   }
   const last = page.at(-1);

@@ -21,9 +21,23 @@ export type InboxView = "all" | "unassigned" | "mine" | "awaiting" | "review";
 const pageSchema = z.number().int().min(1).max(10000);
 export const pageSize = 30;
 
-export async function listInbox(db: Executor, session: Session, view: InboxView = "all", page = 1) {
+// Shared only inside one read service call. Commands and later requests resolve authority again.
+async function queueReadContext(db: Executor, session: Session) {
   const live = await liveStaff(db, session);
-  const grants = await resolveGrants(db, live.actor);
+  return { live, grants: await resolveGrants(db, live.actor) };
+}
+type QueueReadContext = Awaited<ReturnType<typeof queueReadContext>>;
+
+export async function listInbox(db: Executor, session: Session, view: InboxView = "all", page = 1) {
+  return inboxQuery(db, await queueReadContext(db, session), view, page);
+}
+
+async function inboxQuery(
+  db: Executor,
+  { live, grants }: QueueReadContext,
+  view: InboxView,
+  page = 1,
+) {
   const offset = (parseInput(pageSchema, page) - 1) * pageSize;
   const condition =
     view === "unassigned"
@@ -123,19 +137,23 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
   };
 }
 
-export async function listTasks(
+interface TaskQueryOptions {
+  page?: number;
+  mine?: boolean;
+  awaitingAcceptance?: boolean;
+  dueBefore?: Date;
+  caseId?: string;
+}
+
+export async function listTasks(db: Executor, session: Session, options: TaskQueryOptions = {}) {
+  return tasksQuery(db, await queueReadContext(db, session), options);
+}
+
+async function tasksQuery(
   db: Executor,
-  session: Session,
-  options: {
-    page?: number;
-    mine?: boolean;
-    awaitingAcceptance?: boolean;
-    dueBefore?: Date;
-    caseId?: string;
-  } = {},
+  { live, grants }: QueueReadContext,
+  options: TaskQueryOptions = {},
 ) {
-  const live = await liveStaff(db, session);
-  const grants = await resolveGrants(db, live.actor);
   const page = parseInput(pageSchema, options.page ?? 1);
   const effectiveDue = sql<Date>`case when ${tasks.state} = 'waiting' then ${tasks.followUpAt} else ${tasks.dueAt} end`;
   const rows = await db
@@ -222,11 +240,12 @@ export async function readContact(db: Executor, session: Session, id: string) {
 
 /** Bounded real queues; no synthetic metrics or inference that other modules are clear. */
 export async function readToday(db: Executor, session: Session, now = new Date()) {
+  const context = await queueReadContext(db, session);
   const [unassigned, due, mine, handovers] = await Promise.all([
-    listInbox(db, session, "unassigned"),
-    listTasks(db, session, { mine: true, dueBefore: now }),
-    listInbox(db, session, "mine"),
-    listTasks(db, session, { awaitingAcceptance: true }),
+    inboxQuery(db, context, "unassigned"),
+    tasksQuery(db, context, { mine: true, dueBefore: now }),
+    inboxQuery(db, context, "mine"),
+    tasksQuery(db, context, { awaitingAcceptance: true }),
   ]);
   return { unassigned, due, mine, handovers, asOf: now };
 }
