@@ -320,7 +320,10 @@ describe("AT44 saved-search alert delivery", () => {
       maxPrice: 160009,
     };
     const result = await editSearchSubscription(t.db, f.session, input);
-    expect(await editSearchSubscription(t.db, f.session, input)).toEqual(result);
+    expect(await editSearchSubscription(t.db, f.session, input)).toEqual({
+      ...result,
+      replayed: true,
+    });
     const rows = await t.db
       .select()
       .from(subscriptions)
