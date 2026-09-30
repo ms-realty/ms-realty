@@ -416,7 +416,7 @@ export async function InquiryScreen({
           </a>
         ) : null}
       </nav>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
         <div className="space-y-8">
           <section className="space-y-4 rounded-card border border-border bg-surface p-5">
             <h2 className="text-subheading font-semibold">{copy.submitted}</h2>

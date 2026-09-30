@@ -457,13 +457,31 @@ test("P07: native three-property inquiry carries every ordered identity through 
     await expect(selected.locator("details")).toHaveCount(3);
     for (const detail of await selected.locator("details").all())
       await expect(detail).not.toHaveAttribute("open");
-    expect(await broker.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      320,
-    );
     await broker.screenshot({
       path: testInfo.outputPath("comparison-broker-native-320.png"),
       fullPage: true,
     });
+    const overflow = await broker.evaluate(() =>
+      Array.from(document.querySelectorAll("main *"))
+        .map((node) => {
+          const rect = node.getBoundingClientRect();
+          return {
+            tag: node.tagName,
+            class: node.className,
+            text: node.textContent?.slice(0, 100),
+            left: rect.left,
+            right: rect.right,
+          };
+        })
+        .filter((node) => node.right > 320 || node.left < 0),
+    );
+    await testInfo.attach("broker-width-diagnostics.json", {
+      body: JSON.stringify(overflow, null, 2),
+      contentType: "application/json",
+    });
+    expect(await broker.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      320,
+    );
   } finally {
     await staff.close();
   }
