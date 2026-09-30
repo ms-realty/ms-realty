@@ -34,8 +34,27 @@ try {
     .select()
     .from(schema.properties)
     .where(eq(schema.properties.id, propertyId));
+  const [key] =
+    process.env.E2E_KEY_RETURN === "1"
+      ? await db
+          .insert(schema.keySets)
+          .values({
+            reference: `KY-RETURN-${randomUUID().slice(0, 8)}`,
+            propertyId,
+            keyTag: randomUUID(),
+            quantity: 2,
+            sourceReference: "Synthetic overdue custody receipt",
+            state: "checked_out",
+            holderId: broker.id,
+            dueAt: new Date(Date.now() - 86400000),
+          })
+          .returning()
+      : [];
   console.log(
     JSON.stringify({
+      keyId: key?.id,
+      keyReference: key?.reference,
+      dueAt: key?.dueAt?.toISOString(),
       staffToken: manager.token,
       staffId: manager.id,
       brokerId: broker.id,

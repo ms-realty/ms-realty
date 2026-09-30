@@ -3,6 +3,27 @@ export function custodyCopy(locale: string) {
     locale === "bg" ? bg : locale === "ru" ? ru : en;
   return {
     title: s("Ключове", "Ключи", "Key custody"),
+    returnDue: s("Връщане до", "Вернуть до", "Due back"),
+    returnReminders: s(
+      "Просрочено връщане на ключове",
+      "Просроченные возвраты ключей",
+      "Overdue key returns",
+    ),
+    reminderHint: s(
+      "Показани са текущите просрочени комплекти, първо най-старите. Напомнянето не променя наличността или срока.",
+      "Здесь показаны текущие просроченные комплекты, начиная с самых старых. Напоминание не меняет факт выдачи или срок.",
+      "Current overdue sets are shown oldest first. A reminder changes neither custody nor the agreed deadline.",
+    ),
+    moreReminders: s(
+      "Има още просрочени комплекти в регистъра.",
+      "В реестре есть другие просроченные комплекты.",
+      "More overdue sets are available in the register.",
+    ),
+    openOverdue: s(
+      "Всички просрочени комплекти",
+      "Все просроченные комплекты",
+      "All overdue key sets",
+    ),
     lead: s(
       "Записвайте действителното получаване и предаване. Срокът не потвърждава връщане. Не въвеждайте кодове за достъп.",
       "Фиксируйте фактический приём и передачу. Истечение срока не подтверждает возврат. Не вводите коды доступа.",

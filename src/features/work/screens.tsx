@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { type InquiryState, inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
+import { custodyCopy } from "@/features/key-custody/copy";
 import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
@@ -82,15 +83,23 @@ export function Page({
   );
 }
 
-export function When({ date, locale }: { date: Date | null; locale: string }) {
+export function When({
+  date,
+  locale,
+  zone = "UTC",
+}: {
+  date: Date | null;
+  locale: string;
+  zone?: string;
+}) {
   return date ? (
     <time dateTime={date.toISOString()}>
       {new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
-        timeZone: "UTC",
+        timeZone: zone,
       }).format(date)}{" "}
-      UTC
+      {zone}
     </time>
   ) : (
     <span>{workCopy(locale).noDate}</span>
@@ -215,9 +224,57 @@ function TaskList({
 export async function TodayScreen({ locale, session }: { locale: string; session: Session }) {
   const copy = workCopy(locale);
   const queues = await readToday(getDb(), session);
+  const custody = custodyCopy(locale);
   return (
     <Page title={copy.today} locale={locale}>
       <p className="text-text-muted">{copy.queueNote}</p>
+      {queues.keyReturns ? (
+        <section
+          className="space-y-4"
+          aria-labelledby="key-return-reminders"
+          data-key-return-reminders
+        >
+          <h2 id="key-return-reminders" className="text-subheading font-semibold">
+            {custody.returnReminders}
+          </h2>
+          <p>{custody.reminderHint}</p>
+          {queues.keyReturns.rows.length ? (
+            <ul className="divide-y divide-border rounded-card border border-border">
+              {queues.keyReturns.rows.map((row) => (
+                <li
+                  key={row.id}
+                  className="min-w-0 space-y-2 break-words p-4"
+                  data-key-return={row.id}
+                >
+                  <a className={link} href={`/${locale}/operations/keys/${row.id}`}>
+                    <bdi>{row.reference}</bdi>
+                  </a>
+                  <p>
+                    {custody.propertyReference}: <bdi>{row.propertyReference}</bdi>
+                  </p>
+                  <p>
+                    {custody.holderId}:{" "}
+                    <CoverageOwner
+                      name={row.holderName}
+                      needsCoverage={row.needsCoverage}
+                      locale={locale}
+                    />
+                  </p>
+                  <p>
+                    {custody.returnDue}: <When date={row.dueAt} locale={locale} zone="Europe/Sofia" />
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-card border border-border p-5 text-text-muted">{copy.empty}</p>
+          )}
+          {queues.keyReturns.hasMore ? <p>{custody.moreReminders}</p> : null}
+          <a className={link} href={`/${locale}/operations/keys?state=overdue`}>
+            {custody.openOverdue}
+          </a>
+        </section>
+      ) : null}
       <section className="space-y-4">
         <h2 className="text-subheading font-semibold">{taskHandoverCopy(locale).inbox}</h2>
         <TaskList rows={queues.handovers.rows} locale={locale} />

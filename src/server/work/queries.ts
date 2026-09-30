@@ -1,7 +1,17 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-import { activityEvents, contactMethods, inquiries, parties, principals, tasks } from "@/db/schema";
+import {
+  activityEvents,
+  contactMethods,
+  inquiries,
+  keySets,
+  parties,
+  principals,
+  properties,
+  tasks,
+} from "@/db/schema";
+import { hasCapability } from "@/domain/capabilities";
 import type { Session } from "../auth/sessions";
 import { assertCanRead, can, resolveGrants } from "../authz";
 import type { Executor } from "../db";
@@ -238,14 +248,42 @@ export async function readContact(db: Executor, session: Session, id: string) {
   return { party, methods, inquiries: related };
 }
 
+// The custody register requires global key.manage; holding a key does not grant that access.
+// A timer only highlights the existing obligation. It never records a physical return.
+async function overdueKeyQuery(db: Executor, context: QueueReadContext, now: Date) {
+  if (
+    !hasCapability(context.live.actor, context.grants, "key.manage", {
+      now: new Date().toISOString(),
+    })
+  )
+    return null;
+  const rows = await db
+    .select({
+      id: keySets.id,
+      reference: keySets.reference,
+      dueAt: keySets.dueAt,
+      propertyReference: properties.reference,
+      holderName: principals.displayName,
+      needsCoverage: ownerNeedsCoverage(keySets.holderId),
+    })
+    .from(keySets)
+    .innerJoin(properties, eq(properties.id, keySets.propertyId))
+    .leftJoin(principals, eq(principals.id, keySets.holderId))
+    .where(and(eq(keySets.state, "checked_out"), lt(keySets.dueAt, now)))
+    .orderBy(asc(keySets.dueAt), asc(keySets.id))
+    .limit(pageSize + 1);
+  return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize };
+}
+
 /** Bounded real queues; no synthetic metrics or inference that other modules are clear. */
 export async function readToday(db: Executor, session: Session, now = new Date()) {
   const context = await queueReadContext(db, session);
-  const [unassigned, due, mine, handovers] = await Promise.all([
+  const [unassigned, due, mine, handovers, keyReturns] = await Promise.all([
     inboxQuery(db, context, "unassigned"),
     tasksQuery(db, context, { mine: true, dueBefore: now }),
     inboxQuery(db, context, "mine"),
     tasksQuery(db, context, { awaitingAcceptance: true }),
+    overdueKeyQuery(db, context, now),
   ]);
-  return { unassigned, due, mine, handovers, asOf: now };
+  return { unassigned, due, mine, handovers, keyReturns, asOf: now };
 }
