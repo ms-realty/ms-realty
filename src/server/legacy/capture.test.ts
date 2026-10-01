@@ -12,6 +12,22 @@ it("captures the source document title independently from h1 and preserves the u
   expect(source.description).toBe(description);
 });
 
+it("preserves safe published external, email and telephone content links without broadening legacy crawl discovery", () => {
+  const source = extractLiveSource(
+    '<html lang="en"><title>Source</title><nav><a href="https://outside.example/chrome">Chrome</a></nav><div class="post_content_default"><a href="https://outside.example/legal?lang=en#terms">Published terms</a><a href="http://outside.example/original">Original HTTP</a><a href="mailto:public@example.test?subject=Viewing">Published email</a><a href="tel:+359000000000">Published telephone</a><a href="/en/guide/">Legacy guide</a><a href="https://outside.example/unlabelled"></a><a href="javascript:alert(1)">Script</a><a href="data:text/html,unsafe">Data</a><a href="blob:https://outside.example/private">Blob</a><a href="https://user:password@outside.example/">Credentials</a></div></html>',
+    "https://makler-realty.com/en/page/",
+  );
+  expect(source.content_links).toEqual([
+    { url: "https://outside.example/legal?lang=en#terms", text: "Published terms" },
+    { url: "http://outside.example/original", text: "Original HTTP" },
+    { url: "mailto:public@example.test?subject=Viewing", text: "Published email" },
+    { url: "tel:+359000000000", text: "Published telephone" },
+    { url: "https://makler-realty.com/en/guide/", text: "Legacy guide" },
+    { url: "https://outside.example/unlabelled", text: "https://outside.example/unlabelled" },
+  ]);
+  expect(source.links.map((link) => link.url)).toEqual(["https://makler-realty.com/en/guide/"]);
+});
+
 it("preserves actual main text, locale, title and public photos without running scripts or submitting forms", () => {
   const source = extractLiveSource(
     '<html lang="ru-RU"><head><title>Source title</title></head><body><nav>Chrome</nav><main class="post_content_default"><h1>Source title</h1><p>Original body &amp; facts.</p><script>throw Error("run")</script><img src="/wp-content/uploads/photo.jpg" alt="Source caption"></main></body></html>',

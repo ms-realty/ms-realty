@@ -100,9 +100,17 @@ export function extractLiveSource(html: string, url: string) {
   const contentLinks = [...(primary?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? [])].flatMap(
     (link) => {
       try {
-        sourceIdentity(link.href);
-        const text = link.textContent?.replace(/\s+/gu, " ").trim();
-        return text ? [{ url: link.href, text }] : [];
+        const destination = new URL(link.href);
+        if (
+          !["https:", "http:", "mailto:", "tel:"].includes(destination.protocol) ||
+          destination.username ||
+          destination.password
+        )
+          return [];
+        // Link preservation and crawl discovery have separate scopes. Public source
+        // links can leave the legacy domains; a missing label uses the actual source URL.
+        const text = link.textContent?.replace(/\s+/gu, " ").trim() || link.href;
+        return [{ url: link.href, text }];
       } catch {
         return [];
       }
