@@ -18,6 +18,12 @@ import {
 import { caseEmailConfig, caseEmailTemplate } from "../cases/email-contract";
 import { type Database, type Executor, inTransaction } from "../db";
 import { AppError } from "../errors";
+import {
+  inquiryCoverageNoticeActionIsValid,
+  inquiryCoverageNoticeConfig,
+  inquiryCoverageNoticeSubject,
+  inquiryCoverageNoticeTemplate,
+} from "../inquiries/notifications";
 import { assertRecoveryOpen } from "../recovery/quarantine";
 import { alertSubjectType, alertTemplate } from "../subscriptions/template";
 import type { MessageProvider } from "./provider";
@@ -68,6 +74,9 @@ export interface NewOutboxMessage {
   readonly secretParams?: Record<string, unknown>;
   /** The case message being delivered, if any. */
   readonly messageId?: string;
+  /** Explicit business-intent binding for system notices, never inferred from content. */
+  readonly outboxEventId?: string;
+  readonly subject?: { readonly type: string; readonly id: string };
 }
 
 interface EmailPayload {
@@ -88,6 +97,9 @@ export async function enqueueMessage(
   message: NewOutboxMessage,
   queue?: JobQueue,
 ): Promise<{ id: string; created: boolean }> {
+  if (message.messageId && message.subject) throw new AppError("idempotency_key_reused");
+  const subjectType = message.messageId ? "message" : (message.subject?.type ?? null);
+  const subjectId = message.messageId ?? message.subject?.id ?? null;
   const payload: EmailPayload = {
     channel: message.channel,
     recipient: message.recipient,
@@ -106,7 +118,9 @@ export async function enqueueMessage(
     .values({
       kind: "email_send",
       effectKey: message.idempotencyKey,
-      ...(message.messageId ? { subjectType: "message", subjectId: message.messageId } : {}),
+      subjectType,
+      subjectId,
+      outboxEventId: message.outboxEventId ?? null,
       payload,
       payloadDigest: createHash("sha256").update(canonicalJson(payload)).digest("hex"),
       secretPayload: message.secretParams ?? null,
@@ -124,8 +138,9 @@ export async function enqueueMessage(
   if (!existing) throw new Error("External action vanished after a key conflict.");
   if (
     existing.kind !== "email_send" ||
-    existing.subjectType !== (message.messageId ? "message" : null) ||
-    existing.subjectId !== (message.messageId ?? null) ||
+    existing.subjectType !== subjectType ||
+    existing.subjectId !== subjectId ||
+    existing.outboxEventId !== (message.outboxEventId ?? null) ||
     existing.payloadDigest !== createHash("sha256").update(canonicalJson(payload)).digest("hex") ||
     canonicalJson(existing.payload) !== canonicalJson(payload)
   )
@@ -183,6 +198,13 @@ export async function dispatchMessage(
     }
     const payload = row.payload as Partial<EmailPayload> | null;
     const template = payload?.template;
+    const inquiryNotice =
+      template === inquiryCoverageNoticeTemplate ||
+      row.subjectType === inquiryCoverageNoticeSubject;
+    // Disabling staging qualification parks existing notices without any provider call.
+    if (inquiryNotice && !inquiryCoverageNoticeConfig()) return { row, claimed: false as const };
+    const invalidInquiryNotice =
+      inquiryNotice && !(await inquiryCoverageNoticeActionIsValid(tx, row));
     const secretChanged =
       payload?.secretDigest !== undefined &&
       (!row.secretPayload ||
@@ -193,11 +215,13 @@ export async function dispatchMessage(
     if (
       template === alertTemplate ||
       template === caseEmailTemplate ||
+      invalidInquiryNotice ||
       secretChanged ||
       row.payloadDigest !== createHash("sha256").update(canonicalJson(row.payload)).digest("hex")
     ) {
-      const code =
-        template === alertTemplate || template === caseEmailTemplate
+      const code = invalidInquiryNotice
+        ? "inquiry_notice_guard_failed"
+        : template === alertTemplate || template === caseEmailTemplate
           ? "guarded_template_subject_mismatch"
           : secretChanged
             ? "secret_digest_mismatch"
@@ -289,6 +313,15 @@ export async function dispatchQueued(
         caseEmailConfig()
           ? undefined
           : or(isNull(externalActions.subjectType), ne(externalActions.subjectType, "message")),
+        inquiryCoverageNoticeConfig()
+          ? undefined
+          : and(
+              or(
+                isNull(externalActions.subjectType),
+                ne(externalActions.subjectType, inquiryCoverageNoticeSubject),
+              ),
+              sql`${externalActions.payload}->>'template' is distinct from ${inquiryCoverageNoticeTemplate}`,
+            ),
       ),
     )
     .orderBy(asc(externalActions.createdAt))

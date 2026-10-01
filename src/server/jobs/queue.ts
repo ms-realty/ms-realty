@@ -27,6 +27,7 @@ export interface JobPayloads {
   "inbox.reconcile": { afterId?: string };
   "worker.heartbeat": Record<string, never>;
   "search_alerts.sweep": { afterId?: string };
+  "inquiry_notices.sweep": Record<string, never>;
 }
 export type JobName = keyof JobPayloads;
 
@@ -41,6 +42,7 @@ const queueOptions: Record<JobName, { retryLimit: number; retryDelay?: number; c
   "inbox.reconcile": { retryLimit: 0, cron: "* * * * *" },
   "worker.heartbeat": { retryLimit: 0, cron: "* * * * *" },
   "search_alerts.sweep": { retryLimit: 0, cron: "*/15 * * * *" },
+  "inquiry_notices.sweep": { retryLimit: 0, cron: "* * * * *" },
 };
 
 export interface SendOptions {
@@ -125,6 +127,10 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
   });
   await queue.work("outbox.sweep", async () => {
     await dispatchQueued(deps.db, deps.provider);
+  });
+  await queue.work("inquiry_notices.sweep", async () => {
+    const { sweepInquiryCoverageNotices } = await import("../inquiries/notifications");
+    await sweepInquiryCoverageNotices(deps.db, queue);
   });
   await queue.work("rate_limit.prune", async () => {
     await pruneRateLimits(deps.db);

@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
+import { renderInquiryCoverageNotice } from "../inquiries/notifications";
 import { renderSearchAlert } from "../subscriptions/template";
 import type { MessageProvider, OutboundMessage, ProviderResult } from "./provider";
 
@@ -99,6 +100,7 @@ export function renderReviewedEmail(
   return (
     authEmail(message, config.hosts, now) ??
     renderSearchAlert(message, config.hosts) ??
+    renderInquiryCoverageNotice(message, config.hosts) ??
     renderCaseEmail(message, caseEmailConfig()?.from === config.from ? caseEmailConfig() : null)
   );
 }
