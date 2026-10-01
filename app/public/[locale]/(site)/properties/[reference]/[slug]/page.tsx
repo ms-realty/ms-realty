@@ -1,31 +1,44 @@
 // P05/P21: retain safe identity when a publication is restricted or withdrawn.
 import { notFound } from "next/navigation";
-import { getDb } from "@/db/client";
 import { ApprovedGallery } from "@/features/discovery/approved-media";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { Availability, ListingFacts, ListingGrid } from "@/features/discovery/listing-card";
 import { LocalActions } from "@/features/discovery/local-selection";
 import { mapCopy } from "@/features/discovery/map-copy";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import { listingHref, locality, priceText } from "@/features/discovery/presentation";
 import { SearchMap } from "@/features/discovery/search-map";
-import { isRoutableLocale } from "@/i18n/config";
-import { getPublicListing } from "@/server/listings/detail";
+import { listingStructuredData } from "@/i18n/structured-data";
 import { publicMapRelease } from "@/server/publication/map-config";
+import {
+  normalizePublicListingRoute,
+  publicListingMetadata,
+  publicListingUrl,
+  readPublicSeoListing,
+} from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
-export const metadata = discoveryMetadata;
+import { StructuredData } from "@/ui/structured-data";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; reference: string; slug: string }>;
+}) {
+  return publicListingMetadata(await params);
+}
 export default async function PropertyPage({
   params,
 }: {
   params: Promise<{ locale: string; reference: string; slug: string }>;
 }) {
-  const { locale, reference } = await params;
-  if (!isRoutableLocale(locale)) notFound();
+  const { locale, reference, slug } = normalizePublicListingRoute(await params);
   const copy = discoveryCopy(locale);
-  let result: Awaited<ReturnType<typeof getPublicListing>>;
+  let result: Awaited<ReturnType<typeof readPublicSeoListing>>;
+  let source: Awaited<ReturnType<typeof readPublicSeoListing>> | null = null;
   try {
-    result = await getPublicListing(getDb(), { reference, locale });
+    result = await readPublicSeoListing(reference, locale);
+    if (result.status === "not_found" && locale !== "bg")
+      source = await readPublicSeoListing(reference, "bg");
   } catch {
     return (
       <DiscoveryPage>
@@ -37,8 +50,6 @@ export default async function PropertyPage({
     );
   }
   if (result.status === "not_found") {
-    const source =
-      locale === "bg" ? null : await getPublicListing(getDb(), { reference, locale: "bg" });
     if (source?.status !== "listing") notFound();
     return (
       <DiscoveryPage>
@@ -70,10 +81,15 @@ export default async function PropertyPage({
       </DiscoveryPage>
     );
   const listing = result.listing;
+  const structured = listingStructuredData(
+    listing,
+    await publicListingUrl(locale, reference, slug),
+  );
   const inquiry = (purpose: "question" | "viewing_request") =>
     `/${locale}/inquire?${new URLSearchParams({ purpose, reference: listing.reference, manifest: listing.manifestId })}`;
   return (
     <DiscoveryPage>
+      <StructuredData value={structured} />
       <a className="self-start underline" href={`/${locale}/properties?purpose=${listing.purpose}`}>
         {copy.back}
       </a>
