@@ -5,6 +5,7 @@ import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { requestDatabase } from "./request-scope";
 import * as schema from "./schema";
+import { databaseTransport } from "./transport";
 
 export type Database = PostgresJsDatabase<typeof schema>;
 
@@ -26,6 +27,7 @@ export function getDb(): Database {
     // Recycle connections so a failover or DNS change is picked up within 30 minutes.
     max_lifetime: 60 * 30,
     onnotice: () => {},
+    ...databaseTransport(url).postgresOptions,
   });
   cache.__msRealtyDb = drizzle(client, { schema });
   return cache.__msRealtyDb;

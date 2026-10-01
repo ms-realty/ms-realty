@@ -4,6 +4,7 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { fromDrizzle, PgBoss } from "pg-boss";
+import { databaseTransport } from "@/db/transport";
 import type { PublicLocale } from "@/domain/ids";
 import { issueEmailLink } from "../auth/email-link";
 import type { Database, Executor } from "../db";
@@ -61,7 +62,7 @@ export class JobQueue {
    */
   constructor(connectionString: string, options: { producer?: boolean } = {}) {
     this.#boss = new PgBoss({
-      connectionString,
+      ...databaseTransport(connectionString).pgOptions,
       ...(options.producer ? { supervise: false, schedule: false } : {}),
     });
     this.#boss.on("error", (error) => console.error("[jobs]", error));
