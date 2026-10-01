@@ -4,7 +4,7 @@ import { getDb } from "@/db/client";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { intentCopy } from "@/features/discovery/intent-copy";
 import { criteriaFilters } from "@/features/discovery/intent-query";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import { filterUrl, type QueryParams, searchInput } from "@/features/discovery/query";
 import { isRoutableLocale } from "@/i18n/config";
 import { formatNumber } from "@/i18n/format";
@@ -12,10 +12,13 @@ import { acceptableChips, type Chip, interpretIntent, toSearchCriteria } from "@
 import { intentPlaces } from "@/server/ai/intent-source";
 import { hashRequest } from "@/server/crypto";
 import { normalizeSearch } from "@/server/search/search";
+import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
-export const metadata = discoveryMetadata;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicRouteMetadata((await params).locale, "/properties/intent");
+}
 
 export default async function Page({
   params,

@@ -9,11 +9,14 @@ import {
 } from "@/features/discovery/comparison";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { LocalSelection } from "@/features/discovery/local-selection";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import type { QueryParams } from "@/features/discovery/query";
 import { isRoutableLocale } from "@/i18n/config";
 import { getPublicListing } from "@/server/listings/detail";
-export const metadata = discoveryMetadata;
+import { publicRouteMetadata } from "@/server/seo/public-metadata";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicRouteMetadata((await params).locale, "/compare");
+}
 export default async function ComparePage({
   params,
   searchParams,

@@ -4,7 +4,7 @@ import { getDb } from "@/db/client";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { ListingGrid } from "@/features/discovery/listing-card";
 import { mapCopy } from "@/features/discovery/map-copy";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import { listingHref, locality } from "@/features/discovery/presentation";
 import {
   ambiguousFilters,
@@ -22,9 +22,12 @@ import { formatNumber } from "@/i18n/format";
 import { AppError, isAppError } from "@/server/errors";
 import { publicMapRelease } from "@/server/publication/map-config";
 import { type SearchResponse, searchListings } from "@/server/search/search";
+import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
-export const metadata = discoveryMetadata;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicRouteMetadata((await params).locale, "/properties");
+}
 export default async function PropertiesPage({
   params,
   searchParams,

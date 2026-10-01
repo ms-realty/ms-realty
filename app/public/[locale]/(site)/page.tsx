@@ -3,13 +3,16 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { ListingGrid } from "@/features/discovery/listing-card";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import { readFilters } from "@/features/discovery/query";
 import { SearchForm } from "@/features/discovery/search-form";
 import { isRoutableLocale } from "@/i18n/config";
 import { searchListings } from "@/server/search/search";
+import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
-export const metadata = discoveryMetadata;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicRouteMetadata((await params).locale, "/");
+}
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRoutableLocale(locale)) notFound();

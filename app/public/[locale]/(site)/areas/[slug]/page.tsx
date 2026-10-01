@@ -1,7 +1,14 @@
 // P16: current approved area content, otherwise a truthful availability state.
 import { ContentScreen } from "@/features/discovery/content-screen";
-import { discoveryMetadata } from "@/features/discovery/page";
-export const metadata = discoveryMetadata;
+import { publicContentMetadata } from "@/server/seo/public-metadata";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  return publicContentMetadata(locale, "area", slug, `/areas/${slug}`);
+}
 export default async function Page({
   params,
 }: {

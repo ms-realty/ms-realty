@@ -14,7 +14,7 @@ import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryForm } from "@/features/discovery/inquiry-form";
 import { inquiryReviewCopy } from "@/features/discovery/inquiry-review-copy";
 import { emptyInquiry, type InquiryState, inquiryStatus } from "@/features/discovery/inquiry-state";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import type { QueryParams } from "@/features/discovery/query";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
@@ -25,9 +25,12 @@ import {
   validReceiptSession,
 } from "@/server/inquiries/intake";
 import { getPublicListing } from "@/server/listings/detail";
+import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { Notice } from "@/ui/notice";
 import { sendInquiry } from "./actions";
-export const metadata = discoveryMetadata;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicRouteMetadata((await params).locale, "/inquire");
+}
 export default async function InquiryPage({
   params,
   searchParams,

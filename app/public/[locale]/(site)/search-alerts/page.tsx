@@ -1,16 +1,19 @@
 // P10 public entry: search context only. Existing client identity owns verified opt-in.
 import { notFound } from "next/navigation";
-import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { DiscoveryPage } from "@/features/discovery/page";
 import { filterUrl, type QueryParams, readFilters } from "@/features/discovery/query";
 import { searchAlertCopy, searchAlertCopyLocale } from "@/features/discovery/search-alert-copy";
 import { SearchAlertCriteria } from "@/features/discovery/search-alert-criteria";
 import { alertSearch } from "@/features/discovery/search-alert-state";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
+import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { configuredAlertRule } from "@/server/subscriptions/rule";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
-export const metadata = discoveryMetadata;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicRouteMetadata((await params).locale, "/search-alerts");
+}
 export default async function Page({
   params,
   searchParams,

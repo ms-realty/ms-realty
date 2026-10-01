@@ -85,7 +85,7 @@ export function hostContextFor(
 /**
  * The host context that serves each API family (`/api/<family>/…`). Route handlers live in
  * app/api, outside the host trees, so proxy.ts answers any family not listed for the
- * addressed host with 404. `/api/health` is host-neutral and never reaches the proxy.
+ * addressed host with 404. `/api/health` is host-neutral, and the proxy still enforces origin trust.
  */
 const apiFamilies: Readonly<Record<string, HostContext>> = {
   inquiries: "public",
