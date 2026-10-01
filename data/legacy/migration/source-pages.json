@@ -13,10 +13,10 @@
   },
   "sourceEquivalenceReviewed": false,
   "headMetadata": {
-    "capturedTitles": 586,
+    "capturedTitles": 591,
     "unknownTitles": [],
     "unknownDescriptions": [],
-    "liveRawHeadPages": 319,
+    "liveRawHeadPages": 324,
     "historicalRawHeadUnavailable": [
       "01ee45952a336c385c9a118b",
       "028a1b164f650cd01c8177e4",
@@ -312,7 +312,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5efaefb868348e3c61856b9b427e49152565f3aa70dceb65f7c11ef1d8b95c21.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ef484f1e8dedeeb56dc707b550a15dc25917a2d012b0360ef71e42ed25fc5044"
       },
       "equivalenceReview": {
@@ -770,7 +770,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2697219bbff2f685e7cf12f23e127633939970b1fb9f47145353c4130584ddb1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "54a0df858cda95907340c498625cc7c953f7dfa52feef8b19cecdce2c3b4c559"
       },
       "equivalenceReview": {
@@ -1555,7 +1555,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/81bc497101be336bae7a310c25a0b8756b0aab02091236f24c09c01cdd0ea582.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "6939b0bb455b00410ca1bce6ffc344f3ad9638bcfc5b25b31739bdd858002db6"
       },
       "equivalenceReview": {
@@ -1826,7 +1826,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1c9b2710ac37847d85cfeebd4c2fc0b90c74db40baf564f4433cd95096c55d01.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "25ec09215547d4a112791accd96c476adab549a08192481481cf365270ecd1a7"
       },
       "equivalenceReview": {
@@ -2378,7 +2378,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9fc5d3d9d2c45fc166df9180a495d7161ab81409c964d8c470b35c93263cbd73.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "02f584bce067d85cde1e83e9113e7890ddfeb6319a86ceb868f6a7a326e4cf58"
       },
       "equivalenceReview": {
@@ -2566,7 +2566,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6bd2e0e8317caee515fc9ae3afbc92e6defdc46a29fdc103f83bfd95bd11ecf6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "42694fad83be36b6573a01a71bc2a7eaeef089b1b3ee985ab7e7247b97c6538d"
       },
       "equivalenceReview": {
@@ -3608,7 +3608,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/753947a7209df97068f73d70b1b65179859983bfed1b666af483fdf40eaf01d0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "46574d47c61c70365aef73561d9a22c74cfaf617212dfd4f3bf8e84643c92a60"
       },
       "equivalenceReview": {
@@ -4168,7 +4168,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e2c1eae6c9503fac4e8eb6be6b464ee62a9b7be2bf6c5c8e2cb22cc1b1a8d438.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8565bb1f8f2f077150e1bcce54638ce540508d32ab6161989f7ed5cfb98032e0"
       },
       "equivalenceReview": {
@@ -4451,7 +4451,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b54cbb0c174838de9ea9925b0060a6f29826457930f6d5f1744bc90394ae4c41.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "fad1ea1c45e8c9ac3a02ab3f5230afea19658ea6269a125c4934fb59d4878da5"
       },
       "equivalenceReview": {
@@ -4614,7 +4614,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0c00d3436c26f95cc00fc407274107051e48cc5f65325a794bd8731fe1500db6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ebf40450d6b870003aee116418e04e8f93ffa8af9aa4c5e1b01ad6412eb34783"
       },
       "equivalenceReview": {
@@ -4697,7 +4697,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/973c16e4fd757595452af7aa183e453c90129b6ae098e601f632581c098b29e6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8eafabced42efef3587dfc314cc6ef20dbb5a9b3d925e4775aef03c3966bcbd6"
       },
       "equivalenceReview": {
@@ -4873,7 +4873,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/52970250a8d4b4fd878a1f593a4ac53d6e0cca02401199e49ddcea685f44a814.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c1b777b91cdd94c27d0b58e604c2c2c1bcf6df9db1aa08ec6229c80884fa75d5"
       },
       "equivalenceReview": {
@@ -4986,7 +4986,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d0fbe4cfdf54ed7b2efeb98d3b0632f8585b4409451ed3081691442ce1ecf53b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e82c5b9c54c54d0b070a5f495392886b31f5fe24e89c5d928d6f49548b3e3501"
       },
       "equivalenceReview": {
@@ -5027,7 +5027,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5fa83c4ee7618b6f480398716eab9b8a421d6a60fb7b68e22f925d82e56a3576.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7655203e5233efeb16138f7bfe4d813589a27752a274d72db47e7f818c4257a3"
       },
       "equivalenceReview": {
@@ -5486,7 +5486,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/24e20c319a2e4201ef1c3ff41d400276d1475c952fb2a3021d9929d4aa35bc0b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1c69c237ace0b45f2bc6457981e7e9532f38ac0f4ec6cfb2a99c1873fd2e6b66"
       },
       "equivalenceReview": {
@@ -5755,7 +5755,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0483649041d52274decd16ea709110bf67322690cdde2313fb2422a0e04efaaf.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "316b366c81e37ba69144c8f1887cd31d082a30620e0e501d8ced325a0b42c5d4"
       },
       "equivalenceReview": {
@@ -5991,7 +5991,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8709f5a4283de4fe9d84e3251fa298d9cddbb04886f0d0c53e195efa6e6f29bc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7c980a2b1447d1acc63c100c3a667a77059ef370701240d08e6d96bc83359080"
       },
       "equivalenceReview": {
@@ -6044,7 +6044,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/54e44445f24b0e82ad90cd10caeabcf838d4ab06cc1d1a45bfa4362081114ceb.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "337e7f2a04c0be1af21469849c21759e931a93faa0ed23cebee678fceff2e65e"
       },
       "equivalenceReview": {
@@ -6371,7 +6371,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/dbd390fe04b13643ad018ab4033caf5bd56825f06bda9b9598e4ce230e4a3dc6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c87a1b40f8be21a96a3ead8e944124e1fe8369389e5c48261c6475bc76c365f9"
       },
       "equivalenceReview": {
@@ -6946,7 +6946,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/aa2d977bf21820cf69cb8d62a58b43ac504e0c19ff3a46c209060894499c81b4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b0270791e55b6fb12379f406f2b640c84aeed26e6f9ca552c7ca1fc6e8cc7940"
       },
       "equivalenceReview": {
@@ -7048,6 +7048,59 @@
           "storedImageLoadVerified": false
         }
       ],
+      "listing": null
+    },
+    {
+      "id": "0f24488f13d9561085b91a25",
+      "canonicalPath": "/en/legacy/0f24488f13d9561085b91a25",
+      "locale": "en",
+      "title": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoTitle": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "description": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoProvenance": {
+        "title": "live_document_title",
+        "description": "live_raw_head_description_or_absence",
+        "artifact": "data/legacy/migration/live-source-html/13a8ecd7100ad3069ddb3a666441fc971d67e6653480fa8f1403f913445c0449.html.gz",
+        "historicalMetadataWhitespaceNormalized": false
+      },
+      "bodyText": "Online camera Begovitsa hut Online camera Begovitsa Real Estate on Sunny Beach, Bulgaria Real Estate on Sunny Beach, Bulgaria Buying an apartment on Sunny Beach, Bulgaria excellent investment in the current situation where the banks do not give nearly no income from deposits. Many of the apartment complexes that we sell in Sunny Beach offer a guaranteed, at least 5% of the income from the value of your property per year from renting your apartment. Also, you can give you apartment for rent yourself, […] Transfer Thessaloniki Sandanski Transfer Thessaloniki Sandanski Through the company MS Realty You can book a transfer Thessaloniki Sandanski (Bulgaria) – from the airport of Thessaloniki in the town of Sandanski The transfer fee Thessaloniki Sandanski and back is 120 Euros one way. You will be met on a good car business class. Approximate travel time 2 hours 30 minutes Distance – 170 km. Transfer Thessaloniki Sandanski can order by phone: +359 897 69 68 […] Transfer Sofia Sandanski Transfer Sofia Sandanski Through the company MS Realty You can order a taxi from Sofia Airport to Sandanski The transfer fee Sofia Sandanski and back is 100 Euro one way. Approximate travel time: 2 hours 20 minutes Distance – 166 km. For the customers of our real estate agency, we offer a shuttle service from any city in Bulgaria, as well as from neighboring countries Greece and Macedonia. Taxi from […]",
+      "sourceUrl": "https://makler-realty.com/en/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "sourceHost": "makler-realty.com",
+      "sourcePath": "/en/category/новини/",
+      "sourceType": "page",
+      "sourceHash": "509709617ef41e76ece1eb5a071f584c52f24b7744fd3b825e77ad5827da8fc9",
+      "capturedAt": "2026-10-01T12:36:06.753Z",
+      "contentScope": "column:articles_main",
+      "provenance": {
+        "kind": "live",
+        "artifact": "data/legacy/migration/live-source-html/13a8ecd7100ad3069ddb3a666441fc971d67e6653480fa8f1403f913445c0449.html.gz",
+        "extractor": "legacy-main-v4",
+        "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "equivalenceReview": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "contentLinks": [
+        {
+          "url": "https://makler-realty.com/en/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "text": "Online camera Begovitsa hut"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "text": "Real Estate on Sunny Beach, Bulgaria"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Transfer Thessaloniki Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Transfer Sofia Sandanski"
+        }
+      ],
+      "media": [],
       "listing": null
     },
     {
@@ -7447,7 +7500,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/89ba8ca11dab6f3bb419b0c1847ef8e78a477a6fc21d0f6027c2008396c1e2dc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9e6b11e7e0ff4868fb37833e56b4fdbec6c11ed44806353ace75a34468cff8d2"
       },
       "equivalenceReview": {
@@ -7871,7 +7924,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8d6885589083fb0904668336362d42ca6839491514212588c6281b95838729cf.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "aec751d4567d9f0752a990144b0fa4ca33f91a4020fec959a4b5c5934219bc1d"
       },
       "equivalenceReview": {
@@ -8358,7 +8411,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/779444a968d48aeccbcf38e581957f1f14cf0a8dd98f4e176bf2901b4087440b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4cdc7b6addb73f1ba05e458171c8654f4ba6872237408cf78529935251bf63f5"
       },
       "equivalenceReview": {
@@ -8450,7 +8503,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8b2127888f587d21d3c497104cf46b2f642752736f9c7df41ef7f70b7e094c0a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d4c1a14a6beb5a99819dc9899b034cb5f40d8d6f003fc9ad5b1cb58a505e112c"
       },
       "equivalenceReview": {
@@ -9009,7 +9062,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/af2c99e36949c271a3f67dbe663ca00a9e33941148e250feb392599e63ceb89a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "48cf2b65dc16c0a147e9e0476f1a48b2cd9a06856bedb66945180a62714a7230"
       },
       "equivalenceReview": {
@@ -9070,7 +9123,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/22cce044978178594d81575c9133c7494bb7a7892dd9e79362b6a11d1ea8d43a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "fd1ad607f507d30435131b68cf28cba2a38ba4eb7d0e17df3ca03ad1373b603d"
       },
       "equivalenceReview": {
@@ -9679,7 +9732,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b8b1048904ebaabc446a63e859ea6c13354a01a41dd2682b7899743dc29e35b3.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "85665feb67920f3b4a7e7e64b4253b566a410bf18bcbe5bb41dc7144654066a1"
       },
       "equivalenceReview": {
@@ -9950,7 +10003,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0165947a9a70670181d7c93618a10d31a88d5d165731644af9762e213084b6ba.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "207e555ba90bb552764fc95a387a444c7a568862d1083c31f7494227a3b72f10"
       },
       "equivalenceReview": {
@@ -10538,7 +10591,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e6fb0d7abcf7b02699caf5d0cd8157e82156a1b79a1b071c37c9d6661c2f2d4a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "27d39d7ba5dff0960c6d1ebaa5e9a048b93772c822a2b95fe656d8fb729fa64a"
       },
       "equivalenceReview": {
@@ -10709,7 +10762,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2bcc1172c6c755163f2f317f8fee2cf93f3d759a3747973101ab81de35d584f5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c595a776416d54e7738badac43ebce7e458bd7a3f6271e79f6a30caf5c5a6dc5"
       },
       "equivalenceReview": {
@@ -10996,7 +11049,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/bf318956bb9cb760f824bed39f978d561b0bd61818d5832c5db287d3dbe59b58.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "80dd0f966c6fb3d5f3629622e2b7d1043bc1866c8cace57ef3627230701e4ae0"
       },
       "equivalenceReview": {
@@ -11049,7 +11102,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/17661b6f9d0f4147530c12a3fecf45acc025caea25320e184ead4ca348a9f3e2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8c7211bb3e4b36eee06b52c442452e34b11318fb935cdec600587d0c55994bc0"
       },
       "equivalenceReview": {
@@ -11336,7 +11389,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6a2462b476ffff7e278d322502b960ddcd389629c66d312ad83aa9801e9086f0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "75221521d62d6b3e7f26ea81aaf82a441f427ab6423fb89a2f952290203e3255"
       },
       "equivalenceReview": {
@@ -11419,7 +11472,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/40a74a0ed73a9132fbc6c2c16d57a4f5e988bd608d94cf6ddcd3d4101b036c4e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d180de7b1233ca42efbe895cf56cef1643c0f8a77643a8dac9387e45a3fe47e7"
       },
       "equivalenceReview": {
@@ -11737,7 +11790,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d3d5b88ed1cfcfb4b2607c2861aa21aedb6ef37ad821b41b16194f76caf44261.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a9d08d9c92880ecb1abc6dda13279c764d04c9647a60a7bd6a98fc2ab61895a5"
       },
       "equivalenceReview": {
@@ -12135,7 +12188,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9f46d6254bb0eb73b76b98b83d9862c829867e29feb7263dc9821cd43e5f889f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7569b87fbc190449ab37f059b5d9030db610e9c7da829f5d1793b49f88ef5846"
       },
       "equivalenceReview": {
@@ -12310,7 +12363,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/33d8284fa0192b426d9d4e31e4d5a9b1e5ea83a0722880a6b99a440ee2e46190.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d79d74ed7559402dc1e38e213fdd09d21e9138b01ac5156eb7f0cb15a4ed5434"
       },
       "equivalenceReview": {
@@ -13000,7 +13053,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/789dd6f8a98417cd0c5a34eefce65da75393f975b7a8e64bbf214a2b18842550.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "5c6190ec8acc8e14dd8066c02284a6ea465098bf2e329f8c7b7b0b3f8ded5582"
       },
       "equivalenceReview": {
@@ -13158,7 +13211,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a2bd19e564905d7d0e2f021ed5febcce6e47ee45528eb0179ad8d3564fb4a0cf.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "693658a3e0628ed0633357fd60d5720aaef9214590bad82f99c1539efedf4f56"
       },
       "equivalenceReview": {
@@ -13367,7 +13420,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2bf415323108e314b50facf5420102825dd7e56bb49d269b537c31c779f648b5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d76e99aa8ccbe239146f7df4cea4ea527d7ad2d6369cf51f752f76351b08a610"
       },
       "equivalenceReview": {
@@ -13465,7 +13518,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5909aff7406f07b3ecbba9cdea0f1e8c2308e4344ec418ea1b8af8ee2e23efa9.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ef131f729f1c221c79ced981b4f19d19350037d77d93b42a1e6e2e698a3c8a7f"
       },
       "equivalenceReview": {
@@ -13646,7 +13699,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/34628dcb968e46bdd47f5a881e2068b7fea4732f35fd8eb39edae0f4bcb46adc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8ea2ba87030d16e3ca6771cfb1f54310d499ef7ccc3d32633aac5413238c3c5d"
       },
       "equivalenceReview": {
@@ -13751,7 +13804,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6edb13eac1dd585e66d65524a8b13a2ee7e8ae7c07163b57242f1870ddcdd8b2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       "equivalenceReview": {
@@ -14736,7 +14789,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a67fb9c4efd0e3921545232c3d3f924a7c92565bfea419dfba4afabbbf3b2774.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1aad88e1033ced03c55a2b9f001cc8630fc2e9d7fae138cdb80b59e31385a588"
       },
       "equivalenceReview": {
@@ -15002,7 +15055,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5773ea1a69339181c677dd2b6496c02692af177f36164c566d98af723cd084b2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a9d08d9c92880ecb1abc6dda13279c764d04c9647a60a7bd6a98fc2ab61895a5"
       },
       "equivalenceReview": {
@@ -15812,7 +15865,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/def12a89ad05a7ed5b624f5fbc53c2e0693e15115cc11e57af886ddd2b67ccda.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b4a3dd1d8c1f65abca3d9e15614a54cb53263ac5717a9984f256bd0e7d8b7f79"
       },
       "equivalenceReview": {
@@ -16019,7 +16072,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a4ad6d1b6e6f88ef4009a8bef577a3dd1603b8b46db92437831c3dde9168b263.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "24e1c8d73ea36d21d8eda802f41e9d42176430b94786f5d42c9874bc0a6e65dd"
       },
       "equivalenceReview": {
@@ -16154,7 +16207,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/cc8936be09b162c7bf9940fd340feba762fd002064dac642d3045a04d34ef3d3.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "175209ac5e87b1b3754a08e4dd0cfac4431d58d5e08020725ef49d9e5c2289e5"
       },
       "equivalenceReview": {
@@ -16811,7 +16864,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/66125cdb792d42bf7f45858aec2e72f79b55a70fda24cabf2d6eae4db8dfe85c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a5689afd3852ce70b887c487828ac43f54df5869bb2daebd81f95592f3b3edd2"
       },
       "equivalenceReview": {
@@ -16934,7 +16987,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/faa74d4502fa0a0674d5a11fd693192ff127bdee0c8dbab7c36f0d383b007102.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "0ba40fb45d2d32d2c4d0e9913a59c277e685269f85654fe1d06ea129bf01fd54"
       },
       "equivalenceReview": {
@@ -17010,7 +17063,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c500ed16e10059077baa50e10910925bf0c9d44219245ecdbf576367c4409f95.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "dc7155e776f60b19d14e3225b885e0cb32a789c79c28ea856017a80158803dbd"
       },
       "equivalenceReview": {
@@ -18119,7 +18172,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3887585ec3295bed8381faca786ff2738c7267b615053fe4c5bbade071240fb2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ce7ae53419318e9ca38ed5ac18af89c418c54384f094aae251023f5a2bf6f33d"
       },
       "equivalenceReview": {
@@ -18390,7 +18443,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c5fca7c1bca75053e73e1f323ab31669369cd2230c0987717e1d7d0e8de2f0b1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "6b1dcd6a5872bb99c6045c72f5f68c3c987f930f9987e15d62d6eff4c82fdb27"
       },
       "equivalenceReview": {
@@ -18673,7 +18726,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/02425a8a8ba5753e467298732f1fde319575fd87bb55e4c035677c7307133e16.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b58d1fb67b28256c9cc96d5f3549b0a255040b43e5e2e56281246f080f9e0ce3"
       },
       "equivalenceReview": {
@@ -18944,7 +18997,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b079c5438a974b25115f2c898e0290a310af3be36521e55f35863204dd7a2f69.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c3b36df8e277e34dd7cc0922d833826cb5f94b74a70523c3ad284b470e6da12d"
       },
       "equivalenceReview": {
@@ -19191,7 +19244,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3f27f38fa41f0cf7d1adb77942bd8fe8be614259f307f8aa3cba5f385b3233a9.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8e9a186cef418b737c297152587f332db4575b9cb399a2140ed86fd3e2759389"
       },
       "equivalenceReview": {
@@ -19453,7 +19506,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/54fb7fb556f3f0557e74135d1cfd42909198c123492defafc0af464561a1467e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c824cb0b42e0be04f7bf72bf2898dc24411fd575eb5c11a994c1037534ea3608"
       },
       "equivalenceReview": {
@@ -20458,7 +20511,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4ceaba9359b3930db7c5689bc08195ddd18cba2c01c70fa9900e4366c380aacf.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "80664729f721e81ffd51b50aff8a0870c4dc6960ff593c71e60531d92aacab46"
       },
       "equivalenceReview": {
@@ -21058,7 +21111,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6d2d6e5d9fcd323231bad66584f21b496f7dc9f2f154f0a70e633031b18af64e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a38c668a3a69b5f821d14c3ff75960ad0470ce63dd7efa3e0f7e774c5a929631"
       },
       "equivalenceReview": {
@@ -21156,7 +21209,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2e35400daa1d7168f0a170a52668ea451f77baffff000556ee902c1de2f68f85.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "40c0e144dc1d735adcca5065541ec7fc7d312439558b57915e1b831516da548c"
       },
       "equivalenceReview": {
@@ -21809,7 +21862,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/17ab61758a8220283d9100decda9afeda3ff20040179be2f815d56e655440871.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "77c81bf8e515a9eb61510b39513a8b5dfe62838bc014e22f1a315e4347a9d9d4"
       },
       "equivalenceReview": {
@@ -21980,7 +22033,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/cd5f2abfe8b4e008fd2c1222c59fcc1fc2ce89ce3b55962bc9ada39b89fe2225.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "95c0c3e59f886af1fd65c05fa9730fc549dc736c6ba952e0bf97d769d362a3a0"
       },
       "equivalenceReview": {
@@ -22226,7 +22279,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e8e071b53f4586e43879d265d4a33266eb7a81c4e366f2381e30ce9059c1f4be.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7ed7a7f11f8f193f9f68fa70303c2b2df4f06c13d1dcc366baf0cce386ccb887"
       },
       "equivalenceReview": {
@@ -22354,7 +22407,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1196299cf3e4f4d7b4f47a8f9cbc80405d04145e7115a41cab07e7d2d5d761d1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "2631348677ed0de9ef7178fdeac72a8508e57d74d3dfc2446ec6d4aa47ad56ee"
       },
       "equivalenceReview": {
@@ -22899,7 +22952,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/190b553a48b3003fe0ec9a6c72d73edbcd38a119874f1cc2f342fc90888902ad.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "bd593f1eba1f202fbfafc037debe4d57ffe2bbcd6c1254070e91793cb89bdb1f"
       },
       "equivalenceReview": {
@@ -23111,7 +23164,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0bca0f84a20013ddadd5e15828398b1ddc7401b7a3f58dafb917fc54be90583d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "60bbf1ed99012e1cf24336da65becc04b0ff83a470a365afa08004a16676dc26"
       },
       "equivalenceReview": {
@@ -23179,7 +23232,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/519b4f1618f0a2ec8837ebd95c4fa0d1cf2327c969e2b782162f6bd1cc244a62.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "6215c641626ff20535876d1930b65501b9f334f0fa2abd06ea27936005a95266"
       },
       "equivalenceReview": {
@@ -23605,7 +23658,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8040a6a31e39991f9ae33f7bd5371fd69f384f3d649dd041ac29b87ed0ae1a85.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "de85a95fc55a0932e5c0d0c2d917719293c9544c1e0ac484182c30a4824ab5db"
       },
       "equivalenceReview": {
@@ -24014,7 +24067,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/dba86ff73f9f1c6b2dee26e9c63bf80604a57d13fc0bac3fafea8ce50c4d6444.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "192e69a0607540c45ce37b928474d9c88eac68ee8bba736b31797bc2c30b1bd5"
       },
       "equivalenceReview": {
@@ -24128,6 +24181,59 @@
       "listing": null
     },
     {
+      "id": "32ce31baf0b90cd908c941b4",
+      "canonicalPath": "/bg/legacy/32ce31baf0b90cd908c941b4",
+      "locale": "bg",
+      "title": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoTitle": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "description": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoProvenance": {
+        "title": "live_document_title",
+        "description": "live_raw_head_description_or_absence",
+        "artifact": "data/legacy/migration/live-source-html/f9571bd083db9cd60fe7ab38317e0cbd7a024a9030557782d1de0aec683ed7fd.html.gz",
+        "historicalMetadataWhitespaceNormalized": false
+      },
+      "bodyText": "Онлайн камера хижа Беговица Онлайн камера хижа Беговица Трансфер Солун Сандански Трансфер Солун Сандански. Трансфер от летище Македония в Солун /Гърция/ до Сандански и обратно. През агенция за недвижими имоти MS Realty Вие можете да поръчате трансфер от летище Македония в Солун до курорт Сандански и обратно. Стойността на трансфера Солун Сандански е 120 Евро в едната посока. email: [email protected] skype: ms_realty [si-contact-form form=’4′] Такси София Сандански. Трансфер София-Сандански. Такси София Сандански. Трансфер София-Сандански. През агенция за недвижими имоти MS Realty вие можете да поръчате такси от летище София в Сандански и Сандански – София. Стойността на трансфера до Сандански и обратно е 100 Eвро в едната посока. По пътя от София до Сандански ще ви разкажат за всички забележителности на град Сандански и ще ви отговорят на всички въпроси свързани с СПА курорта . Пътят от София до Сандански […]",
+      "sourceUrl": "https://makler-realty.com/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "sourceHost": "makler-realty.com",
+      "sourcePath": "/category/новини/",
+      "sourceType": "taxonomy",
+      "sourceHash": "7cc96db9945cdd0c0a31feaedc55b5eec8da787ce8fd43288adedbf7a698f3d9",
+      "capturedAt": "2026-10-01T12:15:17.088Z",
+      "contentScope": "column:articles_main",
+      "provenance": {
+        "kind": "live",
+        "artifact": "data/legacy/migration/live-source-html/f9571bd083db9cd60fe7ab38317e0cbd7a024a9030557782d1de0aec683ed7fd.html.gz",
+        "extractor": "legacy-main-v4",
+        "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "equivalenceReview": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "contentLinks": [
+        {
+          "url": "https://makler-realty.com/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "text": "Онлайн камера хижа Беговица"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Трансфер Солун Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/cdn-cgi/l/email-protection",
+          "text": "[email protected]"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Такси София Сандански. Трансфер София-Сандански."
+        }
+      ],
+      "media": [],
+      "listing": null
+    },
+    {
       "id": "32f04c0fd5f24fd2900dd189",
       "canonicalPath": "/bg/legacy/32f04c0fd5f24fd2900dd189",
       "locale": "bg",
@@ -24151,7 +24257,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3b32da3c1dabbdf15801d7bfff93bc927e37f9c1bfdb586d13c2aec3d63a72d9.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "57156223b77b07d19a0b0a21aff0790012f41554db4f145d4554c92af9637751"
       },
       "equivalenceReview": {
@@ -24264,7 +24370,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/817d3721e8a9bedd2357c3a864e5412f1f400f5d791e122dc607108faaf1cd9e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7db71a60a71a9f4d35babf48d9c7a1d36a078f5af6363ff57409d16ef54b88cf"
       },
       "equivalenceReview": {
@@ -24380,7 +24486,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1afbc5593a99332cb7c259552600e3c577ed9e50f439402714bdcda17415d9b2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d4c1a14a6beb5a99819dc9899b034cb5f40d8d6f003fc9ad5b1cb58a505e112c"
       },
       "equivalenceReview": {
@@ -24651,7 +24757,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9084a04f619a79c935a16ead72ab133b9cf6f1882b8659f75b4addbc6fd8fb3b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "fbea0b3e55442a2640ad9409db9c36537185674b679eb716126254e8e1b6f495"
       },
       "equivalenceReview": {
@@ -25436,7 +25542,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7c433cd6434e3833325f792d524e7f379d640436c3f2bdb21c4430b477218b82.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "6100ea5d3faf18907e9b6dbb84efb245077d098df7b1bf47184cd48880901cab"
       },
       "equivalenceReview": {
@@ -25727,7 +25833,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d47a37f41c7aa47e0276bcf1242747840d0e080514f1bf23512d1409a8353b98.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f37d074fe7c4a4bffbf50e573d6abb722a83264168e5af1eb8459c8f2b842c9e"
       },
       "equivalenceReview": {
@@ -25883,7 +25989,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a89e6053d4c3812dfbb0a859414ff8efa4c55398ad86b7fa8a5ff4e0a6171d8d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c2ce65eda99c4afa91251a33fa00b392b9e3f335d41cc757f5ce6d92a792a642"
       },
       "equivalenceReview": {
@@ -26004,7 +26110,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/843e3013a19a9c46d12a6939f56c6424c0cba5f9fcc77766e49e0a8e508d916a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "47955c2821c572dcb2fde9189f05c8ca3855e101b0b180dcf51dd1a2e74a531c"
       },
       "equivalenceReview": {
@@ -26220,7 +26326,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f1a884cda4da80e09b47d4f14390f34a27ae85228b60a596600b7e5a11a21488.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "47dbaa2c6c949ed12ae2bb416a158beb04c69114b55ce832fb32d364a4632277"
       },
       "equivalenceReview": {
@@ -26288,7 +26394,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/23de53403f70678828453c59623147a2719545792d21e41fdada8fccef4e33c7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "88994eb835b6c6f094288ca8561fa98681da1222f10cdae73c6569f09425da17"
       },
       "equivalenceReview": {
@@ -26854,7 +26960,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/951e8703bd367aca8a56c1bc0809e8b75b20b569bc2f6404aee14c42118b3759.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "017ba6b1e6cda38a8786c2f1b1e647ede6427333ca1797b5b29aa82d2b6d96a3"
       },
       "equivalenceReview": {
@@ -27125,7 +27231,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1f627346cf83fc240a3b6b13258697528ad7316c726b3089a42f85d30f213668.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ffb4dfa8e1a79d81e6578b133b151841a925db3103f9e30399d3301f2d985b3d"
       },
       "equivalenceReview": {
@@ -27274,7 +27380,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c03ab65f5857c81a9c7b08ed1fbdd2d5c622b751c49afa3def9d764a0b6be740.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8f7d9227049d31eb1bbd6ef2366fc66b774340ae72e93df4c0cb1599a39b4243"
       },
       "equivalenceReview": {
@@ -27491,7 +27597,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e8d28bf13e0bc0043c5b7f50fd6aba67410f146d2703ed369eede3029ad25209.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "272b0ef034329f41b37d8974ea2b9dc2c8573fd22dcc67d04c3e7fe79112c9ca"
       },
       "equivalenceReview": {
@@ -27738,7 +27844,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d9d0d9598221eb938ed2b55ea6eec49ec72c6cfb42c3e9e838eb2daee94c97ad.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       "equivalenceReview": {
@@ -28367,7 +28473,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6e1cf1e294b23a924114b2aa024459cff44c40c280e32d0d60e232c0fcdbd286.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1688672228945a7e955a7d721a53cbdc95332cb5413207c0de72031f7a03d29f"
       },
       "equivalenceReview": {
@@ -30489,7 +30595,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/18a358b1ff5c9fc56d48200bee5b58f34d6f01f8021c45ddf9053796ab0fec2f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7655203e5233efeb16138f7bfe4d813589a27752a274d72db47e7f818c4257a3"
       },
       "equivalenceReview": {
@@ -30602,7 +30708,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d077036bd6efe868b938e8de091920b76ffbf1e4752d21700d91f63c95e623c3.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "52144f2488351202a62265173e4bd0b1cb56813b311192128442fd675dfc226c"
       },
       "equivalenceReview": {
@@ -30760,7 +30866,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/672467a76ca7eedd79e1047b2ae0fca7c61dbfdd752e20b0f2277647e8faf10d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "afb68c00771e8918edaad386d8ea23b2b4db3948b3e7d340b4535cc7de67b964"
       },
       "equivalenceReview": {
@@ -30813,7 +30919,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e0a93a521446d5c24aa0e3dbbb70a1eb131c2da9ff8850e3116a5a7bfe39ee58.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "859d7fe373ba1458fd1e06da941d25c9d3619fd53b000d74a8186e53862e8c3b"
       },
       "equivalenceReview": {
@@ -30896,7 +31002,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d484d09e7cfef4ff29fee36dad5f959cdf1daf78de346e91b35d431c6ce25ac1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ee0cbfe44e9115bb861231edf9d3c7f40f0875fd783668f912d363190ce1f0fe"
       },
       "equivalenceReview": {
@@ -30987,7 +31093,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f833ed428ca2c28a70362e6216bb2d3cea99a0a229ab444b723090205e2953a5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "14a24a3c81a10fac60223438b2a7c5257cf5ccd1e7755d3b12a0dca6f4020fe8"
       },
       "equivalenceReview": {
@@ -31150,7 +31256,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1a9d2a40eb6c5ca988c81f55ae458e64dff3a3aae9f7dfe1dffbe6d2022fc56e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "12ebe9484320b3f4d4683b4a81ece8c6e9868d59cd04ef3b5dfed6e83413c878"
       },
       "equivalenceReview": {
@@ -32172,7 +32278,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4d33d376616ee73602a63ed79f3b287ad3badb34ac2b1bd82c5a325d7136365b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a49f8f769b08ae1a55c3809a86ee6d6910fa85145e8b936e310fcf927fcc9f65"
       },
       "equivalenceReview": {
@@ -32441,7 +32547,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6fc4a392c0106a05668ee807064e789c71ec8b266e83624cf00526c63948c56e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "09082e963c00cd338b88f30cbff24f5c7a83ca58a93657984c5f07c6f8e57f61"
       },
       "equivalenceReview": {
@@ -33531,7 +33637,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5843dba95f5a07957ff456d56b0730f826518b75efdb7280a5b9cb8c12db0583.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "da0b75387d0e09a36b89b83fdb125d818ffe293757831156a7c23e8bd61c3042"
       },
       "equivalenceReview": {
@@ -33693,7 +33799,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/99082e3bf0b5ade6e9f00670b866c2604f3f122b39c5d58372fb779dc594a151.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "38f7a2d98a8c59ace0be855c4e544efdd7d48dbec9a367d07f9c66d6e3cb8eb3"
       },
       "equivalenceReview": {
@@ -33971,7 +34077,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/caef7d76a5d6e7d1ea551b884ba5008acc998621be4688e67798384fbbfcb382.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d527fa85b757a41075c5f786dce9e89d655e2e340927f5b37df3f1931bad6920"
       },
       "equivalenceReview": {
@@ -34408,7 +34514,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/408bb57870b92307a8f864344ef8c8c9c9286fff369f8d1100ac07a88165e4c6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "43f261ae3dae1031d2c51282d5605c224dcc49d3dcf1c30ccbeac5e95c5e09cc"
       },
       "equivalenceReview": {
@@ -35078,7 +35184,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/753bdcede1d3ee800b64e10c1e0f1f1a7cc486b0814623cf8bbec02cd3fb3536.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "849d989d4e499c59e857ceae7b53299355810ff433f7b1138b65b1599cd3440d"
       },
       "equivalenceReview": {
@@ -35233,7 +35339,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2fece90883050fc97d876dfe2047f4c5785d076d281fb1a24461ed4d1d2e61e5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d4d9204bf1d6bde91760295f1e28b3c86b14c92d05d2219d76dde36642ec4ebf"
       },
       "equivalenceReview": {
@@ -35423,7 +35529,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ec6f9db7a3b8275f404fe6c859800dcb986877a7df9ce8c69e0b85a995ff7d77.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "95a0247f3cb9adc52b3e3185335b0596e0e20705b20273e00e73a6cfbee7a8ae"
       },
       "equivalenceReview": {
@@ -36144,7 +36250,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0ce8b72b475ced7e32ec93223a1164fc478898ee2fad9955f7c5c8d454205e7f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "aced957026489ce4d0d8cf0fa023e3661604a935a394048a52b86ac9af976201"
       },
       "equivalenceReview": {
@@ -36189,7 +36295,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/265cdf568a3ef68b5e9a44d5eb7b3d7003b74affbf40290887f8d0787763957f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3fa977eda316862c2a13bc414a6975fc88c8ed359a31858b3fd00b15b44398d0"
       },
       "equivalenceReview": {
@@ -37055,7 +37161,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/07bf951be8ea152a6c07c39d3b4c0ead3ae3e4dc1d057b34d0dc363b281fc96f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9e6d69d17de4338ecf2b436bc72b520ee1bb1e016ffe90f5c40e3a51092850b1"
       },
       "equivalenceReview": {
@@ -37326,7 +37432,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f2156e2d49583f6cc062aab9044013d792a2bf3ff22e8b69be0120cbc8b9130d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "afcecf6ab3e75a6ef09a922b2197653795018e539be1857ffb2053064c173d32"
       },
       "equivalenceReview": {
@@ -38027,7 +38133,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c302d80e329af9886085f7e72bdd3a429bb67e6b00b427fb46503f3a84b8a76a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "5c6190ec8acc8e14dd8066c02284a6ea465098bf2e329f8c7b7b0b3f8ded5582"
       },
       "equivalenceReview": {
@@ -38459,7 +38565,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/18ef89bf401bd3ffdee29fd84045d9027716f5b33045fa1e4ed81085ddbd74c7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4212f8af3b84f506128c413ac8c314157504c804e302eb69cba5a7dac2278a4f"
       },
       "equivalenceReview": {
@@ -38738,7 +38844,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1fd0baad58eaab0425c2c99980659fe595aad4ff2050f3786973393fa50c963a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "20dae71d856cd882acffe10c0746daf132582ab8d53edaf351acff44c8d5ec60"
       },
       "equivalenceReview": {
@@ -39009,7 +39115,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/14edcca957dcceb962905dd962af5265354338ab6d5dd7519fc9a00244521c9f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "bb667084926c8c4a3bb0dcf62f5b6152f5a97a38347f9678c6408de628c6471d"
       },
       "equivalenceReview": {
@@ -39812,7 +39918,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1e0ca54b6f653796617eb8beca03d2538bbca161fcd3b06822b60da8f91c398b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d72092da53a689ccc2434332138015c581db5c86c58412b8c2e90371caa3b71c"
       },
       "equivalenceReview": {
@@ -40656,7 +40762,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5fd7e03cfa2c5f68d5bdea846db1b455be8182d0e5b364467d7d68382054d516.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "509d92b76b59a65a7c2eeead0d74b183ff347e09dd07e0029ef8349639d3346d"
       },
       "equivalenceReview": {
@@ -41439,7 +41545,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/95aa4e9b793d0cb68d88c93df6601c8207949287c87647d86a84c4018fca16bd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "13ac4dd4278bb30848e864cf15b2a5281001a1672a0996cdb81382fb70805406"
       },
       "equivalenceReview": {
@@ -41565,7 +41671,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/94d2e8b9c638e9c1fd125c7d6e3c6cc62fa37a472fd03de7a629867ebc8cc771.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "55f110496fa9f985a398e0e09673fe51a089bfdfe2d1d1f6561fa0deb7454c64"
       },
       "equivalenceReview": {
@@ -41856,7 +41962,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/108abdebf05d2c9a4db46705db948f5345d18384ab97e30766c0f2a0654d9a03.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c4463533772eee6326ecd08bc00836af2bdf430191efe0c400fa49e5460d6788"
       },
       "equivalenceReview": {
@@ -42014,7 +42120,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e36d0b02d1008f2254c3e582d2aa53cbae687df1bede02560c5d0212a23f6859.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "17e9702d089aa4dc70c854b2f532b13ca0cb6bff6a72060ea3fb13fe91751e6b"
       },
       "equivalenceReview": {
@@ -43076,7 +43182,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/10c9ad0a6d949b7e2f9254ae5ed6819b618a22931ae05a98cab473de0c3bfe3b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "5f645bd709f7c256fc288e0d94b642ab9ed92e5f99d5ddf8f36c739a89ab3936"
       },
       "equivalenceReview": {
@@ -43347,7 +43453,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f2b9927a4d26481a1feb3f572f00195f3739e6aa2e69d2acc84d66a7bcea8bb6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "2631348677ed0de9ef7178fdeac72a8508e57d74d3dfc2446ec6d4aa47ad56ee"
       },
       "equivalenceReview": {
@@ -43611,7 +43717,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d512ac876aa8eadb03e90734d70c00d952e364bf0f03ed78c79659f2417c2de8.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "98d69d4c7e9324cf3a82a88769a6742d3555b265129cc013586d8cc123092b33"
       },
       "equivalenceReview": {
@@ -43886,7 +43992,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a9d4d4e6723295833411d2c2b134c7c856d4597905af08b6ae7b9175036be92e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "52144f2488351202a62265173e4bd0b1cb56813b311192128442fd675dfc226c"
       },
       "equivalenceReview": {
@@ -44044,7 +44150,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3827a111f6e33edf373ffa468e5efbae4c83a6ebf47ad18dc0cfb963b5ae3fd6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "0a316a4889fedfc007f42121ef57c3227319f8ec24c5deb0c3c13ce225899cea"
       },
       "equivalenceReview": {
@@ -44355,7 +44461,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d6b2ac4d4373fa73ae413ce79edc54649336a9a19013b1869711776630736242.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "afd571178a5c5a4f4a16ca28a186e0fcf9f0819c65487a7ff1e5f2ae2a6c0afe"
       },
       "equivalenceReview": {
@@ -44408,7 +44514,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/afe26d56156f28f21383093a56ac835d2c8d60cbe5a1010d61f5ea826795612d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "dbfe875874d65d62166fe1beb8ac735978b8899274e881a9b309b568155038c0"
       },
       "equivalenceReview": {
@@ -44672,7 +44778,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/11a7aaf66e00e3c7d577e67309a401883af94ea36886924e66f666c9df0b939e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "451b46ce9e0ccbdb7d7472cfbda394524642851792dde979c2b45a9897089f11"
       },
       "equivalenceReview": {
@@ -45754,7 +45860,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/674973f6b3065eb523b597e12a79435e8e1260bd6d08dfb2f79941a3da68b15d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9ab489c6a95bd1d8c63e14c22a118bd116c3100a974bfa7c2d8ea006ac20b247"
       },
       "equivalenceReview": {
@@ -46038,7 +46144,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b95f17766af84d0d7692daeefa7c503fb9eb72ec6b23359cf99bf5be293571d1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "47dbaa2c6c949ed12ae2bb416a158beb04c69114b55ce832fb32d364a4632277"
       },
       "equivalenceReview": {
@@ -46106,7 +46212,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ea8edd5e87b66858067c7ff078547d6ed6b36b06524d3ff01d01cfb9fb8c7093.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c75978c506e87c3abc3c054d465289639c0359f2c40d41394149ae06a21722a4"
       },
       "equivalenceReview": {
@@ -46526,7 +46632,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c2b3e724496839a748ca6faf7c8c8460f938c354d487e2148dffb36156f2a718.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f722e15807b412c314272f1d611ff951672145358c131247825ad6bf429abefe"
       },
       "equivalenceReview": {
@@ -47087,7 +47193,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/da5c676ad595b9366995a4f37675c60740b1a3140b9cbecefb9662ed4d6fc7f8.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4c44fd227bbba3ca3de61ecdae4b7e0d81dc309231971d689a3595bf65fb5108"
       },
       "equivalenceReview": {
@@ -47255,7 +47361,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/adb81540b2f5e96e5c09937a25e2e16ddbe59c44463076a4021dc875ba3648f4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "01e8b8f69cbbc3ef943d0999a7e1775de2100bc6a59eef7795533ffd52f07c0e"
       },
       "equivalenceReview": {
@@ -47562,7 +47668,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9aae05ee296d3d2401eea8411a68abe165a4c666a3e9cbdf8fa84d4b3e84752d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "792c03bf522cec08dcda7c043b6c6bd0f0f5d30c38573adb5d2b5f9b03fd8e14"
       },
       "equivalenceReview": {
@@ -47985,7 +48091,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/60aba5ae4d67e2bc85c4575fdf6fecbfc4ea15a107ba0522046cecc92f858485.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f98e0a61466eae2c2620e445afa46fffb6e9effadb45b90b8d8c2b13dd582698"
       },
       "equivalenceReview": {
@@ -48136,7 +48242,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/013e66bf5714c711c42dedcde3aa19db70c39b351fbf4e551b5e1b1f823d1516.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b58d1fb67b28256c9cc96d5f3549b0a255040b43e5e2e56281246f080f9e0ce3"
       },
       "equivalenceReview": {
@@ -48407,7 +48513,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b4cfcca45f394ba5cb357adc5d0a0f37341efe2949e60842dc1d4348e14d2503.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "0f45b5c32c45abd4f955990d687488a1b7d6e2bfd21ad1e8bade99abf648e5e8"
       },
       "equivalenceReview": {
@@ -48596,7 +48702,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d495be3aaad682c204e2031bc525a816a2335a44e1e3f1c1d9a006e8b848f88a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "124f215a32180c311ebe495c6c7a9d1c529697cd6223165d2461b4f9a95847a4"
       },
       "equivalenceReview": {
@@ -49154,7 +49260,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2bf44a1fe841131381e9002eff10b9d1afc46d5a5ae368ca2edacd58740e0c51.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c7845dc0d4a5f6a6df62e495f74a0ea0d5684d6cf8568e8fc18e0a89a80748f7"
       },
       "equivalenceReview": {
@@ -49352,7 +49458,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/eb94e7510e00140df65aafe258798a80150089cd3efb664ed89205fdf306f254.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f44d2fda14e862a1062931b9956682b96776de567fb39a41a6adff1ae6798b3e"
       },
       "equivalenceReview": {
@@ -50386,7 +50492,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/13d08d053527dbe832fa3273b4bcc183b5d307dcdf06cc9035e51f277be971d7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "62b247a698dba929406604542cf511875116ab74619fdba0a22c284c7dec9e94"
       },
       "equivalenceReview": {
@@ -50484,7 +50590,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/335488de798a371e5b619a50ac17f97d6debb9e8ee2f168a13dbda95577321f0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c389fe05966941f966ed65d2a08d2b0ea02f42547763e3b0342782a538b1e644"
       },
       "equivalenceReview": {
@@ -50529,7 +50635,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/12c1d6793d2a50bcfdb8d4f7d4d8b05bcfc860de786a9396de8dc247aa6548b2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "11ddabb2bc79abc163a3b315e11caaef290100016988442ddf4a0d34e13104fb"
       },
       "equivalenceReview": {
@@ -50685,7 +50791,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/383c2e58306d3f461c166cc78201eac3099a5c2e2066561eaade1bd90b9a307a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "6b4f74550c63daf0b05c1db16fe7826e883503241b26cf67f97ff837c976d791"
       },
       "equivalenceReview": {
@@ -50901,7 +51007,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/334b863ea928d63ebc71d74c6d281037ec393e8c886339f96e006d4d360d66d5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c9d2eda72cf3a6a391725903c84370def810065070733f1b706b2423665542ac"
       },
       "equivalenceReview": {
@@ -51456,7 +51562,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0577572fcb1eef3d51f26bfcb82ad7f11944740a3700d4e76b1e977c5ba7f9a2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "15484193ce41e8994cf78240bd6a52f0c70c0a1ead9d87e357a27c9ec119cb8f"
       },
       "equivalenceReview": {
@@ -51843,7 +51949,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/67e1fda690188500fb7caf66036944fa268afa85b15e31c57cb6b37dfdf42573.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "23053e0f9ab4c193a3ece6f0ff536d93f0069f5e47f1a5a9053086fdb422d0b7"
       },
       "equivalenceReview": {
@@ -52420,7 +52526,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6f531c7a598606cef061e3f0cde37b5b4a644677e4a018d5ae57774f5cf3a672.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3fe3e93ab5e89712871edcfd68020cc3075a90dec3cb1ef41b876d62733b3cb8"
       },
       "equivalenceReview": {
@@ -52711,7 +52817,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/524156c514949f3096f3b2ce473b9d9d8fa27f1d10c93c3c38195253c5c750ff.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "42884415c6b50caa163a6cbaf526acfc20125600cec46ee8dae8d059abb66e01"
       },
       "equivalenceReview": {
@@ -52988,7 +53094,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/087af591c12503b14b913806e471fee0dee61ac5cb28a49a88a76f3cd0a7b1e1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8eafabced42efef3587dfc314cc6ef20dbb5a9b3d925e4775aef03c3966bcbd6"
       },
       "equivalenceReview": {
@@ -53427,7 +53533,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b96979f6419a395b0e3b895ce7f35f1e0badaf747120cd61d6530d470d1e160d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "195bad9ed6215c126f2b2838c60f48ee782e84d7fff2cffb7452c6b225350d79"
       },
       "equivalenceReview": {
@@ -53655,7 +53761,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/901a34942ea3b9a00419f40c551117a423b4a9de99dbada9f13bd80aecefa08f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c07ad5336900ca73aac6f42f3618393362db2f25a9277da27bdadf4cd8c34ca9"
       },
       "equivalenceReview": {
@@ -53783,7 +53889,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/41c384aad38c73d9b18b2dc6ca75cd3dbf12e9661b2cdf8ea0853b910cccc21f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c33e3addf975c6e0d1ac7b3aad66b8f2c402835e70267b748527793e79504960"
       },
       "equivalenceReview": {
@@ -53903,6 +54009,59 @@
       "listing": null
     },
     {
+      "id": "7a15a97a22b6dccb109fe543",
+      "canonicalPath": "/bg/legacy/7a15a97a22b6dccb109fe543",
+      "locale": "bg",
+      "title": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoTitle": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "description": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoProvenance": {
+        "title": "live_document_title",
+        "description": "live_raw_head_description_or_absence",
+        "artifact": "data/legacy/migration/live-source-html/2eadce8f0360793ea491012d15d302b83d887bae8376f262e3612c266e29f6f3.html.gz",
+        "historicalMetadataWhitespaceNormalized": false
+      },
+      "bodyText": "Онлайн камера хижа Беговица Онлайн камера хижа Беговица Трансфер Солун Сандански Трансфер Солун Сандански. Трансфер от летище Македония в Солун /Гърция/ до Сандански и обратно. През агенция за недвижими имоти MS Realty Вие можете да поръчате трансфер от летище Македония в Солун до курорт Сандански и обратно. Стойността на трансфера Солун Сандански е 120 Евро в едната посока. email: [email protected] skype: ms_realty [si-contact-form form=’4′] Такси София Сандански. Трансфер София-Сандански. Такси София Сандански. Трансфер София-Сандански. През агенция за недвижими имоти MS Realty вие можете да поръчате такси от летище София в Сандански и Сандански – София. Стойността на трансфера до Сандански и обратно е 100 Eвро в едната посока. По пътя от София до Сандански ще ви разкажат за всички забележителности на град Сандански и ще ви отговорят на всички въпроси свързани с СПА курорта . Пътят от София до Сандански […]",
+      "sourceUrl": "https://makler-realty.com/bg/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "sourceHost": "makler-realty.com",
+      "sourcePath": "/bg/category/новини/",
+      "sourceType": "page",
+      "sourceHash": "7cc96db9945cdd0c0a31feaedc55b5eec8da787ce8fd43288adedbf7a698f3d9",
+      "capturedAt": "2026-10-01T12:36:05.525Z",
+      "contentScope": "column:articles_main",
+      "provenance": {
+        "kind": "live",
+        "artifact": "data/legacy/migration/live-source-html/2eadce8f0360793ea491012d15d302b83d887bae8376f262e3612c266e29f6f3.html.gz",
+        "extractor": "legacy-main-v4",
+        "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "equivalenceReview": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "contentLinks": [
+        {
+          "url": "https://makler-realty.com/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "text": "Онлайн камера хижа Беговица"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Трансфер Солун Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/cdn-cgi/l/email-protection",
+          "text": "[email protected]"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Такси София Сандански. Трансфер София-Сандански."
+        }
+      ],
+      "media": [],
+      "listing": null
+    },
+    {
       "id": "7a62ae9e4a621b876f51dea1",
       "canonicalPath": "/bg/legacy/7a62ae9e4a621b876f51dea1",
       "locale": "bg",
@@ -53926,7 +54085,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/82cb2555823bedfe6c3568229ddf3ca4f38736e8eeaa983ad3f81b712e3e6661.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "eb445b39eae62a5229e55fa675adca66221dc5d61b5938a8dcb38ac15f6660c2"
       },
       "equivalenceReview": {
@@ -54054,7 +54213,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d920c20d9bf9efb62ada240e4cf3244fa9e1f7d5417855d4781299f82ad15b39.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "525695b0ade5f58f9077b294282489a456a95366e83391e0b5feb5ced1b6defd"
       },
       "equivalenceReview": {
@@ -54301,7 +54460,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/00f6cb207bc41f72e3012471af23fbe60c4d3e2dbd5614310b00f5d7632587b1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "413f949b556d64a5c212630c42da3c3c0a5c820b667af82fb3229dbb4015fdee"
       },
       "equivalenceReview": {
@@ -54846,7 +55005,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a66b9d7e40290e56fdd1e0eebc3416926cf2184f819a6042a42fb496fbeb4a3d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "84ba6b1845425beab82bccb88f7639f85615d0e68a658f74ea0e9b46075d65b2"
       },
       "equivalenceReview": {
@@ -54987,7 +55146,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c375ca7fd321b613a94b5189bdcae8bdbc12607234a50a1b71502d09afbd165a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e022e34998aa9ebcaf42d99e1212f6d484cfa168a20fcfd3b0f0b4355526349b"
       },
       "equivalenceReview": {
@@ -55145,7 +55304,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f333a224278d1e2f6fb4e793ff01c4f5edc45aacd33281d5c6a3ca831002b7dd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ebe68d5bee1a885c51064d9da0c0ca7747ce29d740f56681f0ad50826775d65b"
       },
       "equivalenceReview": {
@@ -55329,7 +55488,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/aec3a83459ca428b826ba89e2df530fa4d7264e482664ed149ede02cf3fc01db.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3aad8311b525204782bee838c2f44721d6fb69e3a006485a18d4d37ad2378b43"
       },
       "equivalenceReview": {
@@ -55397,7 +55556,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6208ecf0207d95a27deb7b7d0b602295bbfa9a8b01343a253ccd1695ae495217.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7f609ad3d86fded70512d864685a7a4d5b4d7c53098bdfdada5dd167e95da789"
       },
       "equivalenceReview": {
@@ -55714,7 +55873,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/31b94a268e5a01ed0dceb43632a7b2a09544d936bfb92e2a80387b95e331835e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e90a6de726266021ea86fc193319339dab4d30b0f99afdcf3f42d7d82a82202c"
       },
       "equivalenceReview": {
@@ -55790,7 +55949,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ead992531e35339a834e285f455665978225a460019ff2de27338b23da67b1fc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "2d6fcab7b9c69d008fb2448cd3ae6661b322c69e23bcca3aa9b6176bd1045520"
       },
       "equivalenceReview": {
@@ -56061,7 +56220,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/aa84968031f3ba92090f81083f86f4b8f948f8991a84c693f7a7200a749493f5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4eb9a3fcb383c1667d1e1fc568689832d549620588045c12f5ee4093e1034af5"
       },
       "equivalenceReview": {
@@ -56991,7 +57150,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4f010c3bd61392c073fb1c66de3bda1637b3a2f8c7c05c7fb4cc324bba2c667f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f61673c845970313a19a190cb0db316183ab3d1e9bb3c0bd63e0eb144e0d04fe"
       },
       "equivalenceReview": {
@@ -57240,7 +57399,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/25ecf6ef60c6b44d96918c21afddc1533c6524ee493553f31a8ef03f999e5938.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1827612109d35c67a7f4667b05be8e045b1cae971b2e14a2d3dc0c0b3f53f27e"
       },
       "equivalenceReview": {
@@ -57553,7 +57712,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c40e6baac8b797de40e43d5d71ebdeacb3a2e3b10ea2c9eb4dccbda1b78f76d9.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3133b6a239b6a9666ebb5226c65ed12b6a3a7786d4ee9f9fed92f6b2eb5c569d"
       },
       "equivalenceReview": {
@@ -57606,7 +57765,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/765d9b3049bc077a5ea45bb1b5e2beecc2ba10b124e14f246c41e750fb4e0860.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "49f2176e32209415f1a9cdfc497b965b893b99ae6789e69e9e656aff29e37d15"
       },
       "equivalenceReview": {
@@ -57839,7 +57998,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/559fcb760f20bcef9e24a7455ed5623163b415555551914e98892d6ff80ced7b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "71f4c77a8f045a093414288444bee17015ba84ab159726dceab916ad24ccf14a"
       },
       "equivalenceReview": {
@@ -57982,7 +58141,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f764d6ab146b02978c8603c99ef138532899e927c42ff88b776b3386a770aade.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "73f0e5d85b3e3f54b350025701108fbaf0e8b46267c0134c0ae19a521cdb7322"
       },
       "equivalenceReview": {
@@ -58215,7 +58374,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/edcbcb1f50e60310f0a9d79da11185f1d0922d921a7158ebddd1a78fe12c7499.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "25ab54b8363207472210ed24f7597fbccc33e0196aa9967fa02ad494d3bcfdae"
       },
       "equivalenceReview": {
@@ -58845,7 +59004,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/84a5ade47543e94d05111353748f4fbbc4b6ba24b283e3f038000ba5d06dbb15.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "42395f9ce42801dd1fa73d293540540be63224fd65e2838f1c008a635105357b"
       },
       "equivalenceReview": {
@@ -59172,7 +59331,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7f3dc43ae3fdbd4a2e2c07b6da63941f52689565a3358aece92a1446d927fe24.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "5555d0fd63752650a6f327d0117a72ecd2838a394b32ead1f7c92ad0af1ce4ac"
       },
       "equivalenceReview": {
@@ -60743,7 +60902,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5e71f9178a878b4d7e04b5eb530d5e6307f00c66ac67117b62ab949cfd58adf0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "98e861059bc39cfe50bc0a0474438a59ecb7993e1d33c68291416ffd9dec107b"
       },
       "equivalenceReview": {
@@ -61119,7 +61278,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7cb35d614e27bcb47dbe5244f54569e02c81cfac76bd6e97492bd14f9c85ae7b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f722e15807b412c314272f1d611ff951672145358c131247825ad6bf429abefe"
       },
       "equivalenceReview": {
@@ -61300,7 +61459,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0ea8b69cc9b7359209ec126f4092dbf554187e3d8a1ac90cb49286df9a47f9a1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "12d402c2fc0029f64ff4fe909e3d7b4736fb93cf56f82d1c0217b0617dbcbd6d"
       },
       "equivalenceReview": {
@@ -61554,7 +61713,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1503cd03b8981495ca4b569ea247ed46952fcc2398483de5773a86cbc8584823.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1b945e424c8027f26ca759a6b891542f11933c071384151b88ff73a9138ff516"
       },
       "equivalenceReview": {
@@ -61622,7 +61781,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/113930823bc2cf8958172823e9e9312d7f1d43dde0374454734df52d523a7799.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "337e7f2a04c0be1af21469849c21759e931a93faa0ed23cebee678fceff2e65e"
       },
       "equivalenceReview": {
@@ -62021,7 +62180,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ce134bcff4884b306b0b92dc80bc7b709489882f0d30b81120c672420149f6d4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1288b82e03c003089ac75ab0094acb46d115a55162e91c818c2f7faf30c6240d"
       },
       "equivalenceReview": {
@@ -62173,7 +62332,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8aed80074793119ee51897de65390760efd6895b346dd41ba15a5f93fca71835.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "2ea72106cb466394343e2300babfd4a3c0ec113501adea67d8d1f9ab729954f5"
       },
       "equivalenceReview": {
@@ -62490,7 +62649,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8974932ca010970ea8cbcf70b19ece4328e4ed1c9835411b5464f8ee91db63f6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8fae12e933454df6cd18e52f53922cdffe7be7510ee53b9f45853d767ce93f2a"
       },
       "equivalenceReview": {
@@ -62663,7 +62822,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/87b0275315ada4f3454deac42a34ede7ac785d7a45b46957a7e9827e2b7baa02.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "590e43cb3ee9bee2a1f7022115c8f823b5b3f71edda730b0f88cd28bbd5d27ca"
       },
       "equivalenceReview": {
@@ -63194,7 +63353,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/31f568a79770a87e76c504f7f1972b5965d6c9488b93ef82555b00062c38c135.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "746ca883092c424132349b3dbf16eb91ac2211c3e7a82208bdbb2896ecfc2c85"
       },
       "equivalenceReview": {
@@ -63485,7 +63644,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d0957fe0055f65c9cae769bddcbca48d8a041ad09354929abb39a3c71404fefd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "25ab54b8363207472210ed24f7597fbccc33e0196aa9967fa02ad494d3bcfdae"
       },
       "equivalenceReview": {
@@ -63746,7 +63905,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e34c27b0b922f57062f6678dbdf818dc24be3ecca00ca11bd282aecd914c831a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "449ee4ddea86eb875c6a46b223d219c3421b3b2830e495e783f958a22e73e911"
       },
       "equivalenceReview": {
@@ -64459,7 +64618,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ad28945d1a255008d5d422c5f958b582c55c4c31bdf15edbb9e37933287ec86c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "988e0a89ccf2099dc451ef2ad452a41d48928c82e87b3620ecbb4497799e669b"
       },
       "equivalenceReview": {
@@ -64611,7 +64770,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4666c97a81d35ef9e683b5b0d5bfb727bc166ec14526f2c6642d71466aadd37d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c558173b4f3f504cc5efa1aeca4e9c842c8a74cc04fd507f0bf66d8dcad06f1e"
       },
       "equivalenceReview": {
@@ -65573,7 +65732,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f4ebf1e2f76f1331d231f7e6ddcacc2d5576665231e644e637ea9042d18455ad.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "744c4f085d55af95ad3eee6147bcb7f4f37f6e525cd398eb61b170f0ba833a78"
       },
       "equivalenceReview": {
@@ -66122,7 +66281,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2d75482d7f1e60a57eafb6b409295bc0fffe399dfe06e541a69801f98c67dd3a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "01877905bd6412232b024a34027c0616f21750c6d6150c8ecbb08741f3957263"
       },
       "equivalenceReview": {
@@ -66283,7 +66442,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ef90e3f796d7cc54b0b2dcaadcefa9a689717df53abaa70c22e3f576e1b094ea.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ec5d01b86580114453e615d63d9f2ff47d39743fcdebdd9dd885f6e71dc6b77c"
       },
       "equivalenceReview": {
@@ -66537,7 +66696,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/25dbdaa22ce8838f64e3a736ebf6f4ea09f1cd45f13ad95d20b16cefbc3c7f89.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7ed7a7f11f8f193f9f68fa70303c2b2df4f06c13d1dcc366baf0cce386ccb887"
       },
       "equivalenceReview": {
@@ -66665,7 +66824,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/bcdef0b7303a636a9d203c2f59d18031596ff609fae20c91270c85a7fa1644fc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a80a2e94206c29a15f4e1a2eabc06db0753bbfe7a4fb1abcfdb1cc9a903ee24e"
       },
       "equivalenceReview": {
@@ -67091,7 +67250,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8bfecac30662a57125226f0cec58f22ed0f8ad7e21e987ab96293b3ca800f07d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "03b242dd6d31c68d6de08d5aa329469ef46ddfaf3e31689832283cbc0b6e0194"
       },
       "equivalenceReview": {
@@ -67159,7 +67318,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6872023e5870efdf9826138d956c12a918b0fefe1266e5b18dd9a910e31e0fe7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "99089ff411ec711f17aa7a9b543269bc08737343289eac714de1a98b46446f96"
       },
       "equivalenceReview": {
@@ -68690,7 +68849,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1d1b3740730ec03f1d51da8cd426549a98dc60cf2d346e83b971b114b7a135e5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8bdfc39e2f2c5e298236921e7059738fca7acc9ebd431807c043153ef04cc7fe"
       },
       "equivalenceReview": {
@@ -68802,7 +68961,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/81fc7706624c65c9681c4458370ebf814ecd5c820e1f1882e3586dbdbb539ce8.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "24b59a44809c8ab32fdccc0f58ab3e467d0b01c9601767a5ef53c9caa7502846"
       },
       "equivalenceReview": {
@@ -69326,7 +69485,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c9cfeb3d8be5fb616c49c6fe240a74400486ba164e8ceaece73c3e38ae117ec6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "31b20db2699e49d8d8a23c4ba1105b44a4ea7d86866a610d3a377e4102a9d24f"
       },
       "equivalenceReview": {
@@ -70325,7 +70484,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a8799cc2f21f1bfa0734dcfbf5032752a1a478961245ad3e8066758c2788f7fb.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8bf9731ba271382abf35a3b7bf080233e91ead438b4689212bc3b5e6d3136861"
       },
       "equivalenceReview": {
@@ -70819,7 +70978,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/65d2d9fbb1e45c2a3e405e97c1c78b100c90df62d56ffd8c342001e8afb34b41.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "dda9fb7b473a9e449d704674ea37181ee307183cc88ac3b7526a7a4a81870fd5"
       },
       "equivalenceReview": {
@@ -70984,7 +71143,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/fb3d48342f697e987643144e9e0f867f103ee9ba09a7c97e19be763257798dee.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ff7796e5895c24e0a289cf464572012df3f2b76afa4adefd990e9cf63605a9a1"
       },
       "equivalenceReview": {
@@ -71275,7 +71434,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3180b600dbe9797f202b428348271b37572617a4d44e7493998ac2c114dce5b6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8fbbae51b1ce2d69908d5865525cc5af7b027b68a849c54737c7d3d26d07f0d2"
       },
       "equivalenceReview": {
@@ -71761,7 +71920,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/141cd4745e593da8ec6c7c6eba54608c0fdb7ff7a3a06190f8cd5d5e1cada2d3.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ef542f8dfb7bfb38dbce0ddc8bb59ce9fe29b9cb5f7e7a008f4bc77becf24d0f"
       },
       "equivalenceReview": {
@@ -71886,7 +72045,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7dde381aab1419045226079f58b0517fd39deae8d80cb18ab45bb8b903e7694f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "895f05307253d66e4af86c96ae870112e2401aee78277952f78ee84e521c0bef"
       },
       "equivalenceReview": {
@@ -72090,7 +72249,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/250995fdf88b18d599462fe62db608261727f357d9b896efd41a63075d75fee7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e360d34c081df89379d1a9ad60c6d6214f96d4fd06ebc11144801c029b293914"
       },
       "equivalenceReview": {
@@ -72750,7 +72909,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ba427117d7cecbbb2b6313933848f9e30051199c59bd0761af88631faaba62ee.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "38bdf96aa564de95d77f69861b0a41d7da0c5c55297880b46e5a9b3397c359e5"
       },
       "equivalenceReview": {
@@ -72950,7 +73109,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3b76ecf89f0c07c5c4b67af5eab0a31486444b95a0a9ca0cc9d3b8b8a264077a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "90da9fc9c12098f36ff2c5e920dbd9fbfa2dcdbe2dd9992d0a5a7dbd17a3188d"
       },
       "equivalenceReview": {
@@ -73003,7 +73162,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/fe0c8a8e5c65e8941dfdc692034d319f1c7f9883f67c812d0db65cf5a60dede2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8bc1cb82d895767d0b89dc85d71b6d85f97d25b572e3fd24e6cd0f6b2e5cb819"
       },
       "equivalenceReview": {
@@ -73630,7 +73789,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/bcc22513e96d24fe4a7a866cbed44c131ebf79f0e95039cea1011ecdde65e5e0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e23667185c9f9a9c58eeca0d05575436ec70d5f057332cf0bfea0f8264f6386a"
       },
       "equivalenceReview": {
@@ -73894,7 +74053,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ef77aab6a59d999d990f9d15e2f4d37913c6a306428db0b944ac05169a579e03.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "efe45f1dd416ea525741092400bf206fbfc0e11d333399e38f97abebccc94da6"
       },
       "equivalenceReview": {
@@ -74189,7 +74348,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a408ac379049f4512560602b805d2303dfd46ceb88382be4a8171cf43af073ce.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e522cac621b5be72198a3fb1aec4a8e33643f559f4236ab15035d984becd4748"
       },
       "equivalenceReview": {
@@ -74340,7 +74499,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e60cc62559a11407472e0a5e30821e7047546e70a018097a1c3a0650e9167c80.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "27bafbf3a2eab73869ba242d2333fbf26b5b008ae8bcf2ee6d5b48d340223c72"
       },
       "equivalenceReview": {
@@ -74964,7 +75123,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d025c04d7595ba66140f162ab5ccb99faf1a9e408c17126ec8e040b2a65a3c24.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a9d08d9c92880ecb1abc6dda13279c764d04c9647a60a7bd6a98fc2ab61895a5"
       },
       "equivalenceReview": {
@@ -75140,7 +75299,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/78df017831da60d02915d01caf0a312aa065576967c4d34951f90f5cee5465a4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "246fc4ed496dfb0acafafe803252c8c7948af1b72d08f846833eecb6ee3be43b"
       },
       "equivalenceReview": {
@@ -75401,7 +75560,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/529a52e359717f7c6df6e6c36ff4463021d9c2b3dc90f8db83d2b9873bb66724.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "26bdc81361e6b305916dd0abc7a090a6c6b8467fa33fa36ca2cdf2139de862ea"
       },
       "equivalenceReview": {
@@ -75934,7 +76093,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/141f16a4441d96a7fca874236453c7fed467a29009d92f9f1276b862db9099a0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "07a22a8a8ffba96574ecfdd19a036cb7785db77479b6b166b1ebedb95cb28b15"
       },
       "equivalenceReview": {
@@ -76411,7 +76570,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c30ddd19032e1800be10ea5ec87633183702b0ec7e941145f14eca56ff489f9c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a18e878215b64e831592794ee465dfc9d06dbf49e6db6758e3c81ad49171e6b0"
       },
       "equivalenceReview": {
@@ -76740,7 +76899,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8eb3602ac106f7955bc930310fd8899f7de38d8cd8ffc0604f96754636dcaf84.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b8f5c7c210a421e0df28373a9a3c0dad2ed4e2af56602108eaa89b3d69d3b4d8"
       },
       "equivalenceReview": {
@@ -78252,7 +78411,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/93009ac8454662da6a366d7a6a6c8bf4b7947ae40958fd58a759ea1174c982e4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3eaa3fd5d8704d726e91c0d65ed4f7fd4b80b84c5e5abf5fbb922115cba1e87d"
       },
       "equivalenceReview": {
@@ -79601,7 +79760,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c5105fe7ef5844c8d45e3945ce019780923f96776bb029ff47b08755f65d0fe2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f3b07c4d82a3c3ac557fbff773eb39efea24ebeba5b43930cea6b6675ba3bfa9"
       },
       "equivalenceReview": {
@@ -79901,7 +80060,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5dd1670bfc9ba0d90d677aad81aaa8a38050fbd89b574ce241abcfaa58627b16.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "183b0c198b1bda5744eb5f56ab4637d9d5827ee9040f27b78bd24b5658f8603f"
       },
       "equivalenceReview": {
@@ -80067,7 +80226,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/634dcc096a3d52940556cd5164fbc9c4279cc6c9f5523ddf06fcae072627fa49.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "55a90132937cb3361be23f482b61a106bda744be91cfef89ae5f7bc09ee71206"
       },
       "equivalenceReview": {
@@ -80550,7 +80709,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/34530759cf9e250cae6eae482c31430d98e9700d21261901ef1d8ad6fb230663.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "008ca931c435c937d1b43eae8b9c26aa4e34b0ec4c491674d4b073d7bd8cf6b9"
       },
       "equivalenceReview": {
@@ -80692,7 +80851,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5b1d8041663d1d8002da75e9f5b6e67e57755bd81048e291ef15578cecec7388.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f3b07c4d82a3c3ac557fbff773eb39efea24ebeba5b43930cea6b6675ba3bfa9"
       },
       "equivalenceReview": {
@@ -81304,7 +81463,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/32062e64e862a48b2b84fb3f09df9d4f5355e04d16d3e228a7c4592c2f92cbd7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "2666f0d27446786ac7b98812d58cbc10c0b6eae345c37c5cbb4863c4c1de912a"
       },
       "equivalenceReview": {
@@ -81579,7 +81738,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2ace604c31582f8eeed6bb879a49e06986a0890ffab3c45bba0218cade38c7f0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d8970fcf3068ab1f1cf50cae9e957ff8cd7f00c75c5ba749fccdf32a8b665325"
       },
       "equivalenceReview": {
@@ -83152,7 +83311,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/20946570829ac2293e7887b463fc31c4058822d9d2bd1cc046c2a47f2bc4b00b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "13ef212dbb8c465e3f5428b00e64bee678d263427b62ad79bbff184b52cdf3a7"
       },
       "equivalenceReview": {
@@ -83201,6 +83360,55 @@
       "listing": null
     },
     {
+      "id": "bd3e1dfc7d83a81f6a723797",
+      "canonicalPath": "/nl/legacy/bd3e1dfc7d83a81f6a723797",
+      "locale": "nl",
+      "title": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoTitle": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "description": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoProvenance": {
+        "title": "live_document_title",
+        "description": "live_raw_head_description_or_absence",
+        "artifact": "data/legacy/migration/live-source-html/18b183be05931613e2001272b2de8c8dabdea08556c9e3a8ff12ef65a1e1348a.html.gz",
+        "historicalMetadataWhitespaceNormalized": false
+      },
+      "bodyText": "Transfer Thessaloniki Sandanski Transfer Thessaloniki Sandanski Door het bedrijf MS Vastgoed U kunt een shuttle van de luchthaven van Thessaloniki boeken in de stad Sandanski. De transfersom Thessaloniki Sandanski en terug is 120 Euro per enkele reis. U zal worden voldaan op een goede auto business class. Geschatte reistijd 2 uur en 30 minuten Afstand – 160 km. Transfer Thessaloniki Sandanski kan telefonu bestellen: +359 879 69 68 70 e-mail: [email protected] skype: ms_realty Voor […] Тransfer Sofia Sandanski Transfer Sofia Sandanski Door het bedrijf MS Vastgoed U kunt een taxi vanaf de luchthaven van Sofia naar Sandanski Sandanski en van Sofia bestellen. De transfersom Sofia Sandanski en terug is 100 Euro per enkele reis. Transfer Sofia – Sandanski minibus 130 Euro Geschatte reistijd: 2 uur en 20 minuten Afstand – 166 km. Schilderachtige route! Luchthaven Sofia – Sofia ringweg – g.Dupnitsa – Blagoevgrad – stadje Kresna – Sandanski Voor […]",
+      "sourceUrl": "https://makler-realty.com/nl/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "sourceHost": "makler-realty.com",
+      "sourcePath": "/nl/category/новини/",
+      "sourceType": "page",
+      "sourceHash": "2f37354b842ede26dceef65278fd62c2ccd6356b244d0a6eb627655366fe5176",
+      "capturedAt": "2026-10-01T12:36:08.360Z",
+      "contentScope": "column:articles_main",
+      "provenance": {
+        "kind": "live",
+        "artifact": "data/legacy/migration/live-source-html/18b183be05931613e2001272b2de8c8dabdea08556c9e3a8ff12ef65a1e1348a.html.gz",
+        "extractor": "legacy-main-v4",
+        "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "equivalenceReview": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "contentLinks": [
+        {
+          "url": "https://makler-realty.com/nl/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Transfer Thessaloniki Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/cdn-cgi/l/email-protection",
+          "text": "[email protected]"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Тransfer Sofia Sandanski"
+        }
+      ],
+      "media": [],
+      "listing": null
+    },
+    {
       "id": "bdd92a07138a86cc8833f724",
       "canonicalPath": "/de/legacy/bdd92a07138a86cc8833f724",
       "locale": "de",
@@ -83224,7 +83432,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/860e3737eb7e1a68b0ab9b6a0c0e2baa5fea1ede5f54f4cf503d4600657ad10e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "337e7f2a04c0be1af21469849c21759e931a93faa0ed23cebee678fceff2e65e"
       },
       "equivalenceReview": {
@@ -83551,7 +83759,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4547698d2b10c8505b32b2b9e85d0169d7be8197d69a9fdcaadccc0f3dae6bfd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "71f4c77a8f045a093414288444bee17015ba84ab159726dceab916ad24ccf14a"
       },
       "equivalenceReview": {
@@ -83694,7 +83902,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6fd6cb474abfa001079a9baaf2c1d0a20db74a63d3ac016160a2ed2e6749c289.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "fe75d6e3f444196dfa313f1f32dbcd8a7f95696e107937c0a31476c163dd708b"
       },
       "equivalenceReview": {
@@ -83920,7 +84128,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d958db19f24c377cba698a3a992bfda3139db3d91ecd393e769f3d8c6c92a0c3.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d381cf33686280c59551433806a9cb4fcf9a5a98fe777b3585778e0934ede05b"
       },
       "equivalenceReview": {
@@ -84003,7 +84211,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f7a55a8d8c94ac1914b767aa9cdf8ce081d593b21405b17a91609309d5fbeefc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "646c4162f2103767f6db5b6ffdd59ab3c0fae2511aa173e895901065db4955f0"
       },
       "equivalenceReview": {
@@ -84056,7 +84264,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7088906733aedeeb655dd1f428f3d2944907b15a8c879c1d0ee72f7edf2e377e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "7b8c0e9bf194f3486a8b37b2c2a7a4739e182d88b71562b6b6fd3bb3c276df21"
       },
       "equivalenceReview": {
@@ -84129,7 +84337,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/da0d645a70082a3b457bc201c708ed9c39910c725ac84b286a633605f84ea3cd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c9c736096a97c2bb8197213f2274f384b52cb00954412aec57a88e62acd36999"
       },
       "equivalenceReview": {
@@ -84400,7 +84608,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b68cbe43dc916a6397d8d8754810a14efa3ca8803f63d0c5f849954024043df4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "229ad1e478799628832e017c586b82abd4cdd05ac68fb907d1792735e5a280f3"
       },
       "equivalenceReview": {
@@ -84523,7 +84731,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/bb5ebd54cf690ad831b6123c2777c5dca21ea210c1aa706e5e458feabb9eccfd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d69ebe1b5255a21336fc9d5a42620825fa504462948358df509eca6c2fd9d2f6"
       },
       "equivalenceReview": {
@@ -84794,7 +85002,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e38b741006ed991671851c3c95bfa1d570e2bbce38961ab40297bb6b51496acc.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "df0c61e512019b6d6c4e2e0c886b0659f8d9f691a4b5873c102df87e14e30eb2"
       },
       "equivalenceReview": {
@@ -85366,7 +85574,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/5b77eff5463680a11dfeacf16fd19a0008b952f91b578bb671dc6de3ad7f7933.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ebe0a0d104e7efc0b4da7f933e287b24943e14c7d5ec0c293375ad49560cf4c4"
       },
       "equivalenceReview": {
@@ -85729,7 +85937,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c33b87eca00330982e4818e1da2bc4a02ce15f424f0521a104a32a872140c82f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "df5ceee60435d3dc5519830622de9bf402ff3de03cfb88e8f2c6f64c9993bae6"
       },
       "equivalenceReview": {
@@ -86166,7 +86374,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/565e19ff7ded3f94ab4972fef9f47e2704f09e8a93812fea2d27d0767697caf7.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "47c200d40ce8f1800aa0f8c5850491ba5856cb4fdc47b50e3c5449c6ade5cc56"
       },
       "equivalenceReview": {
@@ -86325,7 +86533,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c4e7f4aecc50997db067049abed12bdf65ccabdd5f520cc3f36153a0ab512e0c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "edfb94ef530a67b57eb4f2430e96cd6337d451159581d8ba3eb78f34597a59ab"
       },
       "equivalenceReview": {
@@ -86652,7 +86860,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3f4f78c95d26265d076b1f30527db4bdc7904e59e67ea6e5b0cc7d3caed375ed.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "107154e6173f6907606a91adabc233592e7b25586d68c858aa9ba20154e29faf"
       },
       "equivalenceReview": {
@@ -87154,7 +87362,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1f17a1f863e45205fde06e622259a63b3eef04f00a31cc53ab91c622d2cacc26.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f1b9b08a5a01893ba1ed873f66676d0654ba81f6e7a532b3e2dd4d185816c9cf"
       },
       "equivalenceReview": {
@@ -87341,7 +87549,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/cb0201ea526c781d917fc174c960a8cccc4683dfad024abf8d13d808e43364d0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "42395f9ce42801dd1fa73d293540540be63224fd65e2838f1c008a635105357b"
       },
       "equivalenceReview": {
@@ -87668,7 +87876,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/dbba45019cb40b567c922cc7ff9801420010ff3975b0768099a9a00af6720984.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "57156223b77b07d19a0b0a21aff0790012f41554db4f145d4554c92af9637751"
       },
       "equivalenceReview": {
@@ -88095,7 +88303,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a9df53786476ec5fcbd74b15b15cab40e2bba904a84e5db71b34878619e3e43a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "39b752520c08ef48077719cd4e169802d0ea439957547f435f6df4dc4843bdee"
       },
       "equivalenceReview": {
@@ -88359,7 +88567,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1d33fec6c2b41bcc36f4444523d518569b749f683e057f577f2f85cfb577082a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a260f3024a36929ba69ff01153f0bd47fec2dce1dc625a198b4684ce255e0147"
       },
       "equivalenceReview": {
@@ -88500,7 +88708,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9b4c14d37d84e71e7bb04b91920c75914c3272f254213119d979efbe9e9a23e6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "561cd250d2cfc4a5191280e2a7c4a1508f504988e8ceb9ebf3cd2b7b62fbe1af"
       },
       "equivalenceReview": {
@@ -88798,7 +89006,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e553110e6380386e8bb7788385999c1d62a8b79fd545ec1660d52526f98a9d11.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3eaa3fd5d8704d726e91c0d65ed4f7fd4b80b84c5e5abf5fbb922115cba1e87d"
       },
       "equivalenceReview": {
@@ -89038,7 +89246,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/c0b6a81d23de4854b4b72a0f30feca692902cac700d980568bb442a21bd37374.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "cacdf86609c0bc973f629aa164650b6f3831c738fbd83825cfbf29e8830370bf"
       },
       "equivalenceReview": {
@@ -89189,7 +89397,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e8038688a9972a1cb2a2608d0abf6184ca9186fe611fc4ac5d09d0f922e611e1.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3d6fe9e58281abb29acb77712157b5d55a7f1e3b8c7be4bf0a96e37d231df948"
       },
       "equivalenceReview": {
@@ -89242,7 +89450,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e53574083d794d8d9af07df4c3ee66e04a24b711f8411af05997bc99a5de9a0a.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9d89196810ef3981c24d7d64956bcb984c69d2a6f683f7daeb867501fb135535"
       },
       "equivalenceReview": {
@@ -89580,7 +89788,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/87c0dfe3699a867cd16b756afc45e565772175dc3c9cf02c3285200a46954aac.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c54f9a7e5055393fdbc456c1fc56e848297f8630847894be30c7ee76e10f4b6f"
       },
       "equivalenceReview": {
@@ -92144,7 +92352,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ad429dbe313d40a50257498d8b25b7bfd74f58910bfaa1e52b472cc29f9438d0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "edfb94ef530a67b57eb4f2430e96cd6337d451159581d8ba3eb78f34597a59ab"
       },
       "equivalenceReview": {
@@ -92471,7 +92679,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/15fd89a0950215e841e7b43ac6f3fac88d73c87c4c85d0bd9ee52f7712723b21.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "04f154f6103fb5deba32b54b5205724eb2e3d176ae9f3f1eceedfe612aef375a"
       },
       "equivalenceReview": {
@@ -92539,7 +92747,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/25be8039bdd2c2f654fb20853d18285182571b0f3d182bcc68b5b4fb42e7b10c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "67dbee19e08bc60c43fafc70cde656180b248d0124d9d64714dcd4fe9ce6f50f"
       },
       "equivalenceReview": {
@@ -92628,7 +92836,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/75847f9dbf4279646016416a4b786ba70eca716dc68b7064d5e4db5f3e88dd87.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "c2b8f40d800d2f73f86d15cded3f515c05da8d8b22e68af3d5c5b9fbfb445f0e"
       },
       "equivalenceReview": {
@@ -92681,7 +92889,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/dfab0f9d86d2d40fc8b69a61103c3e5881bef18ec53215ac23cfc88fb69c6bf6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "bd09b4a9acb11f5d5ba370602ff15b430209090130771ec0ab05b82f1420177c"
       },
       "equivalenceReview": {
@@ -93013,7 +93221,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e995e7475eaa0a650680e9f25a438763861f22fcf6814e33ffcc170a9cbb17c6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1177ce0c8f9eb62925d9513ad28bc4147b92421df29d11719adc92f1276192de"
       },
       "equivalenceReview": {
@@ -93119,7 +93327,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ba0ba51e1cad8d34d860c50bdc7e9b3c3172858ac74f32ea2a6e82e5f255d41b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4b92b7b27dcd78b4d6d11c9942df3d029e8348787710469aa9cc12cda96ac720"
       },
       "equivalenceReview": {
@@ -93345,7 +93553,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7ca51c0f5389683ea02e0b533064f3738a0f1db890531c37572c3edf5decb068.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "358ae17c9c39e50430b5793cc55b5ca3dea373e9024ce39e84b7e2de9acaff94"
       },
       "equivalenceReview": {
@@ -94104,7 +94312,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ea94a499b76bd4c1f150b046a028d8a53ba9d4ef281dca08b8a582836d2b5499.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "02f584bce067d85cde1e83e9113e7890ddfeb6319a86ceb868f6a7a326e4cf58"
       },
       "equivalenceReview": {
@@ -95003,7 +95211,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2169a0f9a899db7d77e9ee1bf0e39074128a5a4e6583b34c229d8c020800589f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "71f10d9cc5ea92e7c4bf7fce8176626b6def7a4c73074305844907c3908b66df"
       },
       "equivalenceReview": {
@@ -95680,7 +95888,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d245dcdc8c5a172d94a6a3b96f098874c1444cb7558254cfdc54b2e625cb0483.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "0a316a4889fedfc007f42121ef57c3227319f8ec24c5deb0c3c13ce225899cea"
       },
       "equivalenceReview": {
@@ -95991,7 +96199,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/a82cbe66b8fea8ec74a7d9f0200d6117d7f7411961de17829bbe5b95e66885b6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "e4ac6df18080979787c02adb8c1f363453b680b04e7fe6dbdc10b0ff28d64233"
       },
       "equivalenceReview": {
@@ -96240,7 +96448,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b7ee77956daf958679232a9aa05721c5f137e326a4b0eff4176d73cb68eb3f3e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "67da9a0d03bc1d19e08364821b75b158f73c450ee421dc59de7fb49cdb3a0293"
       },
       "equivalenceReview": {
@@ -96810,7 +97018,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b65b7d9f9ebb21714336e0fc58a1c3f1d46ba7149f9b1133a967e0d8d1117e56.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8e50d9ddf62f83f9f43503c03131ed97f1c4e166d979beb29dea4acc1e3f9c33"
       },
       "equivalenceReview": {
@@ -96893,7 +97101,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/96bc01c86137d1c92790b458ec83410f2e8376e73381d644b59fefdbda6e997f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d6938261670c86ce565559c68169c3186587ac3889a89731fd0acafa0d7e09df"
       },
       "equivalenceReview": {
@@ -97090,7 +97298,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/332c0032aa55d095e73e355efc51b1abf154ce565a84c5eb05165fffa7a788f4.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "21f7efeba83113ecdd0f026d3e61087131e895862fa1e980094c9d77eaa2c21e"
       },
       "equivalenceReview": {
@@ -97438,7 +97646,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/757481dea2934458dde8e4d66e02c8abae400fc89e51aa89465096b9b2a83d8f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4cd21bd2f3d16e77810647be2fb4a18af9e8494f3c3acf905807218dd7c393d3"
       },
       "equivalenceReview": {
@@ -99027,7 +99235,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/64abfea829e5e180e846d9dc1bcb4913fa8708174162364e96510929a810e538.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "f92edb1a686388874ace2848640fbadffc8d277f91f4e11dcddf54e36374a33b"
       },
       "equivalenceReview": {
@@ -99189,7 +99397,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/b56648fe966d5909cbfe3a62ccf67f37a3fd54b7c79856f47dcea052712123ac.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "76b1d7bee269d3e095b24cfa0bbab8f4eee201875985ba96f79eb3b902505e15"
       },
       "equivalenceReview": {
@@ -99317,7 +99525,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/36c2ea48fe72085a710de1fcb3eee3b8105926450984038992c579d9249a60bd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d765e2dd01eb49838404aa30ffa6325b2bdc921a29042f0ea577e3f603e03970"
       },
       "equivalenceReview": {
@@ -99481,7 +99689,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/8cc9493c87edf78142b31fdf0b9603570f2df67b5a6fc222f5c2cd39a2343f8c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9c20fbc68f751a90a14c9b0ae4531bea085820ca9d005aea29cd78efe02c3bbc"
       },
       "equivalenceReview": {
@@ -99570,7 +99778,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3f9825add13f2c5ee2aeab4fe8bf41de5243a28fb2026769290f7b0f6ad9388b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "159a8180a4f05528b7f8250f7430dee7d73d61479913bfe550ae3abff2e5dc1a"
       },
       "equivalenceReview": {
@@ -99710,7 +99918,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f2c19e7251f514084974220034a95d22b832530d4930012cc87dd81d4426aa28.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ff010e39aac8824c17e3869113598cf4aca269a5cad69726b5925867dd2ee53e"
       },
       "equivalenceReview": {
@@ -100017,7 +100225,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/aa71043075a5d003b841b5293712b0ed8a6a09b6037534bc2f0dac2af8b2a421.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "175209ac5e87b1b3754a08e4dd0cfac4431d58d5e08020725ef49d9e5c2289e5"
       },
       "equivalenceReview": {
@@ -100317,7 +100525,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/fd0ab81d0cebc059a83d312c6b42a4224bebf7a751fb2b7f8e9aaaecf7ee9a86.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "95ab289f38cf0e806c310b959b6807b1856eba3686ac32925dcd5b50d6e9c120"
       },
       "equivalenceReview": {
@@ -100938,7 +101146,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/7d26f2c5ea4a52bdd53f06f34147986637558a7dd106fc3adff763e53d4bb069.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "fb845e86478be55a52cf2ee681b7b0bbb53f25332eb5d2ce826b0d870a7394be"
       },
       "equivalenceReview": {
@@ -101058,7 +101266,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/57cb1cc3ec2f92b95f100e70535faeeb0b3278a20869d5aa50aa58f79d450fa0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "40c0e144dc1d735adcca5065541ec7fc7d312439558b57915e1b831516da548c"
       },
       "equivalenceReview": {
@@ -101906,7 +102114,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9b951aade9e0c90e0100fe72ea26fb07a5267cd6c7eb85deb36ccd9189857c48.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9c2a41a57d4da7be0885dd64ae9ff8766a9443fc48d3d8c32016787c2f16f722"
       },
       "equivalenceReview": {
@@ -102400,7 +102608,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/12f3b48de08ddfbfb2ef0fde76c20346f7edfdb184387917e88f8555c9ca98f6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "be3a2499a35bcb1dd020142191a586c2d6d828592936c3235b2ea208e932cde5"
       },
       "equivalenceReview": {
@@ -102607,7 +102815,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d37d02b753266b5ce5120546bdfdfd8629d96b66e0201968784d7eecd081168c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "295f6edb6486fc230a30eb31b62348b45c2538f9ff14549a635a37b121fd6c42"
       },
       "equivalenceReview": {
@@ -102876,7 +103084,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/6ebfda28d19f38c9384669094c09a41c4363a99df8e19df52e2f4ec3c0119e59.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8800fcffa1e357def1ae75efa0a5e41f5b022db981a614c7200392a62bb79210"
       },
       "equivalenceReview": {
@@ -103647,7 +103855,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/eb512134257d7d2f3ae479f5d68122ed9691a21acaa9d74593c7f0e83ef7359c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "49d59360df86d485d82490fdf7e972716ff450880a091f229ddb5470d1c9227b"
       },
       "equivalenceReview": {
@@ -103884,7 +104092,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/cd34d2e19da91a4c322b31e3e8af7d888c97ef4e47f2fb5e0fe28416d86ad2be.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "34851c218a4dc43da1f8831e4f660abf7c8b0af324f7f7f4e686ce47c88f4d98"
       },
       "equivalenceReview": {
@@ -104379,7 +104587,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4d8e92bd2ad98fc68feab11950028f22bc2072294a967688058e89fcdb1459e8.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ecb39c8763e07a76cdc41c5a1f9d0ce8f61f6e8c74e356d6ca423db891e407e3"
       },
       "equivalenceReview": {
@@ -104703,7 +104911,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f5137644f346ebdd6dde10f4b656e4f6a74bfda89a2aff4130031662e0a4044e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "78abeedbb7bfdf640fb055c7bdbfc0a138cc67c50a7cc62e15c49039565ffe70"
       },
       "equivalenceReview": {
@@ -105371,7 +105579,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0709e898982db166f287fdd6b7714d357f236b21a9f5ddb33c52a07391a4ac26.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "0c2fa6cd923eae52d88593899da09ef34cd1e4640e2a9456da276f04ef3da016"
       },
       "equivalenceReview": {
@@ -105688,7 +105896,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/9d3cfdb3dfb842ceb30ba19a124185f9eec194ce7a21d9cfa3a706974c710eef.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d1b399a0dd742206135c553b9d1ac4e29792706edc238279c09089ccadfd981b"
       },
       "equivalenceReview": {
@@ -105807,7 +106015,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/754af581303ae26585a9ff7902ea0597d24ea4846d9bcdf0d683f565ff7990dd.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d76e99aa8ccbe239146f7df4cea4ea527d7ad2d6369cf51f752f76351b08a610"
       },
       "equivalenceReview": {
@@ -107251,7 +107459,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/4adaeaafeaf001bb12388f9816af9f619008b6cb86d5a483380f5886f2b7c271.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "646c4162f2103767f6db5b6ffdd59ab3c0fae2511aa173e895901065db4955f0"
       },
       "equivalenceReview": {
@@ -107304,7 +107512,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/779f8128b5feb55539a3239be195e67ffd18fe5c0ffc0c8bd4165e87ffe21114.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "292245ea4cad0bf005798529bcf7bd62f7903817ccdc7684fbe8d51dcda4c248"
       },
       "equivalenceReview": {
@@ -107453,7 +107661,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/da7103121a171c6f455c40fbfc28c8217ec14c5bfdffa7e660fb170b79ff601d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "561cf9991fa9d2aa0a69fc2d40eb5cf99632e97bf9ee57dc49fb73b4c6e2a881"
       },
       "equivalenceReview": {
@@ -108306,7 +108514,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0909ffa5fff1e4f5f33fc19db91d8a9896bfc0280d500c924b1e0a8dc2477973.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8bc1cb82d895767d0b89dc85d71b6d85f97d25b572e3fd24e6cd0f6b2e5cb819"
       },
       "equivalenceReview": {
@@ -108577,7 +108785,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1b8bd7c962a041e9b5e87f2379857513c621bb3a7a26aa93fbac6ad2ec6fa11e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "d2ff82ca71ff505e82835fd094f32189f980028609f656c57111d0885d45ab45"
       },
       "equivalenceReview": {
@@ -108677,7 +108885,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d5c353f0a7a0f08de74f29e2d9615eccc00ef97bab43dff9bb2514391dd41fe5.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "9ffa9b4a6319eb7124f5d980226f5ccab14557ff3ab3448cfdcb0a94097a91ef"
       },
       "equivalenceReview": {
@@ -109323,7 +109531,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1f596e41ac3ab6f30266329c67698642c8499599594101fa29405e1cbd67f280.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b39a9692290db2a1acbd8ef3b98976740bd2d2b3abd778c7a426cc03369b1aee"
       },
       "equivalenceReview": {
@@ -109825,7 +110033,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/3d0e30b5b799bbf715c264314d2546a52e40e1c11d455b623fb15687cf3c3860.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "615a60d8153301439caffb54424635aec247eaf3ffdf691f7a57f1a203676c1c"
       },
       "equivalenceReview": {
@@ -110079,7 +110287,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/60c916c2567ff62e2587ae38fdb735bff0f1d374118bec69c623efd31ea5ce70.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a8ef6d9ca41b3803eab29e09cbbe99431948fb62178e8bc30476cd086f38958b"
       },
       "equivalenceReview": {
@@ -110689,7 +110897,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e46ee3e6a02995ef59e524f85c522c406eb3698c1bf7b13271d6d82e78e240b8.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8a0d22568b90cf854e166adfe4d28ad9cdce99f5cedae74eb0a2151255ed021b"
       },
       "equivalenceReview": {
@@ -112095,7 +112303,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/07e909ba5640dbe2d31cf8857a5afba40de09bba832c65dcfe1fe125a6d231b6.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8e491840f513f8fdcc7a56d648b98c9c11656979562a7fe796b796a800b10355"
       },
       "equivalenceReview": {
@@ -112637,7 +112845,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/70b85b48527179ab36cbd5de995e3955af5318fcbe2d13eb6fb9b72123f3072b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1acc3e08d8c41345e761474abb5fd44dc3d2c375dad08b2fac7d95d60582b03e"
       },
       "equivalenceReview": {
@@ -112795,7 +113003,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/87a69692dd4a068be4db4c36660cf51b18b421617bf65904eb2844d400cbec5d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "0488b87ffed42e820dd4c2389d698df19af53813876565d4467f70e3dd3a6a15"
       },
       "equivalenceReview": {
@@ -112893,7 +113101,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d460f614b250c4b65b6989552945b392884cb31b00bc16008661ff1b18d47328.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ec604e6a81dda2391113f405e7caf404ca6577d1a27c804cdc763c6e141935ad"
       },
       "equivalenceReview": {
@@ -112946,7 +113154,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/13602b99b7d4782db6a7eec9c9b9d201e4b374ab0139cd6495cd6283d238b037.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "33a57f362689ac036d9f4bac743bf9e9f6e6cc06006c4146c376d727dd10bc7a"
       },
       "equivalenceReview": {
@@ -113342,7 +113550,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/93fa33779211b9ed9d30188b5f0ea48b5b7f68529bac7094e1224f2b9935133c.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "dbb938cac7eba838aaec3f7b28058934789c5a863043d2d9c1ad82d13d58a0ff"
       },
       "equivalenceReview": {
@@ -113480,7 +113688,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/ec9bcd4d37505335d3ad849bb2c4aa204bacc113a4a1095ac8965911681cdda0.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "435b55e56ee79bbf4ab002887e1c59b6223d62b7b83252a6ecb35f7342665fb5"
       },
       "equivalenceReview": {
@@ -113751,7 +113959,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/f84ca657b5c610ee1d06ba978c34fb71e1bca1089da492d41349d29c6cc37d7e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ef126607bd8d84e72e46b4311be2135aac56cc35581105f245672291a2d189f8"
       },
       "equivalenceReview": {
@@ -114752,7 +114960,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/2c76d4214b6f7053badccb10e2f7900050807bfa504c11edcc504d60e784441e.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "1177ce0c8f9eb62925d9513ad28bc4147b92421df29d11719adc92f1276192de"
       },
       "equivalenceReview": {
@@ -114871,6 +115079,59 @@
       "listing": null
     },
     {
+      "id": "f7945193567a10d78604bfb3",
+      "canonicalPath": "/de/legacy/f7945193567a10d78604bfb3",
+      "locale": "de",
+      "title": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoTitle": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "description": "Новости о Болгарии, о недвижимости в Болгарии.",
+      "seoProvenance": {
+        "title": "live_document_title",
+        "description": "live_raw_head_description_or_absence",
+        "artifact": "data/legacy/migration/live-source-html/d84408b27244b3f765b0e09922282b09ea234cf5aa0204a9b47cd3326e25b4c3.html.gz",
+        "historicalMetadataWhitespaceNormalized": false
+      },
+      "bodyText": "Immobilien am Sonnenstrand , Bulgarien Immobilien am Sonnenstrand , Bulgarien Kauf einer Wohnung am Sunny Beach , Bulgarien hervorragende Investition in die aktuelle Situation, in der die Banken nicht geben fast keine Erträge aus Einlagen. Viele der Wohnkomplexe , die wir in Sunny Beach bieten eine garantierte, mindestens 5% der Erträge aus dem Wert Ihrer Immobilie pro Jahr aus der Vermietung Ihrer Wohnung zu verkaufen. Sie können aber auch Sie Wohnung geben zu mieten Sie sich, […] übertragen Thessaloniki Sandanski übertragen Thessaloniki Sandanski Durch die Firma MS Realty Sie können einen Shuttleservice vom Flughafen von Thessaloniki in der Stadt Sandanski Sandanski und von Thessaloniki buchen. Die Ablösesumme Thessaloniki Sandanski und zurück ist 120 € pro Strecke. Sie werden auf einem guten Auto Business-Klasse erfüllt werden. Ungefähre Fahrtdauer 2 Stunden 30 Minuten Entfernung – 170 km. Übertragen Thessaloniki Sandanski können bestellen telefonu: +359 879 69 68 70 E-Mail: [email protected] skype: ms_realty […] Transfer Sofia Sandanski Transfer Sofia Sandanski Durch die Firma MS Realty Sie können ein Taxi von Sofia Flughafen nach Sandanski Sandanski und von Sofia bestellen. Die Ablösesumme Sofia Sandanski und zurück ist 100 € pro Strecke. Ungefähre Fahrtdauer: 2 Stunden 20 Minuten Entfernung – 166 km. Landschaftlich schöne Strecke! Flughafen Sofia – Sofia Ringstraße – Blagoewgrad – Stadt Kresna – Sandanski Für Kunden von unserer Immobilienagentur, bieten wir einen Shuttle-Service von jedem beliebigen Stadt […]",
+      "sourceUrl": "https://makler-realty.com/de/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "sourceHost": "makler-realty.com",
+      "sourcePath": "/de/category/новини/",
+      "sourceType": "page",
+      "sourceHash": "5c7dd3b925ad158ae5ccd1c566aa72eb6f9ecc924f5cfedd1c622787ca8b1978",
+      "capturedAt": "2026-10-01T12:36:07.557Z",
+      "contentScope": "column:articles_main",
+      "provenance": {
+        "kind": "live",
+        "artifact": "data/legacy/migration/live-source-html/d84408b27244b3f765b0e09922282b09ea234cf5aa0204a9b47cd3326e25b4c3.html.gz",
+        "extractor": "legacy-main-v4",
+        "recordedBodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "equivalenceReview": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "contentLinks": [
+        {
+          "url": "https://makler-realty.com/de/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "text": "Immobilien am Sonnenstrand , Bulgarien"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "übertragen Thessaloniki Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/cdn-cgi/l/email-protection",
+          "text": "[email protected]"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Transfer Sofia Sandanski"
+        }
+      ],
+      "media": [],
+      "listing": null
+    },
+    {
       "id": "f7b342512d241461ff64b6f5",
       "canonicalPath": "/en/legacy/f7b342512d241461ff64b6f5",
       "locale": "en",
@@ -114894,7 +115155,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/d64ff3030e6691ed11565c35d92e71679af3f4b667a1f5969adacf00c05eb73b.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "ed3f52abe5d6e46a76753b317896b8a53a141f4ec4f2ff7f5f14a98f0dc9ad7d"
       },
       "equivalenceReview": {
@@ -114985,7 +115246,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/704b7a85519943e8e785337b43228fa628d0cbacd9d733f589bcd8021a0ffc5d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "bc6eda4ffc781958384568348519b94b57d32346eb577280794ef0422f88cf8b"
       },
       "equivalenceReview": {
@@ -115210,7 +115471,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/87694601452bd20cefd3dffb1826e7ef282f6a651f0abdf52ca536bb18e72811.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "8ea7e3fbe108b4c0dcf7e8a4487487812ef9d2adec58610fecdf7fdc90c0f842"
       },
       "equivalenceReview": {
@@ -115278,7 +115539,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/cdc86895322619da3c63f699c02b9cb22dfc9a7db35b10954adf25e3d4360cd9.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4c830af5334ca210c899b6d7b969d60f9587d075f6a906425abeb3766b26ea16"
       },
       "equivalenceReview": {
@@ -115457,7 +115718,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/07e4b1d1266e273c35e8928f5092d3355ab7ece361ebc137c6349ac4673a3290.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "a27fefd6734035e7aea19af896a3a8235f51ad718b40b6d1319417128352fe5f"
       },
       "equivalenceReview": {
@@ -115925,7 +116186,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0af9d50558413922f591c7d7525eb3bc352ecb8caa68fe04d741800e8447e079.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "21050be3c29d5730c68bf47dde2f56b69aa8e2c35c8ea3d725fb68133368a868"
       },
       "equivalenceReview": {
@@ -116300,7 +116561,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/87279d003b78a507cb69d2d2981edffff7015d1d43cf05f03725540c4032f284.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "430a94ede17389afd6fdf17c3e1c0f22544e868fbcdad2b32320e212efd43ed2"
       },
       "equivalenceReview": {
@@ -117323,7 +117584,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/686b33e4948f3bdc809120299390c8cfe2bfbce2dd7d949c202d55e30575a623.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "077e579251598745f850832ffbb08f416517ed82bb2e285707515a3691313329"
       },
       "equivalenceReview": {
@@ -117444,7 +117705,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/11334e8d229e2098d034a9e0649c16eac29466b40c95546e5039c4964f8a57c2.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "15d8a1c2e49e5088f1843bbbf924b31b6a64918311f528227f975a46fd044bf5"
       },
       "equivalenceReview": {
@@ -117860,7 +118121,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/523253424bb9c3a3b79d7d1e33e53228b9f37a7f1a7b693d9fceec5d84e9cc21.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "3e540f5f85499d6e5b86c4d1842e72b4a817691d4ba4fbfa68a06572df5ef739"
       },
       "equivalenceReview": {
@@ -117901,7 +118162,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/e0d2dee31352622a59100867a07130f1b35dc841717893766a704de7a8fec48d.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "b56fafcd04e4aad8ae5162e3afbe433f2ab5b7aa8573a26346bafceaec25f50d"
       },
       "equivalenceReview": {
@@ -117946,7 +118207,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/1d490d9a7fde1d1a5fc0a9ad4487edc5465ada666e5255c9b068716309871c0f.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "4d957f397720d60d1d5ad84fd7840c215b603f2f291d6a555a1f2a83ccf659fa"
       },
       "equivalenceReview": {
@@ -118119,7 +118380,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/56e834087383e7f5bb368c58318f814b8ca74e2509e2f1680d8d971179a1ea25.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "14fb261b26b41791ac4ed05390b77be5d13fb6172a9168bc5ba85e38bb7c738b"
       },
       "equivalenceReview": {
@@ -118398,7 +118659,7 @@
       "provenance": {
         "kind": "live",
         "artifact": "data/legacy/migration/live-source-html/0c6a4adc5ad7f023dba4b873230b69dad2ab5b973de6266af47382da33a56822.html.gz",
-        "extractor": "legacy-main-v3",
+        "extractor": "legacy-main-v4",
         "recordedBodyHash": "aced957026489ce4d0d8cf0fa023e3661604a935a394048a52b86ac9af976201"
       },
       "equivalenceReview": {

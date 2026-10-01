@@ -69,7 +69,7 @@ for (const requested of requestedUrls) {
       response_sha256: responseHash,
       response_artifact: html.trim() && !extracted.parked ? artifact : null,
       provenance: "live",
-      extractor: "legacy-main-v3",
+      extractor: "legacy-main-v4",
       transport: "python_urllib_public_get",
       response_encoding: response.charset,
       redirects: response.redirects,

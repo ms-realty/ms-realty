@@ -26,16 +26,6 @@
       ]
     },
     {
-      "id": "32ce31baf0b90cd908c941b4",
-      "sourceUrls": [
-        "https://makler-realty.com/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
       "id": "8ccff57ae5790cde9de6785d",
       "sourceUrls": [
         "https://makler-realty.com/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"
@@ -1958,22 +1948,22 @@
     {
       "url": "https://makler-realty.com/bg/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
       "id": "7a15a97a22b6dccb109fe543",
-      "primaryBodyCaptured": false
+      "primaryBodyCaptured": true
     },
     {
       "url": "https://makler-realty.com/en/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
       "id": "0f24488f13d9561085b91a25",
-      "primaryBodyCaptured": false
+      "primaryBodyCaptured": true
     },
     {
       "url": "https://makler-realty.com/de/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
       "id": "f7945193567a10d78604bfb3",
-      "primaryBodyCaptured": false
+      "primaryBodyCaptured": true
     },
     {
       "url": "https://makler-realty.com/nl/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
       "id": "bd3e1dfc7d83a81f6a723797",
-      "primaryBodyCaptured": false
+      "primaryBodyCaptured": true
     },
     {
       "url": "https://makler-realty.com/cdn-cgi/l/email-protection",

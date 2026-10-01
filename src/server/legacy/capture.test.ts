@@ -1,6 +1,24 @@
 import { expect, it } from "vitest";
 import { extractLiveSource } from "./capture";
 
+it("retains the source article archive while excluding navigation, sidebar and executable chrome", () => {
+  const source = extractLiveSource(
+    '<html lang="bg"><title>Published news</title><nav>Navigation</nav><div class="row"><div class="col-lg-9"><div><div class="post category_articles"><div class="title"><h2><a href="/original-news/">Original article</a></h2></div><div class="entry"><p>Original summary and facts.</p></div></div><form>Search control</form><script>unsafe()</script></div></div><aside>Sidebar</aside></div></html>',
+    "https://makler-realty.com/category/news/",
+  );
+  expect(source.content_scope).toBe("column:articles_main");
+  expect(source.extracted_body_text).toBe("Original article Original summary and facts.");
+  expect(source.content_links).toEqual([
+    { url: "https://makler-realty.com/original-news/", text: "Original article" },
+  ]);
+  expect(
+    extractLiveSource(
+      '<html><title>Unknown</title><aside><div class="post category_articles">Sidebar</div></aside><div class="col-lg-9"><div><h1>Not Found</h1></div></div></html>',
+      "https://makler-realty.com/missing/",
+    ).content_scope,
+  ).toBe("missing_main_content");
+});
+
 it("captures the source document title independently from h1 and preserves the untrimmed head description", () => {
   const description = `  ${"Original source description. ".repeat(20)}  `;
   const source = extractLiveSource(

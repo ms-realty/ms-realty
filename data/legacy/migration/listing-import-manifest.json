@@ -7699,6 +7699,38 @@
       "sourceStatusVerified": false
     },
     {
+      "sourceUrl": "https://makler-realty.com/bg/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "reference": null,
+      "bodyHash": "7cc96db9945cdd0c0a31feaedc55b5eec8da787ce8fd43288adedbf7a698f3d9",
+      "publicPhotos": [],
+      "recordedR2Keys": false,
+      "sourceStatusVerified": false
+    },
+    {
+      "sourceUrl": "https://makler-realty.com/en/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "reference": null,
+      "bodyHash": "509709617ef41e76ece1eb5a071f584c52f24b7744fd3b825e77ad5827da8fc9",
+      "publicPhotos": [],
+      "recordedR2Keys": false,
+      "sourceStatusVerified": false
+    },
+    {
+      "sourceUrl": "https://makler-realty.com/de/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "reference": null,
+      "bodyHash": "5c7dd3b925ad158ae5ccd1c566aa72eb6f9ecc924f5cfedd1c622787ca8b1978",
+      "publicPhotos": [],
+      "recordedR2Keys": false,
+      "sourceStatusVerified": false
+    },
+    {
+      "sourceUrl": "https://makler-realty.com/nl/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+      "reference": null,
+      "bodyHash": "2f37354b842ede26dceef65278fd62c2ccd6356b244d0a6eb627655366fe5176",
+      "publicPhotos": [],
+      "recordedR2Keys": false,
+      "sourceStatusVerified": false
+    },
+    {
       "sourceUrl": "https://makler-realty.com/de/sitemap-2/",
       "reference": null,
       "bodyHash": "3e540f5f85499d6e5b86c4d1842e72b4a817691d4ba4fbfa68a06572df5ef739",

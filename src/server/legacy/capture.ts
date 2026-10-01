@@ -21,13 +21,19 @@ export function extractLiveSource(html: string, url: string) {
       archive.parentElement.querySelector(".category_objects_description"))
       ? archive.parentElement
       : null;
+  const article = document.querySelector(".col-lg-9 .post.category_articles");
+  const articleColumn = article?.parentElement?.parentElement?.classList.contains("col-lg-9")
+    ? article.parentElement
+    : null;
   const primary = parked
     ? null
-    : (document.querySelector(".post_content, .post_content_default") ?? archiveColumn);
+    : (document.querySelector(".post_content, .post_content_default") ??
+      archiveColumn ??
+      articleColumn);
   primary?.querySelectorAll("script,style,noscript").forEach((element) => {
     element.remove();
   });
-  if (primary === archiveColumn)
+  if (primary === archiveColumn || primary === articleColumn)
     primary?.querySelectorAll("form").forEach((element) => {
       element.remove();
     });
@@ -44,7 +50,9 @@ export function extractLiveSource(html: string, url: string) {
       ? "class:post_content_default"
       : primary === archiveColumn && primary
         ? "column:archive_main"
-        : "missing_main_content";
+        : primary === articleColumn && primary
+          ? "column:articles_main"
+          : "missing_main_content";
   const links = [...document.querySelectorAll<HTMLAnchorElement>("a[href]")].flatMap((link) => {
     try {
       const identity = sourceIdentity(link.href);

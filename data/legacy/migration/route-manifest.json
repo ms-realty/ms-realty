@@ -17,9 +17,9 @@
   "uniqueSources": 454,
   "duplicateSpellingRows": 3,
   "capturedSources": 430,
-  "verifiedMainContentSources": 365,
+  "verifiedMainContentSources": 366,
   "missingCaptureSources": 24,
-  "unresolvedMainContentSources": 65,
+  "unresolvedMainContentSources": 64,
   "reviewedEquivalentSources": 0,
   "routeArtifactSha256": null,
   "blockers": [
@@ -1283,10 +1283,10 @@
         "finalUrl": "https://makler-realty.com/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
         "status": 200,
         "capturedAt": "2026-10-01T12:15:17.088Z",
-        "contentScope": "missing_main_content",
-        "bodyHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "contentScope": "column:articles_main",
+        "bodyHash": "7cc96db9945cdd0c0a31feaedc55b5eec8da787ce8fd43288adedbf7a698f3d9",
         "responseHash": "f9571bd083db9cd60fe7ab38317e0cbd7a024a9030557782d1de0aec683ed7fd",
-        "bodyVerified": false,
+        "bodyVerified": true,
         "provenance": "live"
       },
       "latestLiveObservation": {
@@ -1294,10 +1294,13 @@
         "error": null,
         "capturedAt": "2026-10-01T12:15:17.088Z"
       },
-      "candidate": null,
+      "candidate": {
+        "path": "/bg/legacy/32ce31baf0b90cd908c941b4",
+        "locale": "bg",
+        "status": 200
+      },
       "equivalenceReview": "pending",
       "blockers": [
-        "missing_verified_main_content",
         "target_equivalence_review_missing"
       ]
     },
@@ -19784,8 +19787,8 @@
   "liveDelta": {
     "artifact": "data/legacy/migration/live-delta.json",
     "requestedSources": 597,
-    "verifiedPrimarySources": 319,
-    "newMainContentSources": 221,
+    "verifiedPrimarySources": 324,
+    "newMainContentSources": 225,
     "discoveredOutsideFrozenUrls": [
       {
         "url": "https://makler-realty.com/bg/",
@@ -25760,6 +25763,90 @@
         "sourceLocale": "bg",
         "candidate": {
           "path": "/bg/legacy/d250f8a9ffe099014c39cf95",
+          "status": 200
+        },
+        "equivalenceReview": "pending",
+        "blockers": [
+          "target_equivalence_review_missing",
+          "listing_status_and_photo_parity_unverified"
+        ]
+      },
+      {
+        "host": "makler-realty.com",
+        "path": "/bg/category/новини/",
+        "query": "",
+        "id": "7a15a97a22b6dccb109fe543",
+        "sourceUrl": "https://makler-realty.com/bg/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+        "sourceBodyHash": "7cc96db9945cdd0c0a31feaedc55b5eec8da787ce8fd43288adedbf7a698f3d9",
+        "sourceResponseHash": "2eadce8f0360793ea491012d15d302b83d887bae8376f262e3612c266e29f6f3",
+        "sourceArtifact": "data/legacy/migration/live-source-html/2eadce8f0360793ea491012d15d302b83d887bae8376f262e3612c266e29f6f3.html.gz",
+        "listingReference": null,
+        "sourceLocale": "bg",
+        "candidate": {
+          "path": "/bg/legacy/7a15a97a22b6dccb109fe543",
+          "status": 200
+        },
+        "equivalenceReview": "pending",
+        "blockers": [
+          "target_equivalence_review_missing",
+          "listing_status_and_photo_parity_unverified"
+        ]
+      },
+      {
+        "host": "makler-realty.com",
+        "path": "/en/category/новини/",
+        "query": "",
+        "id": "0f24488f13d9561085b91a25",
+        "sourceUrl": "https://makler-realty.com/en/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+        "sourceBodyHash": "509709617ef41e76ece1eb5a071f584c52f24b7744fd3b825e77ad5827da8fc9",
+        "sourceResponseHash": "13a8ecd7100ad3069ddb3a666441fc971d67e6653480fa8f1403f913445c0449",
+        "sourceArtifact": "data/legacy/migration/live-source-html/13a8ecd7100ad3069ddb3a666441fc971d67e6653480fa8f1403f913445c0449.html.gz",
+        "listingReference": null,
+        "sourceLocale": "en",
+        "candidate": {
+          "path": "/en/legacy/0f24488f13d9561085b91a25",
+          "status": 200
+        },
+        "equivalenceReview": "pending",
+        "blockers": [
+          "target_equivalence_review_missing",
+          "listing_status_and_photo_parity_unverified"
+        ]
+      },
+      {
+        "host": "makler-realty.com",
+        "path": "/de/category/новини/",
+        "query": "",
+        "id": "f7945193567a10d78604bfb3",
+        "sourceUrl": "https://makler-realty.com/de/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+        "sourceBodyHash": "5c7dd3b925ad158ae5ccd1c566aa72eb6f9ecc924f5cfedd1c622787ca8b1978",
+        "sourceResponseHash": "d84408b27244b3f765b0e09922282b09ea234cf5aa0204a9b47cd3326e25b4c3",
+        "sourceArtifact": "data/legacy/migration/live-source-html/d84408b27244b3f765b0e09922282b09ea234cf5aa0204a9b47cd3326e25b4c3.html.gz",
+        "listingReference": null,
+        "sourceLocale": "de",
+        "candidate": {
+          "path": "/de/legacy/f7945193567a10d78604bfb3",
+          "status": 200
+        },
+        "equivalenceReview": "pending",
+        "blockers": [
+          "target_equivalence_review_missing",
+          "listing_status_and_photo_parity_unverified"
+        ]
+      },
+      {
+        "host": "makler-realty.com",
+        "path": "/nl/category/новини/",
+        "query": "",
+        "id": "bd3e1dfc7d83a81f6a723797",
+        "sourceUrl": "https://makler-realty.com/nl/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+        "sourceBodyHash": "2f37354b842ede26dceef65278fd62c2ccd6356b244d0a6eb627655366fe5176",
+        "sourceResponseHash": "18b183be05931613e2001272b2de8c8dabdea08556c9e3a8ff12ef65a1e1348a",
+        "sourceArtifact": "data/legacy/migration/live-source-html/18b183be05931613e2001272b2de8c8dabdea08556c9e3a8ff12ef65a1e1348a.html.gz",
+        "listingReference": null,
+        "sourceLocale": "nl",
+        "candidate": {
+          "path": "/nl/legacy/bd3e1dfc7d83a81f6a723797",
           "status": 200
         },
         "equivalenceReview": "pending",

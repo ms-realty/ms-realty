@@ -71,7 +71,7 @@ missing artifacts and placeholders fail validation. Never use `PRODUCTION_ENV_FI
 An explicitly authorized `purpose: protected_partial_preview` may use the pinned partial
 staging map and manifest only with `scope: staging_only`, `productionAllowed: false` and exact
 manifest/exclusions SHA-256. Its exclusions remain visible and it cannot pass the promotion
-validator. The current map has 586 identities and 554 explicit exclusions; it is not complete
+validator. The current map has 591 identities and 549 explicit exclusions; it is not complete
 baseline or fresh-delta parity. Full coverage with zero exclusions remains a hard promotion gate.
 For Actions install that reviewed nonsecret JSON in the staging environment's `STAGING_INPUTS_JSON`
 variable with `sourceCommit: null`. Only after the exact qualified-SHA guard succeeds does

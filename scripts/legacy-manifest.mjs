@@ -57,7 +57,7 @@ const liveCaptures = (liveDelta?.captures ?? []).map((capture) => {
   return {
     ...capture,
     ...extracted,
-    source_extractor: "legacy-main-v3",
+    source_extractor: "legacy-main-v4",
     recorded_body_hash: capture.text_sha256,
   };
 });
