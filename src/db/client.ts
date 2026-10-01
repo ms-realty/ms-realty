@@ -3,6 +3,7 @@
 import "server-only";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { requestDatabase } from "./request-scope";
 import * as schema from "./schema";
 
 export type Database = PostgresJsDatabase<typeof schema>;
@@ -11,6 +12,10 @@ export type Database = PostgresJsDatabase<typeof schema>;
 const cache = globalThis as { __msRealtyDb?: Database };
 
 export function getDb(): Database {
+  const scoped = requestDatabase();
+  if (scoped) return scoped;
+  if (process.env.DATABASE_RUNTIME === "cloudflare")
+    throw new Error("Cloudflare requests require a scoped Hyperdrive connection.");
   if (cache.__msRealtyDb) return cache.__msRealtyDb;
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is required.");

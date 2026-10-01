@@ -15,6 +15,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   ...(process.env.BUILD_STANDALONE === "1" ? { output: "standalone" as const } : {}),
+  // Node tracing selects pg-cloudflare's empty Node export. The Worker bundle needs
+  // its workerd export too (pg-boss imports pg), so include these small runtime files.
+  ...(process.env.CLOUDFLARE_BUILD === "1"
+    ? {
+        outputFileTracingIncludes: {
+          "/*": ["./node_modules/pg-cloudflare/dist/**", "./node_modules/pg-cloudflare/esm/**"],
+        },
+      }
+    : {}),
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   reactStrictMode: true,

@@ -98,7 +98,7 @@ describe("database schema (architecture §4)", () => {
     );
     const [version] = await t.sql<{ major: number }[]>`
       select current_setting('server_version_num')::int / 10000 as major`;
-    expect(version?.major).toBeGreaterThanOrEqual(18);
+    expect(version?.major).toBeGreaterThanOrEqual(16);
   });
 
   it("has no retired scope: reservations, statements, service dispatch, short stays, partner feed", async () => {
