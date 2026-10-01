@@ -1,0 +1,53 @@
+{
+  "authority": "2026-10-01 owner/controller zero-loss public GET",
+  "status": "completed_bounded_requests",
+  "completeCurrentCrawl": false,
+  "discoveredPageUrls": 465,
+  "remainingUniquePages": 417,
+  "batches": [
+    {
+      "path": "data/legacy/migration/delta-batch-1.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-2.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-3.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-4.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-5.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-6.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-7.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-8.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-9.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-10.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/delta-batch-11.json",
+      "sourceCount": 17
+    }
+  ]
+}
