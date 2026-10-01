@@ -29,6 +29,11 @@ COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/dist-runtime ./dist-runtime
 COPY --from=build --chown=node:node /app/db/migrations ./db/migrations
+# Identity is created once inside this exact image, never taken from runtime bindings. The
+# root-owned file is unreadable for writes by the node process, and is outside copied source.
+COPY --from=build /app/scripts/runtime-entry.mjs /app/runtime-entry.mjs
+RUN node --input-type=module -e 'import {writeFileSync} from "node:fs"; import {randomUUID} from "node:crypto"; writeFileSync("/app/runtime-image.json", JSON.stringify({schemaVersion:1,sourceCommit:process.env.BUILD_SHA,buildNonce:randomUUID()}), {mode:0o444});' \
+    && chown root:root /app /app/runtime-entry.mjs && chmod 755 /app
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]

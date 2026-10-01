@@ -20,7 +20,6 @@ const plain = [
   "R2_BUCKET",
   "MEDIA_PUBLIC_BASE_URL",
   "MAP_RELEASE_ID",
-  "BUILD_SHA",
   "WORKER_HEARTBEAT_URL",
   "GTM_CONTAINER_ID",
   "SITE_GOOGLE_VERIFICATION",
@@ -29,6 +28,8 @@ const value = (env: RuntimeEnv, key: string): string =>
   typeof env[key] === "string" ? (env[key] as string) : "";
 export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<string, string> {
   if (env.STAGING !== "true") throw new Error("Staging adapter cannot start production");
+  const expectedSource = value(env, "BUILD_SHA");
+  if (!/^[a-f0-9]{40}$/.test(expectedSource)) throw new Error("Expected source pin is required");
   const database = value(env, `${role.toUpperCase()}_DATABASE_URL`);
   const url = new URL(database);
   if (
@@ -49,6 +50,8 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
     HOSTNAME: "0.0.0.0",
     PORT: "3000",
     DATABASE_URL: database,
+    // This is a comparison target, never a claim about the running image's identity.
+    EXPECTED_SOURCE_COMMIT: expectedSource,
   });
   if (role === "migrator")
     return {
@@ -56,9 +59,10 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
       STAGING: "true",
       DATABASE_URL: database,
       MIGRATIONS_FOLDER: "/app/db/migrations",
+      EXPECTED_SOURCE_COMMIT: expectedSource,
     };
   if (role === "web") output.ORIGIN_VERIFY_SECRET = value(env, "ORIGIN_VERIFY_SECRET");
-  if (role === "worker")
+  if (role === "worker") {
     Object.assign(output, {
       EMAIL_PROVIDER: "cloudflare",
       EMAIL_FROM: value(env, "EMAIL_FROM"),
@@ -70,5 +74,28 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
       CASE_INBOUND_ENABLED: "0",
       HERMES_ENABLED: "0",
     });
+    if (value(env, "INQUIRY_COVERAGE_NOTICE_ENABLED") === "1") {
+      const inbox = value(env, "INQUIRY_COVERAGE_TEST_INBOX");
+      let allowed: unknown;
+      try {
+        allowed = JSON.parse(value(env, "EMAIL_ALLOWED_RECIPIENTS"));
+      } catch {
+        throw new Error("Reviewed staging notice inbox is required");
+      }
+      if (
+        value(env, "INQUIRY_COVERAGE_TEST_INBOX_REVIEWED") !== "true" ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inbox) ||
+        !Array.isArray(allowed) ||
+        allowed.length !== 1 ||
+        allowed[0] !== inbox
+      )
+        throw new Error("Reviewed notice inbox must equal the sole staging email recipient");
+      Object.assign(output, {
+        INQUIRY_COVERAGE_NOTICE_ENABLED: "1",
+        INQUIRY_COVERAGE_TEST_INBOX_REVIEWED: "true",
+        INQUIRY_COVERAGE_TEST_INBOX: inbox,
+      });
+    }
+  }
   return output;
 }

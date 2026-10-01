@@ -4,7 +4,13 @@ import { DurableObject } from "cloudflare:workers";
 import { Container } from "@cloudflare/containers";
 import { accessAuthorized } from "./access";
 import { type RelayEnv, relayEmail } from "./email-relay";
-import { type RuntimeEnv, runtimeEnvironment } from "./runtime-env";
+import { type RuntimeEnv, type RuntimeRole, runtimeEnvironment } from "./runtime-env";
+import {
+  type MigrationReceipt,
+  migrationCompletion,
+  migrationStopped,
+  runtimeProof,
+} from "./runtime-proof";
 import { stagingArtifacts } from "./staging-artifacts.generated";
 import { type GatewayEnv, gateway } from "./worker";
 
@@ -13,6 +19,7 @@ interface StagingEnv
     Omit<RelayEnv, "EMAIL">,
     RuntimeEnv {
   EMAIL: SendEmail;
+  BUILD_SHA: string;
   IMAGE_DIGEST: string;
   STAGING_CONTROL_SECRET: string;
   EMAIL_RELAY_SECRET: string;
@@ -21,52 +28,100 @@ interface StagingEnv
   MS_REALTY_MIGRATOR: DurableObjectNamespace<MsRealtyMigratorContainer>;
   EMAIL_RECEIPTS: DurableObjectNamespace<EmailReceipt>;
 }
-type MigrationReceipt = {
-  status: "running" | "passed" | "failed";
-  digest: string;
-  exitCode?: number;
-};
+class StagingRoleContainer extends Container<StagingEnv> {
+  protected role: RuntimeRole = "web";
+  async identity() {
+    await this.startAndWaitForPorts([3001]);
+    return { ...(await this.readIdentity()), actorId: this.ctx.id.toString() };
+  }
+  protected async readIdentity() {
+    const response = await this.containerFetch("http://runtime/identity", { method: "GET" }, 3001);
+    if (!response.ok) throw new Error("Private role identity unavailable");
+    return runtimeProof(await response.json(), this.role, this.env.BUILD_SHA ?? "");
+  }
+  protected async startRole(operationId?: string) {
+    const response = await this.containerFetch(
+      "http://runtime/start",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(operationId ? { operationId } : {}),
+      },
+      3001,
+    );
+    if (response.status !== 202) throw new Error("Private role start requires reconciliation");
+  }
+}
 
-export class MsRealtyContainer extends Container<StagingEnv> {
+export class MsRealtyContainer extends StagingRoleContainer {
   defaultPort = 3000;
   sleepAfter = "20m";
   envVars = runtimeEnvironment(this.env, "web");
-  entrypoint = ["node", "server.js"];
+  entrypoint = ["node", "runtime-entry.mjs", "web"];
 }
-export class MsRealtyWorkerContainer extends Container<StagingEnv> {
+export class MsRealtyWorkerContainer extends StagingRoleContainer {
+  protected role: RuntimeRole = "worker";
   envVars = runtimeEnvironment(this.env, "worker");
-  entrypoint = ["node", "--conditions=react-server", "dist-runtime/worker.mjs"];
+  entrypoint = ["node", "--conditions=react-server", "runtime-entry.mjs", "worker"];
   sleepAfter = "20m";
   async startQueue() {
-    await this.start();
+    const proof = await this.identity();
+    if (proof.state !== "prepared" && proof.state !== "running")
+      throw new Error("Queue process requires reconciliation");
+    await this.startRole();
     await this.renewActivityTimeout();
   }
   async onActivityExpired() {
     await this.renewActivityTimeout();
   }
 }
-export class MsRealtyMigratorContainer extends Container<StagingEnv> {
+export class MsRealtyMigratorContainer extends StagingRoleContainer {
+  protected role: RuntimeRole = "migrator";
   envVars = runtimeEnvironment(this.env, "migrator");
-  entrypoint = ["node", "--conditions=react-server", "dist-runtime/migrate.mjs"];
+  entrypoint = ["node", "--conditions=react-server", "runtime-entry.mjs", "migrator"];
   async result(): Promise<MigrationReceipt | undefined> {
-    return this.ctx.storage.get("migration");
+    return this.ctx.blockConcurrencyWhile(async () => {
+      const receipt = await this.ctx.storage.get<MigrationReceipt>("migration");
+      if (receipt?.status !== "running") return receipt;
+      let next: MigrationReceipt;
+      try {
+        if (!this.ctx.container?.running) throw new Error("Migration process disappeared");
+        next = migrationCompletion(receipt, await this.readIdentity());
+      } catch {
+        next = { ...receipt, status: "unknown" };
+      }
+      await this.ctx.storage.put("migration", next);
+      return next;
+    });
   }
   async runMigration(): Promise<MigrationReceipt> {
     return this.ctx.blockConcurrencyWhile(async () => {
-      const previous = await this.result();
+      const previous = await this.ctx.storage.get<MigrationReceipt>("migration");
       if (previous) return previous; // An uncertain operation requires operator reconciliation.
-      const receipt: MigrationReceipt = { status: "running", digest: this.env.IMAGE_DIGEST };
+      const proof = await this.identity();
+      if (proof.state !== "prepared") throw new Error("Migration process requires reconciliation");
+      const receipt: MigrationReceipt = {
+        status: "running",
+        operationId: crypto.randomUUID(),
+        configuredDigest: this.env.IMAGE_DIGEST,
+        digestVerification: "unqualified",
+        sourceCommit: proof.sourceCommit,
+        buildNonce: proof.buildNonce,
+      };
       await this.ctx.storage.put("migration", receipt);
-      await this.start();
+      try {
+        await this.startRole(receipt.operationId);
+      } catch {
+        await this.ctx.storage.put("migration", { ...receipt, status: "unknown" });
+        throw new Error("Migration start acknowledgement requires reconciliation");
+      }
       return receipt;
     });
   }
   async onStop({ exitCode, reason }: { exitCode: number; reason: string }) {
-    await this.ctx.storage.put("migration", {
-      status: reason === "exit" && exitCode === 0 ? "passed" : "failed",
-      digest: this.env.IMAGE_DIGEST,
-      exitCode,
-    } satisfies MigrationReceipt);
+    const receipt = await this.ctx.storage.get<MigrationReceipt>("migration");
+    if (receipt)
+      await this.ctx.storage.put("migration", migrationStopped(receipt, { exitCode, reason }));
   }
 }
 export class EmailReceipt extends DurableObject<StagingEnv> {
@@ -98,7 +153,13 @@ const migrator = (env: StagingEnv) =>
   env.MS_REALTY_MIGRATOR.getByName(`migration-${env.IMAGE_DIGEST}`);
 const migrated = async (env: StagingEnv) => {
   const receipt = await migrator(env).result();
-  return receipt?.status === "passed" && receipt.digest === env.IMAGE_DIGEST;
+  // This gate proves explicit process completion for the immutable source. Exact image digest
+  // and rollout qualification are checked separately by the staging controller, never env vars.
+  return (
+    receipt?.status === "completed" &&
+    receipt.configuredDigest === env.IMAGE_DIGEST &&
+    receipt.sourceCommit === env.BUILD_SHA
+  );
 };
 async function handle(request: Request, env: StagingEnv): Promise<Response> {
   if (
@@ -129,6 +190,22 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
       return Response.json((await migrator(env).result()) ?? { status: "absent" });
     if (request.method !== "POST") return new Response(null, { status: 405 });
     return Response.json(await migrator(env).runMigration(), { status: 202 });
+  }
+  if (url.pathname === "/__staging/runtime") {
+    if (!(await authenticated(request, env.STAGING_CONTROL_SECRET)))
+      return new Response(null, { status: 403 });
+    if (request.method !== "POST") return new Response(null, { status: 405 });
+    const [web, worker, migration] = await Promise.all([
+      env.MS_REALTY.getByName("web").identity(),
+      env.MS_REALTY_WORKER.getByName("queue").identity(),
+      migrator(env).identity(),
+    ]);
+    return Response.json({
+      schemaVersion: 1,
+      configuredDigest: env.IMAGE_DIGEST,
+      digestVerification: "unqualified",
+      roles: { web, worker, migrator: migration },
+    });
   }
   if (!(await migrated(env))) return new Response(null, { status: 503 });
   await env.MS_REALTY_WORKER.getByName("queue").startQueue();
