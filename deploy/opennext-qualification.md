@@ -17,6 +17,10 @@ also uses Sharp for safe derivatives. The protections must survive migration: si
 bounded full decode, dimensions, single-page images and metadata removal. A browser MIME
 claim is not a replacement.
 
+The qualification-only OpenNext configuration is `gateway/wrangler.opennext-qualification.jsonc`.
+`npm run build:cloudflare` and `npm run preview:cloudflare` select it explicitly; neither
+is a release deployment command. The default gateway config remains the local map fixture.
+
 Reproduce the isolated library boundary after `npm ci`:
 
 ```js

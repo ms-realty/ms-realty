@@ -37,8 +37,8 @@
     "prebuild": "node scripts/map-runtime.mjs",
     "predev": "node scripts/map-runtime.mjs",
     "test:load": "playwright test --config playwright.load.config.ts",
-    "build:cloudflare": "CLOUDFLARE_BUILD=1 opennextjs-cloudflare build --config gateway/wrangler.jsonc",
-    "preview:cloudflare": "opennextjs-cloudflare preview --config gateway/wrangler.jsonc"
+    "build:cloudflare": "CLOUDFLARE_BUILD=1 opennextjs-cloudflare build --config gateway/wrangler.opennext-qualification.jsonc",
+    "preview:cloudflare": "opennextjs-cloudflare preview --config gateway/wrangler.opennext-qualification.jsonc"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1141.0",

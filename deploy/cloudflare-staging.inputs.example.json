@@ -46,7 +46,9 @@
   "email": {
     "from": null,
     "allowedRecipients": [],
-    "replyDomain": null
+    "replyDomain": null,
+    "inquiryCoverageNoticeEnabled": false,
+    "testInboxReviewed": false
   },
   "artifacts": {
     "routes": "data/legacy/migration/staging-legacy-routes.json",

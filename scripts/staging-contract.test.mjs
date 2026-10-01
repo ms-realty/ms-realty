@@ -12,7 +12,7 @@ import {
 } from "./staging-config.mjs";
 import { stagingEnvironment } from "./staging-environment.mjs";
 import { bindStagingInputs } from "./staging-inputs.mjs";
-import { cloudflareReader, validateAccess } from "./staging-preflight.mjs";
+import { cloudflareReader, validateAccess, validateRoutes } from "./staging-preflight.mjs";
 
 // These generated identities and fixture reports are local negative-test inputs, never launch evidence.
 test("canonical Cloudflare token cannot fall back without the independent staging custody guard", () => {
@@ -111,6 +111,8 @@ function fixture() {
       from: "fixture@notifications.makler-realty.com",
       allowedRecipients: ["inbox@example.invalid"],
       replyDomain: null,
+      inquiryCoverageNoticeEnabled: false,
+      testInboxReviewed: false,
     },
     artifacts: { routesSha256: sha256(routes), mediaSha256: sha256(media) },
     runtimeVars: { CLAMAV_HOST: "scan.fixture.invalid", CLAMAV_PORT: "3310" },
@@ -229,6 +231,22 @@ test("staging config rejects production aliases, nonisolated resources, incomple
   );
   assert.throws(() => validateStaging(input, artifacts, {}));
 });
+test("inquiry notice can target only the explicit reviewed staging binding recipient", () => {
+  const { input, artifacts } = fixture();
+  assert.equal(stagingConfig(input, artifacts).vars.INQUIRY_COVERAGE_NOTICE_ENABLED, "0");
+  input.email.inquiryCoverageNoticeEnabled = true;
+  assert.throws(() => validateStaging(input, artifacts), /explicit reviewed staging inbox/);
+  input.email.testInboxReviewed = true;
+  const config = stagingConfig(input, artifacts);
+  assert.equal(config.vars.INQUIRY_COVERAGE_NOTICE_ENABLED, "1");
+  assert.equal(config.vars.INQUIRY_COVERAGE_TEST_INBOX_REVIEWED, "true");
+  assert.equal(config.vars.INQUIRY_COVERAGE_TEST_INBOX, input.email.allowedRecipients[0]);
+  assert.deepEqual(config.send_email[0].allowed_destination_addresses, [
+    config.vars.INQUIRY_COVERAGE_TEST_INBOX,
+  ]);
+  input.email.testInboxReviewed = "true";
+  assert.throws(() => validateStaging(input, artifacts), /explicit reviewed staging inbox/);
+});
 test("large artifact bytes stay outside bindings while oversized runtime variables fail before deploy", () => {
   const { input, artifacts } = fixture();
   const media = JSON.parse(artifacts.media);
@@ -277,6 +295,43 @@ test("Unicode-equivalent redirect chains are blocked even when target spelling i
   input.artifacts.routeManifestSha256 = sha256(artifacts.manifest);
   assert.throws(() => validateStaging(input, artifacts), /single-hop legacy redirect/);
 });
+test("route preflight rejects foreign subpaths, bypasses and wildcard staging overrides", () => {
+  const { input } = fixture();
+  const owned = [
+    "staging.makler-realty.com",
+    "my.staging.makler-realty.com",
+    "app.staging.makler-realty.com",
+  ].map((host) => ({ pattern: `${host}/*`, script: input.workerName }));
+  validateRoutes(input, owned);
+  validateRoutes(input, [
+    ...owned,
+    { pattern: "makler-realty.com/*", script: "existing-production-worker" },
+  ]);
+  for (const pattern of [
+    "staging.makler-realty.com/api/*",
+    "https://staging.makler-realty.com/api/*",
+    "http://APP.staging.makler-realty.com/login*",
+    "my.staging.makler-realty.com/private/*",
+    "*.makler-realty.com/api/*",
+    "*staging.makler-realty.com/*",
+  ]) {
+    for (const script of ["foreign-worker", null, input.workerName])
+      assert.throws(
+        () => validateRoutes(input, [...owned, { pattern, script }]),
+        /competing or bypass route/,
+      );
+  }
+  assert.throws(
+    () =>
+      validateRoutes(input, [
+        ...owned,
+        { pattern: "makler-realty.com/*", script: input.workerName },
+      ]),
+    /no production route/,
+  );
+  assert.throws(() => validateRoutes(input, undefined), /known Worker route inventory/);
+});
+
 test("Access preflight denies bypass, everyone, foreign controllers and more-specific app overrides", () => {
   const { input } = fixture();
   const app = {

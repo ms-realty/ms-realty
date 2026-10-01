@@ -84,12 +84,18 @@ contain its own hash; an existing different source pin is rejected.
 - Fresh inventory records no configured Zero Trust Access. Supply the actual application,
   audience, team, owner, reviewed controller identities/group and named service token. The
   read-only preflight checks all three hosts and denies bypass/everyone/foreign members and
-  conflicting more-specific applications. Unknown policy shapes require review.
+  conflicting more-specific applications. Route inventory also rejects more-specific Worker routes,
+  wildcard overlaps and no-script bypasses on any staging host. Unknown policy/route shapes
+  require review; the preflight does not mutate existing routes.
 - Actual legacy PostgreSQL is **16.14**, privately bound inside Docker on the existing host.
   No staging database exists; port 5432 is not public. Supply a separate staging database,
   three distinct reviewed roles, private host/TLS route and pinned successful connectivity
   evidence **from Cloudflare Containers**, with `verify-full` and no public Postgres. This
   repository does not invent a Hyperdrive, tunnel, D1 or database architecture.
+  Workers Hyperdrive/VPC bindings cannot be consumed directly by the native Node PostgreSQL
+  client inside a Container; binding access via outbound interception covers HTTP. The
+  permitted Containers fallback therefore still needs independently proven private database
+  transport. A configured database URL is not reachability or TLS evidence.
 - No staging R2 buckets exist. Supply separate staging media/cache buckets, public R2 domains
   disabled and credentials restricted to staging. Production `ms-realty-media` and
   `ms-realty-production-opennext-cache` are forbidden as staging bindings. `NEXT_CACHE` reserves
@@ -161,6 +167,15 @@ The staging email relay allows only reviewed sender/inbox/plaintext and validate
 reply address. Attachments/arbitrary shapes are rejected before send. Durable receipts persist
 uncertainty before the binding call; duplicates cannot blindly resend. Acceptance is not delivery.
 Case email/inbound/Hermes remain disabled in this adapter pending qualification.
+
+The staging inquiry consumer is disabled by default. To exercise the notification gate, the
+operator must set `email.inquiryCoverageNoticeEnabled: true` and
+`email.testInboxReviewed: true` in the reviewed staging inputs. The consumer receives exactly
+the one `email.allowedRecipients` inbox; an unreviewed or different destination cannot send.
+It creates one transactional event/effect/job binding and sends only identifiers with the
+canonical staff queue link. An accepted provider result is recorded as acknowledged; the
+independent checker still needs actual test-inbox delivery. No customer message is sent by
+this coverage template, and it cannot execute after `STAGING` becomes false.
 
 ## Guarded staging and independent promotion
 

@@ -145,6 +145,12 @@ export function validateStaging(
     "reviewed reply domain",
   );
   demand(
+    typeof input.email.inquiryCoverageNoticeEnabled === "boolean" &&
+      typeof input.email.testInboxReviewed === "boolean" &&
+      (!input.email.inquiryCoverageNoticeEnabled || input.email.testInboxReviewed),
+    "inquiry notice requires explicit reviewed staging inbox",
+  );
+  demand(
     pin(input.artifacts?.routesSha256) &&
       sha256(artifacts.routes ?? "") === input.artifacts.routesSha256,
     "exact legacy route artifact",
@@ -407,6 +413,9 @@ export function stagingConfig(input, artifacts) {
       EMAIL_FROM: input.email.from,
       EMAIL_ALLOWED_RECIPIENTS: JSON.stringify(input.email.allowedRecipients),
       EMAIL_REPLY_DOMAIN: input.email.replyDomain ?? "",
+      INQUIRY_COVERAGE_NOTICE_ENABLED: input.email.inquiryCoverageNoticeEnabled ? "1" : "0",
+      INQUIRY_COVERAGE_TEST_INBOX_REVIEWED: input.email.testInboxReviewed ? "true" : "false",
+      INQUIRY_COVERAGE_TEST_INBOX: input.email.allowedRecipients[0],
       R2_ACCOUNT_ID: input.accountId,
       R2_BUCKET: input.buckets.stagingMedia,
       MEDIA_PUBLIC_BASE_URL: `${input.origins.public}/media`,

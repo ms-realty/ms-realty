@@ -12,6 +12,31 @@ const hosts = [
 ];
 const oneKey = (value, key) => value && Object.keys(value).length === 1 && key in value;
 
+/** Even a more-specific foreign route or a no-script bypass can divert protected traffic. */
+export function validateRoutes(input, routes) {
+  demand(Array.isArray(routes), "known Worker route inventory");
+  for (const route of routes) {
+    const match =
+      typeof route.pattern === "string" &&
+      route.pattern.match(/^(?:https?:\/\/)?([a-z0-9*.-]+)(?:\/.*)?$/i);
+    demand(match, "known Worker route pattern");
+    const hostPattern = new RegExp(
+      `^${match[1].replaceAll(".", "\\.").replaceAll("*", ".*")}$`,
+      "i",
+    );
+    if (hosts.some((host) => hostPattern.test(host)))
+      demand(
+        route.script === input.workerName && hosts.some((host) => route.pattern === `${host}/*`),
+        "no competing or bypass route on any staging host",
+      );
+    if (route.script === input.workerName)
+      demand(
+        hosts.some((host) => route.pattern === `${host}/*`),
+        "staging Worker has no production route",
+      );
+  }
+}
+
 /** Reject broad selectors, bypasses and unreviewed group members. Unknown API shapes fail closed. */
 export function validateAccess(input, app, policies, group, otherApps) {
   const configured = input.access;
@@ -128,15 +153,7 @@ export async function providerPreflight(input, api) {
       ),
       "existing proxied staging DNS",
     );
-  for (const route of routes) {
-    if (hosts.some((host) => route.pattern === `${host}/*`))
-      demand(route.script === input.workerName, "staging route not owned by another Worker");
-    if (route.script === input.workerName)
-      demand(
-        hosts.some((host) => route.pattern === `${host}/*`),
-        "staging Worker has no production route",
-      );
-  }
+  validateRoutes(input, routes);
   for (const bucket of bucketResults)
     demand(
       bucket.managed.enabled === false && bucket.custom.every((x) => x.enabled === false),
