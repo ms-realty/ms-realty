@@ -48,6 +48,12 @@
     caret-color: var(--color-action);
   }
 
+  /* WebKit's preformatted option text can expand the document beyond a bounded select.
+     Keep native selection and the full option label, without page-wide clipping. */
+  select {
+    white-space: normal;
+  }
+
   a {
     text-underline-offset: 0.2em;
     text-decoration-thickness: 1px;

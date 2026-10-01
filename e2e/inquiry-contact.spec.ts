@@ -69,7 +69,7 @@ for (const locale of ["bg", "ru", "en"] as const) {
         const nextAction = `Follow up on the question ${randomUUID().slice(0, 8)}`;
         await page
           .getByLabel(copy.contactedAt, { exact: true })
-          .fill(new Date(Date.now() - 60000).toISOString().slice(0, 19));
+          .fill(new Date(Date.now() - 60000).toISOString().slice(0, 16));
         await page.getByLabel(copy.note, { exact: true }).fill(attemptNote);
         await page.getByLabel(copy.nextAction, { exact: true }).fill(nextAction);
         await page
@@ -97,7 +97,7 @@ for (const locale of ["bg", "ru", "en"] as const) {
 
         const responseNote = `Synthetic useful service explanation ${randomUUID()}`;
         await page.getByLabel(copy.result, { exact: true }).selectOption("useful_response");
-        const observedAt = new Date(Date.now() - 30000).toISOString().slice(0, 19);
+        const observedAt = new Date(Date.now() - 30000).toISOString().slice(0, 16);
         await page.getByLabel(copy.contactedAt, { exact: true }).fill(observedAt);
         await page.getByLabel(copy.note, { exact: true }).fill(responseNote);
         await page
@@ -119,7 +119,7 @@ for (const locale of ["bg", "ru", "en"] as const) {
           .select()
           .from(schema.inquiries)
           .where(eq(schema.inquiries.id, fixture.id));
-        expect(updated?.firstResponseAt?.toISOString()).toBe(`${observedAt}.000Z`);
+        expect(updated?.firstResponseAt?.toISOString()).toBe(`${observedAt}:00.000Z`);
         const commitments = await db
           .select()
           .from(schema.tasks)
@@ -129,6 +129,33 @@ for (const locale of ["bg", "ru", "en"] as const) {
           commitments.every((task) => task.state === "open" && task.ownerId === fixture.brokerId),
         ).toBe(true);
         expect(commitments.filter((task) => task.promisedToClient)).toHaveLength(1);
+        await info.attach("contact-width-320", {
+          body: JSON.stringify(
+            await page.evaluate(() =>
+              Array.from(document.body.querySelectorAll("*"))
+                .map((element) => {
+                  const rect = element.getBoundingClientRect();
+                  return {
+                    tag: element.tagName,
+                    class: element.getAttribute("class"),
+                    width: rect.width,
+                    right: rect.right,
+                    scrollWidth: element.scrollWidth,
+                    clientWidth: element.clientWidth,
+                    text: element.textContent?.slice(0, 80),
+                  };
+                })
+                .filter(
+                  (rect) =>
+                    rect.right > 320 || (rect.width > 0 && rect.scrollWidth > rect.clientWidth + 1),
+                )
+                .slice(0, 30),
+            ),
+            null,
+            2,
+          ),
+          contentType: "application/json",
+        });
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
           320,
         );
@@ -160,7 +187,7 @@ for (const javaScriptEnabled of [true, false]) {
       const note = `Synthetic stale contact ${randomUUID()}`;
       await page
         .getByLabel(copy.contactedAt, { exact: true })
-        .fill(new Date(Date.now() - 60000).toISOString().slice(0, 19));
+        .fill(new Date(Date.now() - 60000).toISOString().slice(0, 16));
       await page.getByLabel(copy.note, { exact: true }).fill(note);
       await page
         .getByLabel(copy.nextAction, { exact: true })
