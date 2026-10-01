@@ -3,6 +3,7 @@ import {
   type MigrationReceipt,
   migrationCompletion,
   migrationStopped,
+  type RuntimeProof,
   runtimeProof,
 } from "./runtime-proof";
 
@@ -17,7 +18,7 @@ const running: MigrationReceipt = {
   sourceCommit: source,
   buildNonce: nonce,
 };
-const completed = {
+const completed: RuntimeProof = {
   schemaVersion: 1,
   role: "migrator",
   sourceCommit: source,
@@ -60,11 +61,7 @@ describe("Explicit migration completion and immutable source proof", () => {
       expect(
         migrationCompletion(
           running,
-          runtimeProof(
-            { ...completed, ...changed },
-            "migrator",
-            "sourceCommit" in changed ? changed.sourceCommit : source,
-          ),
+          runtimeProof({ ...completed, ...changed }, "migrator", changed.sourceCommit ?? source),
         ).status,
       ).toBe("unknown");
   });

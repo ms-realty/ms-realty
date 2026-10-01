@@ -95,4 +95,54 @@ describe("Staging image role isolation", () => {
     ).not.toHaveProperty("INQUIRY_COVERAGE_TEST_INBOX");
     expect(() => runtimeEnvironment({ ...env, BUILD_SHA: "branch-name" }, "worker")).toThrow();
   });
+  it("maps each private transport role and never supplies a companion in direct mode", () => {
+    const ephemeral = () => crypto.randomUUID();
+    const env = {
+      STAGING: "true",
+      BUILD_SHA: "a".repeat(40),
+      STAGING_DATABASE_HOST: "db.staging.example.invalid",
+      STAGING_DATABASE_NAME: "msr_stage",
+      STAGING_WEB_DATABASE_ROLE: "web",
+      STAGING_WORKER_DATABASE_ROLE: "worker",
+      STAGING_MIGRATOR_DATABASE_ROLE: "migration",
+      WEB_DATABASE_URL:
+        "postgres://web:fixture@db.staging.example.invalid/msr_stage?sslmode=verify-full",
+      WORKER_DATABASE_URL:
+        "postgres://worker:fixture@db.staging.example.invalid/msr_stage?sslmode=verify-full",
+      MIGRATOR_DATABASE_URL:
+        "postgres://migration:fixture@db.staging.example.invalid/msr_stage?sslmode=verify-full",
+      DATABASE_TRANSPORT: "cloudflared-access-tcp",
+      DATABASE_TLS_CA_PEM: "reviewed public CA",
+      TUNNEL_SERVICE_HOSTNAME: "db.staging.example.invalid",
+      TUNNEL_SERVICE_URL: "127.0.0.1:15432",
+      TUNNEL_SERVICE_TOKEN_ID: ephemeral(),
+      TUNNEL_SERVICE_TOKEN_SECRET: ephemeral(),
+    };
+    for (const [role, databaseRole] of [
+      ["web", "web"],
+      ["worker", "worker"],
+      ["migrator", "migration"],
+    ] as const) {
+      expect(runtimeEnvironment(env, role)).toMatchObject({
+        DATABASE_TRANSPORT: "cloudflared-access-tcp",
+        STAGING_DATABASE_ROLE: databaseRole,
+        STAGING_DATABASE_HOST: env.STAGING_DATABASE_HOST,
+        STAGING_DATABASE_NAME: env.STAGING_DATABASE_NAME,
+        DATABASE_TLS_CA_PEM: env.DATABASE_TLS_CA_PEM,
+        TUNNEL_SERVICE_URL: "127.0.0.1:15432",
+      });
+      const direct = runtimeEnvironment({ ...env, DATABASE_TRANSPORT: "direct" }, role);
+      expect(direct).not.toHaveProperty("TUNNEL_SERVICE_TOKEN_SECRET");
+      expect(direct).not.toHaveProperty("DATABASE_TRANSPORT");
+    }
+    for (const invalid of [
+      { DATABASE_TRANSPORT: "unknown" },
+      { TUNNEL_SERVICE_HOSTNAME: "another.invalid" },
+      { TUNNEL_SERVICE_URL: "0.0.0.0:15432" },
+      { DATABASE_TLS_CA_PEM: "" },
+      { TUNNEL_SERVICE_TOKEN_ID: "" },
+      { TUNNEL_SERVICE_TOKEN_SECRET: "" },
+    ])
+      expect(() => runtimeEnvironment({ ...env, ...invalid }, "migrator")).toThrow(/companion/);
+  });
 });

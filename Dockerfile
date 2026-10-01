@@ -19,6 +19,16 @@ RUN npm prune --omit=dev --no-audit --no-fund
 
 FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS runtime
 WORKDIR /app
+# Cloudflare Containers run linux/amd64. Retained official HTTPS package and extracted binary
+# are both pinned; this does not claim a signed current repository entry for this old version.
+ADD --checksum=sha256:3be76adc4185d36a0bfb4c2dd8663292f0ed363797f2180333b513b43c81d419 https://pkg.cloudflare.com/cloudflared/pool/main/c/cloudflared/cloudflared_2026.9.1_amd64.deb /tmp/cloudflared.deb
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && test "$(dpkg-deb -f /tmp/cloudflared.deb Version)" = "2026.9.1" \
+    && test "$(dpkg-deb -f /tmp/cloudflared.deb Architecture)" = "amd64" \
+    && dpkg-deb -x /tmp/cloudflared.deb /tmp/cloudflared \
+    && echo '03f1f25d1cc93b9ad6c60569d44060bc4f17ed97075760ed8cfca4b12dcd68cc  /tmp/cloudflared/usr/bin/cloudflared' | sha256sum -c - \
+    && install -o root -g root -m 0755 /tmp/cloudflared/usr/bin/cloudflared /usr/local/bin/cloudflared \
+    && rm -rf /tmp/cloudflared /tmp/cloudflared.deb /var/lib/apt/lists/*
 ARG BUILD_SHA=local-uncommitted
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000 MIGRATIONS_FOLDER=/app/db/migrations BUILD_SHA=$BUILD_SHA
 LABEL org.opencontainers.image.source="https://github.com/ms-realty/ms-realty" org.opencontainers.image.revision=$BUILD_SHA

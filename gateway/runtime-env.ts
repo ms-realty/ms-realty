@@ -43,6 +43,29 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
     url.searchParams.get("sslmode") !== "verify-full"
   )
     throw new Error("Verified isolated TLS database role is required");
+  const transport: Record<string, string> = {};
+  if (env.DATABASE_TRANSPORT !== undefined && env.DATABASE_TRANSPORT !== "direct") {
+    if (
+      env.DATABASE_TRANSPORT !== "cloudflared-access-tcp" ||
+      value(env, "TUNNEL_SERVICE_HOSTNAME") !== url.hostname ||
+      value(env, "TUNNEL_SERVICE_URL") !== "127.0.0.1:15432" ||
+      !value(env, "DATABASE_TLS_CA_PEM").trim() ||
+      !value(env, "TUNNEL_SERVICE_TOKEN_ID").trim() ||
+      !value(env, "TUNNEL_SERVICE_TOKEN_SECRET").trim()
+    )
+      throw new Error("Explicit staging Access TCP companion inputs are required");
+    Object.assign(transport, {
+      DATABASE_TRANSPORT: "cloudflared-access-tcp",
+      STAGING_DATABASE_HOST: url.hostname,
+      STAGING_DATABASE_NAME: value(env, "STAGING_DATABASE_NAME"),
+      STAGING_DATABASE_ROLE: value(env, `STAGING_${role.toUpperCase()}_DATABASE_ROLE`),
+      DATABASE_TLS_CA_PEM: value(env, "DATABASE_TLS_CA_PEM"),
+      TUNNEL_SERVICE_HOSTNAME: value(env, "TUNNEL_SERVICE_HOSTNAME"),
+      TUNNEL_SERVICE_URL: "127.0.0.1:15432",
+      TUNNEL_SERVICE_TOKEN_ID: value(env, "TUNNEL_SERVICE_TOKEN_ID"),
+      TUNNEL_SERVICE_TOKEN_SECRET: value(env, "TUNNEL_SERVICE_TOKEN_SECRET"),
+    });
+  }
   const output = Object.fromEntries(plain.map((key) => [key, value(env, key)]));
   Object.assign(output, {
     NODE_ENV: "production",
@@ -52,6 +75,7 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
     DATABASE_URL: database,
     // This is a comparison target, never a claim about the running image's identity.
     EXPECTED_SOURCE_COMMIT: expectedSource,
+    ...transport,
   });
   if (role === "migrator")
     return {
@@ -60,6 +84,7 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
       DATABASE_URL: database,
       MIGRATIONS_FOLDER: "/app/db/migrations",
       EXPECTED_SOURCE_COMMIT: expectedSource,
+      ...transport,
     };
   if (role === "web") output.ORIGIN_VERIFY_SECRET = value(env, "ORIGIN_VERIFY_SECRET");
   if (role === "worker") {

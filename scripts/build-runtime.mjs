@@ -7,6 +7,7 @@ await build({
     worker: "scripts/worker.ts",
     migrate: "src/db/migrate.ts",
     bootstrap: "scripts/bootstrap-staff.ts",
+    transport: "src/db/transport.ts",
   },
   outdir: "dist-runtime",
   outExtension: { ".js": ".mjs" },
@@ -23,5 +24,5 @@ await build({
   },
 });
 console.log(
-  "Built worker, migration and bootstrap entry points (production dependencies external).",
+  "Built worker, migration, bootstrap and transport entry points (production dependencies external).",
 );
