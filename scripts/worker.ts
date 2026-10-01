@@ -3,6 +3,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { databaseTransport } from "../src/db/transport";
 import { getEnv } from "../src/server/config/env";
 import { CloudflareMessageProvider } from "../src/server/jobs/cloudflare-email";
 import { TestMessageProvider } from "../src/server/jobs/provider";
@@ -67,6 +68,7 @@ const client = postgres(env.databaseUrl, {
   connect_timeout: 10,
   max_lifetime: 1800,
   onnotice: () => {},
+  ...databaseTransport(env.databaseUrl).postgresOptions,
 });
 const db = drizzle(client, { schema }),
   queue = new JobQueue(env.databaseUrl);

@@ -7,6 +7,7 @@ import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { databaseTransport } from "../src/db/transport";
 import { bootstrapManager } from "../src/server/auth/invitations";
 
 const { values } = parseArgs({
@@ -29,10 +30,11 @@ if (values.locale !== "bg" && values.locale !== "en" && values.locale !== "ru") 
   throw new Error("Staff locale must be bg, en or ru.");
 }
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required.");
+const transport = databaseTransport(process.env.DATABASE_URL).postgresOptions;
 
 // Reserve a new private file before touching the database; never print bearer links in logs.
 const output = openSync(values.output, "wx", 0o600);
-const client = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} });
+const client = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {}, ...transport });
 try {
   const db = drizzle(client, { schema });
   const invitation = await db.transaction(async (tx) => {
