@@ -1,6 +1,17 @@
 import { expect, it } from "vitest";
 import { extractLiveSource } from "./capture";
 
+it("captures the source document title independently from h1 and preserves the untrimmed head description", () => {
+  const description = `  ${"Original source description. ".repeat(20)}  `;
+  const source = extractLiveSource(
+    `<html lang="en"><head><title>Original listing | Source brand</title><meta name="description" content="${description}"></head><body><div class="post_content"><h1>Original heading</h1><p>Source body</p></div></body></html>`,
+    "https://makler-realty.com/en/listing/original/",
+  );
+  expect(source.title).toBe("Original listing | Source brand");
+  expect(source.h1).toBe("Original heading");
+  expect(source.description).toBe(description);
+});
+
 it("preserves actual main text, locale, title and public photos without running scripts or submitting forms", () => {
   const source = extractLiveSource(
     '<html lang="ru-RU"><head><title>Source title</title></head><body><nav>Chrome</nav><main class="post_content_default"><h1>Source title</h1><p>Original body &amp; facts.</p><script>throw Error("run")</script><img src="/wp-content/uploads/photo.jpg" alt="Source caption"></main></body></html>',

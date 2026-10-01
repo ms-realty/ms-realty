@@ -126,7 +126,34 @@ const pages = captures
         meta?.title ||
         listing?.source_description.h1 ||
         null,
-      description: capture.description ?? meta?.source_seo?.meta_description ?? null,
+      // Current raw HTML is authoritative: an absent current head field must not inherit old metadata.
+      // Archived title is separately captured by metadata-inventory, never inferred from an h1.
+      seoTitle: capture.provenance === "live" ? capture.title || null : meta?.title || null,
+      description:
+        capture.provenance === "live"
+          ? (capture.description ?? null)
+          : (meta?.source_seo?.meta_description ?? null),
+      seoProvenance: {
+        title:
+          capture.provenance === "live"
+            ? capture.title
+              ? "live_document_title"
+              : null
+            : meta?.title
+              ? "archived_metadata_inventory_title"
+              : null,
+        description:
+          capture.provenance === "live"
+            ? "live_raw_head_description_or_absence"
+            : meta?.source_seo
+              ? "archived_metadata_inventory_description"
+              : null,
+        artifact:
+          capture.provenance === "live"
+            ? capture.response_artifact
+            : "production/data/migration-records.json",
+        historicalMetadataWhitespaceNormalized: capture.provenance !== "live",
+      },
       bodyText: capture.extracted_body_text,
       sourceUrl: capture.url,
       sourceHost: identity.host,
@@ -281,6 +308,17 @@ const outputs = {
     schemaVersion: 1,
     authority: manifest.authority,
     sourceEquivalenceReviewed: false,
+    headMetadata: {
+      capturedTitles: pages.filter((page) => page.seoTitle !== null).length,
+      unknownTitles: pages.filter((page) => page.seoTitle === null).map((page) => page.id),
+      unknownDescriptions: pages
+        .filter((page) => page.description === null && page.provenance.kind === "archived")
+        .map((page) => page.id),
+      liveRawHeadPages: pages.filter((page) => page.provenance.kind === "live").length,
+      historicalRawHeadUnavailable: pages
+        .filter((page) => page.provenance.kind === "archived")
+        .map((page) => page.id),
+    },
     pages,
   },
   "data/legacy/migration/listing-import-manifest.json": listingManifest,

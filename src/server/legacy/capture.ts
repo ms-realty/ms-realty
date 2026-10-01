@@ -11,7 +11,7 @@ const { JSDOM } = createRequire(import.meta.url)("jsdom") as {
 export function extractLiveSource(html: string, url: string) {
   sourceIdentity(url);
   const document = new JSDOM(html, { url }).window.document;
-  const title = document.title.trim();
+  const title = document.title;
   const parked =
     /Срок регистрации домена истек|domain registration has expired|domain is expired/i.test(title);
   const archive = document.querySelector("#scroll-to.row");

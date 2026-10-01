@@ -12,13 +12,18 @@ export async function generateMetadata({ params }: Props) {
   const { locale, id } = await params;
   const page = getLegacyPage(locale, id);
   if (!page) notFound();
-  return publicPageMetadata({
+  const metadata = await publicPageMetadata({
     locale,
     path: `/legacy/${id}`,
     title: page.title,
     description: page.description ?? undefined,
     availableIn: [page.locale],
   });
+  return {
+    ...metadata,
+    title: page.seoTitle == null ? undefined : { absolute: page.seoTitle },
+    description: page.description ?? undefined,
+  };
 }
 
 export default async function LegacyPage({ params }: Props) {

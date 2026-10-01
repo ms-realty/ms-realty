@@ -8,6 +8,8 @@ export interface LegacyPage {
   canonicalPath: string;
   locale: PublicLocale;
   title: string;
+  /** Captured document title, independent of the visible source heading; absent means unknown. */
+  seoTitle?: string | null;
   description: string | null;
   bodyText: string;
   sourceUrl: string;

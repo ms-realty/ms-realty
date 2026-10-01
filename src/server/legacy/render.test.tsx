@@ -37,6 +37,7 @@ const source = {
   id: "a".repeat(24),
   locale: "ru",
   title: "Original title",
+  seoTitle: "Exact source title | Original brand",
   description: "Original description",
   bodyText: 'Exact source contact +359879696870 <script>alert("source")</script>',
   listing: null,
@@ -64,6 +65,31 @@ it("renders actual source text without executing source HTML, recreating WordPre
     description: source.description,
     availableIn: ["ru"],
   });
+});
+it("uses the exact absolute source head title and untrimmed long description while retaining the visible heading", async () => {
+  const description = `  ${"Exact original description. ".repeat(20)}  `;
+  const page = { ...source, description };
+  mocks.page.mockReturnValue(page);
+  mocks.metadata.mockResolvedValue({
+    title: "Generated title",
+    description: "Generic intro",
+    alternates: { canonical: "https://makler-realty.com/ru/legacy/original" },
+    robots: { index: false, follow: false },
+  });
+  const metadata = await generateMetadata({ params });
+  expect(metadata.title).toEqual({ absolute: page.seoTitle });
+  expect(metadata.description).toBe(description);
+  expect(metadata.alternates?.canonical).toBe("https://makler-realty.com/ru/legacy/original");
+  expect(metadata.robots).toEqual({ index: false, follow: false });
+  render(await Page({ params }));
+  expect(screen.getByRole("heading", { name: source.title })).toBeVisible();
+});
+it("an unknown source title or absent description never becomes a generated source head claim", async () => {
+  mocks.page.mockReturnValue({ ...source, seoTitle: null, description: null });
+  mocks.metadata.mockResolvedValue({ title: "Generated title", description: "Generic intro" });
+  const metadata = await generateMetadata({ params });
+  expect(metadata.title).toBeUndefined();
+  expect(metadata.description).toBeUndefined();
 });
 it("listing JSON-LD uses the retained source URL helper and exact source page projection", async () => {
   const page = { ...source, listing: { reference: "962" } };
